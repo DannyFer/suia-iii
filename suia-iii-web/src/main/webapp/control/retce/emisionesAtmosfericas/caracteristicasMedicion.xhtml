@@ -1,0 +1,283 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+		<p:panelGrid columns="1" layout="grid" styleClass="w100"
+			columnClasses="w25, field_mrg w25">
+			<f:facet name="header">
+				<h:outputText value="CARACTERÍSTICAS DE MEDICIÓN" />
+			</f:facet>
+		</p:panelGrid>
+
+		<p:panelGrid columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="Características de la fuente:" />
+			</f:facet>
+			<p:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25,null w75">
+				<h:outputText value="Código del punto de monitoreo aprobado: *"/>
+				<p:inputText id="idCodigoMonitoreo" value="#{emisionesAtmosfericasController.detalleEmision.codigoPuntoMonitoreo}" 
+					readonly="#{emisionesAtmosfericasController.editarFuente}"
+							required="true" requiredMessage="El campo Código del punto de monitoreo aprobado es requerido"/>
+				<h:outputText value="Ubicación fuente fija (coordenadas X)*:"/>
+				<pe:inputNumber id="coordX" readonly="#{emisionesAtmosfericasController.editarFuente}"
+					value="#{emisionesAtmosfericasController.detalleEmision.coordenadaX}"
+					required="true" autocomplete="off" 
+					requiredMessage="El campo 'Coordenada X' es requerido."
+					decimalPlaces="4" thousandSeparator=""
+					maxValue="9999999999.9999">
+					<p:tooltip for="coordX" escape="false" trackMouse="true"
+						value="Coordenanda X en formato WGS84 17S" />
+					<p:ajax  event="change"  listener="#{emisionesAtmosfericasController.validarCoordenadas()}"/>
+				</pe:inputNumber>	
+				<h:outputText value="Ubicación fuente fija (coordenadas Y)*:"/>
+				<pe:inputNumber id="coordY" readonly="#{emisionesAtmosfericasController.editarFuente}"
+						value="#{emisionesAtmosfericasController.detalleEmision.coordenadaY}"
+						required="true" autocomplete="off" 
+						requiredMessage="El campo 'Coordenada Y' es requerido."
+						decimalPlaces="4" thousandSeparator=""
+						maxValue="9999999999.9999">
+						<p:tooltip for="coordY" escape="false" trackMouse="true"
+							value="Coordenanda Y en formato WGS84 17S" />
+					<p:ajax process="@this" event="change" listener="#{emisionesAtmosfericasController.validarCoordenadas()}" update="pnlUbicacion"/>
+				</pe:inputNumber>
+			</p:panelGrid>
+
+			<p:panelGrid columns="6" styleClass="panel_data w100" id="pnlUbicacion"
+				columnClasses="header w15,null w20, header w15, w20, header w10, w20">
+				<h:outputText value="Provincia:"/>
+				<p:inputText value="#{emisionesAtmosfericasController.detalleEmision.ubicacionGeografica.ubicacionesGeografica.ubicacionesGeografica.nombre}" 
+					readonly="true" />
+
+				<h:outputText value="Cantón:"/>
+				<p:inputText value="#{emisionesAtmosfericasController.detalleEmision.ubicacionGeografica.ubicacionesGeografica.nombre}" 
+					readonly="true" />
+
+				<h:outputText value="Parroquia:"/>
+				<p:inputText value="#{emisionesAtmosfericasController.detalleEmision.ubicacionGeografica.nombre}" 
+					readonly="true" />
+				
+			</p:panelGrid>
+			
+			<p:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25,null w75">
+				<h:outputText value="Oficio de aprobación del punto de monitoreo: *" />
+				<p:outputPanel id="panelDocOficio">
+					<p:fileUpload disabled="#{emisionesAtmosfericasController.editarFuente}"
+						fileUploadListener="#{emisionesAtmosfericasController.uploadListenerDocumentoOficioAprobacion}" 												
+						sizeLimit="20971520" 
+						allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar (pdf 20Mb)" 						
+						update="nombreDoc1"
+						uploadLabel="Subir" auto="true"
+						cancelLabel="Cancelar" 
+						invalidFileMessage="Tipo de archivo no válido"
+						invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+						styleClass="w100 toLeft" mode="advanced" 
+						required="true"/>
+                    <h:inputHidden validator="#{emisionesAtmosfericasController.validarDocumentoAprobacionMonitoreo}"/>
+					<p:outputLabel id="nombreDoc1" value="#{emisionesAtmosfericasController.oficioAprobacionDoc.nombre}" styleClass="toLeft"/>						
+					<p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar"
+						rendered="#{emisionesAtmosfericasController.oficioAprobacionDoc.id!=null or emisionesAtmosfericasController.oficioAprobacionDoc.contenidoDocumento!=null}">
+						<p:fileDownload value="#{emisionesAtmosfericasController.documentoAprobacion}"/>
+					</p:commandButton>
+				</p:outputPanel>
+
+				<h:outputText value="Fuente Fija de combustión: *" />
+				<p:selectOneMenu id="fuenteFijaC" disabled="#{emisionesAtmosfericasController.editarFuente}"
+					value="#{emisionesAtmosfericasController.idFuente}" required="true"
+					style="width:100%" filter="true" filterMatchMode="contains"
+					requiredMessage="El campo Fuente Fija de combustión es requerido">
+					<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+					<f:selectItems
+						value="#{emisionesAtmosfericasController.listaFuentesFijasCombustion}"
+						var="item" itemLabel="#{item.fuente}" itemValue="#{item.id}" />
+					<p:ajax event="change"
+						listener="#{emisionesAtmosfericasController.tipoCombustiblesPorFuentes()}"
+						update="tipoCombustible pngFuncionamiento" />
+				</p:selectOneMenu>
+
+				<h:outputText value="Locación asociada: *" />
+				<p:inputText readonly="#{emisionesAtmosfericasController.editarFuente}" value="#{emisionesAtmosfericasController.detalleEmision.locacionAsociada}"
+					maxlength="200" />
+			</p:panelGrid>
+		</p:panelGrid>
+
+		<p:panelGrid columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="Funcionamiento de la Fuente:" />
+			</f:facet>
+			<p:panelGrid id="pngFuncionamiento" columns="4" styleClass="panel_data w100"
+				columnClasses="header w25,null w25, header w25,null w25">
+
+				<h:outputText value="Potencia: " />
+				<h:panelGroup>
+				<pe:inputNumber  id="potencia" readonly="#{emisionesAtmosfericasController.editarFuente}"
+					value="#{emisionesAtmosfericasController.detalleEmision.potencia}"
+					maxValue="9999.9"
+					decimalPlaces="1">
+					<p:tooltip id="potenciaTip" for="potencia" value="Puede ingresar 4 enteros y un decimal" trackMouse="true" />
+				</pe:inputNumber>
+				</h:panelGroup>
+
+				<h:outputText value="Unidad: *" />
+				<p:selectOneMenu id="unidadPotencia" disabled="#{emisionesAtmosfericasController.editarFuente}"
+					value="#{emisionesAtmosfericasController.idUnidadPotencia}"
+					required="true" style="width:100%"
+					requiredMessage="El campo Unidad es requerido">
+					<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+					<f:selectItems
+						value="#{emisionesAtmosfericasController.listaUnidadesPotencia}"
+						var="item" itemLabel="#{item.descripcion}" itemValue="#{item.id}" />
+					<p:ajax event="change"
+						listener="#{emisionesAtmosfericasController.unidadPotenciaListener()}" />
+				</p:selectOneMenu>
+
+				<h:outputText value="Marca: " />
+				<p:inputText readonly="#{emisionesAtmosfericasController.editarFuente}"
+					value="#{emisionesAtmosfericasController.detalleEmision.marca}"
+					maxlength="20" />
+				<h:outputText value="Número de Serie:"/>
+				<p:inputText readonly="#{emisionesAtmosfericasController.editarFuente}"
+					value="#{emisionesAtmosfericasController.detalleEmision.numeroSerie}"
+					maxlength="20" />
+
+				<h:outputText value="Tipo de Combustible: *" />
+			<p:selectOneMenu id="tipoCombustible"
+				value="#{emisionesAtmosfericasController.idTipoCombustible}"
+				required="#{!emisionesAtmosfericasController.deshabilitarTipoCombustible}"
+				style="width:100%" filter="true" filterMatchMode="contains"
+				disabled="#{emisionesAtmosfericasController.deshabilitarTipoCombustible or emisionesAtmosfericasController.editarFuente}"
+				requiredMessage="El campo Tipo de Combustible es requerido">
+				<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+				<f:selectItems value="#{emisionesAtmosfericasController.listaTipoCombustible}"
+					var="item" itemLabel="#{item.descripcion}" itemValue="#{item.id}" />
+				<p:ajax event="change" listener="#{emisionesAtmosfericasController.tipoCombustibleListener()}" process="@this" />
+			</p:selectOneMenu>
+			<h:outputText id="HorasFuncionamientoId" value="Horas de funcionamiento al día:" rendered="#{emisionesAtmosfericasController.mostrarHoras}"/>
+			<h:panelGroup rendered="#{emisionesAtmosfericasController.mostrarHoras}">
+			<pe:inputNumber  id="horasFuncionamiento"
+				validatorMessage="Horas funcionamiento no debe ser Cero"
+				maxValue="24.00"
+				value="#{emisionesAtmosfericasController.detalleEmision.horasFuncionamiento}"
+				decimalPlaces="2">
+				<f:validateDoubleRange minimum="0.01" />
+			</pe:inputNumber>
+			<p:tooltip id="horasFuncionamientoTip" for="horasFuncionamiento" value="Puede ingresar 20 enteros y 2 decimales" trackMouse="true" />
+			</h:panelGroup>
+		</p:panelGrid>
+		<p:panelGrid columns="4" styleClass="panel_data w100"
+			columnClasses="header w25, null w25, header w25, null w25">
+
+			<h:outputText value="Consumo de combustible (mes):*" />
+			<h:panelGroup>
+			<pe:inputNumber required="true" id="consumoCom"
+				requiredMessage="Consumo de Combustible es Requerido"
+				validatorMessage="Consumo de combustible no debe ser Cero"
+				maxValue="9999.9"
+				value="#{emisionesAtmosfericasController.detalleEmision.consumoCombustible}"
+				decimalPlaces="1">
+				<f:validateDoubleRange minimum="0.1" />
+			</pe:inputNumber>
+			<p:tooltip id="combustibleTip" for="consumoCom" value="Puede ingresar 4 enteros y un decimal" trackMouse="true" />
+			</h:panelGroup>
+
+			<h:outputText value="Unidad:*" />
+			<p:selectOneMenu id="unidadCombustible"
+				value="#{emisionesAtmosfericasController.idUnidadCombustible}"
+				required="true" style="width:100%" requiredMessage="El campo Unidad es requerido.">
+				<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+				<f:selectItems
+					value="#{emisionesAtmosfericasController.listaUnidadesCombustible}"
+					var="item" itemLabel="#{item.descripcion}" itemValue="#{item.id}" />
+
+					<p:ajax event="change" listener="#{emisionesAtmosfericasController.unidadCombustibleListener()}" process="@this" />
+			</p:selectOneMenu>
+		</p:panelGrid>
+			<p:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25,null w75">
+
+				<h:outputText value="Número de ductos o chimeneas: *" />
+				<p:selectOneMenu id="numDucto" disabled="#{emisionesAtmosfericasController.editarFuente}"
+					value="#{emisionesAtmosfericasController.detalleEmision.numeroDuctosChimenea}"
+					required="true" style="width:100%" 
+					requiredMessage="El campo Número de ductos o chimeneas">
+					<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+					<f:selectItems
+						value="#{emisionesAtmosfericasController.listaCatalogoChimenea}"
+						var="item" itemLabel="#{item.descripcion}"
+						itemValue="#{item.descripcion}" />
+				</p:selectOneMenu>
+				<h:outputText value="Facilidades de monitoreo: *" />
+				<p:selectManyCheckbox
+					value="#{emisionesAtmosfericasController.facilidadesMonitoreoSeleccionadas}"
+					required="true" id="facilidadesMonitoreo" layout="grid" columns="3"
+					styleClass="field_mrg w100" requiredMessage="El campo Facilidades de monitoreo es requerido">
+					<f:selectItems var="item" value="#{emisionesAtmosfericasController.listaFacilidadesMonitoreo}"
+						itemLabel="#{item.descripcion}" itemValue="#{item.id}" />
+				</p:selectManyCheckbox>
+
+			</p:panelGrid>
+
+			<h:outputLabel value="Características de la chimenea: *" />
+			<p:panelGrid columns="9" styleClass="panel_data w100"
+				columnClasses="header w12,null w12, header w12, null w12, w12, header w12,null w12, header w12,null w12">
+
+				<h:outputText value="Altura o longitud (m): *" />
+				<h:panelGroup>
+				<pe:inputNumber required="true" id="altura" readonly="#{emisionesAtmosfericasController.editarFuente}"
+					requiredMessage="Altura o longitud es Requerido" maxValue="99.9"
+					validatorMessage="Altura o longitud no debe ser Cero"
+					value="#{emisionesAtmosfericasController.detalleEmision.alturaLongitudChimenea}"
+					decimalPlaces="1">
+					<f:validateDoubleRange minimum="0.0" />					
+				</pe:inputNumber>
+				 <p:tooltip id="alturaTip" for="altura" value="Puede ingresar 2 enteros y un decimal" trackMouse="true" />
+				 </h:panelGroup>
+
+				<h:outputText value="Diámetro (m): *" />
+				<h:panelGroup>
+				<pe:inputNumber required="true" id="diametro" readonly="#{emisionesAtmosfericasController.editarFuente}"
+					requiredMessage="Diámetro es Requerido" maxValue="99.9"
+					validatorMessage="Diámetro no debe ser Cero"
+					value="#{emisionesAtmosfericasController.detalleEmision.diametroChimenea}"
+					decimalPlaces="1" title="Puede ingresar 2 enteros numéricos y un decimal">
+					<f:validateDoubleRange minimum="0.0" />					
+				</pe:inputNumber>
+				<p:tooltip id="diametroTip" for="diametro" value="Puede ingresar 2 enteros y un decimal" trackMouse="true" />
+				</h:panelGroup>
+
+				<h:outputLabel value="Distancia puerto de muestreo:" />
+				<h:outputText value="Última perturbación (m): *" />
+				<h:panelGroup>
+				<pe:inputNumber required="true" id="perturbacion" readonly="#{emisionesAtmosfericasController.editarFuente}"
+					requiredMessage="Última perturbación es Requerido" maxValue="99.9"
+					validatorMessage="Última perturbación no debe ser Cero"
+					value="#{emisionesAtmosfericasController.detalleEmision.ultimaPerturbacion}"
+					decimalPlaces="1" title="Puede ingresar 2 enteros numéricos y un decimal">
+					<f:validateDoubleRange minimum="0.0" />
+				</pe:inputNumber>
+				<p:tooltip id="peturbacionTip" for="perturbacion" value="Puede ingresar 2 enteros y un decimal" trackMouse="true" />
+				</h:panelGroup>
+
+				<h:outputText value="Cúspide chimenea (m): *" />
+				<h:panelGroup>
+				<pe:inputNumber required="true" id="cuspide" readonly="#{emisionesAtmosfericasController.editarFuente}"
+					requiredMessage="Cúspide chimenea es Requerido" maxValue="99.9"
+					validatorMessage="Cúspide chimenea no debe ser Cero"
+					value="#{emisionesAtmosfericasController.detalleEmision.cuspideChimenea}"
+					decimalPlaces="1" title="Puede ingresar 2 enteros numéricos y un decimal">
+					<f:validateDoubleRange minimum="0.0" />
+				</pe:inputNumber>
+				<p:tooltip id="cuspideTip" for="cuspide" value="Puede ingresar 2 enteros y un decimal" trackMouse="true" />
+				</h:panelGroup>
+
+			</p:panelGrid>
+		</p:panelGrid>
+</html>

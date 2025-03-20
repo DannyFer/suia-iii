@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui"
+	  xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:pe="http://primefaces.org/ui/extensions">
+
+<p:panel id="adicionarDatosDesecho" widgetVar="adicionarDatosDesecho" toggleable="true" toggleOrientation="vertical" styleClass="colapsablePanel" collapsed="true">
+	<p:ajax event="toggle" listener="#{datosDesechosBean.toggleHandle}" update=":form:adicionarDatosDesecho" process="@this" />
+	<h:panelGroup id="datosGeneralesDesecho">
+		<h:panelGroup rendered="#{datosDesechosBean.panelAdicionarVisible}">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Datos generales" />
+				</f:facet>
+
+				<h:panelGrid styleClass="w100 separatorBottom" columns="1">
+					<p:outputLabel value="Seleccionar desecho" for="desechoPeligroso" />
+					<p:selectOneMenu id="desechoPeligroso" value="#{datosDesechosBean.desechoPeligrosoDatosGenerales.desechoPeligroso}" styleClass="w100" converter="selectItemConverter" required="true">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+						<f:selectItems value="#{datosDesechosBean.desechosPeligrosoDisponibles}" />
+						<p:ajax process="@this" update="desechoPeligrosoContainer datosDesechoPeligrosoContainer" />
+					</p:selectOneMenu>
+				</h:panelGrid>
+
+				<h:panelGroup id="desechoPeligrosoContainer">
+					<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w25, null" rowClasses="null, alt" rendered="#{not empty datosDesechosBean.desechoPeligrosoDatosGenerales.desechoPeligroso}">
+						<h:outputText value="Desecho" />
+						<h:outputText value="#{datosDesechosBean.desechoPeligrosoDatosGenerales.desechoPeligroso.descripcion}" />
+						<h:outputText value="Código" />
+						<h:outputText value="#{datosDesechosBean.desechoPeligrosoDatosGenerales.desechoPeligroso.clave}" />
+						<h:outputText value="CRTIB" title="#{helps['generadorDesecho.crtib']}" />
+						<h:outputText value="#{datosDesechosBean.desechoPeligrosoDatosGenerales.desechoPeligroso.nombresCRITB}" />
+					</h:panelGrid>
+				</h:panelGroup>
+
+				<h:panelGrid id="datosDesechoPeligrosoContainer" styleClass="w100 separatorBottom" columns="3" columnClasses="w33, field_mrg w33, field_mrg w33">
+					<p:outputLabel for="estadoFisico" value="Estado físico" />
+					<p:outputLabel for="cantidadToneladas" value="Cantidad estimada anual de generación (toneladas)" />
+					<p:outputLabel for="cantidadUnidades" value="Cantidad (unidades)" rendered="#{datosDesechosBean.desechoPeligrosoDatosGenerales.desechoPeligroso.desechoES_04 or datosDesechosBean.desechoPeligrosoDatosGenerales.desechoPeligroso.desechoES_06}" />
+					<h:outputText rendered="#{!datosDesechosBean.desechoPeligrosoDatosGenerales.desechoPeligroso.desechoES_04 and !datosDesechosBean.desechoPeligrosoDatosGenerales.desechoPeligroso.desechoES_06}" />
+
+					<p:selectOneMenu value="#{datosDesechosBean.desechoPeligrosoDatosGenerales.tipoEstadoFisico}" id="estadoFisico" styleClass="w100" required="true" converter="selectItemConverter">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+						<f:selectItems value="#{datosDesechosBean.tiposEstadosFisicos}" />
+						<p:ajax process="@this" />
+					</p:selectOneMenu>
+					<p:inputText value="#{datosDesechosBean.desechoPeligrosoDatosGenerales.cantidadToneladas}" id="cantidadToneladas" styleClass="w100" required="true" maxlength="13">
+						<pe:keyFilter mask="num" />
+						<f:validateDoubleRange minimum="0.0001" />
+						<f:convertNumber maxIntegerDigits="10" maxFractionDigits="10" pattern="#0.0000"/>
+						<p:ajax process="@this" />
+					</p:inputText>
+					<p:inputText value="#{datosDesechosBean.desechoPeligrosoDatosGenerales.cantidadUnidades}" id="cantidadUnidades" styleClass="w100" required="true" maxlength="13" rendered="#{datosDesechosBean.desechoPeligrosoDatosGenerales.desechoPeligroso.desechoES_04 or datosDesechosBean.desechoPeligrosoDatosGenerales.desechoPeligroso.desechoES_06}">
+						<pe:keyFilter mask="num" />
+						<f:validateDoubleRange minimum="0.1" />
+					</p:inputText>
+				</h:panelGrid>
+
+				<h:panelGrid columns="1" styleClass="w50">
+					<h:panelGroup id="categoriaDesechoContainer">
+						<h:panelGrid columns="1" styleClass="w100">
+							<p:commandButton styleClass="primary extraLarge" value="Seleccionar categoría" oncomplete="PF('seleccionarCategoriaDesecho').show()" actionListener="#{categoriaDesechoPeligrosoBean.reset()}" process="@this" update=":form:seleccionarCategoriaDesecho" rendered="#{empty categoriaDesechoPeligrosoBean.categoriaDesechoSeleccionada}" />
+						</h:panelGrid>
+						<h:panelGrid columns="2" styleClass="w100 panel_data" columnClasses="header w50, null" rowClasses="null, alt" rendered="#{not empty categoriaDesechoPeligrosoBean.categoriaDesechoSeleccionada}">
+							<h:outputText value="Categoría" />
+							<h:outputText value="#{categoriaDesechoPeligrosoBean.categoriaDesechoSeleccionada.nombreCompuesto}" />
+							<h:outputText value="Modificar" />
+							<p:commandButton styleClass="button-small primary" icon="ui-icon-pencil" oncomplete="PF('seleccionarCategoriaDesecho').show()" actionListener="#{categoriaDesechoPeligrosoBean.reset()}" process="@this" update=":form:seleccionarCategoriaDesecho" />
+						</h:panelGrid>
+					</h:panelGroup>
+				</h:panelGrid>
+
+				<p:outputPanel autoUpdate="true">
+					<h:panelGrid styleClass="w33 separatorBottom" columns="1" columnClasses="w100" rendered="#{categoriaDesechoPeligrosoBean.categoriaDesechoSeleccionada.otro}">
+						<p:outputLabel for="otroCategoria" value="Otra categoría" />
+						<p:inputText id="otroCategoria" value="#{datosDesechosBean.desechoPeligrosoDatosGenerales.otroCategoriaDesecho}" styleClass="w100" required="true" maxlength="150">
+							<f:validateLength maximum="150" />
+							<p:ajax process="@this" />
+						</p:inputText>
+					</h:panelGrid>
+				</p:outputPanel>
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="buttonAdicionarBloquesContainer contentVerticalPadding">
+				<f:facet name="header">
+					<p:commandButton value="Adicionar" oncomplete="PF('seleccionarPuntoGeneracion').show()" process="@this" update="seleccionarPuntoGeneracion" styleClass="buttonAdicionarBloques button-small-text toRight field_mrg" icon="ui-icon-plusthick" />
+					<mae:panelGridHeaderHelp value="Puntos de generación *" conector="bloqueHelp" image="#{request.contextPath}/resources/images/bloques.jpg" help="#{helps['registro.bloques']}" />
+				</f:facet>
+				<p:dataTable id="tbl_puntosGeneracion" value="#{puntosGeneracionBean.puntosGeneracionSeleccionados}" var="punto" emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Nombre del punto">
+						<h:outputText value="#{punto.nombre}" />
+					</p:column>
+					<p:column styleClass="w20px">
+						<p:commandButton update=":form:tbl_puntosGeneracion :form:tablePuntosGeneracion" styleClass="button-small primary" process="@this" icon="ui-icon-circle-close" actionListener="#{puntoGeneracionController.quitarPuntoGeneracion(punto)}" />
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+			<h:inputHidden validator="#{datosDesechosBean.validateData}" />
+		</h:panelGroup>
+	</h:panelGroup>
+
+	<div class="buttons">
+		<p:commandButton value="#{datosDesechosBean.editar ? 'Actualizar' : 'Aceptar'}" actionListener="#{datosDesechosBean.aceptar()}" oncomplete="toogleDatosGenerales(xhr, status, args)" process="@this datosGeneralesDesecho" update="datosGeneralesDesecho listadoDatosDesecho" />
+		<p:commandButton value="Cancelar" styleClass="secondary" actionListener="#{datosDesechosBean.cancelar()}" oncomplete="PF('adicionarDatosDesecho').toggle()" process="@this" update="datosGeneralesDesecho">
+			<p:resetInput target="@form" />
+		</p:commandButton>
+	</div>
+
+	<ui:include src="/prevencion/registrogeneradordesechos/utiles/seleccionarCategoriaDesechoModal.xhtml" />
+	<ui:include src="/prevencion/registrogeneradordesechos/utiles/seleccionarPuntosGeneracionModal.xhtml" />
+
+	<p:separator />
+</p:panel>
+
+<script type="text/javascript">
+	function toogleDatosGenerales(xhr, status, args) {
+		if(args.addDatosGenerales) {
+			PF('adicionarDatosDesecho').toggle();
+		}
+	}
+</script>
+
+</html>

@@ -1,0 +1,73 @@
+<ui:component xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:comp="http://java.sun.com/jsf/composite"
+	xmlns:h="http://java.sun.com/jsf/html">
+
+	<comp:interface
+		shortDescription="Componente para asignar tareas a un usuario ">
+		<comp:attribute name="etiquetaBotonCompletarTarea"
+			shortDescription="Etiqueta para mostrar en el boton que termina la tarea"
+			default="Asignar" />
+	</comp:interface>
+
+	<comp:implementation>
+		<h:form>
+			<p:panel>
+				<f:facet name="header">
+					<h:outputText
+						value="Reasignar tarea: #{reasignarTareaComunBean.task.names.get(0).text}"
+						rendered="#{reasignarTareaComunBean.onStartedTask}" />
+					<h:outputText
+						value="Asignar tarea: #{reasignarTareaComunBean.taskName}"
+						rendered="#{!reasignarTareaComunBean.onStartedTask}" />
+				</f:facet>
+
+				<h:panelGrid columns="1" styleClass="separatorTop">
+					<p:dataTable id="tablaUsuarios"
+						value="#{reasignarTareaComunBean.users}" var="user"
+						paginator="true" paginatorAlwaysVisible="false"
+						paginatorPosition="bottom" rows="7" sortBy="#{user.carga}"
+						sortOrder="ascending" emptyMessage="#{labels['common.table.empty']}">
+						<f:facet name="header">
+							<h:outputText value="Usuarios disponibles" />
+						</f:facet>
+						<p:column styleClass="w5 alCenter">
+							<p:selectBooleanCheckbox value="#{user.selectable}">
+								<f:ajax execute="@this" render="tablaUsuarios"
+									listener="#{reasignarTareaComunBean.updateSelectedUser(user)}" />
+							</p:selectBooleanCheckbox>
+						</p:column>
+						<p:column headerText="Usuario" sortBy="#{user.nombre}"
+							styleClass="w25">
+							<h:outputText value="#{user.nombre}" />
+						</p:column>
+						<p:column headerText="Nombre" sortBy="#{user.nombrePersona}"
+							styleClass="w45">
+							<h:outputText value="#{user.nombrePersona}" />
+						</p:column>
+						<p:column headerText="Total de tareas"
+							sortBy="#{user.numeroTramites}" styleClass="w10 alCenter">
+							<h:outputText value="#{user.numeroTramites}" />
+						</p:column>
+						<p:column headerText="Carga (%)" sortBy="#{user.carga}"
+							styleClass="w15 alCenter">
+							<h:outputText value="#{user.carga}">
+								<f:convertNumber maxFractionDigits="2" />
+							</h:outputText>
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="#{cc.attrs.etiquetaBotonCompletarTarea}"
+						action="#{reasignarTareaComunBean.executeOperationAction()}"
+						icon="ui-icon-check" />
+				</div>
+			</p:panel>
+		</h:form>
+
+	</comp:implementation>
+</ui:component>

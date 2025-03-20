@@ -1,0 +1,388 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+<style type="text/css">
+.cssNotDate .ui-datepicker-calendar {
+	display: none;
+}
+
+.cssButtonDelete .ui-icon {
+	left: 50% !important;
+}
+</style>
+
+<h:panelGrid styleClass="w100" id="pnlInfoProducto">
+	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<h:outputText value="Registro de productos" />
+			<p:commandButton value="Adicionar" title="Adicionar"
+				styleClass="button-small-text toRight field_mrg" update=":form"
+				process="@this"
+				actionListener="#{registrarInformacionExternaController.agregarRegistroPqua()}">
+			</p:commandButton>
+		</f:facet>
+
+		<p:accordionPanel id="acdRegistrosPqua" widgetVar="acdRegistrosPqua"
+			value="#{registrarInformacionExternaController.listaRegistros}"
+			activeIndex="#{registrarInformacionExternaController.indexTab}"
+			var="registroPqua" dynamic="false">
+			<p:ajax event="tabChange"
+				listener="#{registrarInformacionExternaController.onTabChange}" update="acdRegistrosPqua" />
+			<p:tab>
+				<f:facet name="title">
+					<div>
+						Información de productos de #{registroPqua.infoMesingreso}
+						<p:commandButton title="Eliminar"
+							styleClass="button-small primary toRight field_mrg cssButtonDelete"
+							icon="ui-icon-trash" update=":form" process="@this"
+							actionListener="#{registrarInformacionExternaController.eliminarRegistroPqua(registroPqua)}"
+							rendered="#{registroPqua.id ne null and !registroPqua.habilitarCarga}">
+							<p:confirm icon="ui-icon-alert" header="Confirmación"
+								message="¿Está seguro de que desea eliminar la información de los productos?" />
+						</p:commandButton>
+					</div>
+				</f:facet>
+
+				<h:panelGroup id="pnlDataProducto">
+					<p:panelGrid columns="3" styleClass="panel_data w100"
+						columnClasses="header w33, null, w20 null">
+						<p:outputLabel value="Número de oficio de Agrocalidad:"
+							style="color: white" for="txtNroOficio" />
+						<p:inputText id="txtNroOficio" required="true" autocomplete="off"
+							value="#{registroPqua.numeroOficioAgrocalidad}" maxlength="100">
+							<p:ajax process="@this" />
+						</p:inputText>
+						<h:outputText value="" />
+
+						<p:outputLabel value="Fecha de ingreso del oficio de Agrocalidad:"
+							style="color: white" for="txtFechaInicio" />
+						<p:calendar id="txtFechaInicio" required="true"
+							value="#{registroPqua.fechaIngresoOficioAgrocalidad}"
+							pattern="dd/MM/yyyy" readonlyInput="true">
+							<p:ajax event="dateSelect" process="@this" />
+						</p:calendar>
+						<h:outputText value="" />
+
+						<p:outputLabel value="Mes de ingreso: *" style="color: white" />
+						<h:panelGroup id="pnlMesIngreso">
+							<p:selectOneMenu id="cmbMesIngreso"
+								value="#{registrarInformacionExternaController.mesIngresoString}" required="true"
+								requiredMessage="El campo 'Mes de ingreso' es requerido.">
+								<f:selectItem itemLabel="Mes..." noSelectionOption="true" />
+								<f:selectItems
+									value="#{registrarInformacionExternaController.mesList}" />
+								<p:ajax event="change" process="cmbMesIngreso" update="pnlMesIngreso"
+									listener="#{registrarInformacionExternaController.validarMesIngreso(registroPqua)}" />
+							</p:selectOneMenu>
+							<p:selectOneMenu id="cmbAnioIngreso"
+								value="#{registrarInformacionExternaController.anioIngresoString}" required="true"
+								requiredMessage="El campo 'Año de ingreso' es requerido.">
+								<f:selectItem itemLabel="Año..." noSelectionOption="true" />
+								<f:selectItems
+									value="#{registrarInformacionExternaController.anioList}" />
+								<p:ajax event="change" process="@this" update="pnlMesIngreso"
+									listener="#{registrarInformacionExternaController.validarMesIngreso(registroPqua)}" />
+							</p:selectOneMenu>
+
+						</h:panelGroup>
+						<p:commandButton value="Descargar datos" immediate="true"
+							styleClass="primary field_mrg" ajax="false"
+							disabled="#{registroPqua.listaDetalleProductos eq null or registroPqua.listaDetalleProductos.size() eq 0}"
+							action="#{registrarInformacionExternaController.generarReporteProductos(registroPqua)}" />
+
+					</p:panelGrid>
+					<br />
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="Registro de información" />
+							<p:commandButton value="Adjuntar"
+								styleClass="button-small-text toRight field_mrg" process="@this"
+								oncomplete="PF('dlgAdjuntarArchivo').show()"
+								disabled="#{registroPqua.habilitarCarga}"
+								actionListener="#{registrarInformacionExternaController.adjuntarArchivoProductos(registroPqua)}" />
+							<p:commandButton value="Descargar"
+								styleClass="button-small-text toRight field_mrg" ajax="false"
+								immediate="true" onclick="event.stopPropagation();">
+								<p:fileDownload
+									value="#{registrarInformacionExternaController.getPlantilla()}" />
+							</p:commandButton>
+							<p:commandButton value="Añadir"
+								styleClass="button-small-text toRight field_mrg" process="@this"
+								oncomplete="PF('dlgAdicionarProducto').show();"
+								update=":form:tab:dlgAdicionarProducto"
+								actionListener="#{registrarInformacionExternaController.agregarProducto(registroPqua)}">
+							</p:commandButton>
+						</f:facet>
+
+						<p:dataTable id="dtProductos" var="producto"
+							styleClass="table table-hover"
+							value="#{registroPqua.listaDetalleProductos}" paginator="true"
+							paginatorAlwaysVisible="false" paginatorPosition="bottom"
+							emptyMessage="#{labels['common.table.empty']}"
+							currentPageReportTemplate="{currentPage} de {totalPages}"
+							rows="20" rowsPerPageTemplate="20,40,60">
+
+							<p:column headerText="Ruc / Cédula"
+								filterBy="#{producto.cedulaRuc}" filterMatchMode="contains">
+								<h:outputText value="#{producto.cedulaRuc}" />
+							</p:column>
+							<p:column headerText="Nombre Operador"
+								filterBy="#{producto.nombreOperador}" filterMatchMode="contains">
+								<h:outputText value="#{producto.nombreOperador}" />
+							</p:column>
+							<p:column headerText="Nombre comercial producto"
+								filterBy="#{producto.nombreComercialProducto}"
+								filterMatchMode="contains">
+								<h:outputText value="#{producto.nombreComercialProducto}" />
+							</p:column>
+							<p:column headerText="Composición del producto">
+								<h:outputText value="#{producto.composicionProducto}" />
+							</p:column>
+							<p:column headerText="Valor">
+								<h:outputText value="#{producto.valor}" />
+							</p:column>
+							<p:column headerText="Unidad de medida">
+								<h:outputText value="#{producto.unidadMedida}" />
+							</p:column>
+							<p:column headerText="Formulación">
+								<h:outputText value="#{producto.formulacion}" />
+							</p:column>
+							<p:column headerText="Categoría Toxicológica (anterior)">
+								<h:outputText value="#{producto.categoriaToxicologica}" />
+							</p:column>
+							<p:column headerText="Color de franja (anterior)">
+								<h:outputText value="#{producto.colorFranja.nombre}" />
+							</p:column>
+							<p:column headerText="Prórroga">
+								<h:outputText value="#{producto.prorroga ? 'SI' : 'NO'}" />
+							</p:column>
+							<p:column headerText="Acción" styleClass="w70px alCenter">
+
+								<p:commandButton styleClass="button-small primary"
+									process="@this" icon="ui-icon-pencil"
+									actionListener="#{registrarInformacionExternaController.editarAdicionarProducto(registroPqua, producto)}"
+									oncomplete="PF('dlgAdicionarProducto').show();"
+									immediate="true" update=":form:tab:dlgAdicionarProducto" />
+
+								<p:commandButton styleClass="button-small primary"
+									process="@this" icon="ui-icon-trash"
+									actionListener="#{registrarInformacionExternaController.eliminarAdicionarProducto(registroPqua, producto)}"
+									immediate="true" update=":form:tab:acdRegistrosPqua">
+									<p:confirm icon="ui-icon-alert" header="Confirmación"
+										message="¿Está seguro de eliminar el registro?" />
+								</p:commandButton>
+							</p:column>
+						</p:dataTable>
+					</p:panelGrid>
+
+					<h:inputHidden
+						validator="#{registrarInformacionExternaController.validateRegistroProducto}" />
+
+					<h:panelGroup id="pnlButtons">
+						<div class="buttons main">
+							<p:commandButton value="Cancelar" process="@this"
+								styleClass="secondary"
+								actionListener="#{registrarInformacionExternaController.cancelarRegistroPqua}"
+								icon="ui-icon-cancel" update="pnlButtons :form" />
+							<p:commandButton value="Aceptar" icon="ui-icon-disk"
+								process="@this pnlDataProducto" update="pnlButtons :form"
+								actionListener="#{registrarInformacionExternaController.guardarRegistroProducto(registroPqua)}">
+							</p:commandButton>
+						</div>
+					</h:panelGroup>
+				</h:panelGroup>
+			</p:tab>
+		</p:accordionPanel>
+	</p:panelGrid>
+</h:panelGrid>
+
+<p:dialog header="Adjuntar archivo" width="600" height="auto"
+	widgetVar="dlgAdjuntarArchivo" modal="true" resizable="false">
+	<p:panelGrid columns="1" styleClass="w100" columnClasses="label, value">
+		<h:outputText value="Seleccione el archivo excel (.xlsx)" />
+		<p:fileUpload uploadLabel="Subir" auto="true" cancelLabel="Cancelar"
+			label="Seleccionar"
+			fileUploadListener="#{registrarInformacionExternaController.handleFileUpload}"
+			mode="advanced" dragDropSupport="false" multiple="false"
+			allowTypes="/(\.|\/)(xlsx)$/"
+			invalidFileMessage="El archivo es inválido."
+			invalidSizeMessage="El archivo es demasiado grande." update=":form" />
+	</p:panelGrid>
+	<div class="buttons">
+		<p:commandButton type="button" value="Cerrar"
+			onclick="PF('dlgAdjuntarArchivo').hide()" />
+	</div>
+</p:dialog>
+
+
+<p:dialog header="AdicionarProducto" id="dlgAdicionarProducto"
+	widgetVar="dlgAdicionarProducto" modal="true" resizable="false"
+	width="600" closable="false">
+
+	<h:panelGrid styleClass="w100" columns="1" id="pnlProductoAdd">
+		<p:panelGrid columns="2" styleClass="panel_data w100"
+			columnClasses="header w25, null">
+			<p:outputLabel value="RUC / Cédula:" style="color: white"
+				for="txtNumeroCedula" />
+			<h:panelGroup>
+				<h:panelGrid id="pnlValidar" styleClass="w100" columns="2"
+					columnClasses="w50 null, w50 null">
+					<p:inputText id="txtNumeroCedula"
+						value="#{registrarInformacionExternaController.nuevoProducto.cedulaRuc}"
+						maxlength="20" autocomplete="off" required="true"
+						requiredMessage="RUC / Cédula es requerido">
+					</p:inputText>
+					<p:commandButton value="Validar" id="btnValidar"
+						update="pnlDataOperador" styleClass="primary" immediate="true"
+						actionListener="#{registrarInformacionExternaController.validarCedula()}"
+						process="@this">
+						<p:ajax process="txtNumeroCedula" />
+					</p:commandButton>
+				</h:panelGrid>
+			</h:panelGroup>
+		</p:panelGrid>
+
+		<p:panelGrid id="pnlDataOperador" columns="2"
+			styleClass="panel_data w100" columnClasses="header w25, null">
+			<h:outputText value="Nombre Operador" />
+			<p:inputText id="nombreOperador" disabled="true"
+				value="#{registrarInformacionExternaController.nuevoProducto.nombreOperador}" />
+
+			<h:outputText value="Representante Legal"
+				rendered="#{registrarInformacionExternaController.nuevoProducto.representanteLegal ne null}" />
+			<p:inputText disabled="true"
+				value="#{registrarInformacionExternaController.nuevoProducto.representanteLegal}"
+				rendered="#{registrarInformacionExternaController.nuevoProducto.representanteLegal ne null}" />
+		</p:panelGrid>
+
+		<p:panelGrid id="pnlProducto" columns="2" styleClass="panel_data w100"
+			columnClasses="header w25, null">
+
+			<p:outputLabel value="N° de Registro:" style="color: white"
+				for="txtNumRegistro" />
+			<p:inputText id="txtNumRegistro"
+				value="#{registrarInformacionExternaController.nuevoProducto.numeroRegistro}"
+				maxlength="100" required="true"
+				requiredMessage="N° de Registro es requerido" />
+
+			<p:outputLabel value="Fecha de registro:" style="color: white"
+				for="calFechaRegistro" />
+			<p:calendar id="calFechaRegistro" required="true"
+				value="#{registrarInformacionExternaController.nuevoProducto.fechaRegistro}"
+				pattern="dd/MM/yyyy" readonlyInput="true" navigator="true">
+			</p:calendar>
+
+			<p:outputLabel value="Nombre comercial del producto:"
+				style="color: white" for="txtNombreComercial" />
+			<p:inputText id="txtNombreComercial"
+				value="#{registrarInformacionExternaController.nuevoProducto.nombreComercialProducto}"
+				maxlength="100" required="true"
+				requiredMessage="Nombre comercial del producto es requerido" />
+
+			<p:outputLabel value="Composición del producto:" style="color: white"
+				for="txtComposicion" />
+			<p:inputText id="txtComposicion"
+				value="#{registrarInformacionExternaController.nuevoProducto.composicionProducto}"
+				maxlength="100" required="true" placeholder="Chlorpyrifos;Fipronil"
+				requiredMessage="Composición del producto es requerido" />
+
+			<p:outputLabel value="Valor:" style="color: white" for="txtValor" />
+			<p:inputText id="txtValor" placeholder="234,4564;23,3434;654,8765"
+				value="#{registrarInformacionExternaController.nuevoProducto.valor}"
+				required="true" requiredMessage="Valor es requerido" maxlength="100" />
+
+			<p:outputLabel value="Unidad de medida:" style="color: white"
+				for="txtUnidadMed" />
+			<p:inputText id="txtUnidadMed" placeholder="g/l;g/kg"
+				value="#{registrarInformacionExternaController.nuevoProducto.unidadMedida}"
+				maxlength="100" required="true"
+				requiredMessage="Unidad de medida es requerido" />
+
+			<p:outputLabel value="Formulación:" style="color: white"
+				for="txtFormulacion" />
+			<p:inputText id="txtFormulacion"
+				value="#{registrarInformacionExternaController.nuevoProducto.formulacion}"
+				maxlength="100" required="true"
+				requiredMessage="Formulacion es requerido" />
+
+			<p:outputLabel value="Abreviatura de formulación:"
+				style="color: white" for="txtAbreviaturaFormulacion" />
+			<p:inputText id="txtAbreviaturaFormulacion"
+				value="#{registrarInformacionExternaController.nuevoProducto.abreviaturaFormulacion}"
+				maxlength="100" required="true"
+				requiredMessage="Abreviatura de formulacion es requerido" />
+
+			<p:outputLabel value="Categoría Toxicológica:" style="color: white"
+				for="txtCategoriaTox" />
+			<p:inputText id="txtCategoriaTox"
+				value="#{registrarInformacionExternaController.nuevoProducto.categoriaToxicologica}"
+				maxlength="100" required="true"
+				requiredMessage="Categoría Toxicológica es requerido" />
+
+			<p:outputLabel value="Color de franja (anterior):"
+				style="color: white" for="cmbColor" />
+			<p:selectOneMenu styleClass="w50" required="true" id="cmbColor"
+				value="#{registrarInformacionExternaController.nuevoProducto.colorFranja}"
+				converter="selectItemConverter">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="" noSelectionOption="true" />
+				<f:selectItems
+					value="#{registrarInformacionExternaController.listaColor}"
+					var="item" itemLabel="#{item.nombre}" itemValue="#{item}" />
+			</p:selectOneMenu>
+
+			<p:outputLabel value="Prórroga:" style="color: white"
+				for="idProrroga" />
+			<p:selectOneRadio id="idProrroga" required="true"
+				requiredMessage="Prórroga es requerido"
+				value="#{registrarInformacionExternaController.nuevoProducto.prorroga}">
+				<f:selectItem itemValue="true" itemLabel="Si" />
+				<f:selectItem itemValue="false" itemLabel="No" />
+			</p:selectOneRadio>
+
+		</p:panelGrid>
+
+		<h:inputHidden
+			validator="#{registrarInformacionExternaController.validateProducto}" />
+	</h:panelGrid>
+
+
+	<br />
+	<p:outputPanel>
+		<div class="buttons main">
+			<p:commandButton value="Cancelar" resetValues="true" immediate="true"
+				actionListener="#{registrarInformacionExternaController.limpiarAdicionarProducto()}"
+				oncomplete="PF('dlgAdicionarProducto').hide();"
+				update="dlgAdicionarProducto acdRegistrosPqua" process="@this" />
+			<p:commandButton value="Aceptar"
+				actionListener="#{registrarInformacionExternaController.aceptarAdicionarProducto()}"
+				oncomplete="handleDlgAdicionarProducto(xhr, status, args)"
+				update="dlgAdicionarProducto acdRegistrosPqua"
+				process="dlgAdicionarProducto" />
+		</div>
+	</p:outputPanel>
+</p:dialog>
+
+
+<script type="text/javascript">
+	function handleDlgAdicionarProducto(xhr, status, args) {
+		if (args.validationFailed || !args.addProducto) {
+			PF('dlgAdicionarProducto').show();
+		}
+		else {
+			PF('dlgAdicionarProducto').hide();
+		}
+	}
+	</script>
+
+</html>

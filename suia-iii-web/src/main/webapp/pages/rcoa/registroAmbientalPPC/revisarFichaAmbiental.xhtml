@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	template="/WEB-INF/templates/default-task-rappc.xhtml"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="content">
+
+		<h:form id="form">
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				id="pnlGeneral">
+				<f:facet name="header">
+					<h:outputText
+						value="Pronunciamiento favorable revisión Ficha Ambiental*" />
+				</f:facet>
+
+				<h:outputText
+					value="Adjuntar los archivos de manera cronológica con las firmas electrónicas de responsabilidad correspondientes, los documentos deben estar en formato .pdf o .rar, se sugiere que cada uno de los archivos tenga un máximo de 50MB, para lograr una subida óptima de sus archivos." />
+
+				<p:dataTable id="tabDocumento" var="item"
+					emptyMessage="#{labels['common.table.empty']}" lazy="true"
+					value="#{revisarFichaAmbientalController.listaDocumentos}"
+					paginator="false" paginatorAlwaysVisible="true" rows="10"
+					paginatorPosition="bottom">
+
+					<f:facet name="header">
+						<p:commandButton value="Añadir"
+							styleClass="button-small-text toRight field_mrg"
+							icon="ui-icon-plusthick" immediate="true"
+							oncomplete="PF('uploadFile').show()">
+						</p:commandButton>
+						<br />
+					</f:facet>
+
+					<p:column headerText="Documento">
+						<h:outputText value="#{item.nombre}" />
+					</p:column>
+					<p:column styleClass="alCenter" headerText="Acciones">
+						<center>
+							<p:commandButton icon="ui-icon-arrowthick-1-s" title="Descargar"
+								styleClass="secondary" ajax="false " update="tabDocumento"
+								immediate="true">
+								<p:fileDownload
+									value="#{revisarFichaAmbientalController.descargarDocumentos(item)}" />
+							</p:commandButton>
+
+							<p:commandButton icon="ui-icon-trash" title="Eliminar"
+								process="@this" styleClass="secondary"
+								actionListener="#{revisarFichaAmbientalController.eliminarDocumento(item)}"
+								update="tabDocumento">
+								<p:confirm header="Confirmación"
+									message="¿Está seguro que desea eliminar el documento?"
+									icon="ui-icon-alert" />
+							</p:commandButton>
+						</center>
+					</p:column>
+				</p:dataTable>
+
+			</p:panelGrid>
+			
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Regresar" styleClass="large secondary"
+						action="#{revisarFichaAmbientalController.regresar}"
+						icon="ui-icon-check" process="@this" immediate="true">
+					</p:commandButton>
+
+					<p:commandButton value="Guardar"
+						actionListener="#{revisarFichaAmbientalController.guardar}"
+						styleClass="large" update="btnEnviar"/>
+
+					<p:commandButton id="btnEnviar" value="Finalizar"
+						action="#{revisarFichaAmbientalController.completarTarea()}" 
+						disabled="#{!revisarFichaAmbientalController.guardado}"
+						process="@this"/>
+				</div>
+			</h:panelGroup>
+
+		</h:form>
+
+		<h:form id="formDialogs">
+			<p:dialog header="Adjuntar" widgetVar="uploadFile" modal="true"
+				resizable="false">
+				<p:outputPanel>
+					<p:panelGrid columns="1" columnClasses="label, value">
+						<h:outputText value="Seleccione el archivo que desea adjuntar" />
+						<p:fileUpload id="fileDocumento1"
+							fileUploadListener="#{revisarFichaAmbientalController.adjuntarDocumento}"
+							mode="advanced" auto="true" sizeLimit="52428800"
+							label="Seleccionar"
+							invalidFileMessage="El tipo de archivo no es pdf."
+							invalidSizeMessage="Tamaño de archivo incorrecto"
+							allowTypes="/(\.|\/)(pdf|rar)$/"
+							fileLimitMessage="Elija un solo archivo pdf de 50Mb"
+							update=":form:tabDocumento" uploadLabel="Subir"
+							cancelLabel="Cancelar" dragDropSupport="false" multiple="false">
+						</p:fileUpload>
+					</p:panelGrid>
+				</p:outputPanel>
+				<div class="buttons">
+					<p:commandButton type="button" value="Cerrar"
+						onclick="PF('uploadFile').hide()" />
+				</div>
+			</p:dialog>
+		</h:form>
+
+	</ui:define>
+</ui:composition>

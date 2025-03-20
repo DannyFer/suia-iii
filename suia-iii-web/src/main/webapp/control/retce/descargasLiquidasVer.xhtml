@@ -1,0 +1,270 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk" xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<script type="text/javascript">
+		$(document).ready(function() {
+			$('.wizard-custom-btn-back').hide();
+			$('.wizard-custom-btn-only-end').hide();
+		});
+		</script>		
+		<style type="text/css">
+		.ui-fileupload-content{
+			border:none !important;
+			padding: 0px;
+		}
+		</style> 
+		
+		<link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/plugin/wizard.css" />	
+		<h:form id="formTable" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }" rendered="#{!descargasLiquidasController.verFormulario}">
+			
+			<p:panel style="text-align:center;">
+				<f:facet name="header">
+					<h:outputText value="REGISTRO DE EMISIONES Y TRANSFERENCIA DE CONTAMINANTES EN EL ECUADOR" styleClass="uppercase"/>
+				</f:facet>
+			</p:panel>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Información del operador"/>
+				</f:facet>
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25,null w75">
+					<h:outputText value="RUC / Cédula:"/>
+					<h:outputText value="#{loginBean.usuario.nombre}"/>					
+					<h:outputText value="Nombre:"/>
+					<h:outputText value="#{descargasLiquidasController.nombreUsuario}"/>					
+					<h:outputText value="Representante legal:" rendered="#{not empty descargasLiquidasController.representanteLegal}"/>
+					<h:outputText value="#{descargasLiquidasController.representanteLegal}" rendered="#{not empty descargasLiquidasController.representanteLegal}"/>						
+				</p:panelGrid>				
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Información del proyecto"/>
+				</f:facet>
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+					<h:outputText value="Nombre Proyecto:"/>
+					<h:outputText value="#{descargasLiquidasController.informacionProyecto.nombreProyecto}"/>					
+					<h:outputText value="#{descargasLiquidasController.informacionProyecto.esEmisionFisica?'Nombre Proceso':'Tipo de Trámite'}:"/>
+					<h:outputText value="#{descargasLiquidasController.informacionProyecto.nombreProceso}"/>
+					<h:outputText value="Información Básica"/>
+					<h:outputText value="#{descargasLiquidasController.informacionProyecto.codigo}"/>
+				</p:panelGrid>				
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Reportes de Descargas Líquidas"/>
+				</f:facet>
+						
+			<p:dataTable id="descargasTable" value="#{descargasLiquidasController.descargasLiquidasList}" var="item"
+			paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rows="25">	
+				<f:facet name="header">
+					<p:commandButton value="#{msg['button.agregar']}" icon="ui-icon-plus" action="#{descargasLiquidasController.agregarDetalle(null)}" update="@all" style="float:right" title="Agregar Reporte Descarga"
+					rendered="#{descargasLiquidasController.habilitarIngreso}"/>
+				</f:facet>										
+				<p:column headerText="Código" rendered="false">
+					<h:outputText value="#{item.informacionProyecto.codigo}"/>
+				</p:column>
+				<p:column headerText="Código trámite">
+					<h:outputText value="#{item.codigo}"/>
+				</p:column>
+				<p:column headerText="Código(s) punto(s) monitoreo">
+					<h:outputText value="#{descargasLiquidasController.verCodigosMonitoreo(item)}" escape="false"/>
+				</p:column>
+				<p:column headerText="¿Desea adjuntar una acción correctiva?" styleClass="alCenter">
+					<p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar"
+					rendered="#{item.adjuntoJustificacion != null}">
+						<p:fileDownload value="#{descargasLiquidasController.getStreamedContentDocumento(item.adjuntoJustificacion)}"/>
+					</p:commandButton>
+				</p:column>				
+				<p:column styleClass="w15" headerText="Acciones" rendered="#{descargasLiquidasController.habilitarIngreso or descargasLiquidasController.habilitarCorreccion}">
+					<center>
+						<p:commandButton icon="ui-icon-search" title="Ver Detalles" styleClass="secondary" process="@this" action="#{descargasLiquidasController.seleccionarDescargas(item)}" update=":formTable:detalleDescargasPanel" rendered="false"/>
+						<p:commandButton icon="ui-icon-plus" title="Agregar Punto Monitoreo" styleClass="secondary" process="@this" action="#{descargasLiquidasController.agregarDetalle(item)}" update="@all"
+						rendered="#{(!item.enviado and descargasLiquidasController.habilitarIngreso) or (descargasLiquidasController.habilitarCorreccion)}"/>
+					</center>												
+				</p:column>
+			</p:dataTable>
+			<p:panel id="detalleDescargasPanel">
+			<p:dataTable id="detalleDescargasTable" value="#{descargasLiquidasController.detalleDescargasLiquidasList}" var="item"
+			paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rows="5"
+			rendered="#{not empty descargasLiquidasController.detalleDescargasLiquidasList}">
+				<f:facet name="header">
+					<h:outputText value="Puntos de Monitoreo (#{descargasLiquidasController.descargasLiquidas.codigo})"/>
+				</f:facet>											
+				<p:column headerText="Código">
+					<h:outputText value="#{item.codigoPuntoMonitoreo}"/>
+				</p:column>
+				<p:column headerText="Número de identificación del punto de monitoreo">
+					<h:outputText value="#{item.numeroPuntoMonitoreo}"/>
+				</p:column>
+				<p:column headerText="Nombre del lugar del punto de muestreo">
+					<h:outputText value="#{item.lugarPuntoMonitoreo}"/>
+				</p:column>
+				<p:column headerText="Tipo de cuerpo receptor">
+					<h:outputText value="#{item.catalogoTipoCuerpoReceptorCaracteristicasPunto.catalogoTipoCuerpoReceptor.descripcion}"/>
+				</p:column>
+				<p:column headerText="Frecuencia de Monitoreo">
+					<h:outputText value="#{item.catalogoFrecuenciaMonitoreo.descripcion}"/>
+				</p:column>
+				<p:column styleClass="w15" headerText="Acciones">
+					<center>
+						<p:commandButton icon="ui-icon-#{descargasLiquidasController.habilitarIngreso?'pencil':'search'}" title="#{descargasLiquidasController.habilitarIngreso?'Editar':'Ver'}" styleClass="#{descargasLiquidasController.habilitarIngreso?'secondary':'primary'}" process="@this" action="#{descargasLiquidasController.editarDetalle(item)}" update=":#{p:component('content')}"/>
+						<p:commandButton icon="ui-icon-trash" title="Eliminar" styleClass="secondary" process="@this" action="#{descargasLiquidasController.eliminarDetalle(item)}" update=":#{p:component('content')}" rendered="#{descargasLiquidasController.habilitarIngreso}">
+							<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar?" icon="ui-icon-alert"/>
+						</p:commandButton>					
+					</center>												
+				</p:column>
+			</p:dataTable>			
+			</p:panel>
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Resumen de Observaciones"/>
+				</f:facet>
+			<h:panelGroup>
+				<observaciones:tablaObservaciones idComponent="descargasObs"
+					componenteActualizarEliminar="descargasObs"
+					seccion="*"
+					nombreClase="DescargasLiquidas"
+					idClase="#{descargasLiquidasController.descargasLiquidas.id}"							
+					aparace="#{descargasLiquidasController.habilitarObservaciones}"
+					mostrarSiVacio="true"
+					soloLectura="#{!descargasLiquidasController.editarObservaciones}" />
+			</h:panelGroup>
+			</p:panelGrid>
+			<div class="buttons main">
+			    <p:commandButton value="Ir a tarea" styleClass="secondary" icon="ui-icon-arrowthick-1-w" action="#{descargasLiquidasController.irTarea}" process="@this" update="@all"
+			    rendered="#{!descargasLiquidasController.habilitarCorreccion}"/>
+			</div>	
+		</h:form>
+		<h:form id="form" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }" rendered="#{descargasLiquidasController.verFormulario}">
+			<p:panel style="text-align:center;">
+				<f:facet name="header">
+					<h:outputText value="REGISTRO DE EMISIONES Y TRANSFERENCIA DE CONTAMINANTES EN EL ECUADOR" styleClass="uppercase"/><br/>
+					<h:outputText value="REPORTE DE DESCARGAS LIQUIDAS" styleClass="uppercase"/>
+				</f:facet>
+			</p:panel>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">				
+				<p:panelGrid columns="4" styleClass="panel_data w100"	columnClasses="header w25,w25,header w25,w25">
+					<h:outputText value="Código"/>
+					<h:outputText value="#{descargasLiquidasController.informacionProyecto.codigo}"/>					
+					
+					<h:outputText value="Código punto monitoreo *"/>
+					<p:selectOneMenu value="#{descargasLiquidasController.detalleDescargasLiquidas}" converter="selectItemConverter"
+					rendered="#{!descargasLiquidasController.habilitarIngreso}">						
+						<f:selectItems value="#{descargasLiquidasController.detalleDescargasLiquidasList}" var="item" itemLabel="#{item.codigoPuntoMonitoreo}" itemValue="#{item}"/>
+						<p:ajax event="change" update=":form" listener="#{descargasLiquidasController.editarDetalle(descargasLiquidasController.detalleDescargasLiquidas)}" />
+					</p:selectOneMenu>
+					<p:inputText id="codigoDescarga" value="#{descargasLiquidasController.detalleDescargasLiquidas.codigoPuntoMonitoreo}" required="true" requiredMessage="Código Punto Monitoreo es requerido" maxlength="20"
+					rendered="#{descargasLiquidasController.habilitarIngreso}"/>				
+					
+					<h:outputText value="Sector"/>
+					<h:outputText value="#{descargasLiquidasController.informacionProyecto.tipoSector.nombre}"/>					
+					
+					<h:outputText value="Fase"/>
+					<h:outputText value="#{descargasLiquidasController.informacionProyecto.faseRetce.descripcion}"/>
+				</p:panelGrid>					
+			</p:panelGrid>
+			<p:wizard widgetVar="wizard" flowListener="#{wizardBean.onFlowProcess}" showNavBar="false" nextLabel="Siguiente" backLabel="Atrás" id="wizardDescargas" showStepStatus="true">
+				<p:tab id="pasoCaracteristicas" titletip="Características de Medición">
+					<ui:include src="/control/retce/descargas/caracteristicasMedicion.xhtml"/>
+					<h:panelGroup rendered="#{not empty descargasLiquidasController.detalleDescargasLiquidas.id}">
+						<observaciones:tablaObservaciones idComponent="pasoCaracteristicasObs"
+							componenteActualizarEliminar="@none"
+							seccion="Caracteristicas Medicion"
+							nombreClase="DescargasLiquidas"
+							idClase="#{descargasLiquidasController.descargasLiquidas.id}"							
+							aparace="#{descargasLiquidasController.habilitarObservaciones}"
+							mostrarSiVacio="true"
+							soloLectura="#{!descargasLiquidasController.editarObservaciones}" />
+					</h:panelGroup>					
+				</p:tab>
+				<p:tab id="pasoMediciones" titletip="Registro de Mediciones">
+					<ui:include src="/control/retce/descargas/registroMediciones.xhtml"/>
+					<h:panelGroup>
+						<observaciones:tablaObservaciones idComponent="pasoMedicionesObs"
+							componenteActualizarEliminar="@none"
+							seccion="Registro Mediciones"
+							nombreClase="DescargasLiquidas"
+							idClase="#{descargasLiquidasController.descargasLiquidas.id}"							
+							aparace="#{descargasLiquidasController.habilitarObservaciones}"
+							mostrarSiVacio="true"
+							soloLectura="#{!descargasLiquidasController.editarObservaciones}" />
+					</h:panelGroup>	
+				</p:tab>
+				<p:tab id="pasoLaboratorios" titletip="Datos Generales del Laboratorio">
+					<ui:include src="/control/retce/descargas/laboratorios.xhtml"/>
+					<h:panelGroup>
+						<observaciones:tablaObservaciones idComponent="pasoLaboratoriosObs"
+							componenteActualizarEliminar="@none"
+							seccion="Laboratorios"
+							nombreClase="DescargasLiquidas"
+							idClase="#{descargasLiquidasController.descargasLiquidas.id}"							
+							aparace="#{descargasLiquidasController.habilitarObservaciones}"
+							mostrarSiVacio="true"
+							soloLectura="#{!descargasLiquidasController.editarObservaciones}" />
+					</h:panelGroup>	
+				</p:tab>
+				<p:tab id="pasoSustancias" titletip="Sustancias RETCE (Voluntario hasta la expedición de la norma)" rendered="false">
+					<ui:include src="/control/retce/descargas/sustancias.xhtml"/>
+					<h:panelGroup>
+						<observaciones:tablaObservaciones idComponent="pasoSustanciasObs"
+							componenteActualizarEliminar="@none"
+							seccion="Sustancias Retce"
+							nombreClase="DescargasLiquidas"
+							idClase="#{descargasLiquidasController.descargasLiquidas.id}"							
+							aparace="true"
+							mostrarSiVacio="true"
+							soloLectura="#{!descargasLiquidasController.editarObservaciones}" />
+					</h:panelGroup>	
+				</p:tab>
+				<p:tab id="pasoTecnico" titletip="Información del Técnico que Reporta">
+					<ui:include src="/control/retce/descargas/tecnico.xhtml"/>
+					<h:panelGroup>
+						<observaciones:tablaObservaciones idComponent="pasoTecnicoObs"
+							componenteActualizarEliminar="@none"
+							seccion="Tecnico Reporta"
+							nombreClase="DescargasLiquidas"
+							idClase="#{descargasLiquidasController.descargasLiquidas.id}"							
+							aparace="#{descargasLiquidasController.habilitarObservaciones}"
+							mostrarSiVacio="true"
+							soloLectura="#{!descargasLiquidasController.editarObservaciones}" />
+					</h:panelGroup>	
+				</p:tab>
+				<p:tab id="pasoJustificacion" titletip="Justificación">
+					<ui:include src="/control/retce/descargas/justificacion.xhtml"/>
+					<h:panelGroup>
+						<observaciones:tablaObservaciones idComponent="pasoJustificacionObs"
+							componenteActualizarEliminar="@none"
+							seccion="Adjunto Justificacion"
+							nombreClase="DescargasLiquidas"
+							idClase="#{descargasLiquidasController.descargasLiquidas.id}"							
+							aparace="#{descargasLiquidasController.habilitarObservaciones}"
+							mostrarSiVacio="true"
+							soloLectura="#{!descargasLiquidasController.editarObservaciones}" />
+					</h:panelGroup>	
+				</p:tab>
+			</p:wizard>			
+			<div class="buttons main">
+			<p:outputPanel id="pnlButons">
+			    <p:commandButton value="Regresar" styleClass="secondary" icon="ui-icon-arrowthick-1-w" action="#{descargasLiquidasController.ocultarFormulario}" process="@this" update=":#{p:component('content')}" onclick="PF('wizard').loadStep('pasoCaracteristicas', false)"/>
+				<p:commandButton value="Atrás" icon="ui-icon-arrowthick-1-w" oncomplete="PF('wizard').back()" styleClass="wizard-custom-btn-back"/>
+				<p:commandButton value="Guardar" icon="ui-icon-disk" action="#{descargasLiquidasController.guardar}" update="@form" rendered="#{descargasLiquidasController.habilitarIngreso}"/>
+				<p:commandButton value="Siguiente" icon="ui-icon-arrowthick-1-e" oncomplete="PF('wizard').next();reloadWizard();" styleClass="wizard-custom-btn-next" actionListener="#{descargasLiquidasController.guardar}" />
+				<p:commandButton value="Enviar" id="btnEnviar" action="#{descargasLiquidasController.enviar}" styleClass="wizard-custom-btn-only-end" icon="ui-icon-check" process="@this" update=":#{p:component('content')}" disabled="false"
+				rendered="#{descargasLiquidasController.habilitarIngreso}">
+					<p:confirm header="Confirmación" message="¿Está seguro que desea finalizar?" icon="ui-icon-alert"/>
+				</p:commandButton>
+			</p:outputPanel>
+			</div>
+			<h:outputScript name="/plugin/wizard.js" library="js" />			
+		</h:form>
+		<h:form id="formDialogs" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }" rendered="#{descargasLiquidasController.verFormulario}">
+			<ui:include src="/control/retce/descargas/dialogs.xhtml"/>
+		</h:form>
+		<h:form id="formDialogsHistorial" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }" rendered="#{descargasLiquidasController.verFormulario}">
+			<ui:include src="/control/retce/descargas/dialogsHistorial.xhtml"/>
+		</h:form>		
+	</ui:define>
+</ui:composition>
+</html>

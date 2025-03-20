@@ -1,0 +1,246 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<style type="text/css">
+.noHeader.ui-datatable table thead tr {
+	display: none;
+}
+
+.noHeader tr td {
+	padding-left: 0px;
+	padding-right: 0px;
+}
+</style>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100"
+	style="margin-top: 15px !important;">
+	<f:facet name="header">
+		<h:outputText value="EXPORTACION" />
+	</f:facet>
+
+	<h:panelGrid columns="1" styleClass="w100">
+		<p:outputLabel value="¿Realiza exportación?" />
+		<p:selectOneRadio
+			value="#{exportacionDesechosBean.generadorDesechosRetce.realizaExportacion}"
+			required="true" disabled="true">
+			<f:selectItem itemLabel="Sí" itemValue="true" />
+			<f:selectItem itemLabel="No" itemValue="false" />
+			<p:ajax process="@this" />
+		</p:selectOneRadio>
+		<h:outputText />
+		<h:panelGrid styleClass="panel_data" columns="2"
+			rendered="#{exportacionDesechosBean.listaRealizaExportacionHistorial ne null}"
+			columnClasses="header background-orange, null" rowClasses="null, alt">
+			<h:outputText value="Historial exportación" />
+			<p:commandButton styleClass="button-small orange"
+				icon="ui-icon-search" process="@this"
+				oncomplete="PF('verHistorialRealizaExportacion').show()"
+				immediate="true" title="Ver Historial" />
+		</h:panelGrid>
+	</h:panelGrid>
+</p:panelGrid>
+
+
+<h:panelGroup>
+	<p:panelGrid columns="1" layout="grid" styleClass="w100"
+		rendered="#{exportacionDesechosBean.generadorDesechosRetce.realizaExportacion}">
+		<f:facet name="header">
+			<h:outputText value="Desechos exportación" width="600px" />
+		</f:facet>
+		<p:dataTable
+			value="#{exportacionDesechosBean.listaExportacionDesechos}"
+			var="item" emptyMessage="#{labels['common.table.empty']}">
+			<p:column headerText="Desecho peligroso o especial" styleClass="w25">
+				<h:outputText value="#{item.desechoPeligroso.descripcion}" />
+			</p:column>
+			<p:column headerText="Código" style="width: 8%">
+				<h:outputText value="#{item.desechoPeligroso.clave}" />
+			</p:column>
+			<p:column headerText="Cantidad (t)" styleClass="w10 alCenter">
+				<h:outputText value="#{item.cantidad}" />
+			</p:column>
+			<p:column headerText="País de destino" styleClass="w15">
+				<h:outputText value="#{item.paisDestino.nombre}" />
+			</p:column>
+			<p:column headerText="Documentos">
+				<p:dataTable styleClass="noHeader borderless"
+					value="#{item.listaDocumentosExportacion}" var="doc"
+					sortBy="#{doc.tipoDocumento}">
+					<ui:remove>
+						<p:column headerText="Fase"
+							style="text-align: left; background-color: #f5f5f5;"
+							groupRow="true">
+							<h:outputText value="#{doc.tipoDocumento}" />
+						</p:column>
+					</ui:remove>
+					<p:column style="text-align: left; background-color: #f5f5f5;">
+						<p:commandLink value="#{doc.documento.nombre}" ajax="false">
+							<p:fileDownload
+								value="#{exportacionDesechosBean.descargar(doc.documento)}" />
+						</p:commandLink>
+						<h:outputText styleClass="text-orange"
+							rendered="#{!item.nuevoEnModificacion and doc.documento.numeroNotificacion ne null and doc.documento.numeroNotificacion eq exportacionDesechosBean.numeroObservaciones}"
+							value=" (Nuevo)" />
+					</p:column>
+				</p:dataTable>
+			</p:column>
+			<p:column style="text-align: center; width: 33px;"
+				rendered="#{exportacionDesechosBean.mostrarHistorialDesechos}">
+				<p:commandButton icon="ui-icon-search"
+					styleClass="button-small orange"
+					action="#{exportacionDesechosBean.verHistorialDesecho(item)}"
+					oncomplete="PF('verHistorialDesechoExp').show()"
+					update=":form:tabGenerador:pnlHistorialDesechoExp :form:tabGenerador:tblHistorialDesechoExp :form:tabGenerador:tblHistorialDocumentos"
+					rendered="#{item.listaHistorial.size() > 0 or item.listaDocumentosExportacionHistorial.size() > 0}"
+					title="Ver Historial" />
+				<h:outputText styleClass="text-orange"
+					rendered="#{item.nuevoEnModificacion}" value="Nuevo" />
+			</p:column>
+		</p:dataTable>
+		<h:panelGrid styleClass="panel_data" columns="2"
+			rendered="#{exportacionDesechosBean.listaExportacionDesechosEliminados != null}"
+			columnClasses="header background-orange, null" rowClasses="null, alt">
+			<h:outputText value="Desechos eliminados" />
+			<p:commandButton styleClass="button-small orange"
+				icon="ui-icon-search" process="@this"
+				oncomplete="PF('verDesechosExpEliminados').show()" immediate="true"
+				title="Ver Historial" />
+		</h:panelGrid>
+	</p:panelGrid>
+</h:panelGroup>
+
+
+<p:dialog id="verHistorialDesechoExp" widgetVar="verHistorialDesechoExp"
+	modal="true" resizable="false" width="800" header="Historial Desechos">
+	<h:panelGroup id="pnlHistorialDesechoExp">
+		<p:dataTable id="tblHistorialDesechoExp"
+			rendered="#{exportacionDesechosBean.desechoExportacionSeleccionado.listaHistorial.size() > 0}"
+			value="#{exportacionDesechosBean.desechoExportacionSeleccionado.listaHistorial}"
+			var="item" emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<h:outputText value="Desechos modificados" width="600px" />
+			</f:facet>
+			<p:column headerText="Fecha modificación" style="width: 80px;">
+				<h:outputText value="#{item.fechaCreacion}" />
+			</p:column>
+			<p:column headerText="Desecho peligroso o especial" styleClass="w40">
+				<h:outputText value="#{item.desechoPeligroso.descripcion}" />
+			</p:column>
+			<p:column headerText="Código">
+				<h:outputText value="#{item.desechoPeligroso.clave}" />
+			</p:column>
+			<p:column headerText="Cantidad (t)" styleClass="alCenter">
+				<h:outputText value="#{item.cantidad}" />
+			</p:column>
+			<p:column headerText="País de destino">
+				<h:outputText value="#{item.paisDestino.nombre}" />
+			</p:column>
+		</p:dataTable>
+		<h:panelGroup
+			rendered="#{exportacionDesechosBean.desechoExportacionSeleccionado.listaHistorial.size() > 0}">
+			<br />
+			<br />
+		</h:panelGroup>
+		<p:dataTable id="tblHistorialDocumentos"
+			rendered="#{exportacionDesechosBean.desechoExportacionSeleccionado.listaDocumentosExportacionHistorial.size() > 0}"
+			value="#{exportacionDesechosBean.desechoExportacionSeleccionado.listaDocumentosExportacionHistorial}"
+			var="item" emptyMessage="#{labels['common.table.empty']}"
+			sortBy="#{item.tipoDocumento}">
+			<f:facet name="header">
+				<h:outputText value="Documentos Eliminados" width="600px" />
+			</f:facet>
+			<p:column headerText="Fecha modificación" style="width: 80px;">
+				<h:outputText
+					value="#{item.documento.fechaModificacion eq null ? item.documento.fechaCreacion : item.documento.fechaModificacion}" />
+			</p:column>
+			<p:column headerText="Fase">
+				<h:outputText value="#{item.tipoDocumento}" />
+			</p:column>
+			<p:column headerText="Documento">
+				<h:outputText value="#{item.documento.nombre}" />
+			</p:column>
+			<p:column headerText="Descargar" styleClass="w15 alCenter">
+				<p:commandButton icon="ui-icon-arrowthick-1-s"
+					styleClass="button-small primary" title="Ver" ajax="false"
+					immediate="true" rendered="#{item.documento.id ne null}">
+					<p:fileDownload
+						value="#{exportacionDesechosBean.descargar(item.documento)}" />
+				</p:commandButton>
+			</p:column>
+		</p:dataTable>
+		<br />
+		<br />
+	</h:panelGroup>
+</p:dialog>
+
+<p:dialog id="verDesechosExpEliminados"
+	widgetVar="verDesechosExpEliminados" modal="true" resizable="false"
+	width="900" header="Desechos Eliminados">
+	<p:dataTable
+		value="#{exportacionDesechosBean.listaExportacionDesechosEliminados}"
+		var="item" emptyMessage="#{labels['common.table.empty']}">
+		<p:column headerText="Fecha modificación" style="width: 80px;">
+			<h:outputText value="#{item.fechaCreacion}" />
+		</p:column>
+		<p:column headerText="Desecho peligroso o especial" styleClass="w25">
+			<h:outputText value="#{item.desechoPeligroso.descripcion}" />
+		</p:column>
+		<p:column headerText="Código" style="width: 8%">
+			<h:outputText value="#{item.desechoPeligroso.clave}" />
+		</p:column>
+		<p:column headerText="Cantidad (t)" styleClass="w10 alCenter">
+			<h:outputText value="#{item.cantidad}" />
+		</p:column>
+		<p:column headerText="País de destino" styleClass="w15">
+			<h:outputText value="#{item.paisDestino.nombre}" />
+		</p:column>
+		<p:column headerText="Documentos">
+				<p:dataTable styleClass="noHeader borderless"
+					value="#{item.listaDocumentosExportacion}" var="doc"
+					sortBy="#{doc.tipoDocumento}">
+					<ui:remove>
+						<p:column headerText="Fase"
+							style="text-align: left; background-color: #f5f5f5;"
+							groupRow="true">
+							<h:outputText value="#{doc.tipoDocumento}" />
+						</p:column>
+					</ui:remove>
+					<p:column style="text-align: left; background-color: #f5f5f5;">
+						<p:commandLink value="#{doc.documento.nombre}" ajax="false">
+							<p:fileDownload
+								value="#{exportacionDesechosBean.descargar(doc.documento)}" />
+						</p:commandLink>
+					</p:column>
+				</p:dataTable>
+			</p:column>
+	</p:dataTable>
+	<br />
+	<br />
+</p:dialog>
+
+<p:dialog id="verHistorialRealizaExportacion"
+	widgetVar="verHistorialRealizaExportacion" modal="true"
+	resizable="false" width="500" header="Historial Exportación">
+	<p:dataTable
+		value="#{exportacionDesechosBean.listaRealizaExportacionHistorial}"
+		var="generador" emptyMessage="#{labels['common.table.empty']}">
+		<p:column headerText="Fecha modificación">
+			<h:outputText value="#{generador.fechaCreacion}" />
+		</p:column>
+		<p:column headerText="¿Realiza exportación?">
+			<h:outputText value="#{generador.realizaExportacion ? 'SI' : 'NO'}" />
+		</p:column>
+	</p:dataTable>
+	<br />
+	<br />
+</p:dialog>
+
+</html>

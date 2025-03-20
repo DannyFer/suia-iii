@@ -1,0 +1,50 @@
+<ui:composition template="/WEB-INF/templates/default.xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+	<ui:composition template="/WEB-INF/templates/default-task-rappc.xhtml">
+		<ui:define name="content">
+		<h:form id="form">
+        	<h:panelGrid styleClass="w100" id="informeGrid">
+				<object type="application/pdf" data="#{elaborarOficioAprobacionPPCController.urlReporte}?pfdrid_c=true" width="100%" height="500px">
+					Su navegador no soporta la visualización de pdf. Puede descargar el documento presionando el siguiente botón:
+					<p:commandButton value="Descargar" styleClass="primary" ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+						<p:fileDownload
+							value="#{elaborarOficioAprobacionPPCController.getStream()}" />
+					</p:commandButton>
+				</object>
+				<p:outputLabel value="Asunto:" styleClass="bold"/>
+				<p:inputText value="#{elaborarOficioAprobacionPPCController.oficioPronunciamiento.asunto}"  
+							required="true" requiredMessage="El asunto es requerido." maxlength="300">
+				</p:inputText>
+				<p:fieldset widgetVar="fdsAntecedentes" legend="Antecedentes" toggleable="true" toggleSpeed="500" collapsed="true">														
+					<control:imputConTextoEnriquecido id="antecedentes" requiredMessage="Antecedentes es requerido"
+						valor="#{elaborarOficioAprobacionPPCController.oficioPronunciamiento.antecedentes}" requerido="true" soloLectura="false"/>						
+				</p:fieldset>
+				<p:fieldset widgetVar="fdsPronunciamiento" legend="Pronunciamiento" toggleable="true" toggleSpeed="500" collapsed="true">														
+					<control:imputConTextoEnriquecido id="pronunciamiento"
+						requiredMessage="Antecedentes es requerido"
+						valor="#{elaborarOficioAprobacionPPCController.oficioPronunciamiento.pronunciamiento}"
+						requerido="true" soloLectura="false"/>						
+				</p:fieldset>
+			</h:panelGrid>
+			<p:outputPanel id="pnlFinalizarBtn">
+				<div class="buttons main">
+					<p:commandButton  value="Cancelar" actionListener="#{elaborarOficioAprobacionPPCController.redireccionarBandeja()}" process="@this" />
+					<p:commandButton icon="ui-icon-save" value="#{msg['button.guardar']}" process=":form" update="informeGrid pnlFinalizarBtn"
+						actionListener="#{elaborarOficioAprobacionPPCController.guardar(true)}" />
+					<p:commandButton value="Enviar" id="btnEnviar" icon="ui-icon-check" disabled="#{elaborarOficioAprobacionPPCController.activarFinalizar}"
+						action="#{elaborarOficioAprobacionPPCController.completarTarea}">
+						<p:confirm header="Confirmación" message="¿Está seguro de finalizar la tarea?" icon="ui-icon-alert" />
+					</p:commandButton>
+				</div>
+			</p:outputPanel>
+		</h:form>
+		</ui:define>
+	</ui:composition>
+</ui:composition>

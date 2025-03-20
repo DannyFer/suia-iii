@@ -1,0 +1,127 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<h:panelGroup id="datosGenerales">
+	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<mae:panelGridHeaderHelp value="Datos de registro" conector="datosGeneralesHelp" help="#{helps['generadorDesecho.datosRegistro']}" width="600px" />
+		</f:facet>
+		<h:panelGrid styleClass="panel_data w50" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+			<h:outputText value="No. solicitud" />
+			<h:outputText value="#{registroGeneradorDesechoBean.generadorDesechosPeligrosos.solicitud}" />
+			<h:outputText value="Código" rendered="#{!empty registroGeneradorDesechoBean.generadorDesechosPeligrosos.codigo}" />
+			<h:outputText value="#{registroGeneradorDesechoBean.generadorDesechosPeligrosos.codigo}" rendered="#{!empty registroGeneradorDesechoBean.generadorDesechosPeligrosos.codigo}" />
+			<h:outputText value="#{not empty registroGeneradorDesechoBean.organizacion ? 'Nombre de la empresa' : 'Nombre de la persona'} solicitante" />
+			<h:outputText value="#{not empty registroGeneradorDesechoBean.organizacion ? registroGeneradorDesechoBean.organizacion.nombre : registroGeneradorDesechoBean.generadorDesechosPeligrosos.usuario.persona.nombre}" />
+			<h:outputText value="Nombre del representante legal" rendered="#{not empty registroGeneradorDesechoBean.organizacion}" />
+			<h:outputText value="#{registroGeneradorDesechoBean.organizacion.persona.nombre}" rendered="#{not empty registroGeneradorDesechoBean.organizacion}" />
+			<h:outputText value="#{not empty registroGeneradorDesechoBean.organizacion ? 'Ruc de la empresa' : 'Cédula/Ruc de la persona'} solicitante" />
+			<h:outputText value="#{not empty registroGeneradorDesechoBean.organizacion ? registroGeneradorDesechoBean.organizacion.ruc : registroGeneradorDesechoBean.generadorDesechosPeligrosos.usuario.pin}" />
+			<h:outputText value="Nombre del proyecto" rendered="#{not empty registroGeneradorDesechoBean.generadorDesechosPeligrosos.proyecto}" />
+			<h:outputText value="#{registroGeneradorDesechoBean.generadorDesechosPeligrosos.proyecto.nombre}" rendered="#{not empty registroGeneradorDesechoBean.generadorDesechosPeligrosos.proyecto}" />
+			<h:outputText value="Código del proyecto" rendered="#{not empty registroGeneradorDesechoBean.generadorDesechosPeligrosos.proyecto}" />
+			<h:outputText value="#{registroGeneradorDesechoBean.generadorDesechosPeligrosos.proyecto.codigo}" rendered="#{not empty registroGeneradorDesechoBean.generadorDesechosPeligrosos.proyecto}" />
+		</h:panelGrid>
+	</p:panelGrid>
+
+	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<h:outputText value="Actividad productiva principal del establecimiento" />
+		</f:facet>
+		<h:panelGrid styleClass="w100" columns="2" columnClasses="w50 alTop, field_mrg w50 alTop">
+			<h:panelGrid columns="1" styleClass="w100" rendered="#{not empty registroGeneradorDesechoBean.generadorDesechosPeligrosos.proyecto}">
+				<h:outputText value="&nbsp;" rendered="#{registroGeneradorDesechoBean.generadorDesechosPeligrosos.responsabilidadExtendida}" />
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+					<h:outputText value="Sector" />
+					<h:outputText value="#{registroGeneradorDesechoBean.generadorDesechosPeligrosos.proyecto.tipoSector}" />
+				</h:panelGrid>
+			</h:panelGrid>
+			<h:panelGrid columns="1" styleClass="w100" rendered="#{empty registroGeneradorDesechoBean.generadorDesechosPeligrosos.proyecto}">
+				<p:outputLabel value="Sector" for="sector" rendered="#{!registroGeneradorDesechoBean.generadorDesechosPeligrosos.responsabilidadExtendida}" />
+				<p:selectOneMenu value="#{registroGeneradorDesechoBean.generadorDesechosPeligrosos.tipoSector}" id="sector" styleClass="w100" required="true" converter="selectItemConverter" rendered="#{!registroGeneradorDesechoBean.generadorDesechosPeligrosos.responsabilidadExtendida}">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+					<f:selectItems value="#{registroGeneradorDesechoBean.tiposSectores}" />
+					<p:ajax process="@this" />
+				</p:selectOneMenu>
+				<h:outputText value="&nbsp;" rendered="#{registroGeneradorDesechoBean.generadorDesechosPeligrosos.responsabilidadExtendida}" />
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt" rendered="#{registroGeneradorDesechoBean.generadorDesechosPeligrosos.responsabilidadExtendida}">
+					<h:outputText value="Sector" />
+					<h:outputText value="#{registroGeneradorDesechoBean.generadorDesechosPeligrosos.tipoSector}" />
+				</h:panelGrid>
+			</h:panelGrid>
+			<h:outputText rendered="#{!registroGeneradorDesechoBean.generadorDesechosPeligrosos.responsabilidadExtendida}" />
+			<h:panelGrid columns="1" styleClass="w100" rendered="#{registroGeneradorDesechoBean.generadorDesechosPeligrosos.responsabilidadExtendida}">
+				<p:outputLabel value="Actividad asociada" for="actividadAsociada" />
+				<p:selectOneMenu value="#{registroGeneradorDesechoBean.generadorDesechosPeligrosos.politicaDesechoActividad}" id="actividadAsociada" styleClass="w100" required="true" converter="selectItemConverter">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+					<f:selectItems value="#{registroGeneradorDesechoBean.politicasDesechosActividades}" />
+					<p:ajax listener="#{registroGeneradorDesechoController.updateActividadSeleccionada}" process="@this" />
+				</p:selectOneMenu>
+			</h:panelGrid>
+		</h:panelGrid>
+	</p:panelGrid>
+
+	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<h:outputText value="Domicilio del solicitante" />
+		</f:facet>
+		<h:panelGrid styleClass="w100" columns="2" columnClasses="w50, w50 field_mrg">
+			<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+				<h:outputText value="Provincia" />
+				<h:outputText value="#{registroGeneradorDesechoBean.ubicacionesGeografica.ubicacionesGeografica.ubicacionesGeografica}" />
+				<h:outputText value="Cantón" />
+				<h:outputText value="#{registroGeneradorDesechoBean.ubicacionesGeografica.ubicacionesGeografica}" />
+			</h:panelGrid>
+			<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+				<h:outputText value="Parroquia" />
+				<h:outputText value="#{registroGeneradorDesechoBean.ubicacionesGeografica}" />
+				<h:outputText value="Teléfono" />
+				<h:outputText value="#{registroGeneradorDesechoBean.telefono}" />
+			</h:panelGrid>
+		</h:panelGrid>
+		<p:outputLabel value="Dirección" styleClass="bold" />
+		<p:inputTextarea value="#{registroGeneradorDesechoBean.direccion}" readonly="true" rows="2" />
+	</p:panelGrid>
+	
+	<p:panelGrid columns="1" layout="grid" styleClass="w100"
+			 rendered="#{verRegistroGeneradorDesechoBean.registroGeneradorDesechosAsociado.codigoDesecho!=null and bandejaTareasBean.tarea.taskName.equals('Remitir respuestas aclaratorias')}">
+	<f:facet name="header">
+		<h:outputText value="Datos Permiso Ambiental" />
+	</f:facet>
+	<h:panelGrid styleClass="panel_data w50" columns="2" columnClasses="header w50, null" rowClasses="null, alt" >
+		<h:outputText value="Codigo de proyecto" rendered="#{!verRegistroGeneradorDesechoBean.registroGeneradorDesechosAsociado.codigoProyecto.equals('')}" />
+		<h:outputText value="#{verRegistroGeneradorDesechoBean.registroGeneradorDesechosAsociado.codigoProyecto}" rendered="#{!verRegistroGeneradorDesechoBean.registroGeneradorDesechosAsociado.codigoProyecto.equals('')}"/>
+		<h:outputText value="Codigo permiso ambiental" rendered="#{!verRegistroGeneradorDesechoBean.registroGeneradorDesechosAsociado.codigoPermisoAmbiental.equals('')}" />
+		<p:inputText value="#{verRegistroGeneradorDesechoBean.registroGeneradorDesechosAsociado.codigoPermisoAmbiental}" rendered="#{!verRegistroGeneradorDesechoBean.registroGeneradorDesechosAsociado.codigoPermisoAmbiental.equals('')}"/>
+		<h:outputText value="Fecha permiso ambiental" rendered="#{verRegistroGeneradorDesechoBean.registroGeneradorDesechosAsociado.fechaPermisoAmbiental!=null}"/>
+		<p:calendar id="fecRegLicencia" value="#{verRegistroGeneradorDesechoBean.registroGeneradorDesechosAsociado.fechaPermisoAmbiental}"
+					required="true" rendered="#{verRegistroGeneradorDesechoBean.registroGeneradorDesechosAsociado.fechaPermisoAmbiental!=null}"/>
+		<h:outputText value="Documento permiso ambiental" />
+		<p:commandButton rendered="#{verRegistroGeneradorDesechoBean.registroGeneradorDesechosAsociado.nombreDocumento!=null}" icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver"
+		action="#{verRegistroGeneradorDesechoBean.descargarDocumentoPermisoAmbiental(verRegistroGeneradorDesechoBean.registroGeneradorDesechosAsociado)}"/>
+	</h:panelGrid>
+		
+		<h:panelGrid styleClass="w70 separatorBottom" columns="2" columnClasses="w50, field_mrg w50" rowClasses="null, alt">
+			<p:outputLabel for="nombreArchivoHidden"
+				value="Adjuntar permiso ambiental otorgado por el sistema (.pdf)" />
+			<h:outputText id="nombreArchivo"
+				value="#{verRegistroGeneradorDesechoBean.registroGeneradorDesechosAsociado.nombreDocumento}" />
+			<h:inputHidden id="nombreArchivoHidden" required="true"
+				value="#{verRegistroGeneradorDesechoBean.registroGeneradorDesechosAsociado.nombreDocumento}" />
+
+			<p:fileUpload
+				fileUploadListener="#{verRegistroGeneradorDesechoBean.handleFileUpload}"
+				value="#{verRegistroGeneradorDesechoBean.file}"
+				sizeLimit="2048576" allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar"
+				uploadLabel="Subir" auto="true"
+				update="nombreArchivo,nombreArchivoHidden" cancelLabel="Cancelar"
+				invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+				invalidSizeMessage="Debe adjuntar un archivo no mayor de 2 Mb."
+				required="true" mode="advanced" styleClass="w50 ">
+				<f:attribute name="indice" id="indice" value="1" />
+			</p:fileUpload>
+		</h:panelGrid>
+
+	</p:panelGrid>
+</h:panelGroup>
+</html>

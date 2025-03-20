@@ -1,0 +1,219 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:f="http://java.sun.com/jsf/core" xmlns:controles="http://java.sun.com/jsf/composite/controles-prime">
+<ui:composition template="/prevencion/licenciamiento-ambiental/eia/verEIA.xhtml">
+	<ui:define name="content-eia">
+		<h:form id="form">
+			<p:panel header="Ficha Técnica">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+					<f:facet name="header">
+						<h:outputText value="Datos del proyecto" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="Nombre proyecto " />
+						<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.nombre}" />
+						<h:outputText value="Código del proyecto" />
+						<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.codigo}" />
+						<h:outputText value="Proponente" />
+						<h:outputText value="#{fichaTecnicaControllerEia.getProponente()}" />
+						<h:outputText value="Ente responsable" />
+						<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.areaResponsable.areaName}" />
+					</h:panelGrid>
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="panel_data w100" rendered="#{!fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.datosOficinaPrincipal and !fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.concesionesMinerasMultiples}">
+					<f:facet name="header">
+						<h:outputText value="Ubicación geográfica" />
+					</f:facet>
+					<p:dataTable value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.proyectoUbicacionesGeograficas}" var="ubicacion">
+						<p:column headerText="Provincia">
+							<h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+						</p:column>
+						<p:column headerText="Cantón">
+							<h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+						</p:column>
+						<p:column headerText="Parroquia">
+							<h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}" />
+						</p:column>
+					</p:dataTable>
+					<p:outputLabel value="Dirección del proyecto, obra o actividad" styleClass="bold" />
+					<p:inputTextarea value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.direccionProyecto}" readonly="true" rows="2" />
+				</p:panelGrid>
+
+				<h:panelGroup id="pnlDetalles">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="Detalle del proyecto" />
+						</f:facet>
+						<h:panelGrid styleClass="panel_data mw50" columns="2" columnClasses="header, null" rowClasses="null, alt">
+							<h:outputText value="Sector " />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.tipoSector}" />
+							<h:outputText value="Superficie" />
+							<h:panelGroup>
+								<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.area}" />
+								<h:outputText value=" #{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.unidad}" />
+							</h:panelGroup>
+							<h:outputText value="Altitud" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.altitud} msnm" />
+						</h:panelGrid>
+					</p:panelGrid>
+				</h:panelGroup>
+
+				<p:panelGrid columns="1" layout="grid" >
+					<f:facet name="header">
+						<h:outputText value="Ver plano de implantación *" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data" columns="2" columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText id="etiqueta" value="#{fichaTecnicaControllerEia.documentoGeneral.getNombre()}" />
+						<p:commandButton id="download" rendered="true" icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true">
+							<p:fileDownload value="#{fichaTecnicaControllerEia.getStreamContent()}" />
+						</p:commandButton>
+					</h:panelGrid>
+				</p:panelGrid>
+
+				<h:panelGroup id="pnlConsultor">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="Consultor calificado" />
+						</f:facet>
+						<h:outputText value="#{labels['common.table.empty']}" rendered="#{!fichaTecnicaControllerEia.labelAdicionar}" />
+						<h:panelGroup>
+							<h:panelGrid styleClass="panel_data" columns="2" columnClasses="header, null" rowClasses="null, alt">
+								<h:outputText value="Consultor calificado" />
+								<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.consultorSeleccionado.nombre}" />
+							</h:panelGrid>
+						</h:panelGroup>
+					</p:panelGrid>
+				</h:panelGroup>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Equipo consultor" />
+					</f:facet>
+					<p:dataTable id="tblGrupoConsultor" rowIndexVar="index"
+								 value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.consultorNoCalificadosSeleccionados}"
+								 var="equipoConsultor"
+								 emptyMessage="#{labels['common.table.empty']}">
+						<p:column styleClass="w20px alCenter">
+							<h:outputText value="#{index + 1}" />
+						</p:column>
+						<p:column headerText="Nombre">
+							<h:outputText value="#{equipoConsultor.nombre}" />
+						</p:column>
+						<p:column headerText="Formación profesional">
+							<h:outputText value="#{equipoConsultor.formacionProfesional}" />
+						</p:column>
+						<p:column headerText="Componente de participación">
+							<h:outputText value="#{equipoConsultor.componentePaticipacion.nombre}" />
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Tiene fases mineras" />
+					</f:facet>
+					<h:panelGrid columns="1">
+						<p:outputLabel value="¿Su proyecto tiene diferentes fases mineras?" for="tieneFases" styleClass="bold" />
+						<p:selectOneRadio value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.tieneFasesMineras}"
+										  required="true" id="tieneFases" disabled="true">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+						</p:selectOneRadio>
+						<h:outputText />
+					</h:panelGrid>
+				</p:panelGrid>
+
+				<h:panelGroup id="pnlFaseMinera">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25" rendered="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.tieneFasesMineras}">
+						<f:facet name="header">
+							<h:outputText value="Fases mineras *" />
+						</f:facet>
+						<h:panelGrid columns="2">
+							<p:outputLabel value="Fases" for="faseMinera" styleClass="bold"/>
+							<p:selectManyCheckbox
+									value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.fasesMinerasSeleccionadas}"
+									required="true" id="faseMinera" layout="grid" columns="3" styleClass="field_mrg w100" disabled="true">
+								<f:selectItems
+										value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.listaFasesMineras}" />
+							</p:selectManyCheckbox>
+						</h:panelGrid>
+					</p:panelGrid>
+				</h:panelGroup>
+
+				<h:panelGroup id="pnlBeneficio" >
+					<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25" rendered="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.verBeneficio}">
+						<f:facet name="header">
+							<h:outputText value="Beneficio" />
+						</f:facet>
+						<h:panelGrid styleClass="panel_data mw50" columns="2" columnClasses="header, null" rowClasses="null, alt">
+							<h:outputText value="Actividades" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.actividadBeneficio}" />
+
+							<h:outputText value="Recuperación metálica" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.recuperacionMetalica}" />
+
+							<h:outputText value="Construcción de relaves" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.tieneConstruccionRelaves}" />
+
+							<h:outputText value="Localización y disposición de relaves" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.localizacionRelaves}" />
+
+							<h:outputText value="Capacidad" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.capacidad}" />
+
+							<h:outputText value="Estado" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.estadoBeneficio}" />
+
+						</h:panelGrid>
+					</p:panelGrid>
+				</h:panelGroup>
+
+				<h:panelGroup id="explotacion">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25" rendered="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.verExplotacion}">
+						<f:facet name="header">
+							<h:outputText value="Explotación" />
+						</f:facet>
+						<h:panelGrid styleClass="panel_data mw50" columns="2" columnClasses="header, null" rowClasses="null, alt">
+							<h:outputText value="Método de explotación " />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.metodoDeExplotacion}" />
+
+							<h:outputText value="Volumen de explotación" />
+							<h:panelGroup>
+								<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.volumenDeExplotacion}" />
+								<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.unidadMedidaVolumen}" />
+							</h:panelGroup>
+
+							<h:outputText value="Construcción de escombreras" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.tieneConstruccionEscombreras}" />
+
+							<h:outputText value="Localización de la escombrera" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.localizacionEscombreras}" />
+
+							<h:outputText value="Estado de la escombrera" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.estadoExplotacion}" />
+						</h:panelGrid>
+					</p:panelGrid>
+				</h:panelGroup>
+
+
+
+				<h:panelGroup id="pnlClausula">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+						<f:facet name="header">
+							<p:outputLabel value="Cláusula de responsabilidad *" />
+						</f:facet>
+						<h:panelGrid columns="2" styleClass="w100" >
+							<p:selectBooleanCheckbox value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.aceptaClausula}" required="true" id="txtClausula"/>
+							<h:panelGroup>
+								<h:panelGrid columnClasses="alJustify">
+									<p:outputLabel value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.clausula}" for="txtClausula"/>
+								</h:panelGrid>
+							</h:panelGroup>
+						</h:panelGrid>
+					</p:panelGrid>
+				</h:panelGroup>
+
+			</p:panel>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

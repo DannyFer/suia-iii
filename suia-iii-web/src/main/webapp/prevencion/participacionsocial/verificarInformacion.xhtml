@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}" target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+
+    </ui:define>
+    <ui:define name="content">
+        <h:form id="form">
+            <h3><h:outputText  rendered="#{!verificarInformacionParticipacionSocialBean.soloLectura}">#{msg['label.prevencion.participacionsocial.verificarRequiereFacilitadores']}</h:outputText></h3>
+            <f:event type="preRenderView"
+                     listener="#{verificarInformacionParticipacionSocialController.validarTareaBpm()}"/>
+
+            <p:outputLabel styleClass="bold" for="requiereFacilitador"
+                           rendered="#{!verificarInformacionParticipacionSocialBean.soloLectura}"
+                           value="#{msg['label.prevencion.ps.requiereFacilitadores']}"/>
+
+            <p:selectOneRadio id="requiereFacilitador"
+                              rendered="#{!verificarInformacionParticipacionSocialBean.soloLectura}"
+                              value="#{verificarInformacionParticipacionSocialBean.requiereFacilitador}"
+                              required="true"
+                    >
+                <f:selectItem itemLabel="Si" itemValue="true"/>
+                <f:selectItem itemLabel="No" itemValue="false"/>
+            </p:selectOneRadio>
+            <h:panelGrid
+                    rendered="#{verificarInformacionParticipacionSocialBean.requiereFacilitador and verificarInformacionParticipacionSocialBean.soloLectura }">
+                <p:outputLabel value="#{msg['label.nroFacilitadores']}"
+                               rendered="#{verificarInformacionParticipacionSocialBean.requiereFacilitador}"
+                               for="facilitador"/>
+                <h:panelGroup
+                        rendered="#{verificarInformacionParticipacionSocialBean.requiereFacilitador}">
+                    <p:inputText maxlength="2" styleClass="spinner" onkeypress="return numbersonly(this, event)"
+                                 required="#{verificarInformacionParticipacionSocialBean.requiereFacilitador}"
+                                 value="#{verificarInformacionParticipacionSocialBean.numeroFacilitadores}"
+                                 id="facilitador">
+                        <f:validateDoubleRange minimum="1" maximum="20"/>
+
+                        <pe:keyFilter mask="num"/>
+                    </p:inputText>
+                </h:panelGroup>
+            </h:panelGrid>
+
+
+            <div class="buttons main">
+                <p:commandButton value="Enviar" styleClass="primary"
+                                 action="#{verificarInformacionParticipacionSocialController.iniciarTarea}"
+                                 title="Enviar datos" icon="ui-icon-check">
+                    <p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+                               header="#{msg['header.confirmacion.envio.tarea']}"/>
+                </p:commandButton>
+            </div>
+
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+
+	<ui:define name="context-extra">
+		<h:outputText value="Datos" />
+		<h:outputText value="Estudio de Impacto Ambiental" />
+
+		<h:outputLink target="_blank"
+			value="#{request.contextPath}/pages/rcoa/estudioImpactoAmbiental/verProyectoEIAResumen.jsf">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+	</ui:define>
+
+	<ui:define name="content">
+	<style type="text/css">
+.ui-datepicker-unselectable span {
+	background: #c2c2c2 !important;
+}
+</style>
+
+		<script type="text/javascript">  
+			$(document).ready(function() {
+				if(document.getElementById("form:txtHoraReunion_input"))
+					document.getElementById("form:txtHoraReunion_input").readOnly = true; 
+		});
+		
+	PrimeFacesExt.locales.TimePicker['es'] = {
+		    hourText: 'Hora',
+		    minuteText: 'Minuto',
+		    amPmText: ['AM', 'PM'],
+		    closeButtonText: 'Hecho',
+		    nowButtonText: 'Ahora',
+		    deselectButtonText: 'Deseleccionar'
+		};
+</script>
+
+		<f:event type="preRenderView"
+			listener="#{registrarInformacionReunionController.validarTareaBpm()}" />
+
+		<h:form id="form">
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+
+				<h:panelGroup
+					rendered="#{!registrarInformacionReunionController.reunionConfirmada}">
+					<h:panelGrid styleClass="w100 panel_data" columns="2"
+						columnClasses="header w25, null">
+						<p:outputLabel for="txtFechaReunion"
+							value="Fecha de reunión aclaratoria" style="color: white" />
+						<h:panelGrid columns="1" layout="grid" styleClass="w25">
+							<p:calendar id="txtFechaReunion" mindate="today" 
+								value="#{registrarInformacionReunionController.aclaracionProrrogaEsIA.fechaReunion}"
+								timeZone="America/Guayaquil" readonlyInput="true"
+								required="true" pattern="dd/MM/yyyy" />
+						</h:panelGrid>
+
+						<p:outputLabel for="txtHoraReunion"
+							value="Hora de inicio de reunión" style="color: white" />
+						<h:panelGrid columns="1" layout="grid" styleClass="w25">
+							<pe:timePicker id="txtHoraReunion" required="true"
+								value="#{registrarInformacionReunionController.horaReunion}"
+								mode="popup" widgetVar="popupTimeWidget" locale="es" />
+						</h:panelGrid>
+
+						<p:outputLabel for="txtLugarReunion"
+							value="Lugar de reunión Aclaratoria" style="color: white" />
+						<h:panelGrid columns="1" layout="grid" styleClass="w100">
+							<p:inputText required="true"
+								value="#{registrarInformacionReunionController.aclaracionProrrogaEsIA.lugarReunion}"
+								id="txtLugarReunion" />
+						</h:panelGrid>
+
+					</h:panelGrid>
+
+					<br />
+					<div class="buttons main">
+						<p:commandButton value="Confirmar"
+							action="#{registrarInformacionReunionController.guardarInfoReunion()}"
+							icon="ui-icon-check">
+							<p:confirm
+								message="Está seguro de registrar la fecha y hora de la reunión aclaratoria, luego de confirmar no se podrá modificar"
+								header="Confirmación" />
+						</p:commandButton>
+					</div>
+				</h:panelGroup>
+
+				<h:panelGroup
+					rendered="#{registrarInformacionReunionController.reunionConfirmada}">
+					<h:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25, null">
+						<h:outputText value="Fecha de reunión aclaratoria" />
+						<h:outputText
+							value="#{registrarInformacionReunionController.aclaracionProrrogaEsIA.fechaReunion}" />
+
+						<h:outputText value="Hora de inicio de reunión" />
+						<h:outputText
+							value="#{registrarInformacionReunionController.aclaracionProrrogaEsIA.horaReunion}" />
+
+						<h:outputText value="Lugar de reunión Aclaratoria" />
+						<h:outputText
+							value="#{registrarInformacionReunionController.aclaracionProrrogaEsIA.lugarReunion}" />
+
+					</h:panelGrid>
+
+					<br />
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="Registrar documento de Reunión aclaratoria" />
+						</f:facet>
+
+						<p:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="header w25, null">
+							<p:outputLabel for="reunionRealizada"
+								value="¿La Reunión aclaratoria se realizó con éxito?"
+								style="color: white" />
+							<p:selectOneRadio id="reunionRealizada" required="true"
+								value="#{registrarInformacionReunionController.aclaracionProrrogaEsIA.reunionRealizada}">
+								<f:selectItem itemValue="true" itemLabel="Si" />
+								<f:selectItem itemValue="false" itemLabel="No" />
+								<p:ajax event="change" update="pnlRespaldo"
+									process="reunionRealizada"
+									listener="#{registrarInformacionReunionController.limpiarDocumento}" />
+							</p:selectOneRadio>
+						</p:panelGrid>
+
+						<h:panelGroup id="pnlRespaldo">
+							<p:panelGrid columns="2" styleClass="panel_data w100"
+								columnClasses="header w25, null"
+								rendered="#{registrarInformacionReunionController.aclaracionProrrogaEsIA.reunionRealizada ne null}">
+								<p:outputLabel value="Adjuntar Acta de Reunión aclaratoria *"
+									style="color: white"
+									rendered="#{registrarInformacionReunionController.aclaracionProrrogaEsIA.reunionRealizada}" />
+								<p:outputLabel value="Adjuntar justificación *"
+									style="color: white"
+									rendered="#{!registrarInformacionReunionController.aclaracionProrrogaEsIA.reunionRealizada}" />
+								<p:outputPanel id="pnlDocRespaldo">
+									<p:fileUpload
+										fileUploadListener="#{registrarInformacionReunionController.uploadRespaldo}"
+										multiple="false" sizeLimit="5242880"
+										allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+										uploadLabel="Subir"
+										invalidFileMessage="Tipo de archivo no válido"
+										invalidSizeMessage="Tamaño de archivo no válido"
+										cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+										auto="true" required="true" update="pnlDocRespaldo" />
+									<h:outputText
+										value="#{registrarInformacionReunionController.documentoRespaldo.nombre}"
+										rendered="#{registrarInformacionReunionController.documentoRespaldo.nombre ne null}" />
+								</p:outputPanel>
+							</p:panelGrid>
+
+							<h:inputHidden
+								validator="#{registrarInformacionReunionController.validateDatos}" />
+						</h:panelGroup>
+					</p:panelGrid>
+
+
+					<h:panelGroup id="pnlButtons">
+						<div class="buttons main">
+							<p:commandButton value="Enviar" process="form"
+								action="#{registrarInformacionReunionController.finalizar()}"
+								icon="ui-icon-arrowthick-1-e">
+								<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+									header="#{msg['header.confirmacion.envio.tarea']}" />
+							</p:commandButton>
+						</div>
+					</h:panelGroup>
+
+				</h:panelGroup>
+			</p:panelGrid>
+		</h:form>
+
+	</ui:define>
+
+</ui:composition>

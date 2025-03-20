@@ -1,0 +1,258 @@
+<html
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"	
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">			
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Características de Medición"/>
+				</f:facet>							
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+					<h:outputText value="Número de identificación del punto de monitoreo *" for="numeroMonitoreo"/>	
+					<h:outputText value="#{descargasLiquidasController.detalleDescargasLiquidas.numeroPuntoMonitoreo}" rendered="#{!descargasLiquidasController.habilitarIngreso}"/>					
+					<p:inputText id="numeroMonitoreo" value="#{descargasLiquidasController.detalleDescargasLiquidas.numeroPuntoMonitoreo}"
+					required="true" requiredMessage="Número de identificación del punto de monitoreo es requerido" maxlength="20" title="Campo alfanumérico de 20 caracteres."
+					readonly="#{descargasLiquidasController.editarFuente}" rendered="#{descargasLiquidasController.habilitarIngreso}"/>					
+				</p:panelGrid>		
+				<h:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="header w25, null" rowClasses="null, alt">
+							<p:outputLabel
+								value="Coordenadas geográficas (formato WGS84 17S) *"
+								styleClass="ui-label-form" />
+					<p:panelGrid id="pngCordenadas" columns="4" styleClass="panel_data w100" columnClasses="header w20,w30,header w20,w30">
+						<h:outputText value="X *" for="coordX"/>
+						<h:outputText value="#{descargasLiquidasController.detalleDescargasLiquidas.coordenadaX}" rendered="#{!descargasLiquidasController.habilitarIngreso}">
+							<f:convertNumber/>
+						</h:outputText>
+						<pe:inputNumber id="coordX" value="#{descargasLiquidasController.detalleDescargasLiquidas.coordenadaX}" required="true" requiredMessage="Coordenada X es requerido" decimalPlaces="1" thousandSeparator="" maxValue="9999999999.9"
+						title="Coordenanda X en formato WGS84 17S" readonly="#{descargasLiquidasController.editarFuente}"
+						rendered="#{descargasLiquidasController.habilitarIngreso}">
+						<p:ajax process="@this" update="pngCordenadas" event="change" listener="#{descargasLiquidasController.validarCoordenadas}"/>
+						</pe:inputNumber>
+						
+						<h:outputText value="Y *" for="coordY"/>
+						<h:outputText value="#{descargasLiquidasController.detalleDescargasLiquidas.coordenadaY}" rendered="#{!descargasLiquidasController.habilitarIngreso}"/>
+						<pe:inputNumber id="coordY" value="#{descargasLiquidasController.detalleDescargasLiquidas.coordenadaY}" required="true" requiredMessage="Coordenada Y es requerido" decimalPlaces="1" thousandSeparator="" maxValue="9999999999.9"
+						title="Coordenanda Y en formato WGS84 17S" readonly="#{descargasLiquidasController.editarFuente}"
+						rendered="#{descargasLiquidasController.habilitarIngreso}">
+						<p:ajax process="@this" update="pngCordenadas pnlUbicacion" event="change" listener="#{descargasLiquidasController.validarCoordenadas}"/>
+						</pe:inputNumber>
+					</p:panelGrid>
+				</h:panelGrid>
+				<p:panelGrid columns="6" styleClass="panel_data w100" id="pnlUbicacion"
+				columnClasses="header w15,null w20, header w15, w20, header w10, w20">
+					<h:outputText value="Provincia:"/>
+					<p:inputText value="#{descargasLiquidasController.detalleDescargasLiquidas.ubicacionGeografica.ubicacionesGeografica.ubicacionesGeografica.nombre}" 
+						readonly="true" />
+
+					<h:outputText value="Cantón:"/>
+					<p:inputText value="#{descargasLiquidasController.detalleDescargasLiquidas.ubicacionGeografica.ubicacionesGeografica.nombre}" 
+						readonly="true" />
+
+					<h:outputText value="Parroquia:"/>
+					<p:inputText value="#{descargasLiquidasController.detalleDescargasLiquidas.ubicacionGeografica.nombre}" 
+						readonly="true" />
+					
+				</p:panelGrid>
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+					<h:outputText value="Características del punto de monitoreo *" for="caracteristicasMonitoreo"/>
+					<h:outputText value="#{descargasLiquidasController.detalleDescargasLiquidas.caracteristicasPuntoMonitoreo.descripcion}" readonly="#{descargasLiquidasController.editarFuente}" rendered="#{!descargasLiquidasController.habilitarIngreso}"/>
+					<p:selectOneMenu id="caracteristicasMonitoreo" required="true" requiredMessage="Características del punto de monitoreo es requerido" styleClass="w100"
+					value="#{descargasLiquidasController.detalleDescargasLiquidas.caracteristicasPuntoMonitoreo}" converter="selectItemConverter"
+					disabled="#{descargasLiquidasController.editarFuente}" rendered="#{descargasLiquidasController.habilitarIngreso}">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{descargasLiquidasController.caracteristicasPuntoMonitoreoList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+						<p:ajax event="change" listener="#{descargasLiquidasController.caracteristicasMonitoreoListener}" update="tipoReceptor"/>
+					</p:selectOneMenu>
+					<h:outputText value="Oficio de aprobación del punto de monitoreo *" for="fileAprobacionMonitoreo"/>	
+					<h:panelGroup id="groupFileAprobacionMonitoreo">
+                    <p:fileUpload id="fileAprobacionMonitoreo" disabled="#{descargasLiquidasController.editarFuente}"
+                                              fileUploadListener="#{descargasLiquidasController.fileUploadAprobacionMonitoreo}"
+                                              sizeLimit="20971520" allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar (pdf 20Mb)"
+                                              update="groupFileAprobacionMonitoreo"
+                                              uploadLabel="Subir" auto="true"                                              
+                                              cancelLabel="Cancelar"
+                                              invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+                                              invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+                                              styleClass="w100 toLeft" mode="advanced"
+                                              required="true"
+                                              rendered="#{descargasLiquidasController.habilitarIngreso}"/>
+                    <h:inputHidden validator="#{descargasLiquidasController.validarDocumentoAprobacionMonitoreo}"/>                    
+                    <h:outputText id="nombreAprobacionMonitoreo" value="#{descargasLiquidasController.adjuntoAprobacionMonitoreo.nombre}"/><br/>                  
+                    <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar"
+					rendered="#{descargasLiquidasController.adjuntoAprobacionMonitoreo.contenidoDocumento!=null}">
+								<p:fileDownload value="#{descargasLiquidasController.documentoAdjuntoAprobacionMonitoreo}"/>
+					</p:commandButton>
+					                    
+                    </h:panelGroup>
+					
+					<h:outputText value="Nombre del lugar del punto de muestreo *"/>
+					<h:outputText value="#{descargasLiquidasController.detalleDescargasLiquidas.lugarPuntoMonitoreo}" rendered="#{!descargasLiquidasController.habilitarIngreso}"/>					
+					<p:inputText id="lugarMuestreo" value="#{descargasLiquidasController.detalleDescargasLiquidas.lugarPuntoMonitoreo}"
+					required="true" requiredMessage="Nombre del lugar del punto de muestreo es requerido" maxlength="50" title="Campo alfanumérico de 50 caracteres."
+					readonly="#{descargasLiquidasController.editarFuente}" rendered="#{descargasLiquidasController.habilitarIngreso}"/>
+				</p:panelGrid>	
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,w75">	
+					<h:outputText value="Tipo de cuerpo receptor * " for="tipoReceptor"/>
+					<h:panelGroup rendered="#{!descargasLiquidasController.habilitarIngreso}">
+					<h:outputText value="#{descargasLiquidasController.detalleDescargasLiquidas.catalogoTipoCuerpoReceptorCaracteristicasPunto.catalogoTipoCuerpoReceptor.descripcion}"/><br/>
+					</h:panelGroup>
+					<h:panelGroup id="tipoReceptorGroup" rendered="#{descargasLiquidasController.habilitarIngreso}" >
+						<h:panelGrid columns="2" styleClass="w100" columnClasses="w90,w10">	
+							<p:selectOneMenu id="tipoReceptor" required="true" requiredMessage="Tipo de cuerpo receptor es requerido" styleClass="w100"
+										disabled="#{descargasLiquidasController.editarFuente}" 
+							value="#{descargasLiquidasController.detalleDescargasLiquidas.catalogoTipoCuerpoReceptorCaracteristicasPunto}" converter="selectItemConverter">
+								<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+								<f:selectItems value="#{descargasLiquidasController.catalogoTipoCuerpoReceptorCaracteristicasPuntolist}" var="item" itemLabel="#{item.catalogoTipoCuerpoReceptor.descripcion}" itemValue="#{item}"/>
+								<p:ajax event="change" update="tipoReceptorGroup"/>
+							</p:selectOneMenu>
+						</h:panelGrid>
+					</h:panelGroup>
+				</p:panelGrid>
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,w75" id="panelLugar">	
+					<h:outputText value="Lugar o sitio donde se reciben las descargas líquidas * " for="tipoReceptor"/>
+					<h:panelGroup rendered="#{!descargasLiquidasController.habilitarIngreso}">
+					<h:outputText value="#{descargasLiquidasController.detalleDescargasLiquidas.catalogoTipoCuerpoReceptorCaracteristicasPunto.catalogoTipoCuerpoReceptor.descripcion}"/><br/>
+					</h:panelGroup>
+					<h:panelGroup id="tipoLugarReceptorGroup" rendered="#{descargasLiquidasController.habilitarIngreso}" >
+						<h:panelGrid columns="2" styleClass="w100" columnClasses="w90,w10">	
+							<p:selectOneMenu id="tipoLugar" required="true" requiredMessage="Lugar o sitio donde se reciben las descargas líquidas" styleClass="w100"
+										disabled="#{descargasLiquidasController.editarFuente}" 
+							value="#{descargasLiquidasController.detalleDescargasLiquidas.lugarDescarga}" converter="selectItemConverter">
+								<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+								<f:selectItems value="#{descargasLiquidasController.lugarDescargaList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+								<p:ajax event="change" update="panelLugar" listener="#{descargasLiquidasController.validarOtroLugar()}" />
+							</p:selectOneMenu>
+						</h:panelGrid>
+					</h:panelGroup>
+					
+					<h:outputText value="Especifique *" rendered="#{descargasLiquidasController.verOtroLugar}"/>
+					<p:inputText id="otroLugar" value="#{descargasLiquidasController.detalleDescargasLiquidas.otroLugarDescarga}"
+					readonly="#{descargasLiquidasController.editarFuente}" required="true" requiredMessage="Otro Lugar de descarga(Especifique) es requerido" rendered="#{descargasLiquidasController.verOtroLugar}" maxlength="150" title="Campo alfanumérico de 150 caracteres."/>
+					
+				</p:panelGrid>				
+
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,w75">	
+					<h:outputText value="Tipo de descarga *" for="tipoDescarga"/>
+					<h:outputText value="#{descargasLiquidasController.detalleDescargasLiquidas.catalogoTipoDescarga.descripcion}" rendered="#{!descargasLiquidasController.habilitarIngreso}"/>				
+					<p:selectOneRadio id="tipoDescarga" required="true" requiredMessage="Tipo de descarga es requerido" styleClass="w40"
+					value="#{descargasLiquidasController.detalleDescargasLiquidas.catalogoTipoDescarga}" converter="selectItemConverter"
+					rendered="#{descargasLiquidasController.habilitarIngreso}">
+						<f:selectItems value="#{descargasLiquidasController.catalogoTipoDescargaList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+					</p:selectOneRadio>
+					
+					<h:outputText value="Tratamiento de aguas *" for="tratamientoAguas"/>
+					<h:panelGroup rendered="#{!descargasLiquidasController.habilitarIngreso}">
+					<h:outputText value="#{descargasLiquidasController.detalleDescargasLiquidas.catalogoTratamientoAguas.descripcion}"/><br/>					
+					<p:outputLabel value="Especifique:" rendered="#{descargasLiquidasController.detalleDescargasLiquidas.catalogoTratamientoAguas.descripcion.contains('Otro')}"/><br/>
+					<h:outputText value="#{descargasLiquidasController.detalleDescargasLiquidas.otroTratamientoAgua}" rendered="#{descargasLiquidasController.detalleDescargasLiquidas.catalogoTratamientoAguas.descripcion.contains('Otro')}"/>					
+					</h:panelGroup>	
+					
+					<h:panelGroup id="tratamientoAguasGroup" rendered="#{descargasLiquidasController.habilitarIngreso}">
+					<p:selectManyCheckbox id="tratamientoAguas" required="true"
+						requiredMessage="Tratamiento de aguas es requerido" styleClass="w75"
+						disabled="#{descargasLiquidasController.editarFuente}"
+						value="#{descargasLiquidasController.catalogoTratamientoListSelected}"
+						converter="selectItemConverter">
+						<f:selectItems
+							value="#{descargasLiquidasController.catalogoTratamientoAguasList}"
+							var="item" itemLabel="#{item.descripcion}" itemValue="#{item}" />
+						<p:ajax event="change" update="tratamientoAguasGroup" listener="#{descargasLiquidasController.validarOtros}" />
+					</p:selectManyCheckbox>
+					<br rendered="#{descargasLiquidasController.verOtroTratamiento}"/>
+					<p:outputLabel value="Especifique *" rendered="#{descargasLiquidasController.verOtroTratamiento}"/>
+					<p:inputText id="tratamientoAguasOtro" value="#{descargasLiquidasController.detalleDescargasLiquidas.otroTratamientoAgua}"
+					readonly="#{descargasLiquidasController.editarFuente}" required="true" requiredMessage="Tratamiento de aguas(Especifique) es requerido" rendered="#{descargasLiquidasController.verOtroTratamiento}" maxlength="150" title="Campo alfanumérico de 150 caracteres."/>
+					</h:panelGroup>	
+					
+					<h:outputText value="Tipo de muestra *"/>
+					<h:outputText value="#{descargasLiquidasController.detalleDescargasLiquidas.tipoMuestra.descripcion}" rendered="#{!descargasLiquidasController.habilitarIngreso}"/>
+					<p:selectOneRadio id="tipoMuestra" required="true" requiredMessage="Tipo de muestra es requerido" styleClass="w40"
+					value="#{descargasLiquidasController.detalleDescargasLiquidas.tipoMuestra}" converter="selectItemConverter"
+					rendered="#{descargasLiquidasController.habilitarIngreso}">
+						<f:selectItems value="#{descargasLiquidasController.tipoMuestraList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+					</p:selectOneRadio>			
+				</p:panelGrid>
+				<p:panelGrid columns="4" styleClass="panel_data w100" columnClasses="header w25,w25,header w25,w25">
+					<h:outputText value="Caudal medido durante el muestreo (m3/s) *" for="caudalMuestreo"/>
+					<h:outputText value="#{descargasLiquidasController.detalleDescargasLiquidas.caudalMedido}" rendered="#{!descargasLiquidasController.habilitarIngreso}"/>				
+					<pe:inputNumber id="caudalMuestreo" value="#{descargasLiquidasController.detalleDescargasLiquidas.caudalMedido}" required="true" requiredMessage="Caudal medido durante el muestreo es requerido" 
+					decimalPlaces="0" thousandSeparator="" maxValue="9999" title="Máximo 4 dígitos enteros"
+					rendered="#{descargasLiquidasController.habilitarIngreso}"/>	
+					
+					<h:outputText value="Volumen de descarga durante el muestreo (m3) *" for="volumenDescarga"/>
+					<h:outputText value="#{descargasLiquidasController.detalleDescargasLiquidas.volumenDescarga}" rendered="#{!descargasLiquidasController.habilitarIngreso}"/>
+					<pe:inputNumber id="volumenDescarga" value="#{descargasLiquidasController.detalleDescargasLiquidas.volumenDescarga}" required="true" requiredMessage="Volumen de descarga es requerido" 
+					decimalPlaces="1" thousandSeparator="" maxValue="9999.9" title="Máximo 4 dígitos enteros y 1 decimal"
+					rendered="#{descargasLiquidasController.habilitarIngreso}"/>	
+					
+					<h:outputText value="Horas de descarga al día" for="horasDescarga *"/>
+					<h:outputText value="#{descargasLiquidasController.detalleDescargasLiquidas.horasDescargaDia}" rendered="#{!descargasLiquidasController.habilitarIngreso}"/>
+					<pe:inputNumber id="horasDescarga" value="#{descargasLiquidasController.detalleDescargasLiquidas.horasDescargaDia}" required="true" requiredMessage="Horas de descarga al día es requerido" 
+					decimalPlaces="1" thousandSeparator="" maxValue="24" title="Máximo 2 dígitos enteros y 1 decimal"
+					rendered="#{descargasLiquidasController.habilitarIngreso}"/>
+				</p:panelGrid>
+				<p:panelGrid columns="4" styleClass="panel_data w100" columnClasses="header w25,w25,header w25,w25">
+					<h:outputText value="Periodo de medición (Desde) *"/>
+					<h:outputText value="#{descargasLiquidasController.detalleDescargasLiquidas.fechaInicioMonitoreo}" rendered="#{!descargasLiquidasController.habilitarIngreso}"/>
+					<h:panelGroup rendered="#{descargasLiquidasController.habilitarIngreso}">
+					<p:selectOneMenu id="medicionDesdeAnio" value="#{descargasLiquidasController.medicionDesdeAnio}" required="true" requiredMessage="Periodo de medición (Desde Año) es requerido">
+						<f:selectItem itemLabel="Año..." noSelectionOption="true"/>
+						<f:selectItems value="#{descargasLiquidasController.anioList}"/>
+						<p:ajax event="change" listener="#{descargasLiquidasController.validarPeriodoMedicionListener}" update="medicionDesdeAnio medicionDesdeMes medicionHastaAnio medicionHastaMes"/>
+					</p:selectOneMenu>
+					<p:selectOneMenu id="medicionDesdeMes" value="#{descargasLiquidasController.medicionDesdeMes}" required="true" requiredMessage="Periodo de medición (Desde Mes) es requerido">
+					<f:selectItem itemLabel="Mes..." noSelectionOption="true"/>
+						<f:selectItems value="#{descargasLiquidasController.mesList}"/>
+						<p:ajax event="change" listener="#{descargasLiquidasController.validarPeriodoMedicionListener}" update="medicionDesdeAnio medicionDesdeMes medicionHastaAnio medicionHastaMes"/>
+					</p:selectOneMenu>
+					</h:panelGroup>
+					
+					<h:outputText value="Periodo de medición (Hasta) *"/>
+					<h:outputText value="#{descargasLiquidasController.detalleDescargasLiquidas.fechaFinMonitoreo}" rendered="#{!descargasLiquidasController.habilitarIngreso}"/>
+					<h:panelGroup rendered="#{descargasLiquidasController.habilitarIngreso}">
+					<p:selectOneMenu id="medicionHastaAnio" value="#{descargasLiquidasController.medicionHastaAnio}" required="true" requiredMessage="Periodo de medición (Hasta Año) es requerido">
+						<f:selectItem itemLabel="Año..." noSelectionOption="true"/>
+						<f:selectItems value="#{descargasLiquidasController.anioList}"/>
+						<p:ajax event="change" listener="#{descargasLiquidasController.validarPeriodoMedicionListener}" update="medicionDesdeAnio medicionDesdeMes medicionHastaAnio medicionHastaMes"/>						
+					</p:selectOneMenu>
+					<p:selectOneMenu id="medicionHastaMes" value="#{descargasLiquidasController.medicionHastaMes}" required="true" requiredMessage="Periodo de medición (Hasta Mes) es requerido">
+						<f:selectItem itemLabel="Mes..." noSelectionOption="true"/>
+						<f:selectItems value="#{descargasLiquidasController.mesList}"/>
+						<p:ajax event="change" listener="#{descargasLiquidasController.validarPeriodoMedicionListener}" update="medicionDesdeAnio medicionDesdeMes medicionHastaAnio medicionHastaMes"/>
+					</p:selectOneMenu>
+					</h:panelGroup>
+					<h:outputText value="Fases * " for="faseGroup" rendered="#{descargasLiquidasController.mostrarHME}"/>
+					<h:outputText value="#{descargasLiquidasController.detalleDescargasLiquidas.faseRetce.descripcion}" rendered="#{!descargasLiquidasController.habilitarIngreso and descargasLiquidasController.mostrarHME}"/>
+					<h:panelGroup id="faseGroup" rendered="#{descargasLiquidasController.mostrarHME and descargasLiquidasController.habilitarIngreso}" >
+						<h:panelGrid columns="2" styleClass="w100" columnClasses="w90,w10">	
+							<p:selectOneMenu id="tipoFase" required="true" requiredMessage="Seleccione Fase" styleClass="w100"
+										disabled="#{descargasLiquidasController.editarFuente}" 
+							value="#{descargasLiquidasController.detalleDescargasLiquidas.faseRetce}" converter="selectItemConverter">
+								<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+								<f:selectItems value="#{descargasLiquidasController.listaFaseRetce}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+							</p:selectOneMenu>
+						</h:panelGrid>
+					</h:panelGroup>					
+					<h:outputText value="Frecuencia de monitoreo *" for="frecuenciaMonitoreo"/>
+					<h:outputText value="#{descargasLiquidasController.detalleDescargasLiquidas.catalogoFrecuenciaMonitoreo.descripcion}" rendered="#{!descargasLiquidasController.habilitarIngreso}"/>
+					<p:selectOneMenu id="frecuenciaMonitoreo" required="true" requiredMessage="Frecuencia de monitoreo es requerido"
+					value="#{descargasLiquidasController.detalleDescargasLiquidas.catalogoFrecuenciaMonitoreo}" converter="selectItemConverter"
+					disabled="#{descargasLiquidasController.editarFuente}" rendered="#{descargasLiquidasController.habilitarIngreso}">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{descargasLiquidasController.catalogoFrecuenciaMonitoreoList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+					</p:selectOneMenu>
+					
+					<h:outputText value="Historial" rendered="#{descargasLiquidasController.descargasLiquidas.tieneHistorial or descargasLiquidasController.detalleDescargasLiquidas.tieneHistorial}"/>
+					<p:commandButton icon="ui-icon-search" title="Ver Historial" value="Ver Historial" styleClass="orange" process="@this" actionListener="#{descargasLiquidasController.detalleDescargasHistoricoListener(descargasLiquidasController.detalleDescargasLiquidas)}" oncomplete="PF('caracteristicasDiagHistorial').show()" update=":formDialogsHistorial:caracteristicasDiagHistorial"
+					rendered="#{descargasLiquidasController.descargasLiquidas.tieneHistorial or descargasLiquidasController.detalleDescargasLiquidas.tieneHistorial}" />					
+				</p:panelGrid>
+				<h:inputHidden
+							validator="#{descargasLiquidasController.validarCaracteristicas}" />
+			</p:panelGrid>				
+</html>

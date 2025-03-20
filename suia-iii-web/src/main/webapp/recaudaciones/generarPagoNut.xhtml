@@ -1,0 +1,133 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+	<ui:define name="content">
+		<style>
+.ui-selectonemenu-panel {
+	position: fixed;
+}
+
+.ui-selectonemenu-list, .ui-selectonemenu-panel {
+	height: 45% !important
+}
+
+.ui-selectonemenu-items-wrapper {
+	max-height: 90% !important
+}
+</style>
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" id="panelGeneral">
+	              <f:facet name="header">
+	              	Generar Pago NUT
+	              </f:facet>
+	              <h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w15, value" rowClasses="null, alt">
+					<h:outputText value="Usuario:"/>
+					<h:outputText value="#{generarPagoNUTController.nombreUsuarioSolicitud}" />
+					<h:outputText value="Código Solicitud:"/>
+					<h:outputText value="#{generarPagoNUTController.solicitudUsuario.solicitudCodigo}" />
+					<h:outputText value="Solicitud:" />
+					<h:outputText value="#{generarPagoNUTController.solicitudUsuario.solicitudDescripcion}" />
+				</h:panelGrid>
+				<p:commandButton value="Nuevo" styleClass="primary button-small-text toRight field_mrg" ajax="false" immediate="true"
+	              	icon="ui-icon-plusthick" title="Nuevo" actionListener="#{generarPagoNUTController.agregarNUT()}" process="@this" update="tableTN"/>
+				
+				<ui:repeat value="#{generarPagoNUTController.listNut}" var="listNut" >
+					<p:dataTable rowIndexVar="index" id="tableTN"
+									value="#{listNut.listTarifasNUT}" var="item"
+									emptyMessage="#{labels['common.table.empty']}">
+						<f:facet name="header">
+							<h:outputText value="Código NUT: #{listNut.nutCodigo}" rendered="#{listNut.nutCodigo != null}"/>
+							<p:commandButton value="Adicionar" styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg" ajax="false" immediate="true"
+	              			icon="ui-icon-plusthick" title="Agregar Detalle" process="@this" actionListener="#{generarPagoNUTController.adicionarNutATarifas(listNut)}"/>
+	              			<p:commandButton value="#{listNut.nutCodigo != null ? 'Anular' : 'Eliminar'}" styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg" ajax="false" immediate="true"
+	              			icon="ui-icon-closethick" title="Anular NUT" process="@this" actionListener="#{generarPagoNUTController.anularNUT(listNut)}" />
+	              			
+						</f:facet>
+						<p:column headerText="Item" styleClass="alCenter w5">
+							<h:outputText value="#{index + 1}" />
+						</p:column>
+						<p:column headerText="Código" styleClass="alCenter w10">
+							<h:outputText value="#{item.tarifas.tasasCodigo}" />
+						</p:column>
+						<p:column headerText="Nombre" styleClass="alLeft w15">
+							<h:outputText value="#{item.tarifas.tasasNombre}" styleClass="alJustify"/>
+						</p:column>
+						<p:column headerText="Descripción" styleClass="alLeft w30">
+							<h:outputText value="#{item.tarifas.tasasDescripcion}" styleClass="alJustify"/>
+						</p:column>
+						<p:column headerText="N° Cuenta" styleClass="alCenter w10">
+							<h:outputText value="#{item.tarifas.cuentas.cuentaNumero}" />
+						</p:column>
+						<p:column headerText="Valor Unitario" styleClass="alCenter w10">
+							<h:outputText value="#{item.valorUnitario} $" />
+						</p:column>
+						<p:column headerText="Cantidad" styleClass="alCenter w10">
+							<h:outputText value="#{item.cantidad}" />
+						</p:column>
+						<p:column headerText="Subtotal" styleClass="alCenter w10">
+							<h:outputText value="#{item.valorUnitario * item.cantidad} $" />
+						</p:column>
+						<p:column headerText="Acciones" styleClass="alCenter w10">
+							<p:commandButton styleClass="primary" icon="ui-icon-trash" title="Eliminar Registro" process="@this"
+							actionListener="#{generarPagoNUTController.eliminarTarifasNut(listNut,item, index)}" update="tableTN"/>
+						</p:column>
+						<p:columnGroup id="total" type="footer">
+		                    <p:row>
+		                        <p:column colspan="7" styleClass="alRight bold" footerText="Total a Pagar:" />
+		                        <p:column footerText="#{listNut.nutValor} $" />
+		                        <p:column/>
+		                    </p:row>
+		                </p:columnGroup>
+					</p:dataTable><br/>
+				</ui:repeat>
+	        </p:panelGrid>
+	        <h:panelGroup id="revisarNutObservaciones" rendered="#{!generarPagoNUTController.observacionesNUT}">
+				<observaciones:tablaObservaciones idComponent="nut" seccion="Revisar NUT" componenteActualizarEliminar="revisarNutObservaciones" 
+				aparace="true" mostrarSiVacio="false" 
+				idClase="#{generarPagoNUTController.solicitudUsuario.id}" nombreClase="Recaudaciones" 
+				soloLectura="#{!generarPagoNUTController.observacionesNUT}" />
+			</h:panelGroup>
+	        
+	         <t:div styleClass="buttons main">
+				<p:commandButton value="Guardar" icon="ui-icon-disk" actionListener="#{generarPagoNUTController.guardarNUT()}" 
+								 process="@this" update=":form"/>
+				<p:commandButton value="Enviar" icon="ui-icon-check" actionListener="#{generarPagoNUTController.completarTarea()}" 
+								 process="@this" disabled="#{!generarPagoNUTController.finalizarTarea}"/>
+			</t:div>  
+		</h:form>
+		<h:form id="formDialog">
+			<p:dialog header="Adicionar Tasas" id="dialogTasas" widgetVar="dialogTasas" modal="true" resizable="false" width="900"
+			visible="#{generarPagoNUTController.dialogTasas}">
+				<p:panelGrid columns="2" styleClass="w100" id="panelTasas" columnClasses="w15">
+					<p:outputLabel value="Seleccionar Tasas:" for="tasas" />
+					
+						<p:selectOneMenu id="tasas" requiredMessage="El campo 'Seleccionar Tasas' es requerido."
+						value="#{generarPagoNUTController.idTarifa}" required="true"
+						filter="true" filterMatchMode="contains" style="width: 100%;">
+							<f:selectItem itemLabel="Seleccione.." itemValue=""/>
+							<f:selectItems value="#{generarPagoNUTController.listAuxT}" />
+							<p:ajax process="tasas" immediate="true" />
+						</p:selectOneMenu>
+					
+					<p:outputLabel value="Cantidad:" for="cantidad"/>
+					<p:inputText value="#{generarPagoNUTController.tarifasNUT.cantidad}" maxlength="5" styleClass="w100" id="cantidad" 
+					required="true" requiredMessage="El campo 'Cantidad' es requerido.">
+						<f:validateDoubleRange minimum="0" maximum="5000" />
+						<pe:keyFilter mask="num" />
+						<p:ajax process="cantidad" immediate="true" />
+					</p:inputText>
+				</p:panelGrid><br/>
+				<p:commandButton styleClass="primary toRight" icon="ui-icon-disk" title="Adicionar" process="@this panelTasas" update=":formDialog:panelTasas :form:panelGeneral" 
+									actionListener="#{generarPagoNUTController.adcionarTasas()}" value="Aceptar" oncomplete="PF('dialogTasas').hide()" ajax="false" immediate="true"/>
+						
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

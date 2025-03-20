@@ -1,0 +1,242 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:controles="http://java.sun.com/jsf/composite/controles-prime"
+	  xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	  xmlns:hh="http://java.sun.com/jsf/html">
+<ui:composition
+		template="/prevencion/licenciamiento-ambiental/eia/default.xhtml">
+	<ui:define name="content-eia">
+		<h:form id="frmDatos">
+
+
+
+			<p:panel header="Análisis de riesgos">
+
+				<p:separator />
+				<h:outputText styleClass="w100 text-red"
+							  value="Adjuntar documento de Análisis de riesgos" />
+				<p:separator />
+
+				<p:panelGrid columns="2" layout="grid" styleClass="w100"
+							 id="panelGridAdjuntos">
+					<f:facet name="header">
+						<h:outputText value="Adjuntar documento de respaldo*" />
+						<mae:panelGridHeaderHelp conector="riesgoHelp"
+												 help="#{helps['eia.analisisriesgo.adjunto']}" width="500px"
+												 value="" />
+					</f:facet>
+
+					<h:panelGroup id="panelAdjuntos">
+						<p:outputLabel id="etiqueta"
+									   value="#{empty analisisRiesgoEIAController.documentoGeneral.nombre ? 'Documento de respaldo (.pdf|.zip|.rar)' : analisisRiesgoEIAController.documentoGeneral.nombre}" />
+
+						<span class="w10"></span>
+
+						<p:commandButton id="download"
+										 rendered="#{not empty analisisRiesgoEIAController.documentoGeneral.nombre}"
+										 icon="ui-icon-arrowthick-1-s" ajax="false"
+										 styleClass="button-small primary" title="Ver" immediate="true">
+							<p:fileDownload
+									value="#{analisisRiesgoEIAController.getStreamContent()}" />
+						</p:commandButton>
+					</h:panelGroup>
+					<br></br>
+
+					<p:fileUpload
+							fileUploadListener="#{analisisRiesgoEIAController.uploadListenerDocumentos}"
+							multiple="false" sizeLimit="10485760"
+							allowTypes="/(\.|\/)(zip|rar|pdf)$/" label="Seleccionar"
+							uploadLabel="Subir" invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Debe adjuntar un archivo no mayor de 10 Mb."
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update="panelGridAdjuntos" />
+
+
+					<br></br>
+				</p:panelGrid>
+
+				<h:inputHidden id="campoOculto"
+							   validator="#{analisisRiesgoEIAController.validateResultados}" />
+
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+							 id="panelGridAnalisis">
+					<f:facet name="header">
+						<h:outputText value="Análisis de riesgo *" />
+					</f:facet>
+					<f:facet name="header">
+
+						<p:commandButton
+								styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg"
+								icon="ui-icon-plusthick" value="Adicionar"
+								update="panelDatosDialogo" process="@this"
+								action="#{analisisRiesgoEIAController.inicializarAnalisis}"
+								oncomplete="PF('dlg2').show();" />
+
+					</f:facet>
+
+
+					<p:dataTable id="tableAnalisis"
+								 value="#{analisisRiesgoEIAController.analisisRiesgoEIABean.listaAnalisisRiesgoEia}"
+								 var="ana" paginator="true" rows="10" paginatorPosition="bottom"
+								 emptyMessage="#{labels['common.table.empty']}"
+								 paginatorAlwaysVisible="false">
+						<p:column headerText="Tipo">
+							<h:outputText value="#{ana.riesgo.subTipo.tipo.descripcion}" />
+						</p:column>
+						<p:column headerText="Subtipo">
+							<h:outputText value="#{ana.riesgo.subTipo.nombre}" />
+						</p:column>
+						<p:column headerText="Riesgo">
+							<h:outputText
+									value="#{empty ana.otroRiesgo  ? ana.riesgo.nombre : ana.otroRiesgo}" />
+						</p:column>
+						<p:column headerText="Resultado">
+							<h:outputText value="#{ana.resultados}" />
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton icon="ui-icon-pencil"
+											 styleClass="button-small primary"
+											 action="#{analisisRiesgoEIAController.editar(ana)}"
+											 update=":#{p:component('panelDatosDialogo')}" process="@this"
+											 oncomplete="PF('dlg2').show()" />
+							<p:commandButton icon="ui-icon-circle-close"
+											 styleClass="button-small primary"
+											 action="#{analisisRiesgoEIAController.remover(ana)}"
+											 update=":#{p:component('tableAnalisis')}" process="@this">
+								<p:confirm header="Confirmación"
+										   message="¿Está seguro que desea eliminar este Análisis de riesgo?"
+										   icon="ui-icon-alert" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+
+				</p:panelGrid>
+				<br />
+
+
+				<p:dialog id="editar" header="Análisis de riesgo" widgetVar="dlg2"
+						  modal="true" height="200" width="400" styleClass="formulario"
+						  resizable="false" draggable="false">
+					<h:panelGrid columns="2" styleClass="w100" columnClasses="w30, w70"
+								 id="panelDatosDialogo">
+
+						<p:outputLabel for="tipo" value="Tipo" />
+						<h:panelGroup>
+							<p:selectOneMenu id="tipo" required="true"
+											 value="#{analisisRiesgoEIAController.analisisRiesgoEIABean.tipoRiesgo}">
+
+								<f:selectItem itemLabel="#{labels['common.item.choose']}"
+											  itemValue="" noSelectionOption="true" />
+								<f:selectItems
+										value="#{analisisRiesgoEIAController.analisisRiesgoEIABean.tiposRiesgo}"
+										var="tipo" itemValue="#{tipo}" itemLabel="#{tipo.descripcion}" />
+								<p:ajax event="change"
+										update="panelDatosDialogo labelSubtipo subtipo riesgo"
+										listener="#{analisisRiesgoEIAController.cargarSubtiposRiesgoPorTipo}" />
+							</p:selectOneMenu>
+							<p:tooltip for="tipo" escape="false" showDelay="1200"
+									   trackMouse="true"
+									   value="#{helps['eia.analisisriesgo.tiporiesgo']}" />
+						</h:panelGroup>
+
+						<p:outputLabel id="labelSubtipo" for="subtipo" value="Subtipo"
+									   rendered="#{analisisRiesgoEIAController.analisisRiesgoEIABean.renderSubtipo}" />
+						<p:selectOneMenu
+								rendered="#{analisisRiesgoEIAController.analisisRiesgoEIABean.renderSubtipo}"
+								id="subtipo" required="true"
+								value="#{analisisRiesgoEIAController.analisisRiesgoEIABean.subtipo}"
+								converter="selectItemConverter">
+
+							<f:selectItem itemLabel="#{labels['common.item.choose']}"
+										  itemValue="" noSelectionOption="true" />
+							<f:selectItems
+									value="#{analisisRiesgoEIAController.analisisRiesgoEIABean.subTiposRiesgo}" />
+							<p:ajax event="change" update="#{p:component('riesgo')}"
+									listener="#{analisisRiesgoEIAController.cargarRiesgosPorSubTipo}" />
+						</p:selectOneMenu>
+
+						<p:outputLabel for="riesgo" value="Riesgo" />
+
+						<p:selectOneMenu id="riesgo" required="true"
+										 value="#{analisisRiesgoEIAController.analisisRiesgoEIABean.analisisActivo.riesgo}"
+										 converter="selectItemConverter">
+
+							<f:selectItem itemLabel="#{labels['common.item.choose']}"
+										  itemValue="" noSelectionOption="true" />
+							<f:selectItems
+									value="#{analisisRiesgoEIAController.analisisRiesgoEIABean.riesgos}" />
+							<p:ajax event="change" update="panelDatosDialogo"
+									listener="#{analisisRiesgoEIAController.controlarOtroRiesgo}" />
+
+						</p:selectOneMenu>
+
+
+						<p:outputLabel id="labelOtroRiesgo" for="otroRiesgo"
+									   value="Otro riesgo"
+									   rendered="#{analisisRiesgoEIAController.analisisRiesgoEIABean.habilitarOtroRiesgo}" />
+						<p:inputText id="otroRiesgo"
+									 value="#{analisisRiesgoEIAController.analisisRiesgoEIABean.analisisActivo.otroRiesgo}"
+									 required="true"
+									 rendered="#{analisisRiesgoEIAController.analisisRiesgoEIABean.habilitarOtroRiesgo}"
+									 maxlength="200" />
+
+
+						<p:outputLabel for="resultado" value="Resultado:" />
+						<h:panelGroup>
+							<p:inputText id="resultado" required="true"
+										 value="#{analisisRiesgoEIAController.analisisRiesgoEIABean.analisisActivo.resultados}"
+										 maxlength="100" title="#{helps['eia.analisisriesgo.resultado']}" />
+
+							<p:tooltip for="resultado" escape="false" showDelay="1200"
+									   trackMouse="true" />
+						</h:panelGroup>
+
+
+					</h:panelGrid>
+					<p:separator />
+
+					<div class="buttons">
+						<p:commandButton value="Aceptar" icon="ui-icon-check"
+										 styleClass="buttonAceptar"
+										 action="#{analisisRiesgoEIAController.agregar()}"
+										 process="@this panelDatosDialogo"
+										 update=":#{p:component('tableAnalisis')}, panelDatosDialogo"
+										 oncomplete="if (args.validationFailed  || args.riesgoYaRegistrado) { }else { PF('dlg2').hide();}" />
+						<p:commandButton value="Cancelar" styleClass="secondary"
+										 icon="ui-icon-cancel" immediate="true"
+										 onclick="PF('dlg2').hide();" />
+					</div>
+				</p:dialog>
+
+
+				<div class="buttons main">
+					<p:commandButton value="Atrás" immediate="true" process="@this"
+									 rendered="#{eia.proyectosBean.getProyecto().getTipoEstudio().getId() ne 2}"
+									 action="/prevencion/licenciamiento-ambiental/eia/impactoAmbiental/identificacionEvaluacionImpactos.jsf?faces-redirect=true"
+									 icon="ui-icon-arrowthick-1-w" />
+
+					<p:commandButton value="Atrás" immediate="true" process="@this"
+									 rendered="#{eia.proyectosBean.getProyecto().getTipoEstudio().getId() eq 2}"
+									 action="/prevencion/licenciamiento-ambiental/eia/planHallazgos/planHallazgos.jsf?id=19&amp;faces-redirect=true"
+									 icon="ui-icon-arrowthick-1-w" />
+
+					<p:commandButton value="Guardar" icon="ui-icon-check"
+									 action="#{analisisRiesgoEIAController.guardar()}"
+									 update=":#{p:component('frmDatos')}" process="@this campoOculto" />
+
+					<p:commandButton value="Siguiente" immediate="true" process="@this"
+									 action="/prevencion/licenciamiento-ambiental/eia/pma/planManejoAmbiental.jsf?id=15&amp;faces-redirect=true"
+									 icon="ui-icon-arrowthick-1-e" />
+				</div>
+
+			</p:panel>
+		</h:form>
+
+
+	</ui:define>
+</ui:composition>
+</html>

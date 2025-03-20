@@ -1,0 +1,96 @@
+<html 
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"	
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">	
+		<p:panelGrid id="registroMedicionesGrid" columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="Registro de resultado de monitoreo"/>
+			</f:facet>				
+			<ui:repeat value="#{descargasLiquidasController.caracteristicasPuntoMonitoreoTablaList}" var="itemTabla" >
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">	
+					<f:facet name="header"><h:outputText value="#{itemTabla.nombreTabla}"/></f:facet>
+					<p:dataTable id="datosObtenidosTable" value="#{descargasLiquidasController.getDatoObtenidoList(itemTabla)}" var="item" emptyMessage="#{labels['common.table.empty']}"
+						paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rows="25">	
+						<f:facet name="header">
+							<p:commandButton value="#{msg['button.agregar']}" icon="ui-icon-plus" actionListener="#{descargasLiquidasController.crearDatoObtenido(itemTabla)}" oncomplete="PF('datoObtenidoDiag').show()" update=":formDialogs:datoObtenidoDiag" style="float:right"
+							rendered="#{descargasLiquidasController.habilitarIngreso}"/>
+						</f:facet>										
+						<p:column headerText="Parámetro ">
+							<h:outputText value="#{item.parametrosTablas.parametro.nombre}"/>
+						</p:column>						
+						<p:column headerText="Unidad ">
+							<h:outputText value="#{item.parametrosTablas.parametro.unidad}"/>
+						</p:column>
+						<p:column headerText="Límite Maximo permisible" rendered="false">
+							<h:outputText value="#{item.parametrosTablas.limiteMaximoPermisible}"/>
+						</p:column>
+						<p:column headerText="Destino de descarga" rendered="#{itemTabla.mostarDestinoDescarga}">
+							<h:outputText value="#{item.parametrosTablas.destinoDescarga}"/>
+						</p:column>
+						<p:column headerText="Aplicación" rendered="#{itemTabla.mostarAplicacion}">
+							<h:outputText value="#{item.parametrosTablas.aplicacion}"/>
+						</p:column>
+						<p:column headerText="Método de estimación">
+							<h:outputText value="#{item.metodoEstimacion.descripcion}"/>
+						</p:column>
+						<p:column headerText="Reporte">
+							<h:outputText value="#{item.valorIngresado}"/>
+						</p:column>								
+						<p:column styleClass="w15" headerText="Acciones" rendered="#{descargasLiquidasController.habilitarIngreso}">
+							<center>
+								<p:commandButton icon="ui-icon-pencil" title="Editar" styleClass="secondary" process="@this" action="#{descargasLiquidasController.editarDatoObtenido(item)}" oncomplete="PF('datoObtenidoDiag').show()" update=":formDialogs:datoObtenidoDiag"/>						
+								<p:commandButton icon="ui-icon-trash" title="Eliminar" styleClass="secondary" process="@this" actionListener="#{descargasLiquidasController.eliminarDatoObtenido(item)}" update=":form:registroMedicionesGrid">
+									<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar?" icon="ui-icon-alert"/>
+								</p:commandButton>
+								<p:commandButton icon="ui-icon-search" title="Ver Historial" styleClass="orange" process="@this" actionListener="#{descargasLiquidasController.datoObtenidoHistoricoListener(item)}" oncomplete="PF('datoObtenidoDiagHistorial').show()" update=":formDialogsHistorial:datoObtenidoDiagHistorial"
+								rendered="#{item.tieneHistorial}" />
+							</center>												
+						</p:column>
+					</p:dataTable>
+					<p:dataTable id="datosObtenidosHistoricoEliminadosTable" value="#{descargasLiquidasController.getDatoObtenidoHistoricoEliminadosList(itemTabla)}" var="item" emptyMessage="#{labels['common.table.empty']}"
+						paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rows="25"
+						rendered="#{not empty descargasLiquidasController.getDatoObtenidoHistoricoEliminadosList(itemTabla)}">
+						<p:column headerText="Parámetro ">
+							<h:outputText value="#{item.parametrosTablas.parametro.nombre}"/>
+						</p:column>						
+						<p:column headerText="Unidad ">
+							<h:outputText value="#{item.parametrosTablas.parametro.unidad}"/>
+						</p:column>
+						<p:column headerText="Límite Maximo permisible" rendered="false">
+							<h:outputText value="#{item.parametrosTablas.limiteMaximoPermisible}"/>
+						</p:column>
+						<p:column headerText="Destino de descarga" rendered="#{itemTabla.mostarDestinoDescarga}">
+							<h:outputText value="#{item.parametrosTablas.destinoDescarga}"/>
+						</p:column>
+						<p:column headerText="Aplicación" rendered="#{itemTabla.mostarAplicacion}">
+							<h:outputText value="#{item.parametrosTablas.aplicacion}"/>
+						</p:column>
+						<p:column headerText="Método de estimación">
+							<h:outputText value="#{item.metodoEstimacion.descripcion}"/>
+						</p:column>
+						<p:column headerText="Reporte">
+							<h:outputText value="#{item.valorIngresado}"/>
+						</p:column>								
+						<p:column styleClass="w15" headerText="Estado">
+							<center><h:outputText value="Eliminado" style="color:red"/></center>												
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>		
+			</ui:repeat>
+		</p:panelGrid>
+	<br/>
+	<h:panelGrid styleClass="alCenter w50" columns="2" rendered="#{descargasLiquidasController.habilitarIngreso}">
+		<h:outputText value="¿Desea Añadir mas puntos de monitoreo?" styleClass="encabezado" style="text-align:right" />
+		<p:selectOneRadio value="#{descargasLiquidasController.masReportes}">
+			<f:selectItem itemLabel="Sí" itemValue="true" />
+			<f:selectItem itemLabel="No" itemValue="false" />
+			<p:ajax event="change" update=":form:pnlButons" />
+		</p:selectOneRadio>
+	</h:panelGrid>
+</html>

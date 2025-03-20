@@ -1,0 +1,224 @@
+<ui:composition template="/WEB-INF/templates/default.xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+	<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+
+		<ui:define name="context-extra">
+			<h:outputText value="Datos" />
+			<h:outputText value="Estudio de Impacto Ambiental" />
+			<h:outputLink target="_blank"
+				value="#{request.contextPath}/pages/rcoa/estudioImpactoAmbiental/verProyectoEIAResumen.jsf">
+				<p:commandButton type="button" styleClass="primary button-small"
+					icon="ui-icon-search" />
+			</h:outputLink>
+
+
+			<h:panelGroup>
+				<h:outputText value="Oficio" />
+			</h:panelGroup>
+			<h:outputText
+				value="Aprobación Técnica del Estudio de Impacto Ambiental" />
+			<p:commandButton ajax="false" icon="ui-icon-arrowthick-1-s"
+				styleClass="primary button-small" immediate="true">
+				<p:fileDownload
+					value="#{pagosFacilitadoresBypassV1Controller.descargarOficoEia()}" />
+			</p:commandButton>
+		</ui:define>
+
+		<ui:define name="content">
+
+			<f:event type="preRenderView"
+				listener="#{pagosFacilitadoresBypassV1Controller.validarTareaBpm()}" />
+
+			<h:form id="formTransaction"
+				onkeypress="if (event.keyCode == 13) {return false; }">
+				<h:outputText
+					rendered="#{!pagosFacilitadoresBypassV1Controller.facilitadorAdicional}"
+					value="El pago correspondiente a la tasa por servicios de facilitador, se lo debe gestionar por medio de la opción de Pago en Línea del Ministerio del Ambiente, Agua y Transición Ecológica."
+					styleClass="bold" />
+
+				<br />
+				<br />
+
+				<h:panelGrid styleClass="panel_data w100" columns="2"
+					columnClasses="header w25, bold w75">
+					<h:outputText value="N° de facilitadores ambientales" />
+					<h:outputText
+						value="#{pagosFacilitadoresBypassV1Controller.numeroFacilitadores}" />
+
+					<h:outputText value="Valor total" />
+					<h:panelGroup>
+						<h:outputText
+							value="#{pagosFacilitadoresBypassV1Controller.valorTotalFacilitador}">
+							<f:convertNumber pattern="#0.00" />
+						</h:outputText>
+						<h:outputText value=" USD" />
+					</h:panelGroup>
+				</h:panelGrid>
+
+				<ui:remove>
+					<h:panelGrid styleClass="panel_data w100" columns="2"
+						id="pnlGenerarNut" columnClasses="header w25, bold w75"
+						rowClasses="null, alt">
+						<h:outputText value="Generar NUT"
+							rendered="#{pagosFacilitadoresBypassV1Controller.generarNUT and pagosFacilitadoresBypassV1Controller.documentosNUT.size() eq 0}" />
+						<h:panelGroup
+							rendered="#{pagosFacilitadoresBypassV1Controller.generarNUT and pagosFacilitadoresBypassV1Controller.documentosNUT.size() eq 0}">
+							<p:commandButton icon="	ui-icon-document"
+								styleClass="primary button-small"
+								action="#{pagosFacilitadoresBypassV1Controller.generarNut()}"
+								process="@this"
+								rendered="#{pagosFacilitadoresBypassV1Controller.generarNUT}"
+								update="pnlGenerarNut">
+								<p:confirm header="Aviso"
+									message="Usted debe generar el NUT si aún no ha realizado el pago en la institución bancaria"
+									icon="ui-icon-alert" />
+							</p:commandButton>
+							<p:confirmDialog global="true" showEffect="fade"
+								hideEffect="fade">
+								<p:commandButton value="Cancelar" type="button"
+									styleClass="ui-confirmdialog-no primary toRight"
+									icon="ui-icon-closethick" />
+								<p:commandButton value="Generar" type="button"
+									styleClass="ui-confirmdialog-yes primary toRight"
+									icon="ui-icon-check" />
+							</p:confirmDialog>
+						</h:panelGroup>
+						<h:outputText value="Descargar NUT"
+							rendered="#{pagosFacilitadoresBypassV1Controller.documentosNUT.size() > 0}" />
+						<h:panelGroup
+							rendered="#{pagosFacilitadoresBypassV1Controller.documentosNUT.size() > 0}">
+							<p:dataTable styleClass="noHeader borderless"
+								value="#{pagosFacilitadoresBypassV1Controller.documentosNUT}"
+								var="documento">
+								<p:column style="text-align: left; background-color: #f5f5f5;">
+									<h:outputText value="#{documento.nombreDocumento}" />
+									<p:commandButton icon="ui-icon-arrowthick-1-s"
+										styleClass="button-small primary" title="Ver"
+										style="margin-left: 10px" ajax="false" immediate="true">
+										<p:fileDownload
+											value="#{pagosFacilitadoresBypassV1Controller.descargar(documento)}" />
+									</p:commandButton>
+								</p:column>
+							</p:dataTable>
+						</h:panelGroup>
+					</h:panelGrid>
+				</ui:remove>
+
+				<br />
+				<p:panelGrid id="pnl_transacciones" columns="3" layout="grid"
+					styleClass="w100" columnClasses="w33, field_mrg w33, field_mrg w33">
+					<f:facet name="header">
+						<mae:panelGridHeaderHelp value="Ingreso de transacciones"
+							conector="generalHelp" render="false"
+							image="#{request.contextPath}/resources/images/help-how.png"
+							help="#{helps['no.help.yet']}" />
+					</f:facet>
+					<p:outputLabel for="institucionBancaria"
+						value="Institución bancaria" />
+					<p:outputLabel for="numeroTransaccion"
+						value="Número de comprobante" />
+					<h:outputText />
+
+					<p:inputText id="institucionBancaria" disabled="true"
+						value="#{pagosFacilitadoresBypassV1Controller.transaccionFinanciera.institucionFinanciera.nombreInstitucion}" />
+
+
+					<p:inputText id="numeroTransaccion" placeholder="Ej: 584777"
+						disabled="#{pagosFacilitadoresBypassV1Controller.cumpleValorTotal}"
+						required="true"
+						value="#{pagosFacilitadoresBypassV1Controller.transaccionFinanciera.numeroTransaccion}"
+						maxlength="50" onkeypress="return numbersonly(this, event);">
+					</p:inputText>
+
+					<p:commandButton value="Adicionar" icon="ui-icon-plusthick"
+						disabled="#{pagosFacilitadoresBypassV1Controller.cumpleValorTotal}"
+						action="#{pagosFacilitadoresBypassV1Controller.guardarTransaccion(1)}"
+						styleClass="primary"
+						update=":#{p:component('tbl_transacciones')}, :#{p:component('pnl_transacciones')}"
+						process="@this institucionBancaria numeroTransaccion" />
+				</p:panelGrid>
+			</h:form>
+
+
+			<h:form id="formTransactionList">
+				<p:dataTable id="tbl_transacciones"
+					value="#{pagosFacilitadoresBypassV1Controller.transaccionesFinancieras}"
+					var="transaccionFinanciera"
+					emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Institución financiera">
+						<h:outputText
+							value="#{transaccionFinanciera.institucionFinanciera.nombreInstitucion}" />
+					</p:column>
+					<p:column headerText="Número de comprobante"
+						styleClass="w33 alCenter">
+						<h:outputText value="#{transaccionFinanciera.numeroTransaccion}" />
+					</p:column>
+					<p:column headerText="Monto" styleClass="w15 alCenter">
+						<h:outputText value="#{transaccionFinanciera.montoTransaccion}">
+							<f:convertNumber pattern="#0.00" />
+						</h:outputText>
+					</p:column>
+					<p:column styleClass="w20px alCenter">
+						<p:commandButton icon="ui-icon-trash"
+							styleClass="primary button-small"
+							action="#{pagosFacilitadoresBypassV1Controller.eliminarTransacion(transaccionFinanciera)}"
+							update=":#{p:component('tbl_transacciones')}, :#{p:component('pnl_transacciones')}" />
+					</p:column>
+				</p:dataTable>
+			</h:form>
+
+			<br />
+			<h:form id="idfrmfactura">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<p:outputLabel value="Adjuntar factura de pago" />
+					</f:facet>
+					<h:panelGrid layout="grid" styleClass="w100">
+						<h:panelGroup>
+							<h:panelGrid columns="1" columnClasses="null, field_mrg">
+								<p:outputLabel value="Documento (.pdf) 20MB" />
+							</h:panelGrid>
+							<p:fileUpload multiple="false" sizeLimit="20480000"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true"
+								fileUploadListener="#{pagosFacilitadoresBypassV1Controller.uploadDocumentoPago}"
+								update="idnombrefactura">
+							</p:fileUpload>
+						</h:panelGroup>
+						<h:panelGroup id="idnombrefactura">
+							<p:outputLabel
+								value="#{pagosFacilitadoresBypassV1Controller.nombreArchivo}" />
+						</h:panelGroup>
+					</h:panelGrid>
+				</p:panelGrid>
+			</h:form>
+
+			<h:form id="formSubmit">
+				<div class="buttons main">
+
+
+					<p:commandButton value="Enviar" id="btnEnviar" icon="ui-icon-check"
+						actionListener="#{pagosFacilitadoresBypassV1Controller.completarTarea()}"
+						widgetVar="btnEnviar" onstart="PF('btnEnviar').disable()"
+						update="@form">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:form>
+
+		</ui:define>
+	</ui:composition>
+</ui:composition>

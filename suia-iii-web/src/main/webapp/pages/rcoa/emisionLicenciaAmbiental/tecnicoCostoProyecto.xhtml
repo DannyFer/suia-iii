@@ -1,0 +1,316 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+<ui:composition template="/WEB-INF/templates/default-task.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+	<ui:define name="context-extra">
+		<h:outputText value="Código RGDP"
+			rendered="#{contextoTareaEIAController.tieneRgd}" />
+		<h:outputText
+			value="#{contextoTareaEIAController.proyecto.codigoRgdAsociado}"
+			rendered="#{contextoTareaEIAController.tieneRgd}" />
+		<h:outputLink target="_blank"
+			rendered="#{contextoTareaEIAController.tieneRgd}"
+			value="#{contextoTareaEIAController.redireccionarRgd()}">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+
+		<h:outputText value="Código RSQ"
+			rendered="#{contextoTareaEIAController.tieneRsq}" />
+		<h:outputText
+			value="#{contextoTareaEIAController.proyecto.codigoRsqAsociado}"
+			rendered="#{contextoTareaEIAController.tieneRsq}" />
+		<h:outputLink target="_blank"
+			rendered="#{contextoTareaEIAController.tieneRsq}"
+			value="#{contextoTareaEIAController.redireccionarRsq()}">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+
+		<h:outputText value="Código ART"
+			rendered="#{contextoTareaEIAController.tieneArt}" />
+		<h:outputText value="#{contextoTareaEIAController.art.solicitud}"
+			rendered="#{contextoTareaEIAController.tieneArt}" />
+		<p:commandButton ajax="false" icon="ui-icon-search"
+			styleClass="primary button-small" immediate="true"
+			rendered="#{contextoTareaEIAController.tieneArt}">
+			<p:fileDownload
+				value="#{contextoTareaEIAController.descargarOficoArt()}" />
+		</p:commandButton>
+
+		<h:outputText value="Datos" />
+		<h:outputText value="Estudio de Impacto Ambiental" />
+		<h:outputLink target="_blank"
+			value="#{request.contextPath}/pages/rcoa/estudioImpactoAmbiental/verProyectoEIAResumen.jsf">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+	</ui:define>
+
+	<style type="text/css">
+.cssRadioDisabled .ui-radiobutton .ui-state-active {
+	background: #008a8a !important;
+}
+</style>
+
+	<ui:define name="content">
+		<h:form id="form"
+			onkeypress="if (event.keyCode == 13) {return false; }">
+			<h:panelGrid columns="1" layout="grid" styleClass="w100"
+				columnClasses="w100">
+				<f:event type="preRenderView"
+					listener="#{emisionLicenciaAmbientalVisualizarController.validarExisteObservaciones()}" />
+				<p:outputLabel value="Detalle de la revisión" />
+				<p:selectOneRadio id="rbtObservaciones"
+					value="#{emisionLicenciaAmbientalVisualizarController.detalleRevisionEmision}"
+					disabled="true" styleClass="cssRadioDisabled">
+					<f:selectItem itemValue="true" itemLabel="Aprobado" />
+					<f:selectItem itemValue="false" itemLabel="Observado" />
+					<p:ajax update="@form"></p:ajax>
+				</p:selectOneRadio>
+			</h:panelGrid>
+
+			<br />
+
+			<p:panelGrid id="costoProyectoGrid" columns="3"
+				styleClass="panel_data w100"
+				columnClasses="header w25, field_mrg w25">
+				<h:outputText value="Valor del proyecto" />
+				<h:outputText
+					value="#{emisionLicenciaAmbientalVisualizarController.resolucionAmbiental.costoProyecto}">
+					<f:convertNumber pattern="#.00" />
+				</h:outputText>
+				<h:outputText
+					value="Corresponde al valor total del proyecto que se indica en el Acuerdo Ministerial 083-B del 18 de junio del 2015" />
+			</p:panelGrid>
+			<br />
+
+			<p:panelGrid id="costosGrid" columns="2" styleClass="panel_data w50"
+				columnClasses="header w50, w50">
+				<h:outputText value="Pago total por inspección" />
+				<h:outputText
+					value="#{emisionLicenciaAmbientalVisualizarController.resolucionAmbiental.pagoTotalInspeccion}">
+					<f:convertNumber pattern="#.00" />
+				</h:outputText>
+
+				<h:outputText value="Pago por costo de proyecto" />
+				<h:outputText
+					value="#{emisionLicenciaAmbientalVisualizarController.resolucionAmbiental.pagoMinimoProyecto}">
+					<f:convertNumber pattern="#.00" />
+				</h:outputText>
+
+				<h:outputText value="Valor total por Licencia Ambiental" />
+				<h:outputText styleClass="bold"
+					value="#{emisionLicenciaAmbientalVisualizarController.resolucionAmbiental.montoTotalProyecto}"
+					disabled="true">
+					<f:convertNumber pattern="#.00" />
+				</h:outputText>
+			</p:panelGrid>
+
+			<h:panelGroup
+				rendered="#{emisionLicenciaAmbientalVisualizarController.resolucionAmbiental.pagoInventarioForestal ne null and 
+					emisionLicenciaAmbientalVisualizarController.resolucionAmbiental.pagoInventarioForestal > 0}">
+				<br />
+				<p:panelGrid columns="3" styleClass="panel_data w100"
+					columnClasses="header w25, w25">
+					<h:outputText value="Pago por Inventario Forestal" />
+					<h:outputText
+						value="#{emisionLicenciaAmbientalVisualizarController.resolucionAmbiental.pagoInventarioForestal}">
+						<f:convertNumber pattern="#.00" />
+					</h:outputText>
+					<h:outputText
+						value="El pago correspondiente a la tasa por concepto de emisión de Inventario Forestal, se lo debe realizar en entidades bancarias autorizadas a nombre del Ministerio del Ambiente Agua y Transición Ecológica o a través de la opción de Pago en Línea." />
+				</p:panelGrid>
+			</h:panelGroup>
+
+			<h:panelGroup
+				rendered="#{emisionLicenciaAmbientalVisualizarController.resolucionAmbiental.pagoRGDP ne null and 
+					emisionLicenciaAmbientalVisualizarController.resolucionAmbiental.pagoRGDP > 0}">
+				<br />
+				<p:panelGrid columns="3" styleClass="panel_data w100"
+					columnClasses="header w25, w25">
+					<h:outputText value="Pago por Registro Generador de Desechos" />
+					<h:outputText
+						value="#{emisionLicenciaAmbientalVisualizarController.resolucionAmbiental.pagoRGDP}">
+						<f:convertNumber pattern="#.00" />
+					</h:outputText>
+					<h:outputText
+						value="El pago correspondiente a la tasa por concepto de emisión de Registro Generador de Residuos o Desechos Peligrosos y/o Especiales, se lo debe realizar por medio de la opción de Pago en Línea del Ministerio del Ambiente, Agua y Transición Ecológica." />
+				</p:panelGrid>
+			</h:panelGroup>
+			<br />
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				columnClasses="w100">
+				<f:facet name="header">
+					<p:outputLabel value="Transacciones" />
+				</f:facet>
+				<p:dataTable id="tbl_transacciones"
+					value="#{emisionLicenciaAmbientalVisualizarController.transaccionesFinancieras}"
+					var="transaccionFinanciera"
+					emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Instituci&oacute;n financiera">
+						<h:outputText
+							value="#{transaccionFinanciera.institucionFinanciera.nombreInstitucion}" />
+					</p:column>
+					<p:column headerText="Concepto de pago">
+						<h:outputText
+							value="#{emisionLicenciaAmbientalVisualizarController.getConceptoPago(transaccionFinanciera.tipoPago)}" />
+					</p:column>
+					<p:column headerText="N&uacute;mero de comprobante"
+						styleClass="w33 alCenter">
+						<h:outputText value="#{transaccionFinanciera.numeroTransaccion}" />
+					</p:column>
+					<p:column headerText="Valor" styleClass="w15 alCenter">
+						<h:outputText value="#{transaccionFinanciera.montoPago}">
+							<f:convertNumber pattern="#0.00" />
+						</h:outputText>
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+			<br />
+
+			<p:panelGrid id="documentosGrid" columns="2" layout="grid"
+				styleClass="w100" columnClasses="w50, w50">
+				<f:facet name="header">
+					<mae:panelGridHeaderHelp
+						value="Comprobante de pago , Póliza o garantía bancaria"
+						conector="generalHelp" render="false"
+						image="#{request.contextPath}/resources/images/help-how.png"
+						help="#{helps['no.help.yet']}" />
+				</f:facet>
+				<p:outputLabel
+					value="1. Factura por emisión de Autorización Administrativa Ambiental *" />
+				<p:commandButton id="downloadFactura" icon="ui-icon-arrow-1-s"
+					styleClass="button primary toLeft" title="Ver" ajax="false"
+					immediate="true"
+					rendered="#{emisionLicenciaAmbientalVisualizarController.facturaPermisoAmbiental.nombre ne null}">
+					<p:fileDownload
+						value="#{emisionLicenciaAmbientalVisualizarController.descargarDocumento(emisionLicenciaAmbientalVisualizarController.facturaPermisoAmbiental)}" />
+				</p:commandButton>
+
+				<p:outputLabel
+					value="2. Protocolización del pago por emisión de Autorización Administrativa Ambiental *" />
+				<p:commandButton id="downloadPagoEmision" icon="ui-icon-arrow-1-s"
+					styleClass="button primary toLeft" title="Ver" ajax="false"
+					immediate="true"
+					rendered="#{emisionLicenciaAmbientalVisualizarController.pagoEmisionPermiso.nombre ne null}">
+					<p:fileDownload
+						value="#{emisionLicenciaAmbientalVisualizarController.descargarDocumento(emisionLicenciaAmbientalVisualizarController.pagoEmisionPermiso)}" />
+				</p:commandButton>
+
+				<p:outputLabel
+					value="3. Póliza o garantía bancaria por el 100% del costo de implementación del PMA *" />
+				<p:commandButton id="downloadPoliza" icon="ui-icon-arrow-1-s"
+					styleClass="button primary toLeft" title="Ver" ajax="false"
+					immediate="true"
+					rendered="#{emisionLicenciaAmbientalVisualizarController.polizaCostoImplementacion.nombre ne null}">
+					<p:fileDownload
+						value="#{emisionLicenciaAmbientalVisualizarController.descargarDocumento(emisionLicenciaAmbientalVisualizarController.polizaCostoImplementacion)}" />
+				</p:commandButton>
+
+				<p:outputLabel
+					value="4. Justificación del costo de las medidas incluidas dentro del PMA *" />
+				<p:commandButton id="downloadJustificacionPMA"
+					icon="ui-icon-arrow-1-s" styleClass="button primary toLeft"
+					title="Ver" ajax="false" immediate="true"
+					rendered="#{emisionLicenciaAmbientalVisualizarController.justificacionCostoMedidas.nombre ne null}">
+					<p:fileDownload
+						value="#{emisionLicenciaAmbientalVisualizarController.descargarDocumento(emisionLicenciaAmbientalVisualizarController.justificacionCostoMedidas)}" />
+				</p:commandButton>
+
+				<p:outputLabel value="5. Cronograma valorado del PMA *" />
+				<p:commandButton id="downloadCronograma" icon="ui-icon-arrow-1-s"
+					styleClass="button primary toLeft" title="Ver" ajax="false"
+					immediate="true"
+					rendered="#{emisionLicenciaAmbientalVisualizarController.cronogramaValorado.nombre ne null}">
+					<p:fileDownload
+						value="#{emisionLicenciaAmbientalVisualizarController.descargarDocumento(emisionLicenciaAmbientalVisualizarController.cronogramaValorado)}" />
+				</p:commandButton>
+
+			</p:panelGrid>
+			<br />
+
+			<p:panelGrid id="datosLicenciaGrid" columns="1" layout="grid"
+				styleClass="w100" >
+				<f:facet name="header">
+					<mae:panelGridHeaderHelp
+						value="Datos de la Póliza de garantía *"
+						conector="generalHelp" render="false"
+						image="#{request.contextPath}/resources/images/help-how.png"
+						help="#{helps['no.help.yet']}" />
+				</f:facet>
+
+				<h:panelGrid columns="2" layout="grid"
+					styleClass="w100 noBorder"
+					columnClasses="w50, field_mrg w50">
+					<p:outputLabel value="Número de póliza *" />
+					<p:outputLabel value="Costo de implementación del PMA" />
+
+					<p:inputText disabled="true"
+						value="#{emisionLicenciaAmbientalVisualizarController.resolucionAmbiental.numeroPoliza}" />
+					<p:inputText disabled="true"
+						value="#{emisionLicenciaAmbientalVisualizarController.resolucionAmbiental.costoImplementacion}" />
+				</h:panelGrid>
+
+				<p:outputLabel value="Vigencia de póliza" />
+				<h:panelGrid columns="2" layout="grid"
+					styleClass="w100 noBorder"
+					columnClasses="w50, field_mrg w50">
+					<p:outputLabel value="Desde *" />
+					<p:outputLabel value="Hasta *" />
+
+					<p:inputText
+						value="#{emisionLicenciaAmbientalVisualizarController.fechaInicioVigenciaPoliza}"
+						disabled="true" pattern="dd/MM/yyyy" />
+					<p:inputText
+						value="#{emisionLicenciaAmbientalVisualizarController.fechaFinVigenciaPoliza}"
+						disabled="true" pattern="dd/MM/yyyy" />
+				</h:panelGrid>
+				
+				
+			</p:panelGrid>
+
+			<p:panelGrid id="observacionesResolucionLicencia" columns="1"
+				layout="grid" styleClass="w100">
+				<observaciones:tablaObservacionesEmisionLicencia
+					idComponent="observacionesResolucionLicencia"
+					componenteActualizarEliminar="observacionesResolucionLicencia"
+					seccion="ResolucionAmbiental" nombreClase="ResolucionAmbiental"
+					idClase="#{emisionLicenciaAmbientalVisualizarController.resolucionAmbiental.id}"
+					aparace="true" mostrarSiVacio="true" soloLectura="false"
+					idActualizar=":form:rbtObservaciones :form:pnlButtons" />
+			</p:panelGrid>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Enviar" title="Enviar" icon="ui-icon-check"
+						process="@this" immediate="true"  disabled="#{!emisionLicenciaAmbientalVisualizarController.habilitaPagoIF}"
+						action="#{emisionLicenciaAmbientalVisualizarController.enviar}">
+						<p:confirm header="Confirmación"
+							message="¿Está seguro que desea finalizar la solicitud?"
+							icon="ui-icon-alert" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

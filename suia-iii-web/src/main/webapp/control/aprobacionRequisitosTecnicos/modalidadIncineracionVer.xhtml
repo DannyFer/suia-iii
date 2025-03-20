@@ -1,0 +1,629 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition
+	template="/control/aprobacionRequisitosTecnicos/templates/verArt.xhtml">
+	<ui:define name="content-art">
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" id="datosGenerales">
+				<f:facet name="header">
+					<h:outputText value="#{labels['label.modalidad.incineracion']}" />
+				</f:facet>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Capacidad anual de proceso" />
+					</f:facet>
+					<p:dataTable id="tblIncineracionDesecho"
+						value="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracion.modalidadIncineracionDesechos}"
+						var="desechoIncineracion" paginator="true" rows="10"
+						styleClass="paginated"
+						emptyMessage="#{labels['common.table.empty']}">
+						<p:column styleClass="tblUno">
+							<f:facet name="header">
+								<h:outputText value="Nombre Desecho" />
+							</f:facet>
+							<h:outputText value="#{desechoIncineracion.desecho.descripcion}" />
+						</p:column>
+						<p:column styleClass="tblUno">
+							<f:facet name="header">
+								<h:outputText value="Codigo" />
+							</f:facet>
+							<h:outputText value="#{desechoIncineracion.desecho.clave}" />
+						</p:column>
+						<p:column styleClass="tblUno">
+							<f:facet name="header">
+								<h:outputText value="Capacidad anual proceso (T)" />
+							</f:facet>
+							<h:outputText value="#{desechoIncineracion.capacidadAnual}">
+								<f:convertNumber minFractionDigits="2" />
+							</h:outputText>
+						</p:column>
+
+						<p:column>
+							<div class="buttons-inline centrar">
+								<p:commandButton icon="ui-icon-search"
+									action="#{modalidadIncineracionController.seleccionarIncineracionDesecho(desechoIncineracion)}"
+									title="Ver" styleClass="button-small primary" immediate="true"
+									oncomplete="PF('dlgIncineracionDesecho').show();"
+									update=":#{p:component('pnlIncineracionDesecho')}" />
+							</div>
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+				<p:panelGrid styleClass="w100 separatorBottom" columns="1"
+					columnClasses="w50, field_mrg w50" layout="grid">
+					<f:facet name="header">
+						<h:outputText value="#{labels['label.manejo.desechos']}" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data mw100" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText
+							value="Plano de la Planta o del área donde se realiza la incineración" />
+						<p:commandButton icon="ui-icon-search"
+							styleClass="button-small primary toLeft" title="Ver"
+							action="#{modalidadIncineracionController.descargar(0)}"
+							ajax="false"
+							rendered="#{!(modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracion.documentoPlano.id==null)}" />
+					</h:panelGrid>
+				</p:panelGrid>
+				<p:panelGrid columns="1" columnClasses="w40, field_mrg w60"
+					layout="grid">
+					<f:facet name="header">
+						<h:outputText value="#{labels['label.recoleccion.desechos']}" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="Tipo de transporte(s) utilizado(s)" />
+						<h:panelGrid columns="1" id="tipoTransporte">
+							<h:outputText value="Propio"
+								rendered="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracion.transportePropio}" />
+							<h:outputText value="Contratado"
+								rendered="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracion.transporteContratado}" />
+						</h:panelGrid>
+					</h:panelGrid>
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+						columnClasses="header, null" rowClasses="null, alt"
+						rendered="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracion.transporteContratado}">
+						<h:outputText value="#{labels['label.empresa.autorizada']}" />
+						<h:outputText id="nombreEmpresa"
+							value="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracion.nombreEmpresaAutorizada}" />
+					</h:panelGrid>
+				</p:panelGrid>
+				<p:panelGrid columns="1" layout="grid">
+					<f:facet name="header">
+						<h:outputText value="#{labels['label.incineracion.desechos']}" />
+					</f:facet>
+
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText
+							value="Tipo de combustible utilizado para la incineración de desechos y alimentación durante la operación a realizar, así como el sistema de monitoreo de gases, incluyendo su operación, control y puntos de muestreo" />
+						<p:commandButton icon="ui-icon-search"
+							styleClass="button-small primary toLeft" title="Ver"
+							action="#{modalidadIncineracionController.descargar(1)}"
+							ajax="false"
+							rendered="#{!(modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracion.documentoCombustible.id==null)}" />
+					</h:panelGrid>
+
+					<p:panelGrid styleClass="w100 separatorBottom">
+						<h:panelGroup>
+							<p:panelGrid>
+								<p:row>
+									<p:column styleClass="w50">
+										<p:outputLabel
+											value="Descripción de los siguientes requisitos:"
+											styleClass="bold" />
+									</p:column>
+									<p:column styleClass="w50">
+										<h:panelGrid styleClass="w100 separatorBottom" columns="1"
+											columnClasses="w100, field_mrg">
+											<h:panelGrid styleClass="w50 toLeft" columns="3">
+												<p:commandButton icon="ui-icon-search"
+													styleClass="button-small primary toLeft" title="Ver"
+													action="#{modalidadIncineracionController.descargar(4)}"
+													ajax="false"
+													rendered="#{!(modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracion.documentoRequisitos.id==null)}" />
+
+											</h:panelGrid>
+										</h:panelGrid>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column colspan="2">
+										<h:outputText
+											value="#{labels['label.incineracion.requisitos']}"
+											escape="false" styleClass="alJustify" />
+									</p:column>
+								</p:row>
+							</p:panelGrid>
+						</h:panelGroup>
+
+						<h:panelGrid styleClass="panel_data mw50" columns="2"
+							columnClasses="header, null" rowClasses="null, alt"
+							rendered="#{not empty modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracion.justificacionTecnica}">
+							<h:outputText
+								value="Justificación técnica correspondiente en el caso de no anexar alguno de los requisitos" />
+							<h:outputText
+								value="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracion.justificacionTecnica}" />
+						</h:panelGrid>
+					</p:panelGrid>
+
+				</p:panelGrid>
+				<p:panelGrid columns="1" layout="grid" id="panelDesechosBiologicos"
+					styleClass="w100 separatorBottom">
+					<f:facet name="header">
+						<h:outputText
+							value="#{labels['label.tratamiento.desechos.biologicos']}" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data mw100" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText
+							value="¿Tratar desechos biológico infecciosos (Sanitarios)?" />
+						<h:outputText value="Si"
+							rendered="#{modalidadIncineracionController.modalidadIncineracionBean.trataDesechosBiologicos}" />
+						<h:outputText value="No"
+							rendered="#{!modalidadIncineracionController.modalidadIncineracionBean.trataDesechosBiologicos}" />
+					</h:panelGrid>
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+						columnClasses="header, null" rowClasses="null, alt"
+						rendered="#{modalidadIncineracionController.modalidadIncineracionBean.habilitarTrataDesechosBiologicos}">
+						<h:outputText
+							value="Proceso de  incineración que dará a los desechos peligrosos indicando el tipo de tecnología que se empleará y las condiciones de diseño para la operación" />
+						<p:commandButton icon="ui-icon-search"
+							styleClass="button-small primary toLeft" title="Ver"
+							action="#{modalidadIncineracionController.descargar(5)}"
+							ajax="false"
+							rendered="#{!(modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracion.documentoDesechosBiologicosIncineracion.id==null)}" />
+						<h:outputText
+							value="Protocolo de pruebas especifico para la incineración" />
+						<p:commandButton icon="ui-icon-search"
+							styleClass="button-small primary toLeft" title="Ver"
+							action="#{modalidadIncineracionController.descargar(6)}"
+							ajax="false"
+							rendered="#{!(modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracion.documentoDesechosBiologicosProtocoloIncineracion.id==null)}" />
+					</h:panelGrid>
+				</p:panelGrid>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					columnClasses="w50, field_mrg w50">
+					<f:facet name="header">
+						<h:outputText value="Protocolo de Pruebas" />
+					</f:facet>
+					<p:panelGrid columns="1" layout="grid"
+						styleClass="w100 separatorBottom" columnClasses="w50, field_mrg">
+						<f:facet name="header">
+							<h:outputText
+								value="#{labels['label.protocolo.pruebas.descripcion']}" />
+						</f:facet>
+						<h:panelGroup>
+							<h:panelGrid styleClass="panel_data w100" columns="2"
+								columnClasses="header, null" rowClasses="null, alt">
+								<h:outputText
+									value="Descripción y desarrollo de la forma que se llevara a cabo el protocolo de pruebas indicando las características técnicas bajo las que se desarrollen" />
+								<p:commandButton icon="ui-icon-search"
+									styleClass="button-small primary toLeft" title="Ver"
+									action="#{modalidadIncineracionController.descargar(2)}"
+									ajax="false"
+									rendered="#{!(modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracion.documentoCombustible.id==null)}" />
+							</h:panelGrid>
+						</h:panelGroup>
+						<p:panelGrid columns="1" layout="grid" styleClass="w100"
+							style="float:left;">
+							<f:facet name="header">
+								<h:outputText value="Capacidad de los desechos a incinerar" />
+							</f:facet>
+							<p:panel style="overflow: auto">
+								<p:dataTable id="tblDesechoProcesar" style="width:900px;"
+									value="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracion.modalidadIncineracionDesechoProcesados}"
+									var="desechoProcesar" paginator="true" rows="10"
+									styleClass="paginated"
+									emptyMessage="#{labels['common.table.empty']}">
+									<f:facet name="header">
+										<h:outputText
+											value="Caracteristicas de los desechos a incinerar" />
+									</f:facet>
+									<p:column styleClass="tblUno">
+										<f:facet name="header">
+											<h:outputText value="Nombre Desecho" />
+										</f:facet>
+										<h:outputText value="#{desechoProcesar.desecho.descripcion}" />
+									</p:column>
+									<p:column styleClass="tblUno">
+										<f:facet name="header">
+											<h:outputText value="Codigo" />
+										</f:facet>
+										<h:outputText value="#{desechoProcesar.desecho.clave}" />
+									</p:column>
+									<p:column styleClass="tblUno" headerText="Composicón química">
+										<p:commandButton icon="ui-icon-search"
+											update=":#{p:component('datosComposicionQuimica')}"
+											process="@this"
+											action="#{modalidadIncineracionController.seleccionarDesechoProcesar(desechoProcesar)}"
+											oncomplete="PF('composicionQuimicaWdgt').show();"
+											styleClass="button-small primary" />
+									</p:column>
+									<p:column styleClass="tblUno">
+										<f:facet name="header">
+											<h:outputText
+												value="Cantidad máxima desechos requeridos para el protocolo de pruebas" />
+										</f:facet>
+										<h:outputText
+											value="#{desechoProcesar.cantidadMaximaDesechosRequerido}">
+											<f:convertNumber maxFractionDigits="4" />
+										</h:outputText>
+									</p:column>
+									<p:column styleClass="tblUno">
+										<f:facet name="header">
+											<h:outputText value="Punto de Inflamabilidad (°C)" />
+										</f:facet>
+										<h:outputText value="#{desechoProcesar.puntoInflamabilidad}">
+											<f:convertNumber minFractionDigits="4" />
+										</h:outputText>
+									</p:column>
+									<p:column styleClass="tblUno">
+										<f:facet name="header">
+											<h:outputText value="Punto de Ebullición (°C)" />
+										</f:facet>
+										<h:outputText value="#{desechoProcesar.puntoEbullicion}">
+											<f:convertNumber minFractionDigits="2" />
+										</h:outputText>
+									</p:column>
+									<p:column styleClass="tblUno">
+										<f:facet name="header">
+											<h:outputText value="Porcentaje Humedad" />
+										</f:facet>
+										<h:outputText value="#{desechoProcesar.porcentajeHumedad}">
+											<f:convertNumber minFractionDigits="4" />
+										</h:outputText>
+									</p:column>
+									<p:column styleClass="tblUno">
+										<f:facet name="header">
+											<h:outputText value="Porcentaje de Cloro" />
+										</f:facet>
+										<h:outputText value="#{desechoProcesar.porcentajeCloro}">
+											<f:convertNumber minFractionDigits="4" />
+										</h:outputText>
+									</p:column>
+									<p:column styleClass="tblUno">
+										<f:facet name="header">
+											<h:outputText value="Metales Pesados (mg/kg)" />
+										</f:facet>
+										<h:outputText value="#{desechoProcesar.metalPesado}">
+											<f:convertNumber minFractionDigits="4" />
+										</h:outputText>
+									</p:column>
+									<p:column>
+										<div class="buttons-inline centrar">
+											<p:commandButton icon="ui-icon-search"
+												action="#{modalidadIncineracionController.seleccionarDesechoProcesar(desechoProcesar)}"
+												title="Editar" styleClass="button-small primary"
+												oncomplete="PF('dlgProcesarDesecho').show();"
+												immediate="true"
+												update=":#{p:component('pnlProcesarDesecho')}" />
+										</div>
+									</p:column>
+
+								</p:dataTable>
+							</p:panel>
+						</p:panelGrid>
+
+						<h:outputText value="En caso de formulación:" styleClass="bold" />
+
+
+						<p:panelGrid columns="1" layout="grid" styleClass="w100">
+							<f:facet name="header">
+								<h:outputText
+									value="Características de formulación (en caso que aplique)" />
+							</f:facet>
+							<p:dataTable id="tblformulacion"
+								value="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracion.modalidadIncineracionFormulaciones}"
+								var="formulacion" paginator="true" rows="10"
+								styleClass="paginated"
+								emptyMessage="#{labels['common.table.empty']}">
+
+								<p:column styleClass="tblUno">
+									<f:facet name="header">
+										<h:outputText value="Nro Formulación" />
+									</f:facet>
+									<h:outputText value="#{formulacion.indice + 1}" />
+								</p:column>
+								<p:column styleClass="tblUno"
+									headerText="Tipo de Desecho que compone la formulación">
+									<p:commandButton icon="ui-icon-search"
+										update=":#{p:component('datosTipoFormulacion')}"
+										process="@this"
+										action="#{modalidadIncineracionController.seleccionarFormulario(formulacion)}"
+										oncomplete="PF('tipoDesechoFormulacionWdgt').show();"
+										styleClass="button-small primary" />
+								</p:column>
+								<p:column styleClass="tblUno">
+									<f:facet name="header">
+										<h:outputText value="Porcentaje de humedad" />
+									</f:facet>
+									<h:outputText
+										value="#{formulacion.porcentajeHumedadFormulacion}">
+										<f:convertNumber minFractionDigits="4" />
+									</h:outputText>
+								</p:column>
+								<p:column styleClass="tblUno">
+									<f:facet name="header">
+										<h:outputText value="Porcentaje de Cloro" />
+									</f:facet>
+									<h:outputText value="#{formulacion.porcentajeCloroFormulacion}">
+										<f:convertNumber minFractionDigits="4" />
+									</h:outputText>
+								</p:column>
+								<p:column styleClass="tblUno">
+									<f:facet name="header">
+										<h:outputText value="Poder Calorífico (kJ/kg)" />
+									</f:facet>
+									<h:outputText value="#{formulacion.poderCalorifico}">
+										<f:convertNumber minFractionDigits="4" />
+									</h:outputText>
+								</p:column>
+								<p:column>
+									<div class="buttons-inline centrar">
+										<p:commandButton icon="ui-icon-search"
+											action="#{modalidadIncineracionController.seleccionarFormulario(formulacion)}"
+											title="Ver" styleClass="button-small primary"
+											oncomplete="PF('dlgFormulacion').show();" immediate="true"
+											update=":#{p:component('pnlFormulacion')}" />
+									</div>
+								</p:column>
+							</p:dataTable>
+							<h:panelGroup>
+								<h:panelGrid styleClass="panel_data mw50" columns="2"
+									columnClasses="header, null" rowClasses="null, alt"
+									rendered="#{!(modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracion.documentoProcedimiento.id==null)}">
+									<h:outputText value="Procedimiento" />
+									<p:commandButton icon="ui-icon-search"
+										styleClass="button-small primary toLeft" title="Ver"
+										action="#{modalidadIncineracionController.descargar(3)}"
+										ajax="false"
+										rendered="#{!(modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracion.documentoProcedimiento.id==null)}" />
+								</h:panelGrid>
+							</h:panelGroup>
+							<h:panelGroup>
+							</h:panelGroup>
+						</p:panelGrid>
+					</p:panelGrid>
+					<p:panelGrid columns="1" layout="grid">
+						<f:facet name="header">
+							<h:outputText
+								value="#{labels['label.protocolo.pruebas.desarrollo']}" />
+						</f:facet>
+						<h:panelGroup>
+							<p:panelGrid>
+								<p:row>
+									<p:column styleClass="w50">
+										<p:outputLabel
+											value="Descripción de los siguientes requisitos de pruebas:"
+											styleClass="bold" />
+									</p:column>
+									<p:column styleClass="w50">
+										<h:panelGrid styleClass="w100 separatorBottom" columns="1"
+											columnClasses="w100, field_mrg">
+											<h:panelGrid styleClass="w50 toLeft" columns="3">
+												<p:commandButton icon="ui-icon-search"
+													styleClass="button-small primary toLeft" title="Ver"
+													action="#{modalidadIncineracionController.descargar(7)}"
+													ajax="false"
+													rendered="#{!(modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracion.documentoPruebas.id==null)}" />
+
+											</h:panelGrid>
+										</h:panelGrid>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column colspan="2">
+										<h:outputText
+											value="#{labels['label.incineracion.pruebas.requisitos']}"
+											escape="false" styleClass="alJustify" />
+									</p:column>
+								</p:row>
+							</p:panelGrid>
+						</h:panelGroup>
+					</p:panelGrid>
+				</p:panelGrid>
+
+
+
+
+			</p:panelGrid>
+			<p:separator />
+			<t:div styleClass="buttons main">
+				<p:commandButton value="#{labels['label.atras']}" immediate="true"
+					process="@this"
+					action="#{aprobacionRequisitosTecnicosController.recuperarPageAtras(4,true)}"
+					icon="ui-icon-arrowthick-1-w" />
+				<p:commandButton value="#{labels['label.siguiente']}"
+					immediate="true" process="@this"
+					rendered="#{aprobacionRequisitosTecnicosController.isVisibleOpcionNavegarSiguienteEnMenuModoVer(4,true,true)}"
+					action="#{aprobacionRequisitosTecnicosController.recuperarPageSiguiente(4,true,true)}"
+					icon="ui-icon-arrowthick-1-e" />
+			</t:div>
+		</h:form>
+		<p:dialog header="Capacidad anual del proceso"
+			widgetVar="dlgIncineracionDesecho" modal="true" resizable="false"
+			draggable="false" dynamic="true">
+			<h:form>
+				<p:panel id="pnlIncineracionDesecho">
+					<h:panelGrid styleClass="panel_data mw100" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="Nombre del Desecho" />
+						<h:outputText id="nombre"
+							value="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracionDesecho.desecho.descripcion}">
+						</h:outputText>
+						<h:outputText value="Clave del Desecho" />
+						<h:outputText id="clave"
+							value="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracionDesecho.desecho.clave}">
+						</h:outputText>
+						<h:outputText value="Capacidad anual de incineración (T)" />
+						<h:outputText id="capacidad"
+							value="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracionDesecho.capacidadAnual}">
+							<f:convertNumber minFractionDigits="2" />
+						</h:outputText>
+					</h:panelGrid>
+					<p:separator />
+					<div class="buttons">
+						<p:commandButton value="Cerrar" immediate="true"
+							action="#{modalidadIncineracionController.cerrarModal()}"
+							oncomplete="PF('dlgIncineracionDesecho').hide();"
+							styleClass="primary" />
+					</div>
+				</p:panel>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="Características de los desechos a incinerar"
+			widgetVar="dlgProcesarDesecho" modal="true" resizable="false"
+			draggable="false" width="750" height="500">
+			<h:form>
+				<p:panel id="pnlProcesarDesecho">
+					<p:panelGrid columns="2" styleClass="w100"
+						columnClasses="w30 field_mrg" layout="grid">
+						<p:outputLabel value="Nombre desecho" for="nombreDesecho" />
+						<p:inputTextarea id="nombreDesecho" readonly="true" rows="3"
+							cols="33"
+							value="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracionDesechoProcesar.desecho.descripcion}" />
+						<p:outputLabel value="Código" for="codigo" />
+						<p:inputText id="codigo" readonly="true"
+							value="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracionDesechoProcesar.desecho.clave}" />
+					</p:panelGrid>
+					<p:panelGrid columns="1" styleClass="w100"
+						columnClasses="w50 field_mrg" layout="grid">
+						<h:outputText value="Composición Química" />
+						<control:imputConTextoEnriquecido id="itComposicionQuimica"
+							soloLectura="true"
+							valor="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracionDesechoProcesar.composicionQuimica}" />
+					</p:panelGrid>
+					<h:panelGrid styleClass="panel_data mw100" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+
+						<h:outputText
+							value="Cantidad máxima de desechos requeridos para la realización del protocolo de pruebas (T):" />
+						<h:outputText id="cantidadMaximaDesechosRequerido"
+							value="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracionDesechoProcesar.cantidadMaximaDesechosRequerido}">
+						</h:outputText>
+						<h:outputText value="Punto de Inflamabilidad (°C)" />
+						<h:outputText id="puntoInflamabilidad"
+							value="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracionDesechoProcesar.puntoInflamabilidad}">
+						</h:outputText>
+
+						<h:outputText value="Punto de Ebullición (°C)" />
+						<h:outputText id="puntoEbullicion"
+							value="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracionDesechoProcesar.puntoEbullicion}">
+						</h:outputText>
+
+						<h:outputText value="Porcentaje de Humedad" />
+						<h:outputText id="porcentajeHumedad"
+							value="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracionDesechoProcesar.porcentajeHumedad}">
+						</h:outputText>
+
+						<h:outputText value="Porcentaje de Cloro" />
+						<h:outputText id="porcentajeCloro"
+							value="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracionDesechoProcesar.porcentajeCloro}" />
+						<h:outputText value="Metales Pesados (mg/kg)" />
+						<h:outputText id="itMetalesPesados"
+							value="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracionDesechoProcesar.metalPesado}">
+						</h:outputText>
+					</h:panelGrid>
+					<p:separator />
+					<div class="buttons">
+						<p:commandButton value="Cerrar" immediate="true"
+							action="#{modalidadIncineracionController.cerrarModal()}"
+							oncomplete="PF('dlgProcesarDesecho').hide();"
+							styleClass="primary" />
+					</div>
+				</p:panel>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="Características Formulación"
+			widgetVar="dlgFormulacion" modal="true" resizable="false"
+			draggable="false" width="750">
+			<h:form>
+				<p:panel id="pnlFormulacion">
+					<h:panelGrid styleClass="panel_data mw100" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="Tipo de Desecho que compone la formulación" />
+						<control:imputConTextoEnriquecido id="itTipoDesechoFormulacion"
+							soloLectura="true"
+							valor="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracionFormulacion.tipoDesechoFormulacion}" />
+					</h:panelGrid>
+					<h:panelGrid styleClass="panel_data mw100" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="Porcentaje de Humedad" />
+
+						<h:outputText id="porcentajeHumedadFormulacion"
+							value="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracionFormulacion.porcentajeHumedadFormulacion}">
+
+						</h:outputText>
+
+						<h:outputText value="Porcentaje de Cloro" />
+
+						<h:outputText id="porcentajeCloroFormulacion"
+							value="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracionFormulacion.porcentajeCloroFormulacion}">
+						</h:outputText>
+
+
+						<h:outputText value="Poder Calorífico (kJ/kg)" />
+						<h:outputText id="itPoderCalorifico"
+							value="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracionFormulacion.poderCalorifico}">
+						</h:outputText>
+					</h:panelGrid>
+					<p:separator />
+					<div class="buttons">
+
+						<p:commandButton value="Cerrar" immediate="true"
+							action="#{modalidadIncineracionController.cerrarModal()}"
+							oncomplete="PF('dlgFormulacion').hide();" styleClass="primary" />
+					</div>
+				</p:panel>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="Composición química" id="composicionQuimica"
+			widgetVar="composicionQuimicaWdgt" modal="true" resizable="false"
+			width="500">
+			<h:form>
+				<p:panelGrid id="datosComposicionQuimica" columns="1"
+					styleClass="w100" columnClasses="w50 field_mrg" layout="grid">
+
+					<control:imputConTextoEnriquecido id="itComposicionQuimica"
+						soloLectura="true"
+						requiredMessage="El campo 'Composición Química' es requerido."
+						valor="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracionDesechoProcesar.composicionQuimica}" />
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton value="Cerrar"
+						onclick="PF('composicionQuimicaWdgt').hide()" />
+				</div>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="Tipo de Desecho que compone la formulación"
+			id="tipoDesechoFormulacion" widgetVar="tipoDesechoFormulacionWdgt"
+			modal="true" resizable="false" width="500">
+			<h:form>
+				<p:panelGrid id="datosTipoFormulacion" columns="1" styleClass="w100"
+					columnClasses="w50 field_mrg" layout="grid">
+
+					<control:imputConTextoEnriquecido id="itComposicionQuimica"
+						soloLectura="true"
+						requiredMessage="El campo 'Composición Química' es requerido."
+						valor="#{modalidadIncineracionController.modalidadIncineracionBean.modalidadIncineracionDesechoProcesar.composicionQuimica}" />
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton value="Cerrar"
+						onclick="PF('tipoDesechoFormulacionWdgt').hide()" />
+				</div>
+			</h:form>
+		</p:dialog>
+	</ui:define>
+</ui:composition>
+</html>

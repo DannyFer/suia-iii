@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" style="border: none !important; ">
+				<f:facet name="header">
+					<h:outputText value="Ficha Técnica" />
+				</f:facet>
+					<p:outputPanel id="pnlIngresoFase" >
+						<h:panelGrid columns="2" styleClass="mw25 panel_data" columnClasses="header w25, null" rowClasses="null, alt">
+							<h:outputText value="Nombre del Proyecto:" />
+							<h:outputText value="#{estudioImpactoAmbientalController.proyectoLicenciaCoa.nombreProyecto}" />
+							<h:outputText value="Código del Proyecto:" />
+							<h:outputText value="#{estudioImpactoAmbientalController.proyectoLicenciaCoa.codigoUnicoAmbiental}" />
+							<h:outputText value="Superficie del Proyecto:" />
+							<h:outputText value="#{estudioImpactoAmbientalController.proyectoLicenciaCoa.superficie}" />
+							<h:outputText value="Sector del Proyecto:" />
+							<h:outputText value="#{estudioImpactoAmbientalController.sector.nombre}" />
+							
+							<h:outputText value="Código Minero:" rendered="#{estudioImpactoAmbientalController.sector.id eq 2}"/>
+							<p:outputPanel rendered="#{estudioImpactoAmbientalController.sector.id eq 2}">
+								<p:dataTable id="dtConcesiones" var="datos" value="#{estudioImpactoAmbientalController.listaActividadConcesiones}" emptyMessage="#{labels['common.table.empty']}" >
+								<f:facet name="header">
+								<h:outputText value="Concesiones Mineras" />
+								</f:facet>
+									<p:column headerText="Código" width="25%">
+										<h:outputText value="#{datos.codigo}" />
+									</p:column>
+									<p:column headerText="Nombre" width="75%">
+										<h:outputText value="#{datos.nombre}" />
+									</p:column>
+								</p:dataTable>
+							</p:outputPanel>
+							
+							<h:outputText value="Bloques:" rendered="#{estudioImpactoAmbientalController.sector.id eq 1}"/>
+							<p:outputPanel rendered="#{estudioImpactoAmbientalController.sector.id eq 1}">
+								<p:dataTable id="dtBloques" var="datos" value="#{estudioImpactoAmbientalController.listaActividadBloques}"
+								emptyMessage="#{labels['common.table.empty']}" >
+									<p:column headerText="Nombre">
+										<h:outputText value="#{datos.bloque.nombre}" />
+									</p:column>
+								</p:dataTable>
+							</p:outputPanel>
+							
+							<h:outputText value="Fases del Proyecto:" rendered="#{estudioImpactoAmbientalController.mostrarFases }" />
+							<p:selectManyCheckbox id="fasesSector" value="#{estudioImpactoAmbientalController.listaFasesSectorId}" layout="grid" columns="1" disabled="#{!estudioImpactoAmbientalController.habilitadoIngreso}" 
+									 rendered="#{estudioImpactoAmbientalController.mostrarFases }"
+									  >
+								<f:selectItems value="#{estudioImpactoAmbientalController.listaFasesPorSector}" var="item" 
+									itemLabel="#{item.nombre}" itemValue="#{item.id}" />
+								<p:ajax event="change" update="fasesSector" process="@this" bypassUpdates="true"/>
+							</p:selectManyCheckbox>
+						</h:panelGrid>
+					</p:outputPanel>
+				</p:panelGrid>
+				<p:panelGrid id="pngAdjuntos" columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Adjuntar archivo de Alcance, ciclo de vida y descripción detalla da del proyecto " />
+					</f:facet>
+						<p:dataTable id="dtArchivosAdjuntos" var="adjunto" value="#{estudioImpactoAmbientalController.listaDocumentosAdjuntos}" emptyMessage="#{labels['common.table.empty']}">
+							<f:facet name="header">
+								<p:commandButton icon="ui-icon-plus" 
+									actionListener="#{estudioImpactoAmbientalController.getEtiqueta('')}" update=":formDialogAdjunto:adjuntosDiagGrid"
+									value="#{msg['button.agregar']}" process="dtArchivosAdjuntos" rendered="#{estudioImpactoAmbientalController.habilitadoIngreso}"
+									style="float:right"
+									oncomplete="PF('adjuntoDiag').show()" />
+							</f:facet>
+							<p:column headerText="Nombre del adjunto" width="85%">
+								<h:outputText value="#{adjunto.nombre}" />
+							</p:column>
+							<p:column headerText="Acción">
+								<p:commandButton id="downloadAutorizacion"
+										icon="ui-icon-arrowthick-1-s"
+										styleClass="secondary" title="Ver" ajax="false"
+										immediate="true"
+										rendered="#{adjunto.nombre ne null}">
+										<p:fileDownload value="#{descargarDocumentosCoaController.descargarDocumentoEIA(adjunto)}" />
+								</p:commandButton>
+								<ui:remove><p:commandButton icon="ui-icon-pencil" title="#{msg['button.editar']}" styleClass="secondary"  process="dtArchivosAdjuntos" 
+										update=":form:pngAdjuntos" rendered="#{estudioImpactoAmbientalController.habilitadoIngreso}"
+										actionListener="#{estudioImpactoAmbientalController.eliminarAdjunto(adjunto)}" 
+										oncomplete="PF('adjuntoDiag').show()"
+										>
+											<p:confirm header="Confirmación" message="¿Está seguro que desea Reemplazar el documento?" icon="ui-icon-alert" />
+								</p:commandButton>
+								</ui:remove>
+								<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process="dtArchivosAdjuntos" 
+										update=":form:pngAdjuntos" rendered="#{estudioImpactoAmbientalController.habilitadoIngreso}"
+										actionListener="#{estudioImpactoAmbientalController.eliminarAdjunto(adjunto)}">
+											<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar el documento?" icon="ui-icon-alert" />
+								</p:commandButton>
+
+							</p:column>
+						</p:dataTable>
+					</p:panelGrid>
+					
+					<p:panelGrid id="pnlCamaronerasMain" columns="1" layout="grid" styleClass="w100" 
+					rendered="#{!estudioImpactoAmbientalController.habilitadoIngreso}">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{estudioImpactoAmbientalController.esActividadCamaronera}">
+					<f:facet name="header">
+						<h:outputText value="Información Acuerdo Concesión Camaronera" />
+					</f:facet>
+					
+					<h:panelGrid columns="4" columnClasses="null w30,null w20,null w30,null w20">
+					<p:outputLabel value="Número del acuerdo de la concesión camaronera" rendered="#{estudioImpactoAmbientalController.zonaCamaronera eq 'ALTA' ? true : false}"/>
+					<p:outputLabel value="Número del acuerdo de la concesión camaronera Tierras Privadas o Zonas Altas:" rendered="#{estudioImpactoAmbientalController.zonaCamaronera eq 'MIXTA' ? true : false}"/>
+					<p:inputText value="#{estudioImpactoAmbientalController.informacionProyectoEia.concesionCamaroneraAlta}" maxlength="25" 
+						rendered="#{estudioImpactoAmbientalController.zonaCamaronera eq 'MIXTA' ? true : estudioImpactoAmbientalController.zonaCamaronera eq 'ALTA' ? true : false}"
+						disabled="true">
+					</p:inputText>
+										
+					<p:outputLabel value="Autorización Administrativa o Título de Concesión camaronera:" 
+						rendered="#{estudioImpactoAmbientalController.zonaCamaronera eq 'ALTA' ? true : false}"/>
+					<p:outputLabel value="Autorización Administrativa o Título de Concesión camaronera Tierras Privadas o Zonas Altas:" 
+						rendered="#{estudioImpactoAmbientalController.zonaCamaronera eq 'MIXTA' ? true : false}"/>
+					  	<p:commandButton id="downloadDocumentoCamAlta"
+									icon="ui-icon-arrowthick-1-s"
+									styleClass="button-small primary" title="Ver" ajax="false"
+									immediate="true"
+									rendered="#{estudioImpactoAmbientalController.zonaCamaronera eq 'MIXTA' ? true : estudioImpactoAmbientalController.zonaCamaronera eq 'ALTA' ? true : false}">
+									<p:fileDownload value="#{estudioImpactoAmbientalController.descargarDocConcesionAlta()}" />
+						</p:commandButton>
+										
+					<p:outputLabel value="Número del acuerdo de la concesión camaronera" rendered="#{estudioImpactoAmbientalController.zonaCamaronera eq 'PLAYA' ? true : false}"/>
+					<p:outputLabel value="Número del acuerdo de la concesión camaronera Zona de Playa y Bahía:" rendered="#{estudioImpactoAmbientalController.zonaCamaronera eq 'MIXTA' ? true : false}"/>
+					<p:inputText value="#{estudioImpactoAmbientalController.informacionProyectoEia.concesionCamaroneraPlaya}" maxlength="25" disabled="true"
+						rendered="#{estudioImpactoAmbientalController.zonaCamaronera eq 'MIXTA' ? true : estudioImpactoAmbientalController.zonaCamaronera eq 'PLAYA' ? true : false}">
+						<p:ajax process="@this"/>
+					</p:inputText>					
+					
+					<p:outputLabel value="Autorización Administrativa o Título de Concesión camaronera:" 
+						rendered="#{estudioImpactoAmbientalController.zonaCamaronera eq 'PLAYA' ? true : false}"/>
+					<p:outputLabel value="Adjuntar la Autorización Administrativa o Título de Concesión camaronera Zona de Playa y Bahía:" 
+					rendered="#{estudioImpactoAmbientalController.zonaCamaronera eq 'MIXTA' ? true : false}"/>
+					<p:commandButton id="downloadDocumentoCamPlaya"
+									icon="ui-icon-arrowthick-1-s"
+									styleClass="button-small primary" title="Ver" ajax="false"
+									immediate="true"
+									rendered="#{estudioImpactoAmbientalController.zonaCamaronera eq 'MIXTA' ? true : estudioImpactoAmbientalController.zonaCamaronera eq 'PLAYA' ? true : false}">
+									<p:fileDownload value="#{estudioImpactoAmbientalController.descargarDocConcesionPlaya()}" />
+					</p:commandButton>
+				</h:panelGrid>
+					
+					</p:panelGrid>
+					
+					</p:panelGrid>
+
+					<p:panelGrid id="observacionesGrid" columns="1" layout="grid" styleClass="w100" rendered="#{estudioImpactoAmbientalController.informacionProyectoEia.id != null}">
+						<observaciones:tablaObservacionesEsIA idComponent="observacionesDescripcion"
+								componenteActualizarEliminar="observacionesDescripcion"
+								seccion="DescripcionProyectoEIA"
+								nombreClase="#{estudioImpactoAmbientalController.nombreClaseObservaciones}"
+								idClase="#{estudioImpactoAmbientalController.idClaseObservaciones}"
+								aparace="#{estudioImpactoAmbientalController.mostrarObservaciones}"
+								mostrarSiVacio="#{estudioImpactoAmbientalController.mostrarObservaciones}"
+								soloLectura="#{!estudioImpactoAmbientalController.editarObservaciones}"/>
+
+
+
+	</p:panelGrid>
+</ui:composition>

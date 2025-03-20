@@ -1,0 +1,104 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+	<ui:define name="content">
+        <f:event type="preRenderView" listener="#{informacionGeneralController.validarTareaBpm()}"/>
+		<ui:include src="contenido/menuMineria.xhtml" />
+		<div class="content">
+			<h:form id="frmDatos">
+				<p:panel header="3. Descripción de la actividad">
+					<p:panelGrid columns="2" layout="grid" styleClass="w100"
+						columnClasses="">
+						<f:facet name="header">
+							<mae:panelGridHeaderHelp value="Descripción actividad" conector="generalHelp"
+								image="#{request.contextPath}/resources/images/help-how.png"
+								help="#{helps['registro.general']}" />
+						</f:facet>
+						<p:outputLabel value="N°. de personas que laboraran" for="numPersonas"/>
+						<p:inputText maxlength="10"
+							value="#{descripcionActividadMineraController.descripcionActividadMineraBean.descripcionActividadMineria.numeroPersonasLaboran}"
+							id="numPersonas" required="true">
+							<pe:keyFilter mask="num" />
+						</p:inputText>
+
+						<p:outputLabel value="Nombre y código de la concesión minera" for="txtNumeroConcesion"/>
+						<p:inputTextarea id="txtNumeroConcesion" required="true"
+							value="#{descripcionActividadMineraController.descripcionActividadMineraBean.descripcionActividadMineria.numeroConcesion}" />
+							
+						<p:outputLabel value="Monto de la inversión" />
+						<control:soloTextoNumerosDecimales
+							valor="#{descripcionActividadMineraController.descripcionActividadMineraBean.descripcionActividadMineria.montoInversion}"
+							identificador="txtMonto" longitud="50" tamanio="30" />
+						
+						<h:outputLabel value="Volumen de producción diario (metros cúbicos)" />
+						<control:soloTextoNumeros
+							valor="#{descripcionActividadMineraController.descripcionActividadMineraBean.descripcionActividadMineria.volumenProduccionDiario}"
+							identificador="txtVolumen" longitud="50" tamanio="30" />
+					</p:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						columnClasses="">
+						<f:facet name="header">
+							<mae:panelGridHeaderHelp
+								value="Descripción detallada de actividades mineras"
+								conector="generalHelp"
+								image="#{request.contextPath}/resources/images/help-how.png"
+								help="#{helps['registro.general']}" />
+						</f:facet>						
+						<p:outputLabel value="Descripción detallada de las actividades mineras" for="txtDescripcionDetallada"/>
+						<p:inputTextarea id="txtDescripcionDetallada" required="true"
+							value="#{descripcionActividadMineraController.descripcionActividadMineraBean.descripcionActividadMineria.descripcionDetalladaActividadMinera}" />
+						
+						<p:outputLabel value="Descripción detallada de las instalaciones, utilizadas para labores mineras" for="txtDescripcionDetalladaIns"/>
+						<p:inputTextarea id="txtDescripcionDetalladaIns" required="true"
+							value="#{descripcionActividadMineraController.descripcionActividadMineraBean.descripcionActividadMineria.descripcionDetalladaInstalaciones}" />
+						
+						<p:outputLabel for="txtDescripcionDetalladaMaq"
+							value="Descripción detallada de la maquinaria, herramientas y equipos utilizados en las labores mineras artesanales:" />
+						<p:inputTextarea id="txtDescripcionDetalladaMaq" required="true"
+							value="#{descripcionActividadMineraController.descripcionActividadMineraBean.descripcionActividadMineria.descripcionDetalladaMaquinaria}" />
+						
+						<p:outputLabel for="txtDescripcionDetalladaEx"
+							value="Disposición con cantidades y volumenes de insumos utilizados:" />
+						<p:inputTextarea id="txtDescripcionDetalladaEx" required="true"
+							value="#{descripcionActividadMineraController.descripcionActividadMineraBean.descripcionActividadMineria.descripcionCantidadesVolumenes}" />
+						
+						<p:outputLabel value="Nombre de la planta beneficio:" for="txtNombre"/>
+						<p:inputTextarea id="txtNombre" required="true"
+							value="#{descripcionActividadMineraController.descripcionActividadMineraBean.descripcionActividadMineria.nombrePlantaBeneficio}" />
+						
+						<p:outputLabel value="¿Tiene licencia ambiental?" for="rbtNombre"/>
+						<p:selectOneRadio value="#{descripcionActividadMineraController.tieneLicenciaAmbiental}" id="rbtNombre">
+							<f:selectItem itemLabel="Si" itemValue="Si"/>
+							<f:selectItem itemLabel="No" itemValue="No"/>
+						<p:ajax event="change"
+								listener="#{descripcionActividadMineraController.cambiarEtiqueta()}"
+								update=":#{p:component('etiqueta')},:#{p:component('txtNumeroObservacion')}" />								
+						</p:selectOneRadio>						
+						<p:outputLabel
+							value="#{descripcionActividadMineraController.descripcionActividadMineraBean.etiqueta}" id="etiqueta" for="txtNumeroObservacion"/>
+						<p:inputTextarea id="txtNumeroObservacion" required="true"
+							value="#{descripcionActividadMineraController.descripcionActividadMineraBean.descripcionActividadMineria.numeroObservacionLicenciaAmbiental}" />
+					</p:panelGrid>
+
+					<br />
+					<div class="buttons main">
+						<p:commandButton value="Guardar" icon="ui-icon-check"
+							action="#{descripcionActividadMineraController.guardar()}"
+							update=":#{p:component('frmDatos')}" />
+						<p:commandButton value="Cancelar" styleClass="secondary"
+							icon="ui-icon-cancel" immediate="true"
+							action="#{descripcionActividadMineraController.cancelar()}" />
+					</div>
+				</p:panel>
+			</h:form>
+		</div>
+	</ui:define>
+</ui:composition>

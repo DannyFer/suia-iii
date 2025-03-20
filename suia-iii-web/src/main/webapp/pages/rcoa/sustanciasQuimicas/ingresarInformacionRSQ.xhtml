@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+	<ui:define name="content">
+<script type="text/javascript">
+$(document).ready(function() {
+	$('.wizard-custom-btn-back').hide();
+	$('.wizard-custom-btn-only-end').hide();
+});
+</script>
+<style type="text/css">
+.ui-fileupload-content {
+	border: none !important;
+	padding: 0px;
+}
+</style>
+<link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/plugin/wizard.css" />
+		<h:form prependId="false" onkeypress="if (event.keyCode == 13) {return false; }"
+			rendered="#{registrarSustanciasQuimicasController.msgCorrecciones}">
+			
+			<p:panelGrid columns="1" layout="grid" styleClass="w100 alCenter">
+				<f:facet name="header">
+					<h:outputText value="Realizar correcciones sobre la solicitud de registro"/>		
+				</f:facet>	
+				
+				<strong>
+				<h:outputText value="Estimado usuario, debe realizar correcciones sobre los datos de su solicitud"/>
+				</strong>
+		
+				<p:panel>
+				<h1>#{registrarSustanciasQuimicasController.registroSustanciaQuimica.codigo}</h1>		
+				</p:panel>
+				
+				<h:outputText style="color:red" 
+					value="IMPORTANTE: Usted puede encontrar, en la parte inferior de cada sección, los
+						señalamientos realizados. En caso que necesite ingresar alguna justificación, lo
+						puede realizar en el último paso, en la sección “Respuestas aclaratorias
+						adicionales”, en la siguiente línea “Modifique solamente las secciones que
+						contengan observaciones" />
+				
+				<h:outputText value="Modifique solamente la secciones que tengan observaciones" style="color:red"/>
+	
+				
+				
+				<p:commandButton value="Iniciar Correcciones" icon="ui-icon-check" styleClass="primary large"
+					action="#{registrarSustanciasQuimicasController.iniciarCorrecciones()}"
+					update="@all" immediate="true" ajax="false"/>
+			</p:panelGrid>
+		</h:form>
+		<h:form id="form" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }"
+		rendered="#{!registrarSustanciasQuimicasController.msgCorrecciones}">					
+			<p:wizard widgetVar="wizard" flowListener="#{wizardBean.onFlowProcess}" showNavBar="false"
+				nextLabel="Siguiente" backLabel="Atrás" id="wizard" showStepStatus="true">
+				<p:tab id="pasoDatosActividad" title="Información General">
+					<ui:include src="registro/datosActividad.xhtml" />
+					<h:panelGroup rendered="false">
+						<observaciones:tablaObservacionesRSQ idComponent="pasoDatosActividad"
+							componenteActualizarEliminar="@none"
+							seccion="RSQ Datos Actividades"
+							nombreClase="RegistroSustanciaQuimica"
+							idClase="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.id}"							
+							aparace="#{registrarSustanciasQuimicasController.verObservaciones}"
+							mostrarSiVacio="true"
+							soloLectura="#{!registrarSustanciasQuimicasController.editarObservaciones}" />
+					</h:panelGroup>  
+				</p:tab>
+				<p:tab id="pasoActividadRealizar" title="Actividades a realizar">
+					<ui:include src="registro/actividadRealizar.xhtml" />
+					<h:panelGroup>
+						<observaciones:tablaObservacionesRSQ idComponent="pasoActividadRealizar"
+							componenteActualizarEliminar="@none"
+							seccion="RSQ Actividades Realizar"
+							nombreClase="RegistroSustanciaQuimica"
+							idClase="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.id}"							
+							aparace="#{registrarSustanciasQuimicasController.verObservaciones}"
+							mostrarSiVacio="true"
+							soloLectura="#{!registrarSustanciasQuimicasController.editarObservaciones}" />
+					</h:panelGroup> 
+				</p:tab>
+				<p:tab id="pasoUbicacion" title="Ubicación" rendered="#{!registrarSustanciasQuimicasController.actividadExpImp()}">
+					<ui:include src="registro/ubicacion.xhtml" />
+					<h:panelGroup>
+						<observaciones:tablaObservacionesRSQ idComponent="pasoUbicacion"
+							componenteActualizarEliminar="@none"
+							seccion="RSQ Ubicación"
+							nombreClase="RegistroSustanciaQuimica"
+							idClase="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.id}"							
+							aparace="#{registrarSustanciasQuimicasController.verObservaciones}"
+							mostrarSiVacio="true"
+							soloLectura="#{!registrarSustanciasQuimicasController.editarObservaciones}" />
+					</h:panelGroup> 
+				</p:tab>
+				<p:tab id="pasoResponsables" title="Representantes">
+					<ui:include src="registro/responsables.xhtml" />
+					<h:panelGroup>
+						<observaciones:tablaObservacionesRSQ idComponent="pasoResponsables"
+							componenteActualizarEliminar="@none"
+							seccion="RSQ Responsables"
+							nombreClase="RegistroSustanciaQuimica"
+							idClase="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.id}"							
+							aparace="#{registrarSustanciasQuimicasController.verObservaciones}"
+							mostrarSiVacio="true"
+							soloLectura="#{!registrarSustanciasQuimicasController.editarObservaciones}" />
+					</h:panelGroup> 
+				</p:tab>
+				<p:tab id="pasoCupo" title="Cupo">
+					<ui:include src="registro/cupo.xhtml" />
+					<h:panelGroup>
+						<observaciones:tablaObservacionesRSQ idComponent="pasoCupo"
+							componenteActualizarEliminar="@none"
+							seccion="RSQ Cupo"
+							nombreClase="RegistroSustanciaQuimica"
+							idClase="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.id}"							
+							aparace="#{registrarSustanciasQuimicasController.verObservaciones}"
+							mostrarSiVacio="true"
+							soloLectura="#{!registrarSustanciasQuimicasController.editarObservaciones}" />
+					</h:panelGroup>
+				</p:tab>
+				<p:tab id="pasoArt" title="Transporte" rendered="#{registrarSustanciasQuimicasController.esART()}">
+					<ui:include src="registro/transporte.xhtml" />
+					<h:panelGroup>
+						<observaciones:tablaObservacionesRSQ idComponent="pasoArt"
+							componenteActualizarEliminar="@none"
+							seccion="RSQ Transporte"
+							nombreClase="RegistroSustanciaQuimica"
+							idClase="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.id}"							
+							aparace="#{registrarSustanciasQuimicasController.verObservaciones}"
+							mostrarSiVacio="true"
+							soloLectura="#{!registrarSustanciasQuimicasController.editarObservaciones}" />
+					</h:panelGroup> 
+				</p:tab>
+				<p:tab id="pasoJustificaionInspeccion" title="Justificativo" rendered="#{registrarSustanciasQuimicasController.verJustificativo()}">
+					<ui:include src="registro/justificativo.xhtml" />					
+				</p:tab>
+				<p:tab id="pasoFinalizar" title="Finalizar" rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}">
+					<ui:include src="registro/finalizar.xhtml" />
+				</p:tab>			
+			</p:wizard>
+			<div class="buttons main">				
+				<p:commandButton value="Atrás" icon="ui-icon-arrowthick-1-w"
+					oncomplete="PF('wizard').back()"
+					styleClass="wizard-custom-btn-back" process="@this"
+					action="#{registrarSustanciasQuimicasController.btnAtras}"
+					update="@form"/>
+				<p:commandButton value="Guardar" icon="ui-icon-disk"
+					action="#{registrarSustanciasQuimicasController.guardar}"
+					update="@form"
+					rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}"/>
+				<p:commandButton value="Siguiente" icon="ui-icon-arrowthick-1-e"
+					oncomplete="PF('wizard').next();reloadWizard();"
+					styleClass="wizard-custom-btn-next"
+					actionListener="#{registrarSustanciasQuimicasController.guardar}"
+					update="@form" resetValues="true"/>
+				<p:commandButton value="Enviar" id="btnEnviar"
+					action="#{registrarSustanciasQuimicasController.enviar}"
+					styleClass="wizard-custom-btn-only-end" icon="ui-icon-check"					
+					process="@this" update="@all" disabled="#{!registrarSustanciasQuimicasController.aceptaTerminos}"
+					rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}">
+					<p:confirm header="Confirmación"
+						message="¿Está seguro que desea finalizar?" icon="ui-icon-alert" />
+				</p:commandButton>
+			</div>
+			<h:outputScript name="/plugin/wizard.js" library="js" />
+		</h:form>
+		<h:form id="formDialogs" prependId="false"
+			onkeypress="if (event.keyCode == 13) {return false; }">
+			<ui:include src="registro/dialogos.xhtml" />
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

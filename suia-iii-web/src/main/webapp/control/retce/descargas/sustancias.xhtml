@@ -1,0 +1,73 @@
+<html 
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"	
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">	
+		<p:panelGrid id="sustanciasRetceGrid" columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="Sustancias RETCE (Voluntario hasta la expedición de la norma)"/>
+			</f:facet>				
+			<p:dataTable id="sustanciasTable" value="#{descargasLiquidasController.sustanciasRetceList}" var="item" emptyMessage="#{labels['common.table.empty']}"
+				paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rows="25">	
+				<f:facet name="header"> 
+					<p:commandButton icon="ui-icon-plus" value="#{msg['button.agregar']}" process="sustanciasTable" 
+						style="float:right" actionListener="#{descargasLiquidasController.crearSustancias}"
+						 oncomplete="PF('sustanciasDiag').show()" update=":formDialogs:sustanciasDiag"
+						 rendered="#{descargasLiquidasController.habilitarIngreso}"/>
+				</f:facet>										
+				<p:column headerText="Código del punto de monitoreo aprobado">
+					<h:outputText value="#{item.detalleDescargasLiquidas.codigoPuntoMonitoreo}"/>
+				</p:column>
+				<p:column headerText="Tipo de cuerpo receptor">
+					<h:outputText value="#{item.detalleDescargasLiquidas.catalogoTipoCuerpoReceptorCaracteristicasPunto.catalogoTipoCuerpoReceptor.descripcion}"/>
+				</p:column>
+				<p:column headerText="Nombre del contaminante">
+					<h:outputText value="#{item.catologSustanciasRetce.descripcionProductoQuimico}"/>
+				</p:column>
+				<p:column headerText="Reporte (ton/año)">
+					<h:outputText value="#{item.reporteToneladaAnio}"/>
+				</p:column>
+				<p:column headerText="Método de estimación">
+					<h:outputText value="#{item.catalogoMetodoEstimacion.descripcion}"/>
+				</p:column>									
+				<p:column styleClass="w15" headerText="Acciones" rendered="#{descargasLiquidasController.habilitarIngreso}">
+					<center>
+						<p:commandButton icon="ui-icon-pencil" title="#{msg['button.editar']}" styleClass="secondary"  process="@this" 
+							actionListener="#{descargasLiquidasController.editarSustancias(item)}" oncomplete="PF('sustanciasDiag').show()" update=":formDialogs:sustanciasDiag"/>						
+						<p:commandButton icon="ui-icon-trash" title="Eliminar" styleClass="secondary" process="@this" actionListener="#{descargasLiquidasController.eliminarSustancias(item)}" update=":form:sustanciasRetceGrid">
+							<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar?" icon="ui-icon-alert"/>
+						</p:commandButton>
+						<p:commandButton icon="ui-icon-search" title="Ver Historial" styleClass="orange" process="@this" actionListener="#{descargasLiquidasController.sustanciaHistoricoListener(item)}" oncomplete="PF('sustanciasDiagHistorial').show()" update=":formDialogsHistorial:sustanciasDiagHistorial"
+							rendered="#{item.tieneHistorial}" />
+					</center>												
+				</p:column>
+			</p:dataTable>
+			<p:dataTable id="sustanciasHistoricoEliminadosTable" value="#{descargasLiquidasController.sustanciasRetceHistoricoEliminadosList}" var="item" emptyMessage="#{labels['common.table.empty']}"
+				paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rows="25"
+				rendered="#{not empty descargasLiquidasController.sustanciasRetceHistoricoEliminadosList}">	
+				<p:column headerText="Código del punto de monitoreo aprobado">
+					<h:outputText value="#{item.detalleDescargasLiquidas.codigoPuntoMonitoreo}"/>
+				</p:column>
+				<p:column headerText="Tipo de cuerpo receptor">
+					<h:outputText value="#{item.detalleDescargasLiquidas.catalogoTipoCuerpoReceptorCaracteristicasPunto.catalogoTipoCuerpoReceptor.descripcion}"/>
+				</p:column>
+				<p:column headerText="Nombre del contaminante">
+					<h:outputText value="#{item.catologSustanciasRetce.descripcionProductoQuimico}"/>
+				</p:column>
+				<p:column headerText="Reporte (ton/año)">
+					<h:outputText value="#{item.reporteToneladaAnio}"/>
+				</p:column>
+				<p:column headerText="Método de estimación">
+					<h:outputText value="#{item.catalogoMetodoEstimacion.descripcion}"/>
+				</p:column>									
+				<p:column styleClass="w15" headerText="Estado">
+							<center><h:outputText value="Eliminado" style="color:red"/></center>												
+						</p:column>
+			</p:dataTable>
+		</p:panelGrid>	
+</html>

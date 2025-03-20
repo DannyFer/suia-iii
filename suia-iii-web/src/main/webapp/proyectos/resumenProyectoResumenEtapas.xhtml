@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:p="http://primefaces.org/ui" xmlns:c="http://java.sun.com/jsp/jstl/core">
+<f:event type="preRenderView" listener="#{resumenYEstadosEtapasBean.validarBpm}" />
+<p:dataTable id="summaryProcessDatatable" emptyMessage="#{labels['common.table.empty']}" rowIndexVar="rowIndex" var="varCategoriaFlujo" value="#{resumenYEstadosEtapasBean.flujos}" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" rows="10"
+>
+	<p:column headerText="#{msg['label.numero']}" styleClass="w20px">
+		<h:outputText value="#{rowIndex+1}" />
+	</p:column>
+	<p:column headerText="#{msg['label.processName']}">
+		<h:outputText value="#{varCategoriaFlujo.flujo.nombreFlujo}" />
+	</p:column>
+	<p:column headerText="#{msg['label.status']}" styleClass="alCenter w15">
+		<h:outputText value="#{resumenYEstadosEtapasBean.certificadoAbortado(varCategoriaFlujo.flujo)}" />
+	</p:column>
+	<p:column headerText="#{msg['label.tasks']}" styleClass="alCenter w15">
+		<p:commandButton oncomplete="PF('dlg_verTareas').show();" update=":form:tab:pnl_tareas" actionListener="#{proyectosController.verTareas(varCategoriaFlujo.flujo.processInstanceId, varCategoriaFlujo.flujo.estadoProceso)}" styleClass="button-small primary" icon="ui-icon-zoomin" disabled="#{varCategoriaFlujo.flujo.iniciaFlujo or varCategoriaFlujo.flujo.estadoProceso.equalsIgnoreCase('Completado') or resumenYEstadosEtapasBean.rgdArchivado(varCategoriaFlujo.flujo)}" />
+	</p:column>
+	<p:column headerText="#{msg['label.attachDocuments']}" styleClass="alCenter w15">
+		<c:if test="#{resumenYEstadosEtapasBean.proyectoFinalizado}">
+			<p:commandButton styleClass="button-small primary" icon="ui-icon-zoomin" disabled="true" />
+		</c:if>
+		<c:if test="#{!resumenYEstadosEtapasBean.proyectoFinalizado}">
+			<p:commandButton oncomplete="PF('dlg_verDocumentos').show();" update=":form:tab:pnl_documentos :form:tab:pnlEncuesta" actionListener="#{proyectosController.verDocumentos(varCategoriaFlujo.flujo.processInstanceId)}" styleClass="button-small primary" icon="ui-icon-zoomin" disabled="#{varCategoriaFlujo.flujo.iniciaFlujo}" />
+		</c:if>	
+	</p:column>
+</p:dataTable>
+
+<p:separator></p:separator>
+<h:outputText value="Nota: Los procesos se irán habilitando en el transcurso de avance del proyecto" styleClass="bold" />
+
+<p:dataTable id="DocumentsDatatable" emptyMessage="#{labels['common.table.empty']}" rowIndexVar="rowIndex" var="item" value="#{resumenYEstadosEtapasBean.documentosArchivacion}" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" rows="10"
+rendered="#{not empty resumenYEstadosEtapasBean.documentosArchivacion}">
+<f:facet name="header">
+Documentos Archivación / Reactivación
+</f:facet>
+	<p:column headerText="#{msg['label.numero']}" styleClass="w20px">
+		<h:outputText value="#{rowIndex+1}" />
+	</p:column>
+	<p:column headerText="Descripción">
+		<h:outputText value="#{item.descripcion}" />
+	</p:column>
+	<p:column headerText="Tipo" styleClass="alCenter w15">
+		<h:outputText value="#{item.tipoDocumento.nombre}" />
+	</p:column>
+	<p:column headerText="Fecha" styleClass="alCenter w15">
+		<h:outputText value="#{item.fechaCreacion}">
+			<f:convertDateTime pattern="dd/MM/yyyy" />
+		</h:outputText>
+	</p:column>	
+	<p:column styleClass="alCenter w20px">
+		<p:commandButton ajax="false" id="btnDescargar" onclick="PrimeFaces.monitorDownload(start, stop);" icon=" ui-icon-arrowstop-1-s" styleClass="button-small primary" disabled="#{empty item.contenidoDocumento}" title="#{empty item.contenidoDocumento ? 'El documento no está disponible en el gestor documental' : 'Ver documento'}">
+			<p:fileDownload value="#{procesosArchivadosController.getStream(item)}" />
+		</p:commandButton>
+	</p:column>
+	
+</p:dataTable>
+
+<p:dialog header="Resumen de tareas" widgetVar="dlg_verTareas" modal="true" width="900" height="300" id="dlg_Tareas">
+	<h:panelGrid columns="1" columnClasses="w25 alTop,field_mrg alTop" id="pnl_tareas">
+		<p:dataTable id="summaryTaskDatatable" emptyMessage="#{labels['common.table.empty']}" rowIndexVar="rowIndex" var="summaryTask" value="#{resumenYEstadosEtapasBean.tareas}" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" rows="10">
+			<p:column headerText="#{msg['label.numero']}" styleClass="w20px alCenter">
+				<h:outputText value="#{rowIndex+1}" />
+			</p:column>
+			<p:column headerText="#{msg['label.task']}" styleClass="w25">
+				<h:outputText value="#{summaryTask.nombre}" />
+			</p:column>
+			<p:column headerText="#{msg['label.status']}" styleClass="w10 alCenter">
+				<h:outputText value="#{summaryTask.estado}" />
+			</p:column>
+			<p:column headerText="#{msg['label.responsable']}">
+				<h:outputText value="#{summaryTask.responsable}" />
+			</p:column>
+			<p:column headerText="#{msg['label.fechainicio']}" styleClass="alCenter">
+				<h:outputText value="#{summaryTask.fechaInicio}">
+					<f:convertDateTime pattern="dd/MM/yyyy h:mm:ss a" />
+				</h:outputText>
+			</p:column>
+			<p:column headerText="#{msg['label.fechafin']}" styleClass="alCenter">
+				<h:outputText value="#{not empty summaryTask.fechaFin ? summaryTask.fechaFin : 'Pendiente'}" style="#{not empty summaryTask.fechaFin ? '' : 'font-weight: bold;'}">
+					<f:convertDateTime pattern="dd/MM/yyyy h:mm:ss a" />
+				</h:outputText>
+			</p:column>
+		</p:dataTable>
+	</h:panelGrid>
+</p:dialog>
+
+<p:dialog header="Documentos adjuntos al proceso" widgetVar="dlg_verDocumentos" modal="true" width="700" height="300">
+	<h:panelGrid columns="1" columnClasses="w25 alTop,field_mrg alTop" id="pnl_documentos">
+		<p:dataTable value="#{resumenYEstadosEtapasBean.documentos}" var="varDocumentos" emptyMessage="#{labels['common.table.empty']}">
+			<p:column headerText="Nombre documento" styleClass="singleLine">
+				<h:outputText value="#{varDocumentos.nombre}" />
+			</p:column>
+			<p:column styleClass="alCenter w20px">
+				<p:commandButton ajax="false" id="btnDescargar" onclick="PrimeFaces.monitorDownload(start, stop);" icon="ui-icon-search" styleClass="button-small primary" disabled="#{empty varDocumentos.contenidoDocumento}" title="#{empty varDocumentos.contenidoDocumento ? 'El documento no está disponible en el gestor documental' : 'Ver documento'}"
+				rendered="#{!resumenYEstadosEtapasBean.mostrarMsjAcuerdosCamaroneras or (varDocumentos.tipoDocumento.id ne resumenYEstadosEtapasBean.tipoDocResolucion)}">
+					<p:fileDownload value="#{proyectosController.getStream(varDocumentos)}" />
+				</p:commandButton>
+				<p:commandButton oncomplete="PF('documentosCamaroneras').show();"
+					styleClass="button-small primary" icon="ui-icon-search"
+					rendered="#{resumenYEstadosEtapasBean.mostrarMsjAcuerdosCamaroneras and (varDocumentos.tipoDocumento.id eq resumenYEstadosEtapasBean.tipoDocResolucion)}"
+					disabled="#{empty varDocumentos.contenidoDocumento}"
+					actionListener="#{resumenYEstadosEtapasBean.obtenerDocumentoDescarga(varDocumentos)}"
+					title="#{empty varDocumentos.contenidoDocumento ? 'El documento no está disponible en el gestor documental' : 'Ver documento'}" />
+			</p:column>
+		</p:dataTable>
+		
+
+	<br />
+	<br />
+	<br />
+	<br />
+
+	<h:panelGrid id="pnlEncuesta" columns="4" style="width:100%" columnClasses="w25 null, w25 null, w25 null, w25 null" rendered="#{proyectosController.mostrarEncuesta}">
+			<h:outputText value="   " />
+			<div>
+			¿Desea realizar la encuenta para medir la satisfacción de los usuarios externos sobre los servicios que se ofrecen en línea?
+		
+			</div>			
+
+			<p:selectOneRadio id="encuentaRadio" value="#{proyectosController.aceptacion.llenoEncuesta}" unselectable="true">
+				<f:selectItem itemLabel="Si" itemValue="true" />
+				<f:selectItem itemLabel="No" itemValue="false" />
+				
+				<p:ajax listener="#{proyectosController.guardarAceptacion()}" update="surveyDialog"></p:ajax>
+			</p:selectOneRadio>
+		<h:outputText value="   " />
+		</h:panelGrid>
+</h:panelGrid>
+</p:dialog>
+             
+               
+		<p:dialog id="surveyDialog" header="Encuesta de Satisfacción de Servicios" modal="true" closable="true" resizable="false" 
+            	visible="#{proyectosController.aceptacion.llenoEncuesta}" onHide="location.reload();">
+            	<h:panelGrid columns="1" layout="grid" >
+            	
+            	<iframe frameborder="0" align="left" src="#{proyectosController.urlLinkSurvey()}"
+            		scrolling="auto" width="925" height="450" marginheight="5" marginwidth="10"></iframe>         		
+            		
+            	</h:panelGrid>
+            	           
+            </p:dialog>
+
+<p:dialog header="Notificación" id="documentosCamaroneras"
+	widgetVar="documentosCamaroneras" modal="true" width="400"
+	resizable="false" closable="false" draggable="false">
+	<p:separator/>
+	<h:panelGroup>
+		<h:outputText
+			value="En la primera Auditoria de Cumplimiento o en el Informe de Cumplimiento del PMA, el Operador debe presentar el Acuerdo de Concesión y  Acuerdo de Autorización  emitido por la Subsecretaría de Acuacultura."
+			styleClass="alJustify" />
+		<br />
+		<div class="buttons">
+			<p:commandButton ajax="false" id="btnDescargar" value="Ver Documento"
+				onclick="PF('documentosCamaroneras').hide(); PrimeFaces.monitorDownload(start, stop);" 
+				styleClass="primary">
+				<p:fileDownload 
+					value="#{proyectosController.getStream(resumenYEstadosEtapasBean.documentoPermiso)}" />
+			</p:commandButton>
+			<p:commandButton value="Cerrar" type="button" onclick="PF('documentosCamaroneras').hide()" styleClass="secondary" />
+		</div>
+		<br />
+	</h:panelGroup>
+</p:dialog>
+
+<script type="text/javascript">
+function start() {
+    PF('statusDialog').show();
+}
+
+function stop() {
+    PF('statusDialog').hide();
+}
+
+function finalizarRegistro() {
+	window.location.assign('#{verProyectoBean.urlContinuar}');
+}
+</script> 
+
+</html>

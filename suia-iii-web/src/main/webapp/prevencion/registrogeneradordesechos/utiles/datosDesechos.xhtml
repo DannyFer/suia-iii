@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui"
+		>
+
+<h:panelGroup id="datosDesecho">
+	<p:panelGrid columns="1" layout="grid" styleClass="buttonAddDatosGeneralesContainer w100">
+		<f:facet name="header">
+			<p:commandButton value="Adicionar" oncomplete="PF('adicionarDatosDesecho').toggle()" styleClass="buttonAddDatosGenerales button-small-text toRight field_mrg" actionListener="#{datosDesechosBean.cancelar()}" process="@this" update="datosGeneralesDesecho" icon="ui-icon-plusthick" />
+			<h:outputText value="Datos asociados a los desechos *" />
+		</f:facet>
+
+		<p:outputLabel value="Estimado usuario, debe completar los datos asociados a cada desecho seleccionado en el paso anterior." styleClass="bold text-red" escape="false" />
+
+		<ui:include src="/prevencion/registrogeneradordesechos/utiles/datosDesechosAdd.xhtml" />
+
+		<p:dataList id="listadoDatosDesecho" type="none" value="#{datosDesechosBean.desechosPeligrososDatosGenerales}" var="datosDesecho" rowIndexVar="index" emptyMessage="#{labels['common.table.empty']}">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<p:commandButton styleClass="button-small toRight field_mrg" process="@this" update=":form:listadoDatosDesecho" actionListener="#{datosDesechosBean.eliminar(datosDesecho)}" icon="ui-icon-trash">
+						<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar los datos asociados a este desecho?" icon="ui-icon-alert" />
+					</p:commandButton>
+					<p:commandButton styleClass="button-small toRight field_mrg" process="@this" update=":form:adicionarDatosDesecho" actionListener="#{datosDesechosBean.editar(datosDesecho)}" icon="ui-icon-pencil" oncomplete="PF('adicionarDatosDesecho').toggle()" />
+					<h:outputText value="Dato #{(index + 1)}" />
+				</f:facet>
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w25, null" rowClasses="null, alt">
+					<h:outputText value="Desecho" />
+					<h:outputText value="#{datosDesecho.desechoPeligroso.descripcion}" />
+					<h:outputText value="Código" />
+					<h:outputText value="#{datosDesecho.desechoPeligroso.clave}" />
+					<h:outputText value="CRTIB" title="#{helps['generadorDesecho.crtib']}" />
+					<h:outputText value="#{datosDesecho.desechoPeligroso.nombresCRITB}" />
+				</h:panelGrid>
+				<h:panelGrid styleClass="w100" columns="2" columnClasses="w50 alTop, w50 field_mrg alTop">
+					<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+						<h:outputText value="Categoría" />
+						<h:outputText value="#{datosDesecho.categoriaDesechoPeligroso.nombreCompuesto}" />
+						<h:outputText value="Otra categoría" rendered="#{datosDesecho.categoriaDesechoPeligroso.otro}" />
+						<h:outputText value="#{datosDesecho.otroCategoriaDesecho}" rendered="#{datosDesecho.categoriaDesechoPeligroso.otro}" />
+						<h:outputText value="Estado físico" />
+						<h:outputText value="#{datosDesecho.tipoEstadoFisico}" />
+					</h:panelGrid>
+					<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+						<h:outputText value="Cantidad estimada anual de generación (toneladas)" />
+						<h:outputText value="#{datosDesecho.cantidadToneladas}"><f:convertNumber maxIntegerDigits="10" maxFractionDigits="10" pattern="#0.######"/> </h:outputText>
+						<h:outputText value="Cantidad (unidades)" rendered="#{datosDesecho.cantidadUnidades != 0}" />
+						<h:outputText value="#{datosDesecho.cantidadUnidades}" rendered="#{datosDesecho.cantidadUnidades != 0}" ><f:convertNumber maxIntegerDigits="10" maxFractionDigits="10" pattern="#0.######"/></h:outputText>
+					</h:panelGrid>
+				</h:panelGrid>
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w25, null" rowClasses="null, alt">
+					<h:outputText value="Puntos de generación" />
+					<h:outputText value="#{datosDesecho.generadorDesechosDesechoPeligrosoPuntosGeneracion}" converter="listToStringConverter" />
+				</h:panelGrid>
+			</p:panelGrid>
+		</p:dataList>
+	</p:panelGrid>
+</h:panelGroup>
+
+
+</html>

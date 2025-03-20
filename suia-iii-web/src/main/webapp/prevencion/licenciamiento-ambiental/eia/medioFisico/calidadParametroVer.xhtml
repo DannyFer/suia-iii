@@ -1,0 +1,243 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:f="http://java.sun.com/jsf/core"
+        >
+<ui:composition template="/prevencion/licenciamiento-ambiental/eia/default.xhtml">
+    <ui:define name="content-eia">
+        <h:form id="form">
+            <p:panel header="#{calidadComponenteBean.labelCabeceraCalidadComponente}">
+
+                <h:inputHidden id="campoOculto" validator="#{calidadComponenteController.validateFormulario}"/>
+
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" id="pnlGridLaboratorio">
+                    <f:facet name="header">
+                        <h:outputText value="Lista de laboratorios con los que trabajó"/>
+                    </f:facet>
+                    <p:dataTable id="tableLaboratorio" value="#{calidadComponenteBean.laboratorios}"
+                                 var="laboratorio" emptyMessage="#{labels['common.table.empty']}">
+                        <p:columnGroup type="header">
+                            <p:row>
+                                <p:column headerText="Nombre"/>
+                            </p:row>
+
+                        </p:columnGroup>
+                        <p:column>
+                            <h:outputText value="#{laboratorio.nombre}"/>
+                        </p:column>
+                    </p:dataTable>
+                </p:panelGrid>
+
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" id="pnlGridMuestra">
+                    <f:facet name="header">
+                        <h:outputText value="Muestra"/>
+                    </f:facet>
+                    <p:dataTable id="tableMuestra" value="#{calidadComponenteBean.muestras}"
+                                 var="muestra" emptyMessage="#{labels['common.table.empty']}">
+                        <p:columnGroup type="header">
+
+                            <p:row>
+                                <p:column headerText="Código"/>
+
+                                <p:column headerText="X"/>
+
+                                <p:column headerText="Y"/>
+                                <ui:insert name="muestras-content-start"/>
+                            </p:row>
+
+                        </p:columnGroup>
+                        <p:column>
+                            <h:outputText value="#{muestra.codigo}"/>
+                        </p:column>
+
+                        <p:column>
+                            <h:outputText value="#{muestra.coordenadaGeneral.x}"/>
+                        </p:column>
+
+                        <p:column>
+                            <h:outputText value="#{muestra.coordenadaGeneral.y}"/>
+                        </p:column>
+                        <ui:insert name="muestras-content-end"/>
+                    </p:dataTable>
+                </p:panelGrid>
+
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" id="pnlGridCalidad">
+                    <f:facet name="header">
+                        <h:outputText
+                                value="#{calidadComponenteBean.labelCabeceraCalidadComponente}"/>
+                    </f:facet>
+                    <p:dataTable id="tableCalidad" value="#{calidadComponenteBean.calidades}"
+                                 var="calidad" emptyMessage="#{labels['common.table.empty']}"
+                                 tableStyle="table-layout: auto" rowIndexVar="index">
+
+                        <p:columnGroup type="header">
+
+                            <p:row>
+                                <p:column headerText="N°"/>
+                                <p:column headerText="Normativa"/>
+                                <p:column headerText="Tabla"/>
+                                <p:column headerText="Parámetro"/>
+                                <p:column headerText="Laboratorio"/>
+                                <p:column headerText="N° muestras "/>
+                                <p:column headerText=""/>
+                            </p:row>
+
+                        </p:columnGroup>
+
+                        <p:column>
+                            <h:outputText value="#{index + 1}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputText value="#{calidad.parametroNormativas.tablaNormativas.normativa.descripcion}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputText value="#{calidad.parametroNormativas.tablaNormativas}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputText value="#{calidad.parametroNormativas}"/>
+                        </p:column>
+
+                        <p:column>
+                            <h:outputText value="#{calidad.laboratorio.nombre}"/>
+                        </p:column>
+
+                        <p:column>
+                            <h:outputText value="#{calidad.resultadosAnalisis.size()}"/>
+                        </p:column>
+
+                        <p:column styleClass="w40px alCenter">
+
+                            <p:commandButton update=":form:adicionarCalidad"
+                                             styleClass="button-small primary"
+                                             process="@this" icon="ui-icon-search"
+                                             actionListener="#{calidadComponenteController.seleccionarCalidad(calidad)}"
+                                             oncomplete="PF('adicionarCalidad').show()"/>
+
+                        </p:column>
+
+                    </p:dataTable>
+                </p:panelGrid>
+            </p:panel>
+
+            <p:separator/>
+
+
+            <p:dialog header="#{calidadComponenteBean.labelCabeceraCalidadComponente}"
+                      id="adicionarCalidad" widgetVar="adicionarCalidad" modal="true" width="600"
+                      resizable="false" draggable="false">
+                <h:panelGroup id="calidadContainer">
+                    <h:panelGrid columns="2" styleClass="w100" columnClasses="w10, field_mrg w50">
+
+                        <p:outputLabel value="Normativa" for="normativa"/>
+                        <h:outputText value="#{calidadComponenteBean.normativa.descripcion}" id="normativa"/>
+
+                        <p:outputLabel value="Tabla" for="tabla"/>
+                        <h:outputText value="#{calidadComponenteBean.tabla.descripcion}" id="tabla"/>
+
+                        <p:outputLabel value="Parámetro" for="parametro"/>
+                        <h:outputText value="#{calidadComponenteBean.calidadComponente.parametroNormativas.descripcion}" id="parametro"/>
+
+
+                        <p:outputLabel value="Laboratorio" for="laboratorio"/>
+                        <h:outputText value="#{calidadComponenteBean.calidadComponente.laboratorio}" id="laboratorio"/>
+
+                    </h:panelGrid>
+
+
+                    <p:dataTable id="resultadoAnalisis" value="#{calidadComponenteBean.resultados}"
+                                 var="resultado" emptyMessage="#{labels['common.table.empty']}"
+                                 tableStyle="table-layout: auto">
+
+                        <p:columnGroup type="header">
+
+                            <p:row>
+                                <p:column colspan="5" headerText="Resultados"/>
+                            </p:row>
+                            <p:row>
+                                <p:column headerText="Código" rowspan="2"/>
+                                <p:column headerText="Ubicación" colspan="2"/>
+                                <p:column headerText="#{calidadComponenteBean.validateFieldText}" rowspan="2" />
+                                <p:column headerText="Valor" rowspan="2"/>
+                            </p:row>
+
+                            <p:row>
+                                <p:column headerText="X"/>
+                                <p:column headerText="Y"/>
+                            </p:row>
+
+                        </p:columnGroup>
+
+                        <p:column>
+                            <h:outputText value="#{resultado.muestra.codigo}"/>
+                        </p:column>
+
+                        <p:column>
+                            <h:outputText value="#{resultado.muestra.coordenadaGeneral.x}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputText value="#{resultado.muestra.coordenadaGeneral.y}"/>
+                        </p:column>
+                        <p:column rendered="#{!resultado.tipoExcepcional}">
+                            <h:outputText
+                                    value="#{calidadComponenteBean.calidadComponente.parametroNormativas.limiteSuperior}"/>
+                        </p:column>
+                        <p:column rendered="#{!resultado.tipoExcepcional}">
+                            <h:outputLabel value="#{resultado.valor}" required="true"
+                                           styleClass="#{resultado.valor gt calidadComponenteBean.calidadComponente.parametroNormativas.limiteSuperior ? 'text-red': ''}"
+                                           label="Valor para el código de muestra #{resultado.muestra.codigo}"/>
+                        </p:column>
+                        <p:column rendered="#{resultado.tipoExcepcional}">
+                            <h:outputText
+                                    value="#{calidadComponenteBean.calidadComponente.parametroNormativas.criterioExcepcional}"/>
+                        </p:column>
+                        <p:column rendered="#{resultado.tipoExcepcional}">
+                            <h:outputLabel value="#{resultado.valorExcepcional}" required="true"/>
+                        </p:column>
+
+                    </p:dataTable>
+
+                </h:panelGroup>
+
+                <p:separator/>
+
+                <div class="buttons">
+                    <p:commandButton actionListener="#{calidadComponenteController.cerrarCalidadComponente}"
+                                     process="@this :form:calidadContainer" value="Cerrar"
+                                     update=":form:tableCalidad :form:calidadContainer :form:resultadoAnalisis"
+                                     oncomplete="showModalAddCalidad(xhr, status, args)"/>
+
+                </div>
+            </p:dialog>
+
+        </h:form>
+
+        <script type="text/javascript">
+
+            function showModalAddLaboratorio(xhr, status, args) {
+                if (args.addLaboratorio)
+                    PF('adicionarLaboratorio').hide();
+                else
+                    PF('adicionarLaboratorio').show();
+            }
+
+            function showModalAddMuestra(xhr, status, args) {
+                if (args.addMuestra)
+                    PF('adicionarMuestra').hide();
+                else
+                    PF('adicionarMuestra').show();
+            }
+            function showModalAddCalidad(xhr, status, args) {
+                if (args.addCalidad)
+                    PF('adicionarCalidad').hide();
+                else
+                    PF('adicionarCalidad').show();
+            }
+
+
+        </script>
+    </ui:define>
+</ui:composition>
+
+
+</html>

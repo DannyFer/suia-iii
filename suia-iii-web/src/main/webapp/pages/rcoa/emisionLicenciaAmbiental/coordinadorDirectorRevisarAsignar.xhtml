@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+	<ui:define name="context-extra">
+		<h:outputText value="Código RGDP"
+			rendered="#{contextoTareaEIAController.tieneRgd}" />
+		<h:outputText
+			value="#{contextoTareaEIAController.proyecto.codigoRgdAsociado}"
+			rendered="#{contextoTareaEIAController.tieneRgd}" />
+		<h:outputLink target="_blank"
+			rendered="#{contextoTareaEIAController.tieneRgd}"
+			value="#{contextoTareaEIAController.redireccionarRgd()}">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+
+		<h:outputText value="Código RSQ"
+			rendered="#{contextoTareaEIAController.tieneRsq}" />
+		<h:outputText
+			value="#{contextoTareaEIAController.proyecto.codigoRsqAsociado}"
+			rendered="#{contextoTareaEIAController.tieneRsq}" />
+		<h:outputLink target="_blank"
+			rendered="#{contextoTareaEIAController.tieneRsq}"
+			value="#{contextoTareaEIAController.redireccionarRsq()}">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+
+		<h:outputText value="Código ART"
+			rendered="#{contextoTareaEIAController.tieneArt}" />
+		<h:outputText value="#{contextoTareaEIAController.art.solicitud}"
+			rendered="#{contextoTareaEIAController.tieneArt}" />
+		<p:commandButton ajax="false" icon="ui-icon-search"
+			styleClass="primary button-small" immediate="true"
+			rendered="#{contextoTareaEIAController.tieneArt}">
+			<p:fileDownload
+				value="#{contextoTareaEIAController.descargarOficoArt()}" />
+		</p:commandButton>
+
+		<h:outputText value="Datos" />
+		<h:outputText value="Estudio de Impacto Ambiental" />
+		<h:outputLink target="_blank"
+			value="#{request.contextPath}/pages/rcoa/estudioImpactoAmbiental/verProyectoEIAResumen.jsf">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+	</ui:define>
+
+	<ui:define name="content">
+		<f:event type="preRenderView" listener="#" />
+
+		<h:form id="form">
+			<p:tabView id="tab">
+				<p:tab title="Resolución">
+					<h:panelGrid styleClass="w100" id="resolucionData">
+						<object id="pdf_resolucion" type="application/pdf"
+							data="#{emisionLicenciaAmbientalCoordDireRevisarAsignarController.documentoResolucion.informePath}?pfdrid_c=true"
+							width="100%" height="500px">
+							Su navegador no soporta la visualización de pdf. Puede descargar
+							el documento presionando el siguiente botón:
+							<p:commandButton value="Descargar" styleClass="primary"
+								ajax="false" icon="ui-icon-arrowthick-1-s">
+								<p:fileDownload value="#{emisionLicenciaAmbientalCoordDireRevisarAsignarController.getStream(emisionLicenciaAmbientalCoordDireRevisarAsignarController.documentoResolucion.nombreFichero, emisionLicenciaAmbientalCoordDireRevisarAsignarController.documentoResolucion.archivoInforme)}" />
+							</p:commandButton>
+						</object>
+						<br />
+						<br />
+					</h:panelGrid>
+				</p:tab>
+				<p:tab title="Memorando">
+					<h:panelGrid styleClass="w100" id="oficioPronunciamientoData">
+						<object id="pdf_oficioPronunciamiento" type="application/pdf"
+							data="#{emisionLicenciaAmbientalCoordDireRevisarAsignarController.documentoMemorando.informePath}?pfdrid_c=true"
+							width="100%" height="500px">
+							Su navegador no soporta la visualización de pdf. Puede descargar
+							el documento presionando el siguiente botón:
+							<p:commandButton value="Descargar" styleClass="primary"
+								ajax="false" icon="ui-icon-arrowthick-1-s">
+								<p:fileDownload value="#{emisionLicenciaAmbientalCoordDireRevisarAsignarController.getStream(emisionLicenciaAmbientalCoordDireRevisarAsignarController.documentoMemorando.nombreFichero, emisionLicenciaAmbientalCoordDireRevisarAsignarController.documentoMemorando.archivoInforme)}" />
+							</p:commandButton>
+						</object>
+						<br />
+						<br />
+					</h:panelGrid>
+				</p:tab>
+			</p:tabView>
+			<br />
+			<br />
+			<h:outputText styleClass="bold"
+				value="Asignar tarea: Delegar a técnico responsable para analizar la información" />
+			<p:dataTable id="tablaUsuarios"
+				value="#{emisionLicenciaAmbientalCoordDireRevisarAsignarController.listaUsuario}"
+				var="usuario" paginator="true" rows="10" paginatorPosition="bottom"
+				scrollable="true">
+				<f:facet name="header">
+					<p:outputLabel value="Usuarios disponibles" />
+				</f:facet>
+				<p:column styleClass="w20px alCenter">
+					<p:selectBooleanCheckbox value="#{usuario.selectable}">
+						<f:ajax execute="@this"
+							listener="#{emisionLicenciaAmbientalCoordDireRevisarAsignarController.updateSelectedUser(usuario)}" />
+					</p:selectBooleanCheckbox>
+				</p:column>
+				<p:column headerText="Usuario" styleClass="alCenter">
+					<h:outputText value="#{usuario.nombre}" />
+				</p:column>
+				<p:column headerText="Nombre" styleClass="alCenter">
+					<h:outputText value="#{usuario.nombrePersona}" />
+				</p:column>
+				<p:column headerText="CR" styleClass="alCenter">
+					<h:outputText value="#{usuario.coeficienteRendimiento}" />
+				</p:column>
+				<p:column headerText="Tareas" styleClass="alCenter">
+					<h:outputText value="#{usuario.numeroTramites}" />
+				</p:column>
+				<p:column headerText="Peso" styleClass="alCenter">
+					<h:outputText value="#{usuario.pesoTotalTareas}" />
+				</p:column>
+				<p:column headerText="Carga(%)" styleClass="alCenter">
+					<h:outputText value="#{usuario.carga}">
+						<f:convertNumber maxFractionDigits="2" />
+					</h:outputText>
+				</p:column>
+			</p:dataTable>
+
+			<br />
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" icon="ui-icon-check"
+					immediate="true" styleClass="secondary"
+					action="/bandeja/bandejaTareas.jsf" />
+				<p:commandButton value="Reasignar"
+					action="#{emisionLicenciaAmbientalCoordDireRevisarAsignarController.enviar()}"
+					update="@form" icon="ui-icon-check" />
+			</div>
+		</h:form>
+
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" template="/WEB-INF/templates/default.xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:control="http://java.sun.com/jsf/composite/controles-prime" xmlns:t="http://myfaces.apache.org/tomahawk" xmlns:pe="http://primefaces.org/ui/extensions">
+	<ui:define name="content">
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<p:commandButton value="Adicionar" oncomplete="PF('adicionarTemplate').show()" styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick" process="@this" update=":form:adicionarTemplate" />
+					<h:outputText value="Plantillas de notificación" />
+				</f:facet>
+				<h:panelGrid columns="2" styleClass="w100" columnClasses="w25 alTop, field_mrg w75 alTop">
+					<t:div styleClass="customLine">
+						<p:dataList itemType="none" var="template" value="#{templatesBean.templates.entrySet().toArray()}" styleClass="noBorder">
+							<p:commandLink process="@this" update="@form" actionListener="#{templatesController.markTemplate(template.key)}" styleClass="template-name">
+								<h:outputText value="#{template.key}" styleClass="#{template.key == templatesBean.key ? 'bold' : ''}" />
+							</p:commandLink>
+						</p:dataList>
+					</t:div>
+					<t:div styleClass="customLine">
+						<pe:ckEditor value="#{templatesBean.body}" rendered="#{!empty templatesBean.key}" />
+						<h:outputText value="Seleccione una plantilla" rendered="#{empty templatesBean.key}" styleClass="w100 alCenter encabezado1_5em" />
+					</t:div>
+				</h:panelGrid>
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Aceptar" actionListener="#{templatesController.aceptar}" disabled="#{empty templatesBean.key}" styleClass="primary" />
+				</div>
+			</p:panelGrid>
+
+			<p:dialog header="Adicionar datos del área libre" id="adicionarTemplate" widgetVar="adicionarTemplate" modal="true" resizable="false" width="600">
+				ADICIONAR TEMPLATE
+
+				<div class="buttons">
+					<p:commandButton value="Aceptar" update="@form" process="@this adicionarTemplate" oncomplete="handleAdicionarTemplate(xhr, status, args)" />
+				</div>
+
+				<script type="text/javascript">
+        			function handleAdicionarTemplate(xhr, status, args) {
+            			if (args.validationFailed || !args.addTemplate) {
+            				PF('adicionarTemplate').show();
+            			}
+            			else {
+                			PF('adicionarTemplate').hide();
+            			}
+        			}
+    			</script>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

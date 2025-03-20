@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	template="/control/aprobacionRequisitosTecnicos/templates/defaultTemplate.xhtml"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+	<ui:define name="content-art">
+		<style>
+ul.error {
+	padding: 0;
+}
+
+ul.error li {
+	list-style: none;
+}
+</style>
+		<h:form id="frmEnviar">
+
+			<h2 class="verde">Aprobación de Requisitos Técnicos</h2>
+			<h:outputText
+				value="Yo, #{aprobacionRequisitosTecnicosController.loginBean.usuario} con cédula de identidad #{aprobacionRequisitosTecnicosController.loginBean.usuario.pin} declaro bajo
+				juramento que la información que consta en el presente proceso es de
+				mi absoluta responsabilidad. En caso de forzar, falsificar,
+				modificar, alterar o introducir cualquier corrección al presente
+				documento, asumo tácitamente las responsabilidades y sanciones
+				determinadas por la ley."
+				styleClass="alJustify" />
+			<br />
+
+			<h:outputText
+				value="Atención: Por favor revise la información que ingresa al
+				sistema, si está seguro que los datos son correctos presione el
+				botón Enviar, en caso contrario realice los cambios necesarios a
+				través del botón modificar."
+				styleClass="text-red alJustify" />
+			<br />
+			<h:panelGrid columns="2">
+				<p:outputLabel value="He leído y comprendido" styleClass="bold" />
+				<p:selectBooleanCheckbox required="true"
+					value="#{finalizarAprobacionRequisitosTecnicosController.aceptarTerminos}">
+					<p:ajax event="change" update="btn_enviar" />
+				</p:selectBooleanCheckbox>
+			</h:panelGrid>
+			<br />
+			<h:panelGrid columns="2">
+				<p:outputLabel
+					value="¿La información ingresada es de carácter confidencial?"
+					rendered="#{aprobacionRequisitosTecnicosController.aprobacionRequisitosTecnicosBean.aprobacionRequisitosTecnicos.gestion}"
+					for="informacionConfidencial" styleClass="bold" />
+				<p:selectOneRadio id="informacionConfidencial"
+					rendered="#{aprobacionRequisitosTecnicosController.aprobacionRequisitosTecnicosBean.aprobacionRequisitosTecnicos.gestion}"
+					value="#{finalizarAprobacionRequisitosTecnicosController.isInformacionConfidencial}"
+					required="true">
+					<f:selectItem itemLabel="Si" itemValue="true" />
+					<f:selectItem itemLabel="No" itemValue="false" />/>
+			</p:selectOneRadio>
+			</h:panelGrid>
+			<p:dialog header="Aprobación de Requisitos Técnicos incompleto"
+				widgetVar="aprobacionRequisitosIncompleto"
+				id="aprobacionRequisitosIncompleto" modal="true" height="300"
+				width="600">
+				<h:outputText
+					value="Debe terminar de ingresar la información en las siguientes secciones:" />
+
+				<ul class="error alLeft text-red ">
+					<li><h:outputLink class="text-red "
+							rendered="#{!aprobacionRequisitosTecnicosController.seccionCompletada('informacionPatioManiobra')}"
+							value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/informacionPatioManiobra#{mode}.jsf">
+							<h:outputText
+								value="Información general de la ubicación del patio de maniobra , almacenamiento temporal u oficina matriz" />
+						</h:outputLink></li>
+					<li><h:outputLink class="text-red "
+							rendered="#{!aprobacionRequisitosTecnicosController.seccionCompletada('requisitosVehiculo')}"
+							value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/requisitosVehiculo#{mode}.jsf">
+							<h:outputText value="Requisitos para el Vehículo" />
+						</h:outputLink></li>
+					<li><h:outputLink class="text-red "
+							rendered="#{!aprobacionRequisitosTecnicosController.seccionCompletada('requisitosConductor')}"
+							value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/requisitosConductor#{mode}.jsf">
+							<h:outputText value="Requisitos para el Conductor" />
+						</h:outputLink></li>
+					<li><h:outputLink class="text-red "
+							rendered="#{!aprobacionRequisitosTecnicosController.seccionCompletada('sustanciasQuimicasPeligrosas')}"
+							value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/sustanciasQuimicasPeligrosas#{mode}.jsf">
+							<h:outputText value="Sustancias químicas peligrosas" />
+						</h:outputLink></li>
+					<li><h:outputLink class="text-red "
+							rendered="#{!aprobacionRequisitosTecnicosController.seccionCompletada('desechoPeligrosoTransporte')}"
+							value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/desechoPeligrosoTransporte#{mode}.jsf">
+							<h:outputText value="Desechos peligrosos" />
+						</h:outputLink></li>
+					<li><h:outputLink class="text-red "
+							rendered="#{!aprobacionRequisitosTecnicosController.seccionCompletada('recoleccionYTransporteDesechos')}"
+							value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/recoleccionYTransporteDesechos#{mode}.jsf">
+							<h:outputText value="Recolección y transporte de desechos" />
+						</h:outputLink></li>
+					<li><h:outputLink class="text-red "
+							rendered="#{!aprobacionRequisitosTecnicosController.seccionCompletada('recepcionDesechosPeligrosos')}"
+							value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/recepcionDesechosPeligrosos#{mode}.jsf">
+							<h:outputText value="Recepción de desechos peligrosos" />
+						</h:outputLink></li>
+					<li><h:outputLink class="text-red "
+							rendered="#{!aprobacionRequisitosTecnicosController.seccionCompletada('almacenamientoTemporal')}"
+							value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/gestion/almacenamientoTemporal#{mode}.jsf">
+							<h:outputText value="Almacenamiento temporal" />
+						</h:outputLink></li>
+					<li><h:outputLink class="text-red "
+							rendered="#{!aprobacionRequisitosTecnicosController.seccionCompletada('eliminacionDisposicionFinal')}"
+							value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/gestion/eliminacionDisposicionFinal#{mode}.jsf">
+							<h:outputText value="Eliminación o disposición final" />
+						</h:outputLink></li>
+					<li><h:outputLink class="text-red "
+							rendered="#{!aprobacionRequisitosTecnicosController.seccionCompletada('modalidadReciclaje')}"
+							value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/modalidadReciclaje#{mode}.jsf">
+							<h:outputText value="Modalidad reciclaje" />
+						</h:outputLink></li>
+					<li><h:outputLink class="text-red "
+							rendered="#{!aprobacionRequisitosTecnicosController.seccionCompletada('modalidadReuso')}"
+							value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/modalidadReuso#{mode}.jsf?id=10">
+							<h:outputText value="Modalidad reuso" />
+						</h:outputLink></li>
+					<li><h:outputLink class="text-red "
+							rendered="#{!aprobacionRequisitosTecnicosController.seccionCompletada('modalidadTratamiento')}"
+							value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/modalidadTratamiento#{mode}.jsf">
+							<h:outputText value="Modalidad tratamiento" />
+						</h:outputLink></li>
+					<li><h:outputLink class="text-red "
+							rendered="#{!aprobacionRequisitosTecnicosController.seccionCompletada('modalidadTratamientoCalendarioActividades')}"
+							value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/modalidadTratamientoCalendarioActividades#{mode}.jsf">
+							<h:outputText
+								value="Programa calendarizado de actividades  para el tratamiento" />
+						</h:outputLink></li>
+					<li><h:outputLink class="text-red "
+							rendered="#{!aprobacionRequisitosTecnicosController.seccionCompletada('modalidadIncineracion')}"
+							value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/modalidadIncineracion#{mode}.jsf">
+							<h:outputText value="Modalidad incineración" />
+						</h:outputLink></li>
+					<li><h:outputLink class="text-red "
+							rendered="#{!aprobacionRequisitosTecnicosController.seccionCompletada('modalidadIncineracionCalendarioActividades')}"
+							value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/modalidadIncineracionCalendarioActividades#{mode}.jsf">
+							<h:outputText
+								value="Programa calendarizado de actividades  para la incineración" />
+						</h:outputLink></li>
+					<li><h:outputLink class="text-red "
+							rendered="#{!aprobacionRequisitosTecnicosController.seccionCompletada('modalidadCoprocesamiento')}"
+							value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/modalidadCoprocesamiento#{mode}.jsf">
+							<h:outputText value="Modalidad coprocesamiento" />
+						</h:outputLink></li>
+					<li><h:outputLink class="text-red "
+							rendered="#{!aprobacionRequisitosTecnicosController.seccionCompletada('modalidadCoprocesamientoCalendarioActividades')}"
+							value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/modalidadCoprocesamientoCalendarioActividades#{mode}.jsf">
+							<h:outputText
+								value="Programa calendarizado de actividades  para el coprocesamiento" />
+						</h:outputLink></li>
+					<li><h:outputLink class="text-red "
+							rendered="#{!aprobacionRequisitosTecnicosController.seccionCompletada('modalidadDisposicionFinal')}"
+							value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/modalidadDisposicionFinal#{mode}.jsf">
+							<h:outputText value="Modalidad disposición final" />
+						</h:outputLink></li>
+				</ul>
+				<br />
+				<br />
+
+				<h:outputText
+					rendered="#{aprobacionRequisitosTecnicosController.aprobacionRequisitosTecnicosBean.habilitarMensajeNumVehiculoConductores}"
+					value="Recuerde que el número de vehículo debe ser igual al número de vehículo registrados en el patio de maniobras y el número de conductores no puede ser menor al número de vehículos." />
+				<h:outputText
+					value="Por favor tomar en cuenta las siguientes observaciones:"
+					rendered="#{not empty aprobacionRequisitosTecnicosBean.mensajesError}"
+					escape="false" />
+				<br />
+				<br />
+				<h:outputText
+					value="#{aprobacionRequisitosTecnicosBean.mensajesError}"
+					escape="false" />
+			</p:dialog>
+			<p:remoteCommand process="@this"
+				update="aprobacionRequisitosIncompleto"
+				rendered="#{!aprobacionRequisitosTecnicosController.aprobacionRequisitosTecnicosBean.completado}"
+				autoRun="true"
+				action="#{aprobacionRequisitosTecnicosController.mostrarDialogoSeccionesIncompletas}" />
+
+
+
+			<div class="buttons main">
+				<p:commandButton value="Enviar" id="btn_enviar"
+					update=":#{p:component('frmEnviar')}" icon="ui-icon-check"
+					action="#{finalizarAprobacionRequisitosTecnicosController.enviarAprobacionRequisitosTecnicos()}"
+					oncomplete="showModalAddGenerador(xhr, status, args)"
+					process="@form"
+					rendered="#{aprobacionRequisitosTecnicosController.aprobacionRequisitosTecnicosBean.aprobacionRequisitosTecnicos.gestion or aprobacionRequisitosTecnicosController.aprobacionRequisitosTecnicosBean.aprobacionRequisitosTecnicos.transporte}"
+					disabled="#{!aprobacionRequisitosTecnicosController.aprobacionRequisitosTecnicosBean.completado or !finalizarAprobacionRequisitosTecnicosController.aceptarTerminos}">
+					<p:confirm header="Confirmación"
+						message="¿Está seguro que desea enviar la información de aprobación de requisitos técnicos para su revisión?"
+						icon="ui-icon-alert"  />
+				</p:commandButton>
+			</div>
+
+
+		</h:form>
+		<p:dialog id="generadorDlg" header="Informativo"
+			widgetVar="generadorWdgt" modal="true" closable="false" height="140" width="500" resizable="false">
+			<h:panelGroup id="generadorInner" layout="block" style="margin:10px;">
+				<h:outputText
+					value="#{helps['rg.mensaje.informativo.inclusion.desecho']}"
+					styleClass="bold text-red alJustify" />
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Aceptar" styleClass="primary"
+						onclick="PF('generadorWdgt').hide();"
+						action="#{finalizarAprobacionRequisitosTecnicosController.direccionar()}" />
+				</div>
+			</h:panelGroup>
+		</p:dialog>
+		<p:dialog id="anadirGeneradorDlg" header="Informativo"
+			widgetVar="anadirGeneradorWdgt" modal="true" closable="false" height="140" width="500" resizable="false">
+			<h:panelGroup id="anadirGeneradorInner" layout="block"
+				style="margin:10px;">
+				<h:outputText
+					value="#{helps['rg.mensaje.inicio.proceso.obligatorio.vinculado.otros.procesos']}"
+					styleClass="alJustify" />
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Aceptar" styleClass="primary"
+						onclick="PF('anadirGeneradorWdgt').hide();"
+						action="#{finalizarAprobacionRequisitosTecnicosController.direccionar()}" />
+				</div>
+			</h:panelGroup>
+		</p:dialog>
+		<script type="text/javascript">
+	function showModalAddGenerador(xhr, status, args) {		
+    	if (args.generador) {
+        	PF('generadorWdgt').show();
+    	} else if (args.anadirGenerador) {
+        	PF('anadirGeneradorWdgt').show();
+    	}              
+	}
+	      
+</script>
+	</ui:define>
+</ui:composition>

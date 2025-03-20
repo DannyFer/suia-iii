@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<ui:composition>
+    <h:form id="accionEmergenteImplementadaDialog">
+        <p:dialog resizable="false" modal="true" widgetVar="accionEmergenteImplementadaDialog" width="750" height="500">
+            <p:panelGrid id="panel" columns="4" layout="grid">
+                <f:facet name="header">Acción emergente ya implementada</f:facet>
+                <p:outputLabel for="descripcion" value="Descripción del evento"/>
+                <p:inputText id="descripcion" required="true" value="#{accionEmergenteImplementadaController.accionEmergente.eventoOcurrido.descripcion}"
+                             style="width: 200%" />
+                <p:outputLabel value=""/>
+                <p:outputLabel value=""/>
+
+                <p:outputLabel value="Medidas correctivas"/>
+                <p:inputText id="medida" value="#{accionEmergenteImplementadaController.medida}" maxlength="200" style="width: 100%"/>
+                <t:div styleClass="buttons" style="padding-top: 0px; text-align: left;">
+                    <p:commandButton actionListener="#{accionEmergenteImplementadaController.adicionarMedida}" value="Adicionar" icon="ui-icon-plus" process="@this,medida"
+                                     update=":accionEmergenteImplementadaDialog:medidas, :accionEmergenteImplementadaDialog:medida" />
+                </t:div>
+                <p:outputLabel value=""/>
+
+                <p:dataTable id="medidas" value="#{accionEmergenteImplementadaController.accionEmergente.medidaCorrectivas}"
+                             var="medida" emptyMessage="Sin resultados" rowIndexVar="i" rows="3" style="width: 400%"
+                             paginator="true" paginatorAlwaysVisible="false" pageLinks="3" paginatorPosition="bottom">
+                    <p:column headerText="Número">
+                        <h:outputText value="#{i + 1}"/>
+                    </p:column>
+                    <p:column headerText="Medida">
+                        <h:outputText value="#{medida.descripcion}"/>
+                    </p:column>
+                    <p:column headerText="Indicadores">
+                        <h:outputText value="#{medida.indicadores.size()} indicadores" />
+                    </p:column>
+                    <p:column headerText="Acciones">
+                        <p:commandButton icon="ui-icon-pencil" update=":accionEmergenteImplementadaMedidaDialog" styleClass="button-small primary"
+                                         title="Editar" actionListener="#{accionEmergenteImplementadaController.mostrarMedida(i)}" immediate="true" />
+                        <p:commandButton icon="ui-icon-trash" update=":accionEmergenteImplementadaDialog:medidas" styleClass="button-small primary"
+                                         title="Eliminar" actionListener="#{accionEmergenteImplementadaController.eliminarMedida(i)}">
+                            <p:confirm message="¿Estás seguro que desea eliminar esta medida?" header="Confirmación" icon="ui-icon-alert" />
+                        </p:commandButton>
+                        <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                            <p:commandButton value="Si" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                            <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+                        </p:confirmDialog>
+                    </p:column>
+                </p:dataTable>
+                <p:outputLabel value=""/>
+                <p:outputLabel value=""/>
+                <p:outputLabel value=""/>
+
+                <p:outputLabel for="afectada" value="Área/Volumen afectado"/>
+                <p:inputText id="afectada" required="true" value="#{accionEmergenteImplementadaController.accionEmergente.areaAfectada}" style="width: 100%"/>
+                <p:outputLabel value="Unidad de medida"/>
+                <p:selectOneMenu value="#{accionEmergenteImplementadaController.accionEmergente.unidadAreaAfectada}" style="width: 60%">
+                    <p:ajax event="valueChange" update="justificacion, justificacionLabel" listener="#{accionEmergentePorImplementarController.cambiarUnidadMedida}" />
+                    <f:selectItem itemLabel="m2" itemValue="m2" />
+                    <f:selectItem itemLabel="m3" itemValue="m3" />
+                    <f:selectItem itemLabel="Número" itemValue="Número" />
+                    <f:selectItem itemLabel="Unidades" itemValue="Unidades" />
+                    <f:selectItem itemLabel="No cuantificable" itemValue="No cuantificable" />
+                </p:selectOneMenu>
+
+                <p:outputLabel for="recuperada" value="Área/Volumen Recuperada"/>
+                <p:inputText id="recuperada" required="true" value="#{accionEmergenteImplementadaController.accionEmergente.areaRecuperada}" style="width: 100%"/>
+                <p:outputLabel value="Unidad de medida"/>
+                <p:selectOneMenu value="#{accionEmergenteImplementadaController.accionEmergente.unidadAreaRecuperada}" style="width: 60%">
+                    <p:ajax event="valueChange" update="justificacion, justificacionLabel" listener="#{accionEmergenteImplementadaController.cambiarUnidadMedida}" />
+                    <f:selectItem itemLabel="m2" itemValue="m2" />
+                    <f:selectItem itemLabel="m3" itemValue="m3" />
+                    <f:selectItem itemLabel="Número" itemValue="Número" />
+                    <f:selectItem itemLabel="Unidades" itemValue="Unidades" />
+                    <f:selectItem itemLabel="No cuantificable" itemValue="No cuantificable" />
+                </p:selectOneMenu>
+
+                <p:outputLabel value="Área/Volumen perdido(Barriles)"/>
+                <p:inputText value="#{accionEmergenteImplementadaController.accionEmergente.areaPerdida}" style="width: 100%"/>
+                <p:outputLabel value=""/>
+                <p:outputLabel value=""/>
+
+                <p:outputLabel id="justificacionLabel" for="justificacion" value="Justificación por qué no es cuantificable"/>
+                <p:inputText id="justificacion" value="#{accionEmergenteImplementadaController.accionEmergente.justificacion}" style="width: 200%"
+                             required="#{accionEmergenteImplementadaController.accionEmergente.unidadAreaRecuperada eq 'No cuantificable' or
+                                        accionEmergenteImplementadaController.accionEmergente.unidadAreaAfectada eq 'No cuantificable'}"
+                             disabled="#{accionEmergenteImplementadaController.accionEmergente.unidadAreaRecuperada ne 'No cuantificable' and
+                                        accionEmergenteImplementadaController.accionEmergente.unidadAreaAfectada ne 'No cuantificable'}"/>
+                <p:outputLabel value=""/>
+                <p:outputLabel value=""/>
+
+                <p:outputLabel for="medio" value="Medio de verificación"/>
+                <p:inputText id="medio" required="true" maxlength="150" value="#{accionEmergenteImplementadaController.accionEmergente.medioVerificacion}" style="width: 200%"/>
+                <p:outputLabel value=""/>
+                <p:outputLabel value=""/>
+
+                <p:outputLabel for="responsabe" value="Responsable"/>
+                <p:inputText id="responsabe" required="true" maxlength="150" value="#{accionEmergenteImplementadaController.accionEmergente.responsable}" style="width: 200%"/>
+                <p:outputLabel value=""/>
+                <p:outputLabel value=""/>
+
+                <p:outputLabel for="inicio" value="Fecha de Inicio"/>
+                <p:calendar id="inicio" mindate="#{accionEmergenteImplementadaController.minFechaInicio}" maxdate="#{accionEmergenteImplementadaController.maxFechaInicio}"
+                            rendered="true" pattern="dd/MM/yyyy" value="#{accionEmergenteImplementadaController.accionEmergente.fechaInicio}" size="21" required="true">
+                    <p:ajax event="dateSelect" listener="#{accionEmergenteImplementadaController.onDateSelect}" update="fin" />
+                </p:calendar>
+                <p:outputLabel value=""/>
+                <p:outputLabel value=""/>
+
+                <p:outputLabel for="fin" value="Fecha de Fin"/>
+                <p:calendar id="fin" mindate="#{accionEmergenteImplementadaController.minFechaFin}" rendered="true" pattern="dd/MM/yyyy"
+                            value="#{accionEmergenteImplementadaController.accionEmergente.fechaFin}" size="21" required="true" />
+                <p:outputLabel value=""/>
+                <p:outputLabel value=""/>
+
+                <p:outputLabel for="presupuesto" value="Presupuesto proyectado de la medida"/>
+                <p:inputText id="presupuesto" required="true" value="#{accionEmergenteImplementadaController.accionEmergente.presupuesto}" style="width: 100%"/>
+                <p:outputLabel value=""/>
+                <p:outputLabel value=""/>
+            </p:panelGrid><br/>
+
+            <div class="buttons">
+                <p:commandButton actionListener="#{accionEmergenteImplementadaController.editar}" value="Aceptar" icon="ui-icon-check"
+                                 update=":accionEmergenteImplementadaDialog:panel, :accionesImplementadas"/>
+                <p:commandButton immediate="true" process="@this" value="Cancelar" onclick="PF('accionEmergenteImplementadaDialog').hide();"/>
+            </div>
+            <br/><br/>
+        </p:dialog>
+    </h:form>
+
+    <h:form id="accionEmergenteImplementadaMedidaDialog">
+        <p:dialog resizable="false" modal="true" widgetVar="accionEmergenteImplementadaMedidaDialog" width="600" height="300">
+            <f:facet name="header">Editar medida</f:facet>
+            <p:panelGrid columns="3" layout="grid">
+                <p:outputLabel for="medida1" value="Medida" />
+                <p:inputText id="medida1" rendered="true" value="#{accionEmergenteImplementadaController.medidaCorrectiva.descripcion}" maxlength="200" style="width: 100%" />
+                <p:outputLabel value=""/>
+
+                <p:outputLabel value="Indicadores"/>
+                <p:inputText id="indi" value="#{accionEmergenteImplementadaController.indi}" maxlength="100" style="width: 100%"/>
+                <t:div styleClass="buttons" style="padding-top: 0px; text-align: left;">
+                    <p:commandButton actionListener="#{accionEmergenteImplementadaController.adicionarIndicador}" value="Adicionar" icon="ui-icon-plus"
+                                     update=":accionEmergenteImplementadaMedidaDialog:indicadores, :accionEmergenteImplementadaMedidaDialog:indi" />
+                </t:div>
+
+                <p:dataTable id="indicadores" value="#{accionEmergenteImplementadaController.medidaCorrectiva.indicadores}"
+                             var="indicador" emptyMessage="Sin resultados" rowIndexVar="i" rows="3" style="width: 300%"
+                             paginator="true" paginatorAlwaysVisible="false" pageLinks="3" paginatorPosition="bottom">
+                    <p:column headerText="Número">
+                        <h:outputText value="#{i + 1}"/>
+                    </p:column>
+                    <p:column headerText="Indicador">
+                        <h:outputText value="#{indicador.descripcion}"/>
+                    </p:column>
+                    <p:column headerText="Medida">
+                        <h:outputText value="#{accionEmergenteImplementadaController.medidaCorrectiva.descripcion}"/>
+                    </p:column>
+                    <p:column headerText="Acciones">
+                        <p:commandButton icon="ui-icon-pencil" update=":accionEmergenteImplementadaIndicadorDialog" styleClass="button-small primary"
+                                         title="Editar" actionListener="#{accionEmergenteImplementadaController.mostrarIndicador(i)}" />
+                        <p:commandButton icon="ui-icon-trash" update=":accionEmergenteImplementadaDialog:medidas, :accionEmergenteImplementadaMedidaDialog:indicadores" styleClass="button-small primary"
+                                         title="Eliminar" actionListener="#{accionEmergenteImplementadaController.eliminarIndicador(i)}">
+                            <p:confirm message="¿Estás seguro que desea eliminar este indicador?" header="Confirmación" icon="ui-icon-alert" />
+                        </p:commandButton>
+                        <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                            <p:commandButton value="Si" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                            <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+                        </p:confirmDialog>
+                    </p:column>
+                </p:dataTable>
+                <p:outputLabel value=""/>
+                <p:outputLabel value=""/>
+            </p:panelGrid><br/><br/>
+            <div class="buttons">
+                <p:commandButton actionListener="#{accionEmergenteImplementadaController.editarMedida}" value="Aceptar" icon="ui-icon-check"
+                                 update=":accionEmergenteImplementadaDialog:medidas"/>
+            </div>
+        </p:dialog>
+    </h:form>
+
+    <h:form id="accionEmergenteImplementadaIndicadorDialog">
+        <p:dialog resizable="false" modal="true" widgetVar="accionEmergenteImplementadaIndicadorDialog" width="500" height="100">
+            <f:facet name="header">Editar indicador</f:facet>
+            <p:panelGrid columns="3" layout="grid">
+                <p:outputLabel for="indicador" value="Indicador" />
+                <p:inputText id="indicador" required="true" value="#{accionEmergenteImplementadaController.indicador.descripcion}" maxlength="100" style="width: 100%" />
+                <t:div styleClass="buttons" style="padding-top: 0px; text-align: left;">
+                    <p:commandButton actionListener="#{accionEmergenteImplementadaController.editarIndicador}" value="Aceptar" icon="ui-icon-check"
+                                     update=":accionEmergenteImplementadaDialog:medidas, :accionEmergenteImplementadaMedidaDialog:indicadores"/>
+                </t:div>
+            </p:panelGrid>
+        </p:dialog>
+    </h:form>
+</ui:composition>
+</html>

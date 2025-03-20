@@ -1,0 +1,1114 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{descripcionProyectoPmaBean.validarTareaBpm()}"/>
+        <ui:include src="contenido/menu.xhtml" />
+        <div class="content">
+
+            <p:panel id="parte4" header="4. DESCRIPCI&Oacute;N DEL PROCESO. FASES: #{descripcionProcesoPmaBean.nombreFases}">
+
+                <h:form id="formUnloadDialog">
+                    <p:dialog header="Informaci&oacute;n" id="dlgRequerimiento" widgetVar="dlgRequerimiento"
+                              modal="true" width="400" resizable="false" draggable="false" closable="false">
+                        <h:panelGrid columns="1" styleClass="w100" columnClasses="alJustify">
+                            <h:outputText value="Estimado usuario, antes de continuar con el punto actual, debe completar el punto 2 (Datos generales)." />
+                        </h:panelGrid>
+
+                        <p:separator />
+                        <div class="buttons">
+                            <p:commandButton value="Aceptar" icon="ui-icon-check" styleClass="primary"
+                                             immediate="true" process="@this" action="/prevencion/categoria2/fichaAmbiental/proyectoObra.jsf?faces-redirect=true"/>
+                        </div>
+                    </p:dialog>
+                </h:form>
+
+                <!--Actividades del proceso//-->
+                <h:form id="formActividadProceso">
+                    <p:panelGrid id="pnl_actividades_proceso" columns="1" layout="grid"
+                                 styleClass="w100">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp render="false" value="Actividades del proceso *"
+                                                     conector="generalHelp"
+                                                     image="#{request.contextPath}/resources/images/help-how.png"
+                                                     help="#{helps['no.help.yet']}" />
+                        </f:facet>
+
+                        <h:panelGrid id="pnlActividadFase" columns="2" layout="grid" styleClass="w100" columnClasses="w20, w80">
+
+                            <h:panelGrid cellpadding="2" style="vertical-align: top">
+                                <p:outputLabel for="selectFase" value="Fase:" />
+                                <p:selectOneMenu id="selectFase" converter="selectItemConverter" required="true"
+                                                 style="width:135px"
+                                                 value="#{descripcionProcesoPmaBean.faseSeleccionada}">
+                                    <p:ajax event="change" update=":#{p:component('pnlActividadComercial')}" />
+                                    <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                                  itemValue="" noSelectionOption="true" />
+                                    <f:selectItems
+                                            value="#{descripcionProcesoPmaBean.fases}"
+                                            var="fase"
+                                            itemLabel="#{fase.nombre}"
+                                            itemValue="#{fase}" />
+                                </p:selectOneMenu>
+                            </h:panelGrid>
+
+                            <h:panelGrid cellpadding="2" style="vertical-align: top">
+                                <p:outputLabel for="selectActivity" value="Actividad:" />
+
+                                <h:panelGrid id="pnlActividadComercial" styleClass="w80" columns="2" layout="grid">
+                                    <h:panelGroup>
+                                        <p:selectOneMenu id="selectActivity" style="max-width: 550px; min-width: 147px" converter="selectItemConverter" required="true"
+                                                         value="#{descripcionProcesoPmaBean.actividadProceso.actividadComercial}">
+                                            <p:ajax event="change"
+                                                    update=":#{p:component('pnlActividadComercial')}" />
+                                            <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                                          itemValue="" noSelectionOption="true" />
+                                            <f:selectItems
+                                                    value="#{descripcionProcesoPmaBean.todasActividadesComerciales}"
+                                                    var="actividadComercial"
+                                                    itemLabel="#{actividadComercial.nombreActividad}"
+                                                    itemValue="#{actividadComercial}" />
+                                        </p:selectOneMenu>
+                                    </h:panelGroup>
+
+                                    <h:panelGroup cellpadding="2">
+
+                                        <p:inputText required="true" requiredMessage="El campo 'Nombre de la actividad' es requerido."
+                                                     rendered="#{descripcionProcesoPmaBean.actividadProceso.actividadComercial.nombreActividad != null and descripcionProcesoPmaBean.actividadProceso.actividadComercial.nombreActividad == 'Otros'}"
+                                                     value="#{descripcionProcesoPmaBean.actividadProceso.descripcionOtros}"
+                                                     placeholder="Nombre actividad" maxlength="50" />
+
+                                    </h:panelGroup>
+
+
+                                </h:panelGrid>
+                            </h:panelGrid>
+
+                            <h:panelGrid cellpadding="2">
+                                <p:outputLabel for="startDate" value="Fecha inicio:" />
+                                <p:calendar id="startDate" required="true" value="#{descripcionProcesoPmaBean.actividadProceso.fechaInicio}" pattern="dd/MM/yyyy" mindate="#{descripcionProcesoPmaBean.expostOrCurrentDate}" readonlyInput="true">
+                                    <p:ajax event="dateSelect" update=":#{p:component('endDate')}" />
+                                </p:calendar>
+                            </h:panelGrid>
+
+                            <h:panelGrid cellpadding="2">
+                                <p:outputLabel for="endDate" value="Fecha fin" />
+                                <p:calendar id="endDate" required="true" value="#{descripcionProcesoPmaBean.actividadProceso.fechaFin}" pattern="dd/MM/yyyy" mindate="#{descripcionProcesoPmaBean.actividadProceso.fechaInicio}" readonlyInput="true" />
+                            </h:panelGrid>
+
+                        </h:panelGrid>
+
+                        <h:panelGrid columns="1" layout="grid" styleClass="w100">
+                            <p:outputLabel for="textDescripcionActividad" value="Descripci&oacute;n:" />
+                            <p:inputTextarea id="textDescripcionActividad" maxlength="250" scrollHeight="10"
+                                             required="true" autoResize="true" width="400px"
+                                             value="#{descripcionProcesoPmaBean.actividadProceso.descripcion}" />
+                        </h:panelGrid>
+
+                        <p:commandButton id="btnAddActividad" value="#{descripcionProcesoPmaBean.buttonMode}" icon="ui-icon-disk"
+                                         styleClass="primary"
+                                         action="#{descripcionProcesoPmaBean.guardarActividadProceso()}"
+                                         update=":#{p:component('tbl_actividades')}, :#{p:component('pnl_actividades_proceso')}" />
+                    </p:panelGrid>
+                </h:form>
+
+                <p:dataTable id="tbl_actividades"
+                             value="#{descripcionProcesoPmaBean.actividadesProceso}"
+                             var="actividadProceso" emptyMessage="#{labels['common.table.empty']}"
+                             rows="10" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+                    <p:column width="26%" headerText="Fase">
+                        <h:outputText rendered="#{actividadProceso.actividadComercial.categoriaFase != null}"
+                                      value="#{actividadProceso.actividadComercial.categoriaFase.fase.nombre}" />
+
+                        <h:outputText rendered="#{actividadProceso.actividadComercial.categoriaFase == null}"
+                                      value="#{actividadProceso.descripcionFaseOtros}" />
+                    </p:column>
+
+                    <p:column width="26%" headerText="Actividad">
+                        <h:outputText rendered="#{actividadProceso.actividadComercial.nombreActividad != 'Otros'}"
+                                      value="#{actividadProceso.actividadComercial.nombreActividad}" />
+                        <h:outputText rendered="#{actividadProceso.actividadComercial.nombreActividad == 'Otros'}"
+                                      value="#{actividadProceso.descripcionOtros}" />
+                    </p:column>
+                    <p:column width="26%" headerText="Fecha Inicio">
+                        <h:outputText value="#{actividadProceso.fechaInicio}">
+                            <f:convertDateTime pattern="dd/MM/yyyy" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column width="26%" headerText="Fecha Fin">
+                        <h:outputText value="#{actividadProceso.fechaFin}">
+                            <f:convertDateTime pattern="dd/MM/yyyy" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column width="26%" headerText="Descripci&oacute;n">
+                        <h:outputText value="#{actividadProceso.descripcion}" />
+                    </p:column>
+                    <p:column width="20%" headerText="Acciones"
+                              style="text-align: center">
+                        <p:commandButton icon="ui-icon-pencil" styleClass="primary"
+                                         action="#{descripcionProcesoPmaBean.editarActividadProceso(actividadProceso)}"
+                                         update=":#{p:component('pnl_actividades_proceso')}" />
+                        <p:commandButton icon="ui-icon-trash" styleClass="primary"
+                                         action="#{descripcionProcesoPmaBean.eliminarActividadProceso(actividadProceso)}"
+                                         update=":#{p:component('tbl_actividades')}, :#{p:component('pnl_actividades_proceso')}" />
+                    </p:column>
+                </p:dataTable>
+
+                <p:separator style="background-color: #ffffff;border-color:#ffffff;height:10px" />
+
+                <!--Técnicas del proceso//-->
+                <h:form id="formTecnicasInstalaciones">
+                    <p:panelGrid id="pnl_tecnicas_proceso" layout="grid"
+                                 columns="1"
+                                 rendered="#{descripcionProcesoPmaBean.aplicaTecnicas}">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp render="false" value="Técnicas del proceso *"
+                                                     conector="generalHelp"
+                                                     image="#{request.contextPath}/resources/images/help-how.png"
+                                                     help="#{helps['no.help.yet']}" />
+                        </f:facet>
+
+                        <p:dataList id="tbl_tecnicas_proceso" value="#{descripcionProcesoPmaBean.tecnicasCatalogo}"
+                                    var="tecnica" emptyMessage="#{labels['common.table.empty']}" type="unordered" itemType="none">
+
+                            <h:panelGrid columns="2" styleClass="w100" columnClasses="w5 alLeft, alLeft" >
+                                <p:selectBooleanCheckbox value="#{tecnica.seleccionado}">
+                                    <p:ajax event="change" update=":#{p:component('tbl_tecnicas_proceso')}" />
+                                </p:selectBooleanCheckbox>
+
+                                <h:outputText  value="#{tecnica.nombre}" />
+                            </h:panelGrid>
+
+                        </p:dataList>
+
+                    </p:panelGrid>
+
+                    <p:separator
+                            rendered="#{descripcionProcesoPmaBean.aplicaTecnicas}"
+                            style="background-color: #ffffff;border-color:#ffffff;height:10px" />
+
+                    <!--Instalaciones del proceso-->
+                    <p:panelGrid id="pnl_instalaciones_proceso" layout="grid"
+                                 columns="1"
+                                 rendered="#{descripcionProcesoPmaBean.aplicaInstalaciones}">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp render="false" value="Instalaciones del proceso *"
+                                                     conector="generalHelp"
+                                                     image="#{request.contextPath}/resources/images/help-how.png"
+                                                     help="#{helps['no.help.yet']}" />
+                        </f:facet>
+
+                        <p:dataList id="tbl_instalaciones_proceso" value="#{descripcionProcesoPmaBean.instalacionesCatalogo}"
+                                    var="instalacion" emptyMessage="#{labels['common.table.empty']}" type="unordered" itemType="none">
+
+                            <h:panelGrid columns="2" styleClass="w100" columnClasses="w5 alLeft, alLeft" >
+                                <p:selectBooleanCheckbox value="#{instalacion.seleccionado}">
+                                    <p:ajax event="change" update=":#{p:component('tbl_instalaciones_proceso')}" />
+                                </p:selectBooleanCheckbox>
+                                <h:outputText  value="#{instalacion.nombre}" />
+                            </h:panelGrid>
+
+                        </p:dataList>
+
+                    </p:panelGrid>
+
+                    <p:separator
+                            rendered="#{descripcionProcesoPmaBean.aplicaInstalaciones}"
+                            style="background-color: #ffffff;border-color:#ffffff;height:10px" />
+
+                </h:form>
+
+                <!--Plaguicidas//-->
+                <h:form id="formPlaguicidas">
+                    <p:panelGrid id="pnl_plaguicidas" columns="6"
+                                 rendered="#{descripcionProcesoPmaBean.aplicaPlaguicidas}"
+                                 layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp render="false" value="Ingreso de uso de plaguicidas"
+                                                     conector="generalHelp"
+                                                     image="#{request.contextPath}/resources/images/help-how.png"
+                                                     help="#{helps['no.help.yet']}" />
+                        </f:facet>
+                        <p:outputLabel for="textNombreComercial" value="Nombre comercial del producto (Ver en el envase):" />
+                        <p:outputLabel for="selectCategoria" value="Categor&iacute;a toxicol&oacute;gica:" />
+                        <p:outputLabel for="textDosis" value="Dosis de aplicaci&oacute;n (kg/ha):" />
+                        <p:outputLabel for="textFrecuencia" value="Frecuencia de aplicaci&oacute;n (día):" />
+                        <p:outputLabel for="calendarCaducidad" value="Fecha de caducidad:" />
+                        <p:outputLabel for="textPresentacion" value="Presentaci&oacute;n:" />
+
+                        <p:inputText id="textNombreComercial" required="true"
+                                     value="#{descripcionProcesoPmaBean.plaguicidaProceso.nombreComercial}"
+                                     maxlength="250" />
+
+                        <p:selectOneMenu id="selectCategoria" required="true"
+                                         converter="selectItemConverter" style="width:100px"
+                                         value="#{descripcionProcesoPmaBean.plaguicidaProceso.categoriaToxicologica}">
+                            <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                          itemValue="" noSelectionOption="true" />
+                            <f:selectItems
+                                    value="#{descripcionProcesoPmaBean.categoriaToxicologicaCatalogo}"
+                                    var="categoriaToxicologica"
+                                    itemLabel="#{categoriaToxicologica.descripcion}"
+                                    itemValue="#{categoriaToxicologica}" />
+                        </p:selectOneMenu>
+
+                        <p:inputText id="textDosis" required="true"
+                                     value="#{descripcionProcesoPmaBean.plaguicidaProceso.dosisAplicacion}"
+                                     onkeypress="return numbersonly(this, event, false);"
+                                     maxlength="6">
+                            <f:validateDoubleRange minimum="0.001" maximum="500000" />
+                            <pe:keyFilter mask="num" />
+                            <p:ajax process="@this" immediate="true" />
+                        </p:inputText>
+
+                        <p:inputText id="textFrecuencia" required="true"
+                                     value="#{descripcionProcesoPmaBean.plaguicidaProceso.frecuenciaAplicacion}"
+                                     onkeypress="return numbersonly(this, event, false);"
+                                     maxlength="3">
+                            <f:validateDoubleRange minimum="1" maximum="999" />
+                            <pe:keyFilter mask="num" />
+                            <p:ajax process="@this" immediate="true" />
+                        </p:inputText>
+
+                        <p:calendar id="calendarCaducidad" required="true"
+                                    value="#{descripcionProcesoPmaBean.plaguicidaProceso.fechaCaducidad}"
+                                    pattern="dd/MM/yyyy" mindate="#{descripcionProcesoPmaBean.currentDate}" readonlyInput="true" />
+
+                        <p:inputText id="textPresentacion" placeholder="Ej: Funda" required="true"
+                                     value="#{descripcionProcesoPmaBean.plaguicidaProceso.presentacion}"
+                                     maxlength="250" />
+
+                        <p:commandButton value="#{descripcionProcesoPmaBean.buttonMode}" icon="ui-icon-disk" styleClass="primary"
+                                         action="#{descripcionProcesoPmaBean.guardarPlaguicidaProceso}"
+                                         update=":#{p:component('tbl_plaguicidas')}, :#{p:component('pnl_plaguicidas')}" />
+
+                        <p:outputLabel value=""/>
+                        <p:outputLabel value=""/>
+                        <p:outputLabel value=""/>
+                        <p:outputLabel value=""/>
+                        <p:outputLabel value=""/>
+
+                    </p:panelGrid>
+
+                </h:form>
+
+                <h:form id="formPlaguicidasTable">
+
+                    <p:dataTable id="tbl_plaguicidas"
+                                 rendered="#{descripcionProcesoPmaBean.aplicaPlaguicidas}"
+                                 value="#{descripcionProcesoPmaBean.plaguicidasProceso}"
+                                 var="plaguicida" emptyMessage="#{labels['common.table.empty']}"
+                                 rows="10" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+
+                        <p:column width="26%" headerText="Nombre comercial">
+                            <h:outputText value="#{plaguicida.nombreComercial}" />
+                        </p:column>
+                        <p:column width="26%"
+                                  headerText="Categor&iacute;a toxicol&oacute;gica">
+                            <h:outputText
+                                    value="#{plaguicida.categoriaToxicologica.descripcion}" />
+                        </p:column>
+                        <p:column width="26%" headerText="Dosis de aplicaci&oacute;n">
+                            <h:outputText value="#{plaguicida.dosisAplicacion}" />
+                        </p:column>
+                        <p:column width="26%" headerText="Frecuencia de aplicaci&oacute;n">
+                            <h:outputText value="#{plaguicida.frecuenciaAplicacion}" />
+                        </p:column>
+                        <p:column width="26%" headerText="Fecha de caducidad">
+                            <h:outputText value="#{plaguicida.fechaCaducidad}" />
+                        </p:column>
+                        <p:column width="26%" headerText="Presentaci&oacute;n">
+                            <h:outputText value="#{plaguicida.presentacion}" />
+                        </p:column>
+                        <p:column width="20%" headerText="Acciones"
+                                  style="text-align: center">
+                            <p:commandButton icon="ui-icon-pencil" styleClass="primary"
+                                             action="#{descripcionProcesoPmaBean.editarPlaguicidaProceso(plaguicida)}"
+                                             update=":#{p:component('tbl_plaguicidas')}, :#{p:component('pnl_plaguicidas')}" />
+                            <p:commandButton icon="ui-icon-trash" styleClass="primary"
+                                             action="#{descripcionProcesoPmaBean.eliminarPlaguicidaProceso(plaguicida)}"
+                                             update=":#{p:component('tbl_plaguicidas')}, :#{p:component('pnl_plaguicidas')}" />
+                        </p:column>
+                    </p:dataTable>
+                </h:form>
+
+                <p:separator rendered="#{descripcionProcesoPmaBean.aplicaPlaguicidas}"
+                             style="background-color: #ffffff;border-color:#ffffff;height:10px" />
+
+                <!--Fertilizante-->
+                <h:form id="formFertilizantes">
+                    <p:panelGrid id="pnl_fertilizantes"
+                                 rendered="#{descripcionProcesoPmaBean.aplicaPlaguicidas}" columns="4"
+                                 layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp render="false" value="Ingreso de uso de fertilizantes"
+                                                     conector="generalHelp"
+                                                     image="#{request.contextPath}/resources/images/help-how.png"
+                                                     help="#{helps['no.help.yet']}" />
+                        </f:facet>
+
+                        <p:outputLabel value="Uso de fertilizante:" for="selectTipofertilizante" />
+                        <p:outputLabel value="Nombre comercial del producto (Ver en el envase):"
+                                       for="textNombreComercialFertilizante" />
+                        <p:outputLabel value="Dosis de aplicaci&oacute;n (kg/ha):"
+                                       for="textDosisFertilizante" />
+                        <p:spacer width="15px" />
+
+                        <p:selectOneMenu id="selectTipofertilizante" style="width:150px" required="true"
+                                         value="#{descripcionProcesoPmaBean.fertilizanteProceso.esOrganico}">
+                            <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                          itemValue="#{null}" noSelectionOption="true" />
+                            <f:selectItem itemLabel="Qu&iacute;micos" itemValue="false" />
+                            <f:selectItem itemLabel="Org&aacute;nicos" itemValue="true" />
+                        </p:selectOneMenu>
+
+                        <p:inputText id="textNombreComercialFertilizante" required="true"
+                                     value="#{descripcionProcesoPmaBean.fertilizanteProceso.nombreComercial}"
+                                     maxlength="250" />
+
+                        <p:inputText id="textDosisFertilizante" required="true"
+                                     value="#{descripcionProcesoPmaBean.fertilizanteProceso.dosisAplicacion}"
+                                     onkeypress="return numbersonly(this, event, false);"
+                                     maxlength="6">
+                            <f:validateDoubleRange minimum="0.001" maximum="500000" />
+                            <pe:keyFilter mask="num" />
+                            <p:ajax process="@this" immediate="true" />
+                        </p:inputText>
+
+
+                        <p:commandButton value="#{descripcionProcesoPmaBean.buttonMode}" icon="ui-icon-disk"
+                                         styleClass="primary"
+                                         action="#{descripcionProcesoPmaBean.guardarFertilizanteProceso}"
+                                         update=":#{p:component('pnl_fertilizantes')}, :#{p:component('tbl_fertilizantes')}" />
+
+                    </p:panelGrid>
+                </h:form>
+
+                <h:form id="formFertilizantesList">
+                    <p:dataTable id="tbl_fertilizantes"
+                                 rendered="#{descripcionProcesoPmaBean.aplicaPlaguicidas}"
+                                 value="#{descripcionProcesoPmaBean.fertilizantesProceso}"
+                                 var="fertilizante" emptyMessage="#{labels['common.table.empty']}"
+                                 rows="10" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+                        <p:column width="26%" headerText="Tipo fertilizante">
+                            <h:outputText rendered="#{!fertilizante.esOrganico}"
+                                          value="Qu&iacute;mico" />
+                            <h:outputText rendered="#{fertilizante.esOrganico}"
+                                          value="Org&aacute;nico" />
+                        </p:column>
+                        <p:column width="26%" headerText="Nombre comercial">
+                            <h:outputText value="#{fertilizante.nombreComercial}" />
+                        </p:column>
+                        <p:column width="26%" headerText="Dosis de aplicaci&oacute;n">
+                            <h:outputText value="#{fertilizante.dosisAplicacion}" />
+                        </p:column>
+
+                        <p:column width="20%" headerText="Acciones"
+                                  style="text-align: center">
+                            <p:commandButton icon="ui-icon-pencil" styleClass="primary"
+                                             action="#{descripcionProcesoPmaBean.editarFertilizanteProceso(fertilizante)}"
+                                             update=":#{p:component('pnl_fertilizantes')}, :#{p:component('tbl_fertilizantes')}" />
+
+                            <p:commandButton icon="ui-icon-trash" styleClass="primary"
+                                             action="#{descripcionProcesoPmaBean.eliminarFertilizanteProceso(fertilizante)}"
+                                             update=":#{p:component('pnl_fertilizantes')}, :#{p:component('tbl_fertilizantes')}" />
+                        </p:column>
+                    </p:dataTable>
+
+                </h:form>
+
+                <p:separator rendered="#{descripcionProcesoPmaBean.aplicaPlaguicidas}"
+                             style="background-color: #ffffff;border-color:#ffffff;height:10px" />
+
+                <!--Disposición final//-->
+                <h:form id="formDsisposicionFinal">
+                    <p:panelGrid id="pnl_disposicion_final"
+                                 rendered="#{descripcionProcesoPmaBean.aplicaDisposicionFinal}"
+                                 layout="grid" columns="1" styleClass="w100"
+                                 columnClasses="w25, field_mrg w25">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp render="false" value="Disposici&oacute;n final"
+                                                     conector="generalHelp"
+                                                     image="#{request.contextPath}/resources/images/help-how.png"
+                                                     help="#{helps['no.help.yet']}" />
+                        </f:facet>
+
+                        <h:panelGrid columns="2" style="margin-bottom:10px"
+                                     cellpadding="5">
+                            <p:outputLabel for="desechoSanitario"
+                                           value="¿Incluye manejo de desechos sanitarios?" />
+                            <p:selectOneRadio id="desechoSanitario"
+                                              value="#{descripcionProcesoPmaBean.incluyeDesechosSanitarios}">
+                                <f:selectItem itemLabel="Sí" itemValue="true" />
+                                <f:selectItem itemLabel="No" itemValue="false" />
+                                <p:ajax process="@this" update=":#{p:component('pnl_desechos_sanitarios')}" />
+                            </p:selectOneRadio>
+                        </h:panelGrid>
+
+                        <h:panelGroup id="pnl_desechos_sanitarios">
+                            <h:panelGrid columns="1" style="margin-bottom:10px" styleClass="w100"
+                                         rendered="#{descripcionProcesoPmaBean.incluyeDesechosSanitarios}">
+
+                                <p:outputLabel for="textCapacidadAlmacenamiento"
+                                               value="Capacidad total de almacenamiento de desechos (ton): *" />
+
+                                <pe:inputNumber id="textCapacidadAlmacenamiento" minValue="0" maxValue="2000" symbol=" t" symbolPosition="s"
+                                                value="#{descripcionProcesoPmaBean.desechoSanitarioProceso.capacidadAlmacenamiento}" >
+                                    <p:ajax event="change" update=":#{p:component('textCapacidadAlmacenamiento')}" />
+                                    <f:validateDoubleRange minimum="0.1" maximum="500000" />
+                                    <pe:keyFilter mask="num" />
+                                    <p:ajax process="@this" immediate="true" />
+                                </pe:inputNumber>
+
+                                <p:outputLabel for="textMetodosReduccion"
+                                               value="Métodos de reducci&oacute;n de la peligrosidad de los desechos que se confinan: *" />
+
+
+                                <p:inputTextarea id="textMetodosReduccion" maxlength="250"
+                                                 autoResize="true"
+                                                 value="#{descripcionProcesoPmaBean.desechoSanitarioProceso.metodoReduccion}">
+                                    <p:ajax event="change" update=":#{p:component('textMetodosReduccion')}" />
+                                </p:inputTextarea>
+
+                                <p:outputLabel for="textOperacionesPrevias"
+                                               value="Operaciones previas al confinamiento de los desechos: *" />
+
+                                <p:inputTextarea id="textOperacionesPrevias" maxlength="250"
+                                                 autoResize="true"
+                                                 validatorMessage="Debe ingresar un máximo de 250 caracteres"
+                                                 value="#{descripcionProcesoPmaBean.desechoSanitarioProceso.operacionesPrevias}">
+                                    <p:ajax event="change" update=":#{p:component('textOperacionesPrevias')}" />
+                                </p:inputTextarea>
+
+                            </h:panelGrid>
+                        </h:panelGroup>
+                    </p:panelGrid>
+                </h:form>
+
+                <p:separator rendered="#{descripcionProcesoPmaBean.aplicaDisposicionFinal}"
+                             style="background-color: #ffffff;border-color:#ffffff;height:10px" />
+
+                <!--Transporte desechos (Ex-post)//-->
+                <h:form id="formTransporteDesechos">
+                    <p:panelGrid id="pnl_transporte_desechos" columns="1"
+                                 rendered="#{descripcionProcesoPmaBean.aplicaTransporteDesechosExpost}"
+                                 layout="grid" styleClass="w100">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp render="false"
+                                                     value="Transporte de desechos sanitarios (Descripción de vehículos)"
+                                                     conector="generalHelp"
+                                                     image="#{request.contextPath}/resources/images/help-how.png"
+                                                     help="#{helps['no.help.yet']}" />
+                        </f:facet>
+
+                        <p:commandButton value="Adicionar vehículo"
+                                         onclick="PF('dlgVehiculo').show()"
+                                         styleClass="primary" icon="ui-icon-plusthick" />
+
+                    </p:panelGrid>
+                </h:form>
+
+                <!--Dialog para adicionar Vehículo (Ex-post)//-->
+                <h:form id="formTransporteExpost">
+                    <p:dialog header="Adicionar vehículo" id="dlgVehiculo" widgetVar="dlgVehiculo" rendered="#{descripcionProcesoPmaBean.aplicaTransporteDesechosExpost}" modal="true" width="550px" height="550px" resizable="false" draggable="false" closable="true">
+                        <!--<p:separator />-->
+                        <h:panelGrid id="pnl_vehiculo_transporte_desechos" columns="1" layout="grid">
+                            <h:panelGrid columns="3" styleClass="w100">
+
+                                <h:panelGrid cellpadding="2">
+                                    <p:outputLabel for="textPlaca" value="Placa:" />
+                                    <p:inputText id="textPlaca" maxlength="8" placeholder="Ej: PBB-3292" required="true"
+                                                 value="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.numeroPlaca}" />
+                                </h:panelGrid>
+
+                                <h:panelGrid cellpadding="2">
+                                    <p:outputLabel for="textMotor" value="No. Motor:" />
+                                    <p:inputText id="textMotor" maxlength="20" placeholder="Ej: RFR:EW10J42.0l16" required="true"
+                                                 value="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.numeroMotor}" />
+                                </h:panelGrid>
+
+                                <h:panelGrid cellpadding="2">
+                                    <p:outputLabel for="textModelo" value="Modelo:" />
+                                    <p:inputText id="textModelo" placeholder="Ej: Chevrolet Isuzu" maxlength="25" required="true"
+                                                 value="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.modelo}" />
+                                </h:panelGrid>
+
+                                <h:panelGrid cellpadding="2">
+                                    <p:outputLabel for="textTipo" value="Tipo:" />
+                                    <p:inputText id="textTipo" placeholder="Ej: Furgoneta" maxlength="25" required="true"
+                                                 value="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.tipo}" />
+                                </h:panelGrid>
+
+                                <h:panelGrid cellpadding="2">
+                                    <p:outputLabel for="textCilindraje" value="Cilindraje:" />
+                                    <p:inputText id="textCilindraje" placeholder="Ej: 3200" maxlength="10" required="true"
+                                                 onkeypress="return numbersonly(this, event, false);"
+                                                 value="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.cilindraje}" />
+                                </h:panelGrid>
+
+                                <h:panelGrid cellpadding="2">
+                                    <p:outputLabel for="inputPBV" value="Peso bruto vehicular (ton):" />
+                                    <pe:inputNumber id="inputPBV" symbol=" t" symbolPosition="s" required="true"
+                                                    value="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.pbv}">
+                                        <f:validateDoubleRange minimum="1" maximum="800" />
+                                        <pe:keyFilter mask="num" />
+                                        <p:ajax process="@this" immediate="true" />
+                                    </pe:inputNumber>
+                                </h:panelGrid>
+
+                                <h:panelGrid cellpadding="2">
+                                    <p:outputLabel for="inputPV" value="Peso vehicular (ton):" />
+                                    <pe:inputNumber id="inputPV" required="true" symbol=" t" symbolPosition="s"
+                                                    value="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.pv}">
+                                        <f:validateDoubleRange minimum="1" maximum="450" />
+                                        <pe:keyFilter mask="num" />
+                                        <p:ajax process="@this" immediate="true" />
+                                    </pe:inputNumber>
+                                </h:panelGrid>
+
+                                <h:panelGrid cellpadding="2">
+                                    <p:outputLabel for="inputTonelaje" value="Tonelaje (ton):" />
+                                    <pe:inputNumber id="inputTonelaje" symbol=" t" symbolPosition="s" required="true"
+                                                    value="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.tonelaje}">
+                                        <f:validateDoubleRange minimum="1" maximum="800" />
+                                        <pe:keyFilter mask="num" />
+                                        <p:ajax process="@this" immediate="true" />
+                                    </pe:inputNumber>
+                                </h:panelGrid>
+
+                                <h:panelGrid cellpadding="2">
+                                    <p:outputLabel for="textCodigoCertificadoDNCA" value="Código de certificado DNCA:" />
+                                    <p:inputText id="textCodigoCertificadoDNCA" value="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.codigoDNCA}" required="true" maxlength="50" />
+                                </h:panelGrid>
+
+                            </h:panelGrid>
+
+                            <h:panelGrid columns="1" layout="grid" styleClass="w100">
+
+                                <h:panelGrid cellpadding="2" styleClass="w100">
+
+                                    <p:outputLabel value="Imagen del vehículo (Archivo imagen): *" />
+
+                                    <p:fileUpload id="archFotoVehiculo" width="100%" required="true" value="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.imagenVehiculo}"
+                                                  sizeLimit="3145728" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" fileUploadListener="#{descripcionProcesoPmaBean.adjuntarImagenVehiculo}"
+                                                  label="Seleccionar" cancelLabel="Cancelar" uploadLabel="Adjuntar" auto="true"
+                                                  update=":#{p:component('marchFotoVehiculo')}, :#{p:component('labelArchFotoVehiculo')}"
+                                                  invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo gif, jpeg o png."
+                                                  invalidSizeMessage="Debe adjuntar un archivo no mayor de 3 Mb."/>
+
+                                    <p:growl id="marchFotoVehiculo" showDetail="true" />
+
+                                    <h:panelGrid id="labelArchFotoVehiculo">
+
+                                        <p:outputLabel rendered="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.imagenVehiculo != null}"
+                                                       value="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.imagenVehiculo.name}" />
+
+                                        <p:outputLabel rendered="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.imagenVehiculo == null}"
+                                                       value="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.documentoImagenVehículo.nombre}" />
+                                    </h:panelGrid>
+
+                                </h:panelGrid>
+
+                                <h:panelGrid cellpadding="2" styleClass="w100">
+                                    <p:outputLabel value="Certificado de inspección técnica vehicular (Archivo PDF): *" />
+
+                                    <p:fileUpload id="archCertificadoInspeccion" width="100%" required="true" value="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.certificadoInspeccion}"
+                                                  sizeLimit="3145728" allowTypes="/(\.|\/)(pdf)$/" fileUploadListener="#{descripcionProcesoPmaBean.adjuntarCertificadoInspeccion}"
+                                                  label="Seleccionar" cancelLabel="Cancelar" uploadLabel="Adjuntar" auto="true"
+                                                  update=":#{p:component('marchCertificadoInspeccion')}, :#{p:component('labelArchCertificadoInspeccion')}"
+                                                  invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo pdf."
+                                                  invalidSizeMessage="Debe adjuntar un archivo no mayor de 3 Mb."/>
+
+                                    <p:growl id="marchCertificadoInspeccion" showDetail="true" />
+
+                                    <h:panelGrid id="labelArchCertificadoInspeccion">
+
+                                        <p:outputLabel rendered="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.certificadoInspeccion != null}"
+                                                       value="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.certificadoInspeccion.name}" />
+
+                                        <p:outputLabel rendered="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.certificadoInspeccion == null}"
+                                                       value="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.documentoCertificadoInspeccion.nombre}" />
+
+                                    </h:panelGrid>
+
+                                </h:panelGrid>
+
+                                <h:panelGrid cellpadding="2" styleClass="w100">
+                                    <p:outputLabel for="textDescripcionSitio" value="Sitio de lavado de contenedores y vehículos:" />
+                                    <p:inputTextarea id="textDescripcionSitio" maxlength="250" placeholder="Informar sobre el lugar donde se realizará el lavado de contenedores y vehículos, y si cuenta con algún tipo de tratamiento el agua." width="100%"
+                                                     autoResize="true" required="true" value="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.lugarLavado}"
+                                                     validatorMessage="Debe ingresar un máximo de 250 caracteres" />
+                                </h:panelGrid>
+
+                                <h:panelGrid cellpadding="2" styleClass="w100">
+                                    <p:outputLabel value="Copia de matrícula actualizada (Archivo imagen): *" />
+
+                                    <p:fileUpload id="archMatricula" width="100%" required="true" value="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.matricula}" sizeLimit="3145728" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" fileUploadListener="#{descripcionProcesoPmaBean.adjuntarMatricula}"
+                                                  label="Seleccionar" cancelLabel="Cancelar" uploadLabel="Adjuntar" auto="true"
+                                                  update=":#{p:component('marchMatricula')}, :#{p:component('labelArchMatricula')}"
+                                                  invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo gif, jpeg o png."
+                                                  invalidSizeMessage="Debe adjuntar un archivo no mayor de 3 Mb."/>
+
+                                    <p:growl id="marchMatricula" showDetail="true" />
+
+                                    <h:panelGrid id="labelArchMatricula">
+
+                                        <p:outputLabel rendered="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.matricula != null}"
+                                                       value="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.matricula.name}" />
+
+                                        <p:outputLabel rendered="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.matricula == null}"
+                                                       value="#{descripcionProcesoPmaBean.vehiculoDesechoSanitarioProceso.documentoMatricula.nombre}" />
+
+                                    </h:panelGrid>
+
+                                </h:panelGrid>
+
+                            </h:panelGrid>
+
+                        </h:panelGrid>
+
+                        <p:separator />
+                        <div class="buttons">
+
+                            <p:commandButton value="Guardar" icon="ui-icon-disk"
+                                             styleClass="primary"
+                                             action="#{descripcionProcesoPmaBean.guardarVehiculoProceso}"
+                                             update=":#{p:component('tbl_transporte_desechos')}, :#{p:component('pnl_vehiculo_transporte_desechos')},
+                                                         :#{p:component('selectVehicle')}, :#{p:component('tbl_desechos_peligrosos_expost')}" />
+                        </div>
+
+                    </p:dialog>
+                </h:form>
+
+                <p:dataTable id="tbl_transporte_desechos"
+                             rendered="#{descripcionProcesoPmaBean.aplicaTransporteDesechosExpost}"
+                             value="#{descripcionProcesoPmaBean.vehiculosDesechoSanitarioProceso}"
+                             var="vehiculo" emptyMessage="#{labels['common.table.empty']}"
+                             rows="10" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+
+                    <p:column width="26%" headerText="Placa">
+                        <h:outputText value="#{vehiculo.numeroPlaca}" />
+                    </p:column>
+                    <p:column width="26%" headerText="Modelo">
+                        <h:outputText value="#{vehiculo.modelo}" />
+                    </p:column>
+                    <p:column width="26%" headerText="Tipo">
+                        <h:outputText value="#{vehiculo.tipo}" />
+                    </p:column>
+
+                    <p:column width="26%" headerText="Acciones"
+                              style="text-align: center">
+                        <p:commandButton icon="ui-icon-pencil" styleClass="primary"
+                                         action="#{descripcionProcesoPmaBean.editarVehiculoProceso(vehiculo)}"
+                                         update=":#{p:component('tbl_transporte_desechos')}, :#{p:component('pnl_vehiculo_transporte_desechos')}, :#{p:component('selectVehicle')}" />
+                        <p:commandButton icon="ui-icon-trash" styleClass="primary"
+                                         action="#{descripcionProcesoPmaBean.eliminarVehiculoProceso(vehiculo)}"
+                                         update=":#{p:component('tbl_transporte_desechos')}, :#{p:component('pnl_vehiculo_transporte_desechos')}, :#{p:component('selectVehicle')}" />
+                    </p:column>
+                </p:dataTable>
+
+                <p:separator
+                        rendered="#{descripcionProcesoPmaBean.aplicaTransporteDesechosExpost}"
+                        style="background-color: #ffffff;border-color:#ffffff;height:10px" />
+
+                <!--Desechos peligrosos (Ex-post)//-->
+                <h:form id="form">
+                    <p:panelGrid id="pnl_desechos_peligrosos_expost" columns="5"
+                                 rendered="#{descripcionProcesoPmaBean.aplicaTransporteDesechosExpost}"
+                                 layout="grid" styleClass="w100" columnClasses="w20, w20, w20, w20, w20">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp render="false" value="Desechos peligrosos"
+                                                     conector="generalHelp"
+                                                     image="#{request.contextPath}/resources/images/help-how.png"
+                                                     help="#{helps['no.help.yet']}" />
+                        </f:facet>
+
+                        <p:outputLabel value="Desechos Sanitarios:" />
+                        <p:outputLabel for="capacidadRecoleccion" value="Capacidad de recolecci&oacute;n y transporte:" />
+                        <p:outputLabel for="selectVehicle" value="Tipo de veh&iacute;culo:" />
+                        <p:outputLabel for="tipoEnvalaje" value="Tipo de Embalaje/Envase:" />
+                        <p:outputLabel value="" />
+
+                        <h:panelGroup id="pnl_select_desechos_peligrosos_expost" cellpadding="3">
+
+                            <p:commandButton id="btnSeleccionarDesechoExpost" value="Seleccionar"
+                                             process="@this"
+                                             actionListener="#{desechoPeligrosoProcesoBean.reset()}"
+                                             update="seleccionarDesechoProceso"
+                                             oncomplete="PF('seleccionarDesechoProceso').show()"
+                                             styleClass="primary" icon="ui-icon-plusthick" />
+
+                            <br/><br/>
+
+                            <p:outputLabel id="labDesechoExpost"
+                                           value="#{desechoPeligrosoProcesoBean.optenerDesechoSeleccionado().descripcion}" />
+
+                        </h:panelGroup>
+
+                        <pe:inputNumber id="capacidadRecoleccion" required="true" symbol=" t" symbolPosition="s"
+                                        value="#{descripcionProcesoPmaBean.desechoPeligrosoProceso.capacidadRecoleccion}">
+                            <f:validateDoubleRange minimum="1" maximum="500" />
+                            <pe:keyFilter mask="num" />
+                            <p:ajax process="@this" immediate="true" />
+                        </pe:inputNumber>
+
+                        <p:selectOneMenu id="selectVehicle" required="true"
+                                         converter="selectItemConverter" style="width:125px"
+                                         value="#{descripcionProcesoPmaBean.desechoPeligrosoProceso.vehiculo}">
+                            <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                          itemValue="" noSelectionOption="true" />
+                            <f:selectItems
+                                    value="#{descripcionProcesoPmaBean.vehiculosDesechoSanitarioProceso}"
+                                    var="vehiculo" itemLabel="#{vehiculo.modelo}"
+                                    itemValue="#{vehiculo}" />
+                        </p:selectOneMenu>
+
+                        <p:inputText id="tipoEnvalaje" required="true"
+                                     value="#{descripcionProcesoPmaBean.desechoPeligrosoProceso.tipoEnvalaje}"
+                                     maxlength="50" />
+
+                        <p:commandButton value="#{descripcionProcesoPmaBean.buttonMode}" icon="ui-icon-disk"
+                                         styleClass="primary"
+                                         action="#{descripcionProcesoPmaBean.guardarDesechoPeligrosoProcesoExpost()}"
+                                         update=":#{p:component('labDesechoExpost')}, :#{p:component('pnl_desechos_peligrosos_expost')},
+                                    :#{p:component('tbl_desechos_peligrosos_expost')}" />
+                    </p:panelGrid>
+
+                    <p:dataTable id="tbl_desechos_peligrosos_expost"
+                                 rendered="#{descripcionProcesoPmaBean.aplicaTransporteDesechosExpost}"
+                                 value="#{descripcionProcesoPmaBean.desechosPeligrosoProceso}"
+                                 var="desecho" emptyMessage="#{labels['common.table.empty']}"
+                                 rows="10" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+
+                        <p:column width="26%" headerText="Desecho Sanitario">
+                            <h:outputText value="#{desecho.desechoPeligroso.descripcion}" />
+                        </p:column>
+                        <p:column width="26%" headerText="Capacidad de recolecci&oacute;n y transporte">
+                            <h:outputText value="#{desecho.capacidadRecoleccion}" />
+                        </p:column>
+                        <p:column width="26%" headerText="Tipo de veh&iacute;culo">
+                            <h:outputText value="#{desecho.vehiculo.modelo}" />
+                        </p:column>
+                        <p:column width="26%" headerText="Tipo de Embalaje/Envase">
+                            <h:outputText value="#{desecho.tipoEnvalaje}" />
+                        </p:column>
+
+                        <p:column width="26%" headerText="Acciones"
+                                  style="text-align: center">
+                            <p:commandButton icon="ui-icon-pencil" styleClass="primary"
+                                             action="#{descripcionProcesoPmaBean.editarDesechoPeligrosoProceso(vehiculo)}"
+                                             update="" />
+                            <p:commandButton icon="ui-icon-trash" styleClass="primary"
+                                             action="#{descripcionProcesoPmaBean.eliminarDesechoPeligrosoProceso(vehiculo)}"
+                                             update="" />
+                        </p:column>
+                    </p:dataTable>
+
+                    <p:separator
+                            rendered="#{descripcionProcesoPmaBean.aplicaTransporteDesechosExpost}"
+                            style="background-color: #ffffff;border-color:#ffffff;height:10px" />
+
+                    <!--Para dialog de seleccionar desecho-->
+                    <ui:include src="/prevencion/categoria2/fichaAmbiental/registroModalDesechosProceso.xhtml" />
+
+                    <!--Desechos peligrosos (Ex-antes)-->
+                    <p:panelGrid id="pnl_desechos_peligrosos_exantes" columns="5"
+                                 rendered="#{descripcionProcesoPmaBean.aplicaTransporteDesechosExantes}"
+                                 layout="grid" styleClass="w100" columnClasses="w20, w20, w20, w20, w20">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp render="false" value="Desechos peligrosos"
+                                                     conector="generalHelp"
+                                                     image="#{request.contextPath}/resources/images/help-how.png"
+                                                     help="#{helps['no.help.yet']}" />
+                        </f:facet>
+
+                        <p:outputLabel for="pnl_select_desechos_peligrosos_exantes" value="Desechos Sanitarios:" />
+                        <p:outputLabel for="capacidadRecoleccionTransporte" value="Capacidad de recolecci&oacute;n y transporte:" />
+                        <p:outputLabel for="textDescripcionVehiculo" value="Tipo de veh&iacute;culo:" />
+                        <p:outputLabel for="tipoEnvalajeEnvase" value="Tipo de Embalaje/Envases:" />
+                        <p:outputLabel value="" />
+
+                        <h:panelGroup id="pnl_select_desechos_peligrosos_exantes" cellpadding="3">
+
+                            <p:commandButton id="btnSeleccionarDesecho" value="Seleccionar"
+                                             process="@this"
+                                             actionListener="#{desechoPeligrosoProcesoBean.reset()}"
+                                             update="seleccionarDesechoProceso"
+                                             oncomplete="PF('seleccionarDesechoProceso').show()"
+                                             styleClass="primary" icon="ui-icon-plusthick" />
+
+                            <br/><br/>
+
+                            <p:outputLabel id="labDesecho"
+                                           value="#{desechoPeligrosoProcesoBean.optenerDesechoSeleccionado().descripcion}" />
+
+                        </h:panelGroup>
+
+                        <pe:inputNumber id="capacidadRecoleccionTransporte" required="true" symbol=" t" symbolPosition="s"
+                                        value="#{descripcionProcesoPmaBean.desechoPeligrosoProceso.capacidadRecoleccion}">
+                            <f:validateDoubleRange minimum="1" maximum="500" />
+                            <pe:keyFilter mask="num" />
+                            <p:ajax process="@this" immediate="true" />
+                        </pe:inputNumber>
+
+                        <p:inputText id="textDescripcionVehiculo" required="true"
+                                     value="#{descripcionProcesoPmaBean.desechoPeligrosoProceso.vehiculoDescripcionExantes}"
+                                     maxlength="50" />
+
+                        <p:inputText id="tipoEnvalajeEnvase" required="true"
+                                     value="#{descripcionProcesoPmaBean.desechoPeligrosoProceso.tipoEnvalaje}"
+                                     maxlength="50" />
+
+                        <p:commandButton value="#{descripcionProcesoPmaBean.buttonMode}" icon="ui-icon-disk"
+                                         styleClass="primary"
+                                         action="#{descripcionProcesoPmaBean.guardarDesechoPeligrosoProcesoExantes()}"
+                                         update=":#{p:component('labDesecho')}, :#{p:component('pnl_desechos_peligrosos_exantes')}, :#{p:component('tbl_desechos_peligrosos_exantes')}" />
+                    </p:panelGrid>
+                </h:form>
+
+                <p:dataTable id="tbl_desechos_peligrosos_exantes"
+                             rendered="#{descripcionProcesoPmaBean.aplicaTransporteDesechosExantes}"
+                             value="#{descripcionProcesoPmaBean.desechosPeligrosoProceso}"
+                             var="desecho" emptyMessage="#{labels['common.table.empty']}"
+                             rows="10" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+
+                    <p:column width="26%" headerText="Desecho Sanitario">
+                        <h:outputText value="#{desecho.desechoPeligroso.descripcion}" />
+                    </p:column>
+                    <p:column width="26%" headerText="Capacidad de recolecci&oacute;n y transporte">
+                        <h:outputText value="#{desecho.capacidadRecoleccion}" />
+                    </p:column>
+                    <p:column width="26%" headerText="Tipo de veh&iacute;culo">
+                        <h:outputText value="#{desecho.vehiculoDescripcionExantes}" />
+                    </p:column>
+                    <p:column width="26%" headerText="Tipo de Embalaje/Envase">
+                        <h:outputText value="#{desecho.tipoEnvalaje}" />
+                    </p:column>
+
+                    <p:column width="26%" headerText="Acciones"
+                              style="text-align: center">
+                        <p:commandButton icon="ui-icon-pencil" styleClass="primary"
+                                         action="#{descripcionProcesoPmaBean.editarDesechoPeligrosoProceso(desecho)}"
+                                         update=":#{p:component('labDesecho')}, :#{p:component('pnl_desechos_peligrosos_exantes')}" />
+                        <p:commandButton icon="ui-icon-trash" styleClass="primary"
+                                         action="#{descripcionProcesoPmaBean.eliminarDesechoPeligrosoProceso(desecho)}"
+                                         update=":#{p:component('labDesecho')}, :#{p:component('tbl_desechos_peligrosos_exantes')}, :#{p:component('pnl_desechos_peligrosos_exantes')}" />
+                    </p:column>
+                </p:dataTable>
+
+                <p:separator
+                        rendered="#{descripcionProcesoPmaBean.aplicaTransporteDesechosExantes}"
+                        style="background-color: #ffffff;border-color:#ffffff;height:10px" />
+
+                <!--Equipos y Herramientas//-->
+                <h:form id="formHerramientas">
+                    <p:panelGrid id="pnl_equipos_herramientas" columns="3"
+                                 rendered="#{descripcionProcesoPmaBean.aplicaHerramientas}"
+                                 layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp render="false" value="Equipos y herramientas *"
+                                                     conector="generalHelp"
+                                                     image="#{request.contextPath}/resources/images/help-how.png"
+                                                     help="#{helps['no.help.yet']}" />
+                        </f:facet>
+                        <p:outputLabel for="selectHerramienta" value="Equipo o Herramienta:" />
+                        <p:outputLabel for="textCantidadHerramienta" value="Cantidad:" />
+                        <p:spacer width="15px" />
+
+                        <h:panelGroup id="pnlCatalogoHerramienta">
+
+                            <p:selectOneMenu id="selectHerramienta" converter="selectItemConverter" required="true"
+                                             style="width:225px"
+                                             value="#{descripcionProcesoPmaBean.herramientaProceso.herramienta}">
+                                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                              itemValue="" noSelectionOption="true" />
+                                <p:ajax event="change"
+                                        update=":#{p:component('pnlCatalogoHerramienta')}" />
+                                <f:selectItems
+                                        value="#{descripcionProcesoPmaBean.herramientasCatalogo}"
+                                        var="herramienta" itemLabel="#{herramienta.nombreHerramienta} "
+                                        itemValue="#{herramienta}" />
+                            </p:selectOneMenu>
+
+                            <br />
+                            <br />
+
+                            <p:inputText required="true" requiredMessage="El campo 'Nombre de la herramienta' es requerido."
+                                         rendered="#{descripcionProcesoPmaBean.herramientaProceso.herramienta.nombreHerramienta != null and descripcionProcesoPmaBean.herramientaProceso.herramienta.nombreHerramienta == 'Otras'}"
+                                         value="#{descripcionProcesoPmaBean.herramientaProceso.descripcionOtras}"
+                                         placeholder="Nombre de la herramienta" maxlength="50" />
+
+                        </h:panelGroup>
+
+                        <p:inputText id="textCantidadHerramienta"
+                                     value="#{descripcionProcesoPmaBean.herramientaProceso.cantidadHerramientas}"
+                                     onkeypress="return numbersonly(this, event, false);" required="true"
+                                     maxlength="6">
+                            <f:validateDoubleRange minimum="1" maximum="500000" />
+                            <pe:keyFilter mask="num" />
+                            <p:ajax process="@this" immediate="true" />
+                        </p:inputText>
+                        <p:commandButton value="#{descripcionProcesoPmaBean.buttonMode}" icon="ui-icon-disk"
+                                         styleClass="primary"
+                                         action="#{descripcionProcesoPmaBean.guardarHerramientaProceso()}"
+                                         update=":#{p:component('tbl_equipos')}, :#{p:component('pnl_equipos_herramientas')}" />
+                    </p:panelGrid>
+                </h:form>
+
+                <p:dataTable id="tbl_equipos"
+                             rendered="#{descripcionProcesoPmaBean.aplicaHerramientas}"
+                             value="#{descripcionProcesoPmaBean.herramientasProceso}"
+                             var="herramientaEquipoProceso" emptyMessage="#{labels['common.table.empty']}">
+
+                    <p:column width="26%" headerText="Equipo o Herramienta">
+                        <h:outputText rendered="#{herramientaEquipoProceso.herramienta.nombreHerramienta != 'Otras'}"
+                                      value="#{herramientaEquipoProceso.herramienta.nombreHerramienta}" />
+                        <h:outputText rendered="#{herramientaEquipoProceso.herramienta.nombreHerramienta == 'Otras'}"
+                                      value="#{herramientaEquipoProceso.descripcionOtras}" />
+                    </p:column>
+
+                    <p:column width="26%" headerText="Cantidad">
+                        <h:outputText value="#{herramientaEquipoProceso.cantidadHerramientas}" />
+                    </p:column>
+
+                    <p:column width="20%" headerText="Acciones"
+                              style="text-align: center">
+                        <p:commandButton icon="ui-icon-pencil" styleClass="primary"
+                                         action="#{descripcionProcesoPmaBean.editarHerramientaProceso(herramientaEquipoProceso)}"
+                                         update=":#{p:component('pnl_equipos_herramientas')}" />
+                        <p:commandButton icon="ui-icon-trash" styleClass="primary"
+                                         action="#{descripcionProcesoPmaBean.eliminarHerramientaProceso(herramientaEquipoProceso)}"
+                                         update=":#{p:component('tbl_equipos')}, :#{p:component('pnl_equipos_herramientas')}" />
+                    </p:column>
+                </p:dataTable>
+
+                <p:separator
+                        rendered="#{descripcionProcesoPmaBean.aplicaHerramientas}"
+                        style="background-color: #ffffff;border-color:#ffffff;height:10px" />
+
+                <!--Materiales e insumos//-->
+                <h:form id="formIsumos">
+                    <p:panelGrid id="pnl_insumos_proceso" columns="4" layout="grid"
+                                 rendered="#{descripcionProcesoPmaBean.aplicaInsumos}"
+                                 styleClass="w100" columnClasses="w25, field_mrg w25">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp render="false" value="Materiales e insumos *"
+                                                     conector="generalHelp"
+                                                     image="#{request.contextPath}/resources/images/help-how.png"
+                                                     help="#{helps['no.help.yet']}" />
+                        </f:facet>
+                        <p:outputLabel for="selectInsumo" value="Materiales e Insumos:" />
+                        <p:outputLabel for="txtCantidadInsumo" value="Cantidad:" />
+                        <p:outputLabel for="selectUnidadMedida" value="Unidad de medida:" />
+                        <p:spacer width="15px" />
+
+                        <h:panelGroup id="pnlCatalogoInsumo">
+
+                            <p:selectOneMenu id="selectInsumo" converter="selectItemConverter" required="true"
+                                             style="width:165px"
+                                             value="#{descripcionProcesoPmaBean.insumoProceso.catalogoInsumo}">
+                                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                              itemValue="" noSelectionOption="true" />
+                                <p:ajax event="change"
+                                        update=":#{p:component('pnlCatalogoInsumo')}" />
+                                <f:selectItems
+                                        value="#{descripcionProcesoPmaBean.insumosCatalogo}"
+                                        var="insumo" itemLabel="#{descripcionProcesoPmaBean.conformarNombre(insumo)}"
+                                        itemValue="#{insumo}" />
+                            </p:selectOneMenu>
+
+                            <br />
+                            <br />
+
+                            <p:inputText required="true" requiredMessage="El campo 'Nombre del el insumo' es requerido."
+                                         rendered="#{descripcionProcesoPmaBean.insumoProceso.catalogoInsumo.nombreInsumo != null and descripcionProcesoPmaBean.insumoProceso.catalogoInsumo.nombreInsumo == 'Otros'}"
+                                         value="#{descripcionProcesoPmaBean.insumoProceso.descripcionOtros}"
+                                         placeholder="Nombre del insumo" maxlength="50" />
+
+                        </h:panelGroup>
+
+                        <p:inputText id="txtCantidadInsumo" required="true"
+                                     value="#{descripcionProcesoPmaBean.insumoProceso.cantidad}"
+                                     onkeypress="return numbersonly(this, event, false);"
+                                     maxlength="6">
+                            <f:validateDoubleRange minimum="1" maximum="500000" />
+                            <pe:keyFilter mask="num" />
+                            <p:ajax process="@this" immediate="true" />
+                        </p:inputText>
+
+                        <p:selectOneMenu id="selectUnidadMedida" converter="selectItemConverter" required="true"
+                                         style="width:165px"
+                                         value="#{descripcionProcesoPmaBean.insumoProceso.unidadMedida}">
+                            <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                          itemValue="" noSelectionOption="true" />
+                            <f:selectItems
+                                    value="#{descripcionProcesoPmaBean.unidadesMedidaCatalogo}"
+                                    var="unidad" itemLabel="#{unidad.siglas}"
+                                    itemValue="#{unidad}" />
+                        </p:selectOneMenu>
+
+                        <p:commandButton value="#{descripcionProcesoPmaBean.buttonMode}" icon="ui-icon-disk"
+                                         styleClass="primary"
+                                         action="#{descripcionProcesoPmaBean.guardarInsumoProceso()}"
+                                         update=":#{p:component('tbl_insumos_proceso')}, :#{p:component('pnl_insumos_proceso')}" />
+                    </p:panelGrid>
+                </h:form>
+
+                <p:dataTable id="tbl_insumos_proceso"
+                             rendered="#{descripcionProcesoPmaBean.aplicaInsumos}"
+                             value="#{descripcionProcesoPmaBean.insumosProceso}"
+                             var="insumoProceso" emptyMessage="#{labels['common.table.empty']}">
+                    <p:column width="26%" headerText="Materiales e Insumos">
+                        <h:outputText
+                                rendered="#{insumoProceso.catalogoInsumo.nombreInsumo != 'Otros'}"
+                                value="#{insumoProceso.catalogoInsumo.nombreInsumo}" />
+
+                        <h:outputText
+                                rendered="#{insumoProceso.catalogoInsumo.nombreInsumo == 'Otros'}"
+                                value="#{insumoProceso.descripcionOtros}" />
+                    </p:column>
+                    <p:column width="26%" headerText="Cantidad">
+                        <h:outputText value="#{insumoProceso.cantidad}" />
+                    </p:column>
+
+                    <p:column width="26%" headerText="Unidad de medida">
+                        <h:outputText value="#{insumoProceso.unidadMedida.siglas}" />
+                    </p:column>
+
+                    <p:column width="20%" headerText="Acciones"
+                              style="text-align: center">
+                        <p:commandButton icon="ui-icon-pencil" styleClass="primary"
+                                         action="#{descripcionProcesoPmaBean.editarInsumoProceso(insumoProceso)}"
+                                         update=":#{p:component('pnl_insumos_proceso')}" />
+                        <p:commandButton icon="ui-icon-trash" styleClass="primary"
+                                         action="#{descripcionProcesoPmaBean.eliminarInsumoProceso(insumoProceso)}"
+                                         update=":#{p:component('tbl_insumos_proceso')}, :#{p:component('pnl_insumos_proceso')}" />
+                    </p:column>
+                </p:dataTable>
+
+            </p:panel>
+
+            <div class="buttons main">
+                <p:commandButton value="Atrás" immediate="true" process="@this" action="/prevencion/categoria2/fichaAmbiental/marcoReferencial.jsf?faces-redirect=true" icon="ui-icon-arrowthick-1-w" />
+
+                <p:commandButton value="Guardar"
+                                 update=":form"
+                                 oncomplete="window.scrollTo(0,0);"
+                                 action="#{descripcionProcesoPmaController.guardarDatos()}"
+                                 title="Guardar datos" icon="ui-icon-disk"/>
+
+               <!-- <p:commandButton value="Siguiente" immediate="true" process="@this" action="/prevencion/categoria2/fichaAmbiental/descripcionArea.jsf?faces-redirect=true" icon="ui-icon-arrowthick-1-e" />-->
+                <p:commandButton  value="Siguiente"  immediate="true" process="@this" action="/prevencion/categoria2/fichaAmbiental/impactoAmbientales.jsf?faces-redirect=true"  icon="ui-icon-arrowthick-1-e" />
+            </div>
+            <br/>
+
+        </div>
+
+    </ui:define>
+</ui:composition>

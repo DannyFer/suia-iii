@@ -1,0 +1,292 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:f="http://java.sun.com/jsf/core">
+
+<ui:composition template="/prevencion/viabilidadTecnica/default.xhtml">
+	<ui:define name="content-vt">
+		<h:form id="form">
+			<p:panel header="Diagnóstico y Factibilidad" rendered="#{diagnosticoFactibilidadAnexController.fases}">
+
+				<p:panelGrid id="pnlFases" columns="1" layout="grid" styleClass="w100"
+							 columnClasses="">
+					<f:facet name="header">
+						<h:outputText value="Fases" />
+					</f:facet>
+
+					<p:selectManyCheckbox id="fases" converter="selectItemConverter"
+										  value="#{diagnosticoFactibilidadAnexController.diagnosticoFactibilidadAnexBean.fasesSeleccionadas}"
+										  layout="grid" columns="1">
+						<f:selectItems
+								value="#{diagnosticoFactibilidadAnexController.diagnosticoFactibilidadAnexBean.fasesVianilidadTecnica}"
+								var="fases" itemLabel="#{fases.nombre}" itemValue="#{fases}" />
+					</p:selectManyCheckbox>
+
+				</p:panelGrid>
+			</p:panel>
+
+			<p:panel header="" rendered="#{!diagnosticoFactibilidadAnexController.fases}">
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Etapa I" />
+					</f:facet>
+					<h:outputText value="1. Diagnóstico y Factibilidad" />
+					<h:outputText
+							value="1.1 Información básica sobre el área del Proyecto" />
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="1.1.1. Descripción del proyecto *" />
+					</f:facet>
+					<p:inputTextarea
+							value="#{diagnosticoFactibilidadAnexController.diagnosticoFactibilidadAnexBean.descripcionProyecto}"
+							maxlength="500" required="true" autoResize="false">
+						<f:validateLength maximum="500" />
+					</p:inputTextarea>
+
+				</p:panelGrid>
+
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="1.1.2. Datos generales" />
+					</f:facet>
+
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="Ubicación geográfica" />
+						</f:facet>
+						<f:facet name="header">
+
+							<p:commandButton styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg"
+											 icon="ui-icon-plusthick" value="Adicionar"
+											 update=":frmDlgUbicacion:panelUbicacion" process="@this"
+											 action="#{diagnosticoFactibilidadAnexController.inicializarUbicaciones()}"
+											 oncomplete="PF('dlgUbicacion').show();" />
+						</f:facet>
+
+
+						<p:dataTable paginator="true" rows="10" paginatorPosition="bottom" styleClass="tablaUbicaiones"
+									 emptyMessage="#{labels['common.table.empty']}"
+									 value="#{diagnosticoFactibilidadAnexBean.listaUbicacionesGeograficas}" paginatorAlwaysVisible="false"
+									 var="u">
+							<p:column headerText="Región">
+								<h:outputText value="#{u.ubicacionesGeografica.region.nombre}" />
+							</p:column>
+
+							<p:column headerText="Provincia">
+								<h:outputText value="#{u.ubicacionesGeografica.nombre}" />
+							</p:column>
+
+							<p:column headerText="Cantón">
+								<h:outputText value="#{u.nombre}" />
+							</p:column>
+
+							<p:column styleClass="w40px alCenter">
+								<p:commandButton icon="ui-icon-circle-close"
+												 styleClass="button-small primary" update="@form"
+												 process="@this" actionListener="#{diagnosticoFactibilidadAnexBean.eliminarUbicacion(u)}" >
+									<p:confirm header="Confirmación"
+											   message="¿Está seguro que desea eliminar esta ubicacion geográfica?"
+											   icon="ui-icon-alert" />
+								</p:commandButton>
+							</p:column>
+						</p:dataTable>
+					</p:panelGrid>
+
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<h:panelGroup id="containerCoordenadas">
+							<p:panelGrid columns="1" layout="grid"
+										 styleClass="buttonAdjuntarCoordenadasContainer w100">
+								<f:facet name="header">
+									<p:commandButton value="Adjuntar"
+													 onclick="PF('adjuntarCoordenadas').show()"
+													 styleClass="buttonAdjuntarCoordenadas button-small-text toRight field_mrg"
+													 type="button" icon="ui-icon-document" />
+									<p:commandButton
+											rendered="#{!empty cargarCoordenadasBean.plantillaCoordenadas}"
+											value="Descargar plantilla"
+											styleClass="button-small-text toRight field_mrg"
+											icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true">
+										<p:fileDownload
+												value="#{cargarCoordenadasBean.plantillaCoordenadas}" />
+									</p:commandButton>
+									<p:commandButton styleClass="button-small toRight field_mrg"
+													 ajax="false" immediate="true" icon="ui-icon-help">
+										<p:fileDownload
+												value="#{cargarCoordenadasBean.ayudaCoordenadas}" />
+									</p:commandButton>
+									<h:outputText
+											value="Sistema de referencias [Formato: sistema WGS84, zona 17S] *" />
+								</f:facet>
+								<ui:include src="/comun/cargarCoordenadasViabilidadTec.xhtml" />
+							</p:panelGrid>
+						</h:panelGroup>
+
+
+
+
+
+					</p:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" id="pnlTotalPoblacion" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="Población" />
+						</f:facet>
+						<p:panelGrid columns="3" layout="grid" styleClass="w100"
+									 columnClasses="w30, w30 , w30 ">
+
+
+
+							<p:panelGrid columns="1" layout="grid" styleClass="w100">
+								<f:facet name="header">
+									<h:outputText value="Urbana *" id="urbana" />
+								</f:facet>
+								<h:inputText
+										value="#{diagnosticoFactibilidadAnexController.diagnosticoFactibilidadAnexBean.urbana}" required="true"/>
+							</p:panelGrid>
+
+							<p:panelGrid columns="1" layout="grid" styleClass="w100">
+								<f:facet name="header">
+									<h:outputText value="Rural *" id="rural"/>
+								</f:facet>
+
+
+								<h:inputText
+										value="#{diagnosticoFactibilidadAnexController.diagnosticoFactibilidadAnexBean.rural}" required="true"/>
+							</p:panelGrid>
+
+							<p:panelGrid columns="1" layout="grid" styleClass="w100">
+								<f:facet name="header">
+									<h:outputText value="Índice de crecimiento *" id="indiceCrecimiento" />
+								</f:facet>
+								<h:inputText
+										value="#{diagnosticoFactibilidadAnexController.diagnosticoFactibilidadAnexBean.indiceCrecimiento}" required="true" />
+							</p:panelGrid>
+
+
+
+
+
+
+
+
+
+
+						</p:panelGrid>
+						<p:panelGrid columns="2" layout="grid" styleClass="w100"
+									 columnClasses="w50, w50">
+							<p:commandButton
+									process="@this , :#{p:component('pnlTotalPoblacion')} , :#{p:component('pnlFases')}"
+									value="Total Poblacion"
+									actionListener="#{diagnosticoFactibilidadAnexController.calcularTotalPoblacion}"
+									update=":#{p:component('pnlTotalPoblacion')}"></p:commandButton>
+							<p:outputLabel
+									value="#{diagnosticoFactibilidadAnexController.diagnosticoFactibilidadAnexBean.totalPoblacion}"
+									id="lblTotalPoblacion"></p:outputLabel>
+						</p:panelGrid>
+					</p:panelGrid>
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText
+								value="1.1.3 Características físicas, geográficas y ambientales de la región *" />
+					</f:facet>
+					<p:inputTextarea
+							value="#{diagnosticoFactibilidadAnexController.diagnosticoFactibilidadAnexBean.caracteristicasFisicas}"
+							maxlength="500" required="true" autoResize="false">
+						<f:validateLength maximum="500" />
+					</p:inputTextarea>
+
+				</p:panelGrid>
+
+				<div class="buttons">
+					<p:commandButton process="@this" value="Aceptar" actionListener="#{diagnosticoFactibilidadAnexController.enviarFlujo}" />
+				</div>
+
+			</p:panel>
+
+		</h:form>
+
+			<h:form id="frmDlgUbicacion">
+				<p:dialog id="dlgUbicacion" header="Ubicación" widgetVar="dlgUbicacion"
+						  modal="true" width="350" resizable="false">
+					<h:panelGrid id="panelUbicacion" columns="2" styleClass="w100 alCenter panelUbicacion"
+								 columnClasses="alRight, field_mrg w66 alLeft">
+						<p:outputLabel value="Región" for="region" />
+						<p:selectOneMenu styleClass="w100" converter="selectItemConverter"
+										 value="#{diagnosticoFactibilidadAnexBean.regionSeleccionada}" id="region">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}"
+										  itemValue="" noSelectionOption="true" />
+							<f:selectItems value="#{diagnosticoFactibilidadAnexBean.listaRegiones}" var="regiones" itemLabel="#{regiones.nombre}" />
+
+							<p:ajax listener="#{diagnosticoFactibilidadAnexBean.cargarProvincias()}"
+									update="@(.panelUbicacion)" process="@(.panelUbicacion)" />
+
+						</p:selectOneMenu>
+
+						<p:outputLabel value="Provincias" for="provincias" />
+						<p:selectOneMenu styleClass="w100" converter="selectItemConverter"
+										 value="#{diagnosticoFactibilidadAnexBean.provinciaSeleccionada}" id="provincias"
+										 converterMessage="Error no se puede actualizr">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}"
+										  itemValue="" noSelectionOption="true" />
+
+							<f:selectItems value="#{diagnosticoFactibilidadAnexBean.listaProvincias}"  />
+
+							<p:ajax listener="#{diagnosticoFactibilidadAnexBean.cargarCantones()}"
+									update="@(.panelUbicacion)" process="@(.panelUbicacion)" />
+						</p:selectOneMenu>
+
+						<p:outputLabel value="Cantones" for="cantones" />
+						<p:selectOneMenu styleClass="w100"
+										 converter="selectItemConverter"
+										 value="#{diagnosticoFactibilidadAnexBean.cantonSeleccionada}"
+										 id="cantones">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}"
+										  itemValue="" noSelectionOption="true" />
+
+							<f:selectItems value="#{diagnosticoFactibilidadAnexBean.listaCantones}"  />
+
+							<p:ajax
+									update="@(.panelUbicacion)" process="@(.panelUbicacion)" />
+
+						</p:selectOneMenu>
+
+					</h:panelGrid>
+					<p:separator />
+
+					<div class="buttons">
+
+						<p:commandButton
+								actionListener="#{diagnosticoFactibilidadAnexBean.registrarUbicacion()}"
+								process="@this @(.dlgUbicacion)" value="Agregar"
+								oncomplete="showModal(xhr, status, args)" update="@(.tablaUbicaiones)" />
+					</div>
+
+					<script type="text/javascript">
+						function showModal(xhr, status, args) {
+							if (args.puntoMuestreo)
+								PF('agregarUbicacion').hide();
+							else
+								PF('agregarUbicacion').show();
+						}
+					</script>
+				</p:dialog>
+			</h:form>
+			<p:dialog widgetVar="accCoordenadas" modal="false" resizable="false"
+					  draggable="false" width="500" header="Coordenadas">
+
+			</p:dialog>
+
+	</ui:define>
+</ui:composition>
+</html>

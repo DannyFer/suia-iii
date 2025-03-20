@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+        >
+
+<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}"
+                      target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small"
+                             icon="ui-icon-search"/>
+        </h:outputLink>
+
+        <h:outputText value="Número de facilitadores previos"
+                      rendered="#{registrarPagoFacilitadoresBean.facilitadoresAdicionales}"/>
+        <h:outputText value="#{registrarPagoFacilitadoresBean.nroFacilitadoresPrevios}"
+                      rendered="#{registrarPagoFacilitadoresBean.facilitadoresAdicionales}"/>
+        <p:commandButton styleClass="primary button-small"
+                         icon="ui-icon-search" oncomplete="PF('dlg2').show();"
+                         update="modal" rendered="#{registrarPagoFacilitadoresBean.facilitadoresAdicionales}"/>
+
+        <p:dialog header="Facilitadores" widgetVar="dlg2" modal="true" id="modal" styleClass="alLeft"
+                  height="400" width="400" rendered="#{registrarPagoFacilitadoresBean.facilitadoresAdicionales}">
+            <h:outputText escape="false" value="#{registrarPagoFacilitadoresBean.facilitadores}"/>
+        </p:dialog>
+
+    </ui:define>
+
+    <ui:define name="content">
+        <h:form id="form">
+            <h:panelGrid columns="1" layout="grid" styleClass="w100"
+                         columnClasses="w50, field_mrg w50">
+                <p:outputLabel value="Pago de facilitadores" styleClass="bold"
+                               rendered="#{!registrarPagoFacilitadoresBean.facilitadoresAdicionales}"/>
+                <p:outputLabel value="Pago de facilitadores adicionales" styleClass="bold"
+                               rendered="#{registrarPagoFacilitadoresBean.facilitadoresAdicionales}"/>
+
+                <h:panelGrid id="pnlTramite" styleClass="panel_data w50" columns="2" columnClasses="header w50, null"
+                             rowClasses="null, alt">
+                    <h:outputText value="#{msg['label.facilitatorsNumber']}"/>
+                    <h:outputText value="#{registrarPagoFacilitadoresBean.nroFacilitadores}">
+                        <f:convertNumber pattern="#0"/>
+                    </h:outputText>
+                    <h:outputText value="Valor total"/>
+                    <h:outputText value="#{registrarPagoFacilitadoresBean.totalAPagarXFacilitadores}">
+                        <f:convertNumber pattern="#0.00"/>
+                    </h:outputText>
+                </h:panelGrid>
+            </h:panelGrid>
+            <p:dialog header="Estimado Proponente" widgetVar="dlgPPS" visible="#{registrarPagoFacilitadoresBean.verDiag}" modal="true" resizable="false" width="500" closable="false">
+				<h:panelGroup rendered="true">
+					<h:outputText styleClass="alJustify"
+						value="Estimado proponente, Usted no puede ingresar información en la Evaluación Social del Sistema Único de Información Ambiental, sin 
+						contar con el oficio de aprobación de los Términos de Referencia para su Estudio de Impacto Ambiental, en cumplimiento del Art.21 de 
+						Reglamento Ambiental de Actividades Mineras. En tal razón, Usted debe elaborar los Términos de Referencia función de su proyecto en 
+						particular, los mismos, que deben ser presentados ante la Autoridad Ambiental Competente en forma física a través de un oficio, para ser 
+						sometidos a evaluación y aprobación ya sea del Ministerio del Ambiente y Agua o de la Autoridad Ambiental de Aplicación Responsable" />						
+					<div class="buttons">
+						<p:commandButton value="Aceptar" immediate="true" process="@this"
+                                    action="#{registrarPagoFacilitadoresBean.cancelarActividadesMineria()}"/>
+					</div>
+				</h:panelGroup>
+			</p:dialog>
+
+
+            <div class="buttons main">
+                <p:commandButton value="Realizar pago" disabled="#{!registrarPagoFacilitadoresBean.completado}"
+                                 action="#{registrarPagoFacilitadoresController.guardarPago()}"
+                                 title="Realizar pago de facilitadores" icon="ui-icon-check"
+                                 styleClass="primary large">
+
+                </p:commandButton>
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>

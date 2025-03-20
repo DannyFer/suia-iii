@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions">
+
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<f:loadBundle var="helps" basename="ec.gob.ambiente.core.resources.helps_es" />
+		<h:form id="form">
+			<p:panel>
+				<h:panelGrid columns="1" styleClass="w100 alCenter" columnClasses="alCenter ">
+					<p:panel>
+						<h:outputText value="Igualar fechas nuevos registros" styleClass="encabezado1_5em" />
+					</p:panel>
+					<p:separator />
+					<h:panelGrid columns="2" styleClass="w50" columnClasses="w33 bold, field_mrg">
+						<p:outputLabel value="Id Proceso Anterior:"/>
+						<p:inputText value="#{procesoFechasController.idProcesoAnterior}" maxlength="10" styleClass="w100" id="idProcesoAnterior" required="true">
+								<f:validateDoubleRange minimum="0" />
+								<pe:keyFilter mask="num" />
+								<p:ajax process="idProcesoAnterior" immediate="true" />
+						</p:inputText>
+						<p:outputLabel value="Id Proceso Actual:"/>
+						<p:inputText value="#{procesoFechasController.idProcesoActual}" maxlength="10" styleClass="w100" id="idProcesoActual" required="true">
+								<f:validateDoubleRange minimum="0" />
+								<pe:keyFilter mask="num" />
+								<p:ajax process="idProcesoActual" immediate="true" />
+						</p:inputText>
+						<p:outputLabel/>
+						<p:commandButton value="Consultar" actionListener="#{procesoFechasController.consultarFechas}" 
+										 process="@form" update=":form" styleClass="primary" title="Consultar"/>
+					</h:panelGrid>
+							<p:dataTable id="procesFechas"
+						emptyMessage="#{labels['common.table.empty']}" rowIndexVar="rowIndex"
+						var="processed"	rowStyleClass="#{processed.userIdAnterior eq processed.userIdActual ? ' ' : 'row-resalted'}"			
+						value="#{procesoFechasController.listProcesoFechas}"		
+						paginator="true" rows="10"
+						paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+						rowsPerPageTemplate="10,20,30" paginatorPosition="bottom">
+						<p:column headerText="Nº" width="5%" style="text-align:center;">
+							#{rowIndex+1}
+						</p:column>				
+						<p:column headerText="Inicio" width="15%">
+							<h:outputText value="#{processed.createdDateAnterior}">
+								<f:convertDateTime pattern="dd/MM/yyyy h:mm a" />
+							</h:outputText>
+						</p:column>
+						<p:column headerText="Activación" width="15%">
+							<h:outputText value="#{processed.startDateAnterior}">
+								<f:convertDateTime pattern="dd/MM/yyyy h:mm a" />
+							</h:outputText>
+						</p:column>
+						<p:column headerText="Fin" width="15%">
+							<h:outputText value="#{processed.endDateAnterior}">
+								<f:convertDateTime pattern="dd/MM/yyyy h:mm a" />
+							</h:outputText>
+						</p:column>
+						<p:column headerText="Estado" width="10%">
+							<h:outputText value="#{processed.statusAnterior eq 'Completed' ? 'Completada' : 'En curso'}" />
+						</p:column>	
+						<p:column headerText="Tarea Anterior" width="20%">
+							<h:outputText value="#{processed.taskNameAnterior}" />
+						</p:column>
+						<p:column headerText="Usuario Anterior" width="10%" >
+							<h:outputText value="#{procesoFechasController.getPersona(processed.userIdAnterior)}" />
+						</p:column>
+						<p:column headerText="Tarea Actual" width="20%">
+							<h:outputText value="#{processed.taskNameActual}" />
+						</p:column>
+						<p:column headerText="Usuario Actual" width="10%" >
+							<h:outputText value="#{processed.userIdActual!=null ? procesoFechasController.getPersona(processed.userIdActual): ' '}" />
+						</p:column>
+						<p:column headerText="Acciones" styleClass="alCenter" width="10%">
+							<p:commandButton title="Eliminar" actionListener="#{procesoFechasController.eliminarRegistro(processed)}" 
+										 process="procesFechas" update="procesFechas" styleClass="button-small primary" icon="ui-icon-close"/>
+							
+							<p:commandButton title="Actualizar" actionListener="#{procesoFechasController.actualizarRegistro(processed)}" 
+										 rendered="#{processed.userIdAnterior eq processed.userIdActual ? false : true}"
+										 process="procesFechas" update="procesFechas" styleClass="button-small primary" icon="ui-icon-check"/>
+						</p:column>
+					</p:dataTable>
+					<p:commandButton title="Guardar" actionListener="#{procesoFechasController.guardar()}" value="Guardar"
+										 process="@this procesFechas" update=":form" styleClass="primary" icon="ui-icon-disk"/>
+				</h:panelGrid>
+			</p:panel>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

@@ -1,0 +1,432 @@
+<ui:composition template="/WEB-INF/templates/default.xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+	<ui:define name="content">
+
+		<script type="text/javascript">
+		$(document).ready(function() {
+			$('.wizard-custom-btn-back').hide();
+			$('.wizard-custom-btn-only-end').hide();
+			$('.wizard-custom-btn-back .wizard-custom-btn-only-not-end').hide();
+		});
+	</script>
+
+		<style type="text/css">
+.ui-fileupload-content {
+	border: none !important;
+	padding: 0px;
+}
+</style>
+
+		<f:event type="preRenderView"
+			listener="#{sustanciasRetceController.validarData()}" />
+
+		<link rel="stylesheet" type="text/css"
+			href="#{request.contextPath}/resources/css/plugin/wizard.css" />
+
+		<h:form id="form">
+			<p:panel style="text-align:center;">
+				<f:facet name="header">
+					<h:outputText
+						value="REGISTRO DE EMISIONES Y TRANSFERENCIA DE CONTAMINANTES EN EL ECUADOR"
+						styleClass="uppercase" />
+					<br />
+					<h:outputText value="SUSTANCIAS RETCE" styleClass="uppercase" />
+				</f:facet>
+			</p:panel>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<h:panelGrid columns="4" styleClass="panel_data w100"
+					columnClasses="header w25, null w25, header w25, null w25"
+					rowClasses="null, alt">
+					<h:outputText value="Código proyecto" />
+					<h:outputText
+						value="#{sustanciasRetceController.informacionProyecto.codigo}" />
+
+					<h:outputText value="Código Trámite" />
+					<h:outputText
+						value="#{sustanciasRetceController.reporteSustancias.codigoTramite}" />
+
+					<h:outputText value="Reporte" />
+					<h:outputText value="Anual" />
+
+					<h:outputText value="Año de declaración" />
+					<h:outputText
+						value="#{sustanciasRetceController.reporteSustancias.anioDeclaracion}" />
+				</h:panelGrid>
+
+				<h:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null" rowClasses="null, alt">
+
+					<h:outputText value="Proyecto" />
+					<h:outputText
+						value="#{sustanciasRetceController.informacionProyecto.nombreProyecto}" />
+
+					<h:outputText value="Actividad CIIU" />
+					<h:outputText
+						value="#{sustanciasRetceController.informacionProyecto.actividadCiiu.actividadCiiu.descripcion}" />
+
+					<h:outputText value="Subactividad CIIU" />
+					<h:outputText
+						value="#{sustanciasRetceController.informacionProyecto.actividadCiiu.descripcion}" />
+
+				</h:panelGrid>
+			</p:panelGrid>
+
+			<p:wizard widgetVar="wizard"
+				flowListener="#{wizardBean.onFlowProcess}" showNavBar="false"
+				nextLabel="Siguiente" backLabel="Atrás" id="wizardEmision">
+				<p:tab id="paso2" titletip="Sustancias Retce">
+					<ui:include
+						src="/control/retce/sustanciasRetce/formSustanciasRetce.xhtml" />
+						<h:inputHidden
+						validator="#{sustanciasRetceController.validateSustancias}" />
+				</p:tab>
+				<p:tab id="paso3" titletip="Finalizar registro">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="FINALIZAR REGISTRO" />
+						</f:facet>
+						<h:panelGrid styleClass="w100" columns="1">
+							<h:inputHidden
+								validator="#{sustanciasRetceController.validateSustancias}" />
+
+							<p:panelGrid columns="2" styleClass="panel_data w100"
+								columnClasses="header w25,null w75" id="tecnicoGrid">
+								<f:facet name="header">
+									<h:outputText value="Información del técnico que reporta"
+										style="color:#222222;" />
+								</f:facet>
+
+								<p:outputLabel styleClass="ui-label-form" value="Cédula / RUC"
+									for="cedulaRuc" />
+								<p:inputText id="cedulaRuc"
+									value="#{sustanciasRetceController.tecnicoResponsable.identificador}"
+									required="true" requiredMessage="Cédula/RUC es requerido"
+									maxlength="13">
+									<p:ajax event="blur"
+										listener="#{sustanciasRetceController.validarCedulaListener}"
+										update="tecnicoGrid" />
+								</p:inputText>
+
+								<p:outputLabel styleClass="ui-label-form"
+									value="Nombre / Razón Social" for="nombreTecnico" />
+								<p:inputText id="nombreTecnico"
+									value="#{sustanciasRetceController.tecnicoResponsable.nombre}"
+									required="true" requiredMessage="Nombre es requerido"
+									maxlength="200" disabled="true" />
+
+								<p:outputLabel styleClass="ui-label-form"
+									value="Correo electrónico" for="correoTecnico" />
+								<p:inputText id="correoTecnico"
+									value="#{sustanciasRetceController.tecnicoResponsable.correo}"
+									required="true"
+									requiredMessage="Correo electrónico es requerido" />
+
+								<p:outputLabel styleClass="ui-label-form" value="Teléfono"
+									for="telefonoTecnico" />
+								<p:inputText id="telefonoTecnico"
+									value="#{sustanciasRetceController.tecnicoResponsable.telefono}"
+									required="true" requiredMessage="Teléfono es requerido"
+									maxlength="30">
+									<pe:keyFilter regEx="/[\d\-]/" />
+								</p:inputText>
+
+								<p:outputLabel styleClass="ui-label-form" value="Celular"
+									for="celularTecnico" />
+								<p:inputText id="celularTecnico"
+									value="#{sustanciasRetceController.tecnicoResponsable.celular}"
+									required="true" requiredMessage="Celular es requerido"
+									maxlength="15">
+									<pe:keyFilter regEx="/[\d\-]/" />
+								</p:inputText>
+							</p:panelGrid>
+
+							<br />
+							<br />
+
+							<p:panel styleClass="alJustify">
+								<f:facet name="header">
+									<h:outputText value="DECLARACIÓN JURAMENTADA" />
+								</f:facet>
+<!-- 								TODO MG cambiar la clausula -->
+								<h:outputText value="#{sustanciasRetceController.mensajeResponsabilidad}"
+									styleClass="alJustify bold" />
+								<br />
+								<h:panelGrid columns="2">
+									<p:selectBooleanCheckbox
+										value="#{sustanciasRetceController.aceptarCondiciones}"
+										id="aceptarCondiciones">
+										<p:ajax process="@this" update="btnFinalizar" />
+									</p:selectBooleanCheckbox>
+									<p:outputLabel value="Acepto la responsabilidad"
+										for="aceptarCondiciones" />
+								</h:panelGrid>
+							</p:panel>
+
+						</h:panelGrid>
+					</p:panelGrid>
+				</p:tab>
+			</p:wizard>
+
+			<div class="buttons main">
+				<p:commandButton value="Atrás" icon="ui-icon-arrowthick-1-w"
+					oncomplete="PF('wizard').back();reloadWizard();"
+					styleClass="wizard-custom-btn-back" process="@this"
+					update="wizardEmision,btnSiguiente"
+					action="#{sustanciasRetceController.btnAtras}" />
+				<p:commandButton id="btnGuardar" value="Guardar" title="Guardar"
+					icon="ui-icon-disk" styleClass="wizard-custom-btn-only-not-end"
+					actionListener="#{sustanciasRetceController.guardar()}"
+					update="btnSiguiente" />
+				<p:commandButton id="btnSiguiente" value="Siguiente"
+					icon="ui-icon-arrowthick-1-e"
+					oncomplete="PF('wizard').next();reloadWizard();"
+					styleClass="wizard-custom-btn-next"
+					update="wizardEmision,btnSiguiente"
+					disabled="#{!sustanciasRetceController.habilitarSiguiente}"
+					action="#{sustanciasRetceController.btnSiguiente}" />
+				<p:commandButton value="Finalizar" id="btnFinalizar"
+					action="#{sustanciasRetceController.aceptar()}" update="@this"
+					disabled="#{!sustanciasRetceController.aceptarCondiciones}"
+					styleClass="wizard-custom-btn-only-end" icon="ui-icon-check">
+					<p:confirm header="Confirmación"
+						message="¿Está seguro/a que desea enviar la información?"
+						icon="ui-icon-alert" />
+				</p:commandButton>
+			</div>
+
+			<h:outputScript name="/plugin/wizard.js" library="js" />
+		</h:form>
+
+		<h:form id="frmSustancia">
+			<p:dialog id="adicionarSustancia" closable="false"
+				header="Sustancias RETCE"
+				widgetVar="adicionarSustancia" modal="true" resizable="false"
+				width="800" 
+				>
+				<h:panelGroup id="datosSustancias">
+					<h:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25, null" rowClasses="null, alt">
+
+						<p:outputLabel value="Componente" for="componente"
+							styleClass="ui-label-form" />
+						<p:selectOneMenu
+							value="#{sustanciasRetceController.sustanciaRetce.tipoComponente}"
+							id="componente" styleClass="w100" required="true"
+							converter="selectItemConverter">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}"
+								itemValue="" noSelectionOption="true" />
+							<f:selectItems itemLabel="#{tipo.descripcion}"
+								itemValue="#{tipo}" var="tipo"
+								value="#{sustanciasRetceController.tiposComponente}" />
+							<p:ajax 
+								listener="#{sustanciasRetceController.buscarSustancias()}"
+								process="@this" update="pnlDatosSustancia sustancia" />
+						</p:selectOneMenu>
+					</h:panelGrid>
+
+					<h:panelGroup id="pnlDatosSustancia">
+						<h:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="header w25, null" rowClasses="null, alt"
+							rendered="#{sustanciasRetceController.sustanciaRetce.tipoComponente ne null}">
+
+							<p:outputLabel value="Nombre del contaminante" for="sustancia"
+								styleClass="ui-label-form" />
+							<p:selectOneMenu
+								value="#{sustanciasRetceController.sustanciaRetce.catologSustanciasRetce}"
+								id="sustancia" styleClass="w100" required="true"
+								converter="selectItemConverter">
+								<f:selectItem itemLabel="#{labels['common.item.choose']}"
+									itemValue="" noSelectionOption="true" />
+								<f:selectItems itemLabel="#{tipo.descripcionProductoQuimico}"
+								itemValue="#{tipo}" var="tipo"
+								value="#{sustanciasRetceController.getSustanciasPendientes()}" />
+							</p:selectOneMenu>
+
+							<p:outputLabel for="metodoSustancia" styleClass="ui-label-form"
+								value="Método de estimación" />
+							<p:selectOneMenu
+								value="#{sustanciasRetceController.sustanciaRetce.catalogoMetodoEstimacion}"
+								id="metodoSustancia" styleClass="w100" required="true"
+								converter="selectItemConverter">
+								<f:selectItem itemLabel="#{labels['common.item.choose']}"
+									itemValue="" noSelectionOption="true" />
+								<f:selectItems itemLabel="#{tipo.descripcion}"
+									itemValue="#{tipo}" var="tipo"
+									value="#{sustanciasRetceController.listaMetodoEstimacion}" />
+								<p:ajax event="change"
+									listener="#{sustanciasRetceController.cambiarEstimacion}"
+									process="@this" update="pnlLaboratorio pnlDocCalculo" />
+							</p:selectOneMenu>
+
+							<p:outputLabel value="Reporte (t/año)"
+								for="cantidadEliminacionSustancia" styleClass="ui-label-form" />
+							<pe:inputNumber required="true" id="cantidadEliminacionSustancia"
+								thousandSeparator="" maxValue="9999999999.9999999999"
+								minValue="0" autocomplete="off"
+								value="#{sustanciasRetceController.sustanciaRetce.reporteToneladaAnio}">
+								<f:validateDoubleRange minimum="0" />
+							</pe:inputNumber>
+
+						</h:panelGrid>
+
+					</h:panelGroup>
+
+					<h:panelGroup id="pnlLaboratorio">
+						<p:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="header w25, null" rowClasses="null, alt"
+							rendered="#{sustanciasRetceController.sustanciaRetce.catalogoMetodoEstimacion.descripcion.equals('Medición Directa')}">
+							<f:facet name="header">
+								<h:outputText value="DATOS  DEL LABORATORIO"
+									style="text-align: left; color:#222222;" />
+							</f:facet>
+
+							<p:outputLabel for="tipoLaboratorio" styleClass="ui-label-form"
+								value="Tipo de laboratorio" />
+							<p:selectOneRadio id="tipoLaboratorio"
+								value="#{sustanciasRetceController.sustanciaRetce.datosLaboratorio.tipoLaboratorio}"
+								converter="selectItemConverter">
+								<f:selectItems
+									value="#{sustanciasRetceController.tiposLaboratorio}"
+									var="tipo" itemLabel="#{tipo.descripcion}" itemValue="#{tipo}" />
+								<p:ajax event="change" process="@this" listener="#{sustanciasRetceController.cambiarTipoLaboratorio}"
+									update="pnlDataLaboratorio" />
+							</p:selectOneRadio>
+						</p:panelGrid>
+
+						<h:panelGroup id="pnlDataLaboratorio">
+							<h:panelGrid columns="2" styleClass="panel_data w100" 
+								columnClasses="header w25, null" rowClasses="null, alt"
+								rendered="#{sustanciasRetceController.sustanciaRetce.datosLaboratorio.tipoLaboratorio.orden eq 1}">
+								<p:outputLabel for="rucLaboratorio" styleClass="ui-label-form"
+									value="RUC" />
+								<p:inputText required="true" id="rucLaboratorio"
+									value="#{sustanciasRetceController.sustanciaRetce.datosLaboratorio.ruc}"
+									maxlength="20">
+									<pe:keyFilter regEx="/[a-z0-9]/i " />
+									<p:ajax event="change"
+										listener="#{sustanciasRetceController.validarCedula}"
+										update="razonSocial" />
+								</p:inputText>
+
+								<p:outputLabel value="Nombre o Razón Social" for="razonSocial"
+									styleClass="ui-label-form" />
+								<p:inputText id="razonSocial"
+									value="#{sustanciasRetceController.sustanciaRetce.datosLaboratorio.nombre}"
+									readonly="true" />
+
+								<p:outputLabel value="N° de Registro de SAE" for="numeroSae"
+									styleClass="ui-label-form" />
+								<p:inputText id="numeroSae"
+									value="#{sustanciasRetceController.sustanciaRetce.datosLaboratorio.numeroRegistroSAE}"
+									maxlength="30" />
+
+								<p:outputLabel value="Vigencia del registro" for="fechaVigencia"
+									styleClass="ui-label-form" />
+								<p:calendar id="fechaVigencia" readonlyInput="true"
+									value="#{sustanciasRetceController.sustanciaRetce.datosLaboratorio.fechaVigenciaRegistro}"
+									locale="es" navigator="true" pattern="dd-MM-yyyy">
+								</p:calendar>
+							</h:panelGrid>
+
+							<p:panelGrid columns="2" styleClass="panel_data w100"
+								columnClasses="header w25, null" rowClasses="null, alt"
+								rendered="#{sustanciasRetceController.sustanciaRetce.datosLaboratorio.tipoLaboratorio.orden eq 2}">
+
+								<p:outputLabel value="Nombre o Razón Social"
+									for="razonSocialInternacional" styleClass="ui-label-form" />
+								<p:inputText id="razonSocialInternacional" required="true"
+									value="#{sustanciasRetceController.sustanciaRetce.datosLaboratorio.nombre}" />
+							</p:panelGrid>
+						</h:panelGroup>
+
+						<p:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="header w25, null" rowClasses="null, alt"
+							rendered="#{sustanciasRetceController.sustanciaRetce.catalogoMetodoEstimacion.descripcion.equals('Medición Directa')}">
+							<p:outputLabel for="docLaboratorio" styleClass="ui-label-form"
+								value="Informe de monitoreo emitido por el laboratorio" />
+							<h:panelGroup id="panelDocLab">
+								<p:fileUpload required="true" id="docLaboratorio"
+									fileUploadListener="#{sustanciasRetceController.uploadInformeMonitoreo}"
+									multiple="false" sizeLimit="20971520"
+									allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar (pdf 20Mb)"
+									uploadLabel="Subir"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+									cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+									auto="true" update="panelDocLab" />
+								<p:commandButton icon="ui-icon-arrowthick-1-s"
+									styleClass="button-small primary toLeft" title="Ver"
+									ajax="false" immediate="true"
+									rendered="#{sustanciasRetceController.informeMonitoreo.nombre ne null}">
+									<p:fileDownload
+										value="#{sustanciasRetceController.descargar(sustanciasRetceController.informeMonitoreo)}" />
+								</p:commandButton>
+							</h:panelGroup>
+						</p:panelGrid>
+
+						<h:inputHidden
+							validator="#{sustanciasRetceController.validateLaboratorio}" />
+					</h:panelGroup>
+
+					<h:panelGroup id="pnlDocCalculo">
+						<h:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="header w25, null "
+							rendered="#{!sustanciasRetceController.sustanciaRetce.catalogoMetodoEstimacion.descripcion.equals('Medición Directa')}">
+							<p:outputLabel for="docCalculo" value="Cálculo"
+								style="color: white" />
+							<p:outputPanel>
+								<p:fileUpload id="docCalculo"
+									fileUploadListener="#{sustanciasRetceController.uploadFileDocumentoCalculo}"
+									multiple="false" sizeLimit="20971520"
+									allowTypes="/(\.|\/)(xls|xlsx)$/" label="Seleccionar (pdf 20Mb)"
+									uploadLabel="Subir"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+									cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+									auto="true" required="true" update="pnlDocCalculo" />
+								<p:commandButton icon="ui-icon-arrowthick-1-s"
+									styleClass="button-small primary toLeft" title="Ver"
+									ajax="false" immediate="true"
+									rendered="#{sustanciasRetceController.documentoCalculo.nombre ne null}">
+									<p:fileDownload
+										value="#{sustanciasRetceController.descargar(sustanciasRetceController.documentoCalculo)}" />
+								</p:commandButton>
+							</p:outputPanel>
+						</h:panelGrid>
+						<h:inputHidden
+							validator="#{sustanciasRetceController.validateDocumentoCalculo}" />
+					</h:panelGroup>
+				</h:panelGroup>
+				<p:separator />
+				<br />
+				<div class="buttons">
+					<p:commandButton styleClass="primary"
+						value="#{sustanciasRetceController.editarSustancia ? 'Actualizar' : 'Aceptar'}"
+						actionListener="#{sustanciasRetceController.agregarSustancia()}"
+						oncomplete="handleSustancia(xhr, status, args)"
+						process="@this datosSustancias"
+						update="datosSustancias :form:tblSustanciasRetce " />
+					<p:commandButton value="Cancelar" styleClass="secondary"
+						actionListener="#{sustanciasRetceController.cancelarSustancia()}"
+						oncomplete="PF('adicionarSustancia').hide()"
+						process="@this"
+						update="datosSustancias :form:tblSustanciasRetce">
+						<p:resetInput target="@form" />
+					</p:commandButton>
+				</div>
+
+			</p:dialog>
+
+		</h:form>
+
+	</ui:define>
+
+</ui:composition>

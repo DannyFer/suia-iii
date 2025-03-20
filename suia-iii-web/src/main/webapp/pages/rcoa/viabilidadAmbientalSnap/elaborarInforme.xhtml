@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="content">
+
+		<script type="text/javascript">
+		 function removeDisabled()
+		    {
+		        $('.ui-state-disabled').removeClass('ui-state-disabled');
+		    }
+	</script>
+
+		<f:event type="preRenderView"
+			listener="#{elaborarInformeViabilidadSnapController.validarTareaBpm()}" />
+
+
+		<h:form id="form" onShow="removeDisabled();">
+			<h:panelGroup id="pnlDatos">
+				<h:panelGrid styleClass="w100" id="pnlDocumentos">
+
+					<object type="application/pdf"
+						data="#{elaborarInformeViabilidadSnapController.generarInformeViabilidadSnapBean.urlInforme}?pfdrid_c=true"
+						width="100%" height="500px">
+						Su navegador no soporta la visualización de pdf. Puede descargar
+						el documento presionando el siguiente botón:
+						<p:commandButton value="Descargar" styleClass="primary"
+							ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+							<p:fileDownload
+								value="#{elaborarInformeViabilidadSnapController.getStream()}" />
+						</p:commandButton>
+					</object>
+					<br />
+					<br />
+
+
+					<ui:include
+						src="/pages/rcoa/viabilidadAmbientalSnap/viewFormElaborarInforme.xhtml" />
+
+					<h:inputHidden
+						validator="#{elaborarInformeViabilidadSnapController.validateDatosIngreso}" />
+
+					<br />
+					<h:outputText styleClass="bold text-red alJustify"
+						value="Nota: Antes de continuar con el trámite por favor verifique que el PRONUNCIAMIENTO sea el correcto" />
+					<br />
+
+				</h:panelGrid>
+			</h:panelGroup>
+
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Regresar" immediate="true"
+						styleClass="secondary" action="/bandeja/bandejaTareas.jsf"
+						icon="ui-icon-arrowthick-1-w" />
+					<p:commandButton value="Guardar" process="@this"
+						update="pnlDatos pnlButtons dlgConfirmar" immediate="true"
+						actionListener="#{elaborarInformeViabilidadSnapController.guardarInforme()}"
+						icon="ui-icon-disk">
+						<p:ajax process="txtFechaInspeccion" />
+					</p:commandButton>
+					<p:commandButton value="Firmar" update="pnlDatos pnlButtons"
+						immediate="true" widgetVar="btnFirmar"
+						disabled="#{!elaborarInformeViabilidadSnapController.informeGuardado}"
+						onclick="PF('dlgConfirmar').show();" icon="ui-icon-key">
+						<p:ajax process="txtFechaInspeccion" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+
+			<p:dialog modal="true" id="dlgConfirmar" widgetVar="dlgConfirmar"
+				header="#{msg['header.confirmacion.envio.tarea']}" resizable="false"
+				width="400px">
+				<p align="justify">
+					<h:outputText
+						value="El presente informe corresponde a un
+					#{elaborarInformeViabilidadSnapController.generarInformeViabilidadSnapBean.tipoPronunciamiento}. ¿Está seguro
+					que el pronunciamiento es correcto?" />
+				</p>
+				<br />
+				<p:separator />
+				<t:div styleClass="buttons">
+					<p:commandButton icon="ui-icon-check" value="Si"
+						process="@this form" update="pnlDatos pnlButtons"
+						onclick="PF('dlgConfirmar').hide();"
+						actionListener="#{elaborarInformeViabilidadSnapController.guardarDocumentos()}" />
+
+					<p:commandButton icon="ui-icon-cancel" value="No" process="@this"
+						styleClass="secondary" update="pnlDatos pnlButtons"
+						actionListener="#{elaborarInformeViabilidadSnapController.cancelarFirma()}" />
+
+				</t:div>
+			</p:dialog>
+
+		</h:form>
+
+		<h:form id="formDialogFirma">
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600px" height="auto">
+
+				<p:panel>
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel
+							value="Informe técnico  Nro: #{elaborarInformeViabilidadSnapController.generarInformeViabilidadSnapBean.informeInspeccion.numeroInforme}"
+							styleClass="bold" />
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGroup id="pnlFirmaToken">
+						<h:panelGrid styleClass="w100" columns="2"
+							columnClasses="w75, w25 toCenter">
+							<h:outputLabel value="" styleClass="bold" />
+							<p:commandButton value="Firmar" type="button"
+								styleClass="primary" icon="ui-icon-key"
+								onclick="window.location.href='#{elaborarInformeViabilidadSnapController.urlAlfresco}'" />
+						</h:panelGrid>
+					</h:panelGroup>
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialog').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						action="#{elaborarInformeViabilidadSnapController.aceptar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+		</h:form>
+
+
+		<h:form id="pnlObservaciones">
+			<h:panelGroup id="pnlObsInformeTecnico">
+				<observaciones:tablaObservacionesViabilidad idComponent="obsInforme"
+					seccion="Revision Informe Jefes de Area"
+					componenteActualizarEliminar="pnlObsInformeTecnico" aparace="true"
+					mostrarSiVacio="false"
+					idClase="#{elaborarInformeViabilidadSnapController.viabilidadProyecto.id}"
+					nombreClase="revisionJefesOtrasAreas_#{elaborarInformeViabilidadSnapController.numeroRevision}" soloLectura="true" />
+
+				<observaciones:tablaObservacionesViabilidad idComponent="obsInformeFinal"
+					seccion="Revision final informe SNAP"
+					componenteActualizarEliminar="pnlObsInformeTecnico" aparace="true"
+					mostrarSiVacio="false"
+					idClase="#{elaborarInformeViabilidadSnapController.viabilidadProyecto.id}"
+					nombreClase="revisionFinalInformeSnap" soloLectura="true" />
+			</h:panelGroup>
+		</h:form>
+
+	</ui:define>
+</ui:composition>

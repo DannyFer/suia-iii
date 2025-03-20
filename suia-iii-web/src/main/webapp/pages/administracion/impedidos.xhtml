@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+    <ui:define name="content">
+        <h:form id="frmDatos">
+            <p:growl id="msgs" globalOnly="true"/>
+            <p:outputPanel  id="pnlDatos">
+                <p:dataTable value="#{impedidosController.impedidosBean.listaImpedidos}" var="impedidos" paginator="true" rows="20" paginatorPosition="bottom" rendered="#{impedidosController.impedidosBean.apareceTabla}">
+                    <f:facet name="header">
+                        Lista Impedidos
+                    </f:facet>
+                    <p:column headerText="Número Documento">
+                        <h:outputText value="#{impedidos.numeroDocumento}"/>
+                    </p:column>
+                    <p:column headerText="Nombre">
+                        <h:outputText value="#{impedidos.nombre}"/>
+                    </p:column>
+                    <p:column headerText="Causa">
+                        <h:outputText value="#{impedidos.causa}"/>
+                    </p:column>
+                    <p:column headerText="Acción">
+                        <p:commandLink value="Ver" action="#{impedidosController.seleccionarVer()}" update=":#{p:component('frmDatos')}">
+                            <f:setPropertyActionListener value="#{impedidos}" target="#{impedidosController.impedidosBean.impedido}" />
+                        </p:commandLink>
+                        <br/>
+                        <p:commandLink value="Editar" action="#{impedidosController.seleccionarEditar()}" update=":#{p:component('frmDatos')}">
+                            <f:setPropertyActionListener value="#{impedidos}" target="#{impedidosController.impedidosBean.impedido}" />                            
+                        </p:commandLink>
+                    </p:column>
+                </p:dataTable>
+                <br/>
+                <p:commandButton value="Nuevo" rendered="#{impedidosController.impedidosBean.apareceTabla}" action="#{impedidosController.nuevo()}"
+                                 update=":#{p:component('pnlDatos')},:#{p:component('pnlDatos1')}"/>
+            </p:outputPanel>
+            <p:outputPanel id="pnlDatos1">
+                <p:panel header="Editar Impedido" rendered="#{!impedidosController.impedidosBean.apareceTabla}">
+                    <p:panelGrid columns="2">
+                        <h:outputLabel value="*Número documento:"/>
+                        <control:soloTextoNumeros identificador="txtNumeroDocumento" valor="#{impedidosController.impedidosBean.impedido.numeroDocumento}" requerido="true" longitud="255" tamanio="90" soloLectura="#{impedidosController.impedidosBean.soloLectura}"/>
+                        <h:outputLabel value="*Nombre:"/>
+                        <control:soloTextoMayuscula identificador="txtNombre" valor="#{impedidosController.impedidosBean.impedido.nombre}" requerido="true" longitud="255" tamanio="90" soloLectura="#{impedidosController.impedidosBean.soloLectura}"/>
+                        <h:outputLabel value="*Causa:"/>
+                        <control:todoAreaTextoMayuscula identificador="txtNombre" valor="#{impedidosController.impedidosBean.impedido.causa}" longitud="255" tamanio="90" soloLectura="#{impedidosController.impedidosBean.soloLectura}"/>
+                        <h:outputLabel value="*Tipo Impedimento:"/>
+                        <control:combo identificador="cmbTipoImpedimento" lista="#{combosController.listaTipoImpedimento}" valor="#{impedidosController.impedidosBean.idTipoImpedido}" requerido="true" habilitar="#{impedidosController.impedidosBean.soloLectura}"/>
+                        <h:outputLabel value="*Estado:"/>
+                        <h:selectBooleanCheckbox value="#{impedidosController.impedidosBean.impedido.estado}" disabled="#{impedidosController.impedidosBean.soloLectura}"/>
+                        <h:outputLabel value="Fecha duración bloqueo:"/>
+                        <control:calendario identificador="txtBloqueo" valor="#{impedidosController.impedidosBean.impedido.fechaInactivo}" habilitar="#{impedidosController.impedidosBean.soloLectura}" patron="yyyy-MM-dd"/>
+                    </p:panelGrid>
+                    <br/>
+                    <h:panelGrid columns="2">
+                        <p:commandButton value="Guardar" action="#{impedidosController.guardar()}" update=":#{p:component('frmDatos')}" disabled="#{impedidosController.impedidosBean.soloLectura}"/>
+                        <p:commandButton value="Cancelar" action="#{impedidosController.cancelar()}" ajax="false" immediate="true"/>
+                    </h:panelGrid>
+                </p:panel>
+            </p:outputPanel>
+        </h:form>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Actualización de registro de generador de desechos especiales y/o peligrosos" />
+				</f:facet>
+				<h:panelGrid styleClass="w50 separatorBottom" columns="2" columnClasses="w50, field_mrg">
+					<p:outputLabel value="Código del registro de generador" for="codigo" />
+					<h:outputText />
+					<p:inputText id="codigo" value="#{registroGeneradorDesechoActualizarController.codigo}" styleClass="w100" required="true" maxlength="50">
+						<f:validateLength minimum="5" />
+					</p:inputText>
+					<p:commandButton actionListener="#{registroGeneradorDesechoActualizarController.validar()}" icon="ui-icon-check" styleClass="primary" process="@this codigo" update="@form" title="Estimado usuario, ingrese el código del registro y haga clic en este botón" />
+				</h:panelGrid>
+
+				<h:panelGroup rendered="#{!empty verRegistroGeneradorDesechoBean.generadorDesechosPeligrosos}">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="Datos de registro" />
+						</f:facet>
+						<h:panelGrid styleClass="panel_data mw50" columns="2" columnClasses="header, null" rowClasses="null, alt">
+							<h:outputText value="No. solicitud" />
+							<h:outputText value="#{verRegistroGeneradorDesechoBean.generadorDesechosPeligrosos.solicitud}" />
+							<h:outputText value="Código" />
+							<h:outputText value="#{verRegistroGeneradorDesechoBean.generadorDesechosPeligrosos.codigo}" />
+							<h:outputText value="#{not empty verRegistroGeneradorDesechoBean.organizacion ? 'Nombre de la empresa' : 'Nombre de la persona'} que solicita el trámite" />
+							<h:outputText value="#{not empty verRegistroGeneradorDesechoBean.organizacion ? verRegistroGeneradorDesechoBean.organizacion.nombre : verRegistroGeneradorDesechoBean.generadorDesechosPeligrosos.usuario.persona.nombre}" />
+							<h:outputText value="Nombre del representante legal" rendered="#{not empty verRegistroGeneradorDesechoBean.organizacion}" />
+							<h:outputText value="#{verRegistroGeneradorDesechoBean.organizacion.persona.nombre}" rendered="#{not empty verRegistroGeneradorDesechoBean.organizacion}" />
+							<h:outputText value="#{not empty verRegistroGeneradorDesechoBean.organizacion ? 'Ruc de la empresa' : 'Cédula/Ruc de la persona'} que solicita el trámite" />
+							<h:outputText value="#{not empty verRegistroGeneradorDesechoBean.organizacion ? verRegistroGeneradorDesechoBean.organizacion.ruc : verRegistroGeneradorDesechoBean.generadorDesechosPeligrosos.usuario.pin}" />
+							<h:outputText value="Nombre del proyecto" rendered="#{not empty verRegistroGeneradorDesechoBean.generadorDesechosPeligrosos.proyecto}" />
+							<h:outputText value="#{verRegistroGeneradorDesechoBean.generadorDesechosPeligrosos.proyecto.nombre}" rendered="#{not empty verRegistroGeneradorDesechoBean.generadorDesechosPeligrosos.proyecto}" />
+						</h:panelGrid>
+					</p:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="Actividad productiva principal del establecimiento" />
+						</f:facet>
+						<h:panelGrid styleClass="panel_data mw50" columns="2" columnClasses="header, null" rowClasses="null, alt">
+							<h:outputText value="Sector" />
+							<h:outputText value="#{verRegistroGeneradorDesechoBean.generadorDesechosPeligrosos.proyecto.tipoSector}" rendered="#{!empty verRegistroGeneradorDesechoBean.generadorDesechosPeligrosos.proyecto}" />
+							<h:outputText value="#{verRegistroGeneradorDesechoBean.generadorDesechosPeligrosos.tipoSector}" rendered="#{empty verRegistroGeneradorDesechoBean.generadorDesechosPeligrosos.proyecto}" />
+						</h:panelGrid>
+					</p:panelGrid>
+
+					<t:div styleClass="buttons main">
+						<p:commandButton value="Aceptar" icon="ui-icon-check" action="#{registroGeneradorDesechoActualizarController.iniciarActualizacion()}">
+							<p:confirm header="Confirmación" message="Esta acción dará inicio al proceso de actualización de su Registro de generador de desechos especiales y/o peligrosos. ¿Está seguro que desea continuar?" icon="ui-icon-alert" />
+						</p:commandButton>
+					</t:div>
+				</h:panelGroup>
+
+				<h:panelGroup rendered="#{empty verRegistroGeneradorDesechoBean.generadorDesechosPeligrosos and registroGeneradorDesechoActualizarController.permitirNotificar}">
+					<h:panelGrid columns="1" styleClass="w100 alCenter">
+						<h:panelGrid styleClass="alCenter w75" columns="1">
+							<p:panel styleClass="alCenter">
+								<h:outputText value="#{msg['outputText.prevencion.registroGenerador.solicitarRevision']}" escape="false" styleClass="alJustify bold" />
+								<br />
+								<p:commandButton styleClass="primary" type="button" value="Ir a MAE TRANSPARENTE" onclick="navegarMaeTransparente()" />
+							</p:panel>
+						</h:panelGrid>
+					</h:panelGrid>
+				</h:panelGroup>
+			</p:panelGrid>
+
+			<script type="text/javascript">
+				function navegarMaeTransparente() {
+					window.location.assign('#{controlesBean.urlMaeTransparente}');
+				}
+			</script>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

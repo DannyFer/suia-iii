@@ -1,0 +1,341 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+	<ui:define name="context-extra">
+		<h:outputText value="#{contextoViabilidadPfnController.etiqueta}" />
+		<h:outputText value="#{contextoViabilidadPfnController.nombreTecnico}" />
+		<p:commandButton
+			action="#{contextoViabilidadPfnController.visualizarInformacion()}"
+			styleClass="primary button-small" icon="ui-icon-search" />
+	</ui:define>
+
+
+	<ui:define name="content">
+		<style type="text/css">
+.ui-state-error {
+	color: #cd0a0a !important;
+}
+</style>
+
+		<f:event type="preRenderView"
+			listener="#{elaborarDocumentosApoyoViabilidadPfnController.validarTareaBpm()}" />
+
+		<h:form id="form">
+			<p:tabView id="tab"
+				activeIndex="#{elaborarDocumentosApoyoViabilidadPfnController.activeIndex}">
+				<p:ajax event="tabChange" update=":form:tab" />
+				<!--esta linea sirve para hacer el render de las cajas de texto enriquecido-->
+				<p:tab title="Informe técnico" id="tbInforme">
+					<h:panelGrid styleClass="w100" id="pnlDocumentoInforme">
+						<object type="application/pdf"
+							data="#{elaborarDocumentosApoyoViabilidadPfnController.urlReporte}?pfdrid_c=true"
+							width="100%" height="500px">
+							Su navegador no soporta la visualización de pdf. Puede descargar
+							el documento presionando el siguiente botón:
+							<p:commandButton value="Descargar" styleClass="primary"
+								immediate="true" ajax="false" icon="ui-icon-arrowthick-1-s"
+								action="#">
+								<p:fileDownload
+									value="#{elaborarDocumentosApoyoViabilidadPfnController.getStream(1)}" />
+							</p:commandButton>
+						</object>
+						<br />
+						<br />
+
+						<h:panelGroup id="pnlTextos">
+							<p:fieldset legend="Antecedente" toggleable="true"
+								toggleSpeed="500" collapsed="false">
+								<h:panelGrid columns="1" styleClass="w100">
+									<control:imputConTextoEnriquecido
+										requiredMessage="El campo 'Antecedente' es requerido"
+										valor="#{elaborarDocumentosApoyoViabilidadPfnController.informeOficioApoyoViabilidadPfnBean.informeApoyo.antecedentes}"
+										soloLectura="false" />
+								</h:panelGrid>
+							</p:fieldset>
+
+							<br />
+
+							<p:fieldset legend="Marco legal" toggleable="true"
+								toggleSpeed="500" collapsed="false">
+								<h:panelGrid columns="1" styleClass="w100">
+									<control:imputConTextoEnriquecido
+										requiredMessage="El campo 'Marco legal' es requerido"
+										valor="#{elaborarDocumentosApoyoViabilidadPfnController.informeOficioApoyoViabilidadPfnBean.informeApoyo.marcoLegal}"
+										soloLectura="false" />
+								</h:panelGrid>
+							</p:fieldset>
+
+							<br />
+
+							<p:fieldset legend="Conclusiones/Observaciones" toggleable="true"
+								toggleSpeed="500" collapsed="false">
+								<h:panelGrid columns="1" styleClass="w100">
+									<control:imputConTextoEnriquecido
+										requiredMessage="El campo 'Conclusiones/Observaciones' es requerido"
+										valor="#{elaborarDocumentosApoyoViabilidadPfnController.informeOficioApoyoViabilidadPfnBean.informeApoyo.conclusiones}"
+										soloLectura="false" />
+								</h:panelGrid>
+							</p:fieldset>
+
+							<br />
+
+							<p:fieldset legend="Recomendaciones" toggleable="true"
+								toggleSpeed="500" collapsed="false">
+								<h:panelGrid columns="1" styleClass="w100">
+									<control:imputConTextoEnriquecido
+										requiredMessage="El campo 'Recomendaciones' es requerido"
+										valor="#{elaborarDocumentosApoyoViabilidadPfnController.informeOficioApoyoViabilidadPfnBean.informeApoyo.recomendaciones}"
+										soloLectura="false" />
+								</h:panelGrid>
+							</p:fieldset>
+
+						</h:panelGroup>
+
+						<h:inputHidden
+							validator="#{elaborarDocumentosApoyoViabilidadPfnController.validateDatosIngresoInforme}" />
+
+						<h:panelGroup id="pnlButtonsInforme">
+							<div class="buttons main">
+								<p:commandButton value="Guardar"
+									process="@this :form:tab:tbInforme"
+									styleClass="ui-confirmdialog-yes secondary" icon="ui-icon-disk"
+									update="pnlButtonsInforme :form:tab:pnlDocumentoInforme"
+									immediate="true"
+									actionListener="#{elaborarDocumentosApoyoViabilidadPfnController.guardarInforme()}">
+									<p:ajax process="pnlTextos" />
+								</p:commandButton>
+								<p:commandButton value="Siguiente" icon="ui-icon-arrowthick-1-e"
+									update="tab" process="@this :form:tab:tbInforme"
+									disabled="#{!elaborarDocumentosApoyoViabilidadPfnController.informeGuardado}"
+									action="#{elaborarDocumentosApoyoViabilidadPfnController.siguiente}" />
+							</div>
+						</h:panelGroup>
+					</h:panelGrid>
+				</p:tab>
+				<p:tab id="tbOficio" title="Memorando">
+					<h:panelGrid styleClass="w100" id="pnlDocumentoOficio">
+						<object type="application/pdf"
+							data="#{elaborarDocumentosApoyoViabilidadPfnController.informeOficioApoyoViabilidadPfnBean.oficioPronunciamiento.oficioPath}?pfdrid_c=true"
+							width="100%" height="500px">
+							Su navegador no soporta la visualización de pdf. Puede descargar
+							el documento presionando el siguiente botón:
+							<p:commandButton value="Descargar" styleClass="primary"
+								immediate="true" ajax="false" icon="ui-icon-arrowthick-1-s"
+								action="#">
+								<p:fileDownload
+									value="#{elaborarDocumentosApoyoViabilidadPfnController.getStream(2)}" />
+							</p:commandButton>
+						</object>
+
+						<br />
+						<br />
+						<p:fieldset legend="Asunto" toggleable="true" toggleSpeed="500"
+							collapsed="false">
+							<h:panelGrid columns="1" styleClass="w100">
+								<p:inputText required="true" maxlength="10000"
+									value="#{elaborarDocumentosApoyoViabilidadPfnController.informeOficioApoyoViabilidadPfnBean.oficioPronunciamiento.asunto}"
+									requiredMessage="El campo 'Asunto' es requerido">
+									<p:ajax process="@this" />
+								</p:inputText>
+							</h:panelGrid>
+						</p:fieldset>
+						<br />
+
+						<h:panelGroup id="pnlTextosOficio">
+							<p:fieldset id="txtPrueba" legend="Antecedente" toggleable="true"
+								toggleSpeed="500" collapsed="false">
+								<h:panelGrid columns="1" styleClass="w100">
+									<control:imputConTextoEnriquecido
+										requiredMessage="El campo 'Antecedente' es requerido"
+										valor="#{elaborarDocumentosApoyoViabilidadPfnController.informeOficioApoyoViabilidadPfnBean.oficioPronunciamiento.antecedentes}"
+										soloLectura="false" requerido="false" />
+								</h:panelGrid>
+							</p:fieldset>
+							<br />
+
+							<p:fieldset legend="Marco Legal" toggleable="true"
+								toggleSpeed="500" collapsed="false">
+								<h:panelGrid columns="1" styleClass="w100">
+									<control:imputConTextoEnriquecido
+										requiredMessage="El campo 'Marco Legal' es requerido"
+										valor="#{elaborarDocumentosApoyoViabilidadPfnController.informeOficioApoyoViabilidadPfnBean.oficioPronunciamiento.marcoLegal}"
+										soloLectura="false" requerido="false" />
+								</h:panelGrid>
+							</p:fieldset>
+							<br />
+
+							<p:fieldset legend="Conclusiones/Observaciones" toggleable="true"
+								toggleSpeed="500" collapsed="false">
+								<h:panelGrid columns="1" styleClass="w100">
+									<control:imputConTextoEnriquecido
+										requiredMessage="El campo 'Conclusiones/Observaciones' es requerido"
+										valor="#{elaborarDocumentosApoyoViabilidadPfnController.informeOficioApoyoViabilidadPfnBean.oficioPronunciamiento.conclusiones}"
+										soloLectura="false" requerido="false" />
+								</h:panelGrid>
+							</p:fieldset>
+							<br />
+
+							<p:fieldset legend="Recomendaciones" toggleable="true"
+								toggleSpeed="500" collapsed="false">
+								<h:panelGrid columns="1" styleClass="w100">
+									<control:imputConTextoEnriquecido
+										requiredMessage="El campo 'Recomendaciones' es requerido"
+										valor="#{elaborarDocumentosApoyoViabilidadPfnController.informeOficioApoyoViabilidadPfnBean.oficioPronunciamiento.recomendaciones}"
+										soloLectura="false" requerido="false" />
+								</h:panelGrid>
+							</p:fieldset>
+						</h:panelGroup>
+
+						<h:inputHidden
+							validator="#{elaborarDocumentosApoyoViabilidadPfnController.validateDatosIngresoOficio}" />
+
+						<h:panelGroup id="pnlButtons">
+							<div class="buttons main">
+								<p:commandButton value="Atrás" icon="ui-icon-arrowthick-1-w"
+									update="tab pnlButtons" process="@this" styleClass="secondary"
+									action="#{elaborarDocumentosApoyoViabilidadPfnController.atras}" />
+								<p:commandButton value="Guardar"
+									process="@this :form:tab:pnlDocumentoOficio"
+									styleClass="ui-confirmdialog-yes secondary" icon="ui-icon-disk"
+									update=":form:tab:pnlDocumentoOficio" immediate="true"
+									action="#{elaborarDocumentosApoyoViabilidadPfnController.guardarOficio()}">
+									<p:ajax process="pnlTextosOficio" />
+								</p:commandButton>
+								<p:commandButton value="Firmar" styleClass="large"
+									icon="ui-icon-key"
+									update="pnlButtons :formDialogs:pnlFirma :formDialogs:pnlFirmaManual :formDialogs:pnlFirmaToken"
+									disabled="#{!elaborarDocumentosApoyoViabilidadPfnController.habilitarFirma}"
+									actionListener="#{elaborarDocumentosApoyoViabilidadPfnController.guardarDocumentosFirma()}">
+									<p:confirm
+										message="¿Está seguro que la información está correcta? Se procederá a la firma del informe."
+										header="Confirmación" />
+								</p:commandButton>
+							</div>
+						</h:panelGroup>
+					</h:panelGrid>
+				</p:tab>
+
+			</p:tabView>
+
+			<ui:include
+				src="/pages/rcoa/viabilidadAmbientalForestal/_viewInformacionExtra.xhtml" />
+
+		</h:form>
+
+		<h:form id="pnlObservaciones">
+			<h:panelGroup id="pnlObsInformeTecnico">
+				<observaciones:tablaObservacionesViabilidad
+					idComponent="obsDocumentos" seccion="Revision documentos apoyo PFN"
+					componenteActualizarEliminar="pnlObsInformeTecnico" aparace="true"
+					mostrarSiVacio="false"
+					idClase="#{elaborarDocumentosApoyoViabilidadPfnController.informeOficioApoyoViabilidadPfnBean.viabilidadProyecto.id}"
+					nombreClase="revisionDocumentosApoyoPfn_#{elaborarDocumentosApoyoViabilidadPfnController.numeroRevision}"
+					soloLectura="true" />
+			</h:panelGroup>
+		</h:form>
+
+		<h:form id="formDialogs">
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600" height="auto" position="center top">
+
+				<p:panel id="pnlFirma">
+
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel
+							value="Informe técnico Nro: #{elaborarDocumentosApoyoViabilidadPfnController.informeOficioApoyoViabilidadPfnBean.informeApoyo.numeroInforme}"
+							styleClass="bold" />
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold"
+							rendered="#{!elaborarDocumentosApoyoViabilidadPfnController.esProduccion}" />
+						<p:selectOneRadio id="verificaToken"
+							value="#{elaborarDocumentosApoyoViabilidadPfnController.token}"
+							rendered="#{!elaborarDocumentosApoyoViabilidadPfnController.esProduccion}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change" update="pnlFirmaManual pnlFirmaToken"
+								listener="#{elaborarDocumentosApoyoViabilidadPfnController.guardarToken}" />
+						</p:selectOneRadio>
+
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{elaborarDocumentosApoyoViabilidadPfnController.esProduccion}" />
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{elaborarDocumentosApoyoViabilidadPfnController.esProduccion}" />
+
+						<h:panelGroup id="pnlFirmaToken">
+							<p:commandButton value="Firmar documento" type="button"
+								styleClass="primary" icon="ui-icon-key"
+								rendered="#{elaborarDocumentosApoyoViabilidadPfnController.token}"
+								onclick="window.location.href='#{elaborarDocumentosApoyoViabilidadPfnController.urlAlfresco}'" />
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!elaborarDocumentosApoyoViabilidadPfnController.token}">
+							<h:outputLabel value="1. Descargue el Informe Técnico"
+								styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload
+									value="#{elaborarDocumentosApoyoViabilidadPfnController.descargar()}" />
+							</p:commandButton>
+
+							<p:outputLabel for="uploadRequired"
+								value="2. Adjunte el Informe Técnico firmado" styleClass="bold" />
+							<p:fileUpload
+								fileUploadListener="#{elaborarDocumentosApoyoViabilidadPfnController.uploadListenerDocumentos}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreOficioFirmado"
+								rendered="#{!elaborarDocumentosApoyoViabilidadPfnController.token}">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreOficioFirmado"
+								value="#{elaborarDocumentosApoyoViabilidadPfnController.informeFirmaManual.nombre}" />
+						</h:panelGrid>
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!elaborarDocumentosApoyoViabilidadPfnController.token and !elaborarDocumentosApoyoViabilidadPfnController.subido}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialogOficio').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						action="#{elaborarDocumentosApoyoViabilidadPfnController.finalizar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+		</h:form>
+
+	</ui:define>
+</ui:composition>

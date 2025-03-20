@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:controles-prime="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<h:head>
+	<h:outputStylesheet name="suia-layout.css" library="css" />
+	<h:outputStylesheet name="suia-styles.css" library="css" />
+	<h:outputStylesheet name="suia-pf-custom.css" library="css" />
+	<h:outputScript name="util.js" library="js" />
+	<link rel="shortcut icon"
+		href="#{request.contextPath}/resources/images/favicon.ico" />
+	<title>#{labels['label.siglas.institucion']}</title>
+</h:head>
+
+<style>
+.ui-panelgrid .ui-panelgrid-cell{
+	padding: 10px 10px !important;
+}
+
+.panel_data{
+	border-spacing: 6px !important;
+	border: none !important;
+}
+
+</style>
+
+<h:body>
+	<div>
+		<div class="header-left-part"></div>
+		<div id="header" class="containerHeader">
+			<div class="header-right-part"></div>
+			<div class="clear"></div>
+			<div class="header-right-part-bar"></div>
+			<div class="clear"></div>
+		</div>
+		<div class="container bordercontainer">
+			<div id="page">
+				<div id="content">
+					<ui:include src="/WEB-INF/templates/status.xhtml" />
+					<p:growl globalOnly="true" id="msgs" />
+					<h:form id="form"
+						onkeypress="if (event.keyCode == 13) { return false; }">
+						<p:panel id="parte2" style="text-align: center;">
+							<f:facet name="header">
+								<h:outputText id='txtTitulo' style="font-size: large; text-align: center;"
+									value="VALIDACIÓN DOCUMENTO" />
+							</f:facet>
+
+							<p:outputPanel id="resumen" style="text-align:left;" rendered="#{validarCertificadoAmbientalController.mostrarCertificadoRcoa}">
+								<p:panelGrid columns="2" styleClass="mw50 panel_data"
+									rendered="#{validarCertificadoAmbientalController.mostrarInfo}"
+									rowClasses="null, alt"
+									columnClasses="header w25, null, alCenter w20px">
+									<h:outputText value="Código del proyecto" />
+									<h:outputText
+										value="#{validarCertificadoAmbientalController.permisoAmbientalSeleccionado.codigo}" />
+
+									<h:outputText value="Nombre del proyecto" />
+									<h:outputText
+										value="#{validarCertificadoAmbientalController.permisoAmbientalSeleccionado.nombre}" />
+
+									<h:outputText value="Fecha registro"
+										rendered="#{validarCertificadoAmbientalController.enTramite}" />
+									<h:outputText rendered="#{validarCertificadoAmbientalController.enTramite}"
+										value="#{validarCertificadoAmbientalController.permisoAmbientalSeleccionado.fechaRegistro}" />
+
+									<h:outputText value="Identificación del Proponente (NUI/RUC)" />
+									<h:outputText
+										value="#{validarCertificadoAmbientalController.permisoAmbientalSeleccionado.cedulaProponente}" />
+
+									<h:outputText value="Nombre del Proponente - Razón social" />
+									<h:outputText
+										value="#{validarCertificadoAmbientalController.permisoAmbientalSeleccionado.nombreProponente}" />
+
+									<h:outputText value="Código del Certificado Ambiental" />
+									<h:outputText
+										value="#{validarCertificadoAmbientalController.codigoCI}" />
+
+									<h:outputText value="Fecha emisión Certificado Ambiental" />
+									<h:outputText
+										value="#{validarCertificadoAmbientalController.fechaCI}" />
+
+									<ui:remove>
+									<h:outputText value="Información intersección" />
+									<h:outputText
+										value="#{validarCertificadoAmbientalController.resultadoInterseccion}" escape="false" />
+									</ui:remove>
+
+									<h:outputText value="Tipo" />
+									<h:outputText value="#{validarCertificadoAmbientalController.tipoTramite}" />									
+									
+									<h:outputText value="Nombre autoridad" />
+									<h:outputText value="#{validarCertificadoAmbientalController.permisoAmbientalSeleccionado.autoridadResponsable}" />									
+									<h:outputText value="Autoridad Ambiental Competente" />
+									<h:outputText value="#{validarCertificadoAmbientalController.permisoAmbientalSeleccionado.abreviacionArea}" />
+									
+									<h:outputText value="Documentos" />
+									<p:dataTable
+										value="#{validarCertificadoAmbientalController.documentosActualizados}"
+										var="documento" tableStyle="width: 70%" rows="5" paginatorAlwaysVisible="false" paginator="true" paginatorPosition="bottom">
+										<p:column headerText="Documento">
+											<h:outputText value="#{documento.nombre}" />
+										</p:column>
+										<p:column headerText="Fecha" style="width: 100px" styleClass="alCenter">
+											<h:outputText value="#{documento.fechaCreacion}" />
+										</p:column>
+										<p:column headerText="Descargar" style="width: 100px; text-align: center !important;" >
+											<p:commandButton icon="ui-icon-search" styleClass="button-small primary" 
+											action="#{validarCertificadoAmbientalController.descargarDocumentoActualizado(documento)}" ajax="false"/>
+										</p:column>
+									</p:dataTable>									
+								</p:panelGrid>
+
+
+								<br />
+								<h:panelGrid styleClass="alCenter w100" columns="1"
+									rendered="#{!validarCertificadoAmbientalController.mostrarInfo}">
+									<h:outputText value="La Información no ha sido validada"
+										styleClass="encabezado text-red" style="font-size: large; " />
+								</h:panelGrid>
+							</p:outputPanel>
+							
+								<p:outputPanel id="resumenAnt" style="text-align:left;" rendered="#{!validarCertificadoAmbientalController.mostrarCertificadoRcoa}">
+								<p:panelGrid columns="2" styleClass="mw50 panel_data"
+									rendered="#{validarCertificadoAmbientalController.mostrarInfo}"
+									rowClasses="null, alt"
+									columnClasses="header w25, null, alCenter w20px">
+									<h:outputText value="Código del proyecto" />
+									<h:outputText
+										value="#{validarCertificadoAmbientalController.permisoAmbientalSeleccionado.codigo}" />
+
+									<h:outputText value="Nombre del proyecto" />
+									<h:outputText
+										value="#{validarCertificadoAmbientalController.permisoAmbientalSeleccionado.nombre}" />
+
+									<h:outputText value="Fecha registro" />
+									<h:outputText 
+										value="#{validarCertificadoAmbientalController.permisoAmbientalSeleccionado.fechaRegistro}" />
+
+									<h:outputText value="Identificación del Proponente (NUI/RUC)" />
+									<h:outputText
+										value="#{validarCertificadoAmbientalController.permisoAmbientalSeleccionado.cedulaProponente}" />
+
+									<h:outputText value="Nombre del Proponente - Razón social" />
+									<h:outputText
+										value="#{validarCertificadoAmbientalController.permisoAmbientalSeleccionado.nombreProponente}" />
+
+									<h:outputText value="Código del Certificado Ambiental" />
+									<h:outputText
+										value="#{validarCertificadoAmbientalController.codigoCI}" />
+
+									<h:outputText value="Fecha emisión Certificado Ambiental" />
+									<h:outputText
+										value="#{validarCertificadoAmbientalController.fechaCI}" />
+
+									<h:outputText value="Tipo" />
+									<h:outputText value="#{validarCertificadoAmbientalController.tipoTramite}" />									
+									
+									<h:outputText value="Nombre autoridad" />
+									<h:outputText value="#{validarCertificadoAmbientalController.permisoAmbientalSeleccionado.autoridadResponsable}" />									
+									<h:outputText value="Autoridad Ambiental Competente" />
+									<h:outputText value="#{validarCertificadoAmbientalController.permisoAmbientalSeleccionado.abreviacionArea}" />
+									
+									<h:outputText value="Documentos" />
+									<p:dataTable
+										value="#{validarCertificadoAmbientalController.documentosActualizados}"
+										var="documento" tableStyle="width: 70%" rows="5" paginatorAlwaysVisible="false" paginator="true" paginatorPosition="bottom">
+										<p:column headerText="Documento">
+											<h:outputText value="#{documento.nombre}" />
+										</p:column>
+										<p:column headerText="Fecha" style="width: 100px" styleClass="alCenter">
+											<h:outputText value="#{documento.fechaCreacion}" />
+										</p:column>
+										<p:column headerText="Descargar" style="width: 100px; text-align: center !important;" >
+											<p:commandButton icon="ui-icon-search" styleClass="button-small primary" 
+											action="#{validarCertificadoAmbientalController.descargarDocumentoActualizado(documento)}" ajax="false"/>
+										</p:column>
+									</p:dataTable>									
+								</p:panelGrid>
+
+
+								<br />
+								<h:panelGrid styleClass="alCenter w100" columns="1"
+									rendered="#{!validarCertificadoAmbientalController.mostrarInfo}">
+									<h:outputText value="La Información no ha sido validada"
+										styleClass="encabezado text-red" style="font-size: large; " />
+								</h:panelGrid>
+							</p:outputPanel>
+
+						</p:panel>
+					</h:form>
+				</div>
+
+			</div>
+		</div>
+		<ui:insert name="footer">
+			<ui:include src="/WEB-INF/templates/footer.xhtml" />
+		</ui:insert>
+	</div>
+</h:body>
+
+</html>

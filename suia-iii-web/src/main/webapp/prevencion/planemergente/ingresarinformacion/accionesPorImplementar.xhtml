@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="content">
+        <ui:include src="../common/menu.xhtml"/>
+        <div class="content">
+            <p:panel>
+                <f:facet name="header">Acciones emergentes por implementar</f:facet>
+                <h:form id="accionesPorImplementar">
+                    <p:dataTable value="#{accionEmergentePorImplementarController.acciones}" var="accion" rowIndexVar="i" emptyMessage="Sin resultados">
+                        <p:columnGroup type="header">
+                            <p:row>
+                                <p:column rowspan="2" headerText="Medidas correctivas"/>
+                                <p:column colspan="2" headerText="Alcance (Afectación)"/>
+                                <p:column rowspan="2" headerText="Medio de verificación"/>
+                                <p:column rowspan="2" headerText="Responsable"/>
+                                <p:column colspan="2" headerText="Periodo de ejecución"/>
+                                <p:column rowspan="2" headerText="Presupuesto proyectado de la medida "/>
+                                <p:column rowspan="2" headerText="Acciones" width="80px"/>
+                            </p:row>
+                            <p:row>
+                                <p:column headerText="Área/Volumen afectado"/>
+                                <p:column headerText="Área/Volumen recuperado"/>
+                                <p:column headerText="Fecha inicio"/>
+                                <p:column headerText="Fecha fin"/>
+                            </p:row>
+                        </p:columnGroup>
+
+                        <p:column>
+                            <h:outputText value="#{accion.medidaCorrectivas.size()} medidas"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputText value="#{accion.areaAfectada}"/> <h:outputText value="#{accion.unidadAreaAfectada}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputText value="#{accion.areaRecuperada}"/> <h:outputText value="#{accion.unidadAreaRecuperada}"/>
+                        </p:column>
+                        <p:column><h:outputText value="#{accion.medioVerificacion}"/></p:column>
+                        <p:column><h:outputText value="#{accion.responsable}"/></p:column>
+                        <p:column>
+                            <h:outputText value="#{accion.fechaInicio}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputText value="#{accion.fechaFin}"/>
+                        </p:column>
+                        <p:column><h:outputText value="#{accion.presupuesto}"/></p:column>
+                        <p:column style="width: 70px">
+                            <p:commandButton actionListener="#{accionEmergentePorImplementarController.mostrar(i)}" update=":accionEmergentePorImplementarDialog" icon="ui-icon-pencil" styleClass="button-small primary" title="Editar" />
+                        </p:column>
+                    </p:dataTable>
+                    <t:div styleClass="buttons">
+                        <p:outputLabel value="Medios de verificación .PDF, JPG, .PNG, .ZIP" />
+                        <p:commandButton icon="ui-icon-help" type="buttom" onclick="PF('ayuda').show()" />
+                        <p:commandButton value="Adicionar" icon="ui-icon-disk" actionListener="#{accionEmergentePorImplementarController.adjuntarMedioVerificación}" />
+                    </t:div>
+                </h:form>
+            </p:panel>
+            <br/><br/>
+            <h:form>
+                <t:div styleClass="buttons main">
+                    <p:commandButton value="Atrás" immediate="true" process="@this" icon="ui-icon-arrowthick-1-w"
+                                     action="/prevencion/planemergente/ingresarinformacion/accionesImplementadas.jsf?faces-redirect=true" />
+                    <p:commandButton actionListener="#{accionEmergentePorImplementarController.guardar}" id="btnGuardar" value="Guardar" update="@form" oncomplete="window.scrollTo(0,0);" icon="ui-icon-disk"/>
+                    <p:commandButton value="Siguiente" immediate="true" process="@this" icon="ui-icon-arrowthick-1-e"
+                                     action="/prevencion/planemergente/ingresarinformacion/levantamientoPreeliminar.jsf?faces-redirect=true" />
+                </t:div>
+            </h:form>
+            <br/><br/>
+            <ui:include src="../common/accionEmergentePorImplementar.xhtml"/>
+
+            <h:form>
+                <p:dialog header="AYUDA" modal="true" widgetVar="ayuda" resizable="false">
+                    <p:panelGrid columns="1" layout="grid">
+                        <p:outputLabel value="Usted debe Adjuntar en un archivo .ZIP todos los Medios de Verificación previamente ingresados en el sistema." />
+                        <div class="buttons">
+                            <p:commandButton type="button" value="Cerrar" onclick="PF('ayuda').hide()" />
+                        </div>
+                    </p:panelGrid>
+                </p:dialog>
+            </h:form>
+
+            <h:form>
+                <p:dialog header="AVISO" modal="true" widgetVar="aviso" resizable="false">
+                    <p:separator />
+                    <p:outputLabel value="Primero debe adicionar al menos un evento." />
+                    <p:separator />
+                    <div class="buttons">
+                        <p:commandButton action="#{planEmergenteController.irAEventosOcurridos}" value="Aceptar" />
+                    </div>
+                </p:dialog>
+            </h:form>
+        </div>
+        <div class="clear"></div>
+    </ui:define>
+</ui:composition>
+</html>

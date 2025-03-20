@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="content">
+		<f:event type="preRenderView"
+			listener="#{revisarInformeOficioForestalController.validarTareaBpm()}" />
+
+		<h:form id="form">
+			<h:panelGroup id="pnlDatos">
+				<h:panelGrid styleClass="w100" id="pnlDocumentos"
+					rendered="#{revisarInformeOficioForestalController.panelMostrar eq 1 or revisarInformeOficioForestalController.panelMostrar eq 2}">
+					<object type="application/pdf"
+						data="#{revisarInformeOficioForestalController.urlReporte}?pfdrid_c=true"
+						width="100%" height="500px"> Su navegador no soporta la
+						visualización de pdf. Puede descargar el documento presionando el
+						siguiente botón: <p:commandButton value="Descargar" styleClass="primary"
+						ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+						<p:fileDownload
+							value="#{revisarInformeOficioForestalController.getStream(revisarInformeOficioForestalController.nombreReporte, revisarInformeOficioForestalController.archivoReporte)}" />
+					</p:commandButton>
+				</object>
+					<br />
+					<br />
+
+					<h:panelGroup id="informeData"
+						rendered="#{revisarInformeOficioForestalController.panelMostrar eq 1}">
+						<h:panelGrid columns="2" styleClass="w100" id="pnlInforme"
+							columnClasses="w25, fieldPadding">
+							<f:event type="preRenderView"
+								listener="#{revisarInformeOficioForestalController.validarExisteObservacionesInformeOficio()}" />
+
+							<h:outputText value="Informe de inspección"
+								rendered="#{revisarInformeOficioForestalController.informeOficioViabilidadForestalBean.viabilidadProyecto.requiereInspeccionTecnica}" />
+							<p:commandButton icon="ui-icon-arrowthick-1-s" value="Descargar"
+								styleClass="primary toLeft" title="Ver" ajax="false"
+								immediate="true"
+								rendered="#{revisarInformeOficioForestalController.informeOficioViabilidadForestalBean.viabilidadProyecto.requiereInspeccionTecnica}">
+								<p:fileDownload
+									value="#{revisarInformeOficioForestalController.descargarInforme()}" />
+							</p:commandButton>
+
+							<h:outputText value="Tipo de pronunciamiento" />
+							<h:outputText
+								value="Pronunciamiento #{revisarInformeOficioForestalController.esReporteAprobacion ? 'Aprobación':'Observación'}" />
+
+							<h:outputText value="¿El Informe y Oficio están correctos?"
+								styleClass="bold" />
+							<p:selectOneRadio
+								value="#{revisarInformeOficioForestalController.informeOficioCorrectos}"
+								disabled="true">
+								<f:selectItem itemLabel="Si" itemValue="#{true}" />
+								<f:selectItem itemLabel="No" itemValue="#{false}" />
+							</p:selectOneRadio>
+						</h:panelGrid>
+
+						<h:panelGroup id="pnlObsInformeTecnico">
+							<observaciones:tablaObservacionesViabilidad
+								idComponent="obsInforme" seccion="Viabilidad informe forestal"
+								idActualizar=":form:pnlInforme :form:pnlButtons" aparace="true"
+								mostrarSiVacio="true"
+								idClase="#{revisarInformeOficioForestalController.informeOficioViabilidadForestalBean.informeRevision.id}"
+								nombreClase="informeRevisionForestalViabilidad"
+								soloLectura="false" />
+						</h:panelGroup>
+
+
+					</h:panelGroup>
+
+					<h:panelGroup id="oficioData"
+						rendered="#{revisarInformeOficioForestalController.panelMostrar eq 2}">
+						<h:panelGrid columns="2" layout="grid" styleClass="w50"
+							cellpadding="4" cellspacing="4" id="pnlPronunciamientoOficio">
+							<f:event type="preRenderView"
+								listener="#{revisarInformeOficioForestalController.validarExisteObservacionesInformeOficio()}" />
+
+							<h:outputText value="Informe de inspección"
+								rendered="#{revisarInformeOficioForestalController.informeOficioViabilidadForestalBean.viabilidadProyecto.requiereInspeccionTecnica}" />
+							<p:commandButton icon="ui-icon-arrowthick-1-s" value="Descargar"
+								styleClass="primary toLeft" title="Ver" ajax="false"
+								immediate="true"
+								rendered="#{revisarInformeOficioForestalController.informeOficioViabilidadForestalBean.viabilidadProyecto.requiereInspeccionTecnica}">
+								<p:fileDownload
+									value="#{revisarInformeOficioForestalController.descargarInforme()}" />
+							</p:commandButton>
+
+
+							<h:outputText value="Tipo de pronunciamiento" />
+							<h:outputText
+								value="Pronunciamiento #{revisarInformeOficioForestalController.esReporteAprobacion ? 'Aprobación':'Observación'}" />
+
+							<h:outputText value="¿El Informe y Oficio están correctos?"
+								styleClass="bold" />
+							<p:selectOneRadio
+								value="#{revisarInformeOficioForestalController.informeOficioCorrectos}"
+								disabled="true">
+								<f:selectItem itemLabel="Si" itemValue="#{true}" />
+								<f:selectItem itemLabel="No" itemValue="#{false}" />
+							</p:selectOneRadio>
+						</h:panelGrid>
+
+						<h:panelGroup id="pnlObsOficio">
+							<observaciones:tablaObservacionesViabilidad
+								idComponent="obsOficio" seccion="Viabilidad oficio forestal"
+								idActualizar=":form:pnlPronunciamientoOficio :form:pnlButtons"
+								aparace="true" mostrarSiVacio="true"
+								idClase="#{revisarInformeOficioForestalController.informeOficioViabilidadForestalBean.oficioPronunciamiento.id}"
+								nombreClase="oficioViabilidadForestal" soloLectura="false" />
+						</h:panelGroup>
+					</h:panelGroup>
+
+
+				</h:panelGrid>
+
+			</h:panelGroup>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Atrás" icon="ui-icon-arrowthick-1-w"
+						update="pnlDatos pnlButtons" process="@this"
+						styleClass="secondary"
+						action="#{revisarInformeOficioForestalController.atras}"
+						rendered="#{revisarInformeOficioForestalController.panelMostrar eq 2}" />
+					<p:commandButton value="Siguiente" immediate="true"
+						action="#{revisarInformeOficioForestalController.siguiente()}"
+						update="pnlDatos pnlButtons" icon="ui-icon-arrowthick-1-e"
+						rendered="#{revisarInformeOficioForestalController.panelMostrar eq 1}" />
+					<p:commandButton value="Enviar" icon="ui-icon-check"
+						action="#{revisarInformeOficioForestalController.enviar}"
+						rendered="#{(revisarInformeOficioForestalController.panelMostrar eq 2) or (revisarInformeOficioForestalController.esAutoridad and !revisarInformeOficioForestalController.informeOficioCorrectos and revisarInformeOficioForestalController.panelMostrar eq 2)}">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+
+
+
+		</h:form>
+	</ui:define>
+</ui:composition>

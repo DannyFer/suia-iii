@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions">
+
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<h:form id="form">
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Asociar proceso a usuario" />
+					<p:commandButton value="Adicionar" type="button" onclick="PF('seleccionarFlujo').show()" styleClass="button-small-text toRight field_mrg" process="@this" icon="ui-icon-plusthick" />
+				</f:facet>
+
+				<p:dataTable value="#{asociarProcesosUsuarioBean.instanciasProcesos}" emptyMessage="#{labels['common.table.empty']}" rowIndexVar="rowIndex" var="process" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" rows="25">
+					<p:column styleClass="w20px">
+						<h:outputText value="#{rowIndex+1}" />
+					</p:column>
+					<p:column headerText="Trámite" styleClass="alCenter w25" filterBy="#{process.tramite}" filterMatchMode="contains" sortBy="#{process.tramite}">
+						<h:outputText value="#{process.tramite}" />
+					</p:column>
+					<p:column headerText="Usuario" styleClass="alCenter w25" filterBy="#{process.usuarioAsociado}" filterMatchMode="contains" sortBy="#{process.usuarioAsociado}">
+						<h:outputText value="#{process.usuarioAsociado}" rendered="#{!empty process.usuarioAsociado}" />
+						<h:outputText value="Pendiente" rendered="#{empty process.usuarioAsociado}" styleClass="bold" />
+					</p:column>
+					<p:column headerText="Estado" styleClass="alCenter w10" filterBy="#{process.estadoString}" filterMatchMode="contains" sortBy="#{process.estadoString}">
+						<h:outputText value="#{process.estadoString}" />
+					</p:column>
+					<p:column headerText="Inicio" styleClass="alCenter w15" sortBy="#{process.inicio}">
+						<h:outputText value="#{process.inicio}">
+							<f:convertDateTime pattern="dd/MM/yyyy h:mm a" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="Fin" styleClass="alCenter w15">
+						<h:outputText value="#{process.fin}" rendered="#{!empty process.fin}">
+							<f:convertDateTime pattern="dd/MM/yyyy h:mm a" />
+						</h:outputText>
+						<h:outputText value="Pendiente" styleClass="bold" rendered="#{empty process.fin}" />
+					</p:column>
+					<p:column styleClass="alCenter w20px">
+						<p:commandButton styleClass="primary button-small" icon="ui-icon-check" process="@this" update="@form" actionListener="#{asociarProcesosUsuarioBean.seleccionarInstanciaProceso(process)}" oncomplete="PF('asociarUsuario').show()" />
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+
+			<p:dialog header="Seleccionar flujo" id="seleccionarFlujo" widgetVar="seleccionarFlujo" modal="true" resizable="false" width="800">
+				<p:dataTable value="#{asociarProcesosUsuarioBean.procesos}" var="proceso" emptyMessage="#{labels['common.table.empty']}" rows="10" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+					<p:column headerText="ID">
+						<h:outputText value="#{proceso.id}" />
+					</p:column>
+					<p:column headerText="Nombre">
+						<h:outputText value="#{proceso.name}" />
+					</p:column>
+					<p:column styleClass="alCenter w20px">
+						<p:commandButton styleClass="primary button-small" icon="ui-icon-check" process="@this" update="@form" actionListener="#{asociarProcesosUsuarioBean.seleccionarProceso(proceso)}" oncomplete="PF('seleccionarFlujo').hide()" />
+					</p:column>
+				</p:dataTable>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Cerrar" type="button" onclick="PF('seleccionarFlujo').hide()" styleClass="secondary" />
+				</div>
+			</p:dialog>
+
+			<p:dialog header="Asociar usuario" id="asociarUsuario" widgetVar="asociarUsuario" modal="true" resizable="false" width="300">
+				<h:panelGrid columns="1" styleClass="w100">
+					<p:outputLabel value="Usuario" styleClass="bold" for="usuario" />
+					<p:inputText id="usuario" value="#{asociarProcesosUsuarioBean.usuario}" styleClass="w100" maxlength="200" />
+				</h:panelGrid>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Aceptar" actionListener="#{asociarProcesosUsuarioBean.asociar()}" process="asociarUsuario" update="@form" oncomplete="PF('asociarUsuario').hide()" />
+					<p:commandButton value="Cerrar" type="button" onclick="PF('asociarUsuario').hide()" styleClass="secondary" />
+				</div>
+			</p:dialog>
+
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

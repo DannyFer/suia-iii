@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+      xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+      xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+      xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+
+<ui:composition template="/control/aprobacionRequisitosTecnicos/templates/defaultTemplate.xhtml">
+    <ui:define name="content-art">
+        <h:form id="frmAlmacen">
+            <p:panel header="Almacenamiento temporal de desechos peligrosos">
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" id="panelGridAlmacen">
+                    <f:facet name="header">
+                        <p:outputLabel value="Almacenes" />
+
+                    </f:facet>
+                    <f:facet name="header">
+                        <p:commandButton styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg"
+                                         icon="ui-icon-plusthick" value="Adicionar" update="panelAlmacen"
+                                         process="@this" actionListener="#{almacenamientoTemporalController.agregarAlmacen}"
+                                         oncomplete="PF('adicionarAlmacen').show();"/>
+                    </f:facet>
+                    <p:panel style="overflow: auto">
+                    <p:dataTable id="tblAlmacen" style="width: 1500px"
+                                 value="#{almacenamientoTemporalController.almacenTemporalBean.listaAlmacenes}"
+                                 var="almacen"
+                                 emptyMessage="#{labels['common.table.empty']}">
+                        <p:columnGroup type="header">
+                            <p:row>
+                                <p:column width="15" rowspan="2" />
+                                <p:column width="150" rowspan="2"
+                                          headerText="Identificación de almacén" />
+                                <p:column colspan="4" headerText="Carácterísticas del almacén" />
+                                <p:column colspan="3" headerText="Medidas del almacén" />
+                                <p:column headerText="Capacidad total por almacén" width="150"/>
+                                <p:column colspan="2"
+                                          headerText="Descripción del almacenamiento requisitos" />
+                                <p:column rowspan="2"
+                                          headerText="Medidas de seguridad o indicaciones adicionales" />
+                                <p:column rowspan="2" />
+                            </p:row>
+                            <p:row>
+                                <p:column width="100" headerText="Local" />
+                                <p:column width="100" headerText="Material" />
+                                <p:column width="100" headerText="Ventilación" />
+                                <p:column width="100" headerText="Iluminación" />
+                                <p:column width="100" headerText="Largo(m)" />
+                                <p:column width="100" headerText="Ancho(m)" />
+                                <p:column width="100" headerText="Altura(m)" />
+                                <p:column width="150" headerText="Cantidad (metros cúbicos)" />
+                                <p:column
+                                        headerText="Capacidad de Fosas de retención o muros de contención (metros cúbicos)" />
+                                <p:column
+                                        headerText="Breve descripción de sistema de extinción de incendios" />
+                            </p:row>
+                        </p:columnGroup>
+                        <p:column>
+                            <p:rowToggler />
+                        </p:column>
+                        <p:column width="150">
+                            <h:outputLabel value="#{almacen.identificacion}" />
+                        </p:column>
+                        <p:column width="100">
+                            <h:outputLabel value="#{almacen.tipoLocal.nombre}" />
+                        </p:column>
+                        <p:column>
+                            <h:outputLabel
+                                    value="#{almacen.tipoMaterialConstruccion.nombre}" />
+                        </p:column>
+                        <p:column>
+                            <h:outputLabel value="#{almacen.tipoVentilacion.nombre}" />
+                        </p:column>
+                        <p:column>
+                            <h:outputLabel value="#{almacen.tipoIluminacion.nombre}" />
+                        </p:column>
+                        <p:column>
+                            <h:outputText value="#{almacen.largo}">
+                                <f:convertNumber maxFractionDigits="2" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column>
+                            <h:outputText value="#{almacen.ancho}">
+                                <f:convertNumber maxFractionDigits="2" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column>
+                            <h:outputText value="#{almacen.altura}">
+                                <f:convertNumber maxFractionDigits="2" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column>
+                            <h:outputText value="#{almacen.cantidad}">
+                                <f:convertNumber maxFractionDigits="2" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column>
+                            <h:outputLabel
+                                    value="#{empty almacen.capacidadFosas or almacen.capacidadFosas == 0  ? 'N/A' : almacen.capacidadFosas}" />
+                        </p:column>
+                        <p:column>
+                            <h:outputLabel value="#{almacen.extincionIncendio}" />
+                        </p:column>
+                        <p:column>
+                            <h:outputLabel value="#{almacen.medidadSeguridad}" />
+                        </p:column>
+
+                        <p:column styleClass="w40px alCenter">
+                            <p:commandButton icon="ui-icon-pencil" styleClass="button-small primary"
+                                             update=":#{p:component('panelAlmacen')}" process="@this"
+                                             oncomplete="PF('adicionarAlmacen').show()"
+                                             actionListener="#{almacenamientoTemporalController.seleccionarAlmacen(almacen)}"/>
+                            <p:commandButton icon="ui-icon-circle-close" styleClass="button-small primary"
+                                             update=":#{p:component('tblAlmacen')}" process="@this"
+                                             actionListener="#{almacenamientoTemporalController.removerAlmacen(almacen)}">
+                                <p:confirm header="Confirmación"
+                                           message="¿Está seguro que desea eliminar este almacén?"
+                                           icon="ui-icon-alert"/>
+                            </p:commandButton>
+                        </p:column>
+
+                        <p:rowExpansion>
+                            <p:dataTable value="#{almacen.almacenRecepciones}"
+                                         var="almacenRecepcion" style="width: 600px">
+                                <p:column headerText="Nombre">
+                                    <h:outputLabel
+                                            value="#{almacenRecepcion.entityRecepcionDesecho.descripcionDesecho}" />
+                                </p:column>
+                                <p:column headerText="Código Desecho">
+                                    <h:outputLabel
+                                            value="#{almacenRecepcion.entityRecepcionDesecho.codigo}" />
+                                </p:column>
+                                <p:column headerText="Estado Fisico">
+                                    <h:outputLabel
+                                            value="#{almacenRecepcion.entityRecepcionDesecho.tipoEstado}" />
+                                </p:column>
+                                <p:column headerText="Tipo de Envase">
+                                    <h:outputLabel value="#{almacenRecepcion.tipoEnvase.nombre}" />
+                                    <h:outputLabel value=" (#{almacenRecepcion.otroTipoEnvase})"
+                                                   rendered="#{almacenRecepcion.tipoEnvase.nombre=='Otro'}" />
+                                </p:column>
+                            </p:dataTable>
+                        </p:rowExpansion>
+                    </p:dataTable>
+                    </p:panel>
+
+                    <p:dialog header="Importante" id="importanteDlg"
+                              widgetVar="importanteWdgt" modal="true" resizable="false"
+                              width="300" closable="false">
+                        <h:outputText value="Usted debe llenar antes la sección:" />
+                        <ul class="error alLeft text-red ">
+                            <li><h:outputLink class="text-red "
+                                              value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/recepcionDesechosPeligrosos#{mode}.jsf">
+                                <h:outputText value="Recepción de desechos peligrosos" />
+                            </h:outputLink></li>
+                        </ul>
+                    </p:dialog>
+
+                    <p:dialog id="numDesechoAlmacenWdgt" header="Información"
+                              widgetVar="numDesechoAlmacenWdgt" modal="true" width="400"
+                              resizable="false">
+                        <h:panelGroup id="numDesechoAlmacen" layout="block">
+                            <h:outputText
+                                    value="El número de desechos que usted definió es #{almacenamientoTemporalController.almacenTemporalBean.listaEntityRecepcionDesecho.size()}, por lo tanto debe agregar el resto de desechos, caso contrario no podra completar la tarea." />
+                        </h:panelGroup>
+                        <p:separator />
+                        <div class="buttons">
+                            <p:commandButton type="button" value="Aceptar"
+                                             styleClass="buttonAceptar"
+                                             onclick="PF('numDesechoAlmacenWdgt').hide()" />
+                        </div>
+                    </p:dialog>
+
+                </p:panelGrid>
+                <br/> <ui:include
+                    src="/control/aprobacionRequisitosTecnicos/gestion/formularios/almacenModal.xhtml"/>
+
+                <div class="buttons main">
+                    <p:commandButton value="Atrás" immediate="true" process="@this"
+                                     action="/control/aprobacionRequisitosTecnicos/recepcionDesechosPeligrosos.jsf?faces-redirect=true"
+                                     icon="ui-icon-arrowthick-1-w" />
+
+                    <p:commandButton value="Guardar" icon="ui-icon-check" process="@this"
+                                     actionListener="#{almacenamientoTemporalController.guardar}" update="@form"
+                                     oncomplete="handleNumDesechosAlmacenRequest(xhr, status, args);window.scrollTo(0,120);"/>
+
+                    <p:commandButton value="Siguiente" immediate="true" process="@this"
+                                     action="/control/aprobacionRequisitosTecnicos/gestion/eliminacionDisposicionFinal.jsf?faces-redirect=true"
+                                     icon="ui-icon-arrowthick-1-e"/>
+                </div>
+
+            </p:panel>
+        </h:form>
+
+
+        <script type="text/javascript">
+
+            function handleNumDesechosAlmacenRequest(xhr, status, args) {
+                if (args.numDesechosAlmacen) {
+
+                    PF('numDesechoAlmacenWdgt').show();
+                }
+
+            }
+        </script>
+
+    </ui:define>
+</ui:composition>
+</html>

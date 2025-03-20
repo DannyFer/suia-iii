@@ -1,0 +1,357 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" >
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+	<ui:define name="content">
+        <f:event type="preRenderView" listener="#{descripcionProyectoPmaBean.validarTareaBpm()}"/>
+		<ui:include src="contenido/menu.xhtml" />
+		<div class="content">
+			<h:form id="ficha">
+				<p:panel id="parte1" header="2. DATOS GENERALES">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						columnClasses="w50, field_mrg w50">
+						<f:facet name="header">
+							<mae:panelGridHeaderHelp value="Sistema de coordenadas"
+								conector="generalHelp"
+								help="#{helps['registro.ambiental.p2.coordenadas']}" />
+						</f:facet>
+						<p:dataTable id="tbl_coordenadas"
+							value="#{fichaAmbientalPmaBean.coordenadas}" var="coordenada"
+							emptyMessage="#{labels['common.table.empty']}">
+							<p:column headerText="Este (X)">
+								<h:outputText value="#{coordenada.x}" />
+							</p:column>
+							<p:column headerText="Norte (Y)">
+								<h:outputText value="#{coordenada.y}" />
+							</p:column>
+							<p:column headerText="Altitud">
+								<h:outputText value="#{fichaAmbientalPmaBean.proyecto.altitud}" />
+							</p:column>
+						</p:dataTable>
+						<br />
+						<p:outputLabel
+							value="Estado del proyecto, obra o actividad (FASE): *"
+							for="actividad" />
+						<p:dataTable id="actividad" var="activity" tableStyle="border:0px"
+							emptyMessage="No existen fases para este sector"
+							value="#{catalogoGeneralPmaBean.tiposActividades}"
+							selection="#{catalogoGeneralPmaBean.actividadesSeleccionadas}"
+							rowKey="#{activity.id}" style="margin-bottom:0">
+
+							<p:column style="width:15px;text-align:center">
+								<p:selectBooleanCheckbox value="#{activity.seleccionado}">
+									<p:ajax
+										listener="#{fichaAmbientalPmaBean.validarFaseDeseleccionada(activity)}" />
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column>
+								<h:outputText value="#{activity.fase.nombre}" />
+							</p:column>
+						</p:dataTable>
+						<br />
+						<p:outputLabel rendered="#{fichaAmbientalPmaBean.proyecto.direccionProyecto!=null}" value="Dirección del proyecto, obra o actividad:"></p:outputLabel>
+						<p:inputTextarea rendered="#{fichaAmbientalPmaBean.proyecto.direccionProyecto!=null}" disabled="true"
+							value="#{fichaAmbientalPmaBean.proyecto.direccionProyecto}" />
+
+						<h:panelGrid columns="1" layout="grid" styleClass="w100"
+							columnClasses="w50, field_mrg w50">
+							<p:dataTable id="tbl_ubicacion" styleClass="w100"
+								columnClasses="w50, field_mrg w50"
+								value="#{fichaAmbientalPmaBean.listaUbicacionProyecto}"
+								var="ubicacion" emptyMessage="#{labels['common.table.empty']}">
+								<p:column headerText="Provincia">
+									<h:outputText
+										value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+								</p:column>
+								<p:column headerText="Cantón">
+									<h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}" />
+								</p:column>
+								<p:column headerText="Parroquia">
+									<h:outputText value="#{ubicacion.nombre}" />
+								</p:column>
+							</p:dataTable>
+							<br />
+							<h:panelGrid columns="1">
+								<p:outputLabel value="Tipo de zona:" for="tipoPoblacion" />
+								<p:inputText disabled="true" id="tipoPoblacion"
+									value="#{fichaAmbientalPmaBean.proyectosBean.proyecto.tipoPoblacion.nombre}" />
+								<p:spacer width="15px" />
+							</h:panelGrid>
+						</h:panelGrid>
+
+					</p:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						columnClasses="w50, field_mrg w50">
+						<f:facet name="header">
+							<mae:panelGridHeaderHelp value="Datos del promotor"
+								conector="generalHelp"
+								help="#{helps['registro.ambiental.p2.promotor']}" />
+						</f:facet>
+						<p:outputLabel value="Datos del promotor:" />
+						<p:inputText disabled="true"
+							value="#{fichaAmbientalPmaBean.proyectosBean.proyecto.usuario.persona.nombre}" />
+						<h:panelGrid columns="2" layout="grid" styleClass="w100"
+							columnClasses="w50, field_mrg w50">
+							<p:outputLabel value="Correo electrónico del promotor:" />
+							<p:outputLabel value="Teléfono/Celular:" />
+							<p:inputText disabled="true"
+								value="#{fichaAmbientalPmaBean.correo}" />
+							<p:inputText disabled="true"
+								value="#{fichaAmbientalPmaBean.telefono}" />
+						</h:panelGrid>
+						<p:outputLabel value="Domicilio del promotor:" />
+						<p:inputTextarea disabled="true"
+							value="#{fichaAmbientalPmaBean.direccion}" />
+					</p:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						columnClasses="w100, field_mrg w100">
+						<f:facet name="header">
+							<mae:panelGridHeaderHelp value="Características de la zona"
+								conector="generalHelp"
+								help="#{helps['registro.ambiental.p2.caracteristicas.zona']}" />
+						</f:facet>
+
+						<h:panelGrid columns="3">
+							<p:outputLabel value="Infraestructura:" for="infraestructura" />
+							<p:selectOneRadio id="infraestructura" required="true"
+								requiredMessage="El campo 'Infraestructura' es requerido."
+								value="#{catalogoGeneralPmaBean.tiposInfraestructurasSeleccionados}"
+								converter="selectItemConverter">
+								<f:selectItems
+									value="#{catalogoGeneralPmaBean.tiposInfraestructura}">
+								</f:selectItems>
+								<p:ajax update=":#{p:component('pnl_otros_infraestructura')}"
+									listener="#{fichaAmbientalPmaBean.validarOtrosInfraestructura()}" />
+							</p:selectOneRadio>
+							<h:panelGrid id="pnl_otros_infraestructura" columns="1">
+								<p:inputText required="true" id="txt_otros_zona"
+								placeholder="Nueva infraestructura"
+									requiredMessage="El campo 'Otros' referente a infraestructura es requerido."
+									rendered="#{fichaAmbientalPmaBean.mostrarOtrosInfraestructura}"
+									value="#{fichaAmbientalPmaBean.ficha.otrosInfraestructura}" />
+							</h:panelGrid>
+						</h:panelGrid>
+						<p:outputLabel value="Descripción de la zona:"
+							for="descripcion_zona" />
+
+						<p:inputTextarea id="descripcion_zona" maxlength="250"
+							required="true"
+							requiredMessage="El campo 'Descripción de la zona' es requerido."
+							autoResize="false"
+							validatorMessage="Debe ingresar un máximo de 250 caracteres"
+							value="#{fichaAmbientalPmaBean.ficha.descripcionZona}" />
+
+					</p:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						columnClasses="w25, field_mrg w25">
+						<f:facet name="header">
+							<mae:panelGridHeaderHelp value="Espacio físico del proyecto"
+								conector="generalHelp"
+								help="#{helps['registro.ambiental.p2.espacio.fisico']}" />
+						</f:facet>
+						<h:panelGrid columns="4" styleClass="w100" cellpadding="2"
+							columnClasses="w25, field_mrg w25">
+							<p:outputLabel
+								value="Área del proyecto (#{fichaAmbientalPmaBean.proyectosBean.proyecto.unidad}):" />
+							<p:inputText disabled="true"
+								value="#{fichaAmbientalPmaBean.proyecto.area}" />
+
+							<p:outputLabel
+								value="Área de implantación (#{fichaAmbientalPmaBean.proyectosBean.proyecto.unidad}):"
+								for="txt_area_impl" />
+							<p:inputText id="txt_area_impl" required="true"
+								converterMessage="Se debe ingresar un número"
+								validatorMessage="El campo 'Área de implantación' no se encuentra entre los valores permitidos, debe ser mayor que 0 y menor que #{fichaAmbientalPmaBean.proyecto.area}."
+								requiredMessage="El campo 'Área implantación' es requerido."
+								onkeypress="return NumCheckDouble(event,this);"
+								value="#{fichaAmbientalPmaBean.ficha.areaImplantacion}">
+								<f:validateDoubleRange minimum="0.01"
+									maximum="#{fichaAmbientalPmaBean.proyecto.area}" />
+							</p:inputText>
+							<p:outputLabel value="Agua potable:" for="agua" />
+							<p:selectOneRadio id="agua" required="true"
+								requiredMessage="El campo 'Agua potable' es requerido."
+								value="#{fichaAmbientalPmaBean.ficha.aguaPotable}">
+								<f:selectItem itemLabel="Sí" itemValue="true" />
+								<f:selectItem itemLabel="No" itemValue="false" />
+								<p:ajax update=":#{p:component('txt_agua')}"
+									listener="#{fichaAmbientalPmaBean.actulizarConsumo}" />
+							</p:selectOneRadio>
+
+							<p:outputLabel value="Consumo de agua por mes (m3):" />
+							<p:inputText id="txt_agua" required="true"
+								requiredMessage="El campo 'Consumo de agua por mes' es requerido."
+								disabled="#{!fichaAmbientalPmaBean.ficha.aguaPotable}"
+								onkeypress="return NumCheckDouble(event,this);" maxlength="8"
+								value="#{fichaAmbientalPmaBean.ficha.consumoAgua}" />
+
+							<p:outputLabel value="Energía eléctrica:" for="energia" />
+							<p:selectOneRadio id="energia" required="true"
+								requiredMessage="El campo 'Energía eléctrica' es requerido."
+								value="#{fichaAmbientalPmaBean.ficha.energiaElectrica}">
+								<f:selectItem itemLabel="Sí" itemValue="true" />
+								<f:selectItem itemLabel="No" itemValue="false" />
+								<p:ajax update=":#{p:component('txt_energia')}"
+									listener="#{fichaAmbientalPmaBean.actulizarConsumo}" />
+							</p:selectOneRadio>
+
+							<p:outputLabel value="Consumo de energía eléctrica por mes (kwh):" />
+							<p:inputText id="txt_energia" maxlength="8" required="true"
+								requiredMessage="El campo 'Consumo de energía eléctrica por mes' es requerido."
+								disabled="#{!fichaAmbientalPmaBean.ficha.energiaElectrica}"
+								onkeypress="return NumCheckDouble(event,this);"
+								value="#{fichaAmbientalPmaBean.ficha.consumoElectrico}" />
+
+							<p:outputLabel value="Acceso vehicular:" for="vehiculo" />
+							<p:selectOneRadio id="vehiculo" required="true"
+								requiredMessage="El campo 'Acceso vehicular' es requerido."
+								value="#{fichaAmbientalPmaBean.ficha.accesoVehicular}">
+								<f:selectItem itemLabel="Sí" itemValue="true" />
+								<f:selectItem itemLabel="No" itemValue="false" />
+								<p:ajax update=":#{p:component('cmb_tipo_via')}"
+									listener="#{fichaAmbientalPmaBean.actulizarConsumo}" />
+							</p:selectOneRadio>
+
+							<p:outputLabel value="Tipo de vía:" for="cmb_tipo_via" />
+							<p:selectOneMenu required="true"
+								requiredMessage="El campo 'Tipo de vía' es requerido."
+								value="#{fichaAmbientalPmaBean.ficha.tipoVia}" id="cmb_tipo_via"
+								converter="selectItemConverter2"
+								disabled="#{!fichaAmbientalPmaBean.ficha.accesoVehicular}"
+								style="width:100%">
+								<f:selectItem itemLabel="Seleccione" itemValue="-1" />
+								<f:selectItems value="#{catalogoGeneralPmaBean.listaTipoVias}" />
+							</p:selectOneMenu>
+
+							<p:outputLabel value="Alcantarillado:" for="alcantarillado" />
+							<p:selectOneRadio id="alcantarillado" required="true"
+								requiredMessage="El campo 'Alcantarillado' es requerido."
+								value="#{fichaAmbientalPmaBean.ficha.alcantarillado}">
+								<f:selectItem itemLabel="Sí" itemValue="true" />
+								<f:selectItem itemLabel="No" itemValue="false" />
+							</p:selectOneRadio>
+							<p:spacer width="15px" />
+							<p:spacer width="15px" />
+						</h:panelGrid>
+
+						<p:outputLabel value="Observaciones:" rendered="false" />
+						<p:inputTextarea rows="2" maxlength="250" rendered="false"
+							value="#{fichaAmbientalPmaBean.ficha.observacionesEspacioFisico}"
+							validatorMessage="Debe ingresar un máximo de 250 caracteres"
+							styleClass="w100" autoResize="false" />
+					</p:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						columnClasses="w100, field_mrg w100">
+						<f:facet name="header">
+							<mae:panelGridHeaderHelp value="Situación del predio"
+								conector="generalHelp"
+								help="#{helps['registro.ambiental.p2.predio']}" />
+						</f:facet>
+						<p:outputLabel value="Predio:" for="predio" />
+						<p:selectManyCheckbox id="predio" layout="grid" columns="1"
+							required="true" requiredMessage="El campo 'Predio' es requerido."
+							value="#{catalogoGeneralPmaBean.tiposPredioSeleccionados}"
+							converter="selectItemConverter">
+							<f:selectItems value="#{catalogoGeneralPmaBean.tiposPredio}">
+							</f:selectItems>
+							<p:ajax update=":#{p:component('pnl_otros_predio')}"
+								listener="#{fichaAmbientalPmaBean.validarOtrosPredio()}" />
+						</p:selectManyCheckbox>
+						<h:panelGrid id="pnl_otros_predio" columns="1">
+							<p:selectManyCheckbox id="predioSecundario" layout="grid"
+								columns="1" required="true"
+								requiredMessage="El campo 'Otros' referente a predio es requerido."
+								value="#{catalogoGeneralPmaBean.tiposPedioSecundariosSeleccionados}"
+								rendered="#{fichaAmbientalPmaBean.mostrarOtrosPredio}"
+								converter="selectItemConverter">
+								<f:selectItems
+									value="#{catalogoGeneralPmaBean.prediosSecundarios}">
+								</f:selectItems>
+							</p:selectManyCheckbox>
+						</h:panelGrid>
+
+						<p:outputLabel value="Observaciones:"
+							for="txt_observaciones_predio" rendered="false" />
+						<p:inputTextarea rows="2" id="txt_observaciones_predio"
+							maxlength="250"
+							value="#{fichaAmbientalPmaBean.ficha.observacionesPredio}"
+							validatorMessage="Debe ingresar un máximo de 250 caracteres"
+							styleClass="w100" autoResize="false" rendered="false" />
+					</p:panelGrid>
+					<f:facet name="footer">
+						<t:div styleClass="buttons main">
+							<p:commandButton value="Atrás" immediate="true" process="@this"
+								action="/prevencion/categoria2/fichaAmbiental/default.jsf?faces-redirect=true"
+								icon="ui-icon-arrowthick-1-w" />
+							<p:commandButton value="Guardar"
+								action="#{fichaAmbientalPmaController.guardar()}"
+								icon="ui-icon-disk" update=":#{p:component('ficha')}"
+								disabled="#{fichaAmbientalPmaBean.habilitarBtnGuardarParte1}" />
+							<p:commandButton value="Siguiente" immediate="true"
+								process="@this"
+								action="/prevencion/categoria2/fichaAmbiental/marcoReferencial.jsf?faces-redirect=true"
+								icon="ui-icon-arrowthick-1-e" />
+						</t:div>
+					</f:facet>
+				</p:panel>
+			</h:form>
+
+			<p:dialog widgetVar="dg_eliminar_por_fase" modal="true"
+				closable="false" draggable="false" resizable="false">
+				<h:form id="frm_dialog_eliminar_por_fase">
+					<div align="left">
+						<p>Si se realizan cambios en el estado del proyecto, obra o
+							actividad la información asociada a dicho cambio será eliminada</p>
+						<p>
+							Los datos asociados a las fases se encuentran en los puntos:<br />
+							- 4 Descripción del proceso<br /> - 6 Principales impactos
+							ambientales
+						</p>
+					</div>
+					<div class="buttons">
+						<p:commandButton value="Aceptar"
+							oncomplete="handleDGRequest(xhr, status, args)"
+							update=":#{p:component('actividad')}"
+							action="#{fichaAmbientalPmaBean.eliminarAsociadoFase()}"
+							styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+						<p:commandButton value="Cancelar"
+							update=":#{p:component('actividad')}"
+							oncomplete="handleDGRequest(xhr, status, args)"
+							action="#{fichaAmbientalPmaBean.cancelarAsociadoFase()}"
+							styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+					</div>
+				</h:form>
+			</p:dialog>
+
+			<script type="text/javascript">
+				function start() {
+				    PF('statusDialog').show();
+				}
+				
+				function stop() {
+				    PF('statusDialog').hide();
+				}
+
+				function handleDGRequest(xhr, status, args) {
+		            if (args.validationFailed || !args.dgClose) {
+		            	PF('dg_eliminar_por_fase').show();
+		            }
+		            else {
+		                PF('dg_eliminar_por_fase').hide();
+		            }
+		        }
+			</script>
+		</div>
+	</ui:define>
+</ui:composition>

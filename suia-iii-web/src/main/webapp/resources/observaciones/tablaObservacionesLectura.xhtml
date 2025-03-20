@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:composite="http://java.sun.com/jsf/composite" xmlns:p="http://primefaces.org/ui"
+        >
+    <composite:interface>
+        <composite:attribute name="aparace" required="true" type="java.lang.Boolean" />
+        <composite:attribute name="mostrarSiVacio" required="false" type="java.lang.Boolean" default="true" />
+        <composite:attribute name="idClase" required="true" type="java.lang.String" />
+        <composite:attribute name="nombreClase" required="true" type="java.lang.String" />
+        <composite:attribute name="seccion" required="true" type="java.lang.String" />
+
+        <composite:attribute name="rol" required="true" type="java.lang.String" />
+        <composite:attribute name="componenteActualizarEliminar" required="true" type="java.lang.String" />
+    </composite:interface>
+
+    <composite:implementation>
+        <f:event type="preRenderView" listener="#{observacionesLecturaController.cargarDatosInicialesLectura(cc.attrs.nombreClase,cc.attrs.idClase, cc.attrs.seccion)}" />
+
+        <p:outputPanel id="pnlObservacionesLectura" rendered="#{cc.attrs.mostrarSiVacio or observacionesLecturaController.observacionesBB.mapaSecciones.get(cc.attrs.seccion).size() >0}">
+            <br />
+            <p:separator />
+            <br />
+            <p:dataList type="none" styleClass="noBorder"
+                        value="#{observacionesLecturaController.observacionesBB.mapaSecciones.keySet()}"
+                        var="seccion" rendered="#{cc.attrs.aparace}" emptyMessage=" ">
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" id="resultadoContainer-#{seccion}">
+                    <f:facet name="header">
+
+                        <h:outputText value="Observaciones (total: #{observacionesLecturaController.observacionesBB.mapaSecciones.get(seccion).size()})" />
+                    </f:facet>
+                    <p:dataList type="none" styleClass="noBorder" value="#{observacionesLecturaController.observacionesBB.mapaSecciones.get(seccion)}" var="obj" rendered="#{cc.attrs.aparace}" emptyMessage="No hay observaciones hasta este momento.">
+                        <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                            <f:facet name="header">
+                                <p:commandButton styleClass="button-small toRight field_mrg" process="@this" icon="ui-icon-trash" disabled="#{obj.disabled}" action="#{observacionesLecturaController.eliminar(seccion,obj)}" update=":#{p:component(cc.attrs.componenteActualizarEliminar)}">
+                                    <p:confirm header="Confirmación" message="¿Está seguro que desea eliminar esta observación?" icon="ui-icon-alert" />
+                                </p:commandButton>
+                                <h:outputText value="Observación del " />
+                                <h:outputText value="#{obj.fechaRegistro}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy" />
+                                </h:outputText>
+                            </f:facet>
+                            <h:panelGrid styleClass="w100" columns="2" columnClasses="w50 alTop, field_mrg w50 alTop">
+                                <h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+                                    <h:outputText value="Usuario" />
+                                    <h:outputText value="#{obj.usuario.persona.nombre}" />
+                                </h:panelGrid>
+                                <h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+                                    <h:outputText value="Fecha" />
+                                    <h:outputText value="#{obj.fechaRegistro}">
+                                        <f:convertDateTime pattern="dd/MM/yyyy, h:mm:ss aa" />
+                                    </h:outputText>
+                                </h:panelGrid>
+                            </h:panelGrid>
+                            <h:panelGrid styleClass="w100" columns="2" columnClasses="w50 alTop, field_mrg w50 alTop" rendered="true">
+                                <h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+                                    <h:outputText value="Campo observado" />
+                                    <h:outputText value="#{obj.campo}" />
+                                </h:panelGrid>
+                                <h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+                                    <h:outputText value="¿Observación corregida?" />
+                                    <h:outputText value="#{obj.observacionCorregida}" converter="booleanToStringConverter" />
+                                </h:panelGrid>
+                            </h:panelGrid>
+
+                            <p:outputLabel value="Observación" styleClass="bold" />
+                            <p:inputTextarea value="#{obj.descripcion}" readonly="#{obj.disabled}" rows="2" autoResize="false" maxlength="500" />
+                        </p:panelGrid>
+                    </p:dataList>
+
+                    <p:separator />
+
+                </p:panelGrid>
+
+
+            </p:dataList>
+        </p:outputPanel>
+    </composite:implementation>
+</ui:composition>

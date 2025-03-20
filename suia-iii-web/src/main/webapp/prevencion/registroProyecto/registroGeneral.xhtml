@@ -1,0 +1,583 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk" xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+<link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/plugin/wizard.css" />
+
+<div class="arrow-indicator arrow-indicator1" data-forStyleClass="buttonSeleccionarActividad"></div>
+<div class="arrow-indicator arrow-indicator2" data-forStyleClass="buttonSeleccionarUbicacion"></div>
+<div class="arrow-indicator arrow-indicator3" data-forStyleClass="buttonAdjuntarCoordenadas"></div>
+
+<p:dialog header="Notificación de procesos administrativos" id="procesoAdministrativo" widgetVar="procesoAdministrativo" modal="true" width="400" resizable="false" closable="true" draggable="false">
+	<p:separator />
+	<h:panelGrid columns="1" styleClass="w100" columnClasses="alJustify">
+		<h:outputText value="ATENCIÓN: Usted tiene #{procesoAdministrativoBean.cantidadProcesosAdmUsuarioAutenticado} proceso(s) administrativo(s) iniciado(s) en su contra" styleClass="bold text-red" />
+	</h:panelGrid>
+</p:dialog>
+
+<p:remoteCommand process="@this" update="procesoAdministrativo" rendered="#{procesoAdministrativoBean.mostrarTieneProcesoAdministrativo}" autoRun="true" oncomplete="showModalProcesoAdministrativo(xhr, status, args)" />
+
+<p:wizard flowListener="#{registroProyectoBean.onFlowProcess}" nextLabel="Siguiente" backLabel="Atrás">
+
+	<p:tab id="paso1" title="Identificar Actividad Económica">
+		<h:inputHidden validator="#{registroAlias.validateSeleccionActividad}" />
+		<p:panelGrid id="actividadContainer" columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<p:commandButton value="Seleccionar" oncomplete="PF('seleccionarActividad').show()" styleClass="buttonSeleccionarActividad button-small-text toRight field_mrg" icon="ui-icon-check" actionListener="#{catalogoActividadesBean.reset()}" process="@this" update=":form:seleccionarActividad" />
+				<mae:panelGridHeaderHelp value="Actividad *" conector="actividadHelp" image="#{request.contextPath}/resources/images/help/actividades.png" help="#{helps['registro.actividad']}" width="500px" />
+			</f:facet>
+			<h:panelGroup styleClass="alCenter w100">
+				<h:outputText value="Antes de continuar, debe identificar la actividad económica a realizar/realizada en su obra o proyecto." styleClass="encabezado text-red" />
+			</h:panelGroup>
+			<h:panelGroup styleClass="alCenter w100" rendered="#{catalogoActividadesBean.mostrarMetalicos}">
+				<h:outputText value="Nota: Esta actividad corresponde a exploración inicial sin Sondeos de prueba o reconocimiento" styleClass="text-red"/>
+			</h:panelGroup>
+			<h:panelGrid styleClass="panel_data mw50" columns="2" columnClasses="header header_min_width200, null" rowClasses="null, alt">
+				<h:outputText value="Descripción de la actividad" />
+				<h:outputText value="#{!empty catalogoActividadesBean.actividadSeleccionada ? catalogoActividadesBean.actividadSeleccionada.nombre : '(Seleccione)'}" />
+				<h:outputText value="Su trámite corresponde a un(a)" />
+				<h:outputText value="#{catalogoActividadesBean.actividadSistemaSeleccionada.tipoLicenciamiento}" />
+				<h:outputText value="Tiempo de emisión" />
+				<h:outputText value="#{!empty catalogoActividadesBean.actividadSistemaSeleccionada.tipoLicenciamiento and !empty catalogoActividadesBean.actividadSistemaSeleccionada.tipoLicenciamiento.duracionTramite ? catalogoActividadesBean.actividadSistemaSeleccionada.tipoLicenciamiento.duracionTramite : ''}" />
+				<h:outputText value="Costo del trámite" />
+				<h:panelGroup>
+					<h:outputText rendered="#{!empty catalogoActividadesBean.actividadSistemaSeleccionada.tipoLicenciamiento and !empty catalogoActividadesBean.actividadSistemaSeleccionada.tipoLicenciamiento.costo and !empty catalogoActividadesBean.actividadSistemaSeleccionada.tipoLicenciamiento.moneda}" value="#{catalogoActividadesBean.actividadSistemaSeleccionada.tipoLicenciamiento.costo}" />
+					<h:outputText rendered="#{!empty catalogoActividadesBean.actividadSistemaSeleccionada.tipoLicenciamiento and !empty catalogoActividadesBean.actividadSistemaSeleccionada.tipoLicenciamiento.costo and !empty catalogoActividadesBean.actividadSistemaSeleccionada.tipoLicenciamiento.moneda}" value=" #{catalogoActividadesBean.actividadSistemaSeleccionada.tipoLicenciamiento.moneda}" />
+					<h:outputText rendered="#{empty catalogoActividadesBean.actividadSistemaSeleccionada.tipoLicenciamiento or empty catalogoActividadesBean.actividadSistemaSeleccionada.tipoLicenciamiento.costo or empty catalogoActividadesBean.actividadSistemaSeleccionada.tipoLicenciamiento.moneda}" value="#{catalogoActividadesBean.actividadSistemaSeleccionada.tipoLicenciamiento.descripcionCosto}" />
+				</h:panelGroup>
+			</h:panelGrid>
+			
+			
+			<br />
+			<p:panelGrid rendered="#{catalogoActividadesBean.mostrarActualizar}">
+			<h:outputText value="Registro ambiental de “Exploración inicial con sondeos de prueba o reconocimiento” debe ser elaborado por un consultor calificado por el Ministerio del Ambiente y Agua" styleClass="encabezado text-red" />
+			
+			<h:panelGroup style="aling:left" rendered="#{registroProyectoBean.mostrarSistemareferenciasSD()}" >
+				
+			</h:panelGroup>
+			<h:panelGrid styleClass="panel_data mw50" columns="2" columnClasses="header header_min_width200, null" 
+						rowClasses="null, alt" rendered="#{catalogoActividadesBean.mostrarActualizar}">
+			
+				<h:outputText value="Desea actualizar su registro ambiental de Exploración inicial:" />
+										
+						<p:selectOneRadio value="#{catalogoActividadesBean.buscarProyecto}">
+						<f:selectItem itemLabel="Sí" itemValue="true" />
+						<f:selectItem itemLabel="No" itemValue="false" />
+						<p:ajax update="@form" process="@this"/>
+					</p:selectOneRadio>
+				
+			</h:panelGrid>
+			
+			<h:panelGrid id="tramiteGrid" styleClass="panel_data mw50" columns="2" columnClasses="header header_min_width200, null" 
+							rowClasses="null, alt" rendered="#{catalogoActividadesBean.buscarProyecto}">
+			<h:outputText value="Ingrese el número de trámite anterior:" />
+			<h:panelGroup rendered="#{catalogoActividadesBean.buscarProyecto}">
+			<h:panelGrid columns="2">
+				<p:inputText id="numeroTramiteSD" value="#{registroProyectoBean.numeroTramite}" style="width:50%;">
+				<p:ajax process="@this"></p:ajax>
+				</p:inputText>
+				
+				<p:commandButton value="Buscar" actionListener="#{registroProyectoBean.buscarTramiteMineria()}" 
+				process="@this" styleClass="primary" update="numeroTramiteSD"/>
+				</h:panelGrid>
+				</h:panelGroup>
+			</h:panelGrid>
+			</p:panelGrid>
+			
+			<p:dialog id="actualizarDlg" widgetVar="actualizarDlg" style="text-align:justify;"
+                        modal="true" width="350" resizable="false" header="ACTUALIZACIÓN">
+				<p:outputLabel style="text-align:justify;" value="Esta seguro de actualizar el proyecto" />
+                <div class="buttons">
+                
+               	 	<p:commandButton value="Actualizar" styleClass="primary" 
+										actionListener="#{registroProyectoBean.actualizarProyecto()}" process="@this"/>
+            		<p:commandButton type="button" value="Cerrar" styleClass="buttons main primary" onclick="PF('actualizarDlg').hide()"/>
+                
+                </div>
+			</p:dialog>
+			
+			
+			
+			<br />
+			<p:outputLabel value="Especifique el rango de operación" styleClass="bold" for="rango" rendered="#{catalogoActividadesBean.mostrarRangos}" />
+			<h:panelGrid styleClass="w50" columns="2" columnClasses="null, field_mrg" rendered="#{catalogoActividadesBean.mostrarRangos}">
+				<p:selectOneMenu id="rango" value="#{catalogoActividadesBean.actividadSistemaSeleccionada}" styleClass="w100" required="true" converter="selectItemConverter">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+					<f:selectItems value="#{catalogoActividadesBean.categoriasSistemaCandidatas}" var="catalogo" itemLabel="#{catalogo.rango}" itemValue="#{catalogo}" />
+					<p:ajax process="rango @this" update="actividadContainer" />
+				</p:selectOneMenu>
+				<p:outputLabel value="#{catalogoActividadesBean.categoriasSistemaCandidatas.get(0).rango.unidadMedida}" styleClass="bold" />
+			</h:panelGrid>
+		</p:panelGrid>
+		<ui:include src="/prevencion/registroProyecto/utiles/registroModalActividades.xhtml" />
+	</p:tab>
+
+
+	<p:tab id="paso2" title="Datos Generales">
+		<h:inputHidden validator="#{registroAlias.validateDesechosSeleccionados}" />
+		<p:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w50, field_mrg w50">
+			<f:facet name="header">
+				<mae:panelGridHeaderHelp value="Registro de Proyecto #{nombreSector} #{registroProyectoBean.edicion ? '(Editar)' : ''}" conector="generalHelp" image="#{request.contextPath}/resources/images/help/help-how.png" help="#{helps['registro.general']}" width="450px" />
+			</f:facet>
+			<p:outputLabel value="Nombre del proyecto, obra o actividad" for="nombre" />
+			<p:outputLabel value="Resumen del proyecto, obra o actividad" for="resumen" />
+			<h:panelGroup>
+				<p:inputTextarea placeholder="Entre como mínimo 1 y como máximo 250 caracteres." value="#{registroProyectoBean.proyecto.nombre}" required="true" id="nombre" rows="2" styleClass="w100" autoResize="false" maxlength="1000">
+					<f:validateLength minimum="1" />
+					<p:ajax process="nombre" immediate="true" />
+				</p:inputTextarea>
+				<p:tooltip for="nombre" escape="false" showDelay="1200" trackMouse="true">
+					<h:outputText value="#{helps['registro.nombre']}" escape="false" />										
+				</p:tooltip>				
+				<br></br>
+				<br></br>
+				<h:outputText value="NOMBRE: FICHA DE REGISTRO AMBIENTAL Y PLAN DE MANEJO AMBIENTAL PARA LA FASE DE EXPLORACIÓN INICIAL DE MINERALES METALICOS BAJO EL RÉGIMEN DE MEDIANA MINERÍA / GRAN MINERIA CON SONDEOS DE PRUEBA O RECONOCIMIENTO DE LA/S CONCESIÓN/ES MINERA/S XXXXX (nombre de la concesión) CÓDIGO XXXX (se refiere al código del título minero)" for="nombre"
+				rendered="#{registroProyectoBean.mostrarSistemareferenciasTitulo()}" 
+							styleClass="bold alJustify" style="color: #2A7D9B;"/>	
+				<h:outputText value="NOMBRE: FICHA DE REGISTRO AMBIENTAL Y PLAN DE MANEJO AMBIENTAL PARA LA FASE DE EXPLORACIÓN INICIAL DE MINERALES METALICOS BAJO EL RÉGIMEN DE PEQUEÑA MINERIA CON SONDEOS DE PRUEBA O RECONOCIMIENTO DE LA/S CONCESIÓN/ES MINERA/S XXXXX (nombre de la concesión) CÓDIGO XXXX (se refiere al código del título minero)" for="nombre"
+				rendered="#{registroProyectoBean.mostrarSistemareferenciasPM()}" 
+							styleClass="bold alJustify" style="color: #2A7D9B;"/>				
+				<h:outputText value="El nombre del proyecto se debe ingresar de la siguiente manera:" escape="false" rendered="#{catalogoActividadesBean.actividadSistemaSeleccionada.codigo eq '21.02.03.02'}"/>
+				<h:outputText value="#{helps['registro.nombre.mineria_no_metalicos.expost']}" escape="false" rendered="#{catalogoActividadesBean.actividadSistemaSeleccionada.codigo eq '21.02.03.02'}"/>
+				<h:outputText value="#{helps['registro.nombre.mineria_no_metalicos.exante']}" escape="false" rendered="#{catalogoActividadesBean.actividadSistemaSeleccionada.codigo eq '21.02.03.02'}"/>
+			</h:panelGroup>
+			<h:panelGroup>
+				<p:inputTextarea placeholder="Entre como mínimo 25 y como máximo 2500 caracteres." value="#{registroProyectoBean.proyecto.resumen}" required="true" id="resumen" rows="2" styleClass="w100" autoResize="false" maxlength="2500">
+					<f:validateLength minimum="25" />
+					<p:ajax process="resumen" immediate="true" />
+				</p:inputTextarea>
+				<p:tooltip for="resumen" escape="false" showDelay="1200" trackMouse="true">
+					<h:outputText value="#{helps['registro.resumen']}" escape="false" />
+				</p:tooltip>
+			</h:panelGroup>
+		</p:panelGrid>
+		<h:panelGroup id="containerTipoEstudioActividad">
+			<p:panelGrid columns="2" styleClass="w100 noBorderHeader" columnClasses="w50 alTop, field_mrg w50 alTop" rendered="#{!catalogoActividadesBean.categoriaI and not empty catalogoActividadesBean.actividadSeleccionada}">
+				<f:facet name="header">
+					<h:panelGrid columns="3" styleClass="w100" columnClasses="w50, null, field_mrg w50">
+						<t:div>
+							<h:outputText value="Tipo de estudio *" />
+							<mae:btnHelp buttonStyleClass="button-small toRight" render="#{registroProyectoBean.tiposEstudios.size() == 2}" help="#{helps['registro.exs']}" conector="tipoEstudio2Ayuda" />
+							<mae:btnHelp buttonStyleClass="button-small toRight" render="#{registroProyectoBean.tiposEstudios.size() != 2}" help="#{helps['registro.exs4']}" conector="tipoEstudio4Ayuda" />
+						</t:div>
+						<t:div styleClass="header-separator" />
+						<h:outputText value="Por favor, indique si en su proyecto, obra o actividad se realiza:" />
+					</h:panelGrid>
+				</f:facet>
+				<h:panelGroup>
+					<h:panelGroup>
+						<p:selectOneRadio id="tipoEstudio" value="#{registroProyectoBean.proyecto.tipoEstudio}" required="true" converter="selectItemConverter" label="Tipo de estudio" layout="grid" columns="2" cellpading="5">
+							<f:selectItems value="#{registroProyectoBean.tiposEstudios}"/>
+							<p:ajax update="containerTipoEstudio containerQuestions" process="@this" />
+						</p:selectOneRadio>
+					</h:panelGroup>					
+					<h:panelGroup id="containerTipoEstudio">
+						<h:panelGrid styleClass="w50" columns="1" rendered="#{registroAlias.estudioExPost}">
+							<p:outputLabel value="Fecha de inicio de operaciones" for="fechaInicioOperaciones" />
+							<p:calendar id="fechaInicioOperaciones" label="Fecha de inicio de operaciones" value="#{registroProyectoBean.proyecto.fechaInicioOperaciones}" required="true" maxdate="#{registroProyectoBean.currentDate}" readonlyInput="true" styleClass="w100" pattern="dd/MM/yyyy" navigator="true" />
+							<p:tooltip for="fechaInicioOperaciones" escape="false" showDelay="1200" trackMouse="true">
+								<h:outputText value="#{helps['registro.exs.fecha']}" escape="false" />
+							</p:tooltip>
+						</h:panelGrid>
+						<h:panelGrid styleClass="w50 field_mrg" columnClasses="field_mrg" columns="1" rendered="#{registroAlias.emisionInclusionAmbiental}">
+							<p:selectOneRadio id="tipoEmision" value="#{registroProyectoBean.proyecto.tipoEmisionInclusionAmbiental}" required="true" columns="1" layout="grid" label="Tipo de emisión" converter="selectItemConverter">
+								<f:selectItems value="#{registroProyectoBean.tiposEmisionesInclusionAmbiental}" />
+								<p:ajax process="@this" />
+							</p:selectOneRadio>
+							<p:tooltip rendered="false" for="tipoEmision" escape="false" showDelay="1200" trackMouse="true">
+								<h:outputText value="#{helps['registro.tipoEmision']}" escape="false" />
+							</p:tooltip>
+							<ui:remove>
+							<p:outputLabel for="resolucion" value="Número de resolución" />
+							<p:inputText value="#{registroProyectoBean.proyecto.numeroDeResolucion}" styleClass="w100" required="true" id="resolucion" maxlength="20" validator="#{registroAlias.validateNumeroResolucion}" />
+							<p:tooltip rendered="false" for="resolucion" escape="false" showDelay="1200" trackMouse="true">
+								<h:outputText value="#{helps['registro.resolucion']}" escape="false" />
+							</p:tooltip>
+							</ui:remove>
+						</h:panelGrid>
+					</h:panelGroup>				
+					
+					
+					<p:panelGrid columns="2" styleClass="w100 noBorderHeader"
+							columnClasses="w50 alTop, field_mrg w50 alTop"
+							rendered="#{catalogoActividadesBean.actividadSistemaSeleccionada.codigo eq '21.02.02.03' or catalogoActividadesBean.actividadSistemaSeleccionada.codigo eq '21.02.03.05'}">
+							<f:facet name="header">
+								<h:outputText value="Derecho minero:" />
+								<mae:panelGridHeaderHelp conector="adjDerechoMinero"
+									help="Nota: Incluir en un solo archivo los derechos  mineros de las concesiones (Máxima 5 concesiones mineras)" />
+							</f:facet>
+
+							<h:panelGroup>
+								<h:panelGrid columns="2" styleClass="w100"
+									columnClasses="w50, field_mrg w50">
+									<t:div>
+										<h:outputLabel value="Adjuntar la documentación formato PDF*" />
+										<h:panelGrid>
+											<p:fileUpload mode="advanced" allowTypes="/(\.|\/)(pdf)$/"
+												sizeLimit="136314880" label="Seleccione"
+												uploadLabel="Subir" cancelLabel="Cancelar" update="fileName"
+												auto="true"
+												fileUploadListener="#{catalogoActividadesBean.subir}"
+												invalidFileMessage="El tipo de archivo no es pdf."
+												invalidSizeMessage="Tamaño de archivo incorrecto">
+											</p:fileUpload>
+											<p:outputLabel id="fileName"
+												value="#{catalogoActividadesBean.documentName}"></p:outputLabel>
+										</h:panelGrid>
+									</t:div>
+								</h:panelGrid>
+							</h:panelGroup>
+						</p:panelGrid>
+								
+					
+					
+					<h:panelGroup rendered="#{registroProyectoOtrosSectoresController.verPanelCamaroneras}">
+					<t:div style="border-top:4px solid #008A8A !important;background: #008A8A;"><p:outputLabel style="color: white; font-weight: bold;position: relative;top: -3px;" value="El permiso ambiental es para: " /></t:div>
+						<h:panelGrid columns="2" columnClasses="w50px,20px">
+							<p:selectManyCheckbox id="permiso" value="#{registroProyectoBean.listPermisos}" required="true"
+							requiredMessage="El campo permiso ambiental es requerido">
+								<f:selectItem itemLabel="Playas y Bahías" itemValue="playas" />
+								<f:selectItem itemLabel="Tierras Altas" itemValue="tierras" />
+							</p:selectManyCheckbox>
+						</h:panelGrid>
+					</h:panelGroup>
+				</h:panelGroup>
+				<h:panelGroup id="containerQuestions">
+					<h:panelGrid columns="4"  columnClasses="w20px,w90,null,null">
+						<p:selectBooleanCheckbox id="generaDesechos" value="#{registroProyectoBean.proyecto.generaDesechos}" disabled="#{registroAlias.marcarGeneraDesechos}">
+							<p:ajax process="@this" />
+						</p:selectBooleanCheckbox>
+						<p:outputLabel for="generaDesechos" value="Generación de desechos especiales o peligrosos (actualmente)" />
+						<p:tooltip for="generaDesechos" escape="false" showDelay="1200" trackMouse="true">
+							<h:outputText value="#{helps['registro.generacionDesechosEspecialesOPeligrosos']}" escape="false" />
+						</p:tooltip>
+						<p:commandButton styleClass="button-small toRight field_mrg primary" ajax="false" immediate="true" icon="ui-icon-help" title="Ayuda">
+							<p:fileDownload value="#{registroProyectoBean.getStreamContent(registroProyectoBean.ayudaGeneracionDesechosEspecialesOPeligrosos)}" />
+						</p:commandButton>
+					</h:panelGrid>
+					<h:panelGrid columns="4" columnClasses="w20px,w90,null,null">
+						<p:selectBooleanCheckbox value="#{registroProyectoBean.proyecto.gestionaDesechosPeligrosos}" id="desechos" disabled="#{registroAlias.marcarGestionDesechosPeligrosos}">
+							<p:ajax process="@this" />
+						</p:selectBooleanCheckbox>
+						<p:outputLabel for="desechos" value="Gestión de desechos peligrosos" />
+						<p:tooltip for="desechos" escape="false" showDelay="1200" trackMouse="true">
+							<h:outputText value="#{helps['registro.gestionDesechosPeligrosos']}" escape="false" />
+						</p:tooltip>
+						<mae:btnHelp help="#{helps['registro.gestionDesechosPeligrosos']}" conector="ayudaDesechos" buttonStyleClass="button-small toRight field_mrg primary" />
+					</h:panelGrid>
+					<h:panelGrid columns="4" columnClasses="w20px,w90,null,null">
+						<p:selectBooleanCheckbox id="utilizaSustaciasQuimicas" value="#{registroProyectoBean.proyecto.utilizaSustaciasQuimicas}" disabled="#{registroAlias.marcarUtilizaSustaciasQuimicas}">
+							<p:ajax process="@this" />
+						</p:selectBooleanCheckbox>
+						<p:outputLabel for="utilizaSustaciasQuimicas" value="Empleo de sustancias químicas" />
+						<p:tooltip for="utilizaSustaciasQuimicas" escape="false" showDelay="1200" trackMouse="true">
+							<h:outputText value="#{helps['registro.empleoSustanciasQuimicas']}" escape="false" />
+						</p:tooltip>
+						<p:commandButton styleClass="button-small toRight field_mrg primary" ajax="false" immediate="true" icon="ui-icon-help" title="Ayuda">
+							<p:fileDownload value="#{registroProyectoBean.getStreamContent(registroProyectoBean.ayudaEmpleoSustanciasQuimicas)}" />
+						</p:commandButton>
+					</h:panelGrid>
+					<h:panelGrid columns="4" columnClasses="w20px,w90,null,null">
+						<p:selectBooleanCheckbox value="#{registroProyectoBean.proyecto.transporteSustanciasQuimicasPeligrosos}" id="quimicos" disabled="#{registroAlias.marcarTransporteSustanciasQuimicas}">
+							<p:ajax process="@this" />
+						</p:selectBooleanCheckbox>
+						<p:outputLabel for="quimicos" value="Transporte de sustancias químicas peligrosas" />
+						<p:tooltip for="quimicos" escape="false" showDelay="1200" trackMouse="true">
+							<h:outputText value="#{helps['registro.transporteSustanciasQuimicas']}" escape="false" />
+						</p:tooltip>
+						<p:commandButton styleClass="button-small toRight field_mrg primary" ajax="false" immediate="true" icon="ui-icon-help" title="Ayuda">
+							<p:fileDownload value="#{registroProyectoBean.getStreamContent(registroProyectoBean.ayudaTransporteSustanciasQuimicasPeligrosas)}" />
+						</p:commandButton>
+					</h:panelGrid>
+				</h:panelGroup>
+			</p:panelGrid>
+		</h:panelGroup>
+
+		<h:panelGroup id="desechosContainerGeneral" />
+
+	</p:tab>
+
+
+	<p:tab id="paso3" title="Completar Datos del Proyecto">
+		<h:panelGroup id="containerRegistroPaso3">
+
+			<h:panelGroup id="mostrarEnCategoria">
+				<ui:include src="#{contenidoSector}" />
+			</h:panelGroup>
+			<h:panelGroup id="areaAltitudContainer">				
+				
+				<p:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w50, field_mrg w50" rendered="#{registroProyectoBean.mostrarAreaAltitud}">
+					<f:facet name="header">
+						<h:panelGroup id="containerAltitudHeader">
+							<h:outputText value="Área y altura del Proyecto" rendered="#{!catalogoActividadesBean.categoriaI}" />
+							<h:outputText value="Área del Proyecto" rendered="#{catalogoActividadesBean.categoriaI}" />
+						</h:panelGroup>
+					</f:facet>
+					<p:outputLabel value="#{registroProyectoMineriaController.labelMateriales}" for="tipoMatrialConcesion" rendered="#{!registroProyectoBean.proyecto.concesionesMinerasMultiples and catalogoActividadesBean.mostrarActualizar}"/>
+                    <p:outputLabel value="" rendered="#{!registroProyectoBean.proyecto.concesionesMinerasMultiples and catalogoActividadesBean.mostrarActualizar}"/>
+                    <h:panelGrid columns="1" styleClass="w100" columnClasses="w100" rendered="#{!registroProyectoBean.proyecto.concesionesMinerasMultiples and catalogoActividadesBean.mostrarActualizar}" >
+                        <p:selectOneMenu id="tipoMatrialConcesion" value="#{registroProyectoBean.proyecto.tipoMaterial}" styleClass="w66" required="true" converter="selectItemConverter" disabled="true">
+                            <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+                            <f:selectItems value="#{registroProyectoMineriaController.tiposMateriales}" />
+                            <p:ajax process="@this" />
+                        </p:selectOneMenu>
+                    </h:panelGrid>
+                    <p:outputLabel value="" rendered="#{!registroProyectoBean.proyecto.concesionesMinerasMultiples and catalogoActividadesBean.mostrarActualizar}"/>
+					
+					
+					<p:outputLabel value="Área o superficie del proyecto, obra o actividad" for="area" />
+					<h:panelGrid columns="1" styleClass="w100" columnClasses="w100" id="containerAltitudLabel">
+						<p:outputLabel value="Altura sobre el nivel del mar (msnm)" for="altitud" rendered="#{!catalogoActividadesBean.categoriaI}" />
+					</h:panelGrid>
+					<h:panelGrid columns="2" styleClass="w50" columnClasses="w50, field_mrg w25">
+						<h:panelGroup>
+							<p:inputText value="#{registroProyectoBean.proyecto.area}" maxlength="10" styleClass="w100" id="area" required="true" readonly="#{registroProyectoBean.habilitartextinput}">
+								<f:validateDoubleRange minimum="#{registroProyectoBean.validarValorMinimoCamaroneras()}" maximum="#{registroProyectoBean.validarValorMaximoCamaroneras()}" />
+								<ui:remove><f:validateDoubleRange minimum="0.1" maximum="500000" /></ui:remove>
+								<pe:keyFilter mask="num" />
+								<p:ajax process="area" immediate="true"/>
+							</p:inputText>
+							<p:tooltip for="area" escape="false" showDelay="1200" trackMouse="true">
+								<h:outputText value="#{helps['registro.area']}" escape="false" />
+							</p:tooltip>
+						</h:panelGroup>
+						
+												
+						<c:if test="#{!registroProyectoBean.proyecto.concesionesMinerasMultiples and catalogoActividadesBean.mostrarActualizar}">
+							<p:selectOneMenu id="cb_unidad1" value="#{registroProyectoBean.proyecto.unidad}" styleClass="w100" disabled="true">							
+							<f:selectItem itemLabel="ha" itemValue="ha" />
+							<f:selectItem itemLabel="m2" itemValue="m2" />
+							<f:selectItem itemLabel="km2" itemValue="km2" />
+							<p:ajax process="cb_unidad1" immediate="true" />
+						</p:selectOneMenu>
+						</c:if>
+						<c:if test="#{!registroProyectoBean.proyecto.concesionesMinerasMultiples and !catalogoActividadesBean.mostrarActualizar}">
+							<p:selectOneMenu id="cb_unidad" requiredMessage="El campo 'Unidad' es requerido." value="#{registroProyectoBean.proyecto.unidad}" styleClass="w100" required="true" 
+							disabled="#{(registroProyectoBean.proyecto.proyectoPlayasBahias or registroProyectoBean.proyecto.proyectoTierrasAltas) and (!registroProyectoOtrosSectoresController.esGranjaAcuicola() or (registroProyectoOtrosSectoresController.esGranjaAcuicola() and registroProyectoOtrosSectoresController.listaProyectosCamaroneras.size() > 0))}">
+							<f:selectItem itemLabel="Seleccione"  />
+							<f:selectItem itemLabel="ha" itemValue="ha" />
+							<f:selectItem itemLabel="m2" itemValue="m2" />
+							<f:selectItem itemLabel="km2" itemValue="km2" />
+							<p:ajax process="cb_unidad" immediate="true" />
+						</p:selectOneMenu>
+						</c:if>
+						
+						
+					</h:panelGrid>
+					<h:panelGrid columns="2" styleClass="w50" columnClasses="w100" id="containerAltitudBody">
+						<h:panelGroup rendered="#{!catalogoActividadesBean.categoriaI}">
+							<p:inputText value="#{registroProyectoBean.proyecto.altitud}" maxlength="5" styleClass="w100" id="altitud" required="true">
+								<f:validateDoubleRange minimum="0" maximum="5000" />
+								<pe:keyFilter mask="num" />
+								<p:ajax process="altitud" immediate="true" />
+							</p:inputText>
+							<p:tooltip for="altitud" escape="false" showDelay="1200" trackMouse="true">
+								<h:outputText value="#{helps['registro.altitud']}" escape="false" />
+							</p:tooltip>
+						</h:panelGroup>
+						<mae:btnHelp render="#{!catalogoActividadesBean.categoriaI}" help="#{formatearAyudaController.obtenerAyuda(helps['registro.altitudAyuda'])}" conector="alturaAyuda" />
+					</h:panelGrid>
+				</p:panelGrid>
+				
+			</h:panelGroup>
+			
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{catalogoActividadesBean.categoriaI}">
+				<f:facet name="header">
+					<h:outputText value="Cobertura Vegetal *" />
+				</f:facet>
+				<p:outputLabel value="¿El proyecto, obra o actividad, requiere remoción de cobertura vegetal nativa?" for="cobertura" />
+					<p:selectOneRadio id="cobertura" requiredMessage="El campo 'Cobertura Vegetal nativa' es requerido." value="#{registroProyectoBean.proyecto.remocionCoberturaVegetal}" required="true">							
+							<f:selectItem itemLabel="Si" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />							
+				</p:selectOneRadio>
+			</p:panelGrid>
+
+			<h:panelGroup id="ubicacionGeograficaContainer">
+				<ui:remove><p:panelGrid columns="1" layout="grid" styleClass="buttonSeleccionarUbicacionContainer w100" rendered="#{registroProyectoBean.mostrarUbicacionGeografica}">
+					<f:facet name="header">
+						<p:commandButton value="Adicionar" actionListener="#{adicionarUbicacionesBean.resetSelections()}" process="@this" update="#{adicionarUbicacionesBean.dialogWidgetVar}" oncomplete="PF('#{adicionarUbicacionesBean.dialogWidgetVar}').show()" styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg" icon="ui-icon-plusthick" 
+						rendered="#{catalogoActividadesBean.categoriaI}"/>
+						<mae:panelGridHeaderHelp value="Ubicación geográfica *" conector="ubicacionHelp" image="#{request.contextPath}/resources/images/help/proyecto-mapa.png" help="#{helps['registro.ubicaciones']}" width="500px" />
+					</f:facet>
+
+					<t:aliasBeansScope>
+						<t:aliasBean alias="#{adicionarUbicacionesAliasBean}" value="#{adicionarUbicacionesBean}" />
+						<!-- Mandaron a quitarlo -->
+						<h:panelGroup rendered="false">
+							<p:outputLabel for="tipoUbicacion" value="Ubicación del proyecto" styleClass="bold" />
+							<p:selectOneRadio id="tipoUbicacion" value="#{registroProyectoBean.proyecto.tipoUbicacion}" required="true" converter="selectItemConverter">
+								<f:selectItems value="#{registroProyectoBean.tiposUbicaciones}" />
+								<p:ajax process="@this" listener="#{registroProyectoBean.cargarProvinciasSegunTipoUbicacion()}" update=":form:#{adicionarUbicacionesAliasBean.dialogWidgetVar} :form:#{adicionarUbicacionesAliasBean.tablaUbicaciones}" />
+							</p:selectOneRadio>
+							<p:tooltip for="tipoUbicacion" escape="false" showDelay="1200" trackMouse="true">
+								<h:outputText value="#{helps['registro.tipoUbicacion']}" escape="false" />
+							</p:tooltip>
+						</h:panelGroup>
+						
+						<ui:include src="/comun/adicionarUbicaciones.xhtml" />
+					</t:aliasBeansScope>
+
+					<script type="text/javascript">
+						arrow_indicator_start_onover(".arrow-indicator2", 4, '.buttonSeleccionarUbicacionContainer', false);					
+					</script>
+				</p:panelGrid></ui:remove>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{registroProyectoBean.mostrarUbicacionGeografica}">
+					<f:facet name="header">
+						<h:outputText value="Dirección del proyecto, obra o actividad *" />
+					</f:facet>
+					<p:inputTextarea id="direccion" label="Dirección" value="#{registroProyectoBean.proyecto.direccionProyecto}" required="true" rows="2" styleClass="w100" autoResize="false" maxlength="200">
+						<p:ajax process="direccion" immediate="true" />
+					</p:inputTextarea>
+					<p:tooltip for="direccion" escape="false" showDelay="1200" trackMouse="true">
+						<h:outputText value="#{helps['registro.ubicaciones.direccion']}" escape="false" />
+					</p:tooltip>
+				</p:panelGrid>
+			</h:panelGroup>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Tipo de zona *" />
+				</f:facet>
+				<p:selectOneRadio id="tipoPoblacion" label="Tipo de zona" value="#{registroProyectoBean.proyecto.tipoPoblacion}" required="true" converter="selectItemConverter">
+					<f:selectItems value="#{registroAlias.tiposPoblaciones}" />
+					<p:ajax process="tipoPoblacion" immediate="true" />
+				</p:selectOneRadio>
+			</p:panelGrid>
+
+			<h:panelGroup id="containerCoordenadas">
+				<p:panelGrid columns="1" layout="grid" styleClass="buttonAdjuntarCoordenadasContainer w100" rendered="#{not empty catalogoActividadesBean.actividadSeleccionada and !registroProyectoBean.ocultarCoordenadas}">
+					<f:facet name="header">
+						<p:commandButton value="Adjuntar" onclick="PF('adjuntarCoordenadas').show()" styleClass="buttonAdjuntarCoordenadas button-small-text toRight field_mrg" type="button" icon="ui-icon-document" rendered="#{!cargarCoordenadasBean.formato.equals('') and !(registroProyectoBean.mostrarSistemareferenciasSD())}"/>
+						<p:commandButton rendered="#{!empty cargarCoordenadasBean.plantillaCoordenadas and !registroProyectoBean.mostrarSistemareferenciasSD()}" value="Descargar plantilla" styleClass="button-small-text toRight field_mrg" icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true">
+							<p:fileDownload value="#{cargarCoordenadasBean.plantillaCoordenadas}" />
+						</p:commandButton>
+						<p:commandButton styleClass="button-small toRight field_mrg" ajax="false" immediate="true" icon="ui-icon-help">
+							<p:fileDownload value="#{cargarCoordenadasBean.ayudaCoordenadas}" />
+						</p:commandButton>
+						<h:outputText value="Sistema de referencias *" />
+					</f:facet>
+					<t:aliasBeansScope>
+						<t:aliasBean alias="#{libreEleccionAlias}" value="false" />
+						<ui:include src="/comun/cargarCoordenadas.xhtml" />
+					</t:aliasBeansScope>
+				</p:panelGrid>
+				<p:panelGrid columns="1" layout="grid" styleClass="buttonSeleccionarUbicacionContainer w100" rendered="#{registroProyectoBean.mostrarUbicacionGeografica}">
+					<f:facet name="header">
+						<p:commandButton value="Adicionar" actionListener="#{adicionarUbicacionesBean.resetSelections()}" process="@this" update="#{adicionarUbicacionesBean.dialogWidgetVar}" oncomplete="PF('#{adicionarUbicacionesBean.dialogWidgetVar}').show()" styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg" icon="ui-icon-plusthick" 
+						rendered="#{cargarCoordenadasBean.verUbicacion==false}"/>
+						<mae:panelGridHeaderHelp value="Ubicación geográfica *" conector="ubicacionHelp" image="#{request.contextPath}/resources/images/help/proyecto-mapa.png" help="#{helps['registro.ubicaciones']}" width="500px" rendered="#{cargarCoordenadasBean.verUbicacion==true}"/>
+						<mae:panelGridHeaderHelp value="Ubicación geográfica *" conector="ubicacionHelp" image="#{request.contextPath}/resources/images/help/proyecto-mapa.png" help="#{helps['registro.ubicaciones.certificado']}" width="500px" rendered="#{cargarCoordenadasBean.verUbicacion==false}"/>
+					</f:facet>
+
+					<t:aliasBeansScope>
+						<t:aliasBean alias="#{adicionarUbicacionesAliasBean}" value="#{adicionarUbicacionesBean}" />
+						<!-- Mandaron a quitarlo -->
+						<h:panelGroup rendered="false">
+							<p:outputLabel for="tipoUbicacion" value="Ubicación del proyecto" styleClass="bold" />
+							<p:selectOneRadio id="tipoUbicacion" value="#{registroProyectoBean.proyecto.tipoUbicacion}" required="true" converter="selectItemConverter">
+								<f:selectItems value="#{registroProyectoBean.tiposUbicaciones}" />
+								<p:ajax process="@this" listener="#{registroProyectoBean.cargarProvinciasSegunTipoUbicacion()}" update=":form:#{adicionarUbicacionesAliasBean.dialogWidgetVar} :form:#{adicionarUbicacionesAliasBean.tablaUbicaciones}" />
+							</p:selectOneRadio>
+							<p:tooltip for="tipoUbicacion" escape="false" showDelay="1200" trackMouse="true">
+								<h:outputText value="#{helps['registro.tipoUbicacion']}" escape="false" />
+							</p:tooltip>
+						</h:panelGroup>
+						<!-- Mandaron a quitarlo -->
+						<ui:include src="/comun/adicionarUbicaciones.xhtml" />
+					</t:aliasBeansScope>
+
+					<script type="text/javascript">
+						arrow_indicator_start_onover(".arrow-indicator2", 4, '.buttonSeleccionarUbicacionContainer', false);					
+					</script>
+				</p:panelGrid>
+				<script type="text/javascript">
+					arrow_indicator_start_onover(".arrow-indicator3", 4, '.buttonAdjuntarCoordenadasContainer', false);					
+				</script>
+			</h:panelGroup>
+			<div styleClass="header-separator">
+                    <p:dialog id="dialogWidgetVarCoordenadas" visible="#{cargarCoordenadasBean.dialogWidgetVarCoordenadas}"
+                        widgetVar="dialogWidgetVarCoordenadas" style="text-align:justify;"
+                        modal="true" width="350" resizable="false">
+                        <p:outputLabel style="text-align:justify;"
+                            value="Se informa que el SUIA trabaja con la información provista por el Comité Nacional de Límites Internos (CONALI) quien procede con la definición del trazado de límites territoriales a nivel parroquial. cantonal y provincial de conformidad con el artículo 13, literal h e i de la Ley para la Fijación de Limites Territoriales." />
+                        <div class="buttons">
+                            <p:commandButton type="button" value="Aceptar" styleClass="buttons main" onclick="PF('dialogWidgetVarCoordenadas').hide()"/>
+                        </div>
+                    </p:dialog>
+            </div>
+			<t:div styleClass="buttons main">
+				<p:commandButton value="#{registroProyectoBean.edicion ? 'Actualizar' : 'Aceptar'}" icon="ui-icon-check" update="containerRegistroPaso3" action="#{registroAlias.guardar()}" />
+				<p:commandButton value="Cancelar" styleClass="secondary" icon="ui-icon-cancel" action="#{registroAlias.cancelar()}" process="@this">
+					<p:confirm header="Confirmación" message="¿Está seguro que desea salir del registro de proyecto?" icon="ui-icon-alert" />
+				</p:commandButton>
+				<p:commandButton value="VER" icon="ui-icon-check" process="@this" action="#{registroAlias.test()}" rendered="false" />
+			</t:div>
+			<p:separator />
+		</h:panelGroup>
+	</p:tab>
+</p:wizard>
+
+<script type="text/javascript">
+
+		var arrowIndicator1 = ".arrow-indicator1";
+
+        function showModalProcesoAdministrativo(xhr, status, args) {
+            if (args.mostrarTieneProcesoAdministrativo) {
+            	PF('procesoAdministrativo').show();
+            }            
+        }
+
+        function invalidateEnter(event){
+        	if (event.keyCode == 13) {
+            	 return false; 
+            	 }
+            }
+
+        $( document ).ready(function() {
+			var wizard = $('ul.ui-wizard-step-titles');
+			$(wizard).removeClass('ui-wizard-step-titles ui-helper-clearfix ui-helper-reset');			
+			$(wizard).addClass('wizard-steps');			
+			
+			var pos = 1;
+			$(wizard).children('li').each(function() {
+				$(this).removeClass('ui-wizard-step-title ui-state-default ui-state-highlight ui-corner-all');
+				if(pos == 1)
+					$(this).addClass('ui-state-highlight active');				
+				var title = $(this).html();
+				$(this).empty();
+				$(this).append('<span class="step">' + (pos++) + '</span>');
+				$(this).append('<span class="title">' + title + '</span>');				
+			});
+
+			$(wizard).append('<li><span class="step">4</span><span class="title">Finalizar</span></li>');
+			
+			setInterval(function() {
+				updateSteps();
+			}, 500);			
+		});
+		
+		function updateSteps() {		
+			var wizard = $('ul.wizard-steps');	
+			$(wizard).children('li').each(function() {
+				$(this).removeClass('active');
+			});
+			
+			var addClass = true;
+			
+			var index = 0;
+			$(wizard).children('li').each(function() {
+				if(addClass) {
+					index ++;
+					$(this).addClass('active');				
+				}
+				if($(this).hasClass('ui-state-highlight')) {
+					addClass = false;				
+				}
+			});
+						
+			if(index != 1)
+				arrow_indicator_hide(arrowIndicator1);
+		}
+
+		arrow_indicator_start(arrowIndicator1, 5);
+    </script>
+</html>

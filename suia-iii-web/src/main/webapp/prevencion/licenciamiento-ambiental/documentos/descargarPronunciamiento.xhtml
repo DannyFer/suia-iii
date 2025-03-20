@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}" target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+
+
+        <h:outputText value="Informe ténico"/>
+        <h:outputText value="Datos del informe técnico"/>
+
+        <p:commandButton styleClass="primary button-small"
+                         actionListener="#{oficioAprobacionEiaBean.setMostrarInforme(true)}"
+                         icon="ui-icon-search" oncomplete="PF('dlg2').show();"
+                         update="modal"/>
+
+        <p:dialog header="Informe Técnico" widgetVar="dlg2" modal="true" id="modal"
+                  height="500" width="100%">
+            <p:outputPanel rendered="#{oficioAprobacionEiaBean.mostrarInforme}">
+                <ui:include src="../vistaPrevia/informeTecnicoEIAVistaPrevia.xhtml"/>
+            </p:outputPanel>
+        </p:dialog>
+
+    </ui:define>
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{descargarPronunciamientoLABean.validarTareaBpm()}"/>
+        <h:form>
+            <h3>Descargar Pronunciamiento</h3>
+
+
+            <br/>
+            <p:commandButton value="Descargar" ajax="false"
+                             icon="ui-icon-arrowthick-1-s" id="certificado"
+                             styleClass="oculto primary">
+                <p:fileDownload value="#{descargarPronunciamientoLABean.stream}"/>
+            </p:commandButton>
+
+            <div class="buttons main">
+                <p:commandButton value="Enviar"
+                                 action="#{descargarPronunciamientoLAController.iniciarTarea}"
+                                 title="Enviar datos" icon="ui-icon-check">
+                </p:commandButton>
+            </div>
+
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

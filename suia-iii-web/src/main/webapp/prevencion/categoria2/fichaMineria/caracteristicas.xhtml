@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{informacionGeneralController.validarTareaBpm()}"/>
+        <ui:include src="contenido/menuMineria.xhtml" />
+        <div class="content">
+            <h:form id="frmDatos">
+                <p:panel header="2. Características generales">
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp value="Tipo de minería" conector="generalHelp" render="false"
+                                                     image="#{request.contextPath}/resources/images/help-how.png"
+                                                     help="#{helps['registro.general']}" />
+                        </f:facet>
+
+                        <h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w10, w90">
+                            <p:outputLabel
+                                value="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.fichaAmbientalMineria.tipoMaterial.nombre}"
+                                for="txtOpciones" />
+                            <p:selectManyCheckbox
+                                value="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.opcionesTipoMaterial}"
+                                required="true" id="txtOpciones" layout="pageDirection">
+                                <f:selectItems
+                                    value="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.listaOpcionesTipoMaterial}" />
+                            </p:selectManyCheckbox>
+                        </h:panelGrid>
+                    </p:panelGrid>
+
+                    <br />
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp render="false"
+                                value="Predio donde se encuentra la actividad minera" conector="generalHelp"
+                                image="#{request.contextPath}/resources/images/help-how.png"
+                                help="#{helps['registro.general']}" />
+                        </f:facet>
+                        <h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w10, w60" id="pnlOtro">
+                            <p:outputLabel value="Predio"  for="cmbPredio:cpcmbPredio"/>
+                                <control:radioAjax identificador="cmbPredio" id="cmbPredio"
+                                                   lista="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.listaPredioActividadMinera}"
+                                                   valor="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.idPredio}"
+                                                   requerido="true" idComponenteActualizar="pnlOtro"
+                                                   ajax="#{caracteristicasGeneralesController.validarOtro()}"/>
+                                <h:inputHidden />
+                                <h:panelGrid columns="2"
+                                             rendered="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.catalogoOtro.equals(caracteristicasGeneralesController.caracteristicasGeneralesBean.idPredio)}">
+                                    <p:outputLabel value="Otro:" for="txtOtro:cptxtOtro" />
+                                    <control:todoTextoComoIngrese id="txtOtro" identificador="txtOtro" longitud="200" tamanio="30"
+                                                                  valor="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.otro}" requerido="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.catalogoOtro.equals(caracteristicasGeneralesController.caracteristicasGeneralesBean.idPredio)}"/>
+                                </h:panelGrid>
+                        </h:panelGrid>
+                    </p:panelGrid>
+
+                    <br />
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp value="Etapa de la actividad minera" render="false"
+                                                     conector="generalHelp"
+                                                     image="#{request.contextPath}/resources/images/help-how.png"
+                                                     help="#{helps['registro.general']}" />
+                        </f:facet>
+
+                        <h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w10, w60">
+                        	<p:outputLabel value="Etapa" for="cmbEtapa:cpcmbEtapa"/>
+                            <control:radio id="cmbEtapa" identificador="cmbEtapa" requerido="true" 
+                                           lista="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.listaEtapaActividadMinera}"
+                                           valor="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.idEtapa}" />
+                        </h:panelGrid>
+                    </p:panelGrid>
+
+                    <br />                    
+                    <f:facet name="footer">
+						<div class="buttons main">
+							<p:commandButton value="Atrás" immediate="true" process="@this" icon="ui-icon-arrowthick-1-w"
+								action="/prevencion/categoria2/fichaMineria/default.jsf?faces-redirect=true"/>
+							<p:commandButton value="Guardar" icon="ui-icon-disk" update=":#{p:component('frmDatos')}" 
+								oncomplete="window.scrollTo(0,0);" action="#{caracteristicasGeneralesController.guardar()}"/>
+							<p:commandButton value="Siguiente" immediate="true" process="@this" icon="ui-icon-arrowthick-1-e"
+								action="/prevencion/categoria2/fichaMineria/descripcionActividad.jsf?faces-redirect=true"/>
+						</div>
+					</f:facet>
+                </p:panel>
+                
+                <p:dialog id="dlgInfo" header="Información" widgetVar="dlgInfo" resizable="false" modal="true" dynamic="true" closable="false" width="250" height="100">
+					<p:panelGrid columns="1" columnClasses="label, value">
+						<h:outputText value="Existe información asociada en el punto 3 que se eliminará, está seguro de querer actualizar?" />
+					</p:panelGrid>
+					<div class="buttons alCenter">
+						<p:commandButton value="Aceptar" icon="ui-icon-check" action="#{caracteristicasGeneralesController.guardarEliminarActividades()}" update=":#{p:component('frmDatos')}" />
+						<p:commandButton value="Cancelar" action="/prevencion/categoria2/fichaMineria/caracteristicas.jsf" styleClass="secondary" icon="ui-icon-check" ajax="false" immediate="true" />
+					</div>
+				</p:dialog>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>

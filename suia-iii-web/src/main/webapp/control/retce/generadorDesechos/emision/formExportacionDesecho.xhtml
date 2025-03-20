@@ -1,0 +1,268 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<style type="text/css">
+.noHeader.ui-datatable table thead tr {
+	display: none;
+}
+</style>
+
+<p:panel id="adicionarExportacionDesecho"
+	widgetVar="adicionarExportacionDesecho" toggleable="true"
+	toggleOrientation="vertical" styleClass="colapsablePanel"
+	collapsed="true">
+	<p:ajax event="toggle"
+		listener="#{exportacionDesechosBean.toggleHandle}"
+		update=":form:adicionarExportacionDesecho" process="@this" />
+	<h:panelGroup id="datosExportacionDesecho">
+		<h:panelGroup
+			rendered="#{exportacionDesechosBean.panelAdicionarVisible}">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Información desecho" width="600px" />
+				</f:facet>
+				<h:panelGrid columns="2" styleClass="panel_data w100"
+					id="datosDesechoExportacionContainer"
+					columnClasses="header w25, null" rowClasses="null, alt">
+					<p:outputLabel value="Desecho" for="desechoPeligrosoExportacion"
+						styleClass="ui-label-form" />
+					<p:selectOneMenu id="desechoPeligrosoExportacion"
+						disabled="#{exportacionDesechosBean.editar}"
+						value="#{exportacionDesechosBean.desechoSeleccionado}"
+						styleClass="w100" converter="selectItemConverter" required="true">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}"
+							itemValue="" noSelectionOption="true" />
+						<f:selectItems
+							value="#{exportacionDesechosBean.getDesechosPendientes()}" />
+						<p:ajax process="@this"
+							listener="#{exportacionDesechosBean.getInfoDesecho()}"
+							update="datosDesechoExportacionContainer" />
+					</p:selectOneMenu>
+
+					<p:outputLabel value="Cantidad (t)" for="cantidadExportacion"
+						styleClass="ui-label-form" />
+					<pe:inputNumber id="cantidadExportacion" thousandSeparator=""
+						maxValue="9999999999.99" minValue="0" required="true"
+						disabled="true"
+						value="#{exportacionDesechosBean.desechoExportacion.cantidad}">
+						<f:validateDoubleRange minimum="0.1" />
+					</pe:inputNumber>
+
+					<p:outputLabel for="paisDestino" styleClass="ui-label-form"
+						value="País de destino" />
+					<p:selectOneMenu
+						value="#{exportacionDesechosBean.desechoExportacion.paisDestino}"
+						id="paisDestino" styleClass="w100" required="true"
+						converter="selectItemConverter">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}"
+							itemValue="" noSelectionOption="true" />
+						<f:selectItems itemLabel="#{pais.nombre}" itemValue="#{pais}"
+							var="pais" value="#{exportacionDesechosBean.listaPaisDestino}" />
+						<p:ajax process="@this" />
+					</p:selectOneMenu>
+				</h:panelGrid>
+
+				<h:panelGroup>
+					<br />
+					<h:outputText
+						value="Debe adjuntar uno o varios documentos por cada fase"
+						styleClass="encabezado1_1em alLeft ui-panel-title" />
+					<br />
+				</h:panelGroup>
+
+				<h:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null" rowClasses="null, alt">
+					<p:outputLabel value="Fase 1 - Notificación"
+						styleClass="ui-label-form" />
+					<h:panelGroup>
+						<h:panelGroup>
+							<p:fileUpload 
+								fileUploadListener="#{exportacionDesechosBean.uploadFileExportacion}"
+								multiple="false" sizeLimit="20971520"
+								allowTypes="/(\.|\/)(pdf)$/" label="Agregar (pdf 20Mb)"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" required="true" update="tblDocumentosNotificacion">
+								<f:attribute name="tipoDocumento" value="1" />
+							</p:fileUpload>
+						</h:panelGroup>
+						<p:dataTable id="tblDocumentosNotificacion" styleClass="noHeader"
+							value="#{exportacionDesechosBean.listaDocumentosNotificacion}"
+							var="documento" emptyMessage="#{labels['common.table.empty']}">
+							<p:column>
+								<h:outputText value="#{documento.nombre}" />
+							</p:column>
+							<p:column styleClass="w15 alCenter"
+								style="text-align:center !important">
+								<p:commandButton icon="ui-icon-arrowthick-1-s"
+									styleClass="primary" title="Ver" ajax="false" immediate="true">
+									<p:fileDownload
+										value="#{exportacionDesechosBean.descargar(documento)}" />
+								</p:commandButton>
+								<p:commandButton icon="ui-icon-trash" title="Eliminar"
+									process="@this" styleClass="primary"
+									actionListener="#{exportacionDesechosBean.eliminarDocumento(1, documento)}"
+									update="tblDocumentosNotificacion" />
+							</p:column>
+						</p:dataTable>
+					</h:panelGroup>
+
+
+					<p:outputLabel value="Fase 2 - Autorización"
+						styleClass="ui-label-form" />
+					<h:panelGroup>
+						<h:panelGroup>
+							<p:fileUpload 
+								fileUploadListener="#{exportacionDesechosBean.uploadFileExportacion}"
+								multiple="false" sizeLimit="20971520"
+								allowTypes="/(\.|\/)(pdf)$/" label="Agregar (pdf 20Mb)"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" required="true" update="tblDocumentosAutorizacion">
+								<f:attribute name="tipoDocumento" value="2" />
+							</p:fileUpload>
+						</h:panelGroup>
+						<p:dataTable id="tblDocumentosAutorizacion" styleClass="noHeader"
+							value="#{exportacionDesechosBean.listaDocumentosAutorizacion}"
+							var="documento" emptyMessage="#{labels['common.table.empty']}">
+							<p:column headerText="Nombre">
+								<h:outputText value="#{documento.nombre}" />
+							</p:column>
+							<p:column styleClass="w15 alCenter"
+								style="text-align:center !important">
+								<p:commandButton icon="ui-icon-arrowthick-1-s"
+									styleClass="primary" title="Ver" ajax="false"
+									immediate="true">
+									<p:fileDownload
+										value="#{exportacionDesechosBean.descargar(documento)}" />
+								</p:commandButton>
+								<p:commandButton icon="ui-icon-trash" title="Eliminar"
+									process="@this" styleClass="primary"
+									actionListener="#{exportacionDesechosBean.eliminarDocumento(2, documento)}"
+									update="tblDocumentosAutorizacion" />
+							</p:column>
+						</p:dataTable>
+					</h:panelGroup>
+
+					<p:outputLabel value="Fase 3 - Documento de movimiento"
+						styleClass="ui-label-form" />
+					<h:panelGroup>
+						<h:panelGroup>
+							<p:fileUpload 
+								fileUploadListener="#{exportacionDesechosBean.uploadFileExportacion}"
+								multiple="false" sizeLimit="20971520"
+								allowTypes="/(\.|\/)(pdf)$/" label="Agregar (pdf 20Mb)"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" required="true" update="tblDocumentosMovimiento">
+								<f:attribute name="tipoDocumento" value="3" />
+							</p:fileUpload>
+						</h:panelGroup>
+						<p:dataTable id="tblDocumentosMovimiento" styleClass="noHeader"
+							value="#{exportacionDesechosBean.listaDocumentosMovimiento}"
+							var="documento" emptyMessage="#{labels['common.table.empty']}">
+							<p:column headerText="Nombre">
+								<h:outputText value="#{documento.nombre}" />
+							</p:column>
+							<p:column styleClass="w15 alCenter"
+								style="text-align:center !important">
+								<p:commandButton icon="ui-icon-arrowthick-1-s"
+									styleClass="primary" title="Ver" ajax="false"
+									immediate="true">
+									<p:fileDownload
+										value="#{exportacionDesechosBean.descargar(documento)}" />
+								</p:commandButton>
+								<p:commandButton icon="ui-icon-trash" title="Eliminar"
+									process="@this" styleClass="primary"
+									actionListener="#{exportacionDesechosBean.eliminarDocumento(3, documento)}"
+									update="tblDocumentosMovimiento" />
+							</p:column>
+						</p:dataTable>
+					</h:panelGroup>
+
+					<p:outputLabel value="Fase 3 - Acta de destrucción"
+						styleClass="ui-label-form" />
+					<h:panelGroup>
+						<h:panelGroup>
+							<p:fileUpload 
+								fileUploadListener="#{exportacionDesechosBean.uploadFileExportacion}"
+								multiple="false" sizeLimit="20971520"
+								allowTypes="/(\.|\/)(pdf)$/" label="Agregar (pdf 20Mb)"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" required="true" update="tblDocumentosDestruccion">
+								<f:attribute name="tipoDocumento" value="4" />
+							</p:fileUpload>
+						</h:panelGroup>
+						<p:dataTable id="tblDocumentosDestruccion"
+							styleClass="noHeader"
+							value="#{exportacionDesechosBean.listaDocumentosDestruccion}"
+							var="documento" emptyMessage="#{labels['common.table.empty']}">
+							<p:column headerText="Nombre">
+								<h:outputText value="#{documento.nombre}" />
+							</p:column>
+							<p:column styleClass="w15 alCenter"
+								style="text-align:center !important">
+								<p:commandButton icon="ui-icon-arrowthick-1-s"
+									styleClass="primary" title="Ver" ajax="false"
+									immediate="true">
+									<p:fileDownload
+										value="#{exportacionDesechosBean.descargar(documento)}" />
+								</p:commandButton>
+								<p:commandButton icon="ui-icon-trash" title="Eliminar"
+									process="@this" styleClass="primary"
+									actionListener="#{exportacionDesechosBean.eliminarDocumento(4, documento)}"
+									update="tblDocumentosDestruccion" />
+							</p:column>
+						</p:dataTable>
+					</h:panelGroup>
+				</h:panelGrid>
+
+				<h:inputHidden
+					validator="#{exportacionDesechosBean.validateDesechoExportacion}" />
+
+				<div class="buttons">
+					<p:commandButton
+						value="#{exportacionDesechosBean.editar ? 'Actualizar' : 'Aceptar'}"
+						styleClass="primary"
+						actionListener="#{exportacionDesechosBean.aceptar()}"
+						oncomplete="toogleExportacion(xhr, status, args)"
+						process="@this datosExportacionDesecho"
+						update="datosExportacionDesecho tblExportacion" />
+					<p:commandButton value="Cancelar" styleClass="secondary"
+						actionListener="#{exportacionDesechosBean.cancelar()}"
+						oncomplete="PF('adicionarExportacionDesecho').toggle()"
+						process="@this" update="datosExportacionDesecho tblExportacion">
+						<p:resetInput target="@form" />
+					</p:commandButton>
+				</div>
+			</p:panelGrid>
+		</h:panelGroup>
+	</h:panelGroup>
+
+</p:panel>
+
+<script type="text/javascript">
+	function toogleExportacion(xhr, status, args) {
+		if(args.addExportacion) {
+			PF('adicionarExportacionDesecho').toggle();
+		}
+	}
+</script>
+</html>

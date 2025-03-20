@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<f:loadBundle var="helps" basename="ec.gob.ambiente.core.resources.helps_es" />
+<p:dialog header="Seleccionar desecho" id="seleccionarDesecho" widgetVar="seleccionarDesecho" modal="true" resizable="false" width="600">
+	<h:panelGrid styleClass="w100 separatorBottom" columns="2" columnClasses="w50, field_mrg">
+		<p:outputLabel for="filtroDesecho" value="Filtro" styleClass="bold" />
+		<h:outputText />
+		<h:panelGroup>
+			<p:inputText id="filtroDesecho" value="#{desechoPeligrosoBean.filter}" styleClass="w100" title="#{helps['registro.desecho.filtro']}" />
+			<p:tooltip for="filtroDesecho" escape="false" showDelay="1200" trackMouse="true" />
+		</h:panelGroup>
+		<h:panelGroup>
+			<div class="buttons-inline">
+				<p:commandButton icon="ui-icon-check" styleClass="primary" process="@this filtroDesecho" actionListener="#{desechoPeligrosoBean.init()}" update="seleccionarDesecho" oncomplete="PF('seleccionarDesecho').show()" />
+				<p:commandButton icon="ui-icon-refresh" styleClass="secondary" process="@this" actionListener="#{desechoPeligrosoBean.reset()}" update="seleccionarDesecho" oncomplete="PF('seleccionarDesecho').show()" />
+			</div>
+		</h:panelGroup>
+	</h:panelGrid>
+
+	<p:tree value="#{desechoPeligrosoBean.catalogo}" id="arbolCatalogoDesecho" var="catalogo" dynamic="true" selectionMode="multiple" styleClass="w100 h200px" rendered="#{!desechoPeligrosoBean.catalogo.leaf}">
+		<p:treeNode expandedIcon="ui-icon-folder-open" collapsedIcon="ui-icon-folder-collapsed" type="folder">
+			<h:outputText value="#{catalogo}" />
+		</p:treeNode>
+		<p:treeNode icon="ui-icon-document" type="document">
+			<h:outputText value="#{catalogo}" />
+		</p:treeNode>
+		<p:ajax event="expand" update="arbolCatalogoDesecho" listener="#{desechoPeligrosoBean.onNodeExpand}" />
+		<p:ajax event="select" update=":form:desechoContainer" listener="#{desechoPeligrosoBean.onNodeSelect}" />
+		<p:ajax event="unselect" update=":form:desechoContainer" listener="#{desechoPeligrosoBean.onNodeUnselect}" />
+	</p:tree>
+	<p:panel rendered="#{desechoPeligrosoBean.catalogo.leaf}" styleClass="h200px alCenter">
+		<h:outputText value="No se encontraron resultados" styleClass="bold" />
+	</p:panel>
+	<p:separator />
+	<div class="buttons">
+		<p:commandButton type="button" value="Aceptar" onclick="PF('seleccionarDesecho').hide()" />
+	</div>
+</p:dialog>
+
+</html>

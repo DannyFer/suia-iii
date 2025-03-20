@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+	<ui:define name="content">
+		<h:form id="form">
+
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Listado de Empresas" />
+					
+					<p:commandButton value="Adicionar" icon="ui-icon-plus"
+					update=":formEmpresa:dlgEmpresa :formEmpresa:pnlEmpresa"
+					actionListener="#{empresasActivasRSQController.nuevoRegistro()}"
+					oncomplete="PF('dlgEmpresa').show()"
+					styleClass="button-small-text toRight field_mrg">
+					<p:resetInput target=":formEmpresa:dlgEmpresa" />
+					</p:commandButton>
+					
+				</f:facet>
+
+			<h:panelGrid id="pnlEmpresas">
+				<p:dataTable id="tableEmpresas" widgetVar="tableEmpresas"
+					value="#{empresasActivasRSQController.listaRegistros}"
+					filterDelay="600" var="item" rows="10"
+					paginator="true" paginatorAlwaysVisible="false"
+					paginatorPosition="bottom"
+					currentPageReportTemplate="{currentPage} de {totalPages}"
+					rowsPerPageTemplate="5,10,15"
+					emptyMessage="#{labels['common.table.empty']}"
+					sortBy="#{item.nombreOperador}">
+
+					<p:column headerText="Operador" filterBy="#{item.nombreOperador}" filterMatchMode="contains">
+						<h:outputText value="#{item.nombreOperador}" />
+					</p:column>
+					<p:column headerText="Representante Legal" filterBy="#{item.nombreRepLegal}" filterMatchMode="contains">
+						<h:outputText value="#{item.nombreRepLegal}" />
+					</p:column>					
+					<p:column headerText="Código RSQ" filterBy="#{item.numeroAplicacion}" filterMatchMode="contains">
+						<h:outputText value="#{item.numeroAplicacion}" />
+					</p:column>
+					<p:column headerText="Vigencia desde">
+						<h:outputText value="#{item.vigenciaDesde}" />
+					</p:column>
+					<p:column headerText="Vigencia hasta">
+						<h:outputText value="#{item.vigenciaHasta}" />
+					</p:column>
+					<ui:remove>
+					<p:column headerText="Empresa Activa">
+						<h:outputText value="#{item.empresaActiva}" />
+					</p:column>
+					</ui:remove>
+					<p:column headerText="Acción" style="text-align: center">
+						<p:commandButton styleClass="primary" icon="ui-icon-pencil"
+							actionListener="#{empresasActivasRSQController.seleccionarRegistro(item)}"
+							update=":formEmpresa:dlgEmpresa" oncomplete="PF('dlgEmpresa').show()" title="Modificar"/>
+					
+						<p:commandButton id="btnGuardar" process="@this" styleClass="primary"
+							icon="ui-icon-trash" actionListener="#{empresasActivasRSQController.eliminar(item)}" title="Eliminar">
+							<p:confirm header="Confirmación"
+								message="¿Está seguro que desea eliminar la información?"
+								icon="ui-icon-alert" />
+						</p:commandButton>
+					</p:column>
+
+				</p:dataTable>
+
+			</h:panelGrid>
+			</p:panelGrid>
+		</h:form>
+
+		<ui:include src="/pages/rcoa/sustanciasQuimicas/empresaActivaRSQ.xhtml"/>
+
+
+	</ui:define>
+</ui:composition>

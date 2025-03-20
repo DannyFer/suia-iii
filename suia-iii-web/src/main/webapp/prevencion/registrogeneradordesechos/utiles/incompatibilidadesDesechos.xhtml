@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<h:panelGroup id="incompatibilidadDesecho">
+	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<h:outputText value="Almacenamiento *" />
+		</f:facet>
+
+		<h:panelGrid id="incompatibilidadesSeleccionadasContainer" columns="1" styleClass="w100">
+			<p:dataList type="none" value="#{incompatibilidadesDesechosBean.incompatibilidadesDesechos.entrySet().toArray()}" var="incompatibilidad" rowIndexVar="index" emptyMessage="#{labels['common.table.empty']}" styleClass="noBorder">
+				<h:panelGrid styleClass="w100 separatorTop separatorBottom">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<p:commandButton value="Adicionar" actionListener="#{incompatibilidadesDesechosBean.addIncompatibilidades(incompatibilidad.key)}" update=":form:#{adicionarIncompatibilidadesBean.modalWidgetVar}" oncomplete="PF('#{adicionarIncompatibilidadesBean.modalWidgetVar}').show()" styleClass="button-small-text toRight field_mrg" process="@this" icon="ui-icon-plusthick" />
+							<h:outputText value="Incompatibilidades" />
+						</f:facet>
+						<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w10, null" rowClasses="null, alt">
+							<h:outputText value="Desecho" />
+							<h:outputText value="#{incompatibilidad.key}" />
+							<h:outputText value="Característica" rendered="#{!empty incompatibilidadesDesechosBean.cargarIncompatibilidadCaracteristica(incompatibilidad.key)}" />
+							<h:outputText value="#{incompatibilidadesDesechosBean.cargarIncompatibilidadCaracteristica(incompatibilidad.key)}" rendered="#{!empty incompatibilidadesDesechosBean.cargarIncompatibilidadCaracteristica(incompatibilidad.key)}" />
+						</h:panelGrid>
+					</p:panelGrid>
+					<p:dataTable value="#{incompatibilidadesDesechosBean.incompatibilidadesDesechos[incompatibilidad.key]}" var="incompatibilidadDesecho" sortBy="#{incompatibilidadDesecho.nombre}" sortOrder="ASCENDING" emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="Nombre">
+							<h:outputText value="#{incompatibilidadDesecho.nombre}" rendered="#{!incompatibilidadDesecho.otro}" />
+							<h:panelGroup rendered="#{incompatibilidadDesecho.otro}">
+								<table style="border: 0; margin: 0; padding: 0;">
+									<tr style="border: 0; margin: 0; padding: 0;">
+										<td class="w5" style="border: 0; margin: 0; padding: 0"><h:outputText value="Otros" /></td>
+										<td class="field_mrg" style="border: 0; margin: 0; padding: 0 4px;"><p:inputText value="#{incompatibilidadDesecho.otroValor}" required="true" requiredMessage="El campo 'Otros' es requerido." maxlength="220">
+												<p:ajax process="@this" />
+											</p:inputText></td>
+									</tr>
+								</table>
+							</h:panelGroup>
+						</p:column>
+						<p:column styleClass="w20px">
+							<p:commandButton update=":form:incompatibilidadesSeleccionadasContainer" styleClass="button-small primary" process="@this" icon="ui-icon-circle-close" actionListener="#{incompatibilidadesDesechosBean.eliminar(incompatibilidad.key, incompatibilidadDesecho)}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+			</p:dataList>
+		</h:panelGrid>
+
+		<ui:include src="/comun/adicionarIncompatibilidades.xhtml" />
+	</p:panelGrid>
+</h:panelGroup>
+
+
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="content">
+		<f:event type="preRenderView"
+			listener="#{revisarInformacionViabilidadPfnController.validarTareaBpm()}" />
+
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Documentos del proyecto" />
+				</f:facet>
+
+				<p:panelGrid columns="2" styleClass="panel_data w50"
+					columnClasses="header w85, null">
+					<h:outputText value="#{proyectosBean.proyecto.codigo}"
+						rendered="#{!empty proyectosbean.proyecto.codigo}" />
+
+					<p:outputLabel
+						value="Oficio del #{labels['roca.lc.certificado.categorizacion']}"
+						style="color: white" />
+					<p:commandButton icon="ui-icon-arrowthick-1-s"
+						styleClass="button-small primary toLeft" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{revisarInformacionViabilidadPfnController.descargar(1)}" />
+					</p:commandButton>
+					<p:outputLabel
+						value="Mapa del #{labels['roca.lc.certificado.categorizacion']}"
+						style="color: white" />
+					<p:commandButton icon="ui-icon-arrowthick-1-s"
+						styleClass="button-small primary toLeft" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{revisarInformacionViabilidadPfnController.descargar(2)}" />
+					</p:commandButton>
+					<p:outputLabel value="Coordenadas del proyecto"
+						style="color: white" />
+					<p:commandButton icon="ui-icon-arrowthick-1-s"
+						styleClass="button-small primary toLeft" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{revisarInformacionViabilidadPfnController.descargar(3)}" />
+					</p:commandButton>
+					<p:outputLabel for="docRespuestas"
+						value="Informe de factibilidad del proyecto, obra o actividad"
+						style="color: white" />
+					<p:commandButton id="docRespuestas" icon="ui-icon-arrowthick-1-s"
+						styleClass="button-small primary toLeft" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{revisarInformacionViabilidadPfnController.descargar(4)}" />
+					</p:commandButton>
+				</p:panelGrid>
+			</p:panelGrid>
+			<br />
+			<h:outputText
+				value="Para continuar por favor descargue la información proporcionada por el operador"
+				styleClass="encabezado text-red" />
+			<br />
+
+			<p:dataTable
+				value="#{revisarInformacionViabilidadPfnController.listaDocumentosAdjuntos}"
+				var="item" emptyMessage="#{labels['common.table.empty']}">
+				<p:column headerText="Adjunto">
+					<h:outputText value="#{item.nombre}" />
+				</p:column>
+				<p:column headerText="Descripción">
+					<h:outputText value="#{item.descripcionAnexo}" />
+				</p:column>
+
+				<p:column headerText="Acción" styleClass="w70px alCenter">
+					<p:commandButton icon="ui-icon-arrowthick-1-s"
+						styleClass="button-small primary" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{revisarInformacionViabilidadPfnController.descargarAnexo(item)}" />
+					</p:commandButton>
+				</p:column>
+
+			</p:dataTable>
+			<br />
+			<br />
+
+			<p:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w30, null">
+				<p:outputLabel value="Requiere inspección:" for="requiereInspeccion"
+					style="color: white" />
+				<p:selectOneRadio
+					value="#{revisarInformacionViabilidadPfnController.viabilidadProyecto.requiereInspeccionTecnica}"
+					required="true" id="requiereInspeccion">
+					<f:selectItem itemLabel="Sí" itemValue="true" />
+					<f:selectItem itemLabel="No" itemValue="false" />
+					<p:ajax event="change" process="@this" update="pnlZonales" />
+				</p:selectOneRadio>
+			</p:panelGrid>
+
+			<h:panelGroup id="pnlZonales">
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w30, null"
+					rendered="#{revisarInformacionViabilidadPfnController.viabilidadProyecto.requiereInspeccionTecnica and revisarInformacionViabilidadPfnController.variasZonales}">
+					<p:outputLabel value="Requiere apoyo de otra Dirección Zonal:"
+						for="rdbRequiereApoyo" style="color: white" />
+					<p:selectOneRadio id="rdbRequiereApoyo"
+						value="#{revisarInformacionViabilidadPfnController.viabilidadProyecto.requiereApoyo}"
+						required="true">
+						<f:selectItem itemLabel="Sí" itemValue="true" />
+						<f:selectItem itemLabel="No" itemValue="false" />
+						<p:ajax event="change" process="@this" update="pnlApoyo" />
+					</p:selectOneRadio>
+				</p:panelGrid>
+			</h:panelGroup>
+
+			<h:panelGroup id="pnlApoyo">
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w30, null"
+					rendered="#{revisarInformacionViabilidadPfnController.viabilidadProyecto.requiereApoyo}">
+					<p:outputLabel value="Seleccionar la Oficina Técnica:"
+						for="rdbOficina" style="color: white" />
+					<p:selectOneMenu id="rdbOficina"
+						value="#{revisarInformacionViabilidadPfnController.viabilidadProyecto.areaApoyo}"
+						required="true" styleClass="w100" filter="true"
+						filterBy="#{item.areaName}" filterMatchMode="contains"
+						converter="selectItemConverter">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+						<f:selectItems
+							value="#{revisarInformacionViabilidadPfnController.listaAutoridadAmbientalMaae}"
+							var="item" itemValue="#{item}"
+							itemLabel="#{item.areaName} (#{item.areaAbbreviation})" />
+						<p:ajax event="change" process="@this" />
+					</p:selectOneMenu>
+
+					<p:outputLabel value="Detallar requerimiento al técnico de apoyo:"
+						for="txtDetalleApoyo" style="color: white" />
+					<p:inputTextarea id="txtDetalleApoyo" maxlength="200" rows="5"
+						required="true" style="resize: none;" autoResize="false"
+						value="#{revisarInformacionViabilidadPfnController.viabilidadProyecto.detalleApoyo}" />
+				</p:panelGrid>
+			</h:panelGroup>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Guardar" process="@this form"
+						actionListener="#{revisarInformacionViabilidadPfnController.guardarRevision()}"
+						update="pnlButtons" icon="ui-icon-disk" />
+					<p:commandButton value="Finalizar" process="@this form"
+						disabled="#{!revisarInformacionViabilidadPfnController.infoGuardada}"
+						action="#{revisarInformacionViabilidadPfnController.finalizar()}" />
+				</div>
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+</ui:composition>

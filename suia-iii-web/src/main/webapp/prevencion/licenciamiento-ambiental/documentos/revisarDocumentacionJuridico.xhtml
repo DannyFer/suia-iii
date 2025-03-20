@@ -1,0 +1,134 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+                xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+                template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/><h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}" target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+
+
+        <h:outputText value="Informe ténico"/>
+        <h:outputText value="Datos del informe técnico"/>
+
+        <p:commandButton styleClass="primary button-small"
+                         actionListener="#{informeTecnicoGeneralLABean.setMostrarInforme(true)}"
+                         icon="ui-icon-search" oncomplete="PF('dlg2').show();"
+                         update="@(.modal)"/>
+        <p:dialog header="Informe Técnico" widgetVar="dlg2" modal="true" id="modal" styleClass="modal"
+                  height="500" width="100%">
+            <p:outputPanel rendered="#{informeTecnicoGeneralLABean.mostrarInforme}">
+                <ui:include src="../vistaPrevia/informeTecnicoEIAVistaPrevia.xhtml"/>
+            </p:outputPanel>
+        </p:dialog>
+
+    </ui:define>
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{informeTecnicoGeneralLABean.validarTareaBpm()}"/>
+        <p:remoteCommand process="@this"
+                         rendered="#{informeTecnicoGeneralLABean.visualizarOficio()}" autoRun="true"
+                />
+        <h:form styleClass="form">
+            <h:panelGrid columns="1" styleClass="w100 pronunciamiento-wrapper" id="pronunciamiento-wrapper"
+                         rendered="#{informeTecnicoGeneralLABean.revisar}"
+                         columnClasses="w50, field_mrg w50">
+                <p:outputLabel for="requiere-modificaciones"
+                               value="¿Requiere modificaciones el informe?"
+                        ></p:outputLabel>
+                <p:selectOneRadio id="requiere-modificaciones"
+                                  value="#{informeTecnicoGeneralLABean.requiereModificaciones}"
+                                  required="true">
+                    <f:selectItem itemLabel="Si"
+                                  itemValue="true"/>
+                    <f:selectItem itemLabel="No"
+                                  itemValue="false"/>
+                </p:selectOneRadio>
+
+
+            </h:panelGrid>
+
+            <object id="pdf_informe" type="application/pdf"
+                    data="#{informeTecnicoGeneralLABean.informePath}?pfdrid_c=true"
+                    width="100%" height="400px">
+                Su navegador no soporta la visualización de pdf. Puede descargar el
+                documento presionando el siguiente botón:
+                <p:commandButton value="Descargar" styleClass="primary"
+                                 ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+                    <p:fileDownload value="#{informeTecnicoGeneralLABean.stream}"/>
+                </p:commandButton>
+            </object>
+
+			<h:panelGrid styleClass="w100" rendered="#{!informeTecnicoGeneralLABean.revisar}">
+            <br/>
+            <br/>
+            <p:fieldset legend="1. Normativas del sector" toggleable="true"
+                        toggleSpeed="500" collapsed="true">
+                <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                             columnClasses="w50, field_mrg w50">
+                    <control:imputConTextoEnriquecido
+                            valor="#{informeTecnicoGeneralLABean.informeTecnicoGeneralLA.normativasSector}"
+                            soloLectura="false"
+                            requerido="false"/>
+                </p:panelGrid>
+            </p:fieldset>
+            <p:fieldset legend="2. Obligaciones" toggleable="true"
+                        toggleSpeed="500" collapsed="true">
+                <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                             columnClasses="w50, field_mrg w50">
+
+                    <control:imputConTextoEnriquecido
+                            valor="#{informeTecnicoGeneralLABean.informeTecnicoGeneralLA.obligaciones}"
+                            soloLectura="true"
+                            requerido="false"/>
+                </p:panelGrid>
+            </p:fieldset>
+            <p:fieldset legend="3. Respaldo de solicitud" toggleable="true"
+                        toggleSpeed="500" collapsed="true">
+                <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                             columnClasses="w50, field_mrg w50">
+                    <control:imputConTextoEnriquecido
+                            valor="#{informeTecnicoGeneralLABean.informeTecnicoGeneralLA.respaldoSolicitud}"
+                            soloLectura="false"
+                            requerido="false"/>
+                </p:panelGrid>
+            </p:fieldset>
+            </h:panelGrid>
+            <br/>
+            <br/>
+            
+            <h:panelGroup id="pnl2" rendered="#{informeTecnicoGeneralLABean.validarObservaciones()}" styleClass="pnl2"><p:fragment>
+                <h2 class="bold"> Observaciones del pronunciamiento</h2>
+                <observaciones:tablaObservaciones aparace="true"
+                                                  soloLectura="#{!informeTecnicoGeneralLABean.revisar}"
+                                                  mostrarSiVacio="#{informeTecnicoGeneralLABean.revisar}"
+                                                  idClase="#{informeTecnicoGeneralLABean.proyectosBean.proyecto.id}"
+                                                  nombreClase="LicenciaAmbiental"
+                                                  seccion="informeGeneral"
+                                                  rol="sjsj"
+                                                  componenteActualizarEliminar="pnl2"/>
+
+            </p:fragment>
+            </h:panelGroup>
+            
+            <div class="buttons main">
+                <p:commandButton value="Guardar" update="@(.pronunciamiento-wrapper)"
+                                 action="#{informeTecnicoGeneralLABean.guardar()}"
+                                 styleClass="ui-confirmdialog-yes secondary" icon="ui-icon-check"/>
+                <p:commandButton value="Enviar" update="pronunciamiento-wrapper"
+                                 action="#{informeTecnicoGeneralLABean.completarTarea}"
+                                 title="Enviar datos" icon="ui-icon-check" styleClass="primary">
+                    <p:confirm message="¿Estás seguro que desea enviar la información?"
+                               header="Confirmación de envío"></p:confirm>
+                </p:commandButton>
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>

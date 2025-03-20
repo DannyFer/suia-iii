@@ -1,0 +1,295 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions">
+
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<h:form id="form">
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Listado de procesos" />
+				</f:facet>
+
+				<h:panelGrid columns="1" styleClass="w100 alCenter" rendered="#{empty resumenProcesosAliasBean.process}">
+					<h:outputText value="Usted no cuenta con historial de procesos." styleClass="encabezado1_4em" />
+				</h:panelGrid>
+
+				<p:dataList id="dataList" type="none" rowIndexVar="index" value="#{resumenProcesosAliasBean.processNames}" var="proceso" rendered="#{!empty resumenProcesosAliasBean.process}" styleClass="noBorder">
+					<br />
+					<p:panel header="#{proceso}" toggleable="true" collapsed="true">
+						<p:ajax event="toggle" listener="#{resumenProcesosAliasBean.onToggleProcess}" update="@(.table_process_#{index}), @(.table1_process_#{index}), @(.table2_process_#{index})" />
+						
+						<p:dataTable rendered="#{isUserModeAliasBean}" id="table" styleClass="table_process_#{index}" value="#{resumenProcesosAliasBean.process[proceso]}" emptyMessage="#{labels['common.table.empty']}" var="process" paginator="true" paginatorAlwaysVisible="false" sortBy="#{process.inicio}" sortOrder="descending" paginatorPosition="bottom" rows="10">
+							<p:column headerText="ID" styleClass="alCenter w10" sortBy="#{process.processInstanceId}" rendered="#{isAdminModeAliasBean}">
+								<p:commandLink process="@this" actionListener="#{resumenProcesosAliasBean.selectProcess(process, proceso)}" oncomplete="PF('processDialog').show();" update=":form:processDialog">
+									<h:outputText value="#{process.processInstanceId}" />
+								</p:commandLink>
+							</p:column>
+							<p:column headerText="Trámite" styleClass="alCenter w25" filterBy="#{process.tramite}" filterMatchMode="contains" sortBy="#{process.tramite}">
+								<h:outputText value="#{process.tramite}" rendered="#{process.mostrarResumenRgd eq null}"/>
+								<h:commandLink value="#{process.tramite}" target="_blank" actionListener="#{resumenProcesosAliasBean.verRgd(process)}"
+									rendered="#{process.mostrarResumenRgd ne null}">
+								</h:commandLink>
+							</p:column>
+							<p:column headerText="Estado" styleClass="alCenter w10" sortBy="#{process.estadoString}">
+								<h:outputText value="#{process.estadoString}" />
+							</p:column>
+							<p:column headerText="Inicio" styleClass="alCenter w15" sortBy="#{process.inicio}">
+								<h:outputText value="#{process.inicio}">
+									<f:convertDateTime pattern="dd/MM/yyyy h:mm a" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="Fin" styleClass="alCenter w15">
+								<h:outputText value="#{process.fin}" rendered="#{!empty process.fin}">
+									<f:convertDateTime pattern="dd/MM/yyyy h:mm a" />
+								</h:outputText>
+								<h:outputText value="Pendiente" styleClass="bold" rendered="#{empty process.fin}" />
+							</p:column>
+							<p:column headerText="Tareas" styleClass="alCenter w10">
+								<p:commandButton oncomplete="PF('dlg_verTareas').show();" update=":form:pnl_tareas" actionListener="#{resumenProcesosAliasBean.verTareas(process)}" styleClass="button-small primary" icon="ui-icon-zoomin" disabled="#{process.deshabilitarTareas}"/>
+								<p:commandButton rendered="#{isAdminModeAliasBean and resumenProcesosAliasBean.proyectoSuspendido(process.tramite)}" actionListener="#{resumenProcesosAliasBean.reactivarProceso(process.tramite)}" styleClass="button-small primary" icon="ui-icon-play" title="Suspendido: Reactivar Tareas" update="table :form:tablaSuspendidos">
+									<p:confirm header="Estimado Usuario" icon="ui-icon-alert" message="¿Está seguro de reactivar las tareas?"/>
+								</p:commandButton>								
+							</p:column>
+							<p:column headerText="Documentos" styleClass="alCenter w10" rendered="#{proceso eq 'Declaracion Sustancias Quimicas' ? false : true}">
+								<p:commandButton oncomplete="PF('dlg_verDocumentos').show();" update=":form:pnl_documentos" actionListener="#{resumenProcesosAliasBean.verDocumentos(process)}" 
+									styleClass="button-small primary" icon="ui-icon-zoomin" disabled="#{process.deshabilitarDocumentos}"/>
+							</p:column>
+						</p:dataTable>
+						
+						
+						
+						<p:dataTable rendered="#{isAdminModeAliasBean}" id="table1" styleClass="table1_process_#{index}"
+							value="#{resumenProcesosAliasBean.listarProcesoPaginador}"
+							var="process" filterDelay="600" rows="10"
+							paginatorAlwaysVisible="false" paginator="true" 
+							paginatorPosition="bottom"
+							emptyMessage="#{labels['common.table.empty']}" lazy="true"
+							paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+							rowsPerPageTemplate="10,15,20">							
+							<p:column headerText="ID" styleClass="alCenter w10" sortBy="#{process.processInstanceId}" rendered="#{isAdminModeAliasBean}">
+								<p:commandLink process="@this" actionListener="#{resumenProcesosAliasBean.selectProcess(process, proceso)}" oncomplete="PF('processDialog').show();" update=":form:processDialog">
+									<h:outputText value="#{process.processInstanceId}" />
+								</p:commandLink>
+							</p:column>
+							<p:column headerText="Trámite" styleClass="alCenter w25" filterMatchMode="contains" filterBy="#{process.tramite}">
+								<h:outputText value="#{process.tramite}" />
+							</p:column>
+							<p:column headerText="Estado" styleClass="alCenter w10">
+								<h:outputText value="#{process.estadoString}" />
+							</p:column>
+							<p:column headerText="Inicio" styleClass="alCenter w15">
+								<h:outputText value="#{process.inicio}">
+									<f:convertDateTime pattern="dd/MM/yyyy h:mm a" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="Fin" styleClass="alCenter w15">
+								<h:outputText value="#{process.fin}" rendered="#{!empty process.fin}">
+									<f:convertDateTime pattern="dd/MM/yyyy h:mm a" />
+								</h:outputText>
+								<h:outputText value="Pendiente" styleClass="bold" rendered="#{empty process.fin}" />
+							</p:column>
+							<p:column headerText="Tareas" styleClass="alCenter w10">
+								<p:commandButton oncomplete="PF('dlg_verTareas').show();" update=":form:pnl_tareas" actionListener="#{resumenProcesosAliasBean.verTareas(process)}" styleClass="button-small primary" icon="ui-icon-zoomin" />
+								<p:commandButton rendered="#{isAdminModeAliasBean and resumenProcesosAliasBean.proyectoSuspendido(process.tramite)}" actionListener="#{resumenProcesosAliasBean.reactivarProceso(process.tramite)}" styleClass="button-small primary" icon="ui-icon-play" title="Suspendido: Reactivar Tareas" update="table1 :form:tablaSuspendidos">
+									<p:confirm header="Estimado Usuario" icon="ui-icon-alert" message="¿Está seguro de reactivar las tareas?"/>
+								</p:commandButton>								
+							</p:column>
+							<p:column headerText="Documentos" styleClass="alCenter w10">
+								<p:commandButton oncomplete="PF('dlg_verDocumentos').show();" update=":form:pnl_documentos" actionListener="#{resumenProcesosAliasBean.verDocumentos(process)}" styleClass="button-small primary" icon="ui-icon-zoomin" />
+							</p:column>
+						</p:dataTable>
+						
+						
+						<p:dataTable rendered="#{isFuncionarioModeAliasBean}" id="table2" styleClass="table2_process_#{index}"
+							value="#{resumenProcesosAliasBean.listarProcesoPaginador}"
+							var="process" filterDelay="600" rows="10"
+							paginatorAlwaysVisible="false" paginator="true" 
+							paginatorPosition="bottom"
+							emptyMessage="#{labels['common.table.empty']}" lazy="true"
+							paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+							rowsPerPageTemplate="10,15,20">
+							<p:column headerText="Trámite" styleClass="alCenter w25" filterMatchMode="contains" filterBy="#{process.tramite}">
+								<h:outputText value="#{process.tramite}" />
+							</p:column>
+							<p:column headerText="Estado" styleClass="alCenter w10">
+								<h:outputText value="#{process.estadoString}" />
+							</p:column>
+							<p:column headerText="Inicio" styleClass="alCenter w15">
+								<h:outputText value="#{process.inicio}">
+									<f:convertDateTime pattern="dd/MM/yyyy h:mm a" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="Fin" styleClass="alCenter w15">
+								<h:outputText value="#{process.fin}" rendered="#{!empty process.fin}">
+									<f:convertDateTime pattern="dd/MM/yyyy h:mm a" />
+								</h:outputText>
+								<h:outputText value="Pendiente" styleClass="bold" rendered="#{empty process.fin}" />
+							</p:column>
+							<p:column headerText="Tareas" styleClass="alCenter w10">
+								<p:commandButton oncomplete="PF('dlg_verTareas').show();" update=":form:pnl_tareas" actionListener="#{resumenProcesosAliasBean.verTareas(process)}" styleClass="button-small primary" icon="ui-icon-zoomin" />																
+							</p:column>
+							<p:column headerText="Documentos" styleClass="alCenter w10">
+								<p:commandButton oncomplete="PF('dlg_verDocumentos').show();" update=":form:pnl_documentos" actionListener="#{resumenProcesosAliasBean.verDocumentos(process)}" styleClass="button-small primary" icon="ui-icon-zoomin" />
+							</p:column>
+						</p:dataTable>
+						
+						
+						
+					</p:panel>
+				</p:dataList>
+				
+				<p:panel header="Procesos suspendidos" toggleable="true" collapsed="true" rendered="#{isAdminModeAliasBean}">				
+				<p:dataTable id="tablaSuspendidos" value="#{resumenProcesosAliasBean.procesosSuspendidoList}" var="item" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" rows="10" emptyMessage="#{labels['common.table.empty']}" >				
+					<p:column headerText="Trámite" styleClass="alCenter w25" filterBy="#{item.codigo}" filterMatchMode="contains">
+								<h:outputText value="#{item.codigo}" />
+					</p:column>
+					<p:column headerText="#{msg['label.descripcion']}" styleClass="alCenter">
+								<h:outputText value="#{item.descripcion}" />
+					</p:column>
+					<p:column headerText="Reactivar" styleClass="alCenter w10">
+						<p:commandButton styleClass="button-small primary" icon="ui-icon-play" title="Suspendido: Reactivar Tareas" 
+						actionListener="#{resumenProcesosAliasBean.reactivarProceso(item.codigo)}" update="tablaSuspendidos :form:dataList">
+						<p:confirm header="Estimado Usuario" icon="ui-icon-alert" message="¿Está seguro de reactivar las tareas?"/>
+						</p:commandButton>
+					</p:column>			
+				</p:dataTable>
+				</p:panel>
+
+				<p:dialog header="Resumen de tareas" widgetVar="dlg_verTareas" modal="true" width="900" id="dlg_Tareas">
+					<h:panelGrid columns="1" columnClasses="w25 alTop,field_mrg alTop" id="pnl_tareas">
+						<p:dataTable id="summaryTaskDatatable" emptyMessage="#{labels['common.table.empty']}" rowIndexVar="rowIndex" var="summaryTask" value="#{resumenProcesosAliasBean.tareas}" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" rows="10">
+							<p:column headerText="#{msg['label.numero']}" styleClass="w20px alCenter">
+								<h:outputText value="#{rowIndex+1}" />
+							</p:column>
+							<p:column headerText="#{msg['label.task']}" styleClass="w25">
+								<h:outputText value="#{summaryTask.nombre}" />
+							</p:column>
+							<p:column headerText="#{msg['label.status']}" styleClass="w10 alCenter">
+								<h:outputText value="#{summaryTask.estado}" />
+							</p:column>
+							<p:column headerText="#{msg['label.responsable']}">
+								<h:outputText value="#{summaryTask.responsable}" />
+							</p:column>
+							<p:column headerText="#{msg['label.fechainicio']}" styleClass="alCenter">
+								<h:outputText value="#{summaryTask.fechaInicio}">
+									<f:convertDateTime pattern="dd/MM/yyyy h:mm a" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="#{msg['label.fechafin']}" styleClass="alCenter">
+								<h:outputText value="#{not empty summaryTask.fechaFin ? summaryTask.fechaFin : 'Pendiente'}" styleClass="#{not empty summaryTask.fechaFin ? '' : 'bold'}">
+									<f:convertDateTime pattern="dd/MM/yyyy h:mm a" />
+								</h:outputText>
+							</p:column>
+						</p:dataTable>
+					</h:panelGrid>
+					<p:separator />
+					<div class="buttons">
+						<p:commandButton type="button" value="Cerrar" onclick="PF('dlg_verTareas').hide()" />
+					</div>
+				</p:dialog>
+
+				<p:dialog header="Documentos adjuntos al proceso" widgetVar="dlg_verDocumentos" modal="true" width="700">
+					<p:panel style="max-height: 700px; overflow: auto">
+					<h:panelGrid columns="1" columnClasses="w25 alTop,field_mrg alTop" id="pnl_documentos">
+						<p:dataTable value="#{resumenProcesosAliasBean.documentos}" var="varDocumentos" emptyMessage="#{labels['common.table.empty']}">
+							<p:column headerText="Nombre documento" styleClass="singleLine">
+								<h:outputText value="#{varDocumentos.nombre}" />
+							</p:column>
+							<p:column styleClass="alCenter w20px">
+								<p:commandButton ajax="false" id="btnDescargar" onclick="PrimeFaces.monitorDownload(start, stop);" icon="ui-icon-search" styleClass="button-small primary" disabled="#{empty varDocumentos.contenidoDocumento}" title="#{empty varDocumentos.contenidoDocumento ? 'El documento no está disponible en el gestor documental' : 'Ver documento'}">
+									<p:fileDownload value="#{resumenProcesosAliasBean.getStream(varDocumentos)}" />
+								</p:commandButton>
+							</p:column>
+						</p:dataTable>
+					</h:panelGrid>
+					</p:panel>
+					<p:separator />
+					<div class="buttons">
+						<p:commandButton type="button" value="Cerrar" onclick="PF('dlg_verDocumentos').hide()" />
+					</div>
+				</p:dialog>
+			</p:panelGrid>
+
+			<p:dialog header="Proceso: #{resumenProcesosAliasBean.proceso}" id="processDialog" widgetVar="processDialog" modal="true" width="800" resizable="false" draggable="false" rendered="#{isAdminModeAliasBean}">
+				<h:panelGrid styleClass="w100" columns="2" columnClasses="w50 alTop, field_mrg w50 alTop">
+					<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+						<h:outputText value="Instancia" />
+						<h:outputText value="#{resumenProcesosAliasBean.resumenInstanciaProceso.processInstanceId}" />
+						<h:outputText value="Trámite" />
+						<h:outputText value="#{resumenProcesosAliasBean.resumenInstanciaProceso.tramite}" />
+						<h:outputText value="Usuario asociado" />
+						<h:outputText value="#{empty resumenProcesosAliasBean.resumenInstanciaProceso.usuarioAsociado ? 'Pendiente' : resumenProcesosAliasBean.resumenInstanciaProceso.usuarioAsociado}" />
+					</h:panelGrid>
+					<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+						<h:outputText value="Estado" />
+						<h:outputText value="#{resumenProcesosAliasBean.resumenInstanciaProceso.estadoString}" />
+						<h:outputText value="Inicio" />
+						<h:outputText value="#{resumenProcesosAliasBean.resumenInstanciaProceso.inicio}">
+							<f:convertDateTime pattern="dd/MM/yyyy h:mm aa" />
+						</h:outputText>
+						<h:outputText value="Fin" />
+						<h:outputText value="#{resumenProcesosAliasBean.resumenInstanciaProceso.fin}" rendered="#{not empty resumenProcesosAliasBean.resumenInstanciaProceso.fin}">
+							<f:convertDateTime pattern="dd/MM/yyyy h:mm aa" />
+						</h:outputText>
+						<h:outputText value="Pendiente" rendered="#{empty resumenProcesosAliasBean.resumenInstanciaProceso.fin}" />
+					</h:panelGrid>
+				</h:panelGrid>
+				<br />
+				<p:dataTable value="#{resumenProcesosAliasBean.variables.keySet()}" var="variable" paginatorAlwaysVisible="false" paginator="true" paginatorPosition="bottom" rows="7">
+					<p:column headerText="Variable" styleClass="w33 singleLine">
+						<h:outputText value="#{variable}" />
+					</p:column>
+					<p:column headerText="Valor" styleClass="singleLine">
+						<p:inputText value="#{resumenProcesosAliasBean.variables[variable]}" styleClass="w100" />
+					</p:column>
+				</p:dataTable>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Sólo iniciar" actionListener="#{resumenProcesosAliasBean.reiniciar(false)}" styleClass="primary" title="Inicia una nueva instancia. No realizar nigún cambio sobre la instancia actual.">
+						<p:confirm header="Confirmación" message="Esta acción iniciará una nueva instancia. ¿Está seguro que desea continuar?" />
+					</p:commandButton>
+					<p:commandButton value="Abortar e iniciar" actionListener="#{resumenProcesosAliasBean.reiniciar(true)}" styleClass="primary" rendered="#{resumenProcesosAliasBean.resumenInstanciaProceso.estado != 3}" title="Inicia una nueva instancia. La instancia actual será abortada.">
+						<p:confirm header="Confirmación" message="Esta acción abortará el proceso actual e iniciará una nueva instancia. ¿Está seguro que desea continuar?" />
+					</p:commandButton>
+					<p:commandButton value="Avanzar tarea" actionListener="#{resumenProcesosAliasBean.avanzarTareaConfirm()}" styleClass="primary" update="nexttaskConfirmDialog"
+									 rendered="#{resumenProcesosAliasBean.resumenInstanciaProceso.estado != 3}" title="Avanza una tarea en la instancia actual." />
+					<p:commandButton value="Cancelar" onclick="PF('processDialog').hide();" styleClass="secondary" />
+				</div>
+			</p:dialog>
+
+			<p:dialog header="Información" id="processRestartAbortDialog" widgetVar="processRestartAbortDialog" modal="true" width="500" closable="false" resizable="false" draggable="false" rendered="#{isAdminModeAliasBean}">
+				<h:outputText value="Se ha iniciado una nueva instacia del proceso satisfactoriamente." styleClass="encabezado alJustify" />
+				<h:outputText value="La instancia anterior ha quedado abortada. Debe eliminarla de la vista de procesos abortados del PMBS si desea que no se le muestre al usuario." styleClass="encabezado text-red alJustify" />
+				<h:outputText value="Desde la aplicación, utilizando el CAMBIO DE USUARIO,  o desde el BPMS, puede avanzar las tareas hasta donde se encontraba la instancia anterior." styleClass="encabezado alJustify" />
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Aceptar" update="@form" process="@this" styleClass="primary" oncomplete="PF('processRestartAbortDialog').hide();" />
+				</div>
+			</p:dialog>
+
+			<p:dialog header="Información" id="processRestartDialog" widgetVar="processRestartDialog" modal="true" width="500" closable="false" resizable="false" draggable="false" rendered="#{isAdminModeAliasBean}">
+				<h:outputText value="Se ha iniciado una nueva instacia del proceso satisfactoriamente." styleClass="encabezado alJustify" />
+				<h:outputText value="Recuerde que la instacia anterior no está abortada. Si desea puede abortarla manualmente y luego eliminarla de la vista de procesos abortados del PMBS si desea que no se le muestre al usuario." styleClass="encabezado text-red alJustify" />
+				<h:outputText value="Desde la aplicación, utilizando el CAMBIO DE USUARIO,  o desde el BPMS, puede avanzar las tareas hasta donde se encontraba la instancia anterior." styleClass="encabezado alJustify" />
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Aceptar" update="@form" process="@this" styleClass="primary" oncomplete="PF('processRestartDialog').hide();" />
+				</div>
+			</p:dialog>
+
+			<p:dialog header="Información" id="nexttaskConfirmDialog" widgetVar="nexttaskDialog" modal="true" width="500" closable="false" resizable="false" draggable="false" rendered="#{isAdminModeAliasBean}">
+				<h:outputText value="Esta acción avanzará a la siguiente tarea de esta instancia." styleClass="encabezado text-red alJustify" />
+				<h:outputText value="¿Está seguro que quiere completar la tarea #{resumenProcesosAliasBean.nombteTarea} como si lo hubiera hecho el usuario #{resumenProcesosAliasBean.usuarioResponsable}?"
+							  styleClass="encabezado alJustify" />
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton actionListener="#{resumenProcesosAliasBean.avanzarTarea()}" value="Aceptar" update="@form" process="@this" styleClass="primary" />
+					<p:commandButton value="Cancelar" onclick="PF('nexttaskConfirmDialog').hide();" styleClass="secondary" />
+				</div>
+			</p:dialog>
+
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

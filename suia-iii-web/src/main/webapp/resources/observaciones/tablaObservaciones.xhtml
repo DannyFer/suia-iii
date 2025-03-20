@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:composite="http://java.sun.com/jsf/composite" xmlns:p="http://primefaces.org/ui"
+                xmlns:t="http://myfaces.apache.org/tomahawk">
+    <composite:interface>
+        <composite:attribute name="aparace" required="true" type="java.lang.Boolean"/>
+        <composite:attribute name="mostrarSiVacio" required="false" type="java.lang.Boolean" default="true"/>
+        <composite:attribute name="idClase" required="true" type="java.lang.String"/>
+        <composite:attribute name="nombreClase" required="true" type="java.lang.String"/>
+        <composite:attribute name="seccion" required="true" type="java.lang.String"/>
+        <composite:attribute name="soloLectura" required="true" type="java.lang.Boolean"/>
+        <composite:attribute name="rol" required="false" type="java.lang.String" default="user"/>
+        <composite:attribute name="componenteActualizarEliminar" required="true" type="java.lang.String"/>
+        <composite:attribute name="idActualizar" required="false" type="java.lang.String"/>
+
+        <composite:attribute name="idComponent" required="false" type="java.lang.String" default="id"/>
+
+        <composite:attribute name="respuestaActiva" required="false" type="java.lang.Boolean" default="false"/>
+        <composite:attribute name="responder" required="false" type="java.lang.Boolean" default="false"/>
+    </composite:interface>
+
+    <composite:implementation>
+        <p:outputLabel
+                id="#{observacionesController.cargarDatosIniciales(cc.attrs.idComponent,cc.attrs.nombreClase,cc.attrs.idClase, cc.attrs.seccion)}"
+                styleClass="noShow"/>
+
+        <p:outputPanel  styleClass="#{observacionesController.obtenerIdSeccion(cc.attrs.idComponent)}"
+                       rendered="#{cc.attrs.aparace and (cc.attrs.mostrarSiVacio or observacionesController.listaObservacionesBB.get(cc.attrs.idComponent).mapaSecciones.get(cc.attrs.seccion).size() >0)}">
+            <br/>
+            <p:separator/>
+            <br/>
+            <p:panelGrid columns="1" layout="grid" styleClass="w100" id="resultadoContainer">
+
+
+					<h:outputText styleClass="w100 text-red bold" rendered="#{verRegistroGeneradorDesechoBean.registroGeneradorDesechosAsociado!=null and verRegistroGeneradorDesechoBean.isTecnicoAutenticado()}"
+									value="#{labels['msg.informacion.informativoProcesoDesechoTecnico']}" />
+					<p:separator rendered="#{verRegistroGeneradorDesechoBean.registroGeneradorDesechosAsociado!=null and verRegistroGeneradorDesechoBean.isTecnicoAutenticado()}"/>
+
+                <p:dataList type="none" styleClass="noBorder"
+                            value="#{observacionesController.listaObservacionesBB.get(cc.attrs.idComponent).mapaSecciones.entrySet().toArray()}"
+                            var="seccion" rendered="#{cc.attrs.aparace}"
+                            emptyMessage="No hay observaciones hasta este momento.">
+
+
+                    <p:dataList type="none" styleClass="noBorder" paginator="true" rows="10" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}"
+                                value="#{observacionesController.listaObservacionesBB.get(cc.attrs.idComponent).mapaSecciones.get(seccion.key)}"
+                                var="obj" rendered="#{cc.attrs.aparace}"
+                                emptyMessage="No hay observaciones hasta este momento.">
+                        <f:facet name="header">
+                            <p:commandButton value="Agregar" styleClass="button-small-text toRight field_mrg"
+                                             process="@(.#{observacionesController.obtenerIdSeccion(cc.attrs.idComponent)})"
+                                             icon="ui-icon-plusthick"
+                                             action="#{observacionesController.agregarObservacion(cc.attrs.idComponent,cc.attrs.idClase, cc.attrs.nombreClase, seccion.key)}"
+                                             update="@(.#{observacionesController.obtenerIdSeccion(cc.attrs.idComponent)})"
+                                             rendered="#{cc.attrs.aparace and !cc.attrs.soloLectura}"/>
+                            <h:outputText
+                                    value="Observaciones (total: #{observacionesController.listaObservacionesBB.get(cc.attrs.idComponent).mapaSecciones.get(seccion.key).size()})"/>
+                        </f:facet>
+                        <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                            <f:facet name="header">
+                                <p:commandButton styleClass="button-small toRight field_mrg" process="@this"
+                                                 icon="ui-icon-trash" rendered="#{not (obj.disabled or cc.attrs.soloLectura)}"
+                                                 action="#{observacionesController.eliminar(cc.attrs.idComponent,seccion.key,obj)}"
+                                                 update="@(.#{observacionesController.obtenerIdSeccion(cc.attrs.idComponent)}) #{cc.attrs.idActualizar}">
+                                    <p:confirm header="Confirmación"
+                                               message="¿Está seguro que desea eliminar esta observación?"
+                                               icon="ui-icon-alert"/>
+                                </p:commandButton>
+                                <h:outputText value="Observación del "/>
+                                <h:outputText value="#{obj.fechaRegistro}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                </h:outputText>
+                            </f:facet>
+                            <h:panelGrid styleClass="w100" columns="2" columnClasses="w50 alTop, field_mrg w50 alTop">
+                                <h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null"
+                                             rowClasses="null, alt">
+                                    <h:outputText value="Usuario"/>
+                                    <h:outputText value="#{obj.usuario.persona.nombre}"/>
+                                </h:panelGrid>
+                                <h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null"
+                                             rowClasses="null, alt">
+                                    <h:outputText value="Fecha"/>
+                                    <h:outputText value="#{obj.fechaRegistro}">
+                                        <f:convertDateTime pattern="dd/MM/yyyy, h:mm:ss aa"/>
+                                    </h:outputText>
+                                </h:panelGrid>
+                            </h:panelGrid>
+                            <h:panelGrid styleClass="w100" columns="2"
+                                         columnClasses="w50 alTop, field_mrg w50 alCenter alTop"
+                                         rendered="#{!cc.attrs.soloLectura}">
+                                <p:outputLabel value="Campo observado" styleClass="bold" for="campoObservado"/>
+                                <p:outputLabel value="¿Observación corregida?" styleClass="bold" rendered="#{!observacionesController.esNuevoComentario(obj)}" />
+                                <p:outputLabel value=""  rendered="#{observacionesController.esNuevoComentario(obj)}" />
+                                <p:inputText value="#{obj.campo}" id="campoObservado" required="#{!obj.disabled}"
+                                             readonly="#{obj.disabled}" maxlength="200"/>
+
+                                <p:selectOneRadio value="#{obj.observacionCorregida}" disabled="#{obj.disabled}" rendered="#{!observacionesController.esNuevoComentario(obj)}" >
+                                    <f:selectItem itemLabel="Sí" itemValue="true"/>
+                                    <f:selectItem itemLabel="No" itemValue="false"/>
+                                </p:selectOneRadio>
+                                <p:outputLabel value=""  rendered="#{observacionesController.esNuevoComentario(obj)}" />
+                            </h:panelGrid>
+                            <h:panelGrid styleClass="w100" columns="2" columnClasses="w50 alTop, field_mrg w50 alTop"
+                                         rendered="#{cc.attrs.soloLectura}">
+                                <h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null"
+                                             rowClasses="null, alt">
+                                    <h:outputText value="Campo observado"/>
+                                    <h:outputText value="#{obj.campo}" required="#{!obj.disabled}"/>
+                                </h:panelGrid>
+                                <h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null"
+                                             rowClasses="null, alt">
+                                    <h:outputText value="¿Observación corregida?"/>
+                                    <h:outputText value="#{obj.observacionCorregida}"
+                                                  converter="booleanToStringConverter"/>
+                                </h:panelGrid>
+                            </h:panelGrid>
+
+                            <p:outputLabel value="Observación" styleClass="bold" for="observacion"/>
+                            <p:inputTextarea value="#{obj.descripcion}" id="observacion" required="#{!obj.disabled}"
+                                             readonly="#{obj.disabled or cc.attrs.soloLectura}" rows="2" autoResize="false" maxlength="450"/>
+
+                            <p:outputLabel value="Respuesta" styleClass="bold" for="respuesta" rendered="#{cc.attrs.respuestaActiva}"/>
+                            <p:inputTextarea value="#{obj.respuesta}" id="respuesta" rendered="#{cc.attrs.respuestaActiva}" required="#{cc.attrs.responder}"
+                                             readonly="#{not cc.attrs.responder}" rows="2" autoResize="false" maxlength="450"/>
+                        </p:panelGrid>
+                    </p:dataList>
+
+                    <p:separator/>
+                    <t:div styleClass="buttons main">
+                        <p:commandButton value="Guardar observaciones" styleClass="extraLarge" icon="ui-icon-disk"
+                                         action="#{observacionesController.guardar(cc.attrs.idComponent, seccion.key)}"
+                                         update="@(.#{observacionesController.obtenerIdSeccion(cc.attrs.idComponent)}) #{cc.attrs.idActualizar}"
+                                         rendered="#{!cc.attrs.soloLectura or cc.attrs.responder}"
+                                         disabled="#{observacionesController.listaObservacionesBB.get(cc.attrs.idComponent).mapaSecciones.get(seccion.key).isEmpty()}"
+                                         process="@(.#{observacionesController.obtenerIdSeccion(cc.attrs.idComponent)})"/>
+                    </t:div>
+                    <br/>
+                </p:dataList>
+            </p:panelGrid>
+        </p:outputPanel>
+        <p:remoteCommand update="resultadoContainer" autoRun="true"/>
+    </composite:implementation>
+</ui:composition>

@@ -1,0 +1,134 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:controles="http://java.sun.com/jsf/composite/controles-prime">
+<ui:composition
+		template="/prevencion/licenciamiento-ambiental/eia/default.xhtml">
+	<ui:define name="content-eia">
+		<h:form id="frmDatos">
+			<p:panel
+					header="#{adjuntosEiaController.adjuntosEiaBean.nombrePanel}">
+
+				<p:separator />
+				<h:outputText styleClass="w100 text-red"
+							  value="#{adjuntosEiaController.mensajeInformativoAnexos}" />
+				<p:separator />
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Documento *" />
+					</f:facet>
+
+					<p:outputLabel for="anexos" value="Nombre: " />
+					<p:selectOneMenu id="anexos"
+									 value="#{adjuntosEiaController.documento.descripcion}">
+						<f:selectItem itemLabel="Seleccione" itemValue="" />
+						<f:selectItems value="#{adjuntosEiaController.tipoAnexos}" />
+						<p:ajax process="@this" update="agregarAdjunto etiqueta"></p:ajax>
+					</p:selectOneMenu>
+
+					<h:panelGrid columns="2" columnClasses="null, field_mrg"
+								 id="etiqueta">
+						<p:outputLabel
+								value="#{empty adjuntosEiaController.documento.nombre ? 'Documento(.pdf)' : adjuntosEiaController.documento.nombre}" />
+					</h:panelGrid>
+
+					<p:fileUpload id="fileUp"
+								  fileUploadListener="#{adjuntosEiaController.uploadListenerAnexos}"
+								  multiple="false" sizeLimit="209715200"
+								  allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar"
+								  uploadLabel="Subir" invalidFileMessage="Tipo de archivo no válido"
+								  invalidSizeMessage="Tamaño de archivo no válido, máximo 5Mb"
+								  cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								  update="etiqueta agregarAdjunto" auto="true" process="@this" />
+
+					<p:commandButton id="agregarAdjunto" icon="ui-icon-plusthick"
+									 value=" Agregar " styleClass="button-small-text field_mrg primary"
+									 title="Agregar" action="#{adjuntosEiaController.aniadirDocumento}"
+									 update="tablaAnexos etiqueta anexos agregarAdjunto"
+									 process="@form"
+									 disabled="#{empty adjuntosEiaController.documento.nombre || empty adjuntosEiaController.documento.descripcion}" />
+				</p:panelGrid>
+
+				<br />
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Documento *" />
+					</f:facet>
+
+					<p:dataTable id="tablaAnexos" var="doc"
+								 value="#{adjuntosEiaController.documentos}">
+						<p:column headerText="Nombre">
+							<h:outputText value="#{doc.descripcion}" />
+						</p:column>
+
+
+						<p:column headerText="Documento">
+							<h:outputText value="#{doc.nombre}" />
+						</p:column>
+
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton icon="ui-icon-arrowthick-1-s" process="@form"
+											 styleClass="button-small primary" title="Descargar"
+											 immediate="true" ajax="false">
+								<p:fileDownload
+										value="#{adjuntosEiaController.getStreamContentAnexo(doc)}" />
+							</p:commandButton>
+							<p:commandButton icon="ui-icon-circle-close"
+											 action="#{adjuntosEiaController.selecionarDocumento(doc)}"
+											 styleClass="button-small primary" title="Ver"
+											 onclick="PF('dlgEliminar').show();" update=":formEliminarAnexos" />
+
+						</p:column>
+
+					</p:dataTable>
+
+				</p:panelGrid>
+
+				<div class="buttons main">
+					<p:commandButton value="Atrás" immediate="true" process="@this"
+									 action="/prevencion/licenciamiento-ambiental/eia/pma/cronogramaPma.jsf?id=17&amp;faces-redirect=true"
+									 icon="ui-icon-arrowthick-1-w" />
+
+
+					<p:commandButton value="Guardar" icon="ui-icon-check"
+									 action="#{adjuntosEiaController.validarAnexos()}" update="@form" />
+
+					<p:commandButton value="Siguiente" immediate="true" process="@this"
+									 action="/prevencion/licenciamiento-ambiental/eia/envioEia.jsf?faces-redirect=true"
+									 icon="ui-icon-arrowthick-1-e" />
+				</div>
+
+			</p:panel>
+		</h:form>
+
+		<p:dialog header="Eliminar Anexos" widgetVar="dlgEliminar"
+				  id="dlgEliminar" modal="true" resizable="false" draggable="false"
+				  width="500">
+			<h:form id="formEliminarAnexos">
+				<h:panelGrid columns="1" styleClass="w100">
+					<p:outputLabel
+							value="Está seguro de eliminar el anexo seleccionado?" />
+				</h:panelGrid>
+
+				<div class="buttons">
+					<p:commandButton value="Aceptar" icon="ui-icon-check"
+									 actionListener="#{adjuntosEiaController.eliminarDocumento()}"
+									 update=":frmDatos" oncomplete="PF('dlgEliminar').hide()" />
+
+
+					<p:commandButton value="Cancelar" styleClass="secondary"
+									 icon="ui-icon-cancel" type="button"
+									 onclick="PF('dlgEliminar').hide()" />
+				</div>
+
+			</h:form>
+		</p:dialog>
+
+
+	</ui:define>
+</ui:composition>
+</html>

@@ -1,0 +1,113 @@
+<ui:composition template="/WEB-INF/templates/default-task-project.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+
+	<ui:define name="content">
+
+		<script type="text/javascript">
+		$(document).ready(function() {
+			$('.wizard-custom-btn-back').hide();
+			$('.wizard-custom-btn-only-end').hide();
+		});
+	</script>
+	
+
+		<style type="text/css">
+.ui-fileupload-content {
+	border: none !important;
+	padding: 0px;
+}
+
+noBorders tr, .noBorders td {
+background: none !important;
+border: none !important;
+} 
+
+.ui-selectcheckboxmenu-list-item label{
+	color:#222222 !important;
+}
+
+.ui-selectcheckboxmenu-label-container label{
+	color:#222222 !important;
+}
+
+.ui-selectlistbox-listcontainer{
+ overflow: initial !important;
+
+</style>
+
+		<link rel="stylesheet" type="text/css"
+			href="#{request.contextPath}/resources/css/plugin/wizard.css" />
+
+		<h:form id="form" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }">
+
+			<p:wizard widgetVar="wizard"
+				flowListener="#{wizardBean.onFlowProcess}" showNavBar="false"
+				nextLabel="Siguiente" backLabel="Atrás" id="wizardGenerador">
+				<p:tab id="paso1" titletip="Información General" title="Información General">
+					<ui:include	src="/pages/rcoa/generadorDesechos/informacionRegistro/informacionGeneral.xhtml" />
+				</p:tab>		
+				<p:tab id="paso2" titletip="Ubicación de los puntos" title="Ubicación de los puntos">				
+					<ui:include
+						src="/pages/rcoa/generadorDesechos/informacionRegistro/puntosRecuperacion.xhtml" />						
+				</p:tab>
+				<p:tab id="paso3" titletip="Identificación de residuos o desechos" title="Identificación de residuos o desechos">
+					<t:aliasBeansScope>
+						<t:aliasBean alias="#{adicionarDesechosAliasRcoaBean}" value="#{adicionarDesechosPeligrososRcoaBean}" />
+
+						<t:aliasBean alias="#{customHelp}" value="#{helps['generadorDesecho.identificarDesechos']}" />
+						<t:aliasBean alias="#{customImage}" value="#{request.contextPath}/resources/images/help/imagen-vacia.png" />
+
+						<ui:include
+						src="/pages/rcoa/generadorDesechos/informacionRegistro/identificacionResiduosDesechos.xhtml" />
+						<h:inputHidden validator="#{adicionarDesechosAliasRcoaBean.validateDesechos}" />
+					</t:aliasBeansScope>			
+				
+				</p:tab>
+				<p:tab id="paso4" titletip="Finalizar" title="Finalizar">
+					<ui:include
+						src="/pages/rcoa/generadorDesechos/informacionRegistro/finalizar.xhtml" />
+				</p:tab>
+				
+			</p:wizard>
+
+			<div class="buttons main">				
+				<p:commandButton value="Atrás" icon="ui-icon-arrowthick-1-w"
+					oncomplete="PF('wizard').back();reloadWizard();"
+					styleClass="wizard-custom-btn-back" process="@this"
+					update="wizardGenerador,btnSiguiente"
+					action="#{informacionRegistroGeneradorController.btnAtras}"/>
+				<p:commandButton id="btnGuardar" value="Guardar" title="Guardar"
+					icon="ui-icon-disk" update="btnSiguiente" 
+					actionListener="#{informacionRegistroGeneradorController.guardar()}"
+					styleClass="#{informacionRegistroGeneradorController.style}"/>
+				<p:commandButton id="btnSiguiente" value="Siguiente"
+					icon="ui-icon-arrowthick-1-e"
+					oncomplete="PF('wizard').next();reloadWizard();"
+					styleClass="wizard-custom-btn-next"
+					actionListener="#{informacionRegistroGeneradorController.btnSiguiente}"
+					update="wizardGenerador,btnSiguiente, btnGuardar" 
+					disabled="#{!informacionRegistroGeneradorController.guardado}"/>
+				<p:commandButton value="Enviar" id="btnEnviar" process="@this"
+					styleClass="wizard-custom-btn-only-end"
+					icon="ui-icon-check"
+					disabled="#{!informacionRegistroGeneradorController.aceptarCondiciones}"
+					actionListener="#{informacionRegistroGeneradorController.enviar()}">
+					<p:confirm header="Confirmación"
+						message="¿Está seguro que desea enviar la información? Si desea verificar la información de clic en Cancelar y después en el botón Atrás."
+						icon="ui-icon-alert" />
+				</p:commandButton>
+			</div>
+			<h:outputScript name="/plugin/wizard.js" library="js" />
+		</h:form>
+
+		
+	</ui:define>
+</ui:composition>

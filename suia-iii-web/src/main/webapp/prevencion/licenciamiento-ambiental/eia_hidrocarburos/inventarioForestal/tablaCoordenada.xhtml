@@ -1,0 +1,93 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:controles-prime="http://java.sun.com/jsf/composite/controles-prime"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+
+    <h:form id="frmCoordenada">
+        <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="">
+            <f:facet name="header">
+                <p:commandButton value="Adicionar"  styleClass="button-small-text toRight field_mrg" 
+                                 icon="ui-icon-plusthick" action="#{inventarioForestalController.agregarCoordenada()}" update=":#{p:component('pnlPuntoMuestreo')}" 
+                                 oncomplete="PF('dlgPuntoMuetreo').show();"                />
+                <mae:panelGridHeaderHelp value="Ubicación de puntos de muestreos" conector="ubicacionHelp" image="#{request.contextPath}/resources/images/proyecto-mapa.png" help="" />
+
+            </f:facet>
+
+            <p:dataTable id="tblClCoordenadas" value="#{inventarioForestalController.inventarioForestalBean.listaCoordenada}" 
+                         var="coordenada" rows="5" emptyMessage="#{labels['common.table.empty']}"
+                         paginator="true" paginatorPosition="bottom">
+
+                <p:column headerText="Acciones" width="60">
+                    <div class="buttons-inline">
+                        <p:commandButton icon="ui-icon-pencil" action="#{inventarioForestalController.seleccionarCoordenada(coordenada)}"
+                                         title="Editar" styleClass="primary"
+                                         oncomplete="PF('dlgPuntoMuetreo').show();" update=":#{p:component('pnlPuntoMuestreo')}"/>
+                        <p:commandButton icon="ui-icon-trash" action="#{inventarioForestalController.removerCoordenada(coordenada)}"
+                                         title="Remover" styleClass="secondary"
+                                         update="tblClCoordenadas"/>
+                    </div>
+                </p:column>
+
+                <p:column headerText="Código de parcela">
+                    <h:outputText value="#{coordenada.descripcion}"/>
+                </p:column>
+
+                <p:column headerText="X - este">
+                    <h:outputText value="#{coordenada.x}" />
+                </p:column>
+
+                <p:column headerText="Y - norte">
+                    <h:outputText value="#{coordenada.y}" />
+                </p:column>
+            </p:dataTable>
+        </p:panelGrid>
+    </h:form>
+
+    <p:dialog header="Punto de Muestreo" widgetVar="dlgPuntoMuetreo" modal="true" resizable="false" draggable="false"
+              style="overflow: auto;" width="300" height="150">  
+        <h:form id="formActualiza">
+            <p:panel>
+                <h:panelGrid id="pnlPuntoMuestreo" columns="2">
+                    <h:outputLabel value="*Código de parcela" />
+                    <controles-prime:todoTextoComoIngrese identificador="txtCodigoDlg" valor="#{inventarioForestalController.inventarioForestalBean.coordenadaGeneral.descripcion}"
+                                                          longitud="6" tamanio="10" 
+                                                          requerido="true" />
+
+                    <h:outputLabel value="*X - este" />
+                    <controles-prime:soloTextoNumerosDecimales identificador="txtX1Dlg" 
+                                                               valor="#{inventarioForestalController.inventarioForestalBean.coordenadaGeneral.x}"
+                                                               requerido="true" tamanio="10"
+                                                               longitud="6"/>
+
+                    <h:outputLabel value="*Y - norte" />
+                    <controles-prime:soloTextoNumerosDecimales identificador="txtX2Dlg" 
+                                                               valor="#{inventarioForestalController.inventarioForestalBean.coordenadaGeneral.y}"
+                                                               requerido="false" tamanio="10"
+                                                               longitud="6"/>
+
+                </h:panelGrid>
+                <br/>
+                <center>
+                    <p:commandButton value="Guardar" action="#{inventarioForestalController.guardarCoordenada()}"
+                                     oncomplete="handlePuntoRequest(xhr, status, args)" styleClass="primary"
+                                     update="formActualiza, :#{p:component('msgs')}, :#{p:component('tblClCoordenadas')}"/>
+                </center>
+            </p:panel>
+        </h:form>
+    </p:dialog>
+    <script type="text/javascript">
+        function handlePuntoRequest(xhr, status, args) {
+            if (args.validationFailed || !args.puntoIn) {
+                PF('dlgPuntoMuetreo').jq.effect("shake", {times: 5}, 100);
+            }
+            else {
+                PF('dlgPuntoMuetreo').hide();
+                $('#loginLink').fadeOut();
+            }
+        }
+    </script>
+</ui:composition>

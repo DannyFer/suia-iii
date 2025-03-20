@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+	<ui:define name="context-extra">
+		<h:outputText value="#{contextoViabilidadPfnController.etiqueta}"
+			rendered="#{contextoViabilidadPfnController.verExtra}" />
+		<h:outputText value="#{contextoViabilidadPfnController.nombreTecnico}"
+			rendered="#{contextoViabilidadPfnController.verExtra}" />
+		<p:commandButton
+			action="#{contextoViabilidadPfnController.visualizarInformacion()}"
+			styleClass="primary button-small" icon="ui-icon-search"
+			rendered="#{contextoViabilidadPfnController.verExtra}" />
+	</ui:define>
+
+	<ui:define name="content">
+		<style type="text/css">
+.ui-panelgrid-header .ui-widget-header td {
+	background: #00aac3 !important;
+}
+
+.ui-state-error {
+	color: #cd0a0a !important;
+}
+</style>
+
+		<f:event type="preRenderView"
+			listener="#{elaborarDocumentosViabilidadPfnController.validarTareaBpm()}" />
+
+		<h:form id="form">
+			<p:tabView id="tab"
+				activeIndex="#{elaborarDocumentosViabilidadPfnController.activeIndex}">
+				<p:ajax event="tabChange" update=":form:tab" />
+				<p:tab
+					title="#{elaborarDocumentosViabilidadPfnController.nombreTipoInforme}">
+					<ui:include
+						src="/pages/rcoa/viabilidadAmbientalForestal/viewInformeViabilidad.xhtml" />
+				</p:tab>
+				<p:tab
+					rendered="#{elaborarDocumentosViabilidadPfnController.esInformeViabilidad ne null}"
+					title="#{elaborarDocumentosViabilidadPfnController.nombreTipoOficio}">
+					<ui:include
+						src="/pages/rcoa/viabilidadAmbientalForestal/viewOficioViabilidad.xhtml" />
+				</p:tab>
+			</p:tabView>
+
+			<ui:include
+				src="/pages/rcoa/viabilidadAmbientalForestal/_viewInformacionExtra.xhtml" />
+		</h:form>
+
+		<h:form id="pnlObservaciones">
+			<h:panelGroup id="pnlObsInformeTecnico">
+				<observaciones:tablaObservacionesViabilidad
+					idComponent="obsDocumentos"
+					seccion="#{elaborarDocumentosViabilidadPfnController.seccionObservaciones}"
+					componenteActualizarEliminar="pnlObsInformeTecnico" aparace="true"
+					mostrarSiVacio="false"
+					idClase="#{elaborarDocumentosViabilidadPfnController.oficioRevisionViabilidadPfnBean.oficioRevision.id}"
+					nombreClase="#{elaborarDocumentosViabilidadPfnController.claseObservaciones}"
+					soloLectura="true" />
+			</h:panelGroup>
+			<h:panelGroup id="pnlObsInformeTecnicoPc"
+				rendered="#{elaborarDocumentosViabilidadPfnController.validarObservacionesPc()}">
+				<p:panelGrid columns="1" layout="grid">
+					<f:facet name="header">
+						<h:outputText value="Observaciones del Técnico de Bosques" />
+					</f:facet>
+					<observaciones:tablaObservacionesViabilidad
+						idComponent="obsDocumentosPc"
+						seccion="Revision informe de viabilidad PFN por PC"
+						componenteActualizarEliminar="pnlObsInformeTecnicoPc"
+						aparace="true" mostrarSiVacio="false"
+						idClase="#{elaborarDocumentosViabilidadPfnController.viabilidadProyecto.id}"
+						nombreClase="revisionInformeViabilidadPfnPc" soloLectura="true" />
+				</p:panelGrid>
+			</h:panelGroup>
+		</h:form>
+
+		<ui:include
+			src="/pages/rcoa/viabilidadAmbientalForestal/viewDialogosInformeViabilidad.xhtml" />
+
+		<h:form id="formDialogs">
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600" height="auto" position="center top">
+
+				<p:panel id="pnlFirma">
+
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel
+							value="Informe técnico Nro: #{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.numeroInforme}"
+							styleClass="bold" />
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold"
+							rendered="#{!elaborarDocumentosViabilidadPfnController.esProduccion}" />
+						<p:selectOneRadio id="verificaToken"
+							value="#{elaborarDocumentosViabilidadPfnController.token}"
+							rendered="#{!elaborarDocumentosViabilidadPfnController.esProduccion}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change" update="pnlFirmaManual pnlFirmaToken"
+								listener="#{elaborarDocumentosViabilidadPfnController.guardarToken}" />
+						</p:selectOneRadio>
+
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{elaborarDocumentosViabilidadPfnController.esProduccion}" />
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{elaborarDocumentosViabilidadPfnController.esProduccion}" />
+
+						<h:panelGroup id="pnlFirmaToken">
+							<p:commandButton value="Firmar documento" type="button"
+								styleClass="primary" icon="ui-icon-key"
+								rendered="#{elaborarDocumentosViabilidadPfnController.token}"
+								onclick="window.location.href='#{elaborarDocumentosViabilidadPfnController.urlAlfresco}'" />
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!elaborarDocumentosViabilidadPfnController.token}">
+							<h:outputLabel value="1. Descargue el Informe Técnico"
+								styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload
+									value="#{elaborarDocumentosViabilidadPfnController.descargar()}" />
+							</p:commandButton>
+
+							<p:outputLabel for="uploadRequired"
+								value="2. Adjunte el Informe Técnico firmado" styleClass="bold" />
+							<p:fileUpload
+								fileUploadListener="#{elaborarDocumentosViabilidadPfnController.uploadListenerDocumentos}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreOficioFirmado"
+								rendered="#{!elaborarDocumentosViabilidadPfnController.token}">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreOficioFirmado"
+								value="#{elaborarDocumentosViabilidadPfnController.informeFirmaManual.nombre}" />
+						</h:panelGrid>
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!elaborarDocumentosViabilidadPfnController.token and !elaborarDocumentosViabilidadPfnController.subido}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialogOficio').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						action="#{elaborarDocumentosViabilidadPfnController.finalizar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition
+	template="/control/aprobacionRequisitosTecnicos/templates/verArt.xhtml">
+	<ui:define name="content-art">
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText
+						value="#{labels['label.modalidad.disposicion.final']}" />
+				</f:facet>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Desechos a procesar" />
+					</f:facet>
+					<p:dataTable
+						value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.listaDesechos}"
+						var="desecho" rows="10" paginator="true"
+						paginatorAlwaysVisible="false" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						style="table-layout=auto">
+						<p:column headerText="Nombre desecho">
+							<h:outputText value="#{desecho.descripcion}" />
+						</p:column>
+						<p:column headerText="Código">
+							<h:outputText value="#{desecho.clave}" />
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+				<p:panelGrid columns="2" styleClass="w100">
+					<h:outputText id="nombreArchivo"
+						value="Plano de la Planta o del área donde se realiza la Disposición final"
+						styleClass="bold" />
+					<p:commandButton icon="ui-icon-search"
+						styleClass="button-small primary toLeft" title="Ver"
+						action="#{modalidadDisposicionFinalController.descargar(0)}"
+						ajax="false"
+						rendered="#{!(modalidadDisposicionFinalController.modalidadDisposicionFinalBean.modalidadDisposicionFinal.planoPlanta.id==null)}" />
+				</p:panelGrid>
+				<p:panelGrid styleClass="w100 separatorBottom" columns="1"
+					columnClasses="w100 field_mrg" layout="grid">
+					<f:facet name="header">
+						<h:outputText value="#{labels['label.recoleccion.desechos']}" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+
+						<h:outputText value="Tipo de transporte(s) utilizado(s)" />
+
+						<h:panelGrid columns="1" id="tipoTransporte">
+							<p:inputText
+								rendered="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.modalidadDisposicionFinal.transportePropio}"
+								value="Propio" />
+							<p:inputText
+								rendered="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.modalidadDisposicionFinal.transporteContratado}"
+								value="Contratado" />
+
+						</h:panelGrid>
+
+						<h:outputText value="#{labels['label.empresa.autorizada']}" />
+						<p:inputText
+							rendered="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.modalidadDisposicionFinal.transporteContratado}"
+							value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.modalidadDisposicionFinal.nombreEmpresaAutorizada}" />
+					</h:panelGrid>
+				</p:panelGrid>
+
+				<p:panelGrid styleClass="w100 separatorBottom" columns="1"
+					columnClasses="w100 field_mrg" layout="grid">
+					<f:facet name="header">
+						<h:outputText
+							value="#{labels['label.disposicion.final.desechos']}" />
+					</f:facet>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						id="pngridCapConf">
+						<f:facet name="header">
+							<h:outputText
+								value="Detallar capacidad estimada del confinamiento" />
+						</f:facet>
+						<p:dataTable id="tblCCDP"
+							value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadConfinamientoDesechoPeligrosos}"
+							var="varCapaConf">
+							<p:column headerText="#{labels['label.nombre.confinamiento']}"
+								styleClass="w30px">
+								<h:outputText value="#{varCapaConf.nombreLugarConfinamiento}" />
+							</p:column>
+							<p:column headerText="#{labels['label.capacidad.confinamiento']}"
+								styleClass="w30">
+								<ul style="padding: 5px 20px 5px 0;">
+									<li><h:outputText
+											value="> #{varCapaConf.capacidadEnM3} metros cúbicos" /></li>
+									<li><h:outputText
+											value="> #{varCapaConf.capacidadEnTonelada} T" /></li>
+								</ul>
+							</p:column>
+							<p:column styleClass="w25"
+								headerText="#{labels['label.coordenadas.confinamiento']}">
+								<div align="left">
+									<ul style="padding: 5px 20px 5px 0;">
+										<li><h:outputText value="> X: #{varCapaConf.coordenadaX}" /></li>
+										<li><h:outputText value="> Y: #{varCapaConf.coordenadaY}" /></li>
+									</ul>
+								</div>
+							</p:column>
+							<p:column
+								headerText="Capacidad estimada por mes de confinamiento (T)"
+								styleClass="w30px">
+								<h:outputText value="#{varCapaConf.capacidadMesConfinamiento}" />
+							</p:column>
+						</p:dataTable>
+					</p:panelGrid>
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						id="pngridCTDP">
+						<f:facet name="header">
+							<h:outputText
+								value="Detallar capacidad total de almacenamiento de materias primas" />
+						</f:facet>
+						<p:dataTable id="tblCTMP"
+							value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadTotalAlmacenamientoMateriaPrimaDesechoPeligrosos}"
+							var="varCapAlm">
+							<p:column headerText="#{labels['label.nombre.almacenamiento']}">
+								<h:outputText value="#{varCapAlm.nombreLugarAlmacenamiento}" />
+							</p:column>
+							<p:column
+								headerText="#{labels['label.capacidad.confinamiento']} (metros cúbicos)">
+								<h:outputText value="#{varCapAlm.capacidadEnM3}" />
+							</p:column>
+						</p:dataTable>
+					</p:panelGrid>
+					<h:panelGroup>
+
+						<p:panelGrid columns="1" styleClass="w100">
+							<h:panelGrid columns="2">
+								<h:outputText value="Descripción de los siguientes requisitos:"
+									styleClass="bold" />
+								<p:commandButton icon="ui-icon-search"
+									styleClass="button-small primary" title="Ver"
+									action="#{modalidadDisposicionFinalController.descargarRequisitos}"
+									ajax="false" />
+							</h:panelGrid>
+							<h:outputText
+								value="#{labels['label.disposicion.final.requisitos']}"
+								escape="false" styleClass="w100" style="" />
+						</p:panelGrid>
+						<p:panelGrid columns="1" styleClass="w100">
+							<h:panelGrid columns="2">
+								<h:outputText value="Estudios de Vulnerabilidad del Sitio:"
+									styleClass="bold" />
+								<p:commandButton icon="ui-icon-search"
+									styleClass="button-small primary toLeft" title="Ver"
+									action="#{modalidadDisposicionFinalController.descargarAnexos}"
+									ajax="false" />
+							</h:panelGrid>
+							<h:outputText value="#{labels['label.disposicion.final.anexos']}"
+								escape="false" styleClass="w100" />
+						</p:panelGrid>
+					</h:panelGroup>
+				</p:panelGrid>
+			</p:panelGrid>
+			<t:div styleClass="buttons main">
+				<p:commandButton value="#{labels['label.atras']}" immediate="true"
+					process="@this"
+					action="#{aprobacionRequisitosTecnicosController.recuperarPageAtras(6,true)}"
+					icon="ui-icon-arrowthick-1-w" />
+				<p:commandButton value="#{labels['label.siguiente']}"
+					immediate="true" process="@this"
+					action="#{aprobacionRequisitosTecnicosController.recuperarPageSiguiente(6,false,true)}"
+					rendered="#{aprobacionRequisitosTecnicosController.isVisibleOpcionNavegarSiguienteEnMenuModoVer(6,false,true)}"
+					icon="ui-icon-arrowthick-1-e" />
+			</t:div>
+		</h:form>
+
+	</ui:define>
+</ui:composition>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<p:dialog header="Recepción desecho" id="adicionarDesecho" widgetVar="adicionarDesecho" modal="true" resizable="false"
+          draggable="false" width="450" height="200">
+    <h:panelGroup id="panelDesechos">
+        <h:panelGrid styleClass="w100" columns="2" id="panelDatosHDialogoD">
+            <p:outputLabel value="Desecho" for="cmbDesecho" />
+            <p:selectOneMenu required="true"
+                             value="#{almacenamientoTemporalController.almacenTemporalBean.almacenRecepcion.entityRecepcionDesecho}"
+                             id="cmbDesecho"
+                             converter="selectItemConverterEntityRecepcionDesecho"
+                             style="width:200px">
+                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                              itemValue="" noSelectionOption="true"  />
+                <f:selectItems
+                        value="#{almacenamientoTemporalController.almacenTemporalBean.listaEntityRecepcionDesecho}" />
+                <p:ajax event="change" update="pnlEstado" process="@this" />
+            </p:selectOneMenu>
+
+            <h:outputLabel value="Estado" />
+            <h:panelGroup id="pnlEstado">
+                <h:outputLabel
+                        value="#{almacenamientoTemporalController.almacenTemporalBean.almacenRecepcion.entityRecepcionDesecho.tipoEstado}" />
+            </h:panelGroup>
+
+            <p:outputLabel value="Tipo Envase" for="cmbTipoEnvase" />
+            <p:selectOneMenu required="true"
+                             value="#{almacenamientoTemporalController.almacenTemporalBean.almacenRecepcion.tipoEnvase}"
+                             id="cmbTipoEnvase" converter="selectItemConverter"
+                             style="width:200px">
+                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                              itemValue="" noSelectionOption="true" />
+                <f:selectItems
+                        value="#{almacenamientoTemporalController.tipoEnvases}" />
+                <p:ajax event="change"
+                        update="otroTipoEnvaseContainer,otroTipoEnvaseContainerLabel" />
+            </p:selectOneMenu>
+        </h:panelGrid>
+    <br />
+
+    <h:panelGroup id="otroTipoEnvaseContainerLabel">
+
+        <p:outputLabel for="otroEnvase" value="Otro tipo de envase"
+                       rendered="#{almacenamientoTemporalController.almacenTemporalBean.almacenRecepcion.tipoEnvase.otro}" />
+    </h:panelGroup>
+    <h:panelGroup id="otroTipoEnvaseContainer">
+        <p:inputText id="otroEnvase"
+                     value="#{almacenamientoTemporalController.almacenTemporalBean.almacenRecepcion.otroTipoEnvase}"
+                     maxlength="150"
+                     rendered="#{almacenamientoTemporalController.almacenTemporalBean.almacenRecepcion.tipoEnvase.otro}"
+                     required="#{almacenamientoTemporalController.almacenTemporalBean.almacenRecepcion.tipoEnvase.otro}">
+            <f:validateLength maximum="150"/>
+        </p:inputText>
+    </h:panelGroup>
+    </h:panelGroup>
+    <p:separator/>
+
+    <div class="buttons">
+        <p:commandButton value="Guardar" process="@this adicionarDesecho"
+                         update="frmAlmacen:tblDesechos frmAlmacen:panelDesechos frmAlmacen:pngDescripcion"
+                         actionListener="#{almacenamientoTemporalController.guardarAlmacenRecepcion()}"
+                         styleClass="primary"
+                         oncomplete="handleDesecho(xhr, status, args);" />
+
+    </div>
+
+    <script type="text/javascript">
+        function handleDesecho(xhr, status, args) {
+            if (!args.addDesechos) {
+                PF('adicionarDesecho').hide();
+            }
+            else {
+                PF('adicionarDesecho').hide();
+            }
+        }
+    </script>
+</p:dialog>
+</html>

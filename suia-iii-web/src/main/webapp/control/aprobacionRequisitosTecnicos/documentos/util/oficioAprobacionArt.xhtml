@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui"
+      xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+      xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:t="http://myfaces.apache.org/tomahawk" xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+      xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+      
+    <p:growl id="growl" showDetail="true" life="3000"
+	widgetVar="growlWidget" />
+
+    <object id="pdf_informe" type="application/pdf" data="#{oficioAprobacionRtBean.informePath}?pfdrid_c=true"
+            width="100%" height="500px">
+        Su navegador no soporta la visualización de pdf. Puede descargar el documento presionando el siguiente botón:
+        <p:commandButton value="Descargar" styleClass="primary" ajax="false" icon="ui-icon-arrowthick-1-s" action="#"/>
+    </object>
+
+    <br/>
+    <br/>
+
+    <p:fieldset legend="1. ANTECEDENTE ADICIONAL" toggleable="true" toggleSpeed="500" collapsed="true">
+        <p:panelGrid columns="1" layout="grid" styleClass="w100">
+            <p:outputLabel value="Antecedente adicional" styleClass="bold"/>
+            <p:inputTextarea value="#{oficioAprobacionRtBean.oficioArt.txtOpcional1}" maxlength="1000" rows="4"
+                             styleClass="w100" addLine="false" autoResize="false"/>
+        </p:panelGrid>
+    </p:fieldset>
+
+    <br/>
+
+    <p:fieldset legend="2. NORMATIVA *" toggleable="true" toggleSpeed="500" collapsed="true">
+        <p:panelGrid columns="1" layout="grid" styleClass="w100">
+            <p:outputLabel value="Normativa *" styleClass="bold"/>
+            <p:inputTextarea value="#{oficioAprobacionRtBean.oficioArt.normativa}" maxlength="1000" rows="4"
+                             styleClass="w100" addLine="false" autoResize="false"/>
+        </p:panelGrid>
+    </p:fieldset>
+
+    <br/>
+
+    <p:fieldset legend="3. COMENTARIOS ADICIONALES" toggleable="true" toggleSpeed="500" collapsed="true">
+        <p:panelGrid columns="1" layout="grid" styleClass="w100">
+            <p:outputLabel value="Comentarios adicionales" styleClass="bold"/>
+            <p:inputTextarea value="#{oficioAprobacionRtBean.oficioArt.txtOpcional2}" maxlength="1000" rows="4"
+                             styleClass="w100" addLine="false" autoResize="false"/>
+        </p:panelGrid>
+    </p:fieldset>
+
+    <br/>
+
+    <p:fieldset legend="4. DISPOSICIONES ADICIONALES *" toggleable="true" toggleSpeed="500" collapsed="true">
+        <p:panelGrid columns="1" layout="grid" styleClass="w100">
+            <p:outputLabel value="Disposiciones adicionales *" styleClass="bold"/>
+            <p:inputTextarea value="#{oficioAprobacionRtBean.oficioArt.txtDisposicionesPresentancionResultados}"
+                             maxlength="1000" rows="4" styleClass="w100" addLine="false" autoResize="false"/>
+        </p:panelGrid>
+    </p:fieldset>
+	<div class="buttons main">
+				<p:commandButton value="Atrás"
+					action="#{oficioAprobacionRtBean.guardarRegresar()}"
+					icon="ui-icon-arrowthick-1-w" />
+				<p:commandButton value="Guardar"
+					action="#{oficioAprobacionRtBean.guardar()}" icon="ui-icon-disk"
+					update="@form"
+					oncomplete="PF('growlWidget').renderMessage({summary: 'Éxito', detail: 'Los cambios han sido guardados correctamente.', severity: 'info'})">
+					<p:confirm message="¿Estás seguro que deseas guardar los cambios?"
+						header="Confirmación de guardado" icon="ui-icon-alert" />
+				</p:commandButton>
+				<p:commandButton value="Enviar"
+					action="#{oficioAprobacionRtBean.completarTarea()}"
+					title="Enviar datos" icon="ui-icon-check">
+					<p:confirm message="¿Estás seguro que desea enviar la información?"
+						header="Confirmación de envío" />
+				</p:commandButton>
+				<p:commandButton value="Cancelar" immediate="true"
+					action="/bandeja/bandejaTareas.jsf?faces-redirect=true"
+					icon="ui-icon-cancel" styleClass="secondary">
+					<p:confirm
+						message="#{msg['message.confirmacion.cancelacion.tarea']}"
+						header="#{msg['header.confirmacion.cancelacion.tarea']}" />
+				</p:commandButton>
+			</div>
+        <h:panelGroup id="pnl2"
+                      rendered="#{oficioAprobacionRtBean.revisar or !oficioAprobacionRtBean.observacionesController.getObservacionesBB().getMapaSecciones().get('OficioAprobacionRequisitos').isEmpty()}">
+            <p:fragment>
+                <observaciones:tablaObservaciones idComponent="top" aparace="true"
+                                                  soloLectura="#{!oficioAprobacionRtBean.revisar}"
+                                                  mostrarSiVacio="#{oficioAprobacionRtBean.revisar}"
+                                                  idClase="#{oficioAprobacionRtBean.oficioArt.id}"
+                                                  nombreClase="OficioAproReqTec" seccion="OficioAprobacionRequisitos"
+                                                  rol="sjsj" componenteActualizarEliminar="pnl2"/>
+            </p:fragment>
+        </h:panelGroup>
+        
+        <p:dialog header="Firma Electrónica" id="signDialog"
+	widgetVar="signDialog" closeOnEscape="false" modal="true"
+	resizable="false" width="600px" height="auto">
+	<p:panel>
+		<h:panelGrid styleClass="w100" columns="1">
+			<h:outputLabel value="Firmar informe Técnico" styleClass="bold" />
+		</h:panelGrid>
+		<br />
+		<br />
+		<h:panelGrid styleClass="w100" columns="3"
+			columnClasses="w25, w25 toCenter, toCenter">
+			<p:outputLabel value="¿Cuenta con token?" styleClass="bold"
+				rendered="#{!oficioAprobacionRtBean.ambienteProduccion}" />
+			<p:selectOneRadio id="verificaToken"
+				value="#{oficioAprobacionRtBean.token}"
+				rendered="#{!oficioAprobacionRtBean.ambienteProduccion}">
+				<f:selectItem itemLabel="Sí" itemValue="true" />
+				<f:selectItem itemLabel="No" itemValue="false" />
+				<p:ajax event="change" update="pnlFirmaManual pnlFirmaToken"
+					listener="#{oficioAprobacionRtBean.firmarOficio}" />
+			</p:selectOneRadio>
+
+			<h:outputText value="" styleClass="encabezado"
+				rendered="#{oficioAprobacionRtBean.ambienteProduccion}" />
+			<h:outputText value="" styleClass="encabezado"
+				rendered="#{oficioAprobacionRtBean.ambienteProduccion}" />
+
+			<h:panelGroup id="pnlFirmaToken">
+				<p:commandButton value="Firmar documento" type="button"
+					styleClass="primary" icon="ui-icon-key"
+					rendered="#{oficioAprobacionRtBean.token}"
+					onclick="window.location.href='#{oficioAprobacionRtBean.firmarOficio()}'" />
+			</h:panelGroup>
+		</h:panelGrid>
+
+		<br />
+
+		<h:panelGroup id="pnlFirmaManual">
+			<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+				style="text-align:right !important" columnClasses="w66, toCenter"
+				rendered="#{!oficioAprobacionRtBean.token}">
+				<p:outputLabel value="1. Descargar el Informe" styleClass="bold" />
+				<p:commandButton value="Descargar" ajax="false"
+					icon="ui-icon-arrowthick-1-s" styleClass="primary" immediate="true">
+					<p:fileDownload
+						value="#{oficioAprobacionRtBean.descargarInformacion()}" />
+				</p:commandButton>
+				<p:outputLabel
+					value="2. Adjuntar el Informe firmado"
+					styleClass="bold" />
+				<p:fileUpload id="Idfirmada"
+					fileUploadListener="#{oficioAprobacionRtBean.cargarArchivo}"
+					multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+					label="Seleccionar" uploadLabel="Subir"
+					invalidFileMessage="Tipo de archivo no válido"
+					invalidSizeMessage="Tamaño de archivo no válido"
+					cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+					auto="true" update="lblNombreDocFirmado"
+					rendered="#{!oficioAprobacionRtBean.token}">
+					<f:attribute name="clave" value=":form" />
+				</p:fileUpload>
+				<p:outputLabel value="" />
+				<h:outputText id="lblNombreDocFirmado"
+					value="#{oficioAprobacionRtBean.nombreDocumentoFirmado}" />
+			</h:panelGrid>
+		</h:panelGroup>
+		<br />
+	</p:panel>
+
+	<p:separator />
+	<div class="buttons main">
+		<p:commandButton value="Cerrar" styleClass="primary"
+			onclick="PF('signDialog').hide()" icon="ui-icon-close" />
+		<p:commandButton value="Enviar" styleClass="secondary"
+			action="#{oficioAprobacionRtBean.completarTarea()}"
+			icon="ui-icon-check">
+			<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+				header="#{msg['header.confirmacion.envio.tarea']}" />
+		</p:commandButton>
+	</div>
+</p:dialog>
+
+<p:separator />
+
+</html>

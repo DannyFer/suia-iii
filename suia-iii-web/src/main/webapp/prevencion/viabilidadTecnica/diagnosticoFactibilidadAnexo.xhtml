@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+<ui:composition template="/prevencion/viabilidadTecnica/default.xhtml">
+    <ui:define name="content-vt">
+        <h:form id="principal"> 
+            <p:panel header="Diagnóstico del sistema existente">
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                    <f:facet name="header">
+                        <h:outputText value="Almacenamiento Temporal"/>
+                    </f:facet>
+
+                    <p:inputTextarea
+                            value="#{diagnosticoFactibilidadAnexoVTBean.estudioViabilidadTecnicaDiagnostico.almacenamientoTemporal}"
+                            maxlength="500"  autoResize="false">
+                        <f:validateLength maximum="500"/>
+                    </p:inputTextarea>
+                </p:panelGrid>
+
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                    <f:facet name="header">
+                        <h:outputText value="Barrido público"/>
+                    </f:facet>
+
+                    <p:inputTextarea  value="#{diagnosticoFactibilidadAnexoVTBean.estudioViabilidadTecnicaDiagnostico.barridoPublico}" maxlength="500"  autoResize="false">
+                        <f:validateLength maximum="500"/>
+                    </p:inputTextarea>
+                </p:panelGrid>
+                
+                <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                    <f:facet name="header">
+                        <h:outputText value="Recolección y transporte"/>
+                    </f:facet>
+
+                    <p:inputTextarea
+                             value="#{diagnosticoFactibilidadAnexoVTBean.estudioViabilidadTecnicaDiagnostico.transporteRecogida}"
+                            maxlength="500"  autoResize="false">
+                        <f:validateLength maximum="500"/></p:inputTextarea>
+                </p:panelGrid>
+
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                    <f:facet name="header">
+                        <h:outputText value="Tratamiento y aprovechamiento"/>
+                    </f:facet>
+
+                    <p:inputTextarea
+                             value="#{diagnosticoFactibilidadAnexoVTBean.estudioViabilidadTecnicaDiagnostico.procesoUso}"
+                            maxlength="500"  autoResize="false">
+                        <f:validateLength maximum="500"/></p:inputTextarea>
+                </p:panelGrid>
+                
+                <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                    <f:facet name="header">
+                        <h:outputText value="Diagnóstico de la disposicion final"/>
+                    </f:facet>
+
+                    <p:inputTextarea
+                             value="#{diagnosticoFactibilidadAnexoVTBean.estudioViabilidadTecnicaDiagnostico.dispociocionFinal}"
+                            maxlength="500"  autoResize="false">
+                        <f:validateLength maximum="500"/></p:inputTextarea>
+                </p:panelGrid>
+
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                    <f:facet name="header">
+                        
+                        <h:outputText value="Estudio de cantidad y calidad de los residuos y desechos sólidos"/>
+                        
+                        <p:commandButton styleClass="button-small-text toRight field_mrg" oncomplete="PF('uploadFileAs').show()"
+					       icon="ui-icon-plusthick" value="Anexo" update="@none" actionListener="#{diagnosticoFactibilidadAnexoVTBean.setValorAdjunto(3067)}"
+					       process="@this" id="anexarEstudioCalidad" />
+					       
+					       
+                    </f:facet>
+
+                    <p:dataTable id="idDtInsumos" sortBy="#{u.id}" sortOrder="ascending"
+                            paginator="true" rows="10" paginatorPosition="bottom"
+                            emptyMessage="#{labels['common.table.empty']}" value="#{diagnosticoFactibilidadAnexoVTBean.llViabilidadTecnicaTipoMateriales}"
+                            paginatorAlwaysVisible="false" var="u">
+                        
+                        <p:column headerText="Tipo Insumo">                        	
+                            <h:outputText value="#{u.nombre}"/>
+                        </p:column>
+                        <p:column headerText="Tipo de dato">
+                            <h:outputText value="#{u.codigoGrupo}"/>
+                        </p:column>
+						<p:column headerText="Tipo de dato">
+                            <h:inputText value="#{u.detalleNombre}"/>
+                        </p:column>
+
+                    </p:dataTable>
+
+                </p:panelGrid>
+
+            </p:panel>
+            
+            <p:panel>
+            	<div align="right">
+					<p:commandButton value="Atrás" styleClass="primary"
+						icon="ui-icon-arrow-1-w" />
+					<p:commandButton value="Guardar" process="@this, :#{p:component('principal')}"
+					          partialSubmit="true"
+					          styleClass="primary" 
+					          actionListener="#{diagnosticoFactibilidadAnexoVTBean.guardaDiagnosticoFactibilidadAnexo()}"  
+					          icon="ui-icon-disk" />
+					<p:commandButton value="Siguiente" styleClass="primary"
+						icon="ui-icon-arrow-1-e" />
+				</div>
+				
+            </p:panel>
+
+            <h:panelGroup>
+                <p:outputLabel value="Anexo Informe (Archivo Pdf): *" />
+                <h:panelGrid columns="1" columnClasses="null, field_mrg" id="adjuntoPanel">
+                    <p:outputLabel
+                            value="#{empty ingresarDocumentacionController.ingresarDocumentacionBean.documentos.get('correccionDocumentacionPPS') ? 'Documento(.pdf)' :
+                                ingresarDocumentacionController.ingresarDocumentacionBean.documentos.get('correccionDocumentacionPPS').nombre}"/>
+                </h:panelGrid>
+                <p:fileUpload
+                        fileUploadListener="#{ingresarDocumentacionController.uploadListenerDocumentos}"
+                        multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                        label="Seleccionar" uploadLabel="Subir"
+                        invalidFileMessage="Tipo de archivo no válido"
+                        invalidSizeMessage="Tamaño de archivo no válido"
+                        cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                        auto="true" update="adjuntoPanel" required="true"  >
+                    <f:attribute name="clave" value="correccionDocumentacionPPS"/>
+                </p:fileUpload>
+
+                <p:fileUpload id="archFotoAs" fileUploadListener="#{diagnosticoFactibilidadAnexoVTBean.adjuntarDocumento}" width="100%"
+                              multiple="false" sizeLimit="209715200" allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar" uploadLabel="Adjuntar"
+                              invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo .pdf."
+                              invalidSizeMessage="Tamaño de archivo no válido. Debe adjuntar un archivo no mayor de 2 Mb." cancelLabel="Cancelar"
+                              mode="advanced" dragDropSupport="false" auto="true"/>
+
+            </h:panelGroup>
+		   
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>

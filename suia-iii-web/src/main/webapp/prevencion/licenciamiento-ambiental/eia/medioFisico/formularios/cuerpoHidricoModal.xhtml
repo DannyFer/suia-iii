@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<p:dialog header="Cuerpo hídrico" id="adicionarCuerpoHidrico" widgetVar="adicionarCuerpoHidrico"
+          modal="true" resizable="false" width="700">
+    <h:panelGroup id="panelCuerpoHidrico">
+        <h:panelGrid styleClass="w100 separatorBottom" columns="1" columnClasses="w100">
+            <p:outputLabel for="nombreCuerpoHidrico" value="Nombre del cuerpo hídrico"/>
+            <p:inputText id="nombreCuerpoHidrico"
+                         value="#{hidrologiaController.cuerpoHidricoBean.cuerpoHidrico.nombreCuerpo}"
+                         required="true"
+                         maxlength="150">
+            </p:inputText>
+        </h:panelGrid>
+
+        <h:panelGrid styleClass="w100 separatorBottom" columns="1" columnClasses="w100">
+            <p:outputLabel for="tipo" value="Tipo"/>
+            <p:selectOneMenu id="tipo" required="true"
+                             value="#{hidrologiaController.cuerpoHidricoBean.cuerpoHidrico.tipo}"
+                             styleClass="w100">
+                <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true"/>
+                <f:selectItem itemValue="1" itemLabel="Lotico"></f:selectItem>
+                <f:selectItem itemValue="2" itemLabel="Lentico"></f:selectItem>
+            </p:selectOneMenu>
+        </h:panelGrid>
+
+        <h:panelGrid styleClass="w100 separatorBottom" columns="2" columnClasses="w50, field_mrg w50">
+            <p:outputLabel for="anchoSeccion" value="Ancho (M) de sección"/>
+            <p:outputLabel for="profundidadMedia" value="Profundidad (M) media"/>
+            <pe:inputNumber id="anchoSeccion" decimalPlaces="2" thousandSeparator=""
+                            value="#{hidrologiaController.cuerpoHidricoBean.cuerpoHidrico.anchoSeccion}"
+                            required="true">
+                <f:validateDoubleRange minimum="0"  maximum="1000000"/>
+            </pe:inputNumber>
+
+            <pe:inputNumber id="profundidadMedia" thousandSeparator=""
+                            value="#{hidrologiaController.cuerpoHidricoBean.cuerpoHidrico.profundidadMedia}"
+                            required="true">
+                <f:validateDoubleRange minimum="0"  maximum="1000000"/>
+            </pe:inputNumber>
+        </h:panelGrid>
+
+        <h:panelGrid styleClass="w100 separatorBottom" columns="2" columnClasses="w50, field_mrg w50">
+            <p:outputLabel for="velocidadMedia" value="Velocidad (M/S) Media"/>
+            <p:outputLabel for="caudalMedio" value="Caudal (M3/S)medio"/>
+            <pe:inputNumber id="velocidadMedia" decimalPlaces="2" thousandSeparator=""
+                         value="#{hidrologiaController.cuerpoHidricoBean.cuerpoHidrico.velocidadMedia}"
+                         required="true">
+                <f:validateDoubleRange minimum="0" maximum="1000000"/>
+            </pe:inputNumber>
+            <pe:inputNumber id="caudalMedio" decimalPlaces="2" thousandSeparator=""
+                         value="#{hidrologiaController.cuerpoHidricoBean.cuerpoHidrico.cudalMedio}"
+                         required="true">
+                <f:validateDoubleRange minimum="0" maximum="1000000"/>
+            </pe:inputNumber>
+        </h:panelGrid>
+
+        <p:panelGrid columns="1" layout="grid">
+            <f:facet name="header">
+                <p:commandButton id="btnAdicionarCoordenadaCH" value="Adicionar" process="@this"
+                                 update="panelCoordenadasCH"
+                                 oncomplete="PF('adicionarCoordenadaCH').show()"
+                                 actionListener="#{hidrologiaController.agregarCoordenada}"
+                                 styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick"
+                                 disabled="#{hidrologiaController.cuerpoHidricoBean.cuerpoHidrico.coordenadaGeneralList.size() == 2}"/>
+                <h:outputText value="Coordenas en WGS -84 (17S)"/>
+            </f:facet>
+            <p:dataTable id="tableCoordenadasCH" rowIndexVar="index" emptyMessage="#{labels['common.table.empty']}"
+                         value="#{hidrologiaController.cuerpoHidricoBean.cuerpoHidrico.coordenadaGeneralList}"
+                         var="coordenada">
+                <p:column headerText="Coordenada X">
+                    <h:outputText value="#{coordenada.x}"/>
+                </p:column>
+                <p:column headerText="Coordenada Y" styleClass="singleLine">
+                    <h:outputText value="#{coordenada.y}"/>
+                </p:column>
+                <p:column styleClass="w40px">
+                    <p:commandButton styleClass="button-small primary" process="@this" icon="ui-icon-pencil"
+                                     oncomplete="PF('adicionarCoordenadaCH').show()"
+                                     update=":#{p:component('panelCoordenadasCH')}"
+                                     actionListener="#{hidrologiaController.seleccionarCoordenada(coordenada)}"/>
+                    <p:commandButton styleClass="button-small primary" process="@this" icon="ui-icon-circle-close"
+                                     update=":#{p:component('tableCoordenadasCH')} :#{p:component('btnAdicionarCoordenadaCH')}"
+                                     actionListener="#{hidrologiaController.removerCoordenada(coordenada)}">
+                        <p:confirm header="Confirmación" message="¿Está seguro que desea eliminar?"
+                                   icon="ui-icon-alert"/>
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+        </p:panelGrid>
+
+        <br/>
+        <p:panelGrid columns="1" layout="grid">
+            <f:facet name="header">
+                <h:outputText value="Usos"/>
+            </f:facet>
+            <p:selectManyCheckbox layout="grid" columns="2" value="#{hidrologiaController.cuerpoHidricoBean.listaUsos}"
+                                  converter="selectItemConverter" required="true"
+                    requiredMessage="Debe seleccionar al menos 1 uso">
+                <f:selectItems value="#{hidrologiaController.listaCatalogoUso}"
+                               var="uso" itemLabel="#{uso.descripcion}" itemValue="#{uso}"/>
+            </p:selectManyCheckbox>
+
+        </p:panelGrid>
+
+    </h:panelGroup>
+
+    <p:separator/>
+
+    <div class="buttons">
+        <p:commandButton value="Aceptar" actionListener="#{hidrologiaController.guardarCuerpoHidrico}"
+                         process="@this panelCuerpoHidrico" update="tableCuerpoHidrico panelCuerpoHidrico"
+                         oncomplete="handleCuerpoHidrico(xhr, status, args)"/>
+    </div>
+
+    <script type="text/javascript">
+        function handleCuerpoHidrico(xhr, status, args) {
+            if (!args.addCuerpoHidrico) {
+                PF('adicionarCuerpoHidrico').show();
+            }
+            else {
+                PF('adicionarCuerpoHidrico').hide();
+            }
+        }
+    </script>
+</p:dialog>
+
+<ui:include
+        src="/prevencion/licenciamiento-ambiental/eia/medioFisico/formularios/coordenadaModalCH.xhtml"/>
+
+</html>

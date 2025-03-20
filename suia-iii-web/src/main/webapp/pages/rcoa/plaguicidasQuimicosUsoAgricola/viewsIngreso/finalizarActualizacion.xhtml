@@ -1,0 +1,251 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="Finalizar" />
+	</f:facet>
+
+	<p:panelGrid columns="2" styleClass="panel_data w100"
+		columnClasses="header w25,null w75">
+		<h:outputText value="Operador" />
+		<h:outputText
+			value="#{actualizarInformacionEtiquetaController.productoReporte.nombreOperador}" />
+
+		<h:outputText value="Nombre Comercial del producto" />
+		<h:outputText
+			value="#{actualizarInformacionEtiquetaController.productoReporte.nombreComercialProducto}" />
+
+		<h:outputText value="Composición del Producto (Ingrediente activo)" />
+		<h:outputText escape="false"
+			value="#{actualizarInformacionEtiquetaController.productoReporte.tablaComposicionProducto}" />
+
+		<h:outputText value="Formulación" />
+		<h:outputText
+			value="#{actualizarInformacionEtiquetaController.productoReporte.formulacion}" />
+
+		<h:outputText value="Tipo de producto" />
+		<h:outputText
+			value="#{actualizarInformacionEtiquetaController.proyectoPlaguicidas.productoPqua.tipoProducto.nombre}" />
+
+		<h:outputText value="Categoría toxicológica (nueva etiqueta)" />
+		<h:outputText
+			value="#{actualizarInformacionEtiquetaController.proyectoPlaguicidas.productoPqua.categoriaFinal.nombre}" />
+
+		<h:outputText value="Color de franja (nueva etiqueta)" />
+		<h:outputText styleClass="bold"
+			value="#{actualizarInformacionEtiquetaController.proyectoPlaguicidas.productoPqua.colorFranjaFinal.nombre}"
+			style="color:#{actualizarInformacionEtiquetaController.proyectoPlaguicidas.productoPqua.colorFranjaFinal.valor}" />
+	</p:panelGrid>
+
+	<p:dataTable id="dtProductoResumen" var="producto"
+		styleClass="table table-hover"
+		value="#{actualizarInformacionEtiquetaController.listaDetalleProyectoPlaguicidas}"
+		paginator="true" paginatorAlwaysVisible="false"
+		paginatorPosition="bottom" rowIndexVar="index"
+		emptyMessage="#{labels['common.table.empty']}"
+		currentPageReportTemplate="{currentPage} de {totalPages}" rows="5"
+		rowsPerPageTemplate="5,10,15">
+
+		<p:column headerText="Nombre del cultivo">
+			<h:outputText value="#{producto.cultivo.nombreComun}" />
+			<h:outputText value=" (#{producto.nombreCientificoCultivo})"
+				styleClass="italic" />
+		</p:column>
+		<p:column headerText="Plaga">
+			<h:outputText value="#{producto.getDetallePlagas()}" escape="false" />
+		</p:column>
+		<p:column headerText="Dosis aprobada en la etiqueta" styleClass="w20">
+			<h:outputText value="#{producto.getDetalleDosis()}" escape="false" />
+		</p:column>
+	</p:dataTable>
+
+
+</p:panelGrid>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText
+			value="Información que debe tener la etiqueta con base a la Resolución Nro 2075" />
+	</f:facet>
+
+	<p:dataGrid emptyMessage="Sin resultados."
+		value="#{actualizarInformacionEtiquetaController.listaComponentesResumen}"
+		var="item" columns="1" styleClass="cssPnlData">
+		<p:outputLabel value="#{item.ingredienteActivo}" styleClass="bold" />
+		<h:panelGrid columns="2" styleClass="w100"
+			columnClasses="w80,w20 alCenter">
+			<p:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25,null w75">
+				<h:outputText value="Categoría:" />
+				<h:outputText value="#{item.categoria.nombre}" />
+
+				<h:outputText value="Pictograma:" />
+				<h:outputText value="#{(item.pictograma) ? 'SI' : 'NO'}" />
+
+				<h:outputText value="Palabra de advertencia:" />
+				<h:outputText escape="false" value="#{item.palabraAdvertencia}" />
+
+				<h:outputText value="Indicaciones de peligro:" />
+				<h:outputText value="#{item.indicacionesPeligro}" />
+			</p:panelGrid>
+
+			<h:panelGrid columns="1" styleClass="w100 alCenter"
+				columnClasses="alCenter">
+				<h:panelGroup rendered="#{item.pictograma}">
+					<img
+						src="#{request.contextPath}/resources/images/pictograma_plaguicidas.png"
+						style="width: 100px;" />
+				</h:panelGroup>
+			</h:panelGrid>
+		</h:panelGrid>
+		<br />
+	</p:dataGrid>
+</p:panelGrid>
+
+<p:panelGrid id="pnlAdjuntos" columns="1" layout="grid"
+	styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="Adjuntar documentos" />
+	</f:facet>
+
+	<h:panelGrid columns="2" styleClass="w100" columnClasses="w66,null">
+
+		<h:outputText
+			value="Adjuntar documento de respaldo (Solicitud, certificado de registro y etiqueta antigua):" />
+		<h:panelGroup>
+			<h:outputText value="Admite archivo .pdf .zip .rar de 20mb" />
+			<p:fileUpload id="docArchivo" multiple="false"
+				fileUploadListener="#{actualizarInformacionEtiquetaController.uploadRespaldoSolicitud}"
+				sizeLimit="20971520" allowTypes="/(\.|\/)(pdf|rar|zip)$/"
+				label="Seleccionar" uploadLabel="Subir"
+				invalidFileMessage="Tipo de archivo no válido"
+				invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+				cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+				auto="true" required="true" update="txtRespaldoSolicitud" />
+			<h:outputText id="txtRespaldoSolicitud"
+				value="#{actualizarInformacionEtiquetaController.documentoRespaldo.nombre}" />
+		</h:panelGroup>
+
+		<h:outputText
+			value="Adjuntar documento de la etiqueta y hoja de seguridad SGA:" />
+		<h:panelGroup>
+			<h:outputText value="Admite archivo .pdf .zip .rar de 20mb" />
+			<p:fileUpload id="archivo" multiple="false"
+				fileUploadListener="#{actualizarInformacionEtiquetaController.uploadEtiqueta}"
+				sizeLimit="20971520" allowTypes="/(\.|\/)(pdf|rar|zip)$/"
+				label="Seleccionar" uploadLabel="Subir"
+				invalidFileMessage="Tipo de archivo no válido"
+				invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+				cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+				auto="true" required="true" update="txtDocEtiqueta" />
+			<h:outputText id="txtDocEtiqueta"
+				value="#{actualizarInformacionEtiquetaController.documentoEtiqueta.nombre}" />
+		</h:panelGroup>
+
+		<h:inputHidden
+			validator="#{actualizarInformacionEtiquetaController.validateFinalizarActualizacion}" />
+
+	</h:panelGrid>
+
+</p:panelGrid>
+
+<p:panelGrid id="pnlClausula" columns="1" layout="grid"
+	styleClass="w100">
+
+	<h:outputText
+		value="Declaración de responsabilidad sobre la información ingresada"
+		style="font-weight:bold;" />
+	<h:panelGrid columns="3" columnClasses="w10,w80,w10">
+		<h:outputText value="" />
+		<div align="justify">Yo,
+			#{actualizarInformacionEtiquetaController.nombreOperador} portador(a)
+			del documento de identificación No
+			#{actualizarInformacionEtiquetaController.cedula} por mis propios
+			derechos (o en legal representación de la persona jurídica
+			identificada en líneas arriba) declaro que la información consignada
+			es veraz, auténtica y corresponde a la realidad, conforme a lo
+			dispuesto en el numeral 10, del artículo 3 de la ley orgánica para la
+			Optimización y Eficiencia de Trámites Administrativos-LOOETA, que
+			actuó conforme el principio de buena fe determinado en el artículo 17
+			del Código Orgánico Administrativo, que cumplo con los lineamientos
+			establecidos en la Resolución Nro. 2075 de la Comunidad Andina
+			publicada en la Gaceta Oficial del Acuerdo de Cartagena 3709 de 02 de
+			agosto de 2019. <br /> <br />
+			Adicionalmente acepto recibir notificaciones
+			administrativas al correo electrónico designado #{actualizarInformacionEtiquetaController.correo}.</div>
+		<h:outputText value="" />
+	</h:panelGrid>
+	<h:panelGrid columns="2" columnClasses="w50,w50">
+		<h:outputText value="" />
+		<h:panelGroup>
+			<p:selectBooleanCheckbox required="true"
+				value="#{actualizarInformacionEtiquetaController.aceptarCondiciones}"
+				id="aceptarCondiciones" label="Acepto toda la responsabilidad"
+				requiredMessage="Debe aceptar la declaración de responsabilidad">
+				<p:ajax process="@this" />
+			</p:selectBooleanCheckbox>
+			<p:outputLabel value="Acepto toda la responsabilidad"
+				for="aceptarCondiciones" />
+		</h:panelGroup>
+	</h:panelGrid>
+	<h:panelGrid columns="2" columnClasses="w30,w70">
+		<h:outputText value="" />
+		<p:outputLabel
+			value="Para finalizar la solicitud, haga clic en el botón Enviar"
+			style="color: red" />
+	</h:panelGrid>
+</p:panelGrid>
+
+<h:panelGroup
+	rendered="#{actualizarInformacionEtiquetaController.esSubsanacion}">
+	<br />
+	<br />
+	<p:panelGrid columns="1" layout="grid" styleClass="w100"
+		rendered="#{actualizarInformacionEtiquetaController.esSubsanacion}">
+		<observaciones:tablaObservacionesPqua
+			idComponent="observacionesFinalizar"
+			componenteActualizarEliminar="observacionesFinalizar"
+			seccion="FinalizarEtiquetado" nombreClase="ActualizacionEtiquetaPqua"
+			idClase="#{actualizarInformacionEtiquetaController.proyectoPlaguicidas.id}"
+			aparace="#{actualizarInformacionEtiquetaController.esSubsanacion}"
+			mostrarSiVacio="#{actualizarInformacionEtiquetaController.esSubsanacion}"
+			soloLectura="true" />
+	</p:panelGrid>
+</h:panelGroup>
+
+<h:panelGroup id="pnlButtonsFinalizar">
+	<div class="buttons main">
+		<p:commandButton id="btnAtrasFinalizar" type="button" value="Atrás"
+			icon="ui-icon-arrowthick-1-w"
+			onclick="PF('wizard').back();reloadWizard();"
+			styleClass="wizard-custom-btn-back" process="@this"
+			update="wizardInformacion" />
+		<p:commandButton id="btnGuardarFinalizar" value="Guardar"
+			title="Guardar" icon="ui-icon-disk" update="btnEnviar"
+			process="@this aceptarCondiciones"
+			actionListener="#{actualizarInformacionEtiquetaController.guardarFinalizar()}" />
+		<p:commandButton value="Enviar" id="btnEnviar"
+			process="@this pnlAdjuntos pnlClausula" update="pnlButtonsFinalizar"
+			styleClass="wizard-custom-btn-only-end" icon="ui-icon-check"
+			disabled="#{!actualizarInformacionEtiquetaController.guardado}"
+			actionListener="#{actualizarInformacionEtiquetaController.enviar()}">
+			<p:confirm header="Confirmación"
+				message="¿Está seguro que desea enviar la información? Si desea verificar la información de clic en Cancelar y después en el botón Atrás."
+				icon="ui-icon-alert" />
+		</p:commandButton>
+	</div>
+</h:panelGroup>
+
+
+</html>

@@ -1,0 +1,65 @@
+    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+            "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    <ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+                    xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui"
+                    xmlns:f="http://java.sun.com/jsf/core"
+                    template="/WEB-INF/templates/default.xhtml"
+            >
+        <ui:define name="content">
+
+            <h:form id="form">
+
+                <p:commandButton styleClass="primary"   icon="ui-icon-plus"  value="Adicionar" update="@(.formulario)" process="@this"  action="#{configuracionMensajesNotificacionBean.clear}"
+                                 oncomplete="PF('dlg2').show();"/>
+                <p:dataTable var="mensaje" value="#{configuracionMensajesNotificacionBean.mensajes}" filterDelay="600"
+                             widgetVar="tablaMensajes"
+                             rows="10"
+                             paginator="true" paginatorPosition="bottom"
+                             paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                             rowsPerPageTemplate="5,10,15"
+                             emptyMessage="#{labels['common.table.empty']}"
+
+                        >
+
+
+
+                    <p:column filterBy="#{mensaje.nombre}" headerText="Nombre"
+                              filterMatchMode="contains">
+                        <h:outputText value="#{mensaje.nombre}"/>
+                    </p:column>
+
+                    <p:column filterBy="#{mensaje.valor}" headerText="Valor"  styleClass="singleLine"
+                              filterMatchMode="contains" >
+                        <h:outputText value="#{mensaje.valor}" title="#{mensaje.valor}"/>
+                    </p:column>
+
+
+                    <p:column headerText="Operaciones"  style="width:200px;" styleClass="alCenter" >
+                        <p:commandButton value="Editar" update=":form:editar" styleClass="primary"  process="@this" icon="ui-icon-pencil" actionListener="#{configuracionMensajesNotificacionBean.edit(mensaje)}"
+                                         oncomplete="PF('dlg2').show();"/>
+
+                        <p:commandButton value="Eliminar" update=":form" styleClass="primary"  process="@this" icon="ui-icon-trash"
+                                         actionListener="#{configuracionMensajesNotificacionBean.delete(mensaje)}"
+                                         >
+                            <p:confirm header="Conformación" message="¿Estás seguro de eliminar el campo?" icon="ui-icon-alert" />
+                        </p:commandButton>                  </p:column>
+
+
+                </p:dataTable>
+                <p:dialog id="editar" header="Modal Dialog" widgetVar="dlg2" modal="true" height="300" width="400"
+                          styleClass="formulario">
+                    <h:panelGrid columns="2" styleClass="w100" columnClasses="w30, w70">
+                        <p:outputLabel for="nombre" value="Nombre" />
+                        <p:inputText required="true" placeholder="Entre el nombre de la notificación" id="nombre" value="#{configuracionMensajesNotificacionBean.mensajesActivo.nombre}"
+                                     styleClass="w100"/>
+                        <p:outputLabel for="valor" value="Valor" />
+                        <p:inputTextarea id="valor" placeholder="Entre el valor" value="#{configuracionMensajesNotificacionBean.mensajesActivo.valor}"
+                                         styleClass="w100"/>
+                        <p:commandButton value="Guardar" update=":form" icon="ui-icon-disk"
+                                         actionListener="#{configuracionMensajesNotificacionBean.save}"
+                                         onsuccess="PF('dlg2').hide();"/>
+                    </h:panelGrid>
+                </p:dialog>
+            </h:form>
+        </ui:define>
+    </ui:composition>

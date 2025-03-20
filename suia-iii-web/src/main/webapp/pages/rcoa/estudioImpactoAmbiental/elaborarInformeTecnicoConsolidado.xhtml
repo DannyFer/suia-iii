@@ -1,0 +1,378 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="context-extra">
+		<h:outputText value="Datos" />
+		<h:outputText value="Estudio de Impacto Ambiental" />
+		<ui:remove>
+			<h:outputLink target="_blank"
+				value="#{request.contextPath}/pages/rcoa/estudioImpactoAmbiental/default.jsf">
+				<p:commandButton type="button" styleClass="primary button-small"
+					icon="ui-icon-search" />
+			</h:outputLink>
+		</ui:remove>
+		<p:commandButton
+			action="#{elaborarInformeConsolidadoController.abrirEstudio()}"
+			icon="ui-icon-search" styleClass="primary button-small" />
+	</ui:define>
+
+	<ui:define name="content">
+
+		<f:event type="preRenderView"
+			listener="#{elaborarInformeConsolidadoController.validarTareaBpm()}" />
+
+		<h:form id="form">
+
+			
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				style="border: none !important; "
+				rendered="#{informeTecnicoConsolidadoEIABean.realizoInspeccion}">
+				<f:facet name="header">
+					<h:outputText value="Registrar resultados de inspección" />
+				</f:facet>
+				<p:panelGrid id="adjuntosDiagGrid" columns="2"
+					styleClass="panel_data w100" columnClasses="header w30, w70">
+					<h:outputText
+						value="Adjuntar documento de inspección en formato pdf." />
+
+					<p:panel id="pnUpload" style="border: none">
+						<p:fileUpload
+							fileUploadListener="#{elaborarInformeConsolidadoController.uploadDocumentoEIA}"
+							required="true" requiredMessage="Debe ingresar el adjunto"
+							multiple="false" sizeLimit="20971520" fileLimit="1"
+							allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar"
+							uploadLabel="Subir" auto="true"
+							update="adjuntosDiagGrid :form:pnlButtons" cancelLabel="Cancelar"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+							mode="advanced" styleClass="w100">
+						</p:fileUpload>
+						<p:commandButton id="downloadAdjunto"
+							icon="ui-icon-arrowthick-1-s"
+							styleClass="button-small primary toLeft" title="Ver" ajax="false"
+							immediate="true"
+							rendered="#{informeTecnicoConsolidadoEIABean.documentoInspeccion.nombre ne null and informeTecnicoConsolidadoEIABean.documentoInspeccion.nombre ne ''}">
+							<p:fileDownload
+								value="#{descargarDocumentosCoaController.descargarDocumentoEIA(informeTecnicoConsolidadoEIABean.documentoInspeccion)}" />
+						</p:commandButton>
+						<p:commandButton icon="ui-icon-trash"
+							title="#{msg['button.eliminar']}"
+							styleClass="button-small primary toLeft" immediate="true"
+							update="adjuntosDiagGrid"
+							rendered="#{informeTecnicoConsolidadoEIABean.documentoInspeccion.nombre ne null and informeTecnicoConsolidadoEIABean.documentoInspeccion.nombre ne ''}"
+							actionListener="#{informeTecnicoConsolidadoEIABean.eliminarAdjunto()}">
+							<p:confirm header="Confirmación"
+								message="¿Está seguro que desea eliminar el documento?"
+								icon="ui-icon-alert" />
+						</p:commandButton>
+						<p:outputLabel id="fileDocumentoAdjunto"
+							value="#{informeTecnicoConsolidadoEIABean.documentoInspeccion.nombre}" />
+					</p:panel>
+				</p:panelGrid>
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				style="border: none !important; " rendered="false">
+				<f:facet name="header">
+					<h:outputText value="Inspección" />
+				</f:facet>
+				<p:panelGrid id="pnlJustificacion" columns="2"
+					styleClass="panel_data w100" columnClasses="header w20,null w80">
+					<h:outputText value="Justificación" />
+					<h:inputTextarea
+						value="#{informeTecnicoConsolidadoEIABean.justificacionInspecion}"
+						rows="3" disabled="true" style="width: 100%" />
+				</p:panelGrid>
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				style="border: none !important; "
+				rendered="#{informeTecnicoConsolidadoEIABean.mostrarInformesApoyo}">
+				<f:facet name="header">
+					<h:outputText value="Revisar informes técnicos" />
+				</f:facet>
+				<p:dataTable id="dtDocumentoInformes" var="adjunto" styleClass="w50"
+					value="#{informeTecnicoConsolidadoEIABean.listaDocumentosInformesTecnicos}">
+					<p:column headerText="Documento" width="75%">
+						<h:outputText value="#{adjunto.nombre}" />
+					</p:column>
+					<p:column headerText="Acción">
+						<p:commandButton id="downloadAutorizacion"
+							icon="ui-icon-arrowthick-1-s" styleClass="secondary" title="Ver"
+							ajax="false" immediate="true"
+							rendered="#{adjunto.nombre ne null}">
+							<p:fileDownload
+								value="#{descargarDocumentosCoaController.descargarDocumentoEIA(adjunto)}" />
+						</p:commandButton>
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+			<p:tabView id="tab">
+				<p:tab title="Informe técnico">
+					<ui:include
+						src="/pages/rcoa/estudioImpactoAmbiental/viewInformeConsolidado.xhtml" />
+				</p:tab>
+				<p:tab title="Oficio de pronunciamiento">
+					<ui:include
+						src="/pages/rcoa/estudioImpactoAmbiental/viewPronunciamiento.xhtml" />
+				</p:tab>
+			</p:tabView>
+
+			<h:inputHidden
+				validator="#{elaborarInformeConsolidadoController.validateDatosIngreso}" />
+
+			<h:panelGrid styleClass="w100" columns="1">
+				<h:panelGroup id="pnlObsAlInformeOficio">
+					<observaciones:tablaObservacionesEsIA
+						idComponent="obsInformeOficioConsolidado"
+						seccion="Observaciones Informe Oficio Consolidado"
+						componenteActualizarEliminar="pnlObsAlInformeOficiovv"
+						aparace="true" mostrarSiVacio="false"
+						idActualizar=":form:pnlButtons"
+						idClase="#{elaborarInformeConsolidadoController.informeTecnicoEsIABean.informeTecnico.idInformePrincipal}"
+						nombreClase="InfomeOficioConsolidado" soloLectura="true" />
+				</h:panelGroup>
+			</h:panelGrid>
+
+			<br />
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				style="border: none !important; "
+				rendered="#{informeTecnicoConsolidadoEIABean.observacionesDocumentos}">
+				<f:facet name="header">
+					<h:outputText
+						value="Seleccionar técnico de apoyo para corrección de Informe Técnico individual" />
+				</f:facet>
+				<p:dataTable id="dtInformes" var="informe" styleClass="w50"
+					value="#{informeTecnicoConsolidadoEIABean.listaInformes}"
+					selection="#{informeTecnicoConsolidadoEIABean.selectedTecnicos}"
+					rowKey="#{informe.id}">
+					<p:ajax event="rowSelectCheckbox" update="@form" />
+					<p:column selectionMode="multiple" style="text-align:center"
+						width="10%">
+						<h:outputText value="#{informe.id}" rendered="false" />
+					</p:column>
+					<p:column headerText="Pronunciamiento" width="25%">
+						<h:outputText
+							value="#{informe.tipoPronunciamiento eq 1 ? 'Aprobación' : 'Observación' }" />
+					</p:column>
+					<p:column headerText="Nombre del técnico">
+						<h:outputText
+							value="#{informeTecnicoConsolidadoEIABean.getnombreTecnico(informe.usuarioCreacion)}" />
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Guardar"
+						update=":form:pnlButtons :form:tab:informeConsolidadoData :form:tab:oficioPronunciamientoData"
+						actionListener="#{elaborarInformeConsolidadoController.guardarInformeOficio()}"
+						icon="ui-icon-disk"
+						process="@this :form:tab:informeConsolidadoData :form:tab:oficioPronunciamientoData" />
+					<p:commandButton icon="ui-icon-key" value="Firmar documento"
+						style="width: 170px;"
+						onclick="PF('dlgConfirmarSustanciales').show();"
+						rendered="#{informeTecnicoConsolidadoEIABean.observacionesSustanciales}"
+						disabled="#{!elaborarInformeConsolidadoController.habilitarFirma}"
+						actionListener="#{elaborarInformeConsolidadoController.esRequerido(true)}">
+					</p:commandButton>
+					<p:commandButton icon="ui-icon-key" value="Firmar documento"
+						style="width: 170px;" onclick="PF('dlgConfirmar').show();"
+						rendered="#{!informeTecnicoConsolidadoEIABean.observacionesSustanciales}"
+						disabled="#{!elaborarInformeConsolidadoController.habilitarFirma}"
+						actionListener="#{elaborarInformeConsolidadoController.esRequerido(true)}">
+					</p:commandButton>
+
+					<ui:remove>
+						<p:commandButton value="Firmar documento" styleClass="large"
+							icon="ui-icon-key"
+							rendered="#{!informeTecnicoConsolidadoEIABean.observacionesDocumentos}"
+							disabled="#{!elaborarInformeConsolidadoController.habilitarFirma}"
+							update=":formDialogFirma:pnlFirmaManual :formDialogFirma:pnlFirmaToken"
+							actionListener="#{elaborarInformeConsolidadoController.guardarDocumentos()}" />
+					</ui:remove>
+					<p:commandButton value="Enviar" styleClass="secondary"
+						rendered="#{informeTecnicoConsolidadoEIABean.observacionesDocumentos}"
+						action="#{elaborarInformeConsolidadoController.enviar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+
+				<p:dialog modal="true" id="dlgConfirmarSustanciales"
+					widgetVar="dlgConfirmarSustanciales"
+					header="#{msg['header.confirmacion.envio.tarea']}"
+					resizable="false" width="400px">
+					<p align="justify">¿El proyecto tiene observaciones
+						sustanciales lo que archivará el proyecto, desea continuar?</p>
+					<br />
+					<t:div styleClass="buttons">
+						<p:commandButton icon="ui-icon-check" value="Aceptar"
+							oncomplete="PF('dlgConfirmarSustanciales').hide()"
+							actionListener="#{elaborarInformeConsolidadoController.confirmarSustanciales()}"
+							update=":form:pnlButtons" />
+						<p:commandButton icon="ui-icon-cancel" value="Cerrar"
+							onclick="PF('dlgConfirmarSustanciales').hide();"
+							actionListener="#{elaborarInformeConsolidadoController.esRequerido(false)}"
+							process="@this" styleClass="secondary"
+							update=":form :form:adjuntosDiagGrid" />
+
+					</t:div>
+				</p:dialog>
+
+				<p:dialog modal="true" id="dlgConfirmar" widgetVar="dlgConfirmar"
+					header="#{msg['header.confirmacion.envio.tarea']}"
+					resizable="false" width="400px">
+					<p align="justify">¿Está seguro de firmar la información?</p>
+					<br />
+					<p:separator />
+					<t:div styleClass="buttons">
+						<p:commandButton icon="ui-icon-check" value="Aceptar"
+							actionListener="#{elaborarInformeConsolidadoController.guardarDocumentos()}"
+							update=":form:pnlButtons" />
+						<p:commandButton icon="ui-icon-cancel" value="Cerrar"
+							onclick="PF('dlgConfirmar').hide();"
+							actionListener="#{elaborarInformeConsolidadoController.esRequerido(false)}"
+							process="@this" styleClass="secondary"
+							update=":form :form:adjuntosDiagGrid" />
+
+					</t:div>
+				</p:dialog>
+			</h:panelGroup>
+
+		</h:form>
+		<h:form id="formDialogFirma">
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600" height="auto" position="center top">
+
+				<p:panel>
+
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel
+							value="Informe técnico  Nro: #{elaborarInformeConsolidadoController.informeTecnicoEsIABean.informeTecnico.codigoInforme}"
+							styleClass="bold" />
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<h:outputText value="¿Cuenta con token?" styleClass="encabezado"
+							rendered="#{!elaborarInformeConsolidadoController.firmaSoloToken}" />
+						<p:selectOneRadio id="verificaToken"
+							rendered="#{!elaborarInformeConsolidadoController.firmaSoloToken}"
+							value="#{elaborarInformeConsolidadoController.token}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change" update="pnlFirmaManual pnlFirmaToken"
+								listener="#{elaborarInformeConsolidadoController.guardarToken}" />
+						</p:selectOneRadio>
+						<h:panelGroup id="pnlFirmaToken">
+							<p:commandButton value="Firmar documento" type="button"
+								styleClass="primary" icon="ui-icon-key"
+								rendered="#{elaborarInformeConsolidadoController.token}"
+								onclick="window.location.href='#{elaborarInformeConsolidadoController.urlAlfresco}'" />
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!elaborarInformeConsolidadoController.token}">
+							<h:outputLabel value="1. Descargue el Informe Técnico"
+								styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload
+									value="#{elaborarInformeConsolidadoController.descargar()}" />
+							</p:commandButton>
+
+							<p:outputLabel for="uploadRequired"
+								value="2. Adjunte el Informe Técnico firmado" styleClass="bold" />
+							<p:fileUpload
+								fileUploadListener="#{elaborarInformeConsolidadoController.uploadListenerDocumentos}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreOficioFirmado"
+								rendered="#{!elaborarInformeConsolidadoController.token}">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreOficioFirmado"
+								value="#{elaborarInformeConsolidadoController.documentoManual.nombre}" />
+						</h:panelGrid>
+
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!elaborarInformeConsolidadoController.token and !elaborarInformeConsolidadoController.subido}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialogOficio').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						action="#{elaborarInformeConsolidadoController.finalizar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+		</h:form>
+		
+		<!-- dialog para documentos habilitantes  -->
+		<h:form id="formDialogAdjuntoHabilitantes">
+			<p:dialog id="adjuntoDiagHabilitantes" widgetVar="adjuntoDiagHabilitantes" header="Adjuntos" width="600px" closable="false" modal="true">
+				<p:panelGrid id="adjuntosDiagGridHabilitantes" columns="3" styleClass="panel_data w100" columnClasses="header w30,null w70">
+					<h:outputText value="Adjuntar archivo de Documento Habilitante" />
+					<p:panel id="pnUploadHabilitantes" style="border: none">
+						<p:fileUpload fileUploadListener="#{informeTecnicoConsolidadoEIABean.asignarDocumentoEIA}"
+							required="true" requiredMessage="Debe ingresar el adjunto" multiple="false" 
+							sizeLimit="50971520" fileLimit="1" allowTypes="/(\.|\/)(pdf|zip|rar)$/" label="Seleccionar"
+							uploadLabel="Subir" auto="true" update="adjuntosDiagGridHabilitantes" cancelLabel="Cancelar"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+							mode="advanced" styleClass="w100" >
+						</p:fileUpload>
+						<p:commandButton id="downloadAdjunto"
+							icon="ui-icon-arrowthick-1-s"
+							styleClass="button-small primary toLeft" title="Ver" ajax="false"
+							immediate="true"
+							rendered="#{informeTecnicoConsolidadoEIABean.documentoAdjunto.nombre ne null}">
+							<p:fileDownload value="#{informeTecnicoConsolidadoEIABean.descargarDocumentoEIA(informeTecnicoConsolidadoEIABean.documentoAdjunto)}" />
+						</p:commandButton>
+						<p:outputLabel id="fileDocumentoAdjuntoHabilitante" value="#{informeTecnicoConsolidadoEIABean.documentoAdjunto.nombre}" />
+					</p:panel>
+				</p:panelGrid>
+				<br />
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('adjuntoDiagHabilitantes').hide()" styleClass="secondary" />
+					<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}" process="adjuntoDiagHabilitantes" oncomplete="if(!args.validationFailed) PF('adjuntoDiagHabilitantes').hide();"
+						update="adjuntoDiagHabilitantes :form" actionListener="#{informeTecnicoConsolidadoEIABean.agregarAdjunto()}" />
+				</div>
+			</p:dialog>
+		</h:form>
+
+	</ui:define>
+</ui:composition>

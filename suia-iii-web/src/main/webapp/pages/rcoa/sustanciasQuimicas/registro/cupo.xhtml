@@ -1,0 +1,142 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="Justificación para solicitud de cupo"/>		
+	</f:facet>
+	<p:dataTable value="#{registrarSustanciasQuimicasController.actividadSustanciaProyectoSeleccionadasLista}" var="item"
+	 		emptyMessage="#{labels['common.table.empty']}" lazy="true">
+		<p:column headerText="Sustancia Química"
+		styleClass="alCenter singleLine">
+			<h:outputText value="#{item.gestionarProductosQuimicosProyectoAmbiental.sustanciaquimica.descripcion}" />
+		</p:column>
+		
+		<p:column headerText="Porcentaje de concentración de la sustancia (Pureza)" styleClass="alCenter">
+			<p:panelGrid columns="2" columnClasses="null w90, null w10">
+				<pe:inputNumber value="#{item.rangoConcentracion}" maxValue="100"
+					decimalPlaces="2" required="true" style="width: 5px !important"
+					requiredMessage="Porcentaje de concentracion es requerido"
+					readonly="#{registrarSustanciasQuimicasController.bloquearCupo(item)}"
+					rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}" />
+
+				<h:outputText value="#{item.rangoConcentracion}"
+					rendered="#{!registrarSustanciasQuimicasController.habilitarIngreso}" />
+
+				<h:outputText value="%" />
+
+			</p:panelGrid>
+
+		</p:column>
+		
+		<p:column headerText="Actividades">
+			<h:outputText value="#{item.caracteristicaActividad.nombre}"/>
+		</p:column>
+		
+		<p:column headerText="Cupo Cantidad">
+			<pe:inputNumber value="#{item.cupo}" maxValue="9999999" decimalPlaces="0"
+			required="true" requiredMessage="Cupo es requerido"
+			readonly="#{registrarSustanciasQuimicasController.bloquearCupo(item)}"
+			rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}"/>
+			
+			<h:outputText value="#{item.cupo}"
+			rendered="#{!registrarSustanciasQuimicasController.habilitarIngreso}"/>
+		</p:column>
+	
+		<p:column headerText="Unidad de Medida"	styleClass="alCenter singleLine">				
+			<p:selectOneMenu value="#{item.unidadMedida}"
+			styleClass="w100" required="true" requiredMessage="Unidad de Medida es requerido" converter="selectItemConverter"
+			disabled="#{!registrarSustanciasQuimicasController.habilitarIngreso or registrarSustanciasQuimicasController.bloquearCupo(item)}">
+				<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+				<f:selectItems value="#{registrarSustanciasQuimicasController.unidadesMedidaLista}" var="itemU" itemLabel="#{itemU.nombre}" itemValue="#{itemU}"/>
+				<p:ajax update="@this"/>								
+			</p:selectOneMenu>
+		</p:column>
+	</p:dataTable>
+</p:panelGrid>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w60" rendered="#{!registrarSustanciasQuimicasController.actividadExpImp()}">
+	<f:facet name="header">
+		<h:outputText value="Proceso o actividad en la que se empleará la sustancia"/>		
+	</f:facet>
+	<p:dataTable value="#{registrarSustanciasQuimicasController.ubicacionSustanciaProyectoListaCupo()}" var="item"
+	 		emptyMessage="#{labels['common.table.empty']}" lazy="true">
+		<p:column headerText="Sustancia Química" styleClass="alCenter singleLine">
+			<h:outputText value="#{item.gestionarProductosQuimicosProyectoAmbiental.sustanciaquimica.descripcion}" />
+		</p:column>
+		
+		<p:column headerText="Planta, Bodega, Sucursal o Proyectos" styleClass="alCenter">
+			<h:outputText value="#{item.lugares}"/>
+		</p:column>
+		
+		<p:column headerText="Proceso  o actividad" styleClass="alCenter">
+			<p:inputText value="#{item.proceso}" maxlength="50"
+			required="true" requiredMessage="Proceso es requerido"
+			readonly="#{registrarSustanciasQuimicasController.bloquearProceso(item)}"
+			rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}" validatorMessage="Proceso  o actividad: Campo alfanumérico sin caracteres especiales">
+				<f:validateRegex pattern="[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ\s]+"/>
+			</p:inputText>
+			
+			<h:outputText value="#{item.proceso}"
+			rendered="#{!registrarSustanciasQuimicasController.habilitarIngreso}"/>
+		</p:column>
+		
+		<p:column headerText="Promedio de cantidad de producto producido mensual" styleClass="alCenter">
+			<p:inputText value="#{item.cantidadProducida}" maxlength="100"
+			required="true" requiredMessage="Cantidad de producto es requerido"
+			readonly="#{registrarSustanciasQuimicasController.bloquearProceso(item)}"
+			rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}" validatorMessage="Promedio de cantidad de producto producido mensual: Campo alfanumérico sin caracteres especiales">
+				<f:validateRegex pattern="[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ\s]+"/>
+			</p:inputText>
+			
+			<h:outputText value="#{item.cantidadProducida}"
+			rendered="#{!registrarSustanciasQuimicasController.habilitarIngreso}"/>
+		</p:column>
+	
+		<p:column headerText="Promedio de sustancia quimica empleada mensual" styleClass="alCenter">
+			<p:inputText value="#{item.sustanciaEmpleada}" maxlength="50"
+			required="true" requiredMessage="Sustancia quimica empleada es requerido"
+			readonly="#{registrarSustanciasQuimicasController.bloquearProceso(item)}"
+			rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}" validatorMessage="Promedio de cantidad de producto empleada mensual: Campo alfanumérico siN caracteres especiales">
+				<f:validateRegex pattern="[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ\s]+"/>
+			</p:inputText>
+			
+			<h:outputText value="#{item.sustanciaEmpleada}"
+			rendered="#{!registrarSustanciasQuimicasController.habilitarIngreso}"/>
+		</p:column>
+		
+		<p:column headerText="Observaciones">
+			<p:inputText value="#{item.observaciones}" maxlength="100"
+			required="true" requiredMessage="Observaciones es requerido"
+			readonly="#{registrarSustanciasQuimicasController.bloquearProceso(item)}"
+			rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}"/>
+			
+			<h:outputText value="#{item.observaciones}"
+			rendered="#{!registrarSustanciasQuimicasController.habilitarIngreso}"/>
+		</p:column>
+	</p:dataTable>	
+
+</p:panelGrid>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="Información sobre cambio tecnológico y reducción de uso de las sustancias quimicas"/>		
+	</f:facet>
+	
+	<h:outputText value="Cambio tecnológico"/>	
+	<p:inputTextarea styleClass="w100" value="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.cambioTecnologico}" maxlength="300"
+	readonly="#{registrarSustanciasQuimicasController.bloquearMercurio()}" autoResize="false" rows="5"/>
+		
+	<h:outputText value="Meta de reducción de la sustancia"/>
+	<p:inputTextarea styleClass="w100" value="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.metaReduccionSubstancia}" maxlength="300"
+	readonly="#{registrarSustanciasQuimicasController.bloquearMercurio()}" autoResize="false" rows="5"/>
+
+</p:panelGrid>
+
+</html>

@@ -1,0 +1,159 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+
+<ui:composition>
+	<f:loadBundle var="helps"
+		basename="ec.gob.ambiente.core.resources.helps_es" />
+	<f:loadBundle var="msg"
+		basename="ec.gob.ambiente.core.resources.messages_es" />
+	<h:panelGrid columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<h:outputText value="#{msg['label.annexesTdrEia']}"
+				styleClass="encabezado1_5em alLeft" />
+		</f:facet>
+		<h:outputText />
+		<h:outputText />
+		<p:outputLabel styleClass="bold"
+			value="#{msg['label.mappingScaleTdrEia']}: *" for="mapping"></p:outputLabel>
+		<control:imputConTextoEnriquecido id="mapping"
+			requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.mappingScaleTdrEia']} #{msg['label.prevencion.tdr.requerido']}."
+			valor="#{ingresarTDRBean.tdrEia.tdelMapping}"
+			soloLectura="#{ingresarTDRBean.procesoIniciado}" requerido="true" />
+			
+		<h:outputText />
+		<h:outputText />
+		<p:outputLabel styleClass="bold" value=" " for="thematicMapsDatatable" />
+		<p:panelGrid columns="1" layout="grid">
+			<f:facet name="header">
+				<mae:panelGridHeaderHelp value="#{msg['label.thematicMapsList']}:*"
+					conector="actividadHelp"
+					help="#{helps['registro.thematicMapsList']}" />
+			</f:facet>
+
+			<p:dataTable id="thematicMapsDatatable"
+				emptyMessage="#{labels['common.table.empty']}" rowIndexVar="rowIndex"
+				var="mapas" value="#{ingresarTDRBean.listaMapasTematico}"
+				paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+				rowsPerPageTemplate="5,10,15" paginator="true"
+				paginatorAlwaysVisible="true" paginatorPosition="bottom" rows="7">
+				<p:column headerText="#{msg['label.numero']}" width="6%">
+												#{rowIndex+1}
+											</p:column>
+				<p:column headerText="#{msg['label.thematicMapsList']}">
+					<h:outputText value="#{mapas.descripcion}" />
+				</p:column>
+
+				<p:column width="6%">
+					<p:selectBooleanCheckbox value="#{mapas.seleccionado}"
+						disabled="#{ingresarTDRBean.procesoIniciado}">
+						<p:ajax process="@this"></p:ajax>
+					</p:selectBooleanCheckbox>
+				</p:column>
+			</p:dataTable>
+
+			<h:outputText />
+			<h:outputText />
+			<p:outputLabel value="#{msg['label.otherThematicMaps']}: " styleClass="bold" />
+			<p:inputTextarea id="thematicMaps" styleClass="w100"
+				readonly="#{ingresarTDRBean.procesoIniciado}" autoResize="true"
+				value="#{ingresarTDRBean.tdrEia.tdelOtherThematicMaps}" />
+		</p:panelGrid>
+		
+		<h:outputText />
+		<h:outputText />
+		<p:outputLabel styleClass="bold" value=" " for="thematicMapsDatatable" />
+		<p:panelGrid columns="1" layout="grid">
+			<f:facet name="header">
+				<mae:panelGridHeaderHelp value="#{msg['label.selectAnnexes']}:*"
+					conector="actividadHelp"
+					help="#{helps['registro.selectAnnexes']}" />
+			</f:facet>
+			<p:dataTable id="annexesDatatable"
+				emptyMessage="#{labels['common.table.empty']}" rowIndexVar="rowIndex"
+				var="anexo" value="#{ingresarTDRBean.listaAnexos}"
+				paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+				rowsPerPageTemplate="5,10,15" paginator="true"
+				paginatorAlwaysVisible="true" paginatorPosition="bottom" rows="7">
+				<p:column headerText="#{msg['label.numero']}" width="6%">
+					#{rowIndex+1}
+				</p:column>
+				
+				<p:column headerText="#{msg['label.annexesHeader']}">
+					<h:outputText value="#{anexo.descripcion}" />
+				</p:column>
+
+				<p:column width="6%">
+					<p:selectBooleanCheckbox value="#{anexo.seleccionado}"
+						disabled="#{ingresarTDRBean.procesoIniciado}">
+						<p:ajax process="@this"></p:ajax>
+					</p:selectBooleanCheckbox>
+				</p:column>
+			</p:dataTable>
+			
+			<h:outputText />
+			<h:outputText />
+			<p:outputLabel styleClass="bold"
+				value="#{msg['label.otherAnnexes']}:"></p:outputLabel>
+			<p:inputTextarea id="otherAnnexes" styleClass="w100"
+				autoResize="true" readonly="#{ingresarTDRBean.procesoIniciado}"
+				value="#{ingresarTDRBean.tdrEia.tdelOtherAnnexes}"></p:inputTextarea>
+		</p:panelGrid>
+	</h:panelGrid>
+
+	<p:fragment>
+		<h:panelGrid columns="2" rendered="#{ingresarTDRBean.procesoIniciado}">
+			<p:outputLabel for="commentRadio"
+				value="#{msg['label.prevencion.tdr.observacionLabel']}"
+				styleClass="bold" />
+			<p:selectOneRadio required="true" id="commentRadio"
+				value="#{ingresarTDRBean.observacionTdrEiaLiciencia.obs_anexos}">
+				<f:selectItem itemLabel="Sí" itemValue="true" />
+				<f:selectItem itemLabel="No" itemValue="false" />
+				<p:ajax process="@this" update="commentValue"></p:ajax>
+			</p:selectOneRadio>
+		</h:panelGrid>
+	</p:fragment>
+	<h:panelGroup id="commentValue"
+		rendered="#{ingresarTDRBean.procesoIniciado}">
+		<p:outputLabel value="#{msg['label.prevencion.tdr.justifique']} *"
+			rendered="#{ingresarTDRBean.observacionTdrEiaLiciencia.obs_anexos}" />
+		<control:imputConTextoEnriquecido
+			requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.justifique']} #{msg['label.prevencion.tdr.requerido']}."
+			valor="#{ingresarTDRBean.observacionTdrEiaLiciencia.anexos}"
+			requerido="#{ingresarTDRBean.observacionTdrEiaLiciencia.obs_anexos}"
+			rendered="#{ingresarTDRBean.observacionTdrEiaLiciencia.obs_anexos}" />
+	</h:panelGroup>
+
+
+	<p:separator />
+	<div class="buttons">
+
+		<p:commandButton id="saveComment"
+			rendered="#{ingresarTDRBean.procesoIniciado}"
+			value="#{msg['button.guardar']}"
+			actionListener="#{ingresarObservacionesTDRController.guardarObservacion(11)}"
+			update=":formularioTDR" icon="ui-icon-disk"></p:commandButton>
+
+		<p:commandButton value="#{msg['button.guardar']}"
+			rendered="#{!ingresarTDRBean.procesoIniciado}"
+			update=":formularioTDR"
+			action="#{ingresarTDRController.adicionarAnexos()}" />
+		<p:commandButton value="#{msg['button.limpiar']}"
+			rendered="#{!ingresarTDRBean.procesoIniciado}" styleClass="secondary"
+			icon="ui-icon-document"
+			actionListener="#{ingresarTDRBean.limpiarFormulario(11)}"
+			update=":formularioTDR" process="@this">
+			<p:resetInput target=":formularioTDR" />
+		</p:commandButton>
+	</div>
+</ui:composition>
+
+</html>

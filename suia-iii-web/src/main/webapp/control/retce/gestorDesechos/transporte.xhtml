@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+	<h:panelGroup>
+		<p:panelGrid id="transporteGrid" columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<mae:panelGridHeaderHelp value="Ruta" conector="rutaHelp" help="#{helps['ruta.ayuda']}" width="500px" />
+			</f:facet>
+			<p:dataTable id="rutaTable" var="item" value="#{gestorDesechosPeligrososController.listRutas}">
+				<f:facet name="header">
+					<h:outputText value="Ruta"/>
+					<p:commandButton icon="ui-icon-plus" value="#{msg['button.agregar']}" process="rutaTable" update=":form:tabView:transporteGrid" 
+						style="float:right" oncomplete="PF('rutasDiag').show()"/>
+				</f:facet>
+				<p:column headerText="Nombre">
+					<h:outputText value="#{item.nombre}"/>
+				</p:column>
+				<p:column headerText="Desde">
+					<h:outputText value="#{item.nombreProvinciaOrigen}"/>
+				</p:column>
+				<p:column headerText="Hasta">
+					<h:outputText value="#{item.nombreProvinciaDestino}"/>
+				</p:column>
+				<p:column headerText="Acciones">
+					<center>
+						<p:commandButton icon="ui-icon-pencil" title="#{msg['button.editar']}" styleClass="secondary"  process="rutaTable" 
+							update=":form:tabView:transporteGrid :formDialogs:rutasDiag :form:tabView:manifiestoGrid"
+							actionListener="#{gestorDesechosPeligrososController.editarRuta(item)}" oncomplete="PF('rutasDiag').show()"/>
+						<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process="rutaTable" 
+							update=":form:tabView:transporteGrid :formDialogs:rutasDiag :form:tabView:manifiestoGrid"
+							actionListener="#{gestorDesechosPeligrososController.eliminarRuta(item)}"/>
+					</center>
+				</p:column>
+			</p:dataTable>
+		</p:panelGrid>
+	</h:panelGroup>
+
+	<h:panelGroup>
+		<p:panelGrid id="manifiestoGrid" columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="Manifiesto Único"/>
+			</f:facet>
+			
+			<p:dataTable id="manifiestoTable" var="manifiestoTransporte" value="#{gestorDesechosPeligrososController.listManifiestoUnicoTransporte}">
+				<f:facet name="header">
+					<h:outputText value="Manifiesto Único"/>
+					<p:commandButton icon="ui-icon-plus" value="#{msg['button.agregar']}" process="manifiestoTable" update=":form:tabView:manifiestoGrid" 
+						style="float:right" oncomplete="PF('manifiestoDiag').show()"/>
+				</f:facet>
+				<p:column style="width:16px">
+		            <p:rowToggler />
+		        </p:column>
+				<p:column headerText="Identificación de manifiesto">
+					<h:outputText value="#{manifiestoTransporte.numeroManifiesto}"/>
+				</p:column>
+				<p:column headerText="Adjunto">
+					<h:outputText value="#{manifiestoTransporte.adjuntoManifiesto.nombre}"/>
+				</p:column>
+				<p:column headerText="N° de registro de generador de desechos peligrosos y especiales / N° de licencia de gestor">
+					<h:outputText value="#{manifiestoTransporte.numeroRGD}"/>
+				</p:column>
+				<p:column headerText="Fecha de recepción de los residuos y desechos  peligrosos y especiales">
+					<h:outputText value="#{manifiestoTransporte.fechaRecepcion}">
+						<f:convertDateTime pattern="dd-MM-yyyy"/>
+					</h:outputText>
+				</p:column>
+				<p:rowExpansion>
+					<p:dataTable id="desechoTable" var="desechoTransporte" value="#{manifiestoTransporte.listDesechoTransporte}">
+						<f:facet name="header">
+							<h:outputText value="Identificación del desecho"/>
+						</f:facet>
+						<p:column headerText="Nombre del residuo o desecho peligroso o especial">
+							<h:outputText value="#{desechoTransporte.desechoPeligroso.descripcion}"/>
+						</p:column>
+						<p:column headerText="Código">
+							<h:outputText value="#{desechoTransporte.desechoPeligroso.clave}"/>
+						</p:column>
+						<p:column headerText="Unidad">
+							<h:outputText value="#{desechoTransporte.unidadDesechoTransporte.descripcion}"/>
+						</p:column>
+						<p:column headerText="Cantidad recibida">
+							<h:outputText value="#{desechoTransporte.cantidad}"/>
+						</p:column>
+						<p:column headerText="Reporte en unidades">
+							<h:outputText value="#{desechoTransporte.reporteUnidades}"/>
+						</p:column>
+						<p:column headerText="Acción">
+							<center>
+								<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process="desechoTable" 
+									update=":form:tabView:manifiestoGrid :form:tabView:sumatoriaGrid :form:tabView:exportacionTransporteGrid" 
+									actionListener="#{gestorDesechosPeligrososController.eliminarDesechoGestorTransporte(desechoTransporte)}"/>
+							</center>
+						</p:column>
+					</p:dataTable>
+
+					<p:dataTable id="transferenciaTable" var="empresaTransporte" value="#{manifiestoTransporte.listEmpresasTransporte}">
+						<f:facet name="header">
+							<h:outputText value="Transferencia"/>
+						</f:facet>
+						<p:column headerText="Fecha de Transferencia">
+							<h:outputText value="#{empresaTransporte.fechaTransferencia}">
+								<f:convertDateTime pattern="dd-MM-yyyy"/>
+							</h:outputText>
+						</p:column>
+						<p:column headerText="Empresa gestora">
+							<h:outputText value="#{empresaTransporte.sedePrestadorServiciosDesechos.prestadorServiciosDesechos.nombre}"/>
+						</p:column>
+						<p:column headerText="Número de autorización">
+							<h:outputText value="#{empresaTransporte.sedePrestadorServiciosDesechos.codigoPermisoAmbiental}"/>
+						</p:column>
+						<p:column headerText="Acción">
+							<center>
+								<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process="transferenciaTable" 
+									update=":form:tabView:transporteGrid :formDialogs:rutasDiag :form:tabView:manifiestoGrid"
+									actionListener="#{gestorDesechosPeligrososController.eliminarEmpresaGestora(empresaTransporte)}"/>
+							</center>
+						</p:column>
+					</p:dataTable>
+				</p:rowExpansion>
+				<p:column headerText="Acción">
+					<center>
+						<p:commandButton icon="ui-icon-pencil" title="#{msg['button.editar']}" styleClass="secondary"  process=":form:tabView:manifiestoTable" 
+							oncomplete="PF('manifiestoDiag').show()"
+							update=":form:tabView:manifiestoGrid :formDialogs:manifiestoDiag" 
+							actionListener="#{gestorDesechosPeligrososController.editarManifiestoUnico(manifiestoTransporte)}" />
+						<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process=":form:tabView:manifiestoTable" 
+							update=":form:tabView:manifiestoGrid" 
+							actionListener="#{gestorDesechosPeligrososController.eliminarManifiestoUnico(manifiestoTransporte)}"/>
+					</center>
+				</p:column>
+			</p:dataTable>
+			
+
+		</p:panelGrid>
+		
+		<p:panelGrid id="sumatoriaGrid" columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="Sumatoria"/>
+			</f:facet>
+			<p:dataTable id="sumatoriaTable" var="item" value="#{gestorDesechosPeligrososController.listTotalManifiestoTransporte}">
+				<f:facet name="header">
+				</f:facet>
+				<p:column headerText="Nombre del residuo o desecho peligroso o especial">
+					<h:outputText value="#{item.desechoPeligroso.descripcion}"/>
+				</p:column>
+				<p:column headerText="Código">
+					<h:outputText value="#{item.desechoPeligroso.clave}"/>
+				</p:column>
+				<p:column headerText="Total">
+					<h:outputText value="#{item.totalDesecho}"/>
+				</p:column>
+				<p:column headerText="Reporte en unidades (U) únicamente para los desechos ES-04 y ES-06">
+					<h:outputText value="#{item.totalUnidadesES}"/>
+				</p:column>
+			</p:dataTable>
+		</p:panelGrid>
+		
+		<p:panelGrid id="exportacionTransporteGrid" columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="Exportacion"/>
+			</f:facet>
+			<p:dataTable var="item" value="#{gestorDesechosPeligrososController.listDesechoGestorTransporteExportacion}">
+				<f:facet name="header">
+				</f:facet>
+				<p:column headerText="Nombre del residuo o desecho peligroso o especial">
+					<h:outputText value="#{item.desechoPeligroso.descripcion}"/>
+				</p:column>
+				<p:column headerText="Código">
+					<h:outputText value="#{item.desechoPeligroso.clave}"/>
+				</p:column>
+				<p:column headerText="Cantidad">
+					<h:outputText value="#{item.cantidad}"/>
+				</p:column>
+				<p:column headerText="País de destino">
+					<h:outputText value="#{item.pais.nombre}"/>
+				</p:column>
+				<p:column headerText="Autorización">
+					<h:outputText value="#{item.documentoAutorizacion.nombre}"/>
+				</p:column>
+			</p:dataTable>
+		</p:panelGrid>
+	</h:panelGroup>
+	
+	<h:panelGroup>
+		<p:panelGrid id="observacionesTransporteGrid" columns="1" layout="grid" styleClass="w100" rendered="#{gestorDesechosPeligrososController.verObservaciones}">
+			<f:facet name="header">
+				<h:outputText value="Observaciones"/>
+			</f:facet>
+			<p:dataTable var="item" value="#{gestorDesechosPeligrososController.listObservacionesTransporte}">
+				<p:column headerText="Campo">
+					<h:outputText value="#{item.campo}"/>
+				</p:column>
+				<p:column headerText="Detalle">
+					<h:outputText value="#{item.descripcion}"/>
+				</p:column>
+			</p:dataTable>
+		</p:panelGrid>
+	</h:panelGroup>
+</html>

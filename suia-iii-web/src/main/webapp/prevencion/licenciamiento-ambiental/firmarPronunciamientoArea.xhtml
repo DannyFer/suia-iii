@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones" >
+
+	<ui:define name="context-extra">
+		<h:outputText value="Datos" rendered="#{empty elaborarPronunciamientoAreaLABean.tipo}"/>
+        <h:outputText value="Estudio de Impacto Ambiental" rendered="#{empty elaborarPronunciamientoAreaLABean.tipo}"/>
+
+		<h:outputLink value="#{request.contextPath}#{eia.verEIA()}" target="_blank" rendered="#{empty elaborarPronunciamientoAreaLABean.tipo}">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+
+	</ui:define>
+	<ui:define name="content">	
+		<f:metadata>
+            <f:viewParam name="area" value="#{firmarPronunciamientoBean.area}"/>
+        </f:metadata>
+		<f:event type="preRenderView"
+			listener="#{firmarPronunciamientoBean.validarTareaBpm()}" />
+	
+		<h:form id="signOfficeForm">
+		<h3>Recepción de pronunciamiento</h3>
+		<h:panelGrid columns="2" styleClass="alCenter w100">
+		<h:panelGrid columns="3" styleClass="mw50 panel_data" columnClasses="header w25, null, alCenter w20px" rowClasses="null, alt">
+		<h:outputText value="Documento" />
+		<h:outputText value="Pronunciamiento Memorando #{firmarPronunciamientoBean.pronunciamiento.tipo}" styleClass="bold"/>
+		<p:commandButton icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true"
+                              styleClass="primary button-small">
+            	<p:fileDownload value="#{firmarPronunciamientoBean.getStreamDocumento(firmarPronunciamientoBean.pronunciamiento.tipo)}"/>
+        </p:commandButton>
+		</h:panelGrid>
+            <h:panelGrid columns="2" styleClass="alCenter w80" style="float:right" >
+            <p:outputLabel value="¿Recibió el Pronunciamiento?" for="opcion" style="alCenter"/>
+            <p:selectOneRadio id="opcion" required="true" requiredMessage="El campo ¿Existen Observaciones? es requerido"
+                              value="#{firmarPronunciamientoBean.correcto}" style="alCenter">
+                <f:selectItem itemLabel="Si" itemValue="true"/>
+                <f:selectItem itemLabel="No" itemValue="false"/>
+                <p:ajax process="@this"
+						update=":signOfficeForm"  />
+            </p:selectOneRadio>
+            </h:panelGrid>
+		</h:panelGrid>
+			
+			
+			<p:panel>
+				
+				<h:panelGrid styleClass="w25" columns="2" style="float:left">
+				<p:outputLabel value=""/>
+				<p:outputLabel value=""/>
+				<p:outputLabel value=""/>
+				<p:outputLabel value=""/>
+				<p:outputLabel value="¿Cuenta con Token?" />
+			<p:selectOneRadio id="verificaToken" value="#{firmarPronunciamientoBean.token}" disabled="#{!firmarPronunciamientoBean.correcto}">
+			<f:selectItem itemLabel="Sí" itemValue="true" />
+			<f:selectItem itemLabel="No" itemValue="false" />
+			<p:ajax event="change" update=":signOfficeForm" listener="#{firmarPronunciamientoBean.guardarToken}"/>
+			</p:selectOneRadio>
+			</h:panelGrid>
+	
+				<div class="buttons main">
+				<p:commandButton value="Firmar documento" type="button" id="btnFirmar1" disabled="#{!firmarPronunciamientoBean.correcto}" styleClass="large" icon="ui-icon-key" rendered="#{!firmarPronunciamientoBean.token}" onclick="PF('signDialog').show();" />
+				<p:commandButton value="Firmar documento" type="button" id="btnFirmar2" disabled="#{!firmarPronunciamientoBean.correcto}" styleClass="large" icon="ui-icon-key" rendered="#{firmarPronunciamientoBean.token}" onclick="window.location.href='#{firmarPronunciamientoBean.firmarDocumento()}'"/>
+
+					<p:commandButton value="Enviar" process="@this"
+									 action="#{firmarPronunciamientoBean.completarTarea()}"
+									 title="Enviar" icon="ui-icon-check">
+					</p:commandButton>
+				</div>
+			</p:panel>
+
+			<p:dialog header="Firma Electronica" id="signDlg" widgetVar="signDialog" closeOnEscape="false" modal="true" 
+					  resizable="false" width="auto" height="auto" position="center top">
+
+                <p:panel rendered="#{firmarPronunciamientoBean.token}">
+                    <table style="width: 100%;">
+                        <tr>
+                            <td style="text-align:center;">
+                                <object id="embedded"
+                                        data="#{firmarPronunciamientoBean.firmarDocumento()}"
+                                        width="710" height="400"/>
+                            </td>
+                        </tr>
+                    </table>
+
+                </p:panel>
+
+                <p:panel rendered="#{!firmarPronunciamientoBean.token}">
+                    <h:panelGrid columns="2" cellpadding="10" style="text-align:right !important">
+                        <p:outputLabel value="1. Descargue el pronunciamiento" styleClass="bold"/>
+                        <p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary" immediate="true">
+                            <p:fileDownload
+                                    value="#{firmarPronunciamientoBean.stream}"/>
+                        </p:commandButton>
+                        <p:outputLabel for="uploadRequired" value="2. Adjunte el pronunciamiento firmado" styleClass="bold"/>
+                        <p:fileUpload 
+                                fileUploadListener="#{firmarPronunciamientoBean.uploadListenerDocumentos}"
+                                multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                                label="Seleccionar" uploadLabel="Subir" oncomplete="signDialog.hide()"
+                                invalidFileMessage="Tipo de archivo no válido"
+                                invalidSizeMessage="Tamaño de archivo no válido"
+                                cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                auto="true" update="signDlg" required="true"
+                                rendered="#{!firmarPronunciamientoBean.token}">
+                            <f:attribute name="clave" value="signOfficeForm"/>
+                        </p:fileUpload>
+                    </h:panelGrid>
+                </p:panel>
+                <h:inputHidden id="uploadRequired" required="#{!firmarPronunciamientoBean.token and !firmarPronunciamientoBean.subido}"/>
+                <p:separator/>
+
+                <div style="display: block; width: 100%; text-align: right;">
+                    <p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary" 
+                    				 immediate="true" rendered="#{firmarPronunciamientoBean.token}">
+                        <p:fileDownload
+                                value="#{firmarPronunciamientoBean.stream}"/>
+                    </p:commandButton>
+                    <p:commandButton value="Cerrar" styleClass="primary" onclick="signDialog.hide()"
+                                     icon="ui-icon-close"/>
+                </div>
+            </p:dialog>
+			
+			<h:panelGroup id="pnl1">
+                <observaciones:tablaObservaciones aparace="true"
+                                                  idClase="#{firmarPronunciamientoBean.proyecto.id}"
+                                                  nombreClase="Pronunciamiento"
+                                                  seccion="#{firmarPronunciamientoBean.area}" soloLectura="false"
+                                                  rol="sjsj"
+                                                  componenteActualizarEliminar="pnl1"/>
+        	</h:panelGroup>			
+		</h:form>
+		
+		
+
+	</ui:define>
+</ui:composition>

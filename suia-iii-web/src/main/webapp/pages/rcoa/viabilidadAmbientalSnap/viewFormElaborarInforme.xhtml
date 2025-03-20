@@ -1,0 +1,240 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+<style type="text/css">
+.ui-panelgrid-header .ui-widget-header td {
+	background: #00aac3 !important;
+}
+
+.ui-state-error {
+	color: #cd0a0a !important;
+}
+
+.textSecundario {
+	font-weight: normal !important;
+}
+
+.ui-datepicker-unselectable span {
+	background: #b9b5b5 !important;
+}
+
+.panelContenedor td {
+	padding: 0 !important;
+}
+
+.ui-widget-overlay {
+	height: 8000px !important;
+}
+</style>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="1. Datos informativos" />
+	</f:facet>
+	
+	<p:panelGrid columns="2" styleClass="panel_data w100"
+		columnClasses="header w25, null">
+		<p:outputLabel for="txtFechaInspeccion"
+			value="Fecha inspección de campo" style="color: white" />
+		<h:panelGrid styleClass="w25 panelContenedor">
+			<p:calendar id="txtFechaInspeccion"
+				value="#{generarInformeViabilidadSnapBean.informeInspeccion.fechaInspeccion}"
+				timeZone="America/Guayaquil" readonlyInput="true"
+				pattern="dd/MM/yyyy" maxdate="today"
+				disabled="#{generarInformeViabilidadSnapBean.camposSoloLectura}">
+				<p:ajax process="@this" />
+			</p:calendar>
+		</h:panelGrid>
+	</p:panelGrid>
+
+</p:panelGrid>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="2. Análisis de Viabilidad Ambiental" />
+	</f:facet>
+
+	<p:panelGrid columns="2" styleClass="panel_data w100"
+		columnClasses="null w50, null w50">
+		<f:facet name="header">
+			<h:outputText
+				value="a) Zonificación del área protegida o su equivalencia" />
+			<br />
+			<br />
+			<p:outputLabel
+				value="Según el Plan de Manejo del Área Protegida, el proyecto, obra o actividad se encuentran dentro de las siguientes zonas del área protegida:"
+				styleClass="textSecundario" />
+		</f:facet>
+
+		<h:panelGroup>
+			<p:dataGrid var="cabecera" styleClass="pnlHeaders"
+				value="#{generarInformeViabilidadSnapBean.listaZonasAreas}"
+				columns="1" layout="grid">
+				<p:dataTable id="tblDiagnosticos" styleClass="w100"
+					value="#{cabecera.listaPreguntas}" var="pregunta"
+					emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="#{cabecera.descripcion}">
+						<h:outputText value="#{pregunta.descripcion}" />
+					</p:column>
+					<p:column headerText="Selección" styleClass="w70px"
+						style="text-align:center">
+						<p:selectBooleanCheckbox value="#{pregunta.respuesta.respBoolean}" styleClass="cssCheckDisabled"
+							disabled="#{generarInformeViabilidadSnapBean.camposSoloLectura}">
+							<p:ajax process="@this" />
+						</p:selectBooleanCheckbox>
+					</p:column>
+
+				</p:dataTable>
+			</p:dataGrid>
+
+			<h:outputText style="font-size:9px; margin-left: 4%;"
+				value="+ Aplica únicamente para las áreas protegidas marino costeras" />
+		</h:panelGroup>
+
+		<p:dataGrid var="cabecera" styleClass="pnlHeaders"
+			value="#{generarInformeViabilidadSnapBean.preguntasZonificacion}"
+			columns="1" layout="grid">
+			<p:dataGrid var="pregunta" value="#{cabecera.listaPreguntas}"
+				columns="1" id="pnlCabeceras" styleClass="pnlHeaders"
+				columnClasses="w25">
+				<p:panelGrid columns="1" styleClass="panel_data w100"
+					columnClasses="w25">
+					<f:facet name="header">
+						<h:outputText value="#{pregunta.descripcion}" />
+					</f:facet>
+					<p:outputPanel styleClass="alRight">
+						<p:inputTextarea id="txtFacilidades" maxlength="6000" rows="5"
+							rendered="#{pregunta.tipo eq 2}" required="true"
+							style="resize: none;" autoResize="false"
+							value="#{pregunta.respuesta.respText}"
+							disabled="#{generarInformeViabilidadSnapBean.camposSoloLectura}">
+							<p:ajax process="@this" />
+						</p:inputTextarea>
+						<p:selectOneRadio value="#{pregunta.respuesta.respBoolean}"
+							required="true" rendered="#{pregunta.tipo eq 1}"
+							requiredMessage="El campo '#{pregunta.descripcion}' es requerido"
+							disabled="#{generarInformeViabilidadSnapBean.camposSoloLectura}"
+							styleClass="cssRadioDisabled">
+							<f:selectItem itemLabel="Si" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change" process="@this"
+								update=":form:pnlResultado"
+								listener="#{generarInformeViabilidadSnapBean.actualizarTotalViabilidad()}" />
+						</p:selectOneRadio>
+						<p:selectOneRadio value="#{pregunta.respuesta.respValueRadio}"
+							required="true" rendered="#{pregunta.tipo eq 5}"
+							requiredMessage="El campo '#{pregunta.descripcion}' es requerido"
+							disabled="#{generarInformeViabilidadSnapBean.camposSoloLectura}"
+							styleClass="cssRadioDisabled">
+							<f:selectItem itemLabel="Si" itemValue="1" />
+							<f:selectItem itemLabel="No" itemValue="2" />
+							<f:selectItem itemLabel="Sin Información" itemValue="3" />
+							<p:ajax event="change" process="@this"
+								update=":form:pnlResultado"
+								listener="#{generarInformeViabilidadSnapBean.actualizarTotalViabilidad()}" />
+						</p:selectOneRadio>
+					</p:outputPanel>
+				</p:panelGrid>
+
+			</p:dataGrid>
+		</p:dataGrid>
+	</p:panelGrid>
+
+	<p:dataGrid var="cabecera" id="dtgCabecera"
+		value="#{generarInformeViabilidadSnapBean.preguntasInspeccion}"
+		columns="1" layout="grid">
+		<p:dataGrid var="pregunta" value="#{cabecera.listaPreguntas}"
+			columns="1" layout="grid" id="pnlCabeceras"
+			styleClass="pnlSubHeaders">
+			<f:facet name="header">
+				<h:outputText value="#{cabecera.descripcion}" />
+				<br />
+				<br />
+				<h:outputText value="#{cabecera.subDescripcion}"
+					styleClass="textSecundario" />
+			</f:facet>
+
+			<p:panelGrid columns="2" styleClass="panel_data w100"
+				id="pnlContentPregunta" columnClasses="header w50, null">
+				<p:outputLabel for="txtPregunta" value="#{pregunta.descripcion}"
+					style="color: white" rendered="#{pregunta.tipo eq 2}" />
+				<p:outputLabel for="rdbPregunta" value="#{pregunta.descripcion}"
+					style="color: white" rendered="#{pregunta.tipo eq 1}" />
+
+				<p:outputPanel styleClass="alRight">
+					<p:inputTextarea id="txtPregunta" maxlength="6000" rows="5"
+						rendered="#{pregunta.tipo eq 2}" required="true"
+						style="resize: none;" autoResize="false"
+						value="#{pregunta.respuesta.respText}"
+						placeholder="#{pregunta.descripcion}"
+						disabled="#{generarInformeViabilidadSnapBean.camposSoloLectura}">
+						<p:ajax process="@this" />
+					</p:inputTextarea>
+					<p:selectOneRadio value="#{pregunta.respuesta.respBoolean}"
+						required="true" rendered="#{pregunta.tipo eq 1}" id="rdbPregunta"
+						disabled="#{generarInformeViabilidadSnapBean.camposSoloLectura}"
+						styleClass="cssRadioDisabled">
+						<f:selectItem itemLabel="Si" itemValue="true" />
+						<f:selectItem itemLabel="No" itemValue="false" />
+						<p:ajax event="change" process="@this" update=":form:pnlResultado"
+							listener="#{generarInformeViabilidadSnapBean.actualizarTotalViabilidad()}" />
+					</p:selectOneRadio>
+				</p:outputPanel>
+			</p:panelGrid>
+
+		</p:dataGrid>
+	</p:dataGrid>
+
+	<p:panelGrid id="pnlResultado" columns="3" styleClass="panel_data w100"
+		columnClasses="header w25, alCenterImportant w25, alCenterImportant">
+		<h:outputText value="RESULTADO" />
+		<p:inputText required="true"
+			value="#{generarInformeViabilidadSnapBean.totalCalificacion}"
+			style="width: 50% !important;" styleClass="alCenter" disabled="true" />
+		<h:outputText
+			value="#{generarInformeViabilidadSnapBean.tipoPronunciamiento}"
+			styleClass="alCenter bold" />
+	</p:panelGrid>
+
+</p:panelGrid>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="3. CONCLUSIONES" />
+	</f:facet>
+	<p:inputTextarea id="txtConclusiones" maxlength="8000" rows="5"
+		required="true" requiredMessage="El campo 'Conclusiones' es requerido"
+		style="resize: none;" autoResize="false"
+		placeholder="#{generarInformeViabilidadSnapBean.textoAyudaConclusiones}"
+		value="#{generarInformeViabilidadSnapBean.informeInspeccion.conclusiones}"
+		disabled="#{generarInformeViabilidadSnapBean.camposSoloLectura}">
+		<p:ajax process="@this" />
+	</p:inputTextarea>
+</p:panelGrid>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="4. RECOMENDACIONES" />
+	</f:facet>
+	<p:inputTextarea id="txtRecomendaciones" maxlength="8000" rows="5"
+		required="true"
+		requiredMessage="El campo 'Recomendaciones' es requerido"
+		style="resize: none;" autoResize="false"
+		placeholder="Detallar recomendaciones asociadas a los criterios establecidos en el análisis de viabilidad ambiental para pronunciamiento favorable del proyecto, obra o actividad en el área protegida, las mismas que serán consideradas como obligaciones y/o condicionantes de carácter vinculante a la revisión del proceso de regularización ambiental y dentro de la autorización ambiental respectiva"
+		value="#{generarInformeViabilidadSnapBean.informeInspeccion.recomendaciones}"
+		disabled="#{generarInformeViabilidadSnapBean.camposSoloLectura}">
+		<p:ajax process="@this" />
+	</p:inputTextarea>
+</p:panelGrid>
+
+</html>

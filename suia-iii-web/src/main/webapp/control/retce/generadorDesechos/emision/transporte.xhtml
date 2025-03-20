@@ -1,0 +1,473 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+<script type="text/javascript">
+	function deshabilitarBotonesManifiesto() {
+		$('.btnsEditarManifiesto').prop('disabled', true);
+		$('.btnsEditarManifiesto').addClass('ui-state-disabled');
+	};
+
+	function deshabilitarBotonesManifiestoGestor() {
+		$('.btnsEditarManifiestoGestor').prop('disabled', true);
+		$('.btnsEditarManifiestoGestor').addClass('ui-state-disabled');
+	};
+	</script>
+
+<style type="text/css">
+.headerSinBorde .ui-widget-header {
+	border: none !important;
+}
+
+.cssFile {
+	width: 10%;
+	float: right;
+	margin-bottom: -2%
+}
+
+.cssFile .ui-widget-header {
+	border: none !important;
+}
+
+</style>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="TRANSPORTE FUERA DE LA INSTALACIÓN" />
+	</f:facet>
+
+	<p:outputLabel
+		value="Estimado usuario debe ingresar información en una o en las dos formas de transporte."
+		styleClass="bold" escape="false" />
+
+</p:panelGrid>
+
+<h:panelGroup id="pnlMediosPropios">
+	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<h:outputText value="MEDIOS PROPIOS" />
+			<p:commandButton value="Adicionar" id="btnAgregarMedioPropio"
+				rendered="#{!transporteDesechosBean.panelMedioPropioVisible}"
+				action="#{transporteDesechosBean.nuevoMedioPropio()}"
+				styleClass="button-small-text toRight field_mrg" process="@this"
+				update="pnlMediosPropios" icon="ui-icon-plusthick" />
+			<p:commandButton value="Eliminar"
+				rendered="#{transporteDesechosBean.panelMedioPropioVisible}"
+				actionListener="#{transporteDesechosBean.cancelarMedioPropio()}"
+				styleClass="button-small-text toRight field_mrg" process="@this"
+				update="pnlMediosPropios infoMediosPropios btnAgregarMedioPropio"
+				icon="ui-icon-trash" />
+		</f:facet>
+
+		<h:panelGroup id="infoMediosPropios"
+			rendered="#{transporteDesechosBean.panelMedioPropioVisible}">
+
+			<h:panelGrid columns="2" styleClass="panel_data w100"
+				id="datosTipoAutorizacionContainer" columnClasses="header w25, null"
+				rowClasses="null, alt">
+				<p:outputLabel value="Tipo permiso" for="tipoResolucion"
+					styleClass="ui-label-form" />
+				<p:selectOneMenu
+					value="#{transporteDesechosBean.transporteMediosPropios.tipoResolucion}"
+					id="tipoResolucion" styleClass="w25" required="true"
+					converter="selectItemConverter">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="" noSelectionOption="true" />
+					<f:selectItems itemLabel="#{tipo.descripcion}" itemValue="#{tipo}"
+						var="tipo" value="#{transporteDesechosBean.listaTipoResolucion}" />
+					<p:ajax process="@this" update="pnlTipoResolucion" />
+				</p:selectOneMenu>
+
+				<p:outputLabel value="N° resolución" styleClass="ui-label-form" />
+				<h:panelGroup id="pnlTipoResolucion">
+					<p:inputText id="resolucionEspecifica"
+						value="#{transporteDesechosBean.transporteMediosPropios.nroResolucion}"
+						style="width: 50%;" maxlength="30">
+					</p:inputText>
+				</h:panelGroup>
+
+
+				<p:outputLabel value="Anexo" for="anexoMediosPropios"
+					styleClass="ui-label-form" />
+				<p:outputPanel id="pnlDocAutorizacionTransporte">
+					<p:fileUpload id="anexoMediosPropios"
+						fileUploadListener="#{transporteDesechosBean.uploadFileAutorizacion}"
+						multiple="false" sizeLimit="20971520" allowTypes="/(\.|\/)(pdf)$/"
+						label="Seleccionar (pdf 20Mb)" uploadLabel="Subir"
+						invalidFileMessage="Tipo de archivo no válido"
+						invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+						cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+						auto="true" required="true"
+						update="pnlDocAutorizacionTransporte downloadAnexoMediosPropios" />
+					<p:commandButton id="downloadAnexoMediosPropios"
+						icon="ui-icon-arrowthick-1-s"
+						styleClass="button-small primary toLeft" title="Ver" ajax="false"
+						immediate="true"
+						rendered="#{transporteDesechosBean.documentoAutorizacion.nombre ne null}">
+						<p:fileDownload
+							value="#{transporteDesechosBean.descargar(transporteDesechosBean.documentoAutorizacion)}" />
+					</p:commandButton>
+				</p:outputPanel>
+			</h:panelGrid>
+			<br />
+
+			<ui:include
+				src="/control/retce/generadorDesechos/emision/formDetalleManifiestosMediosPropios.xhtml" />
+
+			<p:dataTable id="tblManifiestosMediosPropios"
+				value="#{transporteDesechosBean.listaManifiestos}" var="item"
+				emptyMessage="#{labels['common.table.empty']}"
+				sortBy="#{item.numeroManifiesto}">
+				<f:facet name="header">
+					<p:commandButton value="Añadir" update=":form:datosManifiesto"
+						oncomplete="PF('adicionarManifiesto').toggle()"
+						onclick="deshabilitarBotonesManifiesto()"
+						icon="ui-icon-plusthick"
+						styleClass="button-small-text toRight field_mrg btnsEditarManifiesto" process="@this"
+						style="float:right;" />
+					<h:outputText value="Detalle Manifiestos" />
+				</f:facet>
+
+				<p:column headerText="N° de manifiesto (de la sección generador)">
+					<h:outputText value="#{item.numeroManifiesto}" />
+				</p:column>
+				<p:column
+					headerText="Fecha de embarque (de la sección transportista)">
+					<h:outputText value="#{item.fechaEmbarque}" />
+				</p:column>
+				<ui:remove>
+				<p:column headerText="Manifiesto único" styleClass="w15 alCenter">
+					<p:commandButton icon="ui-icon-arrowthick-1-s"
+						styleClass="button-small primary" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{transporteDesechosBean.descargar(item.manifiestoUnico)}" />
+					</p:commandButton>
+				</p:column>
+				</ui:remove>
+				<p:column headerText="Desechos" styleClass="w10 alCenter">
+					<p:commandButton icon="ui-icon-search" title="ver" process="@this"
+						update=":form:frmDialogVerDesechosManiesto:verDesechosManifiesto"
+						styleClass="button-small secondary btnsEditarManifiesto"
+						oncomplete="PF('verDesechosManifiesto').show()"
+						actionListener="#{transporteDesechosBean.verDesechosManifiesto(item)}" />
+				</p:column>
+				<p:column styleClass="w70px alCenter">
+					<p:commandButton icon="ui-icon-pencil" title="Editar"
+						process="@this" update=":form:datosManifiesto"
+						styleClass="primary btnsEditarManifiesto"
+						oncomplete="PF('adicionarManifiesto').toggle()"
+						onclick="deshabilitarBotonesManifiesto()"
+						actionListener="#{transporteDesechosBean.editarManifiesto(item)}" />
+					<p:commandButton icon="ui-icon-trash" title="Eliminar"
+						process="@this" styleClass="primary"
+						actionListener="#{transporteDesechosBean.eliminarManifiesto(item)}"
+						update="tblManifiestosMediosPropios :form:tblResumenMediosPropios" />
+				</p:column>
+			</p:dataTable>
+			<br />
+			<br />
+			<p:dataTable id="tblResumenMediosPropios" styleClass="headerSinBorde"
+				value="#{transporteDesechosBean.resumenManifiestoMedioPropio}"
+				var="item" emptyMessage="#{labels['common.table.empty']}">
+				<f:facet name="header">
+					<h:outputText value="Sumatoria" />
+				</f:facet>
+
+				<p:column
+					headerText="Nombre del residuo o desecho peligroso o especial"
+					styleClass="w50">
+					<h:outputText value="#{item.desechoPeligroso.descripcion}" />
+				</p:column>
+				<p:column headerText="Código">
+					<h:outputText value="#{item.desechoPeligroso.clave}" />
+				</p:column>
+				<p:column headerText="Total (t)" styleClass="alCenter">
+					<h:outputText value="#{item.totalDesecho}">
+						<f:convertNumber pattern="#0.00" />
+					</h:outputText>
+				</p:column>
+			</p:dataTable>
+			<br />
+			<br />
+			<p:outputLabel
+			value="Adjuntar los manifiestos únicos correspondientes a transporte con medios propios."
+			styleClass="bold" escape="false" />
+			<p:dataTable id="tblDocManifiestoMP" styleClass="noHeader"
+				value="#{transporteDesechosBean.listaDocsManifiestosMediosPropios}"
+				var="documento" emptyMessage="#{labels['common.table.empty']}">
+				<f:facet name="header">
+					<h:outputText value="Manifiestos Únicos" />
+					<p:fileUpload
+						fileUploadListener="#{transporteDesechosBean.uploadFileManifiestoUnico}"
+						multiple="false" sizeLimit="20971520" styleClass="cssFile"
+						allowTypes="/(\.|\/)(pdf|zip|rar)$/" label="Añadir"
+						uploadLabel="Subir" invalidFileMessage="Tipo de archivo no válido"
+						invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+						cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+						auto="true" required="true" update="tblDocManifiestoMP">
+						<f:attribute name="tipoDocumento" value="1" />
+					</p:fileUpload>
+				</f:facet>
+				<p:column headerText="Documento">
+					<h:outputText value="#{documento.nombre}" />
+				</p:column>
+				<p:column headerText="Acciones" styleClass="w15 alCenter"
+					style="text-align:center !important">
+					<p:commandButton icon="ui-icon-arrowthick-1-s" styleClass="primary"
+						title="Ver" ajax="false" immediate="true">
+						<p:fileDownload
+							value="#{transporteDesechosBean.descargar(documento)}" />
+					</p:commandButton>
+					<p:commandButton icon="ui-icon-trash" title="Eliminar"
+						process="@this" styleClass="primary"
+						actionListener="#{transporteDesechosBean.eliminarDocumento(1, documento)}"
+						update="tblDocManifiestoMP" />
+				</p:column>
+			</p:dataTable>
+			<br />
+			<br />
+			<h:panelGroup id="paso3ObservacionesMediosPropios">
+				<observaciones:tablaObservaciones idComponent="obsMediosPropios"
+					seccion="GeneradorRETCE_Transporte Medios propios"
+					componenteActualizarEliminar="paso3ObservacionesMediosPropios"
+					aparace="true" mostrarSiVacio="false"
+					idClase="#{reporteGeneradorRGDController.generadorDesechosRetce.id}"
+					nombreClase="#{reporteGeneradorRGDController.className}"
+					soloLectura="true" />
+			</h:panelGroup>
+
+		</h:panelGroup>
+	</p:panelGrid>
+</h:panelGroup>
+
+<br />
+<br />
+
+<h:panelGroup id="pnlGestores">
+	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<h:outputText value="GESTOR AMBIENTAL" />
+			<p:commandButton value="Adicionar"
+				rendered="#{!transporteDesechosBean.panelGestorVisible}"
+				action="#{transporteDesechosBean.nuevoGestorAmbiental()}"
+				styleClass="button-small-text toRight field_mrg" process="@this"
+				update="pnlGestores" icon="ui-icon-plusthick" />
+			<p:commandButton value="Eliminar"
+				rendered="#{transporteDesechosBean.panelGestorVisible}"
+				actionListener="#{transporteDesechosBean.cancelarGestores()}"
+				styleClass="button-small-text toRight field_mrg" process="@this"
+				update="pnlGestores " icon="ui-icon-trash" />
+		</f:facet>
+
+		<h:panelGroup rendered="#{transporteDesechosBean.panelGestorVisible}">
+			<ui:include
+				src="/control/retce/generadorDesechos/emision/formTransporteEmpresa.xhtml" />
+
+			<p:dataTable id="tblEmpresasGestoras"
+				value="#{transporteDesechosBean.listaEmpresasGestoras}" var="item"
+				emptyMessage="#{labels['common.table.empty']}">
+				<f:facet name="header">
+					<p:commandButton value="Añadir" update=":form:datosManifiesto"
+						oncomplete="PF('adicionarEmpresaGestora').toggle()"
+						icon="ui-icon-plusthick"
+						styleClass="button-small-text toRight field_mrg" process="@this"
+						style="float:right;" />
+					<h:outputText value="Empresas Gestoras" />
+				</f:facet>
+
+				<p:column headerText="Empresa gestora" styleClass="w50">
+					<h:outputText
+						value="#{(item.empresaGestora.prestadorServiciosDesechos.nombre eq 'OTRA') ? item.otraEmpresa : item.empresaGestora.prestadorServiciosDesechos}" />
+				</p:column>
+				<p:column headerText="Número de autorización">
+					<h:outputText value="#{item.empresaGestora.prestadorServiciosDesechos.nombre ne 'OTRA' ? item.empresaGestora.codigoPermisoAmbiental : 'N/A'}" />
+				</p:column>
+				<p:column headerText="Fecha de autorización">
+					<h:outputText value="#{item.empresaGestora.prestadorServiciosDesechos.nombre ne 'OTRA' ? item.empresaGestora.fechaPermisoAmbiental : 'N/A'}" />
+				</p:column>
+				<p:column styleClass="w70px alCenter">
+					<p:commandButton icon="ui-icon-trash" title="Eliminar"
+						process="@this" styleClass="primary"
+						actionListener="#{transporteDesechosBean.eliminarEmpresaGestora(item)}"
+						update="tblEmpresasGestoras" />
+				</p:column>
+			</p:dataTable>
+			<br />
+			<br />
+			<ui:include
+				src="/control/retce/generadorDesechos/emision/formDetalleManifiestosGestor.xhtml" />
+
+			<p:dataTable id="tblManifiestosGestores" 
+				value="#{transporteDesechosBean.listaManifiestosGestores}" var="item"
+				emptyMessage="#{labels['common.table.empty']}"
+				sortBy="#{item.numeroManifiesto}">
+				<f:facet name="header">
+					<p:commandButton value="Añadir"
+						update=":form:datosManifiestoGestor"
+						oncomplete="PF('adicionarManifiestoGestor').toggle()"
+						onclick="deshabilitarBotonesManifiestoGestor()"
+						icon="ui-icon-plusthick"
+						styleClass="button-small-text toRight field_mrg btnsEditarManifiestoGestor" process="@this"
+						style="float:right;" />
+					<h:outputText value="Detalle Manifiestos" />
+				</f:facet>
+
+				<p:column headerText="N° de manifiesto (de la sección generador)">
+					<h:outputText value="#{item.numeroManifiesto}" />
+				</p:column>
+				<p:column
+					headerText="Fecha de embarque (de la sección transportista)">
+					<h:outputText value="#{item.fechaEmbarque}" />
+				</p:column>
+				<ui:remove>
+				<p:column headerText="Manifiesto único" styleClass="w15 alCenter">
+					<p:commandButton icon="ui-icon-arrowthick-1-s"
+						styleClass="button-small primary" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{transporteDesechosBean.descargar(item.manifiestoUnico)}" />
+					</p:commandButton>
+				</p:column>
+				</ui:remove>
+				<p:column headerText="Desechos" styleClass="w10 alCenter">
+					<p:commandButton icon="ui-icon-search" title="ver" process="@this"
+						update=":form:frmDialogVerDesechosManiesto:verDesechosManifiesto"
+						styleClass="button-small secondary btnsEditarManifiestoGestor"
+						oncomplete="PF('verDesechosManifiesto').show()"
+						actionListener="#{transporteDesechosBean.verDesechosManifiesto(item)}" />
+				</p:column>
+				<p:column styleClass="w70px alCenter">
+					<p:commandButton icon="ui-icon-pencil" title="Editar"
+						process="@this" update=":form:datosManifiestoGestor"
+						styleClass="primary btnsEditarManifiestoGestor"
+						oncomplete="PF('adicionarManifiestoGestor').toggle()"
+						onclick="deshabilitarBotonesManifiestoGestor()"
+						actionListener="#{transporteDesechosBean.editarManifiestoGestor(item)}" />
+					<p:commandButton icon="ui-icon-trash" title="Eliminar"
+						process="@this" styleClass="primary"
+						actionListener="#{transporteDesechosBean.eliminarManifiestoGestor(item)}"
+						update="tblManifiestosGestores :form:tblResumenGestores" />
+				</p:column>
+			</p:dataTable>
+
+			<br />
+			<br />
+			<p:dataTable id="tblResumenGestores" styleClass="headerSinBorde"
+				value="#{transporteDesechosBean.resumenManifiestoGestores}"
+				var="item" emptyMessage="#{labels['common.table.empty']}">
+				<f:facet name="header">
+					<h:outputText value="Sumatoria" />
+				</f:facet>
+
+				<p:column
+					headerText="Nombre del residuo o desecho peligroso o especial"
+					styleClass="w50">
+					<h:outputText value="#{item.desechoPeligroso.descripcion}" />
+				</p:column>
+				<p:column headerText="Código">
+					<h:outputText value="#{item.desechoPeligroso.clave}" />
+				</p:column>
+				<p:column headerText="Total (t)" styleClass="alCenter">
+					<h:outputText value="#{item.totalDesecho}">
+						<f:convertNumber pattern="#0.00" />
+					</h:outputText>
+				</p:column>
+			</p:dataTable>
+
+			<br />
+			<br />
+			<p:outputLabel
+			value="Adjuntar los manifiestos únicos correspondientes a transporte con gestor ambiental."
+			styleClass="bold" escape="false" />
+			<p:dataTable id="tblDocManifiestoGestor" styleClass="noHeader"
+				value="#{transporteDesechosBean.listaDocsManifiestosGestor}"
+				var="documento" emptyMessage="#{labels['common.table.empty']}">
+				<f:facet name="header">
+					<h:outputText value="Manifiestos Únicos" />
+					<p:fileUpload
+						fileUploadListener="#{transporteDesechosBean.uploadFileManifiestoUnico}"
+						multiple="false" sizeLimit="20971520" styleClass="cssFile"
+						allowTypes="/(\.|\/)(pdf|zip|rar)$/" label="Añadir"
+						uploadLabel="Subir" invalidFileMessage="Tipo de archivo no válido"
+						invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+						cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+						auto="true" required="true" update="tblDocManifiestoGestor">
+						<f:attribute name="tipoDocumento" value="2" />
+					</p:fileUpload>
+				</f:facet>
+				<p:column headerText="Documento">
+					<h:outputText value="#{documento.nombre}" />
+				</p:column>
+				<p:column headerText="Acciones" styleClass="w15 alCenter"
+					style="text-align:center !important">
+					<p:commandButton icon="ui-icon-arrowthick-1-s" styleClass="primary"
+						title="Ver" ajax="false" immediate="true">
+						<p:fileDownload
+							value="#{transporteDesechosBean.descargar(documento)}" />
+					</p:commandButton>
+					<p:commandButton icon="ui-icon-trash" title="Eliminar"
+						process="@this" styleClass="primary"
+						actionListener="#{transporteDesechosBean.eliminarDocumento(2, documento)}"
+						update="tblDocManifiestoGestor" />
+				</p:column>
+			</p:dataTable>
+
+			<br />
+			<br />
+			<h:panelGroup id="paso3ObservacionesGestor">
+				<observaciones:tablaObservaciones idComponent="obsGestor"
+					seccion="GeneradorRETCE_Transporte Gestor ambiental"
+					componenteActualizarEliminar="paso3ObservacionesGestor"
+					aparace="true" mostrarSiVacio="false"
+					idClase="#{reporteGeneradorRGDController.generadorDesechosRetce.id}"
+					nombreClase="#{reporteGeneradorRGDController.className}"
+					soloLectura="true" />
+			</h:panelGroup>
+		</h:panelGroup>
+	</p:panelGrid>
+
+</h:panelGroup>
+
+<h:form id="frmDialogVerDesechosManiesto">
+	<p:dialog id="verDesechosManifiesto" widgetVar="verDesechosManifiesto"
+		modal="true" resizable="false" width="800"
+		header="Desechos por manifiesto">
+			<p:dataTable id="tblVerDesechosManifiesto"
+				value="#{transporteDesechosBean.listaDetallesManifiestosDesechos}"
+				var="desecho" emptyMessage="#{labels['common.table.empty']}">
+				<p:column
+					headerText="Nombre del residuo o desecho peligroso o especial">
+					<h:outputText value="#{desecho.desechoPeligroso.descripcion}" />
+				</p:column>
+				<p:column headerText="Código">
+					<h:outputText value="#{desecho.desechoPeligroso.clave}" />
+				</p:column>
+				<p:column headerText="Unidad">
+					<h:outputText value="#{desecho.tipoUnidad.descripcion}" />
+				</p:column>
+				<p:column headerText="Cantidad" styleClass="alCenter">
+					<h:outputText value="#{desecho.cantidad}" />
+				</p:column>
+				<p:column rendered="#{transporteDesechosBean.existeReporteUnidades}"
+					styleClass="alCenter"
+					headerText="Reporte en unidades para los desechos ES-04 y ES-06 (únicamente para registros de generador por REP)">
+					<h:outputText
+						value="#{desecho.cantidadEnUnidades ne null ? desecho.cantidadEnUnidades : 'N/A'}" />
+				</p:column>
+			</p:dataTable>
+
+			<br />
+			<br />
+	</p:dialog>
+</h:form>
+
+</html>

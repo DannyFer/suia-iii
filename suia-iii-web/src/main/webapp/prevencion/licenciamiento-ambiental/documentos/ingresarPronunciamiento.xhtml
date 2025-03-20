@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="context-extra">
+
+    </ui:define>
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{ingresarPronunciamientoLABean.validarTareaBpm()}"/>
+        <h:form>
+
+            <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                <f:facet name="header">
+                    <mae:panelGridHeaderHelp value="Ingresar Pronunciamiento" render="false"
+                                             conector="generalHelp"
+                                             image="#{request.contextPath}/resources/images/help-how.png"
+                                             help="#{helps['no.help.yet']}"/>
+                </f:facet>
+
+                <h:panelGrid cellpadding="2" columns="2">
+
+                    <p:outputLabel value="Descargar oficio de pronunciamiento"/>
+
+                    <p:commandButton ajax="false" icon="ui-icon-arrowthick-1-s"
+                                     styleClass="oculto primary">
+                        <p:fileDownload value="#{ingresarPronunciamientoLABean.fileStreamOficio()}"/>
+                    </p:commandButton>
+
+                </h:panelGrid>
+
+                <h:panelGrid cellpadding="2" styleClass="w50">
+
+                    <h:panelGrid id="labelPronunciamiento">
+
+                        <p:outputLabel rendered="#{ingresarPronunciamientoLABean.pronunciamiento != null}"
+                                       value="#{ingresarPronunciamientoLABean.pronunciamiento.name}"/>
+
+                        <p:outputLabel rendered="#{ingresarPronunciamientoLABean.pronunciamiento == null}"
+                                       value="Pronunciamiento(.pdf)"/>
+
+                    </h:panelGrid>
+
+                    <p:fileUpload id="archPronunciamiento" width="100%" required="true"
+                                  value="#{ingresarPronunciamientoLABean.pronunciamiento}"
+                                  sizeLimit="3145728" allowTypes="/(\.|\/)(pdf)$/"
+                                  fileUploadListener="#{ingresarPronunciamientoLABean.adjuntarPronunciamiento}"
+                                  label="Seleccionar" cancelLabel="Cancelar" uploadLabel="Adjuntar" auto="true"
+                                  update=":#{p:component('labelPronunciamiento')}"
+                                  invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo pdf."
+                                  invalidSizeMessage="Debe adjuntar un archivo no mayor de 3 Mb."/>
+
+
+                </h:panelGrid>
+
+                <h:panelGrid columns="2" style="margin-bottom:10px"
+                             cellpadding="5">
+                    <p:outputLabel for="radioButtomPronunciamiento"
+                                   value="¿Fue favorable el pronunciamiento?"/>
+                    <p:selectOneRadio id="radioButtomPronunciamiento" required="true"
+                                      value="#{ingresarPronunciamientoLABean.pronunciamientoFavorable}">
+                        <f:selectItem itemLabel="Sí" itemValue="true"/>
+                        <f:selectItem itemLabel="No" itemValue="false"/>
+                        <p:ajax process="@this"/>
+                    </p:selectOneRadio>
+                </h:panelGrid>
+
+            </p:panelGrid>
+
+            <div class="buttons main">
+                <p:commandButton value="Enviar"
+                                 action="#{ingresarPronunciamientoLAController.realizarTarea}"
+                                 title="Enviar datos" icon="ui-icon-check">
+                </p:commandButton>
+            </div>
+
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

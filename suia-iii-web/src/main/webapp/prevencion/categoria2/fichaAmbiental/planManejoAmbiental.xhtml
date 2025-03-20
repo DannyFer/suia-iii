@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+	<ui:define name="content">
+        <f:event type="preRenderView" listener="#{descripcionProyectoPmaBean.validarTareaBpm()}"/>
+		<ui:include src="contenido/menu.xhtml" />
+		<div class="content">
+			<h:form id="frmPlan">
+				<p:growl id="msgs" globalOnly="true" />
+				<p:panel id="parte7" header="9. PLAN DE MANEJO AMBIENTAL (PMA)">
+					<p:dataTable value="#{detallePmaBean.listaDetallePlan}" var="plan">
+						<p:column headerText="Descripción">
+							<p:outputLabel
+								value="#{plan.planSector.tipoPlanManejoAmbiental.tipo}" />
+						</p:column>
+						<p:column headerText="Fecha inicio">
+							<p:calendar value="#{plan.fechaInicio}" mask="99/99/9999" pattern="dd/MM/yyyy" required="true"
+								requiredMessage="El campo Fecha inicio (#{plan.planSector.tipoPlanManejoAmbiental.tipo}) es requerido"/>
+						</p:column>
+						<p:column headerText="Fecha fin">
+							<p:calendar value="#{plan.fechaFin}" mask="99/99/9999" pattern="dd/MM/yyyy" required="true"
+								requiredMessage="El campo Fecha fin (#{plan.planSector.tipoPlanManejoAmbiental.tipo}) es requerido"/>
+						</p:column>
+						<p:column headerText="Descargar">
+							<center>
+								<p:commandButton value="Descargar" ajax="false"
+									id="btnDescargar" immediate="true"
+									onclick="PrimeFaces.monitorDownload(start, stop);"
+									icon="ui-icon-arrowthick-1-s" styleClass="oculto primary">
+									<p:fileDownload
+										value="#{detallePmaBean.descargarPlan(plan.planSector)}" />
+								</p:commandButton>
+							</center>
+						</p:column>
+					</p:dataTable>
+					<f:facet name="footer">
+						<t:div styleClass="buttons main">
+							<p:commandButton value="Guardar"
+								action="#{detallePmaBean.guardarDetalleFichaPlan}"
+								icon="ui-icon-disk" />
+						</t:div>
+					</f:facet>
+				</p:panel>
+			</h:form>
+
+		</div>
+
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+      xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+      xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition
+        template="/control/aprobacionRequisitosTecnicos/templates/verArt.xhtml">
+    <ui:define name="content-art">
+        <h:form id="frmAlmacen">
+
+            <p:panel id="parte"
+                     header="Almacenamiento Temporal de desechos peligrosos">
+                <p:panel style="overflow: auto">
+                    <f:facet name="header">
+                        <h:outputText value="Almacenes"/>
+                    </f:facet>
+                    <p:dataTable id="tblAlmacen" style="width: 1500px"
+                                 value="#{almacenamientoTemporalControllers.almacenamientoTemporalBean.almacenes}"
+                                 var="almacen" emptyMessage="#{labels['common.table.empty']}">
+                        <p:columnGroup type="header">
+                            <p:row>
+                                <p:column width="80" rowspan="2" headerText="Identificación"/>
+                                <p:column width="300" colspan="4" headerText="Carácterísticas"/>
+                                <p:column width="130" colspan="3"
+                                          headerText="Medidas del almacén"/>
+                                <p:column width="150" headerText="Capacidad total por almacén"/>
+                                <p:column width="170" colspan="2"
+                                          headerText="Descripción del Almacenamiento"/>
+                                <p:column width="140" rowspan="2"
+                                          headerText="Medidas de seguridad o indicaciones adicionales"/>
+                                <p:column width="60" rowspan="2"/>
+                            </p:row>
+                            <p:row>
+                                <p:column width="60" headerText="Local"/>
+                                <p:column width="60" headerText="Material"/>
+                                <p:column width="60" headerText="Ventilación"/>
+                                <p:column width="60" headerText="Iluminación"/>
+                                <p:column width="60" headerText="Largo"/>
+                                <p:column width="60" headerText="Ancho"/>
+                                <p:column width="60" headerText="Altura"/>
+                                <p:column width="150" headerText="Cantidad (metros cúbicos)"/>
+                                <p:column
+                                        headerText="Capacidad de Fosas de retención o muros de contención (metros cúbicos)"/>
+                                <p:column
+                                        headerText="Breve descripción de sistema de extinción de incendios"/>
+                            </p:row>
+                        </p:columnGroup>
+                        <p:column width="150">
+                            <h:outputLabel value="#{almacen.identificacion}"/>
+                        </p:column>
+                        <p:column width="100">
+                            <h:outputLabel value="#{almacen.tipoLocal.nombre}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputLabel value="#{almacen.tipoMaterialConstruccion.nombre}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputLabel value="#{almacen.tipoVentilacion}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputLabel value="#{almacen.tipoIluminacion.nombre}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputLabel value="#{almacen.largo}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputLabel value="#{almacen.ancho}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputLabel value="#{almacen.altura}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputLabel value="#{almacen.cantidad}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputLabel value="#{almacen.capacidadFosas}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputLabel value="#{almacen.extincionIncendio}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputLabel value="#{almacen.medidadSeguridad}"/>
+                        </p:column>
+                        <p:column styleClass="w40px alCenter">
+                            <p:commandButton icon="ui-icon-search"
+                                             action="#{almacenamientoTemporalControllers.seleccionarAlmacenVer(almacen)}"
+                                             title="Ver" styleClass="button-small primary"
+                                             oncomplete="PF('dlgAlmacen').show();"
+                                             update=":#{p:component('pnlAlmacen')}"/>
+
+                        </p:column>
+
+                    </p:dataTable>
+                </p:panel>
+            </p:panel>
+
+            <div class="buttons main">
+                <p:commandButton value="Atrás" immediate="true" process="@this"
+                                 action="/control/aprobacionRequisitosTecnicos/recepcionDesechosPeligrososVer.jsf?faces-redirect=true"
+                                 icon="ui-icon-arrowthick-1-w"/>
+                <p:commandButton value="Siguiente" immediate="true" process="@this"
+                                 action="#{almacenamientoTemporalControllers.recuperarPageSiguiente(true)}"
+                                 rendered="#{almacenamientoTemporalControllers.isVisibleOpcionNavegarSiguienteEnMenuModoVer(true)}"
+                                 icon="ui-icon-arrowthick-1-e"/>
+            </div>
+        </h:form>
+        <p:dialog id="pnlAlmacen" widgetVar="dlgAlmacen" modal="true"
+                  height="500" resizable="false" draggable="false">
+            <h:form>
+                <p:panelGrid columns="2" layout="grid" styleClass="w100"
+                             columnClasses="w50, field_mrg w50">
+                    <f:facet name="header">
+                        <h:outputText value="Detalles del Almacen"/>
+                    </f:facet>
+
+                    <h:panelGrid styleClass="panel_data w100" columns="2"
+                                 columnClasses="header, null" rowClasses="null, alt">
+                        <h:outputText value="Identificación"/>
+                        <h:outputText
+                                value="#{almacenamientoTemporalControllers.almacenamientoTemporalBean.almacenVer.identificacion}"/>
+                        <h:outputText value="Local"/>
+                        <h:outputText
+                                value="#{almacenamientoTemporalControllers.almacenamientoTemporalBean.almacenVer.tipoLocal.nombre}"/>
+                        <h:outputText value="Material"/>
+                        <h:outputText
+                                value="#{almacenamientoTemporalControllers.almacenamientoTemporalBean.almacenVer.tipoMaterialConstruccion.nombre}"/>
+                    </h:panelGrid>
+                    <h:panelGrid styleClass="panel_data mw50" columns="2"
+                                 columnClasses="header, null" rowClasses="null, alt">
+                        <h:outputText value="Ventilación"/>
+                        <h:outputText
+                                value="#{almacenamientoTemporalControllers.almacenamientoTemporalBean.almacenVer.tipoVentilacion}"/>
+                        <h:outputText value="Iluminación"/>
+
+                        <h:outputText
+                                value="#{almacenamientoTemporalControllers.almacenamientoTemporalBean.almacenVer.tipoIluminacion.nombre}"/>
+                    </h:panelGrid>
+                </p:panelGrid>
+
+                <p:panelGrid columns="2" layout="grid" styleClass="w100"
+                             columnClasses="w50, field_mrg w50">
+                    <f:facet name="header">
+                        <h:outputText value="Carácteristicas"/>
+                    </f:facet>
+                    <h:panelGrid styleClass="panel_data w100" columns="2"
+                                 columnClasses="header, null" rowClasses="null, alt">
+                        <h:outputText value="Largo"/>
+                        <h:outputText
+                                value="#{almacenamientoTemporalControllers.almacenamientoTemporalBean.almacenVer.largo}"/>
+                        <h:outputText value="Ancho"/>
+                        <h:outputText
+                                value="#{almacenamientoTemporalControllers.almacenamientoTemporalBean.almacenVer.ancho}"/>
+                    </h:panelGrid>
+                    <h:panelGrid styleClass="panel_data w100" columns="2"
+                                 columnClasses="header, null" rowClasses="null, alt">
+                        <h:outputText value="Altura"/>
+                        <h:outputText
+                                value="#{almacenamientoTemporalControllers.almacenamientoTemporalBean.almacenVer.altura}"/>
+                        <h:outputText value="Cantidad"/>
+                        <h:outputText
+                                value="#{almacenamientoTemporalControllers.almacenamientoTemporalBean.almacenVer.cantidad}"/>
+                    </h:panelGrid>
+                </p:panelGrid>
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                             columnClasses="w50, field_mrg w50">
+                    <f:facet name="header">
+                        <h:outputText value="Descripción del Almacen"/>
+                    </f:facet>
+                    <h:panelGrid styleClass="panel_data w100" columns="2"
+                                 columnClasses="header, null" rowClasses="null, alt">
+                        <h:outputText
+                                value="Capacidad de Fosas de retención o muros de contención"/>
+                        <h:outputText
+                                value="#{almacenamientoTemporalControllers.almacenamientoTemporalBean.almacenVer.capacidadFosas}"/>
+                        <h:outputText
+                                value="Breve descripción de sistema de extinción de incendios"/>
+                        <h:outputText
+                                value="#{almacenamientoTemporalControllers.almacenamientoTemporalBean.almacenVer.extincionIncendio}"/>
+                        <h:outputText value="Medidas de Seguridad Adicionales"/>
+                        <h:outputText
+                                value="#{almacenamientoTemporalControllers.almacenamientoTemporalBean.almacenVer.medidadSeguridad}"/>
+                    </h:panelGrid>
+                </p:panelGrid>
+                <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                             columnClasses="w50, field_mrg w50">
+                    <f:facet name="header">
+                        <h:outputText value="Desechos"/>
+                    </f:facet>
+                    <p:dataTable
+                            value="#{almacenamientoTemporalControllers.almacenamientoTemporalBean.almacenVer.almacenRecepciones}"
+                            var="almacenRecepcion" style="width: 500px">
+
+                        <p:column headerText="Nombre Desecho">
+                            <h:outputLabel
+                                    value="#{almacenRecepcion.entityRecepcionDesecho.descripcionDesecho}"/>
+                        </p:column>
+
+                        <p:column headerText="Código Desecho">
+                            <h:outputLabel
+                                    value="#{almacenRecepcion.entityRecepcionDesecho.codigo}"/>
+                        </p:column>
+                        <p:column headerText="Estado Fisico">
+                            <h:outputLabel
+                                    value="#{almacenRecepcion.entityRecepcionDesecho.tipoEstado}"/>
+                        </p:column>
+                        <p:column headerText="Tipo de Envase">
+                            <h:outputLabel value="#{almacenRecepcion.tipoEnvase.nombre}"/>
+                            <h:outputLabel value=" (#{almacenRecepcion.otroTipoEnvase})"
+                                           rendered="#{almacenRecepcion.tipoEnvase.nombre=='Otro'}"/>
+                        </p:column>
+                    </p:dataTable>
+                </p:panelGrid>
+
+                <div class="buttons">
+                    <p:commandButton value="Cerrar" onclick="PF('dlgAlmacen').hide()"/>
+                </div>
+            </h:form>
+        </p:dialog>
+
+    </ui:define>
+</ui:composition>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+<p:panelGrid columns="1" layout="grid" styleClass="w100" id="ingresoDocumentoJustificativo">	
+				<f:facet name="header">
+				<h:outputText value="DOCUMENTO DE ACCIÓN CORRECTIVA" />
+				</f:facet>
+				<p:panelGrid>
+				<p:outputLabel value="#{emisionesAtmosfericasVerController.documentoJustificativo.nombre}"/>
+				<p:commandButton id="fileDownloadJustificativo"
+							icon="ui-icon-arrowthickstop-1-s" styleClass="primary"
+							ajax="false" process="@this" title="Descargar"
+							rendered="#{emisionesAtmosfericasVerController.documentoJustificativo eq null ? false : true}">
+							<p:fileDownload
+								value="#{emisionesAtmosfericasVerController.obtenerDocumentoJustificativo()}" />
+				</p:commandButton>
+				<p:outputLabel value="EL OPERADOR NO ADJUNTO UN JUSTIFICATIVO" 
+				rendered="#{emisionesAtmosfericasVerController.documentoJustificativo eq null ? true : false}"/>
+				</p:panelGrid>
+				
+				<h:panelGrid styleClass="panel_data" columns="2"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt"
+							rendered="#{not empty emisionesAtmosfericasVerController.listaDocumentosJustificativoHistorial}">
+							<h:outputText id="docJustificativo" value="Documento de Acción Correctiva historial" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('docJustificativoDiag').show()"								
+								/>
+			</h:panelGrid>
+</p:panelGrid>
+
+	<p:dialog header="Documento de Acción Correctiva"
+				id="docJustificativoDiag" widgetVar="docJustificativoDiag" modal="true"
+				width="900" resizable="false" draggable="true" closable="false">
+
+				<p:dataTable value="#{emisionesAtmosfericasVerController.listaDocumentosJustificativoHistorial}"
+					var="doc" emptyMessage="#{labels['common.table.empty']}">					
+					<p:column headerText="Nombre documento" style="text-align:center;">
+						<h:outputText value="#{doc.nombre}"/>
+					</p:column>
+					<p:column headerText="Descarga" style="text-align:center;">
+						<p:commandButton id="fileDownload"
+							icon="ui-icon-arrowthickstop-1-s" styleClass="primary"
+							ajax="false" process="@this" title="Descargar">
+							<p:fileDownload value="#{emisionesAtmosfericasVerController.getDocumentoRespaldoLaboratorio(doc)}" />
+						</p:commandButton>												
+					</p:column>
+					
+				</p:dataTable>
+                 <div class="buttons">       
+                    
+                     <p:commandButton value="Cerrar" styleClass="primary" process="@this" onclick="PF('docJustificativoDiag').hide()"/>
+                    
+                </div>	
+                      
+         </p:dialog>
+
+</html>

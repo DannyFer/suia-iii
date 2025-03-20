@@ -1,0 +1,262 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+	<script type="text/javascript">
+	function deshabilitarBotonesCombustible() {
+		$('.btnsEditarCombustible').prop('disabled', true);
+		$('.btnsEditarCombustible').addClass('ui-state-disabled');
+	};
+	</script>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="CONSUMO DE COMBUSTIBLES" />
+	</f:facet>
+
+	<p:panel id="adicionarCombustibles" widgetVar="adicionarCombustibles"
+		toggleable="true" toggleOrientation="vertical"
+		styleClass="colapsablePanel" collapsed="true">
+		<p:ajax event="toggle"
+			listener="#{consumoRecursosController.toggleHandleCombustibles}"
+			update=":form:adicionarCombustibles" process="@this" />
+		<h:panelGroup id="datosCombustibles">
+			<h:panelGroup
+				rendered="#{consumoRecursosController.panelCombustibleVisible}">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					id="pnlCombustible">
+					<f:facet name="header">
+						<h:outputText value="Información consumo" />
+					</f:facet>
+					<h:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25, null" rowClasses="null, alt">
+						<p:outputLabel value="Tipo de combustible"
+							for="cmbTipoCombustible" styleClass="ui-label-form" />
+						<p:selectOneMenu id="cmbTipoCombustible"
+							disabled="#{consumoRecursosController.editarCombustible}"
+							value="#{consumoRecursosController.consumoCombustible.tipoCombustible}"
+							styleClass="w25" required="true" converter="selectItemConverter">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}"
+								itemValue="" noSelectionOption="true" />
+							<f:selectItems itemLabel="#{tipo.descripcion}"
+								itemValue="#{tipo}" var="tipo"
+								value="#{consumoRecursosController.getTipoCombustibleDisponile()}" />
+							<p:ajax process="@this"
+								listener="#{consumoRecursosController.seleccionarTipoCombustible()}"
+								update="pnlCombustible pnlDataConDensidad pnlDataSinDensidad" />
+						</p:selectOneMenu>
+
+						<p:outputLabel value="Especifique" for="otroCombustible"
+							styleClass="ui-label-form"
+							rendered="#{consumoRecursosController.consumoCombustible.tipoCombustible ne null and consumoRecursosController.consumoCombustible.tipoCombustible.codigo.equals(consumoRecursosController.codOtroTipoCombustible)}" />
+						<p:inputText id="otroCombustible" maxlength="50" required="true"
+							rendered="#{consumoRecursosController.consumoCombustible.tipoCombustible ne null and consumoRecursosController.consumoCombustible.tipoCombustible.codigo.equals(consumoRecursosController.codOtroTipoCombustible)}"
+							value="#{consumoRecursosController.consumoCombustible.otroTipoCombustible}" />
+
+					</h:panelGrid>
+
+					<h:panelGrid columns="2" styleClass="panel_data w100"
+						id="pnlDataConDensidad" columnClasses="header w25, null"
+						rowClasses="null, alt"
+						rendered="#{consumoRecursosController.consumoCombustible.tipoCombustible ne null and consumoRecursosController.consumoCombustible.tipoCombustible.parametro2.equals('l')}">
+
+						<p:outputLabel value="Densidad del combustible (t/m3)" rendered="false"
+							styleClass="ui-label-form" />
+						<h:outputText
+							rendered="#{consumoRecursosController.consumoCombustible.tipoCombustible.parametro ne null and false}"
+							value="#{consumoRecursosController.consumoCombustible.tipoCombustible.parametro}" />
+						<pe:inputNumber id="densidadCombustible" thousandSeparator=""  
+							maxValue="9.9999999999" minValue="0" required="true" autocomplete="off"
+							rendered="#{consumoRecursosController.consumoCombustible.tipoCombustible.parametro eq null and false}"
+							value="#{consumoRecursosController.consumoCombustible.valorDensidad}"
+							requiredMessage="El campo 'Densidad del combustible (t/m3)' es requerido.">
+							<p:ajax event="blur" process="@this"
+								listener="#{consumoRecursosController.calcularConsumoToneladas()}"
+								update="consumoAnualToneladas" />
+						</pe:inputNumber>
+
+
+						<p:outputLabel value="Consumo anual (m3)" for="consumoAnual"
+							styleClass="ui-label-form" />
+						<pe:inputNumber id="consumoAnual" thousandSeparator=""
+							maxValue="9999999999.99" minValue="0" required="true" autocomplete="off"
+							value="#{consumoRecursosController.consumoCombustible.valorAnualMetrosCubicos}">
+							<f:validateDoubleRange minimum="0.1" />
+							<p:ajax event="blur" process="@this"
+								listener="#{consumoRecursosController.calcularConsumoToneladas()}"
+								update="consumoAnualToneladas" />
+						</pe:inputNumber>
+
+						<p:outputLabel value="Consumo anual (t)" rendered="false"
+							for="consumoAnualToneladas" styleClass="ui-label-form" />
+						<h:outputText id="consumoAnualToneladas" rendered="false"
+							value="#{consumoRecursosController.consumoCombustible.valorAnualToneladas}">
+								<f:convertNumber maxIntegerDigits="10" maxFractionDigits="10"
+									pattern="##########.##########" locale="en" />
+						</h:outputText>
+
+					</h:panelGrid>
+
+					<h:panelGrid columns="2" styleClass="panel_data w100"
+						id="pnlDataSinDensidad" columnClasses="header w25, null"
+						rowClasses="null, alt"
+						rendered="#{consumoRecursosController.consumoCombustible.tipoCombustible ne null and consumoRecursosController.consumoCombustible.tipoCombustible.parametro2.equals('s')}">
+						<p:outputLabel value="Consumo anual (t)"
+							for="consumoAnualToneladasSD" styleClass="ui-label-form" />
+						<pe:inputNumber id="consumoAnualToneladasSD" thousandSeparator=""
+							maxValue="9999999999.9999999999" minValue="0" required="true" autocomplete="off"
+							value="#{consumoRecursosController.consumoCombustible.valorAnualToneladas}">
+							<f:validateDoubleRange minimum="0.1" />
+							<p:ajax process="@this" />
+						</pe:inputNumber>
+					</h:panelGrid>
+
+					<h:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25, null" rowClasses="null, alt">
+						<p:outputLabel value="Proceso en el que usa el combustible"
+							styleClass="ui-label-form" for="procesosCombustible" />
+						<p:selectManyCheckbox id="procesosCombustible"
+							value="#{consumoRecursosController.consumoCombustible.listaProcesos}"
+							converter="selectItemConverter" required="true"
+							requiredMessage="Debe seleccionar al menos 1 proceso">
+							<f:selectItems
+								value="#{consumoRecursosController.listaTipoProceso}" var="item"
+								itemLabel="#{item.descripcion}" itemValue="#{item}" />
+						</p:selectManyCheckbox>
+
+						<p:outputLabel value="Medio de verificación"
+							styleClass="ui-label-form" />
+						<p:dataTable id="tblDocumentosCombustible"
+							value="#{consumoRecursosController.listaDocumentosMediosVerificacion}"
+							var="item" emptyMessage="#{labels['common.table.empty']}">
+							<f:facet name="header">
+								<p:commandButton value="Añadir" icon="ui-icon-plus" title="Añadir"
+									oncomplete="PF('adicionarDocumento').show()"
+									process="@this" style="float:right;" />
+							</f:facet>
+							<p:column headerText="Nombre">
+								<h:outputText value="#{item.nombre}" />
+							</p:column>
+							<p:column headerText="Descargar" styleClass="w70px alCenter">
+								<p:commandButton icon="ui-icon-arrowthick-1-s"
+									styleClass="button-small primary" title="Ver" ajax="false"
+									immediate="true">
+									<p:fileDownload
+										value="#{consumoRecursosController.descargar(item)}" />
+								</p:commandButton>
+							</p:column>
+						</p:dataTable>
+
+					</h:panelGrid>
+
+
+				</p:panelGrid>
+			</h:panelGroup>
+		</h:panelGroup>
+
+		<div class="buttons">
+			<p:commandButton styleClass="primary"
+				value="#{consumoRecursosController.editarCombustible ? 'Actualizar' : 'Aceptar'}"
+				actionListener="#{consumoRecursosController.agregarCombustible()}"
+				oncomplete="toggleCombustible(xhr, status, args)"
+				process="@this datosCombustibles"
+				update=":form:datosCombustibles :form:tblCombustibles" />
+			<p:commandButton value="Cancelar" styleClass="secondary"
+				actionListener="#{consumoRecursosController.cancelarCombustible()}"
+				oncomplete="PF('adicionarCombustibles').toggle()" process="@this"
+				update="datosCombustibles :form:tblCombustibles">
+				<p:resetInput target="@form" />
+			</p:commandButton>
+		</div>
+		<p:separator />
+	</p:panel>
+
+	<br />
+	<p:dataTable id="tblCombustibles"
+		value="#{consumoRecursosController.listaConsumoCombustibles}"
+		var="item" emptyMessage="#{labels['common.table.empty']}">
+		<f:facet name="header">
+			<p:commandButton value="Añadir" update=":form:datosCombustibles"
+				oncomplete="PF('adicionarCombustibles').toggle()"
+				onclick="deshabilitarBotonesCombustible()"
+				styleClass="button-small-text toRight field_mrg btnsEditarCombustible"
+				icon="ui-icon-plusthick" process="@this" style="float:right;" />
+		</f:facet>
+
+		<p:column headerText="Tipo de combustible">
+			<h:outputText
+				value="#{item.tipoCombustible.codigo.equals(consumoRecursosController.codOtroTipoCombustible) ? item.otroTipoCombustible :		item.tipoCombustible.descripcion}" />
+		</p:column>
+		<p:column headerText="Densidad del combustible (t/m3)" styleClass="w10 alCenter" rendered="false">
+			<h:outputText
+				value="#{item.valorDensidad ne null ? item.valorDensidad : 'N/A'}">
+				<f:convertNumber maxIntegerDigits="1" maxFractionDigits="10"
+					pattern="#.##########" locale="en" />
+			</h:outputText>
+		</p:column>
+		<p:column headerText="Consumo anual (m3)" styleClass="w10 alCenter">
+			<h:outputText
+				value="#{item.valorAnualMetrosCubicos ne null ? item.valorAnualMetrosCubicos : 'N/A'}" >
+				<f:convertNumber maxIntegerDigits="10" maxFractionDigits="10"
+					pattern="##########.##########" locale="en" />
+			</h:outputText>
+		</p:column>
+		<p:column headerText="Consumo anual (t)" styleClass="alCenter">
+			<h:outputText value="#{item.valorAnualToneladas}">
+				<f:convertNumber maxIntegerDigits="10" maxFractionDigits="10"
+					pattern="##########.##########" locale="en" />
+			</h:outputText>
+		</p:column>
+		<p:column headerText="Proceso en el que usa el combustible" styleClass="w15">
+			<p:dataTable styleClass="borderless"
+				rendered="#{item.listaProcesos.size() > 0}"
+				value="#{item.listaProcesos}" var="proceso">
+				<p:column style="text-align: left; background-color: #f5f5f5;">
+					<h:outputText value="#{proceso.descripcion}" />
+				</p:column>
+			</p:dataTable>
+		</p:column>
+		<p:column headerText="Medio de verificación" styleClass="alCenter">
+			<p:dataTable styleClass="borderless"
+				rendered="#{item.listaMediosVerificacion ne null and item.listaMediosVerificacion.size() > 0}"
+				value="#{item.listaMediosVerificacion}" var="documento">
+				<p:column style="text-align: left; background-color: #f5f5f5;">
+					<p:commandLink value="#{documento.nombre}" ajax="false">
+                        <p:fileDownload value="#{consumoRecursosController.descargar(documento)}" />
+                    </p:commandLink>
+				</p:column>
+			</p:dataTable>
+		</p:column>
+		<p:column styleClass="w70px alCenter">
+			<p:commandButton icon="ui-icon-pencil" title="Editar" process="@this"
+				update=":form:datosCombustibles" styleClass="primary btnsEditarCombustible"
+				onclick="deshabilitarBotonesCombustible()"
+				oncomplete="PF('adicionarCombustibles').toggle()"
+				action="#{consumoRecursosController.editarCombustible(item)}" />
+			<p:commandButton icon="ui-icon-trash" title="Eliminar"
+				process="@this" styleClass="primary btnsEditarCombustible"
+				actionListener="#{consumoRecursosController.eliminarCombustible(item)}"
+				update="tblCombustibles" />
+		</p:column>
+	</p:dataTable>
+
+<br />
+</p:panelGrid>
+
+<script type="text/javascript">
+	function toggleCombustible(xhr, status, args) {
+		if(args.addCombustible) {
+			PF('adicionarCombustibles').toggle();
+		}
+	}
+	
+</script>
+</html>
+

@@ -1,0 +1,215 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="content">
+
+		<script type="text/javascript">
+		 function removeDisabled() {
+		        $('.ui-state-disabled').removeClass('ui-state-disabled');
+		    }
+	</script>
+
+		<style type="text/css">
+tr[aria-selected="true"] .ui-radiobutton-box {
+	border-color: #FFFFFF !important;
+}
+
+tr[aria-selected="true"] .ui-icon {
+	background-image:
+		url("/suia-iii/javax.faces.resource/images/ui-icons_ffffff_256x240.png.jsf?ln=primefaces-suia");
+}
+
+.cssTblProyectos .ui-datatable-header {
+	text-align: left !important;
+	padding-bottom: 10px !important;
+}
+
+.cssRowPrincipal td {
+	background-color: #00B5B5 !important;
+}
+</style>
+
+
+		<h:form id="form">
+			<h:panelGroup id="pnlDatos">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					id="pnlAAAPrincipal"
+					rendered="#{generarAgrupacionController.panelMostrar eq 1}">
+
+					<p:fieldset
+						legend="Listado de Autorizaciones Administrativas Ambientales"
+						toggleable="true" toggleSpeed="500" collapsed="false">
+						<p:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="header w25, null" id="pnlFiltros">
+							<p:outputLabel value="Sector" style="color: white" />
+							<h:panelGroup id="pnlFiltrosSector">
+								<p:selectOneMenu styleClass="w50"
+									value="#{generarAgrupacionController.tipoSector}"
+									converter="selectItemConverter">
+									<f:selectItem itemLabel="#{labels['common.item.choose']}"
+										itemValue="" noSelectionOption="true" />
+									<f:selectItems
+										value="#{generarAgrupacionController.listaTipoSector}"
+										var="item" itemLabel="#{item.nombre}" itemValue="#{item}" />
+									<p:ajax process="@this" update="pnlFiltrosSector" />
+								</p:selectOneMenu>
+
+								<p:panelGrid columns="4" styleClass="panel_data w100"
+									style="margin-top: 10px;"
+									columnClasses="header w25, w25, header w25, w25"
+									rendered="#{generarAgrupacionController.tipoSector ne null and generarAgrupacionController.tipoSector.id eq 1}">
+									<p:outputLabel value="Área" style="color: white" />
+									<p:inputText value="#{generarAgrupacionController.filtroArea}"
+										styleClass="w50"
+										onchange="javascript:this.value = this.value.toUpperCase();" />
+
+									<p:outputLabel value="Bloque" style="color: white" />
+									<p:inputText
+										value="#{generarAgrupacionController.filtroBloque}"
+										styleClass="w50"
+										onchange="javascript:this.value = this.value.toUpperCase();" />
+
+								</p:panelGrid>
+
+								<p:panelGrid columns="2" styleClass="panel_data w50"
+									style="margin-top: 10px;"
+									columnClasses="header w25, w25, header w25, w25"
+									rendered="#{generarAgrupacionController.tipoSector ne null and generarAgrupacionController.tipoSector.id eq 2}">
+									<p:outputLabel value="Concesión" style="color: white" />
+									<p:inputText
+										value="#{generarAgrupacionController.filtroConcesion}"
+										styleClass="w50"
+										onchange="javascript:this.value = this.value.toUpperCase();" />
+								</p:panelGrid>
+
+							</h:panelGroup>
+
+							<p:outputLabel value="Nombre Proyecto" style="color: white" />
+							<p:inputText
+								value="#{generarAgrupacionController.filtroProyecto}"
+								styleClass="w100"
+								onchange="javascript:this.value = this.value.toUpperCase();" />
+
+							<p:outputLabel value="Operador" style="color: white" />
+							<p:inputText
+								value="#{generarAgrupacionController.filtroOperador}"
+								styleClass="w100"
+								onchange="javascript:this.value = this.value.toUpperCase();" />
+
+						</p:panelGrid>
+
+						<div class="buttons main">
+							<p:commandButton value="Buscar" style="height: 28px !important;"
+								action="#{generarAgrupacionController.buscarAutorizaciones()}"
+								icon="ui-icon-search" process="@this form" update="tblProyectos" />
+						</div>
+					</p:fieldset>
+
+					<br />
+					<p:dataTable id="tblProyectos" widgetVar="tblProyectos"
+						value="#{generarAgrupacionController.proyectos}" var="proyecto"
+						rowKey="#{proyecto}" styleClass="cssTblProyectos"
+						selection="#{generarAgrupacionController.proyectoSeleccionado}"
+						rows="10" paginator="true" paginatorAlwaysVisible="false"
+						paginatorPosition="bottom"
+						currentPageReportTemplate="{currentPage} de {totalPages}"
+						emptyMessage="#{labels['common.table.empty']}">
+						<f:facet name="header">
+							<h:outputText
+								value="Selección de la Autorización Administrativa Ambiental Principal" />
+						</f:facet>
+
+						<p:column headerText="Código" styleClass="alCenter w15">
+							<h:outputText value="#{proyecto.codigo}" />
+						</p:column>
+						<p:column headerText="Nombre" styleClass="w25">
+							<h:outputText value="#{proyecto.nombre}" />
+						</p:column>
+						<p:column headerText="Nombres Operador" styleClass="w25">
+							<h:outputText value="#{proyecto.nombreProponente}" />
+						</p:column>
+						<p:column headerText="Estado Proyecto" styleClass="alCenter w15">
+							<h:outputText value="#{proyecto.estado}" />
+						</p:column>
+						<p:column headerText="Sector" styleClass="alCenter w15">
+							<h:outputText value="#{proyecto.sector}" />
+						</p:column>
+						<p:column headerText="Selección" selectionMode="single"
+							styleClass="alCenter w10" />
+					</p:dataTable>
+
+				</p:panelGrid>
+
+				<br />
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					id="pnlAAASecundarias"
+					rendered="#{generarAgrupacionController.panelMostrar eq 2}">
+					<p:dataTable id="tblProyectosSecundarios" widgetVar="tblProyectos"
+						value="#{generarAgrupacionController.autorizacionesSecundarias}"
+						var="proyecto" rowKey="#{proyecto}" styleClass="cssTblProyectos"
+						selection="#{generarAgrupacionController.listaSecundariasSeleccionadas}"
+						rows="10" paginator="true" paginatorAlwaysVisible="false"
+						currentPageReportTemplate="{currentPage} de {totalPages}"
+						rowsPerPageTemplate="5,10,15" frozenRows="1"
+						rowStyleClass="#{proyecto.codigo eq generarAgrupacionController.proyectoSeleccionado.codigo ? 'cssRowPrincipal' : null}"
+						emptyMessage="#{labels['common.table.empty']}">
+						<f:facet name="header">
+							<h:outputText
+								value="Selección de las Autorizaciones Administrativas Ambientales Secundarias" />
+						</f:facet>
+
+						<p:column headerText="Código" styleClass="alCenter w15">
+							<h:outputText value="#{proyecto.codigo}" />
+						</p:column>
+						<p:column headerText="Nombre" styleClass="w25">
+							<h:outputText value="#{proyecto.nombre}" />
+						</p:column>
+						<p:column headerText="Nombres Operador" styleClass="w25">
+							<h:outputText value="#{proyecto.nombreProponente}" />
+						</p:column>
+						<p:column headerText="Estado Proyecto" styleClass="alCenter w15">
+							<h:outputText value="#{proyecto.estado}" />
+						</p:column>
+						<p:column headerText="Sector" styleClass="alCenter w15">
+							<h:outputText value="#{proyecto.sector}" />
+						</p:column>
+						<p:column headerText="Selección" styleClass="alCenter w10">
+							<p:selectBooleanCheckbox
+								value="#{proyecto.seleccionadoSecundario}"
+								disabled="#{proyecto.codigo eq generarAgrupacionController.proyectoSeleccionado.codigo}">
+							</p:selectBooleanCheckbox>
+						</p:column>
+					</p:dataTable>
+
+				</p:panelGrid>
+			</h:panelGroup>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Siguiente" process="form"
+						action="#{generarAgrupacionController.siguiente()}"
+						update="pnlDatos pnlButtons" icon="ui-icon-arrowthick-1-e"
+						rendered="#{generarAgrupacionController.panelMostrar eq 1}"
+						oncomplete="removeDisabled()" />
+					<p:commandButton value="Enviar" process="form"
+						action="#{generarAgrupacionController.enviar()}"
+						rendered="#{generarAgrupacionController.panelMostrar eq 2}"
+						update="pnlDatos pnlButtons" icon="ui-icon-check"
+						oncomplete="removeDisabled()">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+</ui:composition>

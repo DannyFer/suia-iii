@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+<ui:define name="context-extra">
+	<h:outputText value="Trámite" />
+	<h:outputText value="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.codigo}" />
+	<h:outputLink value="ingresarInformacionRSQVer.jsf" target="_blank">
+		<p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search" />
+	</h:outputLink>	
+</ui:define>
+<ui:define name="content">
+		
+<h:form id="form" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }">
+
+	<p:panelGrid id="ubicacionGrid" columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<h:outputText value="Identificar si se requiere de una inspección en campo"/>		
+		</f:facet>
+		<p:dataTable id="ubicacionTable" value="#{revisarInformacionTecnicoController.ubicacionSustanciaProyectoLista}" var="item"
+	 		emptyMessage="#{labels['common.table.empty']}" lazy="true">
+	 	
+	 	<p:column style="width:16px">
+            	<p:rowToggler />
+        </p:column>	 
+		
+		<p:column headerText="Sustancia Quimica"
+			styleClass="alCenter singleLine">
+			<h:outputText value="#{item.gestionarProductosQuimicosProyectoAmbiental.sustanciaquimica.descripcion}" />
+		</p:column>
+		
+		<p:column headerText="Lugar">
+			<h:outputText value="#{item.lugares}"/>
+		</p:column>
+		
+		<p:column headerText="Provincia">
+			<h:outputText value="#{item.ubicacionesGeografica.ubicacionesGeografica.ubicacionesGeografica.nombre}"/>
+		</p:column>
+		
+		<p:column headerText="Cantón">
+			<h:outputText value="#{item.ubicacionesGeografica.ubicacionesGeografica.nombre}"/>
+		</p:column>
+			
+		<p:column headerText="Inspección">
+			<center>
+			<p:selectOneRadio value="#{item.necesitaInspeccion}">
+				<f:selectItem itemLabel="Si" itemValue="#{true}"/>
+				<f:selectItem itemLabel="No" itemValue="#{false}"/>				
+				<p:ajax listener="#{revisarInformacionTecnicoController.solicitarApoyoListener(item)}" update="@this selectApoyo :form:ubicacionResumenTable :form:btnEnviar"/>
+			</p:selectOneRadio>
+			</center>
+		</p:column>
+		
+		<p:column headerText="Apoyo">
+			<center>
+			<p:selectOneRadio id="selectApoyo" value="#{item.necesitaApoyo}" disabled="#{!item.necesitaInspeccion}">
+				<f:selectItem itemLabel="Si" itemValue="#{true}"/>
+				<f:selectItem itemLabel="No" itemValue="#{false}"/>				
+				<p:ajax listener="#{revisarInformacionTecnicoController.solicitarApoyoListener(item)}" update="@this :form:ubicacionResumenTable :form:btnEnviar"/>
+			</p:selectOneRadio>
+			</center>
+		</p:column>
+		
+		<p:rowExpansion rendered="#{!registrarSustanciasQuimicasController.habilitarIngreso}">
+            <p:panelGrid  styleClass="panel_data" columnClasses="header w25,w75" columns="2" >
+                
+                <h:outputText value="Teléfono" />
+                <h:outputText value="#{item.telefono}" />
+                
+                <h:outputText value="Correo" />
+                <h:outputText value="#{item.correo}" />
+                
+                <h:outputText value="Dirección" />
+                <h:outputText value="#{item.direccion}" /> 
+                
+            </p:panelGrid>
+       </p:rowExpansion>
+		
+	</p:dataTable>
+	</p:panelGrid>
+	
+	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<h:outputText value="Resumen de Inspección / Apoyo"/>		
+		</f:facet>
+		<p:dataTable id="ubicacionResumenTable" value="#{revisarInformacionTecnicoController.ubicacionSustanciaProyectoLista}" var="item"
+	 	emptyMessage="#{labels['common.table.empty']}" lazy="true">
+		
+		<p:column headerText="Sustancia Quimica"
+			styleClass="alCenter singleLine">
+			<h:outputText value="#{item.gestionarProductosQuimicosProyectoAmbiental.sustanciaquimica.descripcion}" />
+		</p:column>
+		
+		<p:column headerText="Lugar">
+			<h:outputText value="#{item.lugares}"/>
+		</p:column>
+		
+		<p:column headerText="Provincia">
+			<h:outputText value="#{item.ubicacionesGeografica.ubicacionesGeografica.nombre}"/>
+		</p:column>
+		
+		<p:column headerText="Cantón">
+			<h:outputText value="#{item.ubicacionesGeografica.nombre}"/>
+		</p:column>
+		
+		<p:column headerText="Inspección" styleClass="alCenter">
+			<h:outputText value="#{item.necesitaInspeccion?'Si':'No'}"/>			
+		</p:column>
+		
+		<p:column headerText="Apoyo" styleClass="alCenter">
+			<h:outputText value="#{item.necesitaApoyo?'Si':'No'}"/>			
+		</p:column>
+		
+		<p:column headerText="Oficina Técnica">
+			<h:outputText value="#{item.area.areaName}"/>
+		</p:column>
+		
+	</p:dataTable>
+	</p:panelGrid>
+			
+			<div class="buttons main">
+				
+				<p:commandButton value="Guardar" icon="ui-icon-disk"
+					action="#{revisarInformacionTecnicoController.guardar}"
+					update="@form"/>
+				
+				<p:commandButton value="Enviar" id="btnEnviar"
+					action="#{revisarInformacionTecnicoController.enviar}"
+					icon="ui-icon-check"
+					process="@this" disabled="#{!revisarInformacionTecnicoController.validarInspecciones()}">
+					<p:confirm header="Confirmación"
+						message="¿Está seguro que desea finalizar?" icon="ui-icon-alert" />
+				</p:commandButton>
+			</div>
+		
+		</h:form>
+		
+	</ui:define>
+</ui:composition>
+</html>

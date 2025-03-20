@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml"
+                xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}" target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+
+    </ui:define>
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{oficioPSBean.validarTareaBpm()}"/>
+        <p:remoteCommand process="@this"
+                         rendered="#{oficioPSBean.configurarVariables()}" autoRun="true"
+                         />
+        <h:form id="form">
+            <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                         columnClasses="w100"
+                    >
+                <f:facet name="header">
+                    <mae:panelGridHeaderHelp value="OFICIO DE PARTICIPACIÓN SOCIAL"
+                                             conector="generalHelp" render="false"
+                                             help="Para completar el informe, por favor ingrese la información requerida en las secciones correspondientes. Para previsualizar el documento presione Guardar."/>
+                </f:facet>
+
+
+                <p:outputLabel for="requiere-modificaciones"
+                               value="¿Requiere modificaciones el informe?"
+                               rendered="#{oficioPSBean.revisar}"/>
+                <p:selectOneRadio id="requiere-modificaciones"
+                                  value="#{oficioPSBean.requiereModificaciones}"
+                                  required="#{oficioPSBean.revisar}"
+                                  rendered="#{oficioPSBean.revisar}">
+                    <f:selectItem itemLabel="Si" itemValue="true"/>
+                    <f:selectItem itemLabel="No" itemValue="false"/>
+                </p:selectOneRadio>
+
+                <p:separator/>
+
+                <object id="pdf_informe" type="application/pdf"
+                        data="#{oficioPSBean.informePath}?pfdrid_c=true"
+                        width="100%" height="400px">
+                    Su navegador no soporta la visualización de pdf. Puede descargar el
+                    documento presionando el siguiente botón:
+                    <p:commandButton value="Descargar" styleClass="primary"
+                                     ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+                        <p:fileDownload value="#{oficioPSBean.stream}"/>
+                    </p:commandButton>
+                </object>
+
+
+                <br/>
+                <br/>
+
+            </p:panelGrid>
+            
+            <p:panelGrid>            
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" 				 
+					columnClasses="w50, field_mrg w50">
+					<h:outputLabel value="Conclusiones"/>
+					<control:imputConTextoEnriquecido
+						valor="#{oficioPSBean.participacionSocialAmbiental.conclusionOficio}"
+						soloLectura="false" requerido="false" />
+				</p:panelGrid>
+			</p:panelGrid>
+            
+            <p:fragment>
+                <h:panelGroup id="pnl2">
+
+                    <observaciones:tablaObservaciones aparace="true"
+                                                      soloLectura="#{!oficioPSBean.revisar}"
+                                                      mostrarSiVacio="#{oficioPSBean.revisar}"
+                                                      idClase="#{proyectosBean.proyecto.id}"
+                                                      nombreClase="ParticipacionSocial"
+                                                      seccion="oficio"
+                                                      rol="admin"
+                                                      componenteActualizarEliminar="pnl2"/>
+                </h:panelGroup>
+            </p:fragment>
+
+            <div class="buttons main">
+
+                <p:commandButton value="Atrás"
+                                 action="#{oficioPSBean.guardarRegresar()}"
+                                 styleClass="ui-confirmdialog-yes secondary" icon="ui-icon-arrowthick-1-w"/>
+                <p:commandButton value="Guardar"
+                                 action="#{oficioPSBean.guardar()}"
+                                 styleClass="ui-confirmdialog-yes secondary" icon="ui-icon-disk"/>
+              	<p:commandButton value="Enviar"
+					action="#{oficioPSBean.completarTarea}"
+					title="Enviar datos" icon="ui-icon-check" styleClass="primary">
+					<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+						header="#{msg['header.confirmacion.envio.tarea']}" />
+				</p:commandButton>
+                </div>
+                 
+				<!--Cris F: aumento de cuadro de firma para informe técnico -->
+				<ui:remove>
+                  <p:dialog header="Firma Informe Técnico " id="signDialog" widgetVar="signDialog" closeOnEscape="false" modal="true" resizable="false" width="auto" height="auto" position="center top">
+
+                <p:panel>
+                    <h:panelGrid columns="2" cellpadding="10" style="text-align:right !important" id="firma">
+                        <p:outputLabel value="1. Descargue el Informe Técnico" styleClass="bold"/>
+                        <p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary" immediate="true">
+                            <p:fileDownload
+                                    value="#{oficioPSBean.streamInforme}"/>
+                        </p:commandButton>
+                        <p:outputLabel value="2. Adjunte el Informe Técnico firmado" styleClass="bold"/>
+                        <p:fileUpload
+                                fileUploadListener="#{oficioPSBean.uploadListenerDocumentos}"
+                                multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                                label="Seleccionar" uploadLabel="Subir"
+                                invalidFileMessage="Tipo de archivo no válido"
+                                invalidSizeMessage="Tamaño de archivo no válido"
+                                cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                auto="true">
+                            
+                        </p:fileUpload>
+                    </h:panelGrid>
+                </p:panel>
+                <p:separator/>
+
+                <div style="display: block; width: 100%; text-align: right;">
+                    <p:commandButton value="Guardar" styleClass="primary" 
+                    		actionListener="#{oficioPSBean.guardarInformeTecnico()}" icon="ui-icon-disk"/>
+                </div>
+            </p:dialog>
+            </ui:remove>                 
+            
+        </h:form>     
+        
+        <h:form id="formDialogs">
+
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600px" height="auto">
+				<p:panel>
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel value="Firmar informe Técnico" styleClass="bold" />
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold"
+							rendered="#{!oficioPSBean.ambienteProduccion}" />
+						<p:selectOneRadio id="verificaToken" value="#{oficioPSBean.token}"
+							rendered="#{!oficioPSBean.ambienteProduccion}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change"
+								update=":formDialogs:pnlFirmaManual :formDialogs:pnlFirmaToken"
+								listener="#{oficioPSBean.firmarOficio}" />
+						</p:selectOneRadio>
+
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{oficioPSBean.ambienteProduccion}" />
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{oficioPSBean.ambienteProduccion}" />
+
+						<h:panelGroup id="pnlFirmaToken">
+							<p:commandButton value="Firmar documento" type="button"
+								styleClass="primary" icon="ui-icon-key"
+								rendered="#{oficioPSBean.token}"
+								onclick="window.location.href='#{oficioPSBean.firmarOficio()}'" />
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!oficioPSBean.token}">
+							<p:outputLabel value="1. Descargar el Informe" styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload value="#{oficioPSBean.descargarInformacion()}" />
+							</p:commandButton>
+							<p:outputLabel for="uploadRequired"
+								value="2. Adjuntar el Informe firmado"
+								styleClass="bold" />
+							<p:fileUpload id="Idfirmada"
+								fileUploadListener="#{oficioPSBean.cargarArchivo}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreDocFirmado"
+								rendered="#{!oficioPSBean.token}">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreDocFirmado"
+								value="#{oficioPSBean.nombreDocumentoFirmado}" />
+						</h:panelGrid>
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!oficioPSBean.token and !oficioPSBean.informacionSubida}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialog').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						action="#{oficioPSBean.completarTarea()}" icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+
+			<p:separator />
+
+		</h:form>       
+
+    </ui:define>
+</ui:composition>
+</html>

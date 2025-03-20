@@ -1,0 +1,48 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<p:panelGrid columns="1" layout="grid">
+		<f:facet name="header">
+			<h:outputText value="Ubicación geográfica e información de intersección" />
+		</f:facet>
+		<h:panelGrid id="pngShape" layout="grid" styleClass="panel_data w100" columnClasses="header w25,null w25" columns="2">
+			<h:outputText value="Por favor seleccione el sistema de referencia con el cual se otorgó la Autorización Administrativa Ambiental" />
+			<p:selectOneRadio id="IdSistemaReferencia" layout="grid" columns="2"  value="#{ingresoDigitalizacionProyectosController.sistemareferenciaSeleccionado}" disabled="true">
+				<f:selectItems value="#{ingresoDigitalizacionProyectosController.listaSistemaReferencia}" var="item" itemLabel="#{item}" itemValue="#{item}" />
+				<p:ajax event="change" update="IdSistemaReferencia pngShape pnlgd_coordenadas" listener="#{ingresoDigitalizacionProyectosController.obtenerSistemaReferenciaActual}"/>
+			</p:selectOneRadio>
+			<h:outputText value="Zona" rendered="#{ingresoDigitalizacionProyectosController.sistemareferenciaSeleccionado eq 'WGS84'}"/>
+			<p:selectOneMenu id="zona" value="#{ingresoDigitalizacionProyectosController.zonaSeleccionada}" disabled="true"
+							rendered="#{ingresoDigitalizacionProyectosController.sistemareferenciaSeleccionado eq 'WGS84'}">
+				<f:selectItem itemLabel="Escoja la zona" />
+				<f:selectItem itemLabel="15N" itemValue="15N" />
+				<f:selectItem itemLabel="15S" itemValue="15S" />
+				<f:selectItem itemLabel="16N" itemValue="16N" />
+				<f:selectItem itemLabel="16S" itemValue="16S" />
+				<f:selectItem itemLabel="17N" itemValue="17N" />
+				<f:selectItem itemLabel="17S" itemValue="17S" />
+				<f:selectItem itemLabel="18N" itemValue="18N" />
+				<f:selectItem itemLabel="18S" itemValue="18S" />
+				<p:ajax process="@this" update="pnlgd_coordenadas" listener="#{ingresoDigitalizacionProyectosController.obtenerSistemaReferenciaActual}"/>
+			</p:selectOneMenu>
+		</h:panelGrid>
+	</p:panelGrid>
+	<h:panelGrid id="pnlgd_coordenadas" layout="grid" styleClass="w100" columns="1">
+		<h:panelGrid id="coordenadas_psad" layout="grid" styleClass="w100" columns="1" rendered="#{ingresoDigitalizacionProyectosController.mostrarOtrasCoordenadas}">
+			<ui:include src="/pages/rcoa/digitalizacion/cargarCoordenadasOtroSistemaReferenciaVer.xhtml"/>
+			<ui:include src="/pages/rcoa/digitalizacion/cargarCoordenadasAdicionalesWGS17SVer.xhtml"/>
+		</h:panelGrid>
+		<h:panelGrid id="coordenadas_wgs17s" layout="grid" styleClass="w100" columns="1" rendered="#{ingresoDigitalizacionProyectosController.mostrarOtrasCoordenadas != null and !ingresoDigitalizacionProyectosController.mostrarOtrasCoordenadas}">
+			<ui:include src="/pages/rcoa/digitalizacion/cargarCoordenadasWGS17SVer.xhtml"/>
+		</h:panelGrid>
+	</h:panelGrid>
+	
+</ui:composition>

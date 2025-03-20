@@ -1,0 +1,203 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:f="http://java.sun.com/jsf/core" xmlns:controles-prime="http://java.sun.com/jsf/composite/controles-prime" xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+
+	<style>
+.ui-state-highlight label {
+	color: #fff;
+}
+</style>
+	<p:panel id="panelUsuario" rendered="#{usuarioController.usuarioBean.verDatosUsuario}" header="Usuario">
+		<h:panelGrid columns="2" width="100%" columnClasses="col1,col2">
+			<h:outputLabel value="Tipo Entidad" />
+			<p:selectOneMenu value="#{usuarioController.promotorBean.tipoPersona}">
+				<f:selectItem itemLabel="Persona Natural" itemValue="N" />
+				<f:selectItem itemLabel="Persona Jurídica" itemValue="J" />
+				<p:ajax event="change" update="panelUsuario" listener="#{usuarioController.cambioTipoPersona()}" />
+			</p:selectOneMenu>
+		</h:panelGrid>
+		<h:panelGrid id="pnlPersonaNatural" columns="2" width="100%" columnClasses="col1,col2" rendered="#{usuarioController.promotorBean.tipoPersona == 'N'}">
+			<h:outputLabel value="Tipo de documento" />
+			<controles-prime:combo identificador="cmbTipoDocumento" lista="#{combosController.listaTipoDocumento}" valor="#{usuarioController.promotorBean.usuario.docuId}" habilitar="#{!usuarioController.usuarioConectadoAdminInstitucional()}" />
+			<h:outputLabel value="Cédula / RUC / Pasaporte" />
+			<h:panelGrid columns="2">
+				<p:inputText value="#{usuarioController.promotorBean.usuario.pin}" readonly="#{!usuarioController.usuarioConectadoAdminInstitucional()}" maxlength="15" />
+				<p:commandButton value="Validar" action="#{usuarioController.validarCedula()}" rendered="#{usuarioController.promotorBean.usuario.id  == null}" update=":#{p:component('msgs')}, :#{p:component('pnlPersonaNatural')}, :#{p:component('btnAceptar')}" />
+				<p:commandButton value="Validar" action="#{usuarioController.validarCedulaEditar()}" rendered="#{usuarioController.usuarioConectadoAdminInstitucional() and usuarioController.promotorBean.usuario.id  != null}" update=":#{p:component('msgs')}, :#{p:component('pnlPersonaNatural')}, :#{p:component('btnAceptar')}" />
+			</h:panelGrid>
+			<h:outputLabel value="Nombres y Apellidos" rendered="#{usuarioController.promotorBean.usuario.docuId !='Pasaporte'}" />
+			<h:outputLabel value="Nombres y Apellidos*" rendered="#{usuarioController.promotorBean.usuario.docuId =='Pasaporte'}" />
+			<controles-prime:soloTextoMayuscula identificador="txtNombre" soloLectura="#{!usuarioController.usuarioConectadoAdminInstitucional()}" valor="#{usuarioController.promotorBean.persona.nombre}" tamanio="50" longitud="250" />
+			<h:outputLabel value="Tratamiento y Título Académico *" />
+			<h:panelGrid columns="2">
+				<p:selectOneMenu id="cmbTratamiento" style="size: 150px;" value="#{usuarioController.promotorBean.idTipoTrato}" disabled="#{!usuarioController.usuarioConectadoAdminInstitucional()}">
+					<f:selectItems value="#{combosController.listaTipoTratos}" />
+				</p:selectOneMenu>
+				<p:inputText value="#{usuarioController.promotorBean.persona.titulo}" maxlength="255" />
+			</h:panelGrid>
+			<h:outputLabel value="Nacionalidad*" />
+			<controles-prime:combo identificador="cmbNacionalidad" lista="#{combosController.listaNacionalidades}" valor="#{usuarioController.promotorBean.idNacionalidad}" />
+			<h:outputLabel value="Género" />
+			<controles-prime:combo identificador="cmbGenero" lista="#{combosController.listaGenero}" valor="#{usuarioController.promotorBean.persona.genero}" habilitar="#{usuarioController.promotorBean.usuario.docuId =='Cédula'}" />
+		</h:panelGrid>
+
+		<h:panelGrid id="pnlPersonaJuridica" columns="2" width="100%" columnClasses="col1,col2" rendered="#{usuarioController.promotorBean.tipoPersona == 'J'}">
+			<h:outputLabel value="RUC" />
+			<h:panelGrid columns="2">
+				<controles-prime:soloTextoNumeros identificador="txtJuri" valor="#{usuarioController.promotorBean.usuario.nombre}" tamanio="50" longitud="15" habilitar="#{usuarioController.promotorBean.usuario.id != null}" />
+				<p:commandButton value="Validar" action="#{usuarioController.validarRuc()}" update=":#{p:component('msgs')}, :#{p:component('pnlPersonaJuridica')}, :#{p:component('btnAceptar')}"/>
+			</h:panelGrid>
+			<h:outputLabel value="Nombre organización*" />
+			<controles-prime:todoTextoMayuscula identificador="txtNombreOrganizacion" valor="#{usuarioController.promotorBean.organizacion.nombre}" tamanio="70" longitud="250" soloLectura="true"/>
+			<h:outputLabel value="Cédula / RUC Representante" />
+			<h:panelGrid columns="2">
+				<p:inputText value="#{usuarioController.promotorBean.persona.pin}" readonly="#{!usuarioController.usuarioConectadoAdminInstitucional()}" id="pin" />
+				<p:commandButton value="Validar" action="#{usuarioController.validarCedulaEditarJ()}"  update=":#{p:component('msgs')}, :#{p:component('pnlPersonaJuridica')}, :#{p:component('btnAceptar')}" />
+			</h:panelGrid>
+			<h:outputLabel value="Nombres y Apellidos del representante" />
+			<controles-prime:soloTextoMayuscula identificador="txtNombreRepresentante" soloLectura="#{usuarioController.usuarioConectadoAdminInstitucional()}" valor="#{usuarioController.promotorBean.persona.nombre}" tamanio="50" longitud="250"/>
+			<h:outputLabel value="Cargo Representante" />
+			<controles-prime:todoTextoMayuscula identificador="txtCargoRepresentante" tamanio="50" longitud="250" valor="#{usuarioController.promotorBean.persona.posicion}" />
+			<h:outputLabel value="Tipo de Organización*" />
+			<p:selectOneMenu id="cmbTipoOrganizacion" value="#{usuarioController.promotorBean.idTipoOrganizacion}">
+				<f:selectItems value="#{combosController.listaTipoOrganizacion}" />
+				<p:ajax event="change" update="pnlParticipacionEstado :#{p:component('cpcmbParticipacionEstado')}" />
+			</p:selectOneMenu>
+			<h:outputText value="" />
+			<h:panelGroup id="pnlParticipacionEstado">
+				<controles-prime:combo identificador="cmbParticipacionEstado"
+					rendered="#{usuarioController.promotorBean.idTipoOrganizacion == 8}"
+					lista="#{combosController.listaEmpresaMixta}"
+					valor="#{usuarioController.promotorBean.organizacion.participacionEstado}" />
+			</h:panelGroup>
+
+		</h:panelGrid>
+		<h:panelGrid columns="2" width="100%" columnClasses="col1,col2">
+			<h:outputLabel value="Información de Contacto *" />
+			<h:panelGroup>
+				<p:dataTable id="tblContacto" style="width: 100%" value="#{usuarioController.promotorBean.listaContacto}" var="contacto" emptyMessage="-">
+					<p:column width="25%">
+						<f:facet name="header">
+							<p:selectOneMenu id="cmbTipoContacto" value="#{usuarioController.promotorBean.idFormaContacto}">
+								<f:selectItems value="#{combosController.listaFormasContacto}" />
+								<p:ajax event="change" update=":#{p:component('valor')}" listener="#{usuarioController.validarNumeros()}" />
+							</p:selectOneMenu>
+						</f:facet>
+						<center>
+							<h:selectOneMenu disabled="true" style="background-color: #FFFFFF; color: black;" value="#{contacto.formasContacto.id}">
+								<f:selectItems value="#{combosController.listaFormasContacto}" />
+							</h:selectOneMenu>
+						</center>
+					</p:column>
+
+					<p:column width="50%">
+						<f:facet name="header">
+						<ui:remove>
+						<p:inputMask id="valor" value="#{usuarioController.promotorBean.contacto.valor}"
+							maxlength="#{usuarioController.promotorBean.scriptTamanio}" 
+							size="40" readonly="#{usuarioController.promotorBean.idFormaContacto == null}"
+							onkeypress="#{usuarioController.promotorBean.scriptNumeros}" mask="#{usuarioController.promotorBean.maskValores}"/>
+						</ui:remove>
+							<p:inputText placeholder="#{usuarioController.promotorBean.maskValores}" id="valor" value="#{usuarioController.promotorBean.contacto.valor}"
+							maxlength="#{usuarioController.promotorBean.scriptTamanio}" 
+							size="40" readonly="#{usuarioController.promotorBean.idFormaContacto == null}"
+							onkeypress="#{usuarioController.promotorBean.scriptNumeros}"/>
+													
+						</f:facet>
+						<h:outputText value="#{contacto.valor}" />
+					</p:column>
+
+					<p:column width="25%">
+						<f:facet name="header">
+							<p:commandButton value="Aceptar" action="#{usuarioController.agregarContacto()}" update="tblContacto" />
+						</f:facet>
+						<center>
+							<p:commandButton icon="ui-icon-trash" title="Remover" action="#{usuarioController.removerContacto(contacto)}" update="tblContacto" styleClass="primary"/>
+						</center>
+					</p:column>
+				</p:dataTable>
+
+			</h:panelGroup>
+		</h:panelGrid>
+	</p:panel>
+	<p:panel header="Ubicación" rendered="#{usuarioController.usuarioBean.verDatosUsuario}">
+		<mae-composite:ubicacionGeografica idParroquia="#{usuarioController.promotorBean.idParroquia}" />
+	</p:panel>
+	
+	
+	<p:panel header="Seleccione " rendered="#{usuarioController.usuarioBean.verDatosUsuario and usuarioController.mostrarTodo and !usuarioController.esAutoridad}">		
+		<p:selectOneRadio id="tipo" value="#{usuarioController.mostrarTodasAreas}" unselectable="true">
+            <f:selectItem itemLabel="Selecccionar varias oficinas técnicas para un usuario" itemValue="#{true}"/>
+            <f:selectItem itemLabel="Seleccionar solo un área para el usuario" itemValue="#{false}" />                   
+                 <p:ajax update="@form"/>
+        </p:selectOneRadio>
+	</p:panel>
+	
+	<p:panel header="Seleccione " rendered="#{usuarioController.usuarioBean.verDatosUsuario and usuarioController.mostrarTodo and usuarioController.esAutoridad}">		
+		<p:selectOneRadio id="tipoAutoridad" value="#{usuarioController.mostrarTodasAreas}" unselectable="true">
+            <f:selectItem itemLabel="Selecccionar varias direcciones zonales para un usuario" itemValue="#{true}"/>
+            <f:selectItem itemLabel="Seleccionar solo un área para el usuario" itemValue="#{false}" />                   
+                 <p:ajax update="@form"/>
+        </p:selectOneRadio>
+	</p:panel>
+	
+	<p:panel header="Área / Subárea" rendered="#{usuarioController.usuarioBean.verDatosUsuario and usuarioController.mostrarTodasAreas}">
+		<p:fieldset legend="#{usuarioController.esAutoridad ? 'Asignación Direcciones Zonales*' : 'Asignación de Oficinas Técnicas *'}" toggleable="true" toggleSpeed="500" collapsed="true">
+		<p:tree value="#{usuarioController.promotorBean.rootOt}" styleClass="w100" var="area" selectionMode="checkbox" selection="#{usuarioController.promotorBean.selectedNodes}">
+			<p:treeNode expandedIcon="ui-icon-folder-open" collapsedIcon="ui-icon-folder-collapsed">
+				<h:panelGrid columns="3" columnClasses="null, field_mrg bold separator_top, field_mrg bold separator_top">
+					<h:outputLabel value="#{area.areaName }" />
+					<h:outputLabel value=" #{area.areaAbbreviation}" />
+					<h:outputLabel value=" (#{area.tipoArea.nombre})" />
+				</h:panelGrid>
+			</p:treeNode>
+		</p:tree>		
+		</p:fieldset>
+		<br />		
+	</p:panel>
+	
+	<p:panel header="Área / Subárea" rendered="#{usuarioController.usuarioBean.verDatosUsuario and usuarioController.mostrarAreasProtegidas}">
+		<p:fieldset legend="Asignación de Área / Subárea *" toggleable="true" toggleSpeed="500" collapsed="true">
+		<p:tree value="#{usuarioController.promotorBean.root}" styleClass="w100" var="area" selectionMode="single" selection="#{usuarioController.promotorBean.selectedNode}">
+			<p:treeNode expandedIcon="ui-icon-folder-open" collapsedIcon="ui-icon-folder-collapsed">
+				<h:panelGrid columns="3" columnClasses="null, field_mrg bold separator_top, field_mrg bold separator_top">
+					<h:outputLabel value="#{area.areaName }" />
+					<h:outputLabel value=" #{area.areaAbbreviation}" />
+					<h:outputLabel value=" (#{area.tipoArea.nombre})" />
+				</h:panelGrid>
+			</p:treeNode>
+		</p:tree>		
+		</p:fieldset>
+		<br />		
+
+		<p:fieldset legend="Asignación de Áreas Protegidas *" toggleable="true" toggleSpeed="500" collapsed="true">
+		<p:tree value="#{usuarioController.promotorBean.rootAP}" styleClass="w100" var="area" selectionMode="checkbox" selection="#{usuarioController.promotorBean.selectedNodeAP}">
+			<p:treeNode expandedIcon="ui-icon-folder-open" collapsedIcon="ui-icon-folder-collapsed">
+				<h:panelGrid columns="3" columnClasses="null, field_mrg bold separator_top, field_mrg bold separator_top">
+					<h:outputLabel value="#{area.nombreAreaCompleto}" />
+				</h:panelGrid>
+			</p:treeNode>
+		</p:tree>
+		
+		</p:fieldset>
+	</p:panel>
+	
+	<p:panel header="Área / Subárea" rendered="#{usuarioController.usuarioBean.verDatosUsuario and !usuarioController.mostrarTodasAreas and !usuarioController.mostrarAreasProtegidas}">
+		<p:tree value="#{usuarioController.promotorBean.root}" styleClass="w100" var="area" selectionMode="single" selection="#{usuarioController.promotorBean.selectedNode}">
+			<p:treeNode expandedIcon="ui-icon-folder-open" collapsedIcon="ui-icon-folder-collapsed">
+				<h:panelGrid columns="3" columnClasses="null, field_mrg bold separator_top, field_mrg bold separator_top">
+					<h:outputLabel value="#{area.areaName }" />
+					<h:outputLabel value=" #{area.areaAbbreviation}" />
+					<h:outputLabel value=" (#{area.tipoArea.nombre})" />
+				</h:panelGrid>
+			</p:treeNode>
+		</p:tree>	
+		
+	</p:panel>
+	
+	
+	<h:panelGroup rendered="#{usuarioController.usuarioBean.verDatosUsuario}">
+		<div class="buttons main">
+			<p:commandButton icon="ui-icon-check" id="btnAceptar" disabled="#{usuarioController.promotorBean.deshabilitarRegistro}" value="Aceptar" action="#{usuarioController.guardar()}" update=":#{p:component('msgs')},:#{p:component('frmListaUsuario')},:#{p:component('frmDatosUsuario')}" />
+			<p:commandButton icon="ui-icon-cancel" styleClass="secondary" action="#{usuarioController.inicio()}" value="Cancelar" update=":#{p:component('msgs')},:#{p:component('frmListaUsuario')},:#{p:component('frmDatosUsuario')}" oncomplete="PF('usuariostbl').clearFilters()" />
+		</div>
+	</h:panelGroup>
+</ui:composition>

@@ -1,0 +1,2200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+
+	<ui:define name="content">
+		<style type="text/css">
+.ui-selectonemenu-panel {
+	position: fixed;
+}
+</style>
+
+		<f:event type="preRenderView"
+			listener="#{ingresarInformacionViabilidadPfnController.validarTareaBpm()}" />
+
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="1.1 Datos del operador" />
+				</f:facet>
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null">
+					<p:outputLabel value="Cédula / RUC" style="color: white" />
+					<p:inputText disabled="true"
+						value="#{ingresarInformacionViabilidadPfnController.operador.nombre}" />
+
+					<p:outputLabel value="Nombre del operador" style="color: white" />
+					<p:inputText disabled="true"
+						value="#{ingresarInformacionViabilidadPfnController.nombreOperador}" />
+
+					<p:outputLabel value="Representante legal" style="color: white"
+						rendered="#{ingresarInformacionViabilidadPfnController.representanteLegal eq '' ? false : true}" />
+					<p:inputText disabled="true"
+						rendered="#{ingresarInformacionViabilidadPfnController.representanteLegal eq '' ? false : true}"
+						value="#{ingresarInformacionViabilidadPfnController.representanteLegal}" />
+
+					<p:outputLabel value="Dirección" style="color: white" />
+					<p:inputText disabled="true"
+						value="#{ingresarInformacionViabilidadPfnController.direccion}" />
+
+					<p:outputLabel value="Correo electrónico" style="color: white" />
+					<p:inputText disabled="true"
+						value="#{ingresarInformacionViabilidadPfnController.correo}" />
+
+					<p:outputLabel value="Teléfono" style="color: white" />
+					<p:inputText disabled="true"
+						value="#{ingresarInformacionViabilidadPfnController.telefono}" />
+
+					<p:outputLabel value="Casillero Judicial" style="color: white" />
+					<p:inputText maxlength="200"
+						value="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.casilleroJudicial}">
+						<p:ajax process="@this" />
+					</p:inputText>
+				</p:panelGrid>
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="1.2 Datos generales" />
+				</f:facet>
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null">
+					<p:outputLabel value="Nombre del proyecto" style="color: white" />
+					<p:inputText disabled="true"
+						value="#{ingresarInformacionViabilidadPfnController.proyectoLicenciaCoa.nombreProyecto}" />
+				</p:panelGrid>
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText
+						value="1.3 Coordenadas del área geográfica en DATUM WGS 84 zona 17 sur *" />
+				</f:facet>
+				<p:dataTable rowIndexVar="index"
+					value="#{ingresarInformacionViabilidadPfnController.coordenadasGeograficas}"
+					var="item" emptyMessage="#{labels['common.table.empty']}" rows="10"
+					paginator="true" paginatorAlwaysVisible="false"
+					paginatorPosition="bottom" rowsPerPageTemplate="5,10,15">
+					<p:subTable value="#{item.coordenadas}" var="coordenada" rows="10">
+						<p:columnGroup type="header">
+							<p:row>
+								<p:column headerText="Área Geográfica"
+									styleClass="alCenter table-column-header" />
+								<p:column headerText="Shape"
+									styleClass="alCenter table-column-header" />
+								<p:column headerText="X"
+									styleClass="alCenter table-column-header" />
+								<p:column headerText="Y"
+									styleClass="alCenter table-column-header" />
+							</p:row>
+						</p:columnGroup>
+						<p:column headerText="Área Geográfica" styleClass="alCenter w5">
+							<h:outputText
+								value="#{(coordenada.areaGeografica eq null) ? 1 : coordenada.areaGeografica }" />
+						</p:column>
+						<p:column headerText="Shape" styleClass="alCenter w15">
+							<h:outputText value="#{coordenada.ordenCoordenada}" />
+						</p:column>
+						<p:column headerText="X" styleClass="alCenter w15">
+							<h:outputText value="#{coordenada.x.intValue()}" />
+						</p:column>
+						<p:column headerText="Y" styleClass="alCenter w15">
+							<h:outputText value="#{coordenada.y.intValue()}" />
+						</p:column>
+					</p:subTable>
+				</p:dataTable>
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText
+						value="1.4 Coordenadas del área implantación en DATUM WGS 84 zona 17 sur *" />
+				</f:facet>
+				<p:dataTable rowIndexVar="index"
+					value="#{ingresarInformacionViabilidadPfnController.coordenadasImplantacion}"
+					var="item" emptyMessage="#{labels['common.table.empty']}" rows="10"
+					paginator="true" paginatorAlwaysVisible="false"
+					paginatorPosition="bottom" rowsPerPageTemplate="5,10,15">
+					<p:subTable value="#{item.coordenadas}" var="coordenada">
+						<p:columnGroup type="header">
+							<ui:remove>
+								<p:row>
+									<p:column
+										headerText="Grupo de coordenadas #{index + 1} (#{item.tipoForma})"
+										styleClass="alCenter w100 table-column-header" colspan="4" />
+								</p:row>
+							</ui:remove>
+							<p:row>
+								<p:column headerText="Área de implantación"
+									styleClass="alCenter table-column-header" />
+								<p:column headerText="Shape"
+									styleClass="alCenter table-column-header" />
+								<p:column headerText="X"
+									styleClass="alCenter table-column-header" />
+								<p:column headerText="Y"
+									styleClass="alCenter table-column-header" />
+							</p:row>
+						</p:columnGroup>
+						<p:column headerText="Área de implantación"
+							styleClass="alCenter w5">
+							<h:outputText
+								value="#{(coordenada.areaGeografica eq null) ? 1 : coordenada.areaGeografica}" />
+						</p:column>
+						<p:column headerText="Shape" styleClass="alCenter w15">
+							<h:outputText value="#{coordenada.ordenCoordenada}" />
+						</p:column>
+						<p:column headerText="X" styleClass="alCenter w15">
+							<h:outputText value="#{coordenada.x.intValue()}" />
+						</p:column>
+						<p:column headerText="Y" styleClass="alCenter w15">
+							<h:outputText value="#{coordenada.y.intValue()}" />
+						</p:column>
+					</p:subTable>
+				</p:dataTable>
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="1.5 Ubicación geográfica" />
+				</f:facet>
+				<p:dataTable id="verIdtableubicaciones"
+					value="#{ingresarInformacionViabilidadPfnController.ubicacionProyecto}"
+					var="ubicacion" emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Provincia">
+						<h:outputText
+							value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+					</p:column>
+					<p:column headerText="Cantón">
+						<h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}" />
+					</p:column>
+					<p:column headerText="Parroquia">
+						<h:outputText value="#{ubicacion.nombre}" />
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText
+						value="1.6 Intersección del Proyecto con Patrimonio Forestal Nacional" />
+				</f:facet>
+				<h:outputText value="Su proyecto obra o actividad interseca con:" />
+				<h:outputText escape="false" styleClass="uppercase"
+					value="#{ingresarInformacionViabilidadPfnController.interseccion}" />
+
+				<h:panelGrid columns="2">
+					<h:outputText value="Superficie Total:" />
+					<h:outputText escape="false"
+						value="#{ingresarInformacionViabilidadPfnController.proyectoLicenciaCoa.superficie} ha" />
+
+					<h:outputText value="Superficie Total:" />
+					<h:outputText escape="false"
+						value="#{ingresarInformacionViabilidadPfnController.proyectoLicenciaCoa.superficie*10000} m2" />
+
+				</h:panelGrid>
+
+			</p:panelGrid>
+
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText
+						value="1.7 Intersección del Proyecto con Convenios suscritos para conservación o restauración" />
+				</f:facet>
+
+				<p:dataTable id="dtConvenios" var="convenio"
+					styleClass="table table-hover"
+					value="#{ingresarInformacionViabilidadPfnController.listaInterseccionesConvenios}"
+					paginator="true" paginatorAlwaysVisible="false"
+					paginatorPosition="bottom"
+					emptyMessage="#{labels['common.table.empty']}"
+					currentPageReportTemplate="{currentPage} de {totalPages}" rows="5"
+					rowsPerPageTemplate="5,10,15"
+					rendered="#{ingresarInformacionViabilidadPfnController.mostrarListaConvenio}" >
+
+					<p:column headerText="Tipo de convenio">
+						<h:outputText value="#{convenio.tipoConvenio}" />
+					</p:column>
+					<p:column headerText="Código del convenio">
+						<h:outputText value="#{convenio.codigoConvenio}" />
+					</p:column>
+					<p:column headerText="Nombre beneficiario">
+						<h:outputText value="#{convenio.beneficiarioConvenio}" />
+					</p:column>
+					<p:column headerText="Área total (ha)" >
+						<h:outputText value="#{convenio.porcentajeAreaInterseccion * ingresarInformacionViabilidadPfnController.proyectoLicenciaCoa.superficie}" >
+							<f:convertNumber pattern="#0.00" locale="en_US" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="Porcentaje área intersección" >
+						<h:outputText value="#{convenio.porcentajeAreaInterseccion * 100}" />
+					</p:column>
+				</p:dataTable>
+				<p:outputLabel value="No se registran convenios para conservación o restauración" rendered="#{!ingresarInformacionViabilidadPfnController.mostrarListaConvenio}" />
+
+			</p:panelGrid>
+
+			<p:panelGrid id="pnlUnidadeshidrograficas" columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText
+						value="1.8 Intersección del Proyecto con unidades hidrográficas" />
+					<p:commandButton value="Adicionar" title="Adicionar"
+						styleClass="button-small-text toRight field_mrg"
+						oncomplete="PF('dlgIdentificacionUniHidrograficas').show();"
+						immediate="true"
+						actionListener="#{ingresarInformacionViabilidadPfnController.limpiarUnidadHidrografica()}"
+						update=":formDialog:dlgIdentificacionUniHidrograficas :formDialog:pnlIdentificacionUniHidrograficas">
+					</p:commandButton>
+				</f:facet>
+
+				<p:dataTable id="dtInterUHidrograficas" var="unidadH"
+					styleClass="table table-hover"
+					value="#{ingresarInformacionViabilidadPfnController.listaInterseccionUHidrograficas}"
+					paginator="true" paginatorAlwaysVisible="false"
+					paginatorPosition="bottom"
+					emptyMessage="#{labels['common.table.empty']}"
+					currentPageReportTemplate="{currentPage} de {totalPages}" rows="5"
+					rowsPerPageTemplate="5,10,15"
+					rendered="#{ingresarInformacionViabilidadPfnController.mostrarlistaUnidadesHidrograficas}">
+
+					<p:column headerText="Nombre">
+						<h:outputText value="#{unidadH.nombre}" />
+					</p:column>
+					<p:column headerText="Coordenada X">
+						<h:outputText value="#{unidadH.coordenadaX}" />
+					</p:column>
+					<p:column headerText="Coordenada Y">
+						<h:outputText value="#{unidadH.coordenadaY}" />
+					</p:column>
+					<p:column headerText="Elevación (m.s.n.m.)">
+						<h:outputText value="#{unidadH.elevacion}" />
+					</p:column>
+					<p:column headerText="Acción" styleClass="w70px alCenter">
+
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-pencil"
+							actionListener="#{ingresarInformacionViabilidadPfnController.editarUnidadHidrografica(unidadH)}"
+							update=":formDialog:dlgIdentificacionUniHidrograficas"
+							oncomplete="PF('dlgIdentificacionUniHidrograficas').show();"
+							immediate="true" />
+
+						<p:commandButton update=":form:dtInterUHidrograficas"
+							styleClass="button-small primary" process="@this"
+							icon="ui-icon-trash"
+							actionListener="#{ingresarInformacionViabilidadPfnController.eliminarUnidadHidrografica(unidadH)}"
+							immediate="true">
+							<p:confirm icon="ui-icon-alert" header="Confirmación"
+								message="¿Está seguro de eliminar el registro?" />
+						</p:commandButton>
+					</p:column>
+				</p:dataTable>
+				<p:outputLabel id="lblunidadesHidrograficas" value="No se registran unidades hidrográficas" rendered="#{!ingresarInformacionViabilidadPfnController.mostrarlistaUnidadesHidrograficas}" />
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="1.9 Sector del proyecto, obra o actividad" />
+				</f:facet>
+				<p:panelGrid columns="4" styleClass="panel_data w100"
+					columnClasses="header w25, w25, header w25, w25">
+					<p:outputLabel value="Sector" style="color: white" />
+					<p:inputText disabled="true"
+						value="#{ingresarInformacionViabilidadPfnController.sector}" />
+
+					<p:outputLabel value="Fase del proyecto" style="color: white"
+						for="txtFaseProyecto" />
+					<p:inputText id="txtFaseProyecto" maxlength="200" required="true"
+						value="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.faseProyecto}">
+						<p:ajax process="@this" />
+					</p:inputText>
+
+				</p:panelGrid>
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText
+						value="1.10 Datos del profesional o del equipo consultor responsable del Informe" />
+				</f:facet>
+				<p:panelGrid id="pnlConsultorPrincipal" columns="2"
+					styleClass="panel_data w100" columnClasses="header w25, null">
+					<p:outputLabel value="Cédula profesional principal:"
+						for="txtCedulaConsultor" style="color: white" />
+					<p:inputText id="txtCedulaConsultor" maxlength="50" required="true"
+						value="#{ingresarInformacionViabilidadPfnController.consultorPrincipal.consultor.cedula}">
+						<p:ajax event="blur"
+							listener="#{ingresarInformacionViabilidadPfnController.validarConsultor}"
+							update="pnlConsultorPrincipal" />
+					</p:inputText>
+
+					<p:outputLabel value="Nombres y Apellidos:" style="color: white" />
+					<p:inputText id="txtNombreConsultor" disabled="true"
+						value="#{ingresarInformacionViabilidadPfnController.consultorPrincipal.consultor.nombres}" />
+
+					<p:outputLabel value="Título académico:" style="color: white" />
+					<p:inputText id="txtTituloConsultor" disabled="true"
+						value="#{ingresarInformacionViabilidadPfnController.consultorPrincipal.consultor.tituloAcademico}" />
+
+					<p:outputLabel value="Registro de título SENESCYT:"
+						style="color: white" />
+					<p:inputText id="txtRegistroTituloConsultor" disabled="true"
+						value="#{ingresarInformacionViabilidadPfnController.consultorPrincipal.consultor.registroSenecyt}" />
+
+					<p:outputLabel for="txtCorreoConsultor" value="Correo electrónico:"
+						style="color: white" />
+					<p:inputText id="txtCorreoConsultor" required="true"
+						maxlength="200"
+						value="#{ingresarInformacionViabilidadPfnController.consultorPrincipal.correo}">
+						<p:ajax process="@this" event="blur" />
+						<t:validateEmail />
+					</p:inputText>
+
+					<p:outputLabel for="txtTelefonoConsultor" value="Teléfono:"
+						style="color: white" />
+					<p:inputText id="txtTelefonoConsultor" required="true"
+						maxlength="200"
+						value="#{ingresarInformacionViabilidadPfnController.consultorPrincipal.telefono}">
+						<p:ajax process="@this" />
+					</p:inputText>
+
+				</p:panelGrid>
+
+				<h:panelGrid id="pnlEquipoConsultor" columns="1" layout="grid"
+					styleClass="w100">
+					<f:facet name="header">
+						<p:commandButton value="Adicionar equipo consultor"
+							title="Adicionar" styleClass="toRight field_mrg"
+							oncomplete="PF('dlgEquipoConsultor').show();" immediate="true"
+							actionListener="#{ingresarInformacionViabilidadPfnController.abrirEquipoConsultor()}"
+							update=":formDialog:dlgEquipoConsultor">
+						</p:commandButton>
+					</f:facet>
+
+					<p:dataTable id="dtEquipoConsultor" var="consultor"
+						styleClass="table table-hover"
+						value="#{ingresarInformacionViabilidadPfnController.listaEquipoConsultor}"
+						paginator="true" paginatorAlwaysVisible="false"
+						paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						currentPageReportTemplate="{currentPage} de {totalPages}" rows="5"
+						rowsPerPageTemplate="5,10,15">
+
+						<p:column headerText="Cédula">
+							<h:outputText value="#{consultor.consultor.cedula}" />
+						</p:column>
+						<p:column headerText="Nombres y Apellidos">
+							<h:outputText value="#{consultor.consultor.nombres}" />
+						</p:column>
+						<p:column headerText="Título académico">
+							<h:outputText value="#{consultor.consultor.tituloAcademico}" />
+						</p:column>
+						<p:column headerText="Registro de título SENESCYT">
+							<h:outputText style="word-wrap: break-word;"
+								value="#{consultor.consultor.registroSenecyt}" />
+						</p:column>
+						<p:column headerText="Correo electrónico">
+							<h:outputText style="word-wrap: break-word;"
+								value="#{consultor.correo}" />
+						</p:column>
+						<p:column headerText="Teléfono">
+							<h:outputText value="#{consultor.telefono}" />
+						</p:column>
+						<p:column headerText="Acción" styleClass="w70px alCenter">
+
+							<p:commandButton styleClass="button-small primary"
+								process="@this" icon="ui-icon-pencil"
+								actionListener="#{ingresarInformacionViabilidadPfnController.editarEquipoConsultor(consultor)}"
+								update=":formDialog:dlgEquipoConsultor"
+								oncomplete="PF('dlgEquipoConsultor').show();" immediate="true" />
+
+							<p:commandButton update=":form:dtEquipoConsultor"
+								styleClass="button-small primary" process="@this"
+								icon="ui-icon-trash"
+								actionListener="#{ingresarInformacionViabilidadPfnController.eliminarEquipoConsultor(consultor)}"
+								immediate="true">
+								<p:confirm icon="ui-icon-alert" header="Confirmación"
+									message="¿Está seguro de eliminar el registro del consultor?" />
+							</p:commandButton>
+
+						</p:column>
+
+					</p:dataTable>
+				</h:panelGrid>
+			</p:panelGrid>
+
+			<br />
+			<h:panelGrid styleClass="w100" id="pnlTextos">
+				<p:fieldset legend="2. ANTECEDENTES" toggleable="true"
+					toggleSpeed="500" collapsed="true">
+					<h:panelGrid columns="1" styleClass="w100">
+						<control:imputConTextoEnriquecido longitudmáxima="10000"
+							requiredMessage="El campo 'Antecedentes' es requerido"
+							valor="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.antecedentes}"
+							soloLectura="false" />
+					</h:panelGrid>
+				</p:fieldset>
+
+				<br />
+
+				<p:fieldset legend="3. MARCO LEGAL" toggleable="true"
+					toggleSpeed="500" collapsed="true">
+					<h:panelGrid columns="1" styleClass="w100">
+						<control:imputConTextoEnriquecido
+							requiredMessage="El campo 'Marco Legal' es requerido"
+							valor="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.marcoLegal}"
+							soloLectura="false" />
+					</h:panelGrid>
+				</p:fieldset>
+
+				<br />
+
+				<p:fieldset legend="4. OBJETIVO" toggleable="true" toggleSpeed="500"
+					collapsed="true">
+					<control:imputConTextoEnriquecido
+						requiredMessage="El campo 'Objetivo' es requerido"
+						valor="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.objetivo}"
+						soloLectura="false" />
+				</p:fieldset>
+
+				<br />
+
+				<p:fieldset legend="5. DESCRIPCIÓN GENERAL DEL PROYECTO"
+					toggleable="true" toggleSpeed="500" collapsed="true">
+
+					<h:outputText
+						value="Se debe realizar en función del numeral 5 del anexo 1 del Acuerdo Ministerial 110" />
+					<control:imputConTextoEnriquecido
+						requiredMessage="El campo 'Descripción general del Proyecto' es requerido"
+						valor="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.descripcionProyecto}"
+						soloLectura="false" />
+					<br />
+					<br />
+
+					<h:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<p:commandButton id="btnAgregarFotoProyecto" value="Adicionar"
+								title="Adicionar" styleClass="toRight field_mrg"
+								oncomplete="PF('dlgfotoArchivo').show();" immediate="true"
+								update=":formDialog:dlgfotoArchivo"
+								disabled="#{ingresarInformacionViabilidadPfnController.listaFotoArchivo.size() >= 10}">
+							</p:commandButton>
+						</f:facet>
+
+						<p:dataTable id="dtFotoArchivo" var="foto"
+							styleClass="table table-hover"
+							value="#{ingresarInformacionViabilidadPfnController.listaFotoArchivo}"
+							paginator="true" paginatorAlwaysVisible="false"
+							paginatorPosition="bottom"
+							emptyMessage="#{labels['common.table.empty']}"
+							currentPageReportTemplate="{currentPage} de {totalPages}"
+							rows="10" rowsPerPageTemplate="5, 10,15">
+
+							<p:column headerText="Fotografía">
+								<p:commandLink value="#{foto.nombre}" ajax="false"
+									immediate="true">
+									<p:fileDownload
+										value="#{ingresarInformacionViabilidadPfnController.descargarFotografia(foto)}" />
+								</p:commandLink>
+							</p:column>
+							<p:column headerText="Descripción">
+								<h:outputText value="#{foto.descripcionAnexo}" />
+							</p:column>
+							<p:column headerText="Acción" styleClass="w70px alCenter">
+								<p:commandButton
+									update=":form:dtFotoArchivo :form:btnAgregarFotoProyecto"
+									styleClass="button-small primary" process="@this"
+									icon="ui-icon-trash"
+									actionListener="#{ingresarInformacionViabilidadPfnController.eliminarFotoArchivo(foto)}">
+									<p:confirm icon="ui-icon-alert" header="Confirmación"
+										message="¿Está seguro de eliminar la fotografía?" />
+								</p:commandButton>
+							</p:column>
+
+						</p:dataTable>
+					</h:panelGrid>
+					<br />
+					<h:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<p:commandButton value="Adicionar" title="Adicionar"
+								styleClass="toRight field_mrg"
+								update=":formDialog:dlgArchivoAdjunto"
+								oncomplete="PF('dlgArchivoAdjunto').show();" immediate="true">
+							</p:commandButton>
+						</f:facet>
+
+						<p:dataTable id="dtAdjuntos" var="adjunto"
+							styleClass="table table-hover"
+							value="#{ingresarInformacionViabilidadPfnController.listaDocumentoAdjunto}"
+							paginator="true" paginatorAlwaysVisible="false"
+							paginatorPosition="bottom"
+							emptyMessage="#{labels['common.table.empty']}"
+							currentPageReportTemplate="{currentPage} de {totalPages}"
+							rows="10" rowsPerPageTemplate="5,10,15">
+
+							<p:column headerText="Adjunto">
+								<p:commandLink value="#{adjunto.nombre}" ajax="false"
+									immediate="true">
+									<p:fileDownload
+										value="#{ingresarInformacionViabilidadPfnController.descargarFotografia(adjunto)}" />
+								</p:commandLink>
+							</p:column>
+							<p:column headerText="Descripción">
+								<h:outputText value="#{adjunto.descripcionAnexo}" />
+							</p:column>
+							<p:column headerText="Acción" styleClass="w70px alCenter">
+								<p:commandButton update=":form:dtAdjuntos"
+									styleClass="button-small primary" process="@this"
+									icon="ui-icon-trash"
+									actionListener="#{ingresarInformacionViabilidadPfnController.eliminarDocumentoAdjunto(adjunto)}">
+									<p:confirm icon="ui-icon-alert" header="Confirmación"
+										message="¿Está seguro de eliminar el registro el archivo adjunto?" />
+								</p:commandButton>
+							</p:column>
+
+						</p:dataTable>
+					</h:panelGrid>
+				</p:fieldset>
+			</h:panelGrid>
+
+			<br />
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="6. CARACTERIZACIÓN DEL ÁREA DEL PROYECTO" />
+				</f:facet>
+
+				<h:panelGrid columns="1" styleClass="w100">
+					<h:outputText value="6.1 Cobertura vegetal y uso de suelo" />
+					<h:outputText
+						value="Descripción de la cobertura vegetal y uso de suelo de área geográfica del proyecto" />
+
+					<control:imputConTextoEnriquecido id="txtDescripcionCobertura"
+						requiredMessage="El campo 'Descripción de la cobertura vegetal y uso de suelo del área geográfica del proyecto' es requerido"
+						valor="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.descripcionCoberturaVegetal}"
+						soloLectura="false" />
+
+					<h:outputText value="Citar en el texto las fuentes de consulta" />
+
+					<br />
+					<p:dataTable id="dtTipoCoberturaVegetal" var="interseccion"
+						styleClass="table table-hover"
+						value="#{ingresarInformacionViabilidadPfnController.listaInterseccionesCobertura}"
+						paginator="true" paginatorAlwaysVisible="false"
+						paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						currentPageReportTemplate="{currentPage} de {totalPages}"
+						rows="10" rowsPerPageTemplate="5,10,15">
+						<p:column headerText="Tipo de cobertura vegetal y uso de suelo">
+							<h:outputText value="#{interseccion.nombreGeometria}" />
+						</p:column>
+						<p:column headerText="Superficie total de la cobertura vegetal y uso de suelo (ha)" >
+							<h:outputText value="#{interseccion.porcentajeAreaInterseccion * ingresarInformacionViabilidadPfnController.proyectoLicenciaCoa.superficie}" >
+								<f:convertNumber pattern="#0.00" locale="en_US" />
+							</h:outputText>
+						</p:column>
+						<p:column
+							headerText="Porcentaje de intersección con el proyecto, obra o actividad" >
+							<h:outputText
+								value="#{interseccion.porcentajeAreaInterseccion * 100}" />
+						</p:column>
+
+					</p:dataTable>
+				</h:panelGrid>
+				<br />
+				<h:panelGrid columns="1" styleClass="w100">
+					<h:outputText value="6.2 Ecosistemas " />
+					<h:outputText
+						value="Descripción de los ecosistemas del área geográfica del proyecto" />
+
+					<control:imputConTextoEnriquecido id="txtDescripcionEcosistemas"
+						requiredMessage="Descripción de los ecosistemas del área geográfica del proyecto' es requerido"
+						valor="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.descripcionEcosistemas}"
+						soloLectura="false" />
+					<h:outputText value="Citar en el texto las fuentes de consulta" />
+
+					<br />
+					<p:dataTable id="dtTipoEcosistema" var="ecosistema"
+						styleClass="table table-hover"
+						value="#{ingresarInformacionViabilidadPfnController.listaInterseccionesEcosistema}"
+						paginator="true" paginatorAlwaysVisible="false"
+						paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						currentPageReportTemplate="{currentPage} de {totalPages}"
+						rows="10" rowsPerPageTemplate="5,10,15">
+
+						<p:column headerText="Código del ecosistema">
+							<h:outputText value="#{ecosistema.codigoConvenio}" />
+						</p:column>
+						<p:column headerText="Nombre del ecosistema">
+							<h:outputText value="#{ecosistema.nombreGeometria}" />
+						</p:column>
+						<p:column headerText="Superficie total del ecosistema (ha)" >
+							<h:outputText value="#{ecosistema.porcentajeAreaInterseccion * ingresarInformacionViabilidadPfnController.proyectoLicenciaCoa.superficie}" >
+								<f:convertNumber pattern="#0.00" locale="en_US" />
+							</h:outputText>
+						</p:column>
+						<p:column
+							headerText="Porcentaje de intersección con el proyecto, obra o actividad" >
+							<h:outputText
+								value="#{ecosistema.porcentajeAreaInterseccion * 100}" />
+						</p:column>
+
+					</p:dataTable>
+
+				</h:panelGrid>
+				<br />
+				<h:panelGrid>
+					<f:facet name="header">
+						<p:commandButton value="Adicionar" title="Adicionar"
+							styleClass="toRight field_mrg"
+							update=":formDialog:dlgImagenSatelital"
+							oncomplete="PF('dlgImagenSatelital').show();" immediate="true">
+						</p:commandButton>
+					</f:facet>
+
+					<p:dataTable id="dtImagenSatelital" var="imagen"
+						styleClass="table table-hover"
+						value="#{ingresarInformacionViabilidadPfnController.listaImagenesSatelite}"
+						paginator="true" paginatorAlwaysVisible="false"
+						paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						currentPageReportTemplate="{currentPage} de {totalPages}"
+						rows="10" rowsPerPageTemplate="5,10,15">
+
+						<p:column headerText="Imagen Satelital">
+							<p:commandLink value="#{imagen.nombre}" ajax="false"
+								immediate="true">
+								<p:fileDownload
+									value="#{ingresarInformacionViabilidadPfnController.descargarFotografia(imagen)}" />
+							</p:commandLink>
+						</p:column>
+						<p:column headerText="Descripción">
+							<h:outputText value="#{imagen.descripcionAnexo}" />
+						</p:column>
+						<p:column headerText="Acción" styleClass="w70px alCenter">
+							<p:commandButton update=":form:dtImagenSatelital"
+								styleClass="button-small primary" process="@this"
+								icon="ui-icon-trash"
+								actionListener="#{ingresarInformacionViabilidadPfnController.eliminarImagenSatelital(imagen)}">
+								<p:confirm icon="ui-icon-alert" header="Confirmación"
+									message="¿Está seguro de eliminar el registro de la imagen satelital?" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+
+				<br />
+
+				<p:fieldset legend="6.3 Caracterización de la Cobertura Vegetal"
+					toggleable="true" toggleSpeed="500" collapsed="false">
+
+					<div>En caso de que un proyecto se encuentre en ecosistemas
+						herbáceos o matorrales cuyos diámetros no superen los 10 cm de
+						DAP, se deberá presentar la descripción cualitativa de las
+						especies y determinar la frecuencia, procentaje de cobertura y
+						riqueza</div>
+
+					<br />
+					<h:outputText
+						value="Seleccione el tipo de descripción utilizada para el levantamiento de información de cobertura vegetal del área del proyecto" />
+
+					<p:selectOneRadio id="idCaracterizacion"
+						value="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.caracterizacionCobertura}">
+						<f:selectItem itemValue="1"
+							itemLabel="Caracterización cualitativa" />
+						<f:selectItem itemValue="2"
+							itemLabel="Caracterización cuantitativa" />
+						<p:ajax update="pnlCaracterizacion pnlCaracterizacionCuantitativa"
+							process="@this"
+							listener="#{ingresarInformacionViabilidadPfnController.seleccionarCaracterizacion}" />
+					</p:selectOneRadio>
+
+					<br />
+
+					<h:panelGrid id="pnlCaracterizacion">
+						<h:panelGroup
+							rendered="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.caracterizacionCobertura eq 1}">
+							<h:outputText
+								value="Descripción de la metodología utilizada para la caracterización cualitativa"
+								rendered="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.caracterizacionCobertura eq '1' ? true : false}" />
+							<p:inputTextarea autoResize="false"
+								value="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.descripcionMetodologia}"
+								maxlength="20000"
+								rendered="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.caracterizacionCobertura eq '1' ? true : false}">
+								<p:ajax process="@this" />
+							</p:inputTextarea>
+
+							<br />
+							<br />
+							<p:panelGrid id="pnlCoordenadasCualitativa"
+								rendered="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.caracterizacionCobertura eq '1' ? true : false}"
+								columns="1" layout="grid" styleClass="w100"
+								columnClasses="w25, field_mrg w25">
+								<f:facet name="header">
+									<h:outputText
+										value="Ubicación del sitio de referencia caracterización cualitativa" />
+									<p:commandButton value="Adicionar" title="Adicionar"
+										styleClass="toRight field_mrg"
+										oncomplete="PF('dlgCaracterizacionCualitativa').show();"
+										immediate="true"
+										actionListener="#{ingresarInformacionViabilidadPfnController.abrirCoordenadasSitioMuestral()}"
+										update=":formDialog:dlgCaracterizacionCualitativa">
+									</p:commandButton>
+								</f:facet>
+
+								<p:dataTable id="dtCaracterizacionCualitativa" var="sitio"
+									styleClass="table table-hover"
+									value="#{ingresarInformacionViabilidadPfnController.listaSitioMuestral}"
+									paginator="true" paginatorAlwaysVisible="false"
+									paginatorPosition="bottom"
+									emptyMessage="#{labels['common.table.empty']}"
+									currentPageReportTemplate="{currentPage} de {totalPages}"
+									rows="10" rowsPerPageTemplate="5,10,15">
+
+									<p:column headerText="Código o nombre del sitio">
+										<h:outputText value="#{sitio.nombreSitio}" />
+									</p:column>
+									<p:column headerText="Coordenada X">
+										<h:outputText
+											value="#{sitio.coordenadaSitioMuestral.coordenadaX}" />
+									</p:column>
+									<p:column headerText="Coordenada Y">
+										<h:outputText
+											value="#{sitio.coordenadaSitioMuestral.coordenadaY}" />
+									</p:column>
+									<p:column headerText="Elevación (m.s.n.m.)">
+										<h:outputText value="#{sitio.elevacion}" />
+									</p:column>
+									<p:column headerText="Acción" styleClass="w70px alCenter">
+										<p:commandButton
+											update=":form:dtCaracterizacionCualitativa :formDialog:dlgCaracterizacionCualitativa"
+											styleClass="button-small primary" process="@this"
+											icon="ui-icon-pencil"
+											oncomplete="PF('dlgCaracterizacionCualitativa').show();"
+											actionListener="#{ingresarInformacionViabilidadPfnController.editarCaracterizacionCualitativa(sitio)}" />
+										<p:commandButton update=":form:dtCaracterizacionCualitativa"
+											styleClass="button-small primary" process="@this"
+											icon="ui-icon-trash"
+											actionListener="#{ingresarInformacionViabilidadPfnController.eliminarCaracterizacionCualitativa(sitio)}">
+											<p:confirm icon="ui-icon-alert" header="Confirmación"
+												message="¿Está seguro de eliminar el registro de ubicación del sitio de referencia?" />
+										</p:commandButton>
+									</p:column>
+								</p:dataTable>
+							</p:panelGrid>
+
+							<br />
+							<p:panelGrid
+								rendered="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.caracterizacionCobertura eq '1' ? true : false}"
+								columns="1" layout="grid" styleClass="w100"
+								columnClasses="w25, field_mrg w25">
+								<f:facet name="header">
+									<h:outputText
+										value="Registro cualitativo de especies del área de estudio" />
+									<p:commandButton value="Adicionar" title="Adicionar"
+										styleClass="toRight field_mrg"
+										oncomplete="PF('dlgCaracterizacionEspeciesCualitativa').show();"
+										immediate="true"
+										actionListener="#{ingresarInformacionViabilidadPfnController.borrarCaracterizacionCualitativaEspecies()}"
+										update=":formDialog:dlgCaracterizacionEspeciesCualitativa">
+									</p:commandButton>
+								</f:facet>
+
+								<p:dataTable id="dtCaracterizacionEspeciesCualitativa"
+									var="especie" styleClass="table table-hover"
+									value="#{ingresarInformacionViabilidadPfnController.listaCaracterizacionCualitativaEspecies}"
+									paginator="true" paginatorAlwaysVisible="false"
+									paginatorPosition="bottom"
+									emptyMessage="#{labels['common.table.empty']}"
+									currentPageReportTemplate="{currentPage} de {totalPages}"
+									rows="10" rowsPerPageTemplate="5,10,15">
+
+									<p:column headerText="Código o nombre del sitio">
+										<h:outputText value="#{especie.sitioMuestral.nombreSitio}" />
+									</p:column>
+									<p:column headerText="Familia">
+										<h:outputText
+											value="#{especie.familiaEspecie.hiclScientificName}" />
+									</p:column>
+									<p:column headerText="Género">
+										<h:outputText
+											value="#{especie.generoEspecie.hiclScientificName}" />
+									</p:column>
+									<p:column headerText="Especie">
+										<h:outputText value="#{especie.especie.sptaScientificName}" />
+									</p:column>
+									<p:column headerText="Frecuencia">
+										<h:outputText value="#{especie.frecuencia}" />
+									</p:column>
+									<p:column headerText="Estado de conservación UICN">
+										<h:outputText value="#{especie.estadoConservacion.nombre}" />
+									</p:column>
+									<p:column headerText="Apéndice CITES">
+										<h:outputText value="#{especie.estadoCites.nombre}" />
+									</p:column>
+									<p:column headerText="Aprovechamiento o condicionado">
+										<h:outputText
+											value="#{especie.aprovechamientoCondicionado ? 'SI' : 'NO'}" />
+									</p:column>
+									<p:column headerText="Especies endémicas">
+										<h:outputText value="#{especie.especieEndemica ? 'SI' : 'NO'}" />
+									</p:column>
+									<p:column headerText="Acción" styleClass="w70px alCenter">
+										<p:commandButton
+											update=":formDialog:dlgCaracterizacionEspeciesCualitativa"
+											styleClass="button-small primary" process="@this"
+											icon="ui-icon-pencil"
+											oncomplete="PF('dlgCaracterizacionEspeciesCualitativa').show()"
+											actionListener="#{ingresarInformacionViabilidadPfnController.editarCaracterizacionCualitativaEspecie(especie)}" />
+										<p:commandButton
+											update=":form:dtCaracterizacionEspeciesCualitativa"
+											styleClass="button-small primary" process="@this"
+											icon="ui-icon-trash"
+											actionListener="#{ingresarInformacionViabilidadPfnController.eliminarCaracterizacionCualitativaEspecie(especie)}">
+											<p:confirm icon="ui-icon-alert" header="Confirmación"
+												message="¿Está seguro de eliminar el registro cualitativo de especies del área de estudio?" />
+										</p:commandButton>
+									</p:column>
+								</p:dataTable>
+							</p:panelGrid>
+						</h:panelGroup>
+					</h:panelGrid>
+
+
+					<h:panelGrid id="pnlCaracterizacionCuantitativa">
+
+						<p:panelGrid
+							rendered="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.caracterizacionCobertura eq '2' ? true : false}">
+
+							<h:panelGroup id="pnlTextos3">
+
+								<h:outputText value="6.3.1 Fase de Campo" />
+								<control:imputConTextoEnriquecido
+									requiredMessage="Fase de Campo' es requerido"
+									valor="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.faseCampo}"
+									soloLectura="false" />
+
+								<h:outputText value="Citar en el texto las fuentes de consulta" />
+
+								<h:panelGrid>
+									<f:facet name="header">
+										<p:commandButton value="Adicionar" title="Adicionar"
+											styleClass="toRight field_mrg"
+											update=":formDialog:dlgFotografiaCuantitativa"
+											oncomplete="PF('dlgFotografiaCuantitativa').show();"
+											immediate="true">
+										</p:commandButton>
+									</f:facet>
+
+									<p:dataTable id="dtFotografiaCuantitativa" var="imagen"
+										styleClass="table table-hover"
+										value="#{ingresarInformacionViabilidadPfnController.listaFotografiaCuantitativa}"
+										paginator="true" paginatorAlwaysVisible="false"
+										paginatorPosition="bottom"
+										emptyMessage="#{labels['common.table.empty']}"
+										currentPageReportTemplate="{currentPage} de {totalPages}"
+										rows="10" rowsPerPageTemplate="5,10,15">
+
+										<p:column headerText="Fotografía">
+											<p:commandLink value="#{imagen.nombre}" ajax="false"
+												immediate="true">
+												<p:fileDownload
+													value="#{ingresarInformacionViabilidadPfnController.descargarFotografia(imagen)}" />
+											</p:commandLink>
+										</p:column>
+										<p:column headerText="Descripción">
+											<h:outputText value="#{imagen.descripcionAnexo}" />
+										</p:column>
+										<p:column headerText="Acción" styleClass="w70px alCenter">
+											<p:commandButton update=":form:dtFotografiaCuantitativa"
+												styleClass="button-small primary" process="@this"
+												icon="ui-icon-trash"
+												actionListener="#{ingresarInformacionViabilidadPfnController.eliminarFotografiaCuantitativa(imagen)}">
+												<p:confirm icon="ui-icon-alert" header="Confirmación"
+													message="¿Está seguro de eliminar la fotografía?" />
+											</p:commandButton>
+										</p:column>
+
+									</p:dataTable>
+
+								</h:panelGrid>
+
+								<br />
+								<br />
+
+								<h:outputText value="6.3.2 Fase de Oficina" />
+								<control:imputConTextoEnriquecido
+									requiredMessage="Fase de Campo' es requerido"
+									valor="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.faseOficina}"
+									soloLectura="false" />
+
+								<h:outputText value="Citar en el texto las fuentes de consulta" />
+
+								<h:panelGrid>
+									<f:facet name="header">
+										<p:commandButton value="Adicionar" title="Adicionar"
+											styleClass="toRight field_mrg"
+											update=":formDialog:dlgFotografiaOficina"
+											oncomplete="PF('dlgFotografiaOficina').show();"
+											immediate="true">
+										</p:commandButton>
+									</f:facet>
+
+									<p:dataTable id="dtFotografiaOficina" var="imagen"
+										styleClass="table table-hover"
+										value="#{ingresarInformacionViabilidadPfnController.listaFotografiaOficina}"
+										paginator="true" paginatorAlwaysVisible="false"
+										paginatorPosition="bottom"
+										emptyMessage="#{labels['common.table.empty']}"
+										currentPageReportTemplate="{currentPage} de {totalPages}"
+										rows="10" rowsPerPageTemplate="5,10,15">
+
+										<p:column headerText="Fotografía">
+											<p:commandLink value="#{imagen.nombre}" ajax="false"
+												immediate="true">
+												<p:fileDownload
+													value="#{ingresarInformacionViabilidadPfnController.descargarFotografia(imagen)}" />
+											</p:commandLink>
+										</p:column>
+										<p:column headerText="Descripción">
+											<h:outputText value="#{imagen.descripcionAnexo}" />
+										</p:column>
+										<p:column headerText="Acción" styleClass="w70px alCenter">
+											<p:commandButton update=":form:dtFotografiaOficina"
+												styleClass="button-small primary" process="@this"
+												icon="ui-icon-trash"
+												actionListener="#{ingresarInformacionViabilidadPfnController.eliminarFotografiaOficina(imagen)}">
+												<p:confirm icon="ui-icon-alert" header="Confirmación"
+													message="¿Está seguro de eliminar la fotografía?" />
+											</p:commandButton>
+										</p:column>
+
+									</p:dataTable>
+								</h:panelGrid>
+							</h:panelGroup>
+
+							<br />
+							<br />
+							<h:outputText value="6.3.3 Resultados" />
+							<h:panelGrid columns="2">
+								<h:outputText value="Método de recolección de datos" />
+								<p:selectOneRadio id="rdCensoMuestreo"
+									value="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.recoleccionDatos}">
+									<f:selectItem itemValue="1" itemLabel="Muestreo" />
+									<f:selectItem itemValue="2" itemLabel="Censo" />
+									<p:ajax update="pnlCenso pnlMuestreo :form:pnlCensoMuestreo :form:dtCalculaBasal"
+										process="@this" listener="#{ingresarInformacionViabilidadPfnController.cambiarTipoRecoleccionDatos()}" event="change"/>
+								</p:selectOneRadio>
+							</h:panelGrid>
+
+							<h:panelGrid id="pnlCensoMuestreo">
+								<p:panelGrid id="pnlCenso"
+									rendered="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.recoleccionDatos eq 2 ? true : false}"
+									columns="1" layout="grid" styleClass="w100"
+									columnClasses="w25, field_mrg w25">
+									<f:facet name="header">
+										<h:outputText value="Ubicación del censo forestal" />
+									</f:facet>
+									<p:panelGrid columns="1" layout="grid" styleClass="w100">
+										<f:facet name="header">
+											<h:outputText
+												value="Coordenadas del área geográfica en DATUM WGS 84 zona 17 sur *" />
+										</f:facet>
+										<p:dataTable rowIndexVar="index"
+											value="#{ingresarInformacionViabilidadPfnController.coordenadasGeograficas}"
+											var="item" emptyMessage="#{labels['common.table.empty']}"
+											rows="10" paginator="true" paginatorAlwaysVisible="false"
+											paginatorPosition="bottom" rowsPerPageTemplate="5,10,15">
+											<p:columnGroup type="header">
+												<p:row>
+													<p:column headerText="Área Geográfica"
+														styleClass="alCenter table-column-header" />
+													<p:column headerText="Shape"
+														styleClass="alCenter table-column-header" />
+													<p:column headerText="X"
+														styleClass="alCenter table-column-header" />
+													<p:column headerText="Y"
+														styleClass="alCenter table-column-header" />
+												</p:row>
+											</p:columnGroup>
+											<p:subTable value="#{item.coordenadas}" var="coordenada"
+												rows="10">
+												<p:column headerText="Área Geográfica"
+													styleClass="alCenter w5">
+													<h:outputText
+														value="#{(coordenada.areaGeografica eq null) ? 1 : coordenada.areaGeografica }" />
+												</p:column>
+												<p:column headerText="Shape" styleClass="alCenter w15">
+													<h:outputText value="#{coordenada.ordenCoordenada}" />
+												</p:column>
+												<p:column headerText="X" styleClass="alCenter w15">
+													<h:outputText value="#{coordenada.x.intValue()}" />
+												</p:column>
+												<p:column headerText="Y" styleClass="alCenter w15">
+													<h:outputText value="#{coordenada.y.intValue()}" />
+												</p:column>
+											</p:subTable>
+										</p:dataTable>
+									</p:panelGrid>
+
+									<p:panelGrid columns="1" layout="grid" styleClass="w100">
+										<f:facet name="header">
+											<h:outputText value="Ubicación geográfica" />
+										</f:facet>
+										<p:dataTable id="verIdtableubicacionesCenso"
+											value="#{ingresarInformacionViabilidadPfnController.ubicacionProyecto}"
+											var="ubicacion"
+											emptyMessage="#{labels['common.table.empty']}">
+											<p:column headerText="Provincia">
+												<h:outputText
+													value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+											</p:column>
+											<p:column headerText="Cantón">
+												<h:outputText
+													value="#{ubicacion.ubicacionesGeografica.nombre}" />
+											</p:column>
+											<p:column headerText="Parroquia">
+												<h:outputText value="#{ubicacion.nombre}" />
+											</p:column>
+										</p:dataTable>
+									</p:panelGrid>
+
+									<h:panelGrid columns="2">
+										<h:outputText value="Superficie Total:" />
+										<h:outputText escape="false"
+											value="#{ingresarInformacionViabilidadPfnController.proyectoLicenciaCoa.superficie} ha" />
+
+										<h:outputText value="Superficie Total:" />
+										<h:outputText escape="false"
+											value="#{ingresarInformacionViabilidadPfnController.proyectoLicenciaCoa.superficie*10000} m2" />
+
+									</h:panelGrid>
+
+
+								</p:panelGrid>
+
+								<p:panelGrid id="pnlCalculoAreaBasal"
+									rendered="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.recoleccionDatos eq 2 ? true : false}"
+									columns="1" layout="grid" styleClass="w100"
+									columnClasses="w25, field_mrg w25">
+									<f:facet name="header">
+										<h:outputText
+											value="Tabla de cálculo del área basal y volumen" />
+										<p:commandButton value="Adicionar" title="Adicionar"
+											styleClass="toRight field_mrg"
+											oncomplete="PF('dlgAreaBasal').show();" immediate="true"
+											actionListener="#{ingresarInformacionViabilidadPfnController.limpiarCalculoBasal()}"
+											update=":formDialog:dlgAreaBasal">
+										</p:commandButton>
+									</f:facet>
+									<p:dataTable id="dtCalculaBasal" var="calculo"
+										styleClass="table table-hover"
+										value="#{ingresarInformacionViabilidadPfnController.listaEspeciesCenso}"
+										paginator="true" paginatorAlwaysVisible="false"
+										paginatorPosition="bottom"
+										emptyMessage="#{labels['common.table.empty']}"
+										currentPageReportTemplate="{currentPage} de {totalPages}"
+										rows="10" rowsPerPageTemplate="5,10,15">
+
+										<p:columnGroup type="header">
+											<p:row>
+												<p:column rowspan="2" headerText="N° de individuo" />
+												<p:column colspan="3" headerText="Taxonomía" />
+												<p:column rowspan="2" headerText="Nombre común" />
+												<p:column rowspan="2"
+													headerText="Diámetro a la altura del pecho DAP (m)" />
+												<p:column rowspan="2" headerText="Altura Total HT (m)" />
+												<p:column rowspan="2" headerText="Altura comercial HC (m)" />
+												<p:column rowspan="2" headerText="Área basal AB (m2)" />
+												<p:column rowspan="2" headerText="Volumen total Vt (m3)" />
+												<p:column rowspan="2" headerText="Volumen comercial Vc (m3)" />
+												<p:column rowspan="2" headerText="Acción"
+													style="width:40px !important" />
+											</p:row>
+											<p:row>
+												<p:column headerText="Familia" />
+												<p:column headerText="Género" />
+												<p:column headerText="Especie" />
+											</p:row>
+										</p:columnGroup>
+										<p:column>
+											<h:outputText
+												value="#{1+ingresarInformacionViabilidadPfnController.listaEspeciesCenso.indexOf(calculo)}" />
+										</p:column>
+										<p:column>
+											<h:outputText
+												value="#{calculo.familiaEspecie.hiclScientificName}" />
+										</p:column>
+										<p:column>
+											<h:outputText
+												value="#{calculo.generoEspecie.hiclScientificName}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.especie.sptaScientificName}" />
+										</p:column>
+										<p:column>
+											<h:outputText styleClass="cssColumnDescription"
+												value="#{calculo.nombreComun}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.alturaDap}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.alturaTotal}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.alturaComercial}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.areaBasal}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.volumenTotal}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.volumenComercial}" />
+										</p:column>
+										<p:column styleClass="w70px alCenter">
+											<p:commandButton
+												update=":form:dtCalculaBasal :formDialog:dlgAreaBasal"
+												styleClass="button-small primary" process="@this"
+												icon="ui-icon-pencil"
+												actionListener="#{ingresarInformacionViabilidadPfnController.editarCalculoBasal(calculo)}"
+												oncomplete="PF('dlgAreaBasal').show();" />
+											<p:commandButton
+												update=":formDialog:dlgAreaBasal :form:dtCalculaBasal :form:pnlIndiceValorImportanciaCenso :form:dtEspeciesImportanciaCenso :form:pnlCalculosCenso1 :form:pnlCalculosCenso2 :form:dtSumatoriaBasalCenso"
+												styleClass="button-small primary" process="@this"
+												icon="ui-icon-trash"
+												actionListener="#{ingresarInformacionViabilidadPfnController.eliminarCalculoBasal(calculo)}">
+												<p:confirm icon="ui-icon-alert" header="Confirmación"
+													message="¿Está seguro de eliminar el registro?" />
+											</p:commandButton>
+										</p:column>
+									</p:dataTable>
+									<p:dataTable id="dtSumatoriaBasalCenso" var="sitio"
+										styleClass="table table-hover"
+										value="#{ingresarInformacionViabilidadPfnController.listaSitioSumatoriaCenso}"
+										paginator="true" paginatorAlwaysVisible="false"
+										paginatorPosition="bottom"
+										emptyMessage="#{labels['common.table.empty']}"
+										currentPageReportTemplate="{currentPage} de {totalPages}"
+										rows="10" rowsPerPageTemplate="5,10,15">
+
+										<p:column
+											headerText="Sumatoria del área basal del Censo">
+											<h:outputText value="#{sitio.sumatoriaAreaBasal}" />
+										</p:column>
+										<p:column
+											headerText="Sumatoria del volumen total del Censo">
+											<h:outputText value="#{sitio.sumatoriaVolumenTotal}" />
+										</p:column>
+										<p:column
+											headerText="Sumatoria del volumen comercial del Censo">
+											<h:outputText value="#{sitio.sumatoriaVolumenComercial}" />
+										</p:column>
+									</p:dataTable>
+
+									<h:outputText
+										value="Realizar la interpretación de resultados de la tabla de cálculo de área basal y volumen" />
+									<p:inputTextarea autoResize="false"
+										value="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.interpretacionAreaBasal}"
+										maxlength="4000" required="true"
+										requiredMessage="El campo 'Realizar la interpretación de resultados de la tabla de cálculo de área basal y volumen' es requerido.">
+										<p:ajax process="@this" />
+									</p:inputTextarea>
+
+								</p:panelGrid>
+
+								<p:panelGrid id="pnlEspeciesImportanciaCenso"
+									rendered="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.recoleccionDatos eq 2 ? true : false}"
+									columns="1" layout="grid" styleClass="w100"
+									columnClasses="w25, field_mrg w25">
+									<f:facet name="header">
+										<h:outputText value="Tabla de especies de importancia" />
+										<p:commandButton value="Adicionar" title="Adicionar"
+											styleClass="toRight field_mrg"
+											oncomplete="PF('dlgEspeciesImportanciaCenso').show();"
+											immediate="true"
+											update=":formDialog:dlgEspeciesImportanciaCenso"
+											actionListener="#{ingresarInformacionViabilidadPfnController.borrarEspecieImportancia()}">
+										</p:commandButton>
+									</f:facet>
+
+									<p:dataTable id="dtEspeciesImportanciaCenso" var="especie"
+										styleClass="table table-hover"
+										value="#{ingresarInformacionViabilidadPfnController.listaEspeciesImportancia}"
+										paginator="true" paginatorAlwaysVisible="false"
+										paginatorPosition="bottom"
+										emptyMessage="#{labels['common.table.empty']}"
+										currentPageReportTemplate="{currentPage} de {totalPages}"
+										rows="10" rowsPerPageTemplate="5,10,15">
+
+										<p:column headerText="Familia">
+											<h:outputText
+												value="#{especie.familiaEspecie.hiclScientificName}" />
+										</p:column>
+										<p:column headerText="Género">
+											<h:outputText
+												value="#{especie.generoEspecie.hiclScientificName}" />
+										</p:column>
+										<p:column headerText="Especie">
+											<h:outputText value="#{especie.especie.sptaScientificName}" />
+										</p:column>
+										<p:column headerText="Estado de conservación UICN">
+											<h:outputText value="#{especie.estadoConservacion.nombre}" />
+										</p:column>
+										<p:column headerText="Apéndice CITES">
+											<h:outputText value="#{especie.estadoCites.nombre}" />
+										</p:column>
+										<p:column headerText="Aprovechamiento condicionado">
+											<h:outputText
+												value="#{especie.aprovechamientoCondicionado ? 'SI':'NO'}" />
+										</p:column>
+										<p:column headerText="Especies endémicas">
+											<h:outputText value="#{especie.especieEndemica ? 'SI':'NO'}" />
+										</p:column>
+										<p:column headerText="Acción" styleClass="w70px alCenter">
+											<p:commandButton
+												update=":formDialog:dlgEspeciesImportanciaCenso"
+												styleClass="button-small primary" process="@this"
+												icon="ui-icon-pencil"
+												actionListener="#{ingresarInformacionViabilidadPfnController.editarEspecieImportancia(especie)}"
+												oncomplete="PF('dlgEspeciesImportanciaCenso').show();" />
+											<p:commandButton update=":form:dtEspeciesImportanciaCenso"
+												styleClass="button-small primary" process="@this"
+												icon="ui-icon-trash"
+												actionListener="#{ingresarInformacionViabilidadPfnController.eliminarEspecieImportancia(especie)}">
+												<p:confirm icon="ui-icon-alert" header="Confirmación"
+													message="¿Está seguro de eliminar el registro?" />
+											</p:commandButton>
+										</p:column>
+									</p:dataTable>
+
+									<h:outputText
+										value="Realizar la interpretación de resultados de especies de importancia" />
+									<p:inputTextarea autoResize="false"
+										value="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.interpretacionEspeciesImportancia}"
+										maxlength="8000" required="true"
+										requiredMessage="El campo 'Realizar la interpretación de resultados de especies de importancia' es requerido.">
+										<p:ajax process="@this" />
+									</p:inputTextarea>
+
+								</p:panelGrid>
+
+								<p:panelGrid id="pnlIndiceValorImportanciaCenso"
+									rendered="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.recoleccionDatos eq 2 ? true : false}"
+									columns="1" layout="grid" styleClass="w100"
+									columnClasses="w25, field_mrg w25">
+									<f:facet name="header">
+										<h:outputText value="Tabla de índice de valor de importancia" />
+										<p:commandButton value="Calcular" title="Calcular"
+											styleClass="toRight field_mrg" immediate="true"
+											actionListener="#{ingresarInformacionViabilidadPfnController.calcularIndiceValorImportancia()}"
+											update="dtValorImportancia :form:pnlCalculosCenso1 :form:pnlCalculosCenso2">
+										</p:commandButton>
+									</f:facet>
+
+									<p:dataTable id="dtValorImportancia" var="especie"
+										styleClass="table table-hover"
+										value="#{ingresarInformacionViabilidadPfnController.listaIndiceValorImportancia}"
+										paginator="true" paginatorAlwaysVisible="false"
+										paginatorPosition="bottom"
+										emptyMessage="#{labels['common.table.empty']}"
+										currentPageReportTemplate="{currentPage} de {totalPages}"
+										rows="10" rowsPerPageTemplate="5,10,15">
+
+
+										<p:column headerText="Familia">
+											<h:outputText
+												value="#{especie.generoEspecie.hiclIdParent.hiclScientificName}" />
+										</p:column>
+										<p:column headerText="Género">
+											<h:outputText
+												value="#{especie.generoEspecie.hiclScientificName}" />
+										</p:column>
+										<p:column headerText="Especie">
+											<h:outputText value="#{especie.especie.sptaScientificName}" />
+										</p:column>
+										<p:column headerText="Nombre común">
+											<h:outputText value="#{especie.nombreComun}" />
+										</p:column>
+										<p:column headerText="Frecuencia">
+											<h:outputText value="#{especie.frecuencia}" />
+										</p:column>
+										<p:column headerText="Área basal AB (m2)">
+											<h:outputText value="#{especie.areaBasal}" />
+										</p:column>
+										<p:column headerText="DnR">
+											<h:outputText value="#{especie.valorDnr}" />
+										</p:column>
+										<p:column headerText="DmR">
+											<h:outputText value="#{especie.valorDmr}" />
+										</p:column>
+										<p:column headerText="Índice de valor de importancia IVI (DnR + DmR) / 2">
+											<h:outputText value="#{especie.valorIvi}" />
+										</p:column>
+									</p:dataTable>
+
+								</p:panelGrid>
+
+
+								<p:panelGrid id="pnlCalculosCenso1" columns="6"
+									styleClass="panel_data w100"
+									rendered="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.recoleccionDatos eq 2 ? true : false}"
+									columnClasses="header w15, null, header w15, null, header w15, null">
+
+									<p:outputLabel value="Total de DnR" style="color: white" />
+									<p:inputText
+										value="#{ingresarInformacionViabilidadPfnController.sitioMuestralCenso.totalDnr}"
+										disabled="true" />
+
+									<p:outputLabel value="Total de DmR" style="color: white" />
+									<p:inputText
+										value="#{ingresarInformacionViabilidadPfnController.sitioMuestralCenso.totalDmr}"
+										disabled="true" />
+
+									<p:outputLabel value="Total de IVI" style="color: white" />
+									<p:inputText
+										value="#{ingresarInformacionViabilidadPfnController.sitioMuestralCenso.totalIvi}"
+										disabled="true" />
+
+
+								</p:panelGrid>
+
+								<p:panelGrid id="pnlCalculosCenso2" columns="4"
+									styleClass="panel_data w100"
+									rendered="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.recoleccionDatos eq 2 ? true : false}"
+									columnClasses="header w15, null, header w15, null, header w15, null">
+
+									<p:outputLabel value="Índice de Shannon" style="color: white" />
+									<p:inputText
+										value="#{ingresarInformacionViabilidadPfnController.sitioMuestralCenso.indiceShanon}"
+										disabled="true" />
+
+									<p:outputLabel value="Índice de Simpson" style="color: white" />
+									<p:inputText
+										value="#{ingresarInformacionViabilidadPfnController.sitioMuestralCenso.indiceSimpson}"
+										disabled="true" />
+
+									<p:outputLabel value="Exponencial de Shannon"
+										style="color: white" />
+									<p:inputText
+										value="#{ingresarInformacionViabilidadPfnController.sitioMuestralCenso.exponencialShannon}"
+										disabled="true" />
+
+									<p:outputLabel value="Inverso de Simpson" style="color: white" />
+									<p:inputText
+										value="#{ingresarInformacionViabilidadPfnController.sitioMuestralCenso.indiceSimpson eq 0 ? 'Indefinido' : ingresarInformacionViabilidadPfnController.sitioMuestralCenso.inversoSimpson}"
+										disabled="true" />
+
+
+								</p:panelGrid>
+
+								<p:panelGrid id="pnlInterpretacion" columns="1"
+									styleClass="panel_data w100"
+									rendered="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.recoleccionDatos eq 2 ? true : false}">
+
+									<h:outputText
+										value="Realizar la interpretación de resultados de índice de valor de importancia" />
+									<p:inputTextarea autoResize="false"
+										value="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.interpretacionValorImportancia}"
+										maxlength="8000" required="true"
+										requiredMessage="El campo 'Realizar la interpretación de resultados de índice de valor de importancia' es requerido.">
+										<p:ajax process="@this" />
+									</p:inputTextarea>
+
+									<h:outputText
+										value="Realizar la interpretación de resultados por índice de Shannon, Exponencial de Shannon, Índice de Simpson e Inverso de Simpson" />
+									<p:inputTextarea autoResize="false"
+										value="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.interpretacionShanonSimpson}"
+										maxlength="8000" required="true"
+										requiredMessage="El campo 'Realizar la interpretación de resultados por índice de Shannon, Exponencial de Shannon, Índice de Simpson e Inverso de Simpson' es requerido.">
+										<p:ajax process="@this" />
+									</p:inputTextarea>
+
+								</p:panelGrid>
+
+
+								<p:panelGrid id="pnlMuestreo"
+									rendered="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.recoleccionDatos eq 1 ? true : false}"
+									columns="1" layout="grid" styleClass="w100"
+									columnClasses="w25, field_mrg w25">
+									<f:facet name="header">
+										<h:outputText value="Ubicación de las unidades muestrales" />
+										<p:commandButton value="Adicionar" title="Adicionar"
+											styleClass="toRight field_mrg"
+											oncomplete="PF('dlgUbicacionUnidadesMuestra').show();"
+											immediate="true"
+											actionListener="#{ingresarInformacionViabilidadPfnController.abriUbicacionMuestral()}"
+											update=":formDialog:dlgUbicacionUnidadesMuestra">
+										</p:commandButton>
+									</f:facet>
+
+									<p:dataTable id="dtUbicacionMuestras" var="sitio"
+										styleClass="table table-hover"
+										value="#{ingresarInformacionViabilidadPfnController.listaSitioMuestreo}"
+										paginator="true" paginatorAlwaysVisible="false"
+										paginatorPosition="bottom"
+										emptyMessage="#{labels['common.table.empty']}"
+										currentPageReportTemplate="{currentPage} de {totalPages}"
+										rows="10" rowsPerPageTemplate="5,10,15">
+
+										<p:columnGroup type="header">
+											<p:row>
+												<p:column rowspan="2"
+													headerText="Código de la Unidad Muestral (muestreo)" />
+												<p:column rowspan="2" headerText="Coordenada X" />
+												<p:column rowspan="2" headerText="Coordenada Y" />
+												<p:column rowspan="2" headerText="Provincia" />
+												<p:column rowspan="2" headerText="Cantón" />
+												<p:column rowspan="2" headerText="Parroquia" />
+												<p:column rowspan="2" headerText="Elevación (m.s.n.m.)" />
+												<p:column colspan="2"
+													headerText="Dimensiones de la Unidad Muestral(muestreo)" />
+												<p:column rowspan="2"
+													headerText="Superficie de la Unidad Muestral" />
+												<p:column rowspan="2" headerText="Acción"
+													style="width:40px !important" />
+											</p:row>
+											<p:row>
+												<p:column headerText="Largo" />
+												<p:column headerText="Ancho" />
+											</p:row>
+										</p:columnGroup>
+										<p:column>
+											<h:outputText styleClass="cssColumnDescription"
+												value="#{sitio.nombreSitio}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{sitio.coordenadasX}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{sitio.coordenadasY}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{sitio.provincia}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{sitio.canton}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{sitio.parroquia}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{sitio.elevacion}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{sitio.largo}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{sitio.ancho}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{sitio.areaSitio}" />
+										</p:column>
+
+										<p:column styleClass="w70px alCenter">
+											<p:commandButton
+												update=":formDialog:dlgUbicacionUnidadesMuestra"
+												styleClass="button-small primary" process="@this"
+												icon="ui-icon-pencil"
+												actionListener="#{ingresarInformacionViabilidadPfnController.editarSitioMuestralMuestreo(sitio)}"
+												oncomplete="PF('dlgUbicacionUnidadesMuestra').show();" />
+											<p:commandButton
+												update=":form:dtUbicacionMuestras :form:dtCalculaBasalMuestreo :form:dtSumatoriaBasalMuestreo :form:pnlTotalSuperficieMuestral :form:dtEspeciesImportanciaMuestreo :form:idSitioMuestreo"
+												styleClass="button-small primary" process="@this"
+												icon="ui-icon-trash"
+												actionListener="#{ingresarInformacionViabilidadPfnController.eliminarSitioMuestralMuestreo(sitio)}">
+												<p:confirm icon="ui-icon-alert" header="Confirmación"
+													message="¿Está seguro de eliminar el registro?" />
+											</p:commandButton>
+										</p:column>
+									</p:dataTable>
+
+								</p:panelGrid>
+
+								<p:panelGrid id="pnlTotalSuperficieMuestral" columns="2"
+									rendered="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.recoleccionDatos eq 1 ? true : false}"
+									styleClass="panel_data w100" columnClasses="header w50, w50">
+
+									<p:outputLabel
+										value="Total de la superficie de la Unidad Muestral"
+										style="color: white" for="txtTotalSuperficieUM" />
+									<p:inputText id="txtTotalSuperficieUM"
+										value="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.areaSitioMuestral}"
+										disabled="true" />
+
+								</p:panelGrid>
+
+								<p:panelGrid id="pnlCalculoAreaBasalMuestreo"
+									rendered="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.recoleccionDatos eq 1 ? true : false}"
+									columns="1" layout="grid" styleClass="w100"
+									columnClasses="w25, field_mrg w25">
+									<f:facet name="header">
+										<h:outputText
+											value="Tabla de cálculo del área basal y volumen muestreo" />
+										<p:commandButton value="Adicionar" title="Adicionar"
+											styleClass="toRight field_mrg"
+											oncomplete="PF('dlgAreaBasalMuestreo').show();"
+											immediate="true" update=":formDialog:dlgAreaBasalMuestreo"
+											actionListener="#{ingresarInformacionViabilidadPfnController.abrirEspeciesCalculoMuestreo()}">
+										</p:commandButton>
+									</f:facet>
+									<p:dataTable id="dtCalculaBasalMuestreo" var="calculo"
+										styleClass="table table-hover"
+										value="#{ingresarInformacionViabilidadPfnController.listaEspeciesMuestreo}"
+										paginator="true" paginatorAlwaysVisible="false"
+										paginatorPosition="bottom" rowIndexVar="index"
+										emptyMessage="#{labels['common.table.empty']}"
+										currentPageReportTemplate="{currentPage} de {totalPages}"
+										rows="10" rowsPerPageTemplate="5,10,15">
+
+										<p:columnGroup type="header">
+											<p:row>
+												<p:column rowspan="2"
+													headerText="Código de la Unidad Muestral" />
+												<p:column rowspan="2" headerText="N° de individuo" />
+												<p:column colspan="3" headerText="Taxonomía" />
+												<p:column rowspan="2" headerText="Nombre común" />
+												<p:column rowspan="2"
+													headerText="Diámetro a la altura del pecho DAP (m)" />
+												<p:column rowspan="2" headerText="Altura Total HT (m)" />
+												<p:column rowspan="2" headerText="Altura comercial HC (m)" />
+												<p:column rowspan="2" headerText="Área basal AB (m2)" />
+												<p:column rowspan="2" headerText="Volumen total Vt (m3)" />
+												<p:column rowspan="2" headerText="Volumen comercial Vc (m3)" />
+												<p:column rowspan="2" headerText="Acción"
+													styleClass="w70px alCenter" />
+											</p:row>
+											<p:row>
+												<p:column headerText="Familia" />
+												<p:column headerText="Género" />
+												<p:column headerText="Especie" />
+											</p:row>
+										</p:columnGroup>
+										<p:column>
+											<h:outputText styleClass="cssColumnDescription"
+												value="#{calculo.sitioMuestral.nombreSitio}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{index + 1}" />
+										</p:column>
+										<p:column>
+											<h:outputText
+												value="#{calculo.familiaEspecie.hiclScientificName}" />
+										</p:column>
+										<p:column>
+											<h:outputText
+												value="#{calculo.generoEspecie.hiclScientificName}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.especie.sptaScientificName}" />
+										</p:column>
+										<p:column>
+											<h:outputText styleClass="cssColumnDescription"
+												value="#{calculo.nombreComun}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.alturaDap}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.alturaTotal}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.alturaComercial}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.areaBasal}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.volumenTotal}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.volumenComercial}" />
+										</p:column>
+										<p:column>
+											<p:commandButton
+												update=":form:dtCalculaBasalMuestreo :formDialog:dlgAreaBasalMuestreo"
+												styleClass="button-small primary" process="@this"
+												icon="ui-icon-pencil"
+												actionListener="#{ingresarInformacionViabilidadPfnController.editarCalculoBasalMuestreo(calculo)}"
+												oncomplete="PF('dlgAreaBasalMuestreo').show();" />
+											<p:commandButton
+												update=":form:dtCalculaBasalMuestreo :form:dtSumatoriaBasalMuestreo :form:idSitioMuestreo :form:dtEspeciesImportanciaMuestreo"
+												styleClass="button-small primary" process="@this"
+												icon="ui-icon-trash"
+												actionListener="#{ingresarInformacionViabilidadPfnController.eliminarCalculoBasalMuestreo(calculo)}">
+												<p:confirm icon="ui-icon-alert" header="Confirmación"
+													message="¿Está seguro de eliminar el registro?" />
+											</p:commandButton>
+										</p:column>
+									</p:dataTable>
+
+									<p:dataTable id="dtSumatoriaBasalMuestreo" var="sitio"
+										styleClass="table table-hover"
+										value="#{ingresarInformacionViabilidadPfnController.listaSitioSumatoria}"
+										paginator="true" paginatorAlwaysVisible="false"
+										paginatorPosition="bottom"
+										emptyMessage="#{labels['common.table.empty']}"
+										currentPageReportTemplate="{currentPage} de {totalPages}"
+										rows="10" rowsPerPageTemplate="5,10,15">
+
+										<p:column headerText="Código de la Unidad Muestral">
+											<h:outputText value="#{sitio.nombreSitio}" />
+										</p:column>
+										<p:column
+											headerText="Sumatoria del área basal de cada sitio de muestreo">
+											<h:outputText value="#{sitio.sumatoriaAreaBasal}" />
+										</p:column>
+										<p:column
+											headerText="Sumatoria del volumen total de cada sitio de muestreo">
+											<h:outputText value="#{sitio.sumatoriaVolumenTotal}" />
+										</p:column>
+										<p:column
+											headerText="Sumatoria del volumen comercial de cada sitio de muestreo">
+											<h:outputText value="#{sitio.sumatoriaVolumenComercial}" />
+										</p:column>
+
+									</p:dataTable>
+
+									<br />
+									<h:outputText
+										value="Realizar la interpretación de resultados de la tabla de cálculo de área basal y volumen" />
+									<p:inputTextarea autoResize="false" required="true"
+										requiredMessage="El campo 'Realizar la interpretación de resultados de la tabla de cálculo de área basal y volumen' es requerido"
+										value="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.interpretacionAreaBasal}"
+										maxlength="4000">
+										<p:ajax process="@this" />
+									</p:inputTextarea>
+
+								</p:panelGrid>
+
+								<p:panelGrid id="pnlEspeciesImportanciaMuestreo"
+									rendered="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.recoleccionDatos eq 1 ? true : false}"
+									columns="1" layout="grid" styleClass="w100"
+									columnClasses="w25, field_mrg w25">
+									<f:facet name="header">
+										<h:outputText value="Tabla de especies de importancia" />
+										<p:commandButton value="Adicionar" title="Adicionar"
+											styleClass="toRight field_mrg"
+											oncomplete="PF('dlgEspeciesImportanciaMuestreo').show();"
+											immediate="true"
+											actionListener="#{ingresarInformacionViabilidadPfnController.borrarEspecieImportancia()}"
+											update=":formDialog:dlgEspeciesImportanciaMuestreo">
+										</p:commandButton>
+									</f:facet>
+
+									<p:dataTable id="dtEspeciesImportanciaMuestreo" var="especie"
+										styleClass="table table-hover"
+										value="#{ingresarInformacionViabilidadPfnController.listaEspeciesImportancia}"
+										paginator="true" paginatorAlwaysVisible="false"
+										paginatorPosition="bottom"
+										emptyMessage="#{labels['common.table.empty']}"
+										currentPageReportTemplate="{currentPage} de {totalPages}"
+										rows="10" rowsPerPageTemplate="5,10,15">
+
+										<p:column headerText="Familia">
+											<h:outputText
+												value="#{especie.familiaEspecie.hiclScientificName}" />
+										</p:column>
+										<p:column headerText="Género">
+											<h:outputText
+												value="#{especie.generoEspecie.hiclScientificName}" />
+										</p:column>
+										<p:column headerText="Especie">
+											<h:outputText value="#{especie.especie.sptaScientificName}" />
+										</p:column>
+										<p:column headerText="Estado de conservación UICN">
+											<h:outputText value="#{especie.estadoConservacion.nombre}" />
+										</p:column>
+										<p:column headerText="Apéndice CITES">
+											<h:outputText value="#{especie.estadoCites.nombre}" />
+										</p:column>
+										<p:column headerText="Aprovechamiento condicionado">
+											<h:outputText
+												value="#{especie.aprovechamientoCondicionado ? 'SI':'NO'}" />
+										</p:column>
+										<p:column headerText="Especies endémicas">
+											<h:outputText value="#{especie.especieEndemica ? 'SI':'NO'}" />
+										</p:column>
+										<p:column headerText="Acción" styleClass="w70px alCenter">
+											<p:commandButton
+												update=":formDialog:dlgEspeciesImportanciaMuestreo"
+												styleClass="button-small primary" process="@this"
+												icon="ui-icon-pencil"
+												actionListener="#{ingresarInformacionViabilidadPfnController.editarEspecieImportancia(especie)}"
+												oncomplete="PF('dlgEspeciesImportanciaMuestreo').show();" />
+											<p:commandButton update=":form:dtEspeciesImportanciaMuestreo"
+												styleClass="button-small primary" process="@this"
+												icon="ui-icon-trash"
+												actionListener="#{ingresarInformacionViabilidadPfnController.eliminarEspecieImportancia(especie)}">
+												<p:confirm icon="ui-icon-alert" header="Confirmación"
+													message="¿Está seguro de eliminar el registro?" />
+											</p:commandButton>
+										</p:column>
+									</p:dataTable>
+
+									<h:outputText
+										value="Realizar la interpretación de resultados de especies de importancia" />
+									<p:inputTextarea autoResize="false" required="true"
+										requiredMessage="El campo 'Realizar la interpretación de resultados de especies de importancia' es requerido"
+										value="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.interpretacionEspeciesImportancia}"
+										maxlength="4000">
+										<p:ajax process="@this" />
+									</p:inputTextarea>
+
+								</p:panelGrid>
+
+								<h:panelGroup
+									rendered="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.recoleccionDatos eq 1 ? true : false}">
+
+									<p:accordionPanel id="idSitioMuestreo" multiple="true"
+										value="#{ingresarInformacionViabilidadPfnController.listaSitioMuestreo}"
+										var="sitioMuestreo" dynamic="false">
+										<p:tab>
+											<f:facet name="title">
+												<div>Índice de valor de importancia de las unidades
+													muestrales - #{sitioMuestreo.nombreSitio}</div>
+											</f:facet>
+
+											<h:panelGrid>
+												<f:facet name="header">
+													<h:outputText
+														value="Tabla de índice de valor de importancia para: " />#{sitioMuestreo.nombreSitio}
+													
+													<p:commandButton value="Calcular" title="Calcular"
+														process="@this" styleClass="toRight field_mrg"
+														immediate="true"
+														actionListener="#{ingresarInformacionViabilidadPfnController.calcularIndiceValorImportanciaMuestreo(sitioMuestreo)}"
+														update="dtValorImportancia pnlCalculosMuestreo1 pnlCalculosMuestreo2">
+													</p:commandButton>
+													<br />
+												</f:facet>
+
+												<p:dataTable id="dtValorImportancia" var="especie"
+													styleClass="table table-hover"
+													value="#{sitioMuestreo.listaEspecieValorImportancia}"
+													paginator="true" paginatorAlwaysVisible="false"
+													paginatorPosition="bottom"
+													emptyMessage="#{labels['common.table.empty']}"
+													currentPageReportTemplate="{currentPage} de {totalPages}"
+													rows="10" rowsPerPageTemplate="5,10,15">
+
+													<p:column headerText="Familia">
+														<h:outputText
+															value="#{especie.generoEspecie.hiclIdParent.hiclScientificName}" />
+													</p:column>
+													<p:column headerText="Género">
+														<h:outputText
+															value="#{especie.generoEspecie.hiclScientificName}" />
+													</p:column>
+													<p:column headerText="Especie">
+														<h:outputText
+															value="#{especie.especie.sptaScientificName}" />
+													</p:column>
+													<p:column headerText="Nombre común">
+														<h:outputText styleClass="cssColumnDescription"
+															value="#{especie.nombreComun}" />
+													</p:column>
+													<p:column headerText="Frecuencia">
+														<h:outputText value="#{especie.frecuencia}" />
+													</p:column>
+													<p:column headerText="Área basal AB (m2)">
+														<h:outputText value="#{especie.areaBasal}" />
+													</p:column>
+													<p:column headerText="DnR">
+														<h:outputText value="#{especie.valorDnr}" />
+													</p:column>
+													<p:column headerText="DmR">
+														<h:outputText value="#{especie.valorDmr}" />
+													</p:column>
+													<p:column headerText="Índice de valor de importancia IVI (DnR + DmR) / 2">
+														<h:outputText value="#{especie.valorIvi}" />
+													</p:column>
+												</p:dataTable>
+
+											</h:panelGrid>
+
+											<p:panelGrid id="pnlCalculosMuestreo1" columns="6"
+												styleClass="panel_data w100"
+												columnClasses="header w15, null, header w15, null, header w15, null">
+
+												<p:outputLabel value="Total de DnR" style="color: white" />
+												<p:inputText value="#{sitioMuestreo.totalDnr}"
+													disabled="true" />
+
+												<p:outputLabel value="Total de DmR" style="color: white" />
+												<p:inputText value="#{sitioMuestreo.totalDmr}"
+													disabled="true" />
+
+												<p:outputLabel value="Total de IVI" style="color: white" />
+												<p:inputText value="#{sitioMuestreo.totalIvi}"
+													disabled="true" />
+
+
+											</p:panelGrid>
+
+											<p:panelGrid id="pnlCalculosMuestreo2" columns="4"
+												styleClass="panel_data w100"
+												columnClasses="header w15, null, header w15, null, header w15, null">
+
+												<p:outputLabel value="Índice de Shannon"
+													style="color: white" />
+												<p:inputText value="#{sitioMuestreo.indiceShanon}"
+													disabled="true" />
+
+												<p:outputLabel value="Índice de Simpson"
+													style="color: white" />
+												<p:inputText value="#{sitioMuestreo.indiceSimpson}"
+													disabled="true" />
+
+												<p:outputLabel value="Exponencial de Shannon"
+													style="color: white" />
+												<p:inputText value="#{sitioMuestreo.exponencialShannon}"
+													disabled="true" />
+
+												<p:outputLabel value="Inverso de Simpson"
+													style="color: white" />
+												<p:inputText
+													value="#{sitioMuestreo.indiceSimpson eq 0 ? 'Indefinido' : sitioMuestreo.inversoSimpson}"
+													disabled="true" />
+
+
+											</p:panelGrid>
+
+											<p:panelGrid id="pnlInterpretacionMuestreo" columns="1"
+												styleClass="panel_data w100">
+
+												<h:outputText
+													value="Realizar la interpretación de resultados de índice de valor de importancia" />
+												<p:inputTextarea autoResize="false"
+													value="#{sitioMuestreo.interpretacionValorImportancia}"
+													maxlength="8000" required="true"
+													requiredMessage="El campo 'Realizar la interpretación de resultados de índice de valor de importancia' es requerido">
+													<p:ajax process="@this" />
+												</p:inputTextarea>
+
+												<h:outputText
+													value="Realizar la interpretación de resultados por índice de Shannon, Exponencial de Shannon, Índice de Simpson e Inverso de Simpson" />
+												<p:inputTextarea autoResize="false" required="true"
+													requiredMessage="El campo 'Realizar la interpretación de resultados por índice de Shannon, Exponencial de Shannon, Índice de Simpson e Inverso de Simpson' es requerido"
+													value="#{sitioMuestreo.interpretacionShanonSimpson}"
+													maxlength="8000">
+													<p:ajax process="@this" />
+												</p:inputTextarea>
+
+											</p:panelGrid>
+
+
+
+
+										</p:tab>
+									</p:accordionPanel>
+								</h:panelGroup>
+
+							</h:panelGrid>
+
+						</p:panelGrid>
+					</h:panelGrid>
+
+				</p:fieldset>
+
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<p:fieldset legend="7. ANÁLISIS DE POSIBLES AFECTACIONES"
+					toggleable="true" toggleSpeed="500" collapsed="true">
+
+					<p:panelGrid id="pnlPosiblesAfectaciones" columns="1" layout="grid"
+						styleClass="w100" columnClasses="w25, field_mrg w25">
+
+						<f:facet name="header">
+							<h:outputText value="Detalle de actividades del proyecto" />
+							<p:commandButton value="Adicionar" title="Adicionar"
+								styleClass="toRight field_mrg"
+								oncomplete="PF('dlgActividadesProyecto').show();"
+								immediate="true" update=":formDialog:dlgActividadesProyecto"
+								actionListener="#{ingresarInformacionViabilidadPfnController.abrirAfectacionForestal()}">
+							</p:commandButton>
+						</f:facet>
+
+						<p:dataTable id="dtActividadesProyecto" var="afectacion"
+							styleClass="table table-hover"
+							value="#{ingresarInformacionViabilidadPfnController.listaAfectacionForestal}"
+							paginator="true" paginatorAlwaysVisible="false"
+							paginatorPosition="bottom"
+							emptyMessage="#{labels['common.table.empty']}"
+							currentPageReportTemplate="{currentPage} de {totalPages}"
+							rows="10" rowsPerPageTemplate="5,10,15">
+
+							<p:columnGroup type="header">
+								<p:row>
+									<p:column rowspan="2" style="word-wrap: break-word;"
+										headerText="Enlistar todas las actividades del proyecto, obra o actividad durante todas las fases o etapas que se contemplan para la ejecución del mismo" />
+									<p:column colspan="4"
+										headerText="Ubicación del proyecto de acuerdo a la Zonificación del BVP" />
+									<p:column rowspan="2" style="word-wrap: break-word;"
+										headerText="Ecosistemas (afectados)" />
+									<p:column rowspan="2" style="word-wrap: break-word;"
+										headerText="Cobertura Vegetal (afectados)" />
+									<p:column rowspan="2" style="word-wrap: break-word;"
+										headerText="Convenios (afectados)" />
+									<p:column rowspan="2" style="word-wrap: break-word;"
+										headerText="Unidad Hidrográfica (afectados)" />
+									<p:column colspan="4" headerText="Especies Forestales" />
+									<p:column rowspan="2" headerText="Acción"
+										style="width:40px !important" />
+								</p:row>
+								<p:row>
+									<p:column headerText="ZPP" />
+									<p:column headerText="ZMBN" />
+									<p:column headerText="ZR" />
+									<p:column headerText="ZOU" />
+									<p:column style="word-wrap: break-word;"
+										headerText="Estado de conservación UICN" />
+									<p:column style="word-wrap: break-word;"
+										headerText="Apéndice CITES" />
+									<p:column style="word-wrap: break-word;"
+										headerText="Aprovechamiento condicionado" />
+									<p:column style="word-wrap: break-word;"
+										headerText="Especies endémicas" />
+								</p:row>
+							</p:columnGroup>
+							<p:column>
+								<h:outputText styleClass="cssColumnDescription"
+									value="#{afectacion.actividad}" />
+							</p:column>
+							<p:column>
+								<h:outputText
+									value="#{(afectacion.zppZonaProteccion ne null and afectacion.zppZonaProteccion) ? 'X' : '' }" />
+							</p:column>
+							<p:column>
+								<h:outputText
+									value="#{(afectacion.zmbnZonaManejoBosque ne null and afectacion.zmbnZonaManejoBosque) ? 'X' : '' }" />
+							</p:column>
+							<p:column>
+								<h:outputText
+									value="#{(afectacion.zrZonaRecuperacion ne null and afectacion.zrZonaRecuperacion) ? 'X' : '' }" />
+							</p:column>
+							<p:column>
+								<h:outputText
+									value="#{(afectacion.zouZonaOtrosUsos ne null and afectacion.zouZonaOtrosUsos) ? 'X' : '' }" />
+							</p:column>
+							<p:column>
+								<h:outputText styleClass="cssColumnDescription"
+									value="#{afectacion.nombresEcosistemas}" />
+							</p:column>
+							<p:column>
+								<h:outputText styleClass="cssColumnDescription"
+									value="#{afectacion.nombresCoberturaVegetal}" escape="false" />
+							</p:column>
+							<p:column>
+								<h:outputText styleClass="cssColumnDescription"
+									value="#{afectacion.nombresConvenio}" />
+							</p:column>
+							<p:column>
+								<h:outputText styleClass="cssColumnDescription"
+									value="#{afectacion.nombresUnidadHidrograficas}" />
+							</p:column>
+							<p:column>
+								<h:outputText value="#{afectacion.esUicn ? 'SI':'NO'}" />
+							</p:column>
+							<p:column>
+								<h:outputText value="#{afectacion.esCites ? 'SI':'NO'}" />
+							</p:column>
+							<p:column>
+								<h:outputText
+									value="#{afectacion.esAprovechamientoCondicionado ? 'SI':'NO'}" />
+							</p:column>
+							<p:column>
+								<h:outputText value="#{afectacion.esEndemica ? 'SI':'NO'}" />
+							</p:column>
+							<p:column>
+								<p:commandButton
+									update=":form:dtActividadesProyecto :formDialog:dlgActividadesProyecto"
+									styleClass="button-small primary" process="@this"
+									icon="ui-icon-pencil"
+									actionListener="#{ingresarInformacionViabilidadPfnController.editarAfectacionForestal(afectacion)}"
+									oncomplete="PF('dlgActividadesProyecto').show();" />
+								<p:commandButton update=":form:dtActividadesProyecto"
+									styleClass="button-small primary" process="@this"
+									icon="ui-icon-trash"
+									actionListener="#{ingresarInformacionViabilidadPfnController.eliminarAfectacionForestal(afectacion)}">
+									<p:confirm icon="ui-icon-alert" header="Confirmación"
+										message="¿Está seguro de eliminar el registro?" />
+								</p:commandButton>
+							</p:column>
+						</p:dataTable>
+
+						<h:panelGrid>
+							<h:outputText value="BVP: Bosques y Vegetación protectores" />
+							<h:outputText value="PFE: Patrimonio Forestal del Estado" />
+							<h:outputText value="ZPP: Zona de Protección Permanente" />
+							<h:outputText value="ZMBN: Zona de Manejo de Bosque Natural" />
+							<h:outputText value="ZR: Zona de recuperación" />
+							<h:outputText value="ZOU: Zona de Otros Usos" />
+
+
+						</h:panelGrid>
+
+					</p:panelGrid>
+
+					<p:panelGrid id="pnlAnalisisPosiblesAfectaciones" columns="1"
+						layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+
+						<p:dataTable id="dtAnalisisPosiblesAfectaciones" var="afectacion"
+							styleClass="table table-hover"
+							value="#{ingresarInformacionViabilidadPfnController.listaAfectacionForestal}"
+							paginator="true" paginatorAlwaysVisible="false"
+							paginatorPosition="bottom"
+							emptyMessage="#{labels['common.table.empty']}"
+							currentPageReportTemplate="{currentPage} de {totalPages}"
+							rows="10" rowsPerPageTemplate="5,10,15">
+							<p:column headerText="Actividad">
+								<h:outputText value="#{afectacion.actividad}" />
+							</p:column>
+							<p:column
+								headerText="Descripción de la posible afectación al Patrimonio Forestal Nacional">
+								<p:inputTextarea value="#{afectacion.descripcionAfectacion}"
+									maxlength="4000" required="true" autoResize="false"
+									requiredMessage="El campo 'Descripción de la posible afectación' es requerido.">
+									<p:ajax process="@this" />
+								</p:inputTextarea>
+							</p:column>
+							<p:column headerText="Medida Propuesta">
+								<p:inputTextarea value="#{afectacion.medidaPropuesta}"
+									maxlength="4000" required="true" autoResize="false"
+									requiredMessage="El campo 'Medida propuesta' es requerido.">
+									<p:ajax process="@this" />
+								</p:inputTextarea>
+							</p:column>
+						</p:dataTable>
+
+
+					</p:panelGrid>
+
+				</p:fieldset>
+			</p:panelGrid>
+
+			<h:panelGroup id="pnlTextos2">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<p:fieldset legend="8. CONCLUSIONES" toggleable="true"
+						toggleSpeed="500" collapsed="true">
+
+						<control:imputConTextoEnriquecido
+							requiredMessage="El campo 'CONCLUSIONES' es requerido"
+							valor="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.conclusiones}"
+							soloLectura="false" />
+
+					</p:fieldset>
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<p:fieldset legend="9. RECOMENDACIONES" toggleable="true"
+						toggleSpeed="500" collapsed="true">
+
+						<control:imputConTextoEnriquecido
+							requiredMessage="El campo 'RECOMENDACIONES' es requerido"
+							valor="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.recomendaciones}"
+							soloLectura="false" />
+
+					</p:fieldset>
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<p:fieldset legend="10. BIBLIOGRAFÍA" toggleable="true"
+						toggleSpeed="500" collapsed="true">
+						<h:outputText
+						value="Deberá incluir las referencias bibliográficas citadas en los diferentes ítems del informe" />
+						<control:imputConTextoEnriquecido
+							requiredMessage="El campo 'BIBLIOGRAFÍA' es requerido"
+							valor="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.bibliografia}"
+							soloLectura="false" />
+
+					</p:fieldset>
+				</p:panelGrid>
+			</h:panelGroup>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<p:fieldset legend="11. ANEXOS" toggleable="true" toggleSpeed="500"
+					collapsed="true">
+
+					<h:panelGrid columns="1">
+						<f:facet name="header">
+							<p:commandButton value="Adicionar" title="Adicionar"
+								styleClass="toRight field_mrg"
+								oncomplete="PF('dlgArchivoAdjuntoAnexo').show();"
+								immediate="true" update=":formDialog:dlgArchivoAdjuntoAnexo">
+							</p:commandButton>
+						</f:facet>
+
+						<p:dataTable id="dtAdjuntosAnexo" var="adjunto"
+							styleClass="table table-hover"
+							value="#{ingresarInformacionViabilidadPfnController.listaDocumentosAnexos}"
+							paginator="true" paginatorAlwaysVisible="false"
+							paginatorPosition="bottom"
+							emptyMessage="#{labels['common.table.empty']}"
+							currentPageReportTemplate="{currentPage} de {totalPages}"
+							rows="10" rowsPerPageTemplate="5,10,15">
+
+							<p:column headerText="Adjunto">
+								<p:commandLink value="#{adjunto.nombre}" ajax="false"
+									immediate="true">
+									<p:fileDownload
+										value="#{ingresarInformacionViabilidadPfnController.descargarFotografia(adjunto)}" />
+								</p:commandLink>
+							</p:column>
+							<p:column headerText="Descripción">
+								<h:outputText value="#{adjunto.descripcionAnexo}" />
+							</p:column>
+							<p:column headerText="Acción" styleClass="w70px alCenter">
+								<p:commandButton update=":form:dtAdjuntosAnexo"
+									styleClass="button-small primary" process="@this"
+									icon="ui-icon-trash"
+									actionListener="#{ingresarInformacionViabilidadPfnController.eliminarAnexo(adjunto)}">
+									<p:confirm icon="ui-icon-alert" header="Confirmación"
+										message="¿Está seguro de eliminar el registro?" />
+								</p:commandButton>
+							</p:column>
+						</p:dataTable>
+					</h:panelGrid>
+
+				</p:fieldset>
+
+				<h:inputHidden
+					validator="#{ingresarInformacionViabilidadPfnController.validateDatosIngresoInforme}" />
+			</p:panelGrid>
+
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Cancelar" immediate="true"
+						styleClass="secondary" action="/bandeja/bandejaTareas.jsf"
+						icon="ui-icon-cancel" />
+					<p:commandButton value="Guardar" styleClass="secondary"
+						icon="ui-icon-disk" process="@this" update="pnlButtons :form"
+						immediate="true"
+						actionListener="#{ingresarInformacionViabilidadPfnController.guardarInforme()}">
+						<p:ajax
+							process="txtDescripcionCobertura txtDescripcionEcosistemas pnlTextos pnlTextos2 pnlTextos3" />
+					</p:commandButton>
+					<p:commandButton value="Siguiente" icon="ui-icon-arrowthick-1-e"
+						process="@this :form" update="pnlButtons"
+						disabled="#{!ingresarInformacionViabilidadPfnController.informeGuardado}"
+						action="#{ingresarInformacionViabilidadPfnController.visualizarInforme()}" />
+				</div>
+			</h:panelGroup>
+		</h:form>
+		<ui:include
+			src="/pages/rcoa/viabilidadAmbientalForestal/popupDialog.xhtml" />
+
+	</ui:define>
+</ui:composition>

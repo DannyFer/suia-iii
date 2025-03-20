@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="content">
+
+
+		<style type="text/css">
+.ui-fileupload-content {
+	border: none !important;
+	padding: 0px;
+}
+
+.ui-fileupload-buttonbar {
+	text-align: right !important;
+}
+</style>
+
+		<h:form id="form">
+
+			<h:panelGroup id="pnlDatos">
+				<h:panelGrid styleClass="w100" id="pnlDocumentos">
+					<object type="application/pdf"
+						data="#{revisarOficioPronunciamientoController.urlReporte}?pfdrid_c=true"
+						width="100%" height="500px">
+						Su navegador no soporta la visualización de pdf. Puede descargar
+						el documento presionando el siguiente botón:
+						<p:commandButton value="Descargar" styleClass="primary"
+							ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+							<p:fileDownload
+								value="#{revisarOficioPronunciamientoController.getStream(revisarOficioPronunciamientoController.nombreReporte, revisarOficioPronunciamientoController.archivoReporte)}" />
+						</p:commandButton>
+					</object>
+					<br />
+					<h:panelGroup id="oficioData">
+						<p:panelGrid columns="1" styleClass="w100">
+							<h:panelGrid columns="2" layout="grid" style="width: 60%;"
+								cellpadding="4" cellspacing="4" id="pnlPronunciamientoOficio">
+								<f:event type="preRenderView"
+									listener="#{revisarOficioPronunciamientoController.validarExisteObservacionesOficio()}" />
+
+								<p:outputLabel
+									value="¿Es necesario realizar correcciones sobre el Oficio de pronunciamiento?"
+									styleClass="bold" />
+								<p:selectOneRadio
+									value="#{revisarOficioPronunciamientoController.requiereCorrecciones}"
+									disabled="true">
+									<f:selectItem itemLabel="Si" itemValue="#{true}" />
+									<f:selectItem itemLabel="No" itemValue="#{false}" />
+								</p:selectOneRadio>
+
+								<h:outputText styleClass="bold text-red alJustify"
+									value="Si es necesario realizar correcciones, el trámite regresará al técnico responsable" />
+							</h:panelGrid>
+						</p:panelGrid>
+
+						<h:panelGroup id="pnlObsOficio">
+							<observaciones:tablaObservacionesPreliminar
+								idComponent="obsOficio"
+								seccion="Pronunciamiento observaciones no subsanables"
+								idActualizar=":form:pnlPronunciamientoOficio :form:pnlButtons"
+								aparace="true" mostrarSiVacio="true"
+								idClase="#{revisarOficioPronunciamientoController.oficioPronunciamientoBean.oficioPronunciamiento.id}"
+								nombreClase="oficioObservacionesNoSubsanables"
+								soloLectura="false" />
+						</h:panelGroup>
+					</h:panelGroup>
+				</h:panelGrid>
+			</h:panelGroup>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Guardar" process="form" update="pnlButtons"
+						actionListener="#{revisarOficioPronunciamientoController.guardar()}"
+						icon="ui-icon-disk" />
+
+					<p:commandButton value="Enviar"
+						action="#{revisarOficioPronunciamientoController.enviar()}"
+						rendered="#{revisarOficioPronunciamientoController.requiereCorrecciones}"
+						disabled="#{!revisarOficioPronunciamientoController.oficioGuardado}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+
+					<p:commandButton value="Firmar documento" styleClass="large"
+						icon="ui-icon-key" style="width: 170px;"
+						rendered="#{!revisarOficioPronunciamientoController.requiereCorrecciones}"
+						disabled="#{!revisarOficioPronunciamientoController.oficioGuardado}"
+						update=":formDialogs:pnlFirmaManual :formDialogs:pnlFirmaToken"
+						actionListener="#{revisarOficioPronunciamientoController.subirDocumento()}" />
+
+				</div>
+			</h:panelGroup>
+		</h:form>
+
+		<h:form id="formDialogs">
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600" height="auto" position="center top">
+
+				<p:panel>
+
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel
+							value="Oficio de pronunciamiento  Nro: #{revisarOficioPronunciamientoController.oficioPronunciamientoBean.oficioPronunciamiento.codigo}"
+							styleClass="bold" />
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter" >
+						<h:outputText value="¿Cuenta con token?" styleClass="encabezado" rendered="#{!revisarOficioPronunciamientoController.soloToken}"/>
+						<p:selectOneRadio id="verificaToken"
+							value="#{revisarOficioPronunciamientoController.token}" rendered="#{!revisarOficioPronunciamientoController.soloToken}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change" update="pnlFirmaManual pnlFirmaToken"
+								listener="#{revisarOficioPronunciamientoController.guardarToken}" />
+						</p:selectOneRadio>
+
+						<h:outputText value="" styleClass="encabezado" rendered="#{revisarOficioPronunciamientoController.soloToken}" />
+						<h:outputText value="" styleClass="encabezado" rendered="#{revisarOficioPronunciamientoController.soloToken}" />
+
+						<h:panelGroup id="pnlFirmaToken">
+							<p:commandButton value="Firmar documento" type="button"
+								styleClass="primary" icon="ui-icon-key"
+								rendered="#{revisarOficioPronunciamientoController.token}"
+								onclick="window.location.href='#{revisarOficioPronunciamientoController.urlAlfresco}'" />
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!revisarOficioPronunciamientoController.token}">
+							<h:outputLabel value="1. Descargue el Oficio de Pronunciamiento"
+								styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload
+									value="#{revisarOficioPronunciamientoController.descargar()}" />
+							</p:commandButton>
+
+							<p:outputLabel for="uploadRequired"
+								value="2. Adjunte el Oficio de Pronunciamiento firmado"
+								styleClass="bold" />
+							<p:fileUpload
+								fileUploadListener="#{revisarOficioPronunciamientoController.uploadListenerDocumentos}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreOficioFirmado"
+								rendered="#{!revisarOficioPronunciamientoController.token}">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreOficioFirmado"
+								value="#{revisarOficioPronunciamientoController.documentoManual.nombreDocumento}" />
+						</h:panelGrid>
+
+						<h:panelGrid columns="1" cellpadding="10" styleClass="w100"
+							rendered="#{!revisarOficioPronunciamientoController.token}">
+							<h:outputText
+								value="Recuerde que es obligatorio mantener un archivo de los documentos originales en el caso de firma manual"
+								styleClass="bold italic" />
+						</h:panelGrid>
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!revisarOficioPronunciamientoController.token and !revisarOficioPronunciamientoController.subido}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialogOficio').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						action="#{revisarOficioPronunciamientoController.finalizar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+		</h:form>
+
+	</ui:define>
+</ui:composition>

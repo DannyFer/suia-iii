@@ -1,0 +1,100 @@
+<ui:composition template="/WEB-INF/templates/default.xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+	<ui:composition template="/WEB-INF/templates/default-task-rappc.xhtml">
+		<ui:define name="content">
+			<h:form id="form">
+				<h:panelGrid styleClass="w100" id="informeGrid">
+					<object type="application/pdf" data="#{firmarOficioAprobacionPPCController.urlReporte}?pfdrid_c=true" width="100%" height="500px">
+						Su navegador no soporta la visualización de pdf. Puede descargar el documento presionando el siguiente botón:
+						<p:commandButton value="Descargar" styleClass="primary" ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+							<p:fileDownload
+								value="#{firmarOficioAprobacionPPCController.getStream()}" />
+						</p:commandButton>
+					</object>
+				</h:panelGrid>
+				<p:outputPanel id="pnlFinalizarBtn">
+					<div class="buttons main">
+						<p:commandButton  value="Cancelar" actionListener="#{firmarOficioAprobacionPPCController.redireccionarBandeja()}" process="@this" />
+						<p:commandButton value="Firmar documento " type="button" styleClass="large buttonLarge" icon="ui-icon-key"
+						 update=":formDialog:pnlFirmar" onclick="PF('signDialogOficio').show();" />
+					</div>
+				</p:outputPanel>
+			</h:form>
+
+			<h:form id="formDialog">
+				<p:dialog id="signDialogOficio" widgetVar="signDialogOficio"
+					header="Firmar Oficio" modal="true" resizable="false" width="500px"
+					closable="false">
+					<h:panelGrid styleClass="alCenter w100" columns="1" id="pnlFirmar">
+						<h:outputText value="Firmar Oficio Archivo" styleClass="encabezado1_4em" />
+						<h:panelGrid styleClass="alCenter w66" columns="1">
+							<p:panel styleClass="alCenter" rendered="#{!firmarOficioAprobacionPPCController.firmaSoloToken}">
+								<h:form>
+									<h:panelGrid styleClass="alCenter w100" columns="2">
+										<h:outputText value="Cuenta con token?" styleClass="encabezado" style="text-align:right" />
+										<p:selectOneRadio id="verificaToken"
+											value="#{firmarOficioAprobacionPPCController.token}">
+											<f:selectItem itemLabel="Si" itemValue="true" />
+											<f:selectItem itemLabel="No" itemValue="false" />
+											<p:ajax event="change" update="@form :formDialog:pnlFirmar"
+												process="@this" listener="#{firmarOficioAprobacionPPCController.guardarToken}" />
+										</p:selectOneRadio>
+									</h:panelGrid>
+								</h:form>
+							</p:panel>
+						</h:panelGrid>
+	
+	
+						<h:panelGrid id="digital">
+							<p:commandButton value="Firmar documento" type="button" styleClass="primary" icon="ui-icon-key"
+								rendered="#{firmarOficioAprobacionPPCController.token}"
+								onclick="window.location.href='#{firmarOficioAprobacionPPCController.firmarDocumento()}'" />
+						</h:panelGrid>
+	
+						<h:panelGrid id="fisico" columns="2" cellpadding="10" style="text-align:right !important"
+							rendered="#{!firmarOficioAprobacionPPCController.token}">
+							<p:outputLabel value="1. Descargue el oficio pronunciamiento" styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload value="#{firmarOficioAprobacionPPCController.stream}" />
+							</p:commandButton>
+							<p:outputLabel for="uploadRequired" value="2. Adjuntar el oficio de pronunciamiento firmado" styleClass="bold" />
+							<p:fileUpload
+								fileUploadListener="#{firmarOficioAprobacionPPCController.uploadListenerDocumentos}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreOficioFirmado">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreOficioFirmado" value="#{firmarOficioAprobacionPPCController.documentoManual.nombre}" />
+						</h:panelGrid>
+						<h:inputHidden id="uploadRequired" required="#{!firmarOficioAprobacionPPCController.token and !firmarOficioAprobacionPPCController.documentoSubido}" />
+						<p:separator />
+					</h:panelGrid>
+	
+					<div class="buttons">
+						<p:commandButton value="Enviar" action="#{firmarOficioAprobacionPPCController.completarTarea()}"
+							icon="ui-icon-check" process="@this">
+							<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+								header="#{msg['header.confirmacion.envio.tarea']}" />
+						</p:commandButton>
+						<p:commandButton type="button" value="Cerrar" onclick="PF('signDialogOficio').hide()" />
+					</div>
+				</p:dialog>
+			</h:form>
+		</ui:define>
+	</ui:composition>
+</ui:composition>

@@ -1,0 +1,831 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+	<ui:composition template="/WEB-INF/templates/default.xhtml" 
+		xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:p="http://primefaces.org/ui"	
+		xmlns:pe="http://primefaces.org/ui/extensions"
+		xmlns:t="http://myfaces.apache.org/tomahawk"
+		xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+		xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+		<ui:define name="content">
+			
+			<h:form id="formInformacionTable" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }">
+				<p:panel style="text-align:center;">
+					<f:facet name="header">
+						<h:outputText value="Declaraciones anuales de residuos y desechos peligrosos y especiales - Declaración de gestor" styleClass="uppercase"/>
+					</f:facet>
+				</p:panel>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Información del operador"/>
+					</f:facet>
+					<p:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25,null w75">
+						<h:outputText value="RUC / Cédula:"/>
+						<h:outputText value="#{loginBean.usuario.nombre}"/>					
+						<h:outputText value="Nombre:"/>
+						<h:outputText value="#{gestorDesechosPeligrososController.nombreUsuario}"/>					
+						<h:outputText value="Representante legal:" rendered="#{not empty gestorDesechosPeligrososController.representanteLegal}"/>
+						<h:outputText value="#{gestorDesechosPeligrososController.representanteLegal}" rendered="#{not empty gestorDesechosPeligrososController.representanteLegal}"/>						
+					</p:panelGrid>				
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Información del proyecto"/>
+					</f:facet>
+					<p:panelGrid columns="2" styleClass="panel_data w1000"
+						columnClasses="header w25,null w75">
+						<h:outputText value="Nombre Proyecto:"/>
+						<h:outputText value="#{gestorDesechosPeligrososController.informacionProyecto.nombreProyecto}"/>					
+						<h:outputText value="#{gestorDesechosPeligrososController.informacionProyecto.esEmisionFisica?'Nombre Proceso':'Tipo de Trámite'}:"/>
+						<h:outputText value="#{gestorDesechosPeligrososController.informacionProyecto.nombreProceso}"/>
+						<h:outputText value="Código Proyecto"/>
+						<h:outputText value="#{gestorDesechosPeligrososController.informacionProyecto.esEmisionFisica ? 
+						gestorDesechosPeligrososController.informacionProyecto.numeroResolucion : gestorDesechosPeligrososController.informacionProyecto.codigo}"/>
+					</p:panelGrid>				
+				</p:panelGrid>
+			</h:form>
+
+			<h:form id="form" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Información Declaracion" styleClass="w100"/>
+					</f:facet>
+					<p:tabView id="tabView" styleClass="w100">
+						<p:tab title="Transporte" rendered="#{gestorDesechosPeligrososController.tabTransporte}">
+							<ui:include src="/control/retce/gestorDesechos/transporte.xhtml" />
+						</p:tab>
+						<p:tab title="Almacenamiento" rendered="#{gestorDesechosPeligrososController.tabAlmacenamiento}">
+							<ui:include src="/control/retce/gestorDesechos/almacenamiento.xhtml" />
+						</p:tab>
+						<p:tab title="Eliminación" rendered="#{gestorDesechosPeligrososController.tabEliminacion}">
+							<ui:include src="/control/retce/gestorDesechos/eliminacion.xhtml" />
+						</p:tab>
+						<p:tab title="Disposición Final" rendered="#{gestorDesechosPeligrososController.tabDisposicion}">
+							<ui:include src="/control/retce/gestorDesechos/disposicionFinal.xhtml" />
+						</p:tab>
+					</p:tabView>
+				</p:panelGrid>
+				
+				<p:panelGrid id="tecnicoGrid" columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText
+							value="Información del técnico que reporta"/>
+					</f:facet>
+					<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+						<f:facet name="header">
+							<h:outputText value="Información del técnico que reporta"
+								style="color:#222222;" />
+						</f:facet>
+	
+						<h:outputText value="Cédula / RUC:" for="cedulaRuc" />
+						<p:inputText id="cedulaRuc"
+							value="#{gestorDesechosPeligrososController.tecnicoResponsable.identificador}"
+							required="true" requiredMessage="Cédula/RUC es requerido" 
+							maxlength="13" disabled="true">
+						</p:inputText>
+	
+						<h:outputText value="Nombre / Razón Social:" for="nombreTecnico" />
+						<p:inputText id="nombreTecnico"
+							value="#{gestorDesechosPeligrososController.tecnicoResponsable.nombre}"
+							required="true" requiredMessage="Nombre es requerido"
+							maxlength="200" disabled="true" />
+	
+						<h:outputText value="Correo electrónico:" for="correoTecnico" />
+						<p:inputText id="correoTecnico"
+							value="#{gestorDesechosPeligrososController.tecnicoResponsable.correo}"
+							required="true" requiredMessage="Correo electrónico es requerido" disabled="true"/>
+	
+						<h:outputText value="Teléfono:" for="telefonoTecnico" />
+						<p:inputText id="telefonoTecnico"
+							value="#{gestorDesechosPeligrososController.tecnicoResponsable.telefono}"
+							required="true" requiredMessage="Teléfono es requerido"
+							maxlength="30" disabled="true">
+							<pe:keyFilter regEx="/[\d\-]/" />
+						</p:inputText>
+	
+						<h:outputText value="Celular:" for="celularTecnico" />
+						<p:inputText id="celularTecnico"
+							value="#{gestorDesechosPeligrososController.tecnicoResponsable.celular}"
+							required="true" requiredMessage="Celular es requerido"
+							maxlength="15" disabled="true">
+							<pe:keyFilter regEx="/[\d\-]/" />
+						</p:inputText>
+					</p:panelGrid>
+				</p:panelGrid>
+
+				<div class="buttons main">
+					<p:commandButton value="Enviar" title="Enviar" icon="ui-icon-check" process="@this" immediate="true"
+						action="#{gestorDesechosPeligrososController.enviar}">
+						<p:confirm header="Confirmación" message="¿Está seguro que desea finalizar la solicitud?" icon="ui-icon-alert" />
+					</p:commandButton>
+				</div>
+			</h:form>
+			
+			<h:form id="formDialogs">
+				<p:dialog id="rutasDiag" widgetVar="rutasDiag" header="Rutas" width="900px" closable="false">
+					<p:panelGrid id="rutasDiagGrid" columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+						<h:outputText value="Provincia Origen:" for="cmb_provinciaDesde"/>
+						<p:selectOneMenu value="#{gestorDesechosPeligrososController.ruta.provinciaOrigen}"
+							requiredMessage="Provincia de origen es requerido"
+							id="cmb_provinciaDesde" styleClass="w100" required="true">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="#{null}" noSelectionOption="true"/>
+							<f:selectItems value="#{ubicacionGeograficaController.ubicacionGeograficaBean.listaProvincia}" 
+								var="provincia" itemLabel="#{provincia.nombre}" itemValue="#{provincia.id}"/>
+						</p:selectOneMenu>
+						<h:outputText value="Provincia Destino:" for="cmb_provinciaHasta"/>
+						<p:selectOneMenu value="#{gestorDesechosPeligrososController.ruta.provinciaDestino}"
+							requiredMessage="Provincia de destino es requerido"
+							id="cmb_provinciaHasta" styleClass="w100" required="true">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="#{null}" noSelectionOption="true"/>
+							<f:selectItems value="#{ubicacionGeograficaController.ubicacionGeograficaBean.listaProvincia}" 
+								var="provincia" itemLabel="#{provincia.nombre}" itemValue="#{provincia.id}"/>
+						</p:selectOneMenu>
+					</p:panelGrid>
+					<t:div styleClass="buttons">
+						<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('rutasDiag').hide()" styleClass="secondary"
+							update=":formDialogs:rutasDiagGrid" actionListener="#{gestorDesechosPeligrososController.resetRuta()}"/>
+						<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}" process="rutasDiag" oncomplete="if(!args.validationFailed) PF('rutasDiag').hide();"
+							update=":formDialogs:rutasDiagGrid :form:tabView:transporteGrid"
+							actionListener="#{gestorDesechosPeligrososController.agregarRuta()}"/>
+					</t:div>
+				</p:dialog>
+				
+				<p:dialog id="manifiestoDiag" widgetVar="manifiestoDiag" header="Manifiesto" width="900px" closable="false">
+					<p:panelGrid id="manifiestoDiagGrid" columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+						<h:outputText value="N° manifiesto:" for="nroManifiesto" />
+						<p:inputText value="#{gestorDesechosPeligrososController.manifiestoUnico.numeroManifiesto}" required="true" requiredMessage="Número de manifiesto es requerido" maxlength="20">
+<!-- 							<pe:keyFilter regEx="/[a-z0-9]/i " /> -->
+						</p:inputText>
+						<h:outputText value="Adjunto" />
+						<p:panel>
+						<h:outputText value="Admite archivos .pdf hasta 20Mb" />
+						<p:fileUpload id="documentoManifiestoTransporte" fileUploadListener="#{gestorDesechosPeligrososController.asignarDocumentoManifiestoTransporte}"
+							sizeLimit="20971520" fileLimit="1" allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar"
+							uploadLabel="Subir" auto="true" update="fileManifiestoTransporte" cancelLabel="Cancelar"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+							fileLimitMessage="Máximo 1 archivo"
+							mode="advanced" styleClass="w100">
+						</p:fileUpload>
+						<p:outputLabel id="fileManifiestoTransporte" value="#{gestorDesechosPeligrososController.documentoManifiestoTransporte.nombre}" />
+						</p:panel>
+						<h:outputText value="N° de registro de generador de desechos peligrosos y especiales / N° de licencia de gestor:" for="nroRegistro" />
+						<p:inputText value="#{gestorDesechosPeligrososController.manifiestoUnico.numeroRGD}" maxlength="20" />
+						<h:outputText value="Fecha de recepción de los residuos y desechos  peligrosos y especiales:" for="fechaRecepcion"/>
+						<p:calendar styleClass="calendarClass" value="#{gestorDesechosPeligrososController.manifiestoUnico.fechaRecepcion}" 
+							pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" 
+							required="true" requiredMessage="Fecha de recepción es requerido">
+						</p:calendar>
+					</p:panelGrid>
+					
+					<p:dataTable value="#{gestorDesechosPeligrososController.listDesechosTransporte}" var="desecho"
+					paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rows="5">
+						<f:facet name="header">
+							<h:outputText value="Identificación del desecho"/>
+						</f:facet>
+						<p:column headerText="Nombre del Desecho" filterBy="#{desecho.descripcion}" filterMatchMode="contains" styleClass="w75">
+							<h:outputText value="#{desecho.descripcion}" />
+						</p:column>
+						<p:column headerText="Código"  filterBy="#{desecho.clave}" filterMatchMode="contains" styleClass="alCenter w15">
+							<h:outputText value="#{desecho.clave}" />
+						</p:column>
+						<p:column styleClass="w10">
+							<p:commandButton icon="ui-icon-plus" styleClass="primary" oncomplete="PF('desechoDiag').show()"
+							process="@this" update=":formDialogs:desechoDiag" >
+								<f:setPropertyActionListener value="#{desecho}" target="#{gestorDesechosPeligrososController.desechoPeligroso}" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+					
+					<p:dataTable id="tblDesechoTransporte" var="desechoTransporte" value="#{gestorDesechosPeligrososController.manifiestoUnico.listDesechoTransporte}">
+						<f:facet name="header">
+							<h:outputText value="Desecho Ingresado"/>
+						</f:facet>
+						<p:column headerText="Nombre del residuo o desecho peligroso o especial">
+							<h:outputText value="#{desechoTransporte.desechoPeligroso.descripcion}"/>
+						</p:column>
+						<p:column headerText="Código">
+							<h:outputText value="#{desechoTransporte.desechoPeligroso.clave}"/>
+						</p:column>
+						<p:column headerText="Unidad">
+							<h:outputText value="#{desechoTransporte.unidadDesechoTransporte.descripcion}"/>
+						</p:column>
+						<p:column headerText="Cantidad recibida">
+							<h:outputText value="#{desechoTransporte.cantidad}"/>
+						</p:column>
+						<p:column headerText="Reporte en unidades">
+							<h:outputText value="#{desechoTransporte.reporteUnidades}"/>
+						</p:column>
+					</p:dataTable>
+					
+					<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+						<h:outputText value="Fecha de transferencia:" />
+						<p:calendar styleClass="calendarClass" value="#{gestorDesechosPeligrososController.manifiestoUnicoTransferencia.fechaTransferencia}" 
+							pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" required="true" requiredMessage="Fecha de transferencia es requerido">
+						</p:calendar>
+					</p:panelGrid>
+					
+					<p:dataTable value="#{gestorDesechosPeligrososController.listSedePrestadorServiciosDesechos}" var="empresaTransporte"
+					selection="#{gestorDesechosPeligrososController.listSedePrestadorServiciosSelected}" rowKey="#{empresaTransporte}"
+					sortBy="#{empresaTransporte.prestadorServiciosDesechos.ruc}" sortOrder="descending" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" 
+					currentPageReportTemplate="{currentPage} de {totalPages}" rows="5" rowsPerPageTemplate="5,10,15">
+						<p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+						<p:column headerText="RUC empresa gestora" filterBy="#{empresaTransporte.prestadorServiciosDesechos.ruc}" filterMatchMode="contains" styleClass="alCenter w15">
+							<h:outputText value="#{empresaTransporte.prestadorServiciosDesechos.ruc}" />
+						</p:column>
+						<p:column headerText="Nombre empresa gestora" filterBy="#{empresaTransporte.prestadorServiciosDesechos.nombre}" filterMatchMode="contains">
+							<h:outputText value="#{empresaTransporte.prestadorServiciosDesechos.nombre}" />
+						</p:column>
+						<p:column headerText="Número de permiso ambiental" styleClass="alCenter w15">
+							<h:outputText value="#{empresaTransporte.codigoPermisoAmbiental}" />
+						</p:column>
+					</p:dataTable>
+
+					<t:div styleClass="buttons">
+						<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('manifiestoDiag').hide()" styleClass="secondary"
+							update=":formDialogs:manifiestoDiag" actionListener="#{gestorDesechosPeligrososController.resetManifiestoUnico}" />
+						<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}" process="manifiestoDiag" oncomplete="if(!args.validationFailed) PF('manifiestoDiag').hide();"
+							update=":form:tabView:manifiestoGrid :formDialogs:manifiestoDiagGrid :formDialogs:transferenciaDiag"
+							actionListener="#{gestorDesechosPeligrososController.agregarManifiestoUnico}" />
+					</t:div>
+				</p:dialog>
+				
+				<p:dialog id="desechoDiag" widgetVar="desechoDiag" header="Desecho: #{gestorDesechosPeligrososController.desechoPeligroso.descripcion}" width="900px" closable="false">
+					<p:panelGrid id="desechoTransporteDiagGrid" columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+						<h:outputText value="Unidad:" />
+						<p:selectOneMenu value="#{gestorDesechosPeligrososController.desechoGestorTransporte.unidadDesechoTransporte}" style="width: 50%" required="true" requiredMessage="Unidad de Desecho es requerido" converter="selectItemConverter">
+							<f:selectItem itemLabel="Seleccione" itemValue=""/>
+							<f:selectItems value="#{gestorDesechosPeligrososController.listUnidad}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>				
+						</p:selectOneMenu>
+						<h:outputText value="Cantidad recibida:" />
+						<pe:inputNumber required="true" thousandSeparator="" maxValue="9999999999.99" minValue="0" requiredMessage="Cantidad es requerida"
+							value="#{gestorDesechosPeligrososController.desechoGestorTransporte.cantidad}" >
+							<f:validateDoubleRange minimum="0.1" />
+						</pe:inputNumber>
+					</p:panelGrid>
+					
+					<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75"
+					rendered="#{gestorDesechosPeligrososController.desechoPeligroso.clave eq 'ES-04' || gestorDesechosPeligrososController.desechoPeligroso.clave eq 'ES-06'}"> 
+						<h:outputText value="Reporte en unidades (U) únicamente para los desechos ES-04 y ES-06:" />
+						<p:inputText value="#{gestorDesechosPeligrososController.desechoGestorTransporte.reporteUnidades}" required="true" requiredMessage="Reporte de Unidades es requerido" maxlength="20">
+							<pe:keyFilter regEx="/[0-9]/i " />
+						</p:inputText>
+					</p:panelGrid>
+					
+					<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+						<h:outputText value="Tipo" />
+				        <p:selectBooleanCheckbox value="#{gestorDesechosPeligrososController.esDesechoExportacion}" itemLabel="Exportación">
+				        	<p:ajax update=":#{p:component('transporteExportacionGroupDiag')}" listener="#{gestorDesechosPeligrososController.validarTransporteExportacion}" />
+				        </p:selectBooleanCheckbox>
+					</p:panelGrid>
+					
+					<h:panelGroup id="transporteExportacionGroupDiag">
+						<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75" rendered="#{gestorDesechosPeligrososController.esDesechoExportacion}">
+							<h:outputText value="Cantidad:" />
+							<pe:inputNumber required="true" thousandSeparator="" maxValue="9999999999.99" minValue="0"
+							value="#{gestorDesechosPeligrososController.desechoGestorTransporteExportacion.cantidad}" >
+								<f:validateDoubleRange minimum="0.1" />
+							</pe:inputNumber>
+							<h:outputText value="País de destino:" />
+							<p:selectOneMenu value="#{gestorDesechosPeligrososController.desechoGestorTransporteExportacion.pais}" style="width: 100%" 
+								converter="selectItemConverter" filter="true" filterMatchMode="startsWith">
+								<f:selectItem itemLabel="Seleccione" itemValue=""/>
+								<f:selectItems value="#{gestorDesechosPeligrososController.listUbicacionesGeografica}" var="item" itemLabel="#{item.nombre}" itemValue="#{item}"/>				
+							</p:selectOneMenu>
+							<h:outputText value="Autorizacion:" for="documentoTransporteExportacionAutorizacion" />
+							<p:panel>
+								<h:outputText value="Admite archivos .rar/.zip hasta 20Mb" />
+								<p:fileUpload id="documentoTransporteExportacionAutorizacion" fileUploadListener="#{gestorDesechosPeligrososController.asignarDocumentoTransporteAutorizacion}"
+									sizeLimit="20971520" fileLimit="1" allowTypes="/(\.|\/)(zip|rar)$/" label="Seleccionar"
+									uploadLabel="Subir" auto="true" update="fileTransporteExportacionAutorizacion" cancelLabel="Cancelar"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+									fileLimitMessage="Máximo 1 archivo"
+									mode="advanced" styleClass="w100">
+								</p:fileUpload>
+								<p:outputLabel id="fileTransporteExportacionAutorizacion" value="#{gestorDesechosPeligrososController.documentoTransporteExportacionAutorizacion.nombre}" />
+							</p:panel>
+						</p:panelGrid>
+					</h:panelGroup>
+					
+					<t:div styleClass="buttons">
+						<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('desechoDiag').hide()" styleClass="secondary"
+						update=":formDialogs:desechoDiag"
+						actionListener="#{gestorDesechosPeligrososController.resetDesechoGestorTransporte}" />
+						<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}" 
+						process="desechoDiag" 
+						update=":formDialogs:tblDesechoTransporte" oncomplete="PF('desechoDiag').hide()"
+						actionListener="#{gestorDesechosPeligrososController.agregarDesechoGestorTransporte}" />
+					</t:div>
+				</p:dialog>
+				
+				<p:dialog id="transferenciaDiag" widgetVar="transferenciaDiag" header="Transferencia" width="900px" closable="false">
+					<p:panelGrid id="transferenciaDiagGrid" columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+						<h:outputText value="Número de manifiesto:" for="numManifiestoTransferencia" />
+						<p:selectOneMenu id="numManifiestoTransferencia" value="#{gestorDesechosPeligrososController.manifiestoUnico}" style="width: 50%" required="true" requiredMessage="Manifiesto Único es requerido" converter="selectItemConverter">
+							<f:selectItem itemLabel="Seleccione" itemValue=""/>
+							<f:selectItems value="#{gestorDesechosPeligrososController.listManifiestoUnicoTransporte}" var="item_manifiesto" itemLabel="#{item_manifiesto.numeroManifiesto}" itemValue="#{item_manifiesto}"/>				
+						</p:selectOneMenu>
+						<h:outputText value="Fecha de transferencia:" />
+						<p:calendar styleClass="calendarClass" value="#{gestorDesechosPeligrososController.manifiestoUnicoTransferencia.fechaTransferencia}" 
+							pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" 
+							required="true" requiredMessage="Fecha de recepción es requerido">
+						</p:calendar>
+					</p:panelGrid>
+					<p:dataTable value="#{gestorDesechosPeligrososController.listSedePrestadorServiciosDesechos}" var="item"
+						sortBy="#{item.prestadorServiciosDesechos.ruc}" sortOrder="descending" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" 
+						currentPageReportTemplate="{currentPage} de {totalPages}" rows="5" rowsPerPageTemplate="5,10,15">
+						<p:column headerText="RUC empresa gestora" filterBy="#{item.prestadorServiciosDesechos.ruc}" filterMatchMode="contains" styleClass="alCenter w15">
+							<h:outputText value="#{item.prestadorServiciosDesechos.ruc}" />
+						</p:column>
+						<p:column headerText="Nombre empresa gestora" filterBy="#{item.prestadorServiciosDesechos.nombre}" filterMatchMode="contains">
+							<h:outputText value="#{item.prestadorServiciosDesechos.nombre}" />
+						</p:column>
+						<p:column headerText="Número de permiso ambiental" styleClass="alCenter w15">
+							<h:outputText value="#{item.codigoPermisoAmbiental}" />
+						</p:column>
+						<p:column headerText="Seleccionar" styleClass="alCenter w10">
+                        	<p:commandButton actionListener="#{gestorDesechosPeligrososController.seleccionarEmpresaGestora(item)}" oncomplete="if(!args.validationFailed) PF('transferenciaDiag').hide();" 
+                        		icon="ui-icon-play" styleClass="button-small primary" 
+                        		process=":formDialogs:transferenciaDiag :formDialogs:transferenciaDiagGrid" 
+                        		update=":form:tabView:manifiestoGrid :formDialogs:transferenciaDiagGrid" /> 
+						</p:column>
+					</p:dataTable>
+					<t:div styleClass="buttons">
+						<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('transferenciaDiag').hide()" styleClass="secondary"/>
+					</t:div>
+				</p:dialog>
+				
+				<p:dialog id="manifiestoRecepcionDiag" widgetVar="manifiestoRecepcionDiag" header="Manifiesto - Recepción" width="900px" closable="false" modal="true">
+					<p:panelGrid id="manifiestoRecepcionDiagGrid" columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+						<h:outputText value="N° manifiesto:" />
+						<p:inputText value="#{gestorDesechosPeligrososController.manifiestoUnico.numeroManifiesto}" required="true" requiredMessage="Número de manifiesto es requerido" maxlength="20" />
+						<h:outputText value="Adjunto" />
+						<p:panel>
+							<h:outputText value="Admite archivos .pdf hasta 20Mb" />
+							<p:fileUpload fileUploadListener="#{gestorDesechosPeligrososController.asignarDocumentoManifiestoRecepcion}"
+								required="true" requiredMessage="Debe ingresar el adjunto del Manifiesto - Recepción"
+								sizeLimit="20971520" fileLimit="1" allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar"
+								uploadLabel="Subir" auto="true" update="fileManifiestoRecepcion" cancelLabel="Cancelar"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+								fileLimitMessage="Máximo 1 archivo"
+								mode="advanced" styleClass="w100">
+							</p:fileUpload>
+							<p:outputLabel id="fileManifiestoRecepcion" value="#{gestorDesechosPeligrososController.documentoManifiestoAlmacenamientoRecepcion.nombre}" />
+						</p:panel>
+						<h:outputText value="N° de registro de generador de desechos peligrosos y especiales / N° de licencia de gestor:" for="nroRegistroRecepcion" />
+						<p:inputText value="#{gestorDesechosPeligrososController.manifiestoUnico.numeroRGD}" required="true" requiredMessage="Número de registro es requerido" maxlength="20" />
+						<h:outputText value="Fecha de recepción de los residuos y desechos  peligrosos y especiales:" for="fechaManifiestoRecepcion"/>
+						<p:calendar styleClass="calendarClass" value="#{gestorDesechosPeligrososController.manifiestoUnico.fechaRecepcion}" 
+							pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" required="true" requiredMessage="Fecha de recepción es requerido">
+						</p:calendar>
+					</p:panelGrid>
+					
+					<p:dataTable value="#{gestorDesechosPeligrososController.listDesechosAlmacenamientoRecepcion}" var="desecho"
+					paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rows="5">
+						<f:facet name="header">
+							<h:outputText value="Identificación del desecho"/>
+						</f:facet>
+						<p:column headerText="Nombre del Desecho" filterBy="#{desecho.descripcion}" filterMatchMode="contains" styleClass="w75">
+							<h:outputText value="#{desecho.descripcion}" />
+						</p:column>
+						<p:column headerText="Código"  filterBy="#{item.clave}" filterMatchMode="contains" styleClass="alCenter w15">
+							<h:outputText value="#{desecho.clave}" />
+						</p:column>
+						<p:column styleClass="w10">
+							<p:commandButton icon="ui-icon-plus" styleClass="primary" oncomplete="PF('desechoRecepcionDiag').show()"
+							process="@this" update=":formDialogs:desechoRecepcionDiag" >
+								<f:setPropertyActionListener value="#{desecho}" target="#{gestorDesechosPeligrososController.desechoPeligroso}" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+					
+					<p:dataTable id="tblDesechoRecepcion" var="desechoRecepcion" value="#{gestorDesechosPeligrososController.manifiestoUnico.listDesechoRecepcion}">
+						<f:facet name="header">
+							<h:outputText value="Desecho Ingresado"/>
+						</f:facet>
+						<p:column headerText="Nombre del residuo o desecho peligroso o especial">
+							<h:outputText value="#{desechoRecepcion.desechoPeligroso.descripcion}"/>
+						</p:column>
+						<p:column headerText="Código">
+							<h:outputText value="#{desechoRecepcion.desechoPeligroso.clave}"/>
+						</p:column>
+						<p:column headerText="Unidad">
+							<h:outputText value="#{desechoRecepcion.unidadDesechoRecepcion.descripcion}"/>
+						</p:column>
+						<p:column headerText="Cantidad recibida">
+							<h:outputText value="#{desechoRecepcion.cantidad}"/>
+						</p:column>
+						<p:column headerText="Reporte en unidades">
+							<h:outputText value="#{desechoRecepcion.reporteUnidades}"/>
+						</p:column>
+					</p:dataTable>
+					
+					<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+						<h:outputText value="Fecha de transferencia:" />
+						<p:calendar styleClass="calendarClass" value="#{gestorDesechosPeligrososController.manifiestoUnicoTransferencia.fechaTransferencia}" 
+							pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" required="true" requiredMessage="Fecha de transferencia es requerido">
+						</p:calendar>
+					</p:panelGrid>
+					
+					<p:dataTable value="#{gestorDesechosPeligrososController.listSedePrestadorServiciosDesechosAlmacenamiento}" var="empresaRecepcion"
+					selection="#{gestorDesechosPeligrososController.listSedePrestadorServiciosSelected}" rowKey="#{empresaRecepcion}"
+					sortBy="#{empresaRecepcion.prestadorServiciosDesechos.ruc}" sortOrder="descending" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" 
+					currentPageReportTemplate="{currentPage} de {totalPages}" rows="5" rowsPerPageTemplate="5,10,15">
+						<p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+						<p:column headerText="RUC empresa gestora" filterBy="#{empresaRecepcion.prestadorServiciosDesechos.ruc}" filterMatchMode="contains" styleClass="alCenter w15">
+							<h:outputText value="#{empresaRecepcion.prestadorServiciosDesechos.ruc}" />
+						</p:column>
+						<p:column headerText="Nombre empresa gestora" filterBy="#{empresaRecepcion.prestadorServiciosDesechos.nombre}" filterMatchMode="contains">
+							<h:outputText value="#{empresaRecepcion.prestadorServiciosDesechos.nombre}" />
+						</p:column>
+						<p:column headerText="Número de permiso ambiental" styleClass="alCenter w15">
+							<h:outputText value="#{empresaRecepcion.codigoPermisoAmbiental}" />
+						</p:column>
+					</p:dataTable>
+					
+					<t:div styleClass="buttons">
+						<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('manifiestoRecepcionDiag').hide()" styleClass="secondary"
+							update=":formDialogs:manifiestoRecepcionDiag" actionListener="#{gestorDesechosPeligrososController.resetRecepcion}" />
+						<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}" process="manifiestoRecepcionDiag" oncomplete="if(!args.validationFailed) PF('manifiestoRecepcionDiag').hide();"
+							update=":form:tabView:manifiestoRecepcionGrid :formDialogs:manifiestoRecepcionDiag :formDialogs:desechoRecepcionDiag :form:tabView:exportacionAlmacenamientoGrid"
+							actionListener="#{gestorDesechosPeligrososController.agregarManifiestoRecepcion}" />
+					</t:div>
+				</p:dialog>
+				
+				<p:dialog id="transferenciaRecepcionDiagGrid" widgetVar="transferenciaRecepcionDiagGrid" header="Tramsferencia - Recepción" width="900px" closable="false" modal="true"></p:dialog>
+
+				<p:dialog id="desechoRecepcionDiag" widgetVar="desechoRecepcionDiag" header="Desecho: #{gestorDesechosPeligrososController.desechoPeligroso.descripcion}" width="900px" closable="false">
+					<p:panelGrid id="desechoRecepcionDiagGrid" columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+						<h:outputText value="Unidad:" />
+						<p:selectOneMenu value="#{gestorDesechosPeligrososController.desechoGestorAlmacenamiento.unidadDesechoRecepcion}" style="width: 50%" required="true" requiredMessage="Unidad de Desecho es requerido" converter="selectItemConverter">
+							<f:selectItem itemLabel="Seleccione" itemValue=""/>
+							<f:selectItems value="#{gestorDesechosPeligrososController.listUnidad}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>				
+						</p:selectOneMenu>
+						<h:outputText value="Cantidad recibida:" />
+						<pe:inputNumber required="true" thousandSeparator="" maxValue="9999999999.99" minValue="0" requiredMessage="Cantidad es requerida"
+							value="#{gestorDesechosPeligrososController.desechoGestorAlmacenamiento.cantidad}" >
+							<f:validateDoubleRange minimum="0.1" />
+						</pe:inputNumber>
+					</p:panelGrid>
+
+					<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75"
+					rendered="#{gestorDesechosPeligrososController.desechoPeligroso.clave eq 'ES-04' || gestorDesechosPeligrososController.desechoPeligroso.clave eq 'ES-06'}"> 
+						<h:outputText value="Reporte en unidades (U) únicamente para los desechos ES-04 y ES-06:" />
+						<p:inputText value="#{gestorDesechosPeligrososController.desechoGestorAlmacenamiento.reporteUnidades}" required="true" requiredMessage="Reporte de Unidades es requerido" maxlength="20">
+							<pe:keyFilter regEx="/[0-9]/i " />
+						</p:inputText>
+					</p:panelGrid>
+					
+					<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+						<h:outputText value="Tipo" />
+				        <p:selectManyButton id="tipoAlmacenamiento" layout="grid" columns="4" 
+				        value="#{gestorDesechosPeligrososController.tipoAlmacenamientoSeleccionada}" converter="selectItemConverter" >
+							<f:selectItems value="#{gestorDesechosPeligrososController.listAlmacenamiento}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+							<p:ajax update=":#{p:component('almacenamientoExportacionGroupDiag')}" 
+							listener="#{gestorDesechosPeligrososController.validarTipoAlmacenamiento}" />
+						</p:selectManyButton>
+					</p:panelGrid>
+					
+					<h:panelGroup id="almacenamientoExportacionGroupDiag">
+						<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75" rendered="#{gestorDesechosPeligrososController.esDesechoExportacion}">
+							<h:outputText value="Cantidad:" />
+							<pe:inputNumber required="true" requiredMessage="Cantidad Exportación es requierida" 
+							thousandSeparator="" maxValue="9999999999.99" minValue="0"
+							value="#{gestorDesechosPeligrososController.desechoGestorAlmacenamientoExportacion.cantidad}" >
+								<f:validateDoubleRange minimum="0.1" />
+							</pe:inputNumber>
+							<h:outputText value="País de destino:" />
+							<p:selectOneMenu value="#{gestorDesechosPeligrososController.desechoGestorAlmacenamientoExportacion.pais}" style="width: 100%"
+							required="true" requiredMessage="El País de Destino es requerido" 
+							converter="selectItemConverter" filter="true" filterMatchMode="startsWith">
+								<f:selectItem itemLabel="Seleccione" itemValue=""/>
+								<f:selectItems value="#{gestorDesechosPeligrososController.listUbicacionesGeografica}" var="item" itemLabel="#{item.nombre}" itemValue="#{item}"/>				
+							</p:selectOneMenu>
+							<mae:panelGridHeaderHelp value="* Notificación:" conector="desechoHelp" help="#{helps['notificacion.ayuda']}" styleClass="secondary" />
+							<p:panel>
+								<h:outputText value="Admite archivos .rar/.zip hasta 20Mb" />
+								<p:fileUpload fileUploadListener="#{gestorDesechosPeligrososController.asignarDocumentoAlmacenamientoNotificacion}"
+									required="true" requiredMessage="El documento de Notificación es requerido"
+									sizeLimit="20971520" fileLimit="1" allowTypes="/(\.|\/)(zip|rar)$/" label="Seleccionar"
+									uploadLabel="Subir" auto="true" update="fileAlmacenamientoExportacionNotificacion" cancelLabel="Cancelar"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+									fileLimitMessage="Máximo 1 archivo"
+									mode="advanced" styleClass="w100">
+								</p:fileUpload>
+								<p:outputLabel id="fileAlmacenamientoExportacionNotificacion" value="#{gestorDesechosPeligrososController.documentoAlmacenamientoExportacionNotificacion.nombre}" />
+							</p:panel>
+							<h:outputText value="Autorización:" />
+							<p:panel>
+								<h:outputText value="Admite archivos .rar/.zip hasta 20Mb" />
+								<p:fileUpload fileUploadListener="#{gestorDesechosPeligrososController.asignarDocumentoAlmacenamientoAutorizacion}"
+									required="true" requiredMessage="El documento de Autorización es requerido"
+									sizeLimit="20971520" fileLimit="1" allowTypes="/(\.|\/)(zip|rar)$/" label="Seleccionar"
+									uploadLabel="Subir" auto="true" update="fileAlmacenamientoExportacionAutorizacion" cancelLabel="Cancelar"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+									fileLimitMessage="Máximo 1 archivo"
+									mode="advanced" styleClass="w100">
+								</p:fileUpload>
+								<p:outputLabel id="fileAlmacenamientoExportacionAutorizacion" value="#{gestorDesechosPeligrososController.documentoAlmacenamientoExportacionAutorizacion.nombre}" />
+							</p:panel>
+							<h:outputText value="Documento de movimiento:" />
+							<p:panel>
+								<h:outputText value="Admite archivos .rar/.zip hasta 20Mb" />
+								<p:fileUpload fileUploadListener="#{gestorDesechosPeligrososController.asignarDocumentoAlmacenamientoMovimiento}"
+									required="true" requiredMessage="El documento de Movimiento es requerido"
+									sizeLimit="20971520" fileLimit="1" allowTypes="/(\.|\/)(zip|rar)$/" label="Seleccionar"
+									uploadLabel="Subir" auto="true" update="fileAlmacenamientoExportacionMovimiento" cancelLabel="Cancelar"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+									fileLimitMessage="Máximo 1 archivo"
+									mode="advanced" styleClass="w100">
+								</p:fileUpload>
+								<p:outputLabel id="fileAlmacenamientoExportacionMovimiento" value="#{gestorDesechosPeligrososController.documentoAlmacenamientoExportacionMovimiento.nombre}" />
+							</p:panel>
+							<h:outputText value="Acta de destrucción:" />
+							<p:panel>
+								<h:outputText value="Admite archivos .rar/.zip hasta 20Mb" />
+								<p:fileUpload fileUploadListener="#{gestorDesechosPeligrososController.asignarDocumentoAlmacenamientoDestruccion}"
+									required="true" requiredMessage="El documento de Destrucción es requerido"
+									sizeLimit="20971520" fileLimit="1" allowTypes="/(\.|\/)(zip|rar)$/" label="Seleccionar"
+									uploadLabel="Subir" auto="true" update="fileAlmacenamientoExportacionDestruccion" cancelLabel="Cancelar"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+									fileLimitMessage="Máximo 1 archivo"
+									mode="advanced" styleClass="w100">
+								</p:fileUpload>
+								<p:outputLabel id="fileAlmacenamientoExportacionDestruccion" value="#{gestorDesechosPeligrososController.documentoAlmacenamientoExportacionDestruccion.nombre}" />
+							</p:panel>
+						</p:panelGrid>
+					</h:panelGroup>
+					
+					<t:div styleClass="buttons">
+						<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('desechoRecepcionDiag').hide()" styleClass="secondary"
+						update=":formDialogs:desechoRecepcionDiag"
+						actionListener="#{gestorDesechosPeligrososController.resetDesechoGestorRecepcion}" />
+						<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}" 
+						process="desechoRecepcionDiag" 
+						update=":formDialogs:tblDesechoRecepcion" oncomplete="PF('desechoRecepcionDiag').hide()"
+						actionListener="#{gestorDesechosPeligrososController.agregarDesechoGestorRecepcion}" />
+					</t:div>
+				</p:dialog>
+<ui:remove>
+<mae:panelGridHeaderHelp value="Desecho *" conector="desechoHelp" help="#{helps['desecho.seleccionar']}" width="500px" />
+</ui:remove>
+
+				<p:dialog id="manifiestoTransferenciaDiag" widgetVar="manifiestoTransferenciaDiag" header="Tramsferencia - Transferencia" width="900px" closable="false" modal="true">
+					<p:panelGrid id="manifiestoTransferenciaDiagGrid" columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+						<h:outputText value="N° manifiesto:" />
+						<p:inputText value="#{gestorDesechosPeligrososController.manifiestoUnico.numeroManifiesto}" required="true" requiredMessage="Número de manifiesto es requerido" maxlength="20" />
+						<h:outputText value="Adjunto" />
+						<p:panel>
+							<h:outputText value="Admite archivos .pdf hasta 20Mb" />
+							<p:fileUpload fileUploadListener="#{gestorDesechosPeligrososController.asignarDocumentoManifiestoTransferencia}"
+								required="true" requiredMessage="Debe ingresar el adjunto del Manifiesto - Recepción"
+								sizeLimit="20971520" fileLimit="1" allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar"
+								uploadLabel="Subir" auto="true" update="fileManifiestoTransferencia" cancelLabel="Cancelar"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+								fileLimitMessage="Máximo 1 archivo"
+								mode="advanced" styleClass="w100">
+							</p:fileUpload>
+							<p:outputLabel id="fileManifiestoTransferencia" value="#{gestorDesechosPeligrososController.documentoManifiestoAlmacenamientoTransferencia.nombre}" />
+						</p:panel>
+					</p:panelGrid>
+					
+					<p:dataTable value="#{gestorDesechosPeligrososController.listDesechosAlmacenamientoTransferencia}" var="desecho"
+					paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rows="5">
+						<f:facet name="header">
+							<h:outputText value="Identificación del desecho"/>
+						</f:facet>
+						<p:column headerText="Nombre del Desecho" filterBy="#{item.descripcion}" filterMatchMode="contains" styleClass="w75">
+							<h:outputText value="#{desecho.descripcion}" />
+						</p:column>
+						<p:column headerText="Código"  filterBy="#{item.clave}" filterMatchMode="contains" styleClass="alCenter w15">
+							<h:outputText value="#{desecho.clave}" />
+						</p:column>
+						<p:column styleClass="w10">
+							<p:commandButton icon="ui-icon-plus" styleClass="primary" oncomplete="PF('desechoTransferenciaDiag').show()"
+							process="@this" update=":formDialogs:desechoTransferenciaDiag" >
+								<f:setPropertyActionListener value="#{desecho}" target="#{gestorDesechosPeligrososController.desechoPeligroso}" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+					
+					<p:dataTable id="tblDesechoTransferencia" var="desechoTransferencia" value="#{gestorDesechosPeligrososController.manifiestoUnico.listDesechoTransferencia}">
+						<f:facet name="header">
+							<h:outputText value="Desecho Ingresado"/>
+						</f:facet>
+						<p:column headerText="Nombre del residuo o desecho peligroso o especial">
+							<h:outputText value="#{desechoTransferencia.desechoPeligroso.descripcion}"/>
+						</p:column>
+						<p:column headerText="Código">
+							<h:outputText value="#{desechoTransferencia.desechoPeligroso.clave}"/>
+						</p:column>
+						<p:column headerText="Unidad">
+							<h:outputText value="#{desechoTransferencia.unidadDesechoRecepcion.descripcion}"/>
+						</p:column>
+						<p:column headerText="Cantidad recibida">
+							<h:outputText value="#{desechoTransferencia.cantidad}"/>
+						</p:column>
+						<p:column headerText="Reporte en unidades">
+							<h:outputText value="#{desechoTransferencia.reporteUnidades}"/>
+						</p:column>
+					</p:dataTable>
+					
+					<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+						<h:outputText value="Fecha de transferencia:" />
+						<p:calendar styleClass="calendarClass" value="#{gestorDesechosPeligrososController.manifiestoUnicoTransferencia.fechaTransferencia}" 
+							pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" required="true" requiredMessage="Fecha de transferencia es requerido">
+						</p:calendar>
+					</p:panelGrid>
+					
+					<p:dataTable value="#{gestorDesechosPeligrososController.listSedePrestadorServiciosDesechosAlmacenamiento}" var="empresaTransferencia"
+					selection="#{gestorDesechosPeligrososController.listSedePrestadorServiciosSelected}" rowKey="#{empresaTransferencia}"
+					sortBy="#{empresaTransferencia.prestadorServiciosDesechos.ruc}" sortOrder="descending" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" 
+					currentPageReportTemplate="{currentPage} de {totalPages}" rows="5" rowsPerPageTemplate="5,10,15">
+						<p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+						<p:column headerText="RUC empresa gestora" filterBy="#{empresaTransferencia.prestadorServiciosDesechos.ruc}" filterMatchMode="contains" styleClass="alCenter w15">
+							<h:outputText value="#{empresaTransferencia.prestadorServiciosDesechos.ruc}" />
+						</p:column>
+						<p:column headerText="Nombre empresa gestora" filterBy="#{empresaTransferencia.prestadorServiciosDesechos.nombre}" filterMatchMode="contains">
+							<h:outputText value="#{empresaTransferencia.prestadorServiciosDesechos.nombre}" />
+						</p:column>
+						<p:column headerText="Número de permiso ambiental" styleClass="alCenter w15">
+							<h:outputText value="#{empresaTransferencia.codigoPermisoAmbiental}" />
+						</p:column>
+					</p:dataTable>
+
+					<t:div styleClass="buttons">
+						<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('manifiestoTransferenciaDiag').hide()" styleClass="secondary"
+						update=":formDialogs:manifiestoTransferenciaDiag" actionListener="#{gestorDesechosPeligrososController.resetTransferencia}" />
+						<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}" process="manifiestoTransferenciaDiag" oncomplete="if(!args.validationFailed) PF('manifiestoTransferenciaDiag').hide();"
+						update=":form:tabView:manifiestoTransferenciaGrid :formDialogs:manifiestoTransferenciaDiag :formDialogs:desechoTransferenciaDiag :form:tabView:exportacionAlmacenamientoGrid"
+						actionListener="#{gestorDesechosPeligrososController.agregarManifiestoTransferencia}" />
+					</t:div>
+				</p:dialog>
+				
+				<p:dialog id="desechoTransferenciaDiag" widgetVar="desechoTransferenciaDiag" header="Desecho: #{gestorDesechosPeligrososController.desechoPeligroso.descripcion}" width="900px" closable="false">
+					<p:panelGrid id="desechoTransferenciaDiagGrid" columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+						<h:outputText value="Unidad:" />
+						<p:selectOneMenu value="#{gestorDesechosPeligrososController.desechoGestorAlmacenamiento.unidadDesechoRecepcion}" style="width: 50%" required="true" requiredMessage="Unidad de Desecho es requerido" converter="selectItemConverter">
+							<f:selectItem itemLabel="Seleccione" itemValue=""/>
+							<f:selectItems value="#{gestorDesechosPeligrososController.listUnidad}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>				
+						</p:selectOneMenu>
+						<h:outputText value="Cantidad recibida:" />
+						<pe:inputNumber required="true" thousandSeparator="" maxValue="9999999999.99" minValue="0" requiredMessage="Cantidad es requerida"
+							value="#{gestorDesechosPeligrososController.desechoGestorAlmacenamiento.cantidad}" >
+							<f:validateDoubleRange minimum="0.1" />
+						</pe:inputNumber>
+					</p:panelGrid>
+					
+					<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75"
+					rendered="#{gestorDesechosPeligrososController.desechoPeligroso.clave eq 'ES-04' || gestorDesechosPeligrososController.desechoPeligroso.clave eq 'ES-06'}"> 
+						<h:outputText value="Reporte en unidades (U) únicamente para los desechos ES-04 y ES-06:" />
+						<p:inputText value="#{gestorDesechosPeligrososController.desechoGestorAlmacenamiento.reporteUnidades}" required="true" requiredMessage="Reporte de Unidades es requerido" maxlength="20">
+							<pe:keyFilter regEx="/[0-9]/i " />
+						</p:inputText>
+					</p:panelGrid>
+
+					<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+						<h:outputText value="Tipo" />
+				        <p:selectBooleanCheckbox value="#{gestorDesechosPeligrososController.esDesechoExportacion}" itemLabel="Exportación">
+				        	<p:ajax update=":#{p:component('almacenamientoExportacionTransferenciaGroupDiag')}" listener="#{gestorDesechosPeligrososController.validarTransferenciaExportacion}" />
+				        </p:selectBooleanCheckbox>
+					</p:panelGrid>
+					
+					<h:panelGroup id="almacenamientoExportacionTransferenciaGroupDiag">
+						<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75" rendered="#{gestorDesechosPeligrososController.esDesechoExportacion}">
+							<h:outputText value="Cantidad:" />
+							<pe:inputNumber required="true" requiredMessage="Cantidad Exportación es requierida" 
+							thousandSeparator="" maxValue="9999999999.99" minValue="0"
+							value="#{gestorDesechosPeligrososController.desechoGestorAlmacenamientoExportacion.cantidad}" >
+								<f:validateDoubleRange minimum="0.1" />
+							</pe:inputNumber>
+							<h:outputText value="País de destino:" />
+							<p:selectOneMenu value="#{gestorDesechosPeligrososController.desechoGestorAlmacenamientoExportacion.pais}" style="width: 100%"
+							required="true" requiredMessage="El País de Destino es requierido"
+							converter="selectItemConverter" filter="true" filterMatchMode="startsWith">
+								<f:selectItem itemLabel="Seleccione" itemValue=""/>
+								<f:selectItems value="#{gestorDesechosPeligrososController.listUbicacionesGeografica}" var="item" itemLabel="#{item.nombre}" itemValue="#{item}"/>				
+							</p:selectOneMenu>
+							<h:outputText value="Notificación:" />
+							<p:panel>
+								<h:outputText value="Admite archivos .rar/.zip hasta 20Mb" />
+								<p:fileUpload fileUploadListener="#{gestorDesechosPeligrososController.asignarDocumentoAlmacenamientoNotificacion}"
+								required="true" requiredMessage="El Documento de Notificación es requierido"
+								sizeLimit="20971520" fileLimit="1" allowTypes="/(\.|\/)(zip|rar)$/" label="Seleccionar"
+								uploadLabel="Subir" auto="true" update="fileAlmacenamientoExportacionNotificacionTransferencia" cancelLabel="Cancelar"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+								fileLimitMessage="Máximo 1 archivo"
+								mode="advanced" styleClass="w100">
+								</p:fileUpload>
+								<p:outputLabel id="fileAlmacenamientoExportacionNotificacionTransferencia" value="#{gestorDesechosPeligrososController.documentoAlmacenamientoExportacionNotificacion.nombre}" />
+							</p:panel>
+							<h:outputText value="Autorización:" />
+							<p:panel>
+								<h:outputText value="Admite archivos .rar/.zip hasta 20Mb" />
+								<p:fileUpload fileUploadListener="#{gestorDesechosPeligrososController.asignarDocumentoAlmacenamientoAutorizacion}"
+								required="true" requiredMessage="El Documento de Autorización es requierido"
+								sizeLimit="20971520" fileLimit="1" allowTypes="/(\.|\/)(zip|rar)$/" label="Seleccionar"
+								uploadLabel="Subir" auto="true" update="fileAlmacenamientoExportacionAutorizacionTransferencia" cancelLabel="Cancelar"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+								fileLimitMessage="Máximo 1 archivo"
+								mode="advanced" styleClass="w100">
+								</p:fileUpload>
+								<p:outputLabel id="fileAlmacenamientoExportacionAutorizacionTransferencia" value="#{gestorDesechosPeligrososController.documentoAlmacenamientoExportacionAutorizacion.nombre}" />
+							</p:panel>
+							<h:outputText value="Documento de movimiento:" />
+							<p:panel>
+								<h:outputText value="Admite archivos .rar/.zip hasta 20Mb" />
+								<p:fileUpload fileUploadListener="#{gestorDesechosPeligrososController.asignarDocumentoAlmacenamientoMovimiento}"
+								required="true" requiredMessage="El Documento de Movimiento es requierido"
+								sizeLimit="20971520" fileLimit="1" allowTypes="/(\.|\/)(zip|rar)$/" label="Seleccionar"
+								uploadLabel="Subir" auto="true" update="fileAlmacenamientoExportacionMovimientoTransferencia" cancelLabel="Cancelar"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+								fileLimitMessage="Máximo 1 archivo"
+								mode="advanced" styleClass="w100">
+								</p:fileUpload>
+								<p:outputLabel id="fileAlmacenamientoExportacionMovimientoTransferencia" value="#{gestorDesechosPeligrososController.documentoAlmacenamientoExportacionMovimiento.nombre}" />
+							</p:panel>
+							<h:outputText value="Acta de destrucción:" />
+							<p:panel>
+								<h:outputText value="Admite archivos .rar/.zip hasta 20Mb" />
+								<p:fileUpload fileUploadListener="#{gestorDesechosPeligrososController.asignarDocumentoAlmacenamientoDestruccion}"
+								required="true" requiredMessage="El Documento de Destrucción es requierido"
+								sizeLimit="20971520" fileLimit="1" allowTypes="/(\.|\/)(zip|rar)$/" label="Seleccionar"
+								uploadLabel="Subir" auto="true" update="fileAlmacenamientoExportacionDestruccionTransferencia" cancelLabel="Cancelar"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+								fileLimitMessage="Máximo 1 archivo"
+								mode="advanced" styleClass="w100">
+								</p:fileUpload>
+								<p:outputLabel id="fileAlmacenamientoExportacionDestruccionTransferencia" value="#{gestorDesechosPeligrososController.documentoAlmacenamientoExportacionDestruccion.nombre}" />
+							</p:panel>
+						</p:panelGrid>
+					</h:panelGroup>
+					
+					<t:div styleClass="buttons">
+						<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('desechoTransferenciaDiag').hide()" styleClass="secondary"
+						update=":formDialogs:desechoTransferenciaDiag"
+						actionListener="#{gestorDesechosPeligrososController.resetDesechoGestorTransferencia}" />
+						<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}" 
+						process="desechoTransferenciaDiag" 
+						update=":formDialogs:desechoTransferenciaDiag :formDialogs:tblDesechoTransferencia" oncomplete="PF('desechoTransferenciaDiag').hide()"
+						actionListener="#{gestorDesechosPeligrososController.agregarDesechoGestorTransferencia}" />
+					</t:div>
+				</p:dialog>
+				
+				<p:dialog id="transferenciaTransferenciaDiag" widgetVar="transferenciaTransferenciaDiag" header="Transferencia" width="900px" closable="false">
+					<p:panelGrid id="transferenciaTransferenciaDiagGrid" columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+						<h:outputText value="Número de manifiesto:" />
+						<p:selectOneMenu value="#{gestorDesechosPeligrososController.manifiestoUnico}" style="width: 50%" required="true" requiredMessage="Manifiesto Único es requerido" converter="selectItemConverter">
+							<f:selectItem itemLabel="Seleccione" itemValue=""/>
+							<f:selectItems value="#{gestorDesechosPeligrososController.listManifiestoTransferencia}" var="item_manifiesto" itemLabel="#{item_manifiesto.numeroManifiesto}" itemValue="#{item_manifiesto}"/>				
+						</p:selectOneMenu>
+						<h:outputText value="Fecha de transferencia:" />
+						<p:calendar styleClass="calendarClass" value="#{gestorDesechosPeligrososController.manifiestoUnicoTransferencia.fechaTransferencia}" 
+							pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" 
+							required="true" requiredMessage="Fecha de transferencia es requerido">
+						</p:calendar>
+					</p:panelGrid>
+					<p:dataTable value="#{gestorDesechosPeligrososController.listSedePrestadorServiciosDesechosAlmacenamiento}" var="item"
+						sortBy="#{item.prestadorServiciosDesechos.ruc}" sortOrder="descending" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" 
+						currentPageReportTemplate="{currentPage} de {totalPages}" rows="5" rowsPerPageTemplate="5,10,15">
+						<p:column headerText="RUC empresa gestora" filterBy="#{item.prestadorServiciosDesechos.ruc}" filterMatchMode="contains" styleClass="alCenter w15">
+							<h:outputText value="#{item.prestadorServiciosDesechos.ruc}" />
+						</p:column>
+						<p:column headerText="Nombre empresa gestora" filterBy="#{item.prestadorServiciosDesechos.nombre}" filterMatchMode="contains">
+							<h:outputText value="#{item.prestadorServiciosDesechos.nombre}" />
+						</p:column>
+						<p:column headerText="Número de permiso ambiental" styleClass="alCenter w15">
+							<h:outputText value="#{item.codigoPermisoAmbiental}" />
+						</p:column>
+						<p:column headerText="Seleccionar" styleClass="alCenter w10">
+                        	<p:commandButton actionListener="#{gestorDesechosPeligrososController.seleccionarEmpresaGestoraTransferencia(item)}" 
+                       		oncomplete="if(!args.validationFailed) PF('transferenciaTransferenciaDiag').hide();" 
+                       		icon="ui-icon-play" styleClass="button-small primary" 
+                       		process=":formDialogs:transferenciaTransferenciaDiag :formDialogs:transferenciaTransferenciaDiagGrid" 
+                       		update=":form:tabView:manifiestoTransferenciaGrid :formDialogs:transferenciaTransferenciaDiagGrid" /> 
+						</p:column>
+					</p:dataTable>
+					<t:div styleClass="buttons">
+						<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('transferenciaTransferenciaDiag').hide()" styleClass="secondary" />
+					</t:div>
+				</p:dialog>
+
+			</h:form>
+		</ui:define>
+	</ui:composition>
+</html>

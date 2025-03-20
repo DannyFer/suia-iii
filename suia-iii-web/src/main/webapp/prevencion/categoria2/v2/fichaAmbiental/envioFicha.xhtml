@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core">
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{descripcionProyectoPmaBean.validarTareaBpmV2()}"/>
+        <ui:include src="contenido/menu.xhtml"/>
+        <style>
+            ul.error {
+                padding: 0;
+            }
+
+ul.error li {
+	list-style: none;
+}
+</style>
+		<div class="content">
+			<h:form id="frmEnviar">
+				<h:panelGroup id="datos">
+
+					<p class="allJustify" style="text-align: justify;padding-right: 15px;">#{fichaAmbientalGeneralImprimirBean.mensaje}</p>
+
+
+					<h:panelGrid columns="2" style="margin-bottom:10px" cellpadding="5">
+						<h:outputLabel for="condiciones"
+							value="He leído y comprendo las condiciones" />
+
+						<p:selectBooleanCheckbox id="condiciones"
+							value="#{fichaAmbientalGeneralImprimirBean.condiciones}"
+							required="true">
+							<p:ajax update=":frmEnviar:datos" process="@this" />
+						</p:selectBooleanCheckbox>
+					</h:panelGrid>
+
+
+					<div class="buttons main">
+						<p:commandButton value="Atrás" immediate="true" process="@this" rendered="#{fichaAmbientalGeneralControllerV2.ppc1()}"
+							action="/prevencion/categoria2/v2/fichaAmbiental/participacionCiudadanaSubir.jsf?faces-redirect=true"
+							icon="ui-icon-arrowthick-1-w" />
+							
+							<p:commandButton value="Atrás" immediate="true" process="@this" rendered="#{!fichaAmbientalGeneralControllerV2.ppc1()}"
+							action="/prevencion/categoria2/v2/fichaAmbiental/inventarioForestal.jsf?faces-redirect=true"
+							icon="ui-icon-arrowthick-1-w" />	
+																																
+						<p:commandButton value="Visualizar registro"
+							disabled="#{!fichaAmbientalGeneralImprimirBean.condiciones}"
+							styleClass="extraLarge buttonVisualizarFicha"
+							action="#{fichaAmbientalGeneralImprimirBean.cargarDatosBandeja}"
+							rendered="#{fichaAmbientalGeneralController.completado and fichaAmbientalGeneralControllerV2.completado and (fichaAmbientalGeneralControllerV2.fichaAmbiental.validarParticipacionCiudadana or fichaAmbientalGeneralControllerV2.ppc())}"
+							update=":#{p:component('pgPdf')}" onclick="PF('dlg1').show();"
+							icon="ui-icon-check" process="@this">
+						</p:commandButton>
+						
+						
+						<p:commandButton value="Visualizar registro"
+							disabled="#{!fichaAmbientalGeneralImprimirBean.condiciones}"
+							styleClass="extraLarge buttonVisualizarFicha"
+							rendered="#{!fichaAmbientalGeneralControllerV2.completado or (!fichaAmbientalGeneralControllerV2.fichaAmbiental.validarParticipacionCiudadana and !fichaAmbientalGeneralControllerV2.ppc())}"
+							onclick="PF('dlg2').show();" icon="ui-icon-check" type="button">
+						</p:commandButton>
+					</div>
+				</h:panelGroup>
+				<h:inputHidden value="#{fichaAmbientalGeneralImprimirBean.pdf}" />
+
+				<p:dialog id="dlg2" header="Registro Ambiental incompleto"
+					widgetVar="dlg2" modal="true" height="300">
+					<h:outputText
+						value="Para finalizar el Registro Ambiental debe completar los siguientes puntos:" />
+					<ul class="error alLeft text-red ">
+						<li><h:outputLink
+								value="#{request.contextPath}/prevencion/categoria2/v2/fichaAmbiental/default.jsf"
+								rendered="#{!fichaAmbientalGeneralMenuBean.fichaAmbiental.validarDescripcionProyectoObraActividad}">
+								<h:outputText value="1 Información del proyecto"
+									class="text-red " />
+							</h:outputLink></li>
+						<li><h:outputLink
+								value="#{request.contextPath}/prevencion/categoria2/v2/fichaAmbiental/proyectoObra.jsf"
+								rendered="#{!fichaAmbientalGeneralMenuBean.fichaAmbiental.validarDatosGenerales}">
+								<h:outputText value="2 Datos generales" class="text-red " />
+							</h:outputLink></li>
+						<li><h:outputLink
+								value="#{request.contextPath}/prevencion/categoria2/v2/fichaAmbiental/marcoReferencial.jsf"
+								rendered="#{!fichaAmbientalGeneralMenuBean.fichaAmbiental.validarMarcoLegalReferencial}">
+								<h:outputText value="3 Marco legal referencial"
+									class="text-red " />
+							</h:outputLink></li>
+						<li><h:outputLink
+								value="#{request.contextPath}/prevencion/categoria2/v2/fichaAmbiental/descripcionProceso.jsf"
+								rendered="#{!fichaAmbientalGeneralMenuBean.fichaAmbiental.validarDescripcionProceso}">
+								<h:outputText value="4 Descripción del proyecto"
+									class="text-red " />
+							</h:outputLink></li>
+						<li><h:outputLink
+								value="#{request.contextPath}/prevencion/categoria2/v2/fichaAmbiental/descripcionArea.jsf"
+								rendered="#{!fichaAmbientalGeneralMenuBean.fichaAmbiental.validarDescripcionAreaImplantacion}">
+								<h:outputText value="5 Descripción del área de implantación"
+									class="text-red " />
+							</h:outputLink></li>
+						<li><h:outputLink
+								value="#{request.contextPath}/prevencion/categoria2/v2/fichaAmbiental/impactoAmbientales.jsf"
+								rendered="#{!fichaAmbientalGeneralMenuBean.fichaAmbiental.validarPrincipalesImpactosAmbientales}">
+								<h:outputText value="6 Principales impactos ambientales"
+									class="text-red " />
+							</h:outputLink></li>
+						<li><h:outputLink
+								value="#{request.contextPath}/prevencion/categoria2/v2/fichaAmbiental/cronogramaValorado.jsf"
+								rendered="#{!fichaAmbientalGeneralMenuBean.fichaAmbiental.validarCronogramaValoradoPlanManejoAmbiental}">
+								<h:outputText value="7 Plan de manejo ambiental (PMA)"
+									class="text-red " />
+							</h:outputLink></li>
+						<li><h:outputLink
+								value="#{request.contextPath}/prevencion/categoria2/v2/fichaAmbiental/inventarioForestal.jsf"
+								rendered="#{!fichaAmbientalGeneralMenuBean.fichaAmbiental.validarInventarioForestal}">
+								<h:outputText value="8 Inventario forestal" class="text-red " />
+							</h:outputLink></li>
+							
+							<li><h:outputLink
+								value="#{request.contextPath}/prevencion/categoria2/v2/fichaAmbiental/participacionCiudadanaDescargar.jsf"								
+								rendered="#{!fichaAmbientalGeneralMenuBean.fichaAmbiental.validarParticipacionCiudadana and fichaAmbientalGeneralControllerV2.ppc1()}">
+								<h:outputText value="9 Participación Ciudadana" class="text-red " />
+							</h:outputLink></li>
+							
+						<li><h:outputLink
+								value="#{request.contextPath}/prevencion/categoria2/v2/fichaAmbiental/participacionCiudadanaSubir.jsf"
+								rendered="#{!fichaAmbientalGeneralMenuBean.fichaAmbiental.validarParticipacionCiudadana and fichaAmbientalGeneralControllerV2.ppc1()}">
+								<h:outputText value="10 Subir el informe de sistematización de Participación Ciudadana" class="text-red " />
+							</h:outputLink></li>	
+					</ul>
+
+                </p:dialog>
+
+                <p:dialog header="Registro Ambiental" id="dialogo" onShow="#{fichaAmbientalGeneralControllerV2.validarPagos()}"
+                          styleClass="ventana" widgetVar="dlg1" modal="true" height="500px"
+                          width="90%">
+                    <br/>
+
+                    <div align="left">
+                        <h:outputText
+                                value="Nota: En caso de que necesite realizar cambios en su registro ambiental cierre la ventana y seleccione la sección en la cual desea modificar la información."
+                                styleClass="encabezado text-red"/>
+                    </div>
+                    <h:panelGroup id="pgPdf">
+                        <div class="buttons main">
+                            <p:commandButton styleClass="large" value="Finalizar registro"
+                            				rendered="#{!fichaAmbientalGeneralControllerV2.mostrarMensaje}"
+                                             icon="ui-icon-check" update="@form"
+                                    action="#{fichaAmbientalGeneralControllerV2.completarFicha()}">
+                                <p:confirm header="Confirmación"
+                                           message="#{fichaAmbientalGeneralControllerV2.mensajeFinalizacion}"
+                                           icon="ui-icon-alert"/>
+                            </p:commandButton>
+                            <p:commandButton styleClass="large" value="Finalizar registro"
+                            				rendered="#{fichaAmbientalGeneralControllerV2.mostrarMensaje}"
+                                             icon="ui-icon-check" 
+                                    		onclick="PF('continuarDialog').show();">
+                                <p:confirm header="Confirmación"
+                                           message="#{fichaAmbientalGeneralControllerV2.mensajeFinalizacion}"
+                                           icon="ui-icon-alert"/>
+                            </p:commandButton>
+
+                        </div>
+                        <object data="#{fichaAmbientalGeneralImprimirBean.pdf}?pfdrid_c=true"
+                                height="390px" width="100%">
+                            Su navegador no soporta la visualización de pdf. Puede descargar
+                            el documento presionando el siguiente botón:
+                            <p:commandButton value="Descargar" styleClass="primary"
+                                             ajax="false" icon="ui-icon-arrowthick-1-s"
+                                             action="#{fichaAmbientalGeneralImprimirBean.descargarFichaTecnico()}"/>
+                        </object>
+                    </h:panelGroup>
+                </p:dialog>
+
+	
+		<h:form id="formSubmitV2">
+           <p:dialog id="continuarDialog" widgetVar="continuarDialog"
+                     header="Información" modal="true" closable="false"
+                     resizable="false" width="500">
+               <p:panel>
+                   <h:panelGrid columns="1" styleClass="w100"
+                                columnClasses="alCenter">
+                       <p:outputLabel
+                               value="- Estimado Usuario ha culminado satisfactoriamente la obtención de su Registro Ambiental del proyecto #{fichaAmbientalGeneralControllerV2.proyectosBean.proyecto.codigo}, por favor dirigirse al listado de proyectos en resumen de etapas y documentos adjuntos, allí se descargará la Resolución Ambiental original de su proyecto.                     "/>
+                       <p:commandButton value="Aceptar" ajax="false" styleClass="primary" widgetVar="btnAceptar"
+                       					action="#{fichaAmbientalGeneralControllerV2.completarFicha()}"
+                                        onclick="PF('continuarDialog').hide();PF('statusDialog').show();" />
+                   </h:panelGrid>
+               </p:panel>
+           </p:dialog>
+           </h:form>
+           
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>

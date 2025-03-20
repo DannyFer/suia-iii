@@ -1,0 +1,590 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	template="/control/aprobacionRequisitosTecnicos/templates/defaultTemplate.xhtml"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+	<ui:define name="content-art">
+		<h:form id="form">
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+
+					<h:outputText
+						value="#{labels['label.modalidad.disposicion.final']}" />
+				<p:separator />
+				<h:outputText styleClass="w100 text-red bold"
+							  value="#{labels['msg.informacion.modalidad']}"/>
+				<p:separator />
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Desechos a procesar" />
+					</f:facet>
+					<p:dataTable
+						value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.listaDesechos}"
+						var="desecho" rows="10" paginator="true"
+						paginatorAlwaysVisible="false" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						style="table-layout=auto">
+						<p:column headerText="Nombre desecho">
+							<h:outputText value="#{desecho.descripcion}" />
+						</p:column>
+						<p:column headerText="Código">
+							<h:outputText value="#{desecho.clave}" />
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+
+				<p:panelGrid styleClass="w100 separatorBottom" columns="1"
+					columnClasses="w50, field_mrg w50">
+					<f:facet name="header">
+						<h:outputText value="#{labels['label.manejo.desechos']}" />
+					</f:facet>
+					<h:panelGrid columns="1">
+						<p:outputLabel for="nombreArchivoPlanoHidden"
+							value="#{labels['label.plano.disposicion.final']}  (.zip|.rar)*"
+							escape="false" id="lblDesechos" />
+					</h:panelGrid>
+
+					<h:panelGrid styleClass="w50 toLeft" columns="3">
+						<h:outputText id="nombreArchivo"
+							value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.modalidadDisposicionFinal.planoPlanta.nombre}" />
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="button-small primary toLeft" title="Ver"
+							action="#{modalidadDisposicionFinalController.descargar(0)}"
+							ajax="false"
+							rendered="#{!(modalidadDisposicionFinalController.modalidadDisposicionFinalBean.modalidadDisposicionFinal.planoPlanta.id==null)}" />
+						<h:inputHidden id="nombreArchivoPlanoHidden"
+							value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.nombreFilePlano}" />
+					</h:panelGrid>
+
+					<p:fileUpload id="filePlano"
+						fileUploadListener="#{modalidadDisposicionFinalController.fileUploadListenerPlano}"
+						value="#{modalidadDisposicionFinalController.file}"
+						sizeLimit="5242880" allowTypes="/(\.|\/)(zip|rar)$/"
+						label="Seleccionar" uploadLabel="Subir" auto="true"
+						update=":#{p:component('nombreArchivo')},:#{p:component('nombreArchivoPlanoHidden')}"
+						cancelLabel="Cancelar"
+						invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+						invalidSizeMessage="Debe adjuntar un archivo no mayor de 5 Mb."
+						styleClass="w50 toLeft" mode="advanced">
+						<f:attribute name="indice" id="indice" value="0" />
+					</p:fileUpload>
+				</p:panelGrid>
+
+				<p:panelGrid styleClass="w100 separatorBottom" columns="2"
+					columnClasses="w50, field_mrg w50" layout="grid">
+					<f:facet name="header">
+						<h:outputText value="#{labels['label.recoleccion.desechos']}" />
+					</f:facet>
+					<p:outputLabel for="tipoTransporte"
+						value="#{labels['label.tipos.transporte']} *" styleClass="bold" />
+
+					<h:panelGrid columns="2" id="tipoTransporte">
+						<p:outputLabel for="transportePropio" value="Transporte propio" />
+						<p:selectBooleanCheckbox id="transportePropio"
+							value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.modalidadDisposicionFinal.transportePropio}">
+							<p:ajax process="@this" update="validarTransporte" />
+						</p:selectBooleanCheckbox>
+
+						<p:outputLabel for="transporteContratado"
+							value="Transporte contratado" />
+						<p:selectBooleanCheckbox id="transporteContratado"
+							value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.modalidadDisposicionFinal.transporteContratado}">
+							<p:ajax process="@this" update="nombreEmpresa,validarTransporte" />
+						</p:selectBooleanCheckbox>
+					</h:panelGrid>
+
+					<p:outputLabel for="nombreEmpresa" id="labelNombreEmpresa"
+						value="#{labels['label.empresa.autorizada']} *" styleClass="bold" />
+					<p:inputText id="nombreEmpresa"
+						disabled="#{!modalidadDisposicionFinalController.modalidadDisposicionFinalBean.modalidadDisposicionFinal.transporteContratado}"
+						value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.modalidadDisposicionFinal.nombreEmpresaAutorizada}"
+						maxlength="100" />
+
+					<p:outputLabel />
+					<h:inputHidden id="validarTransporte"
+						value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.validacionTipoTransporte}">
+						<f:attribute name="campo1"
+							value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.modalidadDisposicionFinal.transportePropio}" />
+						<f:attribute name="campo2"
+							value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.modalidadDisposicionFinal.transporteContratado}" />
+						<f:validator validatorId="tipoTransporteValidator" />
+					</h:inputHidden>
+				</p:panelGrid>
+				<p:panelGrid styleClass="w100 separatorBottom" columns="1"
+					columnClasses="w100 field_mrg" layout="grid">
+					<f:facet name="header">
+						<h:outputText
+							value="#{labels['label.disposicion.final.desechos']}" />
+					</f:facet>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						columnClasses="w100, field_mrg w50" id="pngridCapConf">
+						<f:facet name="header">
+							<p:commandButton value="Adicionar"
+								styleClass="button-small-text toRight field_mrg"
+								action="#{modalidadDisposicionFinalController.abrirDialogoDetalleCapacidadConfinamiento()}"
+								icon="ui-icon-plusthick" process="@this"
+								oncomplete="PF('dlgCapConf').show();"
+								update=":#{p:component('confinamientoCampos')}">
+							</p:commandButton>
+							<mae:panelGridHeaderHelp
+								value="Detallar capacidad estimada del confinamiento *"
+								conector="generalHelp"
+								help="#{helps['registro.ambiental.p2.promotor']}" />
+						</f:facet>
+						<p:dataTable id="tblCCDP"
+							rendered="#{modalidadDisposicionFinalController.habilitarTablaConfinamiento}"
+							value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadConfinamientoDesechoPeligrosos}"
+							var="varCapaConf">
+							<p:column headerText="#{labels['label.nombre.confinamiento']}"
+								styleClass="w30px">
+								<h:outputText value="#{varCapaConf.nombreLugarConfinamiento}" />
+							</p:column>
+							<p:column headerText="#{labels['label.capacidad.confinamiento']}"
+								styleClass="w30">
+								<ul >
+									<li>
+										<h:outputText value=" #{varCapaConf.capacidadEnM3} metros cúbicos">
+											<f:convertNumber minFractionDigits="2" />
+									    </h:outputText>
+									</li>
+									<li>
+										<h:outputText value=" #{varCapaConf.capacidadEnTonelada}T">
+											<f:convertNumber minFractionDigits="2" />
+										</h:outputText>
+									</li>
+								</ul>
+							</p:column>
+							<p:column styleClass="w25"
+								headerText="#{labels['label.coordenadas.confinamiento']}">
+								<div align="left">
+
+									<ul >
+
+										<li>
+
+											<h:outputText value="X: #{varCapaConf.coordenadaX}">
+												<f:convertNumber currencyCode="X" type="currency" />
+											</h:outputText>
+										</li>
+										<li>
+
+											<h:outputText value="Y: #{varCapaConf.coordenadaY}">
+												<f:convertNumber currencyCode="Y" type="currency" />
+											</h:outputText>
+										</li>
+									</ul>
+								</div>
+							</p:column>
+							<p:column headerText="Capacidad estimada por mes de confinamiento (T)"
+								styleClass="w30px">
+								<h:outputText value="#{varCapaConf.capacidadMesConfinamiento}">
+									<f:convertNumber minFractionDigits="2" />
+								</h:outputText>
+							</p:column>
+							<p:column styleClass="w40px">
+								<div class="centrar">
+									<p:commandButton icon="ui-icon-pencil"
+										action="#{modalidadDisposicionFinalController.editarDetalleCapacidadConfinamientoDesechoPeligroso()}"
+										title="Editar" styleClass="button-small primary"
+										process="@this,:#{p:component('confinamientoCampos')},:#{p:component('pngridCapConf')}"
+										update=":#{p:component('confinamientoCampos')}">
+
+										<f:setPropertyActionListener
+											target="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadConfinamientoDesechoPeligroso}"
+											value="#{varCapaConf}" />
+										<f:setPropertyActionListener
+											target="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadConfinamientoDesechoPeligroso.id}"
+											value="#{varCapaConf.id}" />
+									</p:commandButton>
+									<p:commandButton icon="ui-icon-circle-close"
+										styleClass="button-small primary" process="@this"
+										update="@all"
+										action="#{modalidadDisposicionFinalController.eliminarDetalleCapacidadConfinamientoDesechoPeligroso}">
+										<f:setPropertyActionListener
+											target="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadConfinamientoDesechoPeligroso}"
+											value="#{varCapaConf}" />
+										<f:setPropertyActionListener
+											target="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadConfinamientoDesechoPeligroso.id}"
+											value="#{varCapaConf.id}" />
+										<p:confirm header="Confirmación"
+											message="¿Está seguro que desea eliminar el detalle de capacidad de confinamiento seleccionado?"
+											icon="ui-icon-alert" />
+									</p:commandButton>
+								</div>
+							</p:column>
+						</p:dataTable>
+					</p:panelGrid>
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						columnClasses="w100, field_mrg w50" id="pngridCTDP">
+						<f:facet name="header">
+							<p:commandButton value="Adicionar"
+								styleClass="button-small-text toRight field_mrg" process="@this"
+								action="#{modalidadDisposicionFinalController.abrirDialogoDetalleCapacidadAlmacenamientoMateriasPrimas()}"
+								update=":#{p:component('capacidadAlmacenamientoTotalMateriasPrimas')}"
+								oncomplete="PF('dlgCapMatPr').show();" icon="ui-icon-plusthick">
+							</p:commandButton>
+							<mae:panelGridHeaderHelp
+								value="Detallar capacidad total de almacenamiento de materias primas *"
+								conector="generalHelp"
+								help="#{helps['registro.ambiental.p2.promotor']}" />
+						</f:facet>
+						<p:dataTable id="tblCTMP"
+							rendered="#{modalidadDisposicionFinalController.habilitarTablaAlmacenamiento}"
+							value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadTotalAlmacenamientoMateriaPrimaDesechoPeligrosos}"
+							var="varCapAlm">
+							<p:column headerText="#{labels['label.nombre.almacenamiento']}">
+								<h:outputText value="#{varCapAlm.nombreLugarAlmacenamiento}" />
+							</p:column>
+							<p:column
+								headerText="#{labels['label.capacidad.confinamiento']} (metros cúbicos)">
+								<h:outputText value="#{varCapAlm.capacidadEnM3}" />
+							</p:column>
+							<p:column styleClass="w40px">
+								<div class="centrar">
+									<p:commandButton icon="ui-icon-pencil"
+										action="#{modalidadDisposicionFinalController.editarDetalleCapacidadTotalAlmacenamientoMateriasPrimas()}"
+										title="Editar" styleClass="button-small primary"
+										process="@this,:#{p:component('capacidadAlmacenamientoTotalMateriasPrimas')},:#{p:component('pngridCTDP')}"
+										update=":#{p:component('capacidadAlmacenamientoTotalMateriasPrimas')}">
+										<f:setPropertyActionListener
+											target="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadTotalAlmacenamientoMateriaPrimaDesechoPeligroso}"
+											value="#{varCapAlm}" />
+										<f:setPropertyActionListener
+											target="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadTotalAlmacenamientoMateriaPrimaDesechoPeligroso.id}"
+											value="#{varCapAlm.id}" />
+									</p:commandButton>
+
+									<p:commandButton icon="ui-icon-circle-close"
+										styleClass="button-small primary" process="@this"
+										update="@all"
+										action="#{modalidadDisposicionFinalController.eliminarDetalleCapacidadTotalAlmacenamientoMateriasPrimas}">
+										<f:setPropertyActionListener
+											target="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadTotalAlmacenamientoMateriaPrimaDesechoPeligroso}"
+											value="#{varCapAlm}" />
+										<f:setPropertyActionListener
+											target="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadTotalAlmacenamientoMateriaPrimaDesechoPeligroso.id}"
+											value="#{varCapAlm.id}" />
+										<p:confirm header="Confirmación"
+											message="¿Está seguro que desea eliminar el detalle de capacidad total de almacenamiento de materias primas seleccionado?"
+											icon="ui-icon-alert" />
+									</p:commandButton>
+								</div>
+							</p:column>
+						</p:dataTable>
+					</p:panelGrid>
+					<h:panelGroup>
+						<p:panelGrid>
+							<p:row>
+								<p:column styleClass="w50">
+									<p:outputLabel for="nombreArchivoRequisitoHidden"
+										value="Presentar la descripción de los siguientes requisitos (.zip|.rar) *"
+										styleClass="bold" id="lblRequisitos" />
+								</p:column>
+
+								<p:column styleClass="w50">
+									<h:panelGrid styleClass="w100 separatorBottom" columns="1"
+										columnClasses="w50, field_mrg w50">
+										<h:panelGrid styleClass="w50 toLeft" columns="3">
+											<h:outputText id="nombreArchivoRequisito"
+												value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.modalidadDisposicionFinal.requisitos.nombre}" />
+											<p:commandButton icon="ui-icon-arrowthick-1-s"
+												styleClass="button-small primary toRight" title="Ver"
+												action="#{modalidadDisposicionFinalController.descargar(1)}"
+												ajax="false"
+												rendered="#{!(modalidadDisposicionFinalController.modalidadDisposicionFinalBean.modalidadDisposicionFinal.requisitos.id==null)}" />
+											<h:inputHidden id="nombreArchivoRequisitoHidden"
+												value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.nombreFileRequisitos}" />
+										</h:panelGrid>
+										<p:fileUpload id="fileRequisitos"
+											fileUploadListener="#{modalidadDisposicionFinalController.fileUploadListenerRequisitos}"
+											value="#{modalidadDisposicionFinalController.file}"
+											sizeLimit="5242880" allowTypes="/(\.|\/)(zip|rar)$/"
+											label="Seleccionar" uploadLabel="Subir" auto="true"
+											update="nombreArchivoRequisito,nombreArchivoRequisitoHidden"
+											cancelLabel="Cancelar"
+											invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+											invalidSizeMessage="Debe adjuntar un archivo no mayor de 5 Mb."
+											mode="advanced">
+											<f:attribute name="indice" id="indice" value="1" />
+										</p:fileUpload>
+									</h:panelGrid>
+								</p:column>
+							</p:row>
+							<p:row style="border-style: none !important">
+								<p:column colspan="2">
+									<h:outputText
+										value="#{labels['label.disposicion.final.requisitos']}"
+										escape="false" styleClass="alJustify" />
+								</p:column>
+							</p:row>
+						</p:panelGrid>
+					</h:panelGroup>
+					<h:panelGroup>
+						<p:panelGrid>
+							<p:row>
+								<p:column styleClass="w50">
+									<p:outputLabel for="nombreArchivoAnexoHidden"
+										value="Estudios de Vulnerabilidad del Sitio (.zip|.rar) *"
+										styleClass="bold" id="lblAnexos" />
+								</p:column>
+								<p:column styleClass="w50">
+									<h:panelGrid styleClass="w100 separatorBottom" columns="1"
+										columnClasses="w50, field_mrg w50">
+										<h:panelGrid styleClass="w50 toLeft" columns="3">
+											<h:outputText id="nombreArchivoAnexo"
+												value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.modalidadDisposicionFinal.anexos.nombre}" />
+											<p:commandButton icon="ui-icon-arrowthick-1-s"
+												styleClass="button-small primary toRight" title="Ver"
+												action="#{modalidadDisposicionFinalController.descargar(2)}"
+												ajax="false"
+												rendered="#{!(modalidadDisposicionFinalController.modalidadDisposicionFinalBean.modalidadDisposicionFinal.anexos.id==null)}" />
+											<h:inputHidden id="nombreArchivoAnexoHidden"
+												value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.nombreFileAnexos}" />
+										</h:panelGrid>
+										<p:fileUpload id="fileAnexos"
+											fileUploadListener="#{modalidadDisposicionFinalController.fileUploadListenerAnexos}"
+											value="#{modalidadDisposicionFinalController.file}"
+											sizeLimit="5242880" allowTypes="/(\.|\/)(zip|rar)$/"
+											label="Seleccionar" uploadLabel="Subir" auto="true"
+											update="nombreArchivoAnexo,nombreArchivoAnexoHidden"
+											cancelLabel="Cancelar"
+											invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+											invalidSizeMessage="Debe adjuntar un archivo no mayor de 5 Mb."
+											mode="advanced">
+											<f:attribute name="indice" id="indice" value="2" />
+										</p:fileUpload>
+									</h:panelGrid>
+								</p:column>
+							</p:row>
+							<p:row style="border-style: none !important">
+								<p:column colspan="2">
+									<h:outputText
+										value="#{labels['label.disposicion.final.anexos']}"
+										escape="false" styleClass="alJustify" />
+								</p:column>
+							</p:row>
+						</p:panelGrid>
+					</h:panelGroup>
+				</p:panelGrid>
+			</p:panelGrid>
+			<h:panelGroup id="pnl2"
+				rendered="#{modalidadDisposicionFinalController.aprobacionRequisitosTecnicosBean.revisar}">
+				<p:fragment>
+					<h2 class="bold">Observaciones de la modalidad de
+						coprocesamiento.</h2>
+
+					<observaciones:tablaObservaciones aparace="true"
+						soloLectura="#{modalidadDisposicionFinalController.aprobacionRequisitosTecnicosBean.revisar}"
+						mostrarSiVacio="#{!modalidadDisposicionFinalController.aprobacionRequisitosTecnicosBean.revisar}"
+						idClase="#{modalidadDisposicionFinalController.aprobacionRequisitosTecnicosBean.aprobacionRequisitosTecnicos.id}"
+						nombreClase="AprobacionRequisitosTecnicos"
+						seccion="#{modalidadDisposicionFinalController.aprobacionRequisitosTecnicosBean.seccion}"
+						rol="sjsj" componenteActualizarEliminar="pnl2" />
+
+				</p:fragment>
+			</h:panelGroup>
+			<t:div styleClass="buttons main">
+				<p:commandButton value="#{labels['label.atras']}" immediate="true"
+					process="@this"
+					action="#{aprobacionRequisitosTecnicosController.recuperarPageAtras(6,false)}"
+					icon="ui-icon-arrowthick-1-w" />
+
+				<p:commandButton value="#{labels['label.guardar']}"
+					update=":#{p:component('form')},:#{p:component('notaUsuario')}"
+					icon="ui-icon-disk"
+					action="#{modalidadDisposicionFinalController.validarModalidadDisposicionFinal}" />
+
+				<p:commandButton value="#{labels['label.siguiente']}"
+					immediate="true" process="@this"
+					action="#{aprobacionRequisitosTecnicosController.recuperarPageSiguiente(6,false,false)}"
+					icon="ui-icon-arrowthick-1-e" />
+			</t:div>
+
+
+
+			<p:dialog header="Nota" id="dlgNotaFinal" widgetVar="dlgNotaFinal"
+				modal="true" resizable="false" width="700">
+
+				<h:panelGroup id="notaUsuario">
+					<h:panelGrid styleClass="w100 separatorBottom" columns="1"
+						columnClasses="w100, field_mrg w50">
+						<h:outputText
+							value="#{labels['label.disposicion.final.nota.usuario']}"
+							escape="false" styleClass="alJustify" />
+					</h:panelGrid>
+				</h:panelGroup>
+				<div class="buttons-inline">
+					<p:commandButton value="Aceptar" icon="ui-icon-check"
+						styleClass="primary"
+						action="#{modalidadDisposicionFinalController.guardarPagina}"
+						oncomplete="PF('dlgNotaFinal').hide();" update="@form" />
+					<p:commandButton value="Cancelar" icon="ui-icon-close"
+						styleClass="secondary" oncomplete="PF('dlgNotaFinal').hide();" />
+				</div>
+			</p:dialog>
+		</h:form>
+
+		<p:dialog
+			header="Capacidad total del almacenamiento de materias primas"
+			id="dlgCapMatPr" widgetVar="dlgCapMatPr" modal="true"
+			resizable="false" width="400">
+			<h:form>
+				<h:panelGroup id="capacidadAlmacenamientoTotalMateriasPrimas">
+
+					<h:panelGrid styleClass="w100 separatorBottom" columns="2"
+						columnClasses="w50, field_mrg w50">
+						<p:outputLabel value="#{labels['label.nombre.almacenamiento']}"
+							for="dlgNombreAlmacenamiento" />
+						<p:inputText id="dlgNombreAlmacenamiento" required="true" maxlength="255"
+							value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadTotalAlmacenamientoMateriaPrimaDesechoPeligroso.nombreLugarAlmacenamiento}" />
+						<p:outputLabel
+							value="#{labels['label.capacidad.confinamiento']} (metros cúbicos)"
+							for="dlgCapacidadConfinamiento" />
+
+						<pe:inputNumber id="dlgCapacidadConfinamiento" decimalPlaces="2" maxValue="99999"
+										thousandSeparator="" required="true"
+										value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadTotalAlmacenamientoMateriaPrimaDesechoPeligroso.capacidadEnM3}">
+						</pe:inputNumber>
+						<!--<p:inputText id="dlgCapacidadConfinamiento" required="true"
+							value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadTotalAlmacenamientoMateriaPrimaDesechoPeligroso.capacidadEnM3}">
+							<pe:keyFilter mask="num" />
+						</p:inputText>-->
+					</h:panelGrid>
+					<p:separator />
+					<div class="buttons">
+						<p:commandButton value="Aceptar" styleClass="primary"
+							process="@this,:#{p:component('pngridCTDP')},:#{p:component('capacidadAlmacenamientoTotalMateriasPrimas')}"
+							rendered="#{modalidadDisposicionFinalController.habilitarBtnGuardar}"
+							action="#{modalidadDisposicionFinalController.agregarAlmacenamiento}"
+							update=":#{p:component('pngridCTDP')},:#{p:component('capacidadAlmacenamientoTotalMateriasPrimas')}" />
+						<p:commandButton value="Actualizar"
+							process="@this,:#{p:component('pngridCTDP')},:#{p:component('capacidadAlmacenamientoTotalMateriasPrimas')}"
+							rendered="#{modalidadDisposicionFinalController.habilitarBtnActualizar}"
+							styleClass="primary"
+							action="#{modalidadDisposicionFinalController.actualizarDetalleCapacidadTotalAlmacenamientoMateriasPrimas}"
+							update=":#{p:component('pngridCTDP')},:#{p:component('capacidadAlmacenamientoTotalMateriasPrimas')}" />
+						<p:commandButton value="Cancelar" styleClass="secondary"
+							process="@this,:#{p:component('tblCTMP')}"
+							oncomplete="PF('dlgCapMatPr').hide();"
+							update=":#{p:component('pngridCTDP')}" />
+					</div>
+				</h:panelGroup>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog id="dlgCapConf" header="Capacidad del confinamiento"
+			widgetVar="dlgCapConf" modal="true" resizable="false" width="400"
+			styleClass="w100">
+			<h:form>
+				<h:panelGroup id="confinamientoCampos">
+					<h:panelGrid styleClass="w100 separatorBottom" columns="2"
+						columnClasses="w50, field_mrg w50">
+						<p:outputLabel value="#{labels['label.nombre.confinamiento']}"
+							for="dlgNombreConfinamiento" />
+						<h:outputText />
+						<p:inputText id="dlgNombreConfinamiento" required="true" maxlength="255"
+							value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadConfinamientoDesechoPeligroso.nombreLugarConfinamiento}" />
+						<h:outputText />
+						<h:outputText value="#{labels['label.capacidad.confinamiento']}"
+							style="font-weight:bold" />
+						<h:outputText />
+						<p:outputLabel value="metros cúbicos" for="dlgM3" />
+						<p:outputLabel value="T" for="dlgT" />
+
+						<pe:inputNumber id="dlgM3" decimalPlaces="2" maxValue="99999.99"
+										thousandSeparator="" required="true" maxlength="5"
+										value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadConfinamientoDesechoPeligroso.capacidadEnM3}">
+						</pe:inputNumber>
+
+						<pe:inputNumber id="dlgT" decimalPlaces="2" maxValue="9999999999.99"
+										thousandSeparator="" required="true"
+										value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadConfinamientoDesechoPeligroso.capacidadEnTonelada}">
+						</pe:inputNumber>
+						<!--<p:inputText id="dlgM3" required="true"
+							value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadConfinamientoDesechoPeligroso.capacidadEnM3}">
+							<pe:keyFilter mask="num" />
+						</p:inputText>-->
+						<!--<p:inputText id="dlgT" required="true"
+							value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadConfinamientoDesechoPeligroso.capacidadEnTonelada}">
+							<pe:keyFilter mask="num" />
+						</p:inputText>-->
+						<br />
+						<h:outputText />
+						<h:outputText value="#{labels['label.coordenadas.confinamiento']}"
+							styleClass="bold" />
+						<h:outputText />
+						<p:outputLabel value="X " for="dlgX" />
+						<p:outputLabel value="Y " for="dlgY" />
+
+						<pe:inputNumber id="dlgX" decimalPlaces="2" maxValue="9999999999.99" maxlength="10"
+							thousandSeparator="" required="true"
+							value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadConfinamientoDesechoPeligroso.coordenadaX}">
+							<f:validateLength minimum="6"></f:validateLength>
+						</pe:inputNumber>
+						<pe:inputNumber id="dlgY"  maxValue="9999999999.99" maxlength="10" thousandSeparator=""
+							decimalPlaces="2" required="true"
+							value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadConfinamientoDesechoPeligroso.coordenadaY}">
+							<f:validateLength minimum="7"></f:validateLength>
+						</pe:inputNumber>
+						<p:outputLabel
+							value="Capacidad estimada por mes de confinamiento (T)"
+							for="capacidad" />
+						<h:outputText />
+
+						<pe:inputNumber id="capacidad" decimalPlaces="2" maxValue="9999999999.99"
+										thousandSeparator="" required="true" maxlength="10"
+										value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadConfinamientoDesechoPeligroso.capacidadMesConfinamiento}">
+						</pe:inputNumber>
+						<!--<p:inputText id="capacidad" required="true"
+							value="#{modalidadDisposicionFinalController.modalidadDisposicionFinalBean.detalleCapacidadConfinamientoDesechoPeligroso.capacidadMesConfinamiento}">
+							<pe:keyFilter mask="num" />
+						</p:inputText>-->
+
+					</h:panelGrid>
+					<p:separator />
+					<div class="buttons">
+						<p:commandButton value="Aceptar"
+							process="@this,:#{p:component('confinamientoCampos')}"
+							rendered="#{modalidadDisposicionFinalController.habilitarBtnGuardar}"
+							styleClass="primary"
+							action="#{modalidadDisposicionFinalController.agregarConfinamiento}"
+							update=":#{p:component('pngridCapConf')},:#{p:component('confinamientoCampos')}" />
+						<p:commandButton value="Actualizar"
+							rendered="#{modalidadDisposicionFinalController.habilitarBtnActualizar}"
+							process="@this,:#{p:component('confinamientoCampos')}"
+							styleClass="primary"
+							action="#{modalidadDisposicionFinalController.actualizarDetalleCapacidadConfinamientoDesechoPeligroso}"
+							update=":#{p:component('pngridCapConf')},:#{p:component('confinamientoCampos')}" />
+						<p:commandButton value="Cancelar" styleClass="secondary"
+							process="@this,:#{p:component('pngridCapConf')}"
+							oncomplete="PF('dlgCapConf').hide();"
+							update=":#{p:component('pngridCapConf')}" />
+					</div>
+				</h:panelGroup>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="Importante" id="importanteDlg"
+			widgetVar="importanteWdgt" modal="true" resizable="false" width="300"
+			closable="false">
+			<h:outputText
+				value="No existen desechos asociados a la modalidad, por favor asocie los desechos a la modalidad en la sección" />
+			<ul class="error alLeft text-red ">
+				<li><h:outputLink class="text-red "
+						value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/gestion/eliminacionDisposicionFinal.jsf">
+						<h:outputText
+							value="Tipo de eliminación o disposición final de los desechos generados en la gestión" />
+					</h:outputLink></li>
+			</ul>
+		</p:dialog>
+	</ui:define>
+</ui:composition>

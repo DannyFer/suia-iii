@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<ui:composition>
+    <h:form id="eventoOcurridoDialog">
+        <p:dialog resizable="false" modal="true" widgetVar="eventoOcurridoDialog" width="600" height="500">
+            <p:panelGrid columns="3" layout="grid">
+                <f:facet name="header">Evento ocurrido</f:facet>
+                <p:outputLabel for="descripcion" value="Descripción del evento" />
+                <h:outputText /><h:outputText />
+
+                <p:inputText id="descripcion" value="#{eventoOcurridoController.eventoOcurrido.descripcion}" maxlength="500" style="width:300%" required="true" />
+                <h:outputText /><h:outputText />
+
+                <p:outputLabel value="Fecha" for="fecha" />
+                <p:outputLabel value="Hora" for="hora"/>
+                <h:outputText />
+
+                <p:calendar id="fecha" required="true" value="#{eventoOcurridoController.eventoOcurrido.fecha}" />
+                <p:inputMask required="true" id="hora" value="#{eventoOcurridoController.eventoOcurrido.tiempo}" mask="99:99" />
+                <p:selectOneRadio value="#{eventoOcurridoController.eventoOcurrido.meridiano}">
+                    <f:selectItem itemLabel="AM" itemValue="a" />
+                    <f:selectItem itemLabel="PM" itemValue="p" />
+                </p:selectOneRadio>
+            </p:panelGrid><br/>
+            <p:panelGrid id="ubicacion" columns="3" layout="grid" style="width: 100%">
+                <f:facet name="header">Ubicación</f:facet>
+                <p:outputLabel value="Provincia" />
+                <p:outputLabel value="Cantón" />
+                <p:outputLabel value="Parroquia" />
+
+                <p:selectOneMenu value="#{eventoOcurridoController.provincia}" styleClass="w100">
+                    <p:ajax event="valueChange" update=":eventoOcurridoDialog:ubicacion" listener="#{eventoOcurridoController.cambiarCantones}" />
+                    <f:selectItems value="#{eventoOcurridoController.provincias}" var="provincia" itemLabel="#{provincia.nombre}" itemValue="#{provincia.id}" />
+                </p:selectOneMenu>
+                <p:selectOneMenu value="#{eventoOcurridoController.canton}" styleClass="w100">
+                    <p:ajax event="valueChange" update=":eventoOcurridoDialog:ubicacion" listener="#{eventoOcurridoController.cambiarParroquias}" />
+                    <f:selectItems value="#{eventoOcurridoController.cantones}" var="canton" itemLabel="#{canton.nombre}" itemValue="#{canton.id}" />
+                </p:selectOneMenu>
+                <p:selectOneMenu value="#{eventoOcurridoController.parroquia}" styleClass="w100">
+                    <f:selectItems value="#{eventoOcurridoController.parroquias}" var="parroquia" itemLabel="#{parroquia.nombre}" itemValue="#{parroquia.id}" />
+                </p:selectOneMenu>
+            </p:panelGrid><br/>
+            <p:panelGrid id="coordenadas" columns="1" layout="grid">
+                <f:facet name="header">
+                    <p:commandButton value="Adjuntar" onclick="PF('adjuntarCoordenadas').show()" styleClass="buttonAdjuntarCoordenadas button-small-text toRight field_mrg" type="button" icon="ui-icon-document" />
+                    <p:commandButton value="Descargar plantilla" styleClass="button-small-text toRight field_mrg" icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true">
+                        <p:fileDownload value="#{eventoOcurridoController.cargarCoordenadasBean.plantillaCoordenadas}" />
+                    </p:commandButton>
+                    <p:commandButton styleClass="button-small toRight field_mrg" ajax="false" immediate="true" icon="ui-icon-help">
+                        <p:fileDownload value="#{eventoOcurridoController.cargarCoordenadasBean.ayudaCoordenadas}" />
+                    </p:commandButton>
+                    <h:outputText value="Coordenadas (Zona 17S)" />
+                </f:facet>
+                <p:row>
+                    <p:column>
+                        <p:dataTable value="#{eventoOcurridoController.eventoOcurrido.coordenadas}" var="coodenada" emptyMessage="Sin resultados"
+                                     paginator="true" paginatorAlwaysVisible="false" pageLinks="3" paginatorPosition="bottom" rows="5">
+                            <p:column headerText="Shape">
+                                <h:outputText value="#{coodenada.shape}"/>
+                            </p:column>
+                            <p:column headerText="X">
+                                <h:outputText value="#{coodenada.x}"/>
+                            </p:column>
+                            <p:column headerText="Y">
+                                <h:outputText value="#{coodenada.y}"/>
+                            </p:column>
+                            <p:column headerText="Tipo">
+                                <h:outputText value="#{coodenada.tipo}"/>
+                            </p:column>
+                            <p:column headerText="Descripción">
+                                <h:outputText value="#{coodenada.descripcion}"/>
+                            </p:column>
+                        </p:dataTable>
+                    </p:column>
+                </p:row>
+            </p:panelGrid><br/>
+            <p:panelGrid columns="1" layout="grid" rendered="#{planEmergenteController.mineria}">
+                <f:facet name="header">Causante</f:facet>
+                <p:outputLabel for="causante1" value="Causante" />
+                <p:inputText id="causante1" value="#{eventoOcurridoController.eventoOcurrido.causante}" maxlength="500" style="width:100%" required="true" />
+
+                <p:outputLabel value="Código y nombre de concesión"
+                               rendered="#{!planEmergenteController.regularizacion or (planEmergenteController.regularizacion and
+                               not empty eventoOcurridoController.eventoOcurrido.proyectoLicenciamientoAmbiental.concesionesMineras)}"  />
+                <p:inputText value="#{eventoOcurridoController.eventoOcurrido.concesion}" maxlength="500" style="width:100%" rendered="#{!planEmergenteController.regularizacion}" />
+                <p:selectOneMenu value="#{eventoOcurridoController.eventoOcurrido.concesion}" rendered="#{planEmergenteController.regularizacion and
+                               not empty eventoOcurridoController.eventoOcurrido.proyectoLicenciamientoAmbiental.concesionesMineras}">
+                    <f:selectItems value="#{eventoOcurridoController.eventoOcurrido.proyectoLicenciamientoAmbiental.concesionesMineras}"
+                                   var="concesion" itemLabel="#{concesion.codigo} #{concesion.nombre}" itemValue="#{concesion.codigo} #{concesion.nombre}" />
+                </p:selectOneMenu>
+
+                <p:outputLabel value="Planta beneficio" />
+                <p:inputText value="#{eventoOcurridoController.eventoOcurrido.beneficio}" maxlength="500" style="width:100%" />
+
+                <p:outputLabel value="Relavera" />
+                <p:inputText value="#{eventoOcurridoController.eventoOcurrido.relavera}" maxlength="500" style="width:100%" />
+
+                <p:panelGrid id="fases" columns="1" layout="grid">
+                    <f:facet name="header">
+                        <p:commandButton value="Adicionar" styleClass="buttonAdjuntarCoordenadas button-small-text toRight field_mrg" process="@this" update=":seleccionarFase"
+                                         icon="ui-icon-plus" actionListener="#{eventoOcurridoController.mostrarFases}" rendered="#{!planEmergenteController.hidrocarburos}" />
+                        <h:outputText value="Fases de gestión" />
+                    </f:facet>
+                    <p:dataTable value="#{eventoOcurridoController.eventoOcurrido.etapas}" var="etapa" emptyMessage="Sin resultados" style="width: 50%;"
+                                 paginator="true" paginatorAlwaysVisible="false" pageLinks="3" paginatorPosition="bottom" rows="5">
+                        <p:column headerText="Fase" rendered="#{planEmergenteController.hidrocarburos or planEmergenteController.mineria}">
+                            <h:outputText value="#{etapa.fase.nombre}"/>
+                        </p:column>
+                        <p:column headerText="Etapa" rendered="#{planEmergenteController.otros}">
+                            <h:outputText value="#{etapa.etapa.nombre}"/>
+                        </p:column>
+                    </p:dataTable>
+                </p:panelGrid>
+            </p:panelGrid><br/>
+            <p:panelGrid columns="1" layout="grid" rendered="#{!planEmergenteController.mineria}">
+                <f:facet name="header">Causante</f:facet>
+                <p:outputLabel for="causante" value="Causante" />
+                <p:inputText id="causante" value="#{eventoOcurridoController.eventoOcurrido.causante}" maxlength="500" style="width:100%" required="true" />
+                <p:panelGrid id="fases1" columns="1" layout="grid">
+                    <f:facet name="header">
+                        <p:commandButton value="Adicionar" styleClass="buttonAdjuntarCoordenadas button-small-text toRight field_mrg" update=":seleccionarFase" process="@this"
+                                         icon="ui-icon-plus" actionListener="#{eventoOcurridoController.mostrarFases}" rendered="#{!planEmergenteController.hidrocarburos}" />
+                        <h:outputText value="Fases de gestión" />
+                    </f:facet>
+                    <p:dataTable value="#{eventoOcurridoController.eventoOcurrido.etapas}" var="etapa" emptyMessage="Sin resultados" style="width: 50%"
+                                 paginator="true" paginatorAlwaysVisible="false" pageLinks="3" paginatorPosition="bottom" rows="5">
+                        <p:column headerText="Fase" rendered="#{planEmergenteController.hidrocarburos or planEmergenteController.mineria}">
+                            <h:outputText value="#{etapa.fase.nombre}"/>
+                        </p:column>
+                        <p:column headerText="Etapa" rendered="#{planEmergenteController.otros}">
+                            <h:outputText value="#{etapa.etapa.nombre}"/>
+                        </p:column>
+                    </p:dataTable>
+                </p:panelGrid>
+            </p:panelGrid><br/>
+            <div class="buttons">
+                <p:commandButton value="Aceptar" icon="ui-icon-check" actionListener="#{eventoOcurridoController.adicionar}" update=":eventos, :eventoOcurridoDialog:hora,
+                            :eventoOcurridoDialog:descripcion, :eventoOcurridoDialog:fecha, :eventoOcurridoDialog:causante1, :eventoOcurridoDialog:causante" />
+                <p:commandButton immediate="true" process="@this" value="Cancelar" onclick="PF('eventoOcurridoDialog').hide();"/>
+            </div><br/><br/>
+        </p:dialog>
+    </h:form>
+
+    <h:form>
+        <p:dialog header="Adjuntar coordenadas" widgetVar="adjuntarCoordenadas" modal="#{eventoOcurridoController.cargarCoordenadasBean.modalLoadFile}" resizable="false">
+            <p:panelGrid columns="1" columnClasses="label, value">
+                <h:outputText value="Seleccione el archivo excel (.xls)" />
+                <p:fileUpload uploadLabel="Subir" auto="true" cancelLabel="Cancelar" label="Seleccionar" fileUploadListener="#{eventoOcurridoController.handleFileUpload}" mode="advanced" dragDropSupport="false" update=":eventoOcurridoDialog:coordenadas" multiple="false" allowTypes="/(\.|\/)(xls)$/" oncomplete="showModalTransformation()" invalidFileMessage="El archivo es inválido." invalidSizeMessage="El archivo es demasiado grande." />
+            </p:panelGrid>
+            <div class="buttons">
+                <p:commandButton type="button" value="Cerrar" onclick="PF('adjuntarCoordenadas').hide()" />
+            </div>
+        </p:dialog>
+    </h:form>
+
+    <h:form id="seleccionarFase">
+        <p:dialog header="Seleccionar fases / etapa" widgetVar="seleccionarFase" resizable="false">
+            <p:panelGrid columns="1" layout="grid">
+                <p:selectManyCheckbox value="#{eventoOcurridoController.eventoEtapaFase}" layout="grid" columns="2" rendered="#{planEmergenteController.otros}">
+                    <f:selectItems value="#{eventoOcurridoController.fases[0].etapasProyecto}" var="etapaProyecto" itemLabel="#{etapaProyecto.nombre}" itemValue="#{etapaProyecto.id}" />
+                </p:selectManyCheckbox>
+
+                <p:selectManyCheckbox value="#{eventoOcurridoController.eventoEtapaFase}" layout="grid" columns="1" rendered="#{planEmergenteController.mineria}">
+                    <f:selectItems value="#{eventoOcurridoController.fases}" var="fase" itemLabel="#{fase.nombre}" itemValue="#{fase.id}" />
+                </p:selectManyCheckbox>
+            </p:panelGrid>
+            <div class="buttons">
+                <p:commandButton value="Aceptar" icon="ui-icon-check" update=":eventoOcurridoDialog:fases, :eventoOcurridoDialog:fases1" actionListener="#{eventoOcurridoController.adicionarFases}" />
+                <p:commandButton type="button" value="Cerrar" onclick="PF('seleccionarFase').hide()" />
+            </div>
+        </p:dialog>
+    </h:form>
+</ui:composition>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+	<p:panelGrid id="panelLab" columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<h:outputText value="REGISTRO DE LABORATORIOS" />
+		</f:facet>		
+			
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" id="laboratorios">			
+				
+				<p:dataTable
+					value="#{emisionesAtmosfericasVerController.listaLaboratorios}"
+					var="lab" emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="RUC" style="text-align:center;" styleClass="w10">
+						<h:outputText value="#{lab.ruc}" />
+					</p:column>
+					<p:column headerText="Nombre o Razón Social" style="text-align:center;" styleClass="w15">
+						<h:outputText value="#{lab.nombre}" />
+					</p:column>
+					<p:column headerText="N° de Registro de SAE" style="text-align:center;" styleClass="w15">
+						<h:outputText value="#{lab.numeroRegistroSAE}" />
+					</p:column>
+					<p:column headerText="Vigencia del Registro" style="text-align:center;" styleClass="w10">
+						<h:outputText value="#{lab.fechaVigenciaRegistro}" />
+					</p:column>
+					<p:column headerText="Informes de monitoreo emitido por el laboratorio">
+					<p:commandButton
+							styleClass="button-small primary" process="@this" 
+							actionListener="#{emisionesAtmosfericasVerController.cargarInformacionLaboratorio(lab)}"
+							icon="ui-icon-search"
+							oncomplete="PF('adicionarLaboratorio').show()"
+							update=":dialogform:adicionarLaboratorio :dialogform:ingresoDatosLaboratorio">						
+					</p:commandButton>
+						<h:outputText value="Documentos Eliminados" 
+						rendered="#{not empty emisionesAtmosfericasVerController.obtenerListaEliminados(lab.listaDocumentosLaboratorios)}" 
+						styleClass="text-orange" style="text-align:center; font-weight: bold"/>
+						<p:dataTable
+						value="#{emisionesAtmosfericasVerController.obtenerListaEliminados(lab.listaDocumentosLaboratorios)}"
+						var="doc" emptyMessage="#{labels['common.table.empty']}"
+						rendered="#{not empty emisionesAtmosfericasVerController.obtenerListaEliminados(lab.listaDocumentosLaboratorios)}">		
+						<p:column headerText="Fecha Modificación" style="text-align:center;" styleClass="w25">
+							<h:outputText value="#{doc.fechaModificacion}"/>
+						</p:column>			
+						<p:column headerText="Descargar documento" style="text-align:center;">
+						<p:commandLink id="fileDownloadDoc" ajax="false" value="#{doc.nombre}">
+						<p:fileDownload value="#{emisionesAtmosfericasVerController.getDocumentoRespaldoLaboratorio(doc)}" />
+						</p:commandLink>														
+						</p:column>
+					
+						</p:dataTable>
+					
+					</p:column>
+					
+					<p:column headerText="" style="text-align:center;" styleClass="w5" 
+						rendered="#{emisionesAtmosfericasVerController.numeroObservacion > 0}">					
+						<p:commandButton
+							styleClass="button-small orange" process="@this"
+							icon="ui-icon-pencil" oncomplete="PF('laboratoriosHDiag').show()"
+							actionListener="#{emisionesAtmosfericasVerController.obtenerLaboratorioHistorial(lab.historialLista)}"
+							rendered="#{not empty lab.historialLista}"
+							update=":dialogform:laboratoriosHPanel"
+							title="Historial">							
+						</p:commandButton>		
+					
+						<h:outputText value="Nuevo" 
+						rendered="#{lab.numeroObservacion ne null and lab.numeroObservacion eq emisionesAtmosfericasVerController.numeroObservacion}" 
+						styleClass="text-orange"/>
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+			
+			<h:panelGrid styleClass="panel_data" columns="2"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt"
+							rendered="#{not empty emisionesAtmosfericasVerController.listaLaboratoriosEliminados}">
+							<h:outputText id="labEliminado" value="Registro de laboratorios eliminados" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('laboratoriosEDiag').show()"/>
+			</h:panelGrid>
+			
+	</p:panelGrid>
+	
+	<p:dialog header="Registro de laboratorios"
+				id="laboratoriosEDiag" widgetVar="laboratoriosEDiag" modal="true"
+				width="900" resizable="false" draggable="true" closable="true">
+
+		<p:panel id="laboratoriosEPanel">		
+		
+		<p:dataTable value="#{emisionesAtmosfericasVerController.listaLaboratoriosEliminados}"
+					var="lab" emptyMessage="#{labels['common.table.empty']}">
+					
+					<p:column headerText="Fecha Modificación" style="text-align:center;">
+						<h:outputText value="#{lab.fechaCreacion}" />
+					</p:column>
+					<p:column headerText="RUC" style="text-align:center;">
+						<h:outputText value="#{lab.ruc}" />
+					</p:column>
+					<p:column headerText="Nombre o Razón Social" style="text-align:center;">
+						<h:outputText value="#{lab.nombre}" />
+					</p:column>
+					<p:column headerText="N° de Registro de SAE" style="text-align:center;">
+						<h:outputText value="#{lab.numeroRegistroSAE}" />
+					</p:column>
+					<p:column headerText="Vigencia del Registro" style="text-align:center;">
+						<h:outputText value="#{lab.fechaVigenciaRegistro}" />
+					</p:column>
+					<p:column headerText="Documentos" style="text-align:center;">
+					<p:commandButton styleClass="button-small orange" process="@this"
+							actionListener="#{emisionesAtmosfericasVerController.obtenerDocLabEliminado(lab.listaDocumentosLaboratorios)}"
+							icon="ui-icon-pencil" oncomplete="PF('documentosLab').show()" 
+							title="Descargar"
+							update=":dialogform:documentosLab">							
+						</p:commandButton>	
+					</p:column>
+			</p:dataTable>
+		</p:panel>
+		</p:dialog>
+
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+      	          template="/WEB-INF/templates/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                 xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+		<ui:define name="content">
+		<ui:include src="../contenido/menu.xhtml" />
+		<div class="content">
+				<f:loadBundle var="labels" basename="ec.gob.ambiente.core.resources.labels_es" />
+			<h:form id="frmHidrico" enctype="multipart/form-data">
+				<p:growl id="msgs" globalOnly="true" />
+		
+				<p:panel >
+				<h:panelGrid columns="2" id="pgAdjunto">
+		<h:outputLabel value="Adjuntar Documento:" />
+				<p:fileUpload id="idArchivo" auto="true" label="Adjuntar"
+								fileUploadListener="#{hidrologiaController.handleFileUpload}"
+								mode="advanced" value="#{medioFisicoBean.documento.nombre}"
+								skinSimple="true" required="true" sizeLimit="10000000"
+								allowTypes="/(\.|\/)(pdf)$/" update=":frmHidrico:lblArchivo :frmHidrico:lblDescargar :frmHidrico:pgAdjunto" />
+								<p:outputLabel value="#{hidrologiaController.medioFisicoBean.documento.nombre}" id="lblArchivo" style="color:blue"/>
+								<p:commandLink ajax="false" value="Descargar" id="lblDescargar" 
+										 onclick="PrimeFaces.monitorDownload(start, stop);"	rendered="#{hidrologiaController.medioFisicoBean.visibleDocumento}"	style="color:blue">
+										 <p:fileDownload value="#{hidrologiaController.descargar()}"/>
+										 </p:commandLink>
+		</h:panelGrid>
+		
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<p:commandButton value="Adicionar"  action="#{hidrologiaController.agregarCuerpoHidrico()}" immediate="true" update=":#{p:component('frmCuerpoHidrico')}"
+						 onclick="PF('dlgCuerpoHidrometrico').show()" id="btnAgregarMedio"  icon="ui-icon-plusthick" styleClass="button-small-text toRight field_mrg" >
+						<p:tooltip id="acciontt" for="btnAgregarMedio"
+							value="Agregar Cuerpo Hídrico"></p:tooltip>
+					</p:commandButton>
+					<mae:panelGridHeaderHelp value="Cuerpos hídricos" conector="cuerpoHelp"  help="#{helps['no.help.yet']}" />
+					</f:facet>
+			
+				<p:dataTable id="tblHidrologia" paginator="true" rows="10" paginatorPosition="bottom"  scrollable="true" scrollWidth="720"
+					 value="#{hidrologiaController.medioFisicoBean.listaCuerpoHidricos}" var="cuerpoHidrico" emptyMessage="#{labels['common.table.empty']}">
+					
+					<p:columnGroup type="header">
+						<p:row>
+							<p:column colspan="7"
+								headerText="Características hidrométricas de los cuerpos hídricos monitoreados" width="1000"/>
+						</p:row>
+						<p:row>
+							<p:column rowspan="2" headerText="Acciones" width="60"/>
+							<p:column headerText="Cuerpo Hídrico" width="150"/>
+							<p:column headerText="Ubicación Geográfica" width="300"/>
+							<p:column headerText="Ancho (m) de sección" width="150"/>
+							<p:column headerText="Profundidad (m) media" width="150" />
+							<p:column headerText="Velocidad (m/s) media" width="140" />
+							<p:column headerText="Caudal (m3/s) media" width="100" />
+						</p:row>	
+
+					</p:columnGroup>
+					<p:column>
+					 <p:commandButton icon="ui-icon-pencil" action="#{hidrologiaController.seleccionarCuerpo(cuerpoHidrico)}"
+                                 title="Editar" oncomplete="PF('dlgCuerpoHidrometrico').show();" update=":#{p:component('frmCuerpoHidrico')} :frmCuerpoHidrico:cmbCanton "/>
+                	<p:commandButton icon="ui-icon-trash" action="#{hidrologiaController.eliminarCuerpo(cuerpoHidrico)}"
+                                 title="Remover"
+                                 update=":#{p:component('tblHidrologia')}"/>
+					</p:column>
+					<p:column>	
+					<h:outputText value="#{cuerpoHidrico.nombreCuerpo}" />
+					</p:column>
+					<p:column>
+						<h:outputText value="#{cuerpoHidrico.provincia.nombre} - #{cuerpoHidrico.canton.nombre} - #{cuerpoHidrico.parroquia.nombre}" />
+					</p:column>
+					<p:column>
+					<h:outputText value="#{cuerpoHidrico.ancho}" />
+					</p:column>
+					<p:column>
+					<h:outputText value="#{cuerpoHidrico.profundidad}" />
+					</p:column>
+					<p:column>
+					<h:outputText value="#{cuerpoHidrico.velocidad}" />
+					</p:column>
+					<p:column>
+					<h:outputText value="#{cuerpoHidrico.caudal}" />
+					</p:column>
+				</p:dataTable>
+				</p:panelGrid>
+				</p:panel>
+			<div class="buttons main">
+				<p:commandButton id="btnGuardar" value="Guardar" icon="ui-icon-check" action="#{hidrologiaController.guardar()}" 
+								update=":#{p:component('tblHidrologia')}"/>
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel" action="#{hidrologiaController.cancelar()}" process="@this">
+					<p:confirm header="Confirmación" message="¿Está seguro de cancelar?" icon="ui-icon-alert" />
+				</p:commandButton>
+			</div>	
+		
+	</h:form>
+	
+	<p:dialog id="agregarCuerpoHidrico" header="Características de Cuerpo Hídrico" widgetVar="dlgCuerpoHidrometrico" modal="true" width="380" resizable="false">
+	<h:form id="frmCuerpoHidrico">
+	<h:panelGrid  id="pngCuerpoHidrico" columns="2" styleClass="w100 alCenter" columnClasses="alRight, field_mrg w66 alLeft" >
+		<p:outputLabel value="Cuerpo Hídrico" for="txtNombreCuerpo"/>
+		<p:inputText id="txtNombreCuerpo" value="#{hidrologiaController.medioFisicoBean.cuerpoHidrico.nombreCuerpo}" required="true" requiredMessage="El campo cuerpo hídrico es requerido. "/>
+		
+		<p:outputLabel value="Provinicia" />
+		<p:selectOneMenu id="cmbProvincia" value="#{hidrologiaController.medioFisicoBean.cuerpoHidrico.provincia}"  
+						converter="selectItemConverter2" style="width:100%" required="true" requiredMessage="El campo provincia es requerido." >
+		<f:selectItems value="#{hidrologiaController.medioFisicoBean.provincias}"/>
+		<p:ajax event="change" listener="#{hidrologiaController.cargarCantones()}" update=":#{p:component('cmbCanton')} :#{p:component('cmbParroquia')}"/>
+		</p:selectOneMenu>
+			<p:outputLabel value="Cantón" />
+		<p:selectOneMenu id="cmbCanton" value="#{hidrologiaController.medioFisicoBean.cuerpoHidrico.canton}"  
+						converter="selectItemConverter2" style="width:100%" required="true" requiredMessage="El campo cantón es requerido.">
+		<f:selectItems value="#{hidrologiaController.medioFisicoBean.cantones}"/>
+		<p:ajax event="change" listener="#{hidrologiaController.cargarParroquias()}" update=":#{p:component('cmbParroquia')}"/>
+		</p:selectOneMenu>
+		<p:outputLabel value="Parroquia"/>
+		<p:selectOneMenu id="cmbParroquia" value="#{hidrologiaController.medioFisicoBean.cuerpoHidrico.parroquia}" 
+						converter="selectItemConverter2" style="width:100%" required="true" requiredMessage="El campo parroquia es requerido.">
+		<f:selectItems value="#{hidrologiaController.medioFisicoBean.parroquias}"/>
+		</p:selectOneMenu>
+		
+		<p:outputLabel value="Ancho (m)" for="txtAncho"/>
+		<p:inputText id="txtAncho" required="true" value="#{hidrologiaController.medioFisicoBean.cuerpoHidrico.ancho}"
+					  onkeypress="return NumCheckDouble(event,this);" requiredMessage="El campo ancho es requerido.">
+		<f:validateDoubleRange minimum="0.00"/>
+		</p:inputText>
+		<p:outputLabel value="Profundidad (m)" for="txtProfundidad"/>
+		<p:inputText id="txtProfundidad" required="true" value="#{hidrologiaController.medioFisicoBean.cuerpoHidrico.profundidad}"
+					 onkeypress="return NumCheckDouble(event,this);" requiredMessage="El campo profundidad es requerido.">
+		<f:validateDoubleRange minimum="0.00"/>
+		</p:inputText>
+		<p:outputLabel value="Velocidad (m/s)" for="txtVelocidad"/>
+		<p:inputText id="txtVelocidad" required="true" value="#{hidrologiaController.medioFisicoBean.cuerpoHidrico.velocidad}"
+					 onkeypress="return NumCheckDouble(event,this);" requiredMessage="El campo velocidad es requerido.">
+		<f:validateDoubleRange minimum="0.00"/>
+		</p:inputText>
+		<p:outputLabel value="Caudal (m3/s)" for="txtCaudal"/>
+		<p:inputText id="txtCaudal" required="true" value="#{hidrologiaController.medioFisicoBean.cuerpoHidrico.caudal}"
+					 onkeypress="return NumCheckDouble(event,this);" requiredMessage="El campo caudal es requerido.">
+		<f:validateDoubleRange minimum="0.00"/>
+		</p:inputText>
+	</h:panelGrid>
+	
+	<p:separator />
+	<div class="buttons">
+		<p:commandButton action="#{hidrologiaController.agregarAListaCuerpoHidrico}"  value="Agregar" update=":#{p:component('msgs')}, :#{p:component('tblHidrologia')}"  
+				oncomplete="handlHidrometricoRequest(xhr, status, args)" />
+	</div>
+	</h:form>
+</p:dialog>
+
+	
+	
+ <script type="text/javascript">
+        function handlHidrometricoRequest(xhr, status, args) {
+            if (args.validationFailed || !args.puntoIn) {
+                PF('dlgCuerpoHidrometrico').jq.effect("shake", {times: 5}, 100);
+            }
+            else {
+                PF('dlgCuerpoHidrometrico').hide();
+                $('#loginLink').fadeOut();
+            }
+        }
+    </script>
+	<script type="text/javascript">
+				function start() {
+    				PF('statusDialog').show();
+				}
+
+				function stop() {
+    				PF('statusDialog').hide();
+			}
+	</script>
+	</div>
+	</ui:define>
+</ui:composition>
+
+

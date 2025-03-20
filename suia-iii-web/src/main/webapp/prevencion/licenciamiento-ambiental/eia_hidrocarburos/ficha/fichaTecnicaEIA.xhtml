@@ -1,0 +1,648 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:controles="http://java.sun.com/jsf/composite/controles-prime"
+      xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition
+        template="/prevencion/licenciamiento-ambiental/eia/default.xhtml">
+    <ui:define name="content-eia">
+        <h:form id="frmFicha">
+            <p:growl id="msgs" globalOnly="true" />
+            <p:panel id="fichaTecnica" header="Ficha Técnica">
+                <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                    <f:facet name="header">
+                        <h:outputText value="Datos del proyecto" />
+                    </f:facet>
+
+                    <h:panelGrid styleClass="panel_data w100" columns="2"
+                                 columnClasses="header, null" rowClasses="null, alt">
+                        <h:outputText value="Nombre proyecto " />
+                        <h:outputText
+                                value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.nombre}" />
+                        <h:outputText value="Código del proyecto" />
+                        <h:outputText
+                                value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.codigo}" />
+                        <h:outputText value="Proponente" />
+                        <h:outputText value="#{fichaTecnicaControllerEia.getProponente()}" />
+                        <h:outputText value="Ente responsable" />
+                        <h:outputText
+                                value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.areaResponsable.areaName}" />
+                    </h:panelGrid>
+                </p:panelGrid>
+
+                <p:panelGrid columns="1" layout="grid" styleClass="panel_data w100"
+                             rendered="#{!fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.datosOficinaPrincipal and !fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.concesionesMinerasMultiples}">
+                    <f:facet name="header">
+                        <h:outputText value="Ubicación geográfica" />
+                    </f:facet>
+                    <p:dataTable
+                            value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.proyectoUbicacionesGeograficas}"
+                            var="ubicacion">
+                        <p:column headerText="Provincia">
+                            <h:outputText
+                                    value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+                        </p:column>
+                        <p:column headerText="Cantón">
+                            <h:outputText
+                                    value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+                        </p:column>
+                        <p:column headerText="Parroquia">
+                            <h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}" />
+                        </p:column>
+                    </p:dataTable>
+                    <p:outputLabel value="Dirección del proyecto, obra o actividad"
+                                   styleClass="bold" />
+                    <p:inputTextarea
+                            value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.direccionProyecto}"
+                            readonly="true" rows="2" />
+                </p:panelGrid>
+
+                <h:panelGroup id="pnlDetalles">
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                        <f:facet name="header">
+                            <h:outputText value="Detalle del proyecto" />
+                        </f:facet>
+                        <h:panelGrid styleClass="panel_data mw50" columns="2"
+                                     columnClasses="header, null" rowClasses="null, alt">
+                            <h:outputText value="Sector " />
+                            <h:outputText
+                                    value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.tipoSector}" />
+                            <h:outputText value="Superficie" />
+                            <h:panelGroup>
+                                <h:outputText
+                                        value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.area}" />
+                                <h:outputText
+                                        value=" #{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.unidad}" />
+                            </h:panelGroup>
+                            <h:outputText value="Altitud" />
+                            <h:outputText
+                                    value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.altitud} msnm" />
+                        </h:panelGrid>
+                    </p:panelGrid>
+                </h:panelGroup>
+
+                <p:panelGrid columns="2" layout="grid" styleClass="w100"
+                             columnClasses="w50, w50">
+                    <f:facet name="header">
+                        <h:outputText value="Adjuntar plano de implantación *" />
+                        <mae:panelGridHeaderHelp conector="planoHelp"
+                                                 help="#{helps['eia.fichatecnica.planoimplantacion']}"
+                                                 width="500px" value="" />
+                    </f:facet>
+                    <h:panelGrid columns="2" columnClasses="null, field_mrg"
+                                 id="etiqueta">
+                        <p:outputLabel
+                                value="#{empty fichaTecnicaControllerEia.documentoGeneral.nombre ? 'Documento(.pdf)' : fichaTecnicaControllerEia.documentoGeneral.nombre}" />
+                        <p:commandButton id="download" icon="ui-icon-arrowthick-1-s"
+                                         ajax="false" styleClass="button-small primary" title="Ver"
+                                         immediate="true"
+                                         rendered="#{not empty fichaTecnicaControllerEia.documentoGeneral.nombre}">
+                            <p:fileDownload
+                                    value="#{fichaTecnicaControllerEia.getStreamContent()}" />
+                        </p:commandButton>
+                    </h:panelGrid>
+                    <h:outputText />
+                    <p:fileUpload
+                            fileUploadListener="#{fichaTecnicaControllerEia.uploadListenerDocumentos}"
+                            multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/"
+                            label="Seleccionar" uploadLabel="Subir"
+                            invalidFileMessage="Tipo de archivo no válido"
+                            invalidSizeMessage="Tamaño de archivo no válido"
+                            cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                            auto="true" update="etiqueta download" />
+                    <h:outputText />
+                </p:panelGrid>
+
+                <h:panelGroup id="pnlConsultor">
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                        <f:facet name="header">
+                            <p:commandButton value="Seleccionar"
+                                             oncomplete="PF('adicionarConsultorCalificado').show()"
+                                             styleClass="button-small-text toRight field_mrg" process="@this"
+                                             update=":formConsultor:adicionarConsultorCalificado"
+                                             icon="ui-icon-check">
+                                <p:resetInput
+                                        target=":formConsultor:adicionarConsultorCalificado" />
+                            </p:commandButton>
+                            <h:outputText value="Consultor calificado *" />
+                            <mae:panelGridHeaderHelp conector="consultoroHelp"
+                                                     help="#{helps['eia.fichatecnica.consultorcalificado']}"
+                                                     width="500px" value="" />
+                        </f:facet>
+                        <h:outputText value="#{labels['common.table.empty']}"
+                                      rendered="#{!fichaTecnicaControllerEia.labelAdicionar}" />
+                        <h:panelGroup
+                                rendered="#{fichaTecnicaControllerEia.labelAdicionar}">
+                            <h:panelGrid styleClass="panel_data" columns="2"
+                                         columnClasses="header, null" rowClasses="null, alt">
+                                <h:outputText value="Consultor calificado" />
+                                <h:outputText
+                                        value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.consultorSeleccionado.nombre}" />
+                            </h:panelGrid>
+                        </h:panelGroup>
+                    </p:panelGrid>
+                </h:panelGroup>
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                    <f:facet name="header">
+                        <p:commandButton value="Adicionar"
+                                         oncomplete="PF('adicionarConsultorNoCalificado').show()"
+                                         styleClass="button-small-text toRight field_mrg"
+                                         icon="ui-icon-plusthick" process="@this"
+                                         update=":formEquipoConsultor:adicionarConsultorNoCalificado"
+                                         actionListener="#{fichaTecnicaControllerEia.limpiarConsultorNoCalificado()}" />
+                        <h:outputText value="Equipo consultor *" />
+                    </f:facet>
+                    <p:dataTable id="tblGrupoConsultor" rowIndexVar="index"
+                                 value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.consultorNoCalificadosSeleccionados}"
+                                 var="equipoConsultor"
+                                 emptyMessage="#{labels['common.table.empty']}">
+                        <p:column styleClass="w20px alCenter">
+                            <h:outputText value="#{index + 1}" />
+                        </p:column>
+                        <p:column headerText="Nombre">
+                            <h:outputText value="#{equipoConsultor.nombre}" />
+                        </p:column>
+                        <p:column headerText="Formación profesional">
+                            <h:outputText value="#{equipoConsultor.formacionProfesional}" />
+                        </p:column>
+                        <p:column headerText="Componente de participación">
+                            <h:outputText value="#{equipoConsultor.componentePaticipacion.nombre}" />
+                        </p:column>
+                        <p:column styleClass="w40px alCenter">
+                            <p:commandButton
+                                    update=":formEquipoConsultor:adicionarConsultorNoCalificado"
+                                    styleClass="button-small primary" process="@this"
+                                    icon="ui-icon-pencil"
+                                    actionListener="#{fichaTecnicaControllerEia.seleccionarConsultorNoCalificado(equipoConsultor)}"
+                                    oncomplete="PF('adicionarConsultorNoCalificado').show()" />
+                            <p:commandButton update=":frmFicha:tblGrupoConsultor"
+                                             styleClass="button-small primary" process="@this"
+                                             icon="ui-icon-circle-close"
+                                             actionListener="#{fichaTecnicaControllerEia.eliminarConsultorNoCalificado(equipoConsultor)}">
+                                <p:confirm header="Confirmación"
+                                           message="¿Está seguro que desea eliminar este miembro del equipo consultor?"
+                                           icon="ui-icon-alert" />
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+                </p:panelGrid>
+
+                <h:panelGroup id="pnlClausula">
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                 columnClasses="w25, field_mrg w25">
+                        <f:facet name="header">
+                            <h:outputText value="Cláusula de responsabilidad *" />
+                        </f:facet>
+                        <h:panelGrid columns="2" styleClass="w100">
+                            <p:selectBooleanCheckbox
+                                    value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.aceptaClausula}"
+                                    required="true" id="txtClausula" />
+                            <h:panelGroup>
+                                <h:panelGrid columnClasses="alJustify">
+                                    <p:outputLabel
+                                            value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.clausula}"
+                                            for="txtClausula" />
+                                </h:panelGrid>
+                            </h:panelGroup>
+                        </h:panelGrid>
+                    </p:panelGrid>
+                </h:panelGroup>
+
+                <h:panelGroup id="pnlFases">
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                 columnClasses="w25, field_mrg w25"
+                                 rendered="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.verFichaTecnicaMineria}">
+                        <f:facet name="header">
+                            <h:outputText value="Tiene fases mineras *" />
+                        </f:facet>
+                        <h:panelGrid columns="1">
+                            <p:outputLabel
+                                    value="¿Su proyecto tiene diferentes fases mineras?"
+                                    for="tieneFases" styleClass="bold" />
+                            <p:selectOneRadio
+                                    value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.tieneFasesMineras}"
+                                    id="tieneFases" required="true">
+                                <f:selectItem itemLabel="Sí" itemValue="true" />
+                                <f:selectItem itemLabel="No" itemValue="false" />
+                                <p:ajax process="@this"
+                                        update=":frmFicha:explotacion :frmFicha:pnlBeneficio :frmFicha:pnlFaseMinera"
+                                        listener="#{fichaTecnicaControllerEia.accionTieneFasesMineras}" />
+                                <p:outputLabel value="Tipo de minería" />
+                            </p:selectOneRadio>
+                            <h:outputText />
+                        </h:panelGrid>
+                    </p:panelGrid>
+                </h:panelGroup>
+
+                <h:panelGroup id="pnlFaseMinera">
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                 columnClasses="w25, field_mrg w25"
+                                 rendered="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.tieneFasesMineras}">
+                        <f:facet name="header">
+                            <h:outputText value="Fases mineras *" />
+                        </f:facet>
+                        <h:panelGrid columns="2">
+                            <p:outputLabel value="Fases" for="faseMinera" styleClass="bold" />
+                            <p:selectManyCheckbox
+                                    value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.fasesMinerasSeleccionadas}"
+                                    required="true" id="faseMinera" layout="grid" columns="3"
+                                    styleClass="field_mrg w100">
+                                <f:selectItems
+                                        value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.listaFasesMineras}" />
+                                <p:ajax process="@this"
+                                        update=":frmFicha:explotacion :frmFicha:pnlBeneficio"
+                                        listener="#{fichaTecnicaControllerEia.accionFasesMineras}" />
+                            </p:selectManyCheckbox>
+                        </h:panelGrid>
+                    </p:panelGrid>
+                </h:panelGroup>
+
+                <h:panelGroup id="pnlBeneficio">
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                 columnClasses="w25, field_mrg w25"
+                                 rendered="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.verBeneficio}">
+                        <f:facet name="header">
+                            <h:outputText value="Beneficio" />
+                        </f:facet>
+                        <h:panelGrid columns="3" styleClass="w100"
+                                     columnClasses="w33, field_mrg w33, field_mrg w33">
+                            <p:outputLabel value="Actividades" for="actividad" />
+                            <p:outputLabel value="Recuperación metálica (m3)"
+                                           for="recuperacionMetalica" />
+                            <p:outputLabel value="Construcción de relaveras"
+                                           for="construccionRelaves" />
+                            <p:inputText
+                                    value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.actividadBeneficio}"
+                                    id="actividad" styleClass="w100" required="true" />
+                            <p:inputText
+                                    value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.recuperacionMetalica}"
+                                    maxlength="6" styleClass="w100" id="recuperacionMetalica"
+                                    required="true">
+                                <f:validateDoubleRange minimum="1" maximum="500000" />
+                                <pe:keyFilter mask="num" />
+                                <p:ajax process="volumen" immediate="true" />
+                            </p:inputText>
+                            <p:selectOneMenu id="construccionRelaves"
+                                             value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.tieneConstruccionRelaves}"
+                                             styleClass="w100" required="true">
+                                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                              itemValue="" />
+                                <f:selectItem itemLabel="Sí" itemValue="true" />
+                                <f:selectItem itemLabel="No" itemValue="false" />
+                            </p:selectOneMenu>
+
+                            <p:outputLabel value="Localización y disposición de relaves"
+                                           for="localizacionRelaves" />
+                            <p:outputLabel value="Capacidad" for="capacidad" />
+                            <p:outputLabel value="Estado" for="estadoBeneficio" />
+                            <p:inputText id="localizacionRelaves"
+                                         value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.localizacionRelaves}"
+                                         styleClass="w100" required="true" />
+                            <p:inputText
+                                    value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.capacidad}"
+                                    maxlength="6" styleClass="w100" id="capacidad" required="true">
+                                <f:validateDoubleRange minimum="1" maximum="500000" />
+                                <pe:keyFilter mask="num" />
+                                <p:ajax process="volumen" immediate="true" />
+                            </p:inputText>
+                            <p:selectOneMenu id="estadoBeneficio"
+                                             value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.estadoBeneficio}"
+                                             styleClass="w100" required="true">
+                                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                              itemValue="" />
+                                <f:selectItem itemLabel="Uso" itemValue="Uso" />
+                                <f:selectItem itemLabel="Lleno" itemValue="Lleno" />
+                            </p:selectOneMenu>
+                        </h:panelGrid>
+                    </p:panelGrid>
+                </h:panelGroup>
+
+                <h:panelGroup id="explotacion">
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                 columnClasses="w25, field_mrg w25"
+                                 rendered="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.verExplotacion}">
+                        <f:facet name="header">
+                            <h:outputText value="Explotación *" />
+                        </f:facet>
+                        <h:panelGrid columns="3" styleClass="w100"
+                                     columnClasses="w33, field_mrg w33, field_mrg w33">
+                            <p:outputLabel value="Método de explotación"
+                                           for="metodoExplotacion" />
+                            <p:outputLabel value="Número de frentes de explotación"
+                                           for="numeroFrentes" />
+                            <h:outputText />
+
+                            <p:selectOneMenu id="metodoExplotacion"
+                                             value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.metodoDeExplotacion}"
+                                             styleClass="w100" required="true">
+                                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                              itemValue="" />
+                                <f:selectItem itemLabel="Aluvial" itemValue="Aluvial" />
+                                <f:selectItem itemLabel="Cielo abierto"
+                                              itemValue="Cielo abierto" />
+                                <f:selectItem itemLabel="Subterráneo" itemValue="Subterráneo" />
+                            </p:selectOneMenu>
+                            <p:inputText
+                                    value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.numeroDeFrentesExplotacion}"
+                                    maxlength="9" styleClass="w100" id="numeroFrentes"
+                                    required="true">
+                                <f:validateDoubleRange minimum="1" maximum="5000000" />
+                                <pe:keyFilter mask="num" />
+                            </p:inputText>
+                            <h:outputText />
+                        </h:panelGrid>
+
+                        <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                            <f:facet name="header">
+                                <h:panelGrid columns="3" styleClass="w100" columnClasses="w100">
+                                    <h:outputText value="Coordenadas *" />
+                                    <mae:panelGridHeaderHelp conector="planoHelp"
+                                                             help="#{helps['fichaTecnica.Mineria.Explotacion']}"
+                                                             width="500px" value="" />
+                                    <p:commandButton value="Adicionar"
+                                                     oncomplete="PF('adicionarCoordenada').show()"
+                                                     styleClass="button-small-text toRight field_mrg"
+                                                     icon="ui-icon-plusthick" process="@this"
+                                                     update=":formCoordenada:adicionarCoordenada"
+                                                     actionListener="#{fichaTecnicaControllerEia.limpiarCoordenada()}" />
+                                </h:panelGrid>
+
+                            </f:facet>
+
+                            <p:dataTable id="tblCoordenadas" rowIndexVar="index"
+                                         value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.listaCoordenadasGenerales}"
+                                         var="coordenadas" emptyMessage="#{labels['common.table.empty']}">
+                                <p:column styleClass="w20px alCenter">
+                                    <h:outputText value="#{index + 1}" />
+                                </p:column>
+                                <p:column headerText="Coordenada X">
+                                    <h:outputText value="#{coordenadas.x}" />
+                                </p:column>
+                                <p:column headerText="Coordenada Y">
+                                    <h:outputText value="#{coordenadas.y}" />
+                                </p:column>
+                                <p:column headerText="Descripción">
+                                    <h:outputText value="#{coordenadas.descripcion}" />
+                                </p:column>
+                                <p:column styleClass="w40px alCenter">
+                                    <p:commandButton update=":formCoordenada:adicionarCoordenada"
+                                                     styleClass="button-small primary" process="@this"
+                                                     icon="ui-icon-pencil"
+                                                     actionListener="#{fichaTecnicaControllerEia.seleccionarCoordenada(coordenadas)}"
+                                                     oncomplete="PF('adicionarCoordenada').show()" />
+                                    <p:commandButton update=":frmFicha:tblCoordenadas"
+                                                     styleClass="button-small primary" process="@this"
+                                                     icon="ui-icon-circle-close"
+                                                     actionListener="#{fichaTecnicaControllerEia.eliminarCoordenada(coordenadas)}">
+                                        <p:confirm header="Confirmación"
+                                                   message="¿Está seguro que desea eliminar la coordenada?"
+                                                   icon="ui-icon-alert" />
+                                    </p:commandButton>
+                                </p:column>
+                            </p:dataTable>
+                        </p:panelGrid>
+
+                        <h:panelGrid columns="3" styleClass="w100"
+                                     columnClasses="w33, field_mrg w33, field_mrg w33">
+                            <p:outputLabel value="Volumen de explotación" for="volumen" />
+                            <p:outputLabel value="Construcción de escombreras"
+                                           for="construccion" />
+                            <h:outputText />
+
+                            <h:panelGrid columns="2" styleClass="w100"
+                                         columnClasses="w50, field_mrg">
+                                <p:inputText
+                                        value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.volumenDeExplotacion}"
+                                        maxlength="6" styleClass="w100" id="volumen" required="true">
+                                    <f:validateDoubleRange minimum="1" maximum="500000" />
+                                    <pe:keyFilter mask="num" />
+                                    <p:ajax process="volumen" immediate="true" />
+                                </p:inputText>
+                                <p:selectOneMenu id="unidadMedida"
+                                                 value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.unidadMedidaVolumen}"
+                                                 styleClass="w100" required="true">
+                                    <f:selectItem itemLabel="Ton/día" itemValue="Ton/día" />
+                                    <f:selectItem itemLabel="m3" itemValue="m3" />
+                                </p:selectOneMenu>
+                            </h:panelGrid>
+                            <p:selectOneMenu id="construccion"
+                                             value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.tieneConstruccionEscombreras}"
+                                             styleClass="w100" required="true">
+                                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                              itemValue="" />
+                                <f:selectItem itemLabel="Sí" itemValue="true" />
+                                <f:selectItem itemLabel="No" itemValue="false" />
+                            </p:selectOneMenu>
+                            <h:outputText />
+
+
+                            <p:outputLabel value="Localización de la escombrera"
+                                           for="localizacionEscombrera" />
+                            <p:outputLabel value="Capacidad" for="capacidadEscombrera" />
+                            <p:outputLabel value="Estado de la escombrera"
+                                           for="estadoEscombrera" />
+
+                            <p:inputText id="localizacionEscombrera"
+                                         value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.localizacionEscombreras}"
+                                         styleClass="w100" required="true" />
+                            <p:inputText
+                                    value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.capacidadEscombrera}"
+                                    maxlength="6" styleClass="w100" id="capacidadEscombrera"
+                                    required="true">
+                                <f:validateDoubleRange minimum="1" maximum="500000" />
+                                <pe:keyFilter mask="num" />
+                            </p:inputText>
+                            <p:selectOneMenu id="estadoEscombrera"
+                                             value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.estadoExplotacion}"
+                                             styleClass="w100" required="true">
+                                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                              itemValue="" />
+                                <f:selectItem itemLabel="Uso" itemValue="Uso" />
+                                <f:selectItem itemLabel="Lleno" itemValue="Lleno" />
+                            </p:selectOneMenu>
+                        </h:panelGrid>
+                    </p:panelGrid>
+                </h:panelGroup>
+
+                <br />
+
+                <div class="buttons main">
+                    <p:commandButton value="Atrás" immediate="true" process="@this"
+                                     action="/prevencion/licenciamiento-ambiental/eia/resumenEjecutivo/resumenEjecutivo.jsf?faces-redirect=true"
+                                     icon="ui-icon-arrowthick-1-w" />
+
+                    <p:commandButton value="Guardar" icon="ui-icon-check"
+                                     action="#{fichaTecnicaControllerEia.guardar()}" update="@form" />
+
+                    <p:commandButton value="Siguiente" immediate="true" process="@this"
+                                     action="/prevencion/licenciamiento-ambiental/eia/adjuntos/adjuntos.jsf?id=1&amp;faces-redirect=true"
+                                     icon="ui-icon-arrowthick-1-e" />
+                </div>
+            </p:panel>
+        </h:form>
+
+        <h:form id="formConsultor">
+            <p:dialog header="Seleccionar consultor calificado"
+                      id="adicionarConsultorCalificado"
+                      widgetVar="adicionarConsultorCalificado" modal="true"
+                      resizable="false" width="600">
+                <h:panelGroup id="datosConsultorCalificado">
+                    <h:panelGrid columns="1" columnClasses="w100">
+                        <p:dataTable id="tblConsultores" paginator="true"
+                                     paginatorPosition="bottom" rows="10" var="consultorCalificado"
+                                     value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.listaConsultoresCalificados}"
+                                     emptyMessage="#{labels['common.table.empty']}">
+                            <p:column headerText="Consultor"
+                                      filterBy="#{consultorCalificado.nombre}"
+                                      filterMatchMode="contains"
+                                      sortBy="#{consultorCalificado.nombre}">
+                                <h:outputText value="#{consultorCalificado.nombre}" />
+                            </p:column>
+                            <p:column styleClass="alCenter w20px">
+                                <p:commandButton styleClass="primary button-small"
+                                                 icon="ui-icon-check"
+                                                 update=":formConsultor:adicionarConsultorCalificado :frmFicha:pnlConsultor"
+                                                 process="@this :formConsultor:adicionarConsultorCalificado"
+                                                 actionListener="#{fichaTecnicaControllerEia.seleccionarConsultor(consultorCalificado)}"
+                                                 oncomplete="handleDatosConsultor(xhr, status, args)" />
+                            </p:column>
+                        </p:dataTable>
+                    </h:panelGrid>
+                </h:panelGroup>
+                <script type="text/javascript">
+                    function handleDatosConsultor(xhr, status, args) {
+                        if (args.validationFailed || !args.consultorCalificado) {
+                            PF('adicionarConsultorCalificado').show();
+                        }
+                        else {
+                            PF('adicionarConsultorCalificado').hide();
+                        }
+                    }
+                </script>
+            </p:dialog>
+        </h:form>
+
+        <h:form id="formEquipoConsultor">
+            <p:dialog header="Miembro del equipo consultor"
+                      id="adicionarConsultorNoCalificado"
+                      widgetVar="adicionarConsultorNoCalificado" modal="true" width="500"
+                      resizable="false" draggable="false">
+                <h:panelGrid columns="2" id="consultorNoCalificadoContainer"
+                             styleClass="w100" columnClasses="w50, field_mrg w50">
+                    <p:outputLabel value="Nombre" for="nombre" styleClass="bold" />
+                    <p:outputLabel value="Formación profesional" for="formacion"
+                                   styleClass="bold" />
+                    <p:inputText id="nombre"
+                                 value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.consultorNoCalificado.nombre}"
+                                 maxlength="150" required="true" />
+                    <p:inputText id="formacion"
+                                 value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.consultorNoCalificado.formacionProfesional}"
+                                 maxlength="150" required="true" />
+                    <p:outputLabel value="Componente de participación" for="componente"
+                                   styleClass="bold" />
+                    <h:outputText />
+                    <h:panelGrid columns="2" styleClass="w100" columnClasses="w100">
+                        <p:selectOneMenu id="componente" required="true" styleClass="w100"
+                                         value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.consultorNoCalificado.componentePaticipacion}"
+                                         converter="selectItemConverter">
+                            <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                          itemValue="" noSelectionOption="true"/>
+                            <f:selectItems
+                                    value="#{fichaTecnicaControllerEia.listaCatalogoComponenteParticipacion}"
+                                    var="ccp" itemLabel="#{ccp.nombre}"
+                                    itemValue="#{ccp}"/>
+                        </p:selectOneMenu>
+
+                        <mae:btnHelp conector="componenteHelp"
+                                     help="#{helps['eia.fichatecnica.componenteparticipacion']}" />
+                    </h:panelGrid>
+                </h:panelGrid>
+                <p:separator />
+
+                <div class="buttons">
+                    <p:commandButton
+                            actionListener="#{fichaTecnicaControllerEia.agregarConsultorNoCalificado()}"
+                            process="@this :formEquipoConsultor:adicionarConsultorNoCalificado"
+                            value="Aceptar"
+                            update=":frmFicha:tblGrupoConsultor consultorNoCalificadoContainer"
+                            oncomplete="showModalAddConsultorNoCalificado(xhr, status, args)" />
+                    <p:commandButton value="Cancelar" type="button"
+                                     onclick="PF('adicionarConsultorNoCalificado').hide()"
+                                     styleClass="secondary" />
+                </div>
+
+                <script type="text/javascript">
+                    function showModalAddConsultorNoCalificado(xhr, status, args) {
+                        if (args.addConsultorNoCalificado)
+                            PF('adicionarConsultorNoCalificado').hide();
+                        else
+                            PF('adicionarConsultorNoCalificado').show();
+                    }
+                </script>
+            </p:dialog>
+        </h:form>
+
+        <h:form id="formCoordenada">
+            <p:dialog header="Coordenas" id="adicionarCoordenada"
+                      widgetVar="adicionarCoordenada" modal="true" width="500"
+                      resizable="false" draggable="false">
+                <h:panelGrid columns="2" id="adicionarCoordenadaContainer"
+                             styleClass="w100" columnClasses="w50, field_mrg w50">
+                    <p:outputLabel value="Coordenada X" for="coordenadaX"
+                                   styleClass="bold" />
+                    <p:outputLabel value="Coordenada Y" for="coordenadaY"
+                                   styleClass="bold" />
+
+                    <p:inputText id="coordenadaX"
+                                 value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.coordenadaGeneral.x}"
+                                 maxlength="15" required="true">
+                        <pe:keyFilter mask="num" />
+                    </p:inputText>
+
+                    <p:inputText id="coordenadaY"
+                                 value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.coordenadaGeneral.y}"
+                                 maxlength="15" required="true">
+                        <pe:keyFilter mask="num" />
+                    </p:inputText>
+
+                    <p:outputLabel value="Descripción" for="descripcion"
+                                   styleClass="bold" />
+                    <h:outputText />
+                    <p:inputText id="descripcion"
+                                 value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.coordenadaGeneral.descripcion}"
+                                 maxlength="150" required="true" />
+                    <h:outputText />
+                </h:panelGrid>
+                <p:separator />
+
+                <div class="buttons">
+
+
+                    <p:commandButton
+                            actionListener="#{fichaTecnicaControllerEia.agregarCoordenada()}"
+                            process="@this :formCoordenada:adicionarCoordenada"
+                            value="Aceptar"
+                            update=":frmFicha:tblCoordenadas adicionarCoordenadaContainer"
+                            oncomplete="showModalAddCoordenadas(xhr, status, args)" />
+                    <p:commandButton value="Cancelar" type="button"
+                                     onclick="PF('adicionarCoordenada').hide()" styleClass="secondary" />
+
+                </div>
+
+                <script type="text/javascript">
+                    function showModalAddCoordenadas(xhr, status, args) {
+                        if (args.addCordenadas)
+                            PF('adicionarCoordenada').hide();
+                        else
+                            PF('adicionarCoordenada').show();
+                    }
+                </script>
+            </p:dialog>
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>

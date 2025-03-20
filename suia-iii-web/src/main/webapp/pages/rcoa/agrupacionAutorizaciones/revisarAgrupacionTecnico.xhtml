@@ -1,0 +1,327 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="content">
+
+		<script type="text/javascript">
+		 function removeDisabled() {
+		        $('.ui-state-disabled').removeClass('ui-state-disabled');
+		    }
+	</script>
+
+		<style type="text/css">
+tr[aria-selected="true"] .ui-radiobutton-box {
+	border-color: #FFFFFF !important;
+}
+
+tr[aria-selected="true"] .ui-icon {
+	background-image:
+		url("/suia-iii/javax.faces.resource/images/ui-icons_ffffff_256x240.png.jsf?ln=primefaces-suia");
+}
+
+.cssTblProyectos .ui-datatable-header {
+	text-align: left !important;
+	padding-bottom: 10px !important;
+}
+
+.cssRowPrincipal td {
+	background-color: #00B5B5 !important;
+}
+
+.ui-state-error {
+	color: #cd0a0a !important;
+}
+</style>
+
+
+		<h:form id="form">
+			<h:panelGroup id="pnlDatos">
+
+				<h:panelGroup
+					rendered="#{revisarAgrupacionTecnicoController.panelMostrar eq 1}">
+					<p:dataTable id="tblAgrupacion" widgetVar="tblAgrupacion"
+						value="#{revisarAgrupacionTecnicoController.proyectos}"
+						var="proyecto" rowKey="#{proyecto}" styleClass="cssTblProyectos"
+						selection="#{revisarAgrupacionTecnicoController.proyectoSeleccionado}"
+						rows="10" paginator="true" paginatorAlwaysVisible="false"
+						paginatorPosition="bottom"
+						currentPageReportTemplate="{currentPage} de {totalPages}"
+						emptyMessage="#{labels['common.table.empty']}"
+						rowStyleClass="#{proyecto.codigo eq revisarAgrupacionTecnicoController.proyectoSeleccionado.codigo ? 'cssRowPrincipal' : null}">
+						<f:facet name="header">
+							<h:outputText
+								value="Listado de Autorizaciones Administrativas Ambientales" />
+						</f:facet>
+
+						<p:column headerText="Código" styleClass="alCenter w15">
+							<h:outputText value="#{proyecto.codigo}" />
+						</p:column>
+						<p:column headerText="Nombre" styleClass="w25">
+							<h:outputText value="#{proyecto.nombre}" />
+						</p:column>
+						<p:column headerText="Nombres Operador" styleClass="w25">
+							<h:outputText value="#{proyecto.nombreProponente}" />
+						</p:column>
+						<p:column headerText="Estado Proyecto" styleClass="alCenter w15">
+							<h:outputText value="#{proyecto.estado}" />
+						</p:column>
+						<p:column headerText="Sector" styleClass="alCenter w15">
+							<h:outputText value="#{proyecto.sector}" />
+						</p:column>
+						<p:column headerText="Selección" styleClass="alCenter w10">
+							<p:selectBooleanCheckbox
+								value="#{proyecto.seleccionadoSecundario}" disabled="true">
+							</p:selectBooleanCheckbox>
+						</p:column>
+					</p:dataTable>
+
+					<br />
+					<h:panelGroup id="pnlObservacionOperador">
+						<observaciones:tablaObservacionesAgrupacion
+							idComponent="obsAgrupacion"
+							seccion="Agrupacion autorizaciones ambientales"
+							idActualizar=":form:pnlDatos :form:pnlButtons" aparace="true"
+							mostrarSiVacio="true"
+							idClase="#{revisarAgrupacionTecnicoController.agrupacionPrincipal.id}"
+							nombreClase="agrupacionAutorizacionesAmbientales"
+							soloLectura="true" />
+					</h:panelGroup>
+
+					<br />
+					<p:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25, null">
+						<p:outputLabel value="Documento de respaldo *"
+							style="color: white" />
+						<p:outputPanel id="pnlDocRespaldo">
+							<p:commandButton icon="ui-icon-arrowthick-1-s"
+								styleClass="button-small primary toLeft" title="Ver"
+								ajax="false" immediate="true"
+								rendered="#{revisarAgrupacionTecnicoController.documentoRespaldo.nombre ne null}">
+								<p:fileDownload
+									value="#{revisarAgrupacionTecnicoController.descargar()}" />
+							</p:commandButton>
+							<h:outputText
+								value="#{revisarAgrupacionTecnicoController.documentoRespaldo.nombre}"
+								rendered="#{revisarAgrupacionTecnicoController.documentoRespaldo.nombre ne null}" />
+						</p:outputPanel>
+
+						<p:outputLabel value="¿Desea realizar correcciones?" for="legal2"
+							style="color: white" />
+						<p:selectOneRadio id="legal2"
+							value="#{revisarAgrupacionTecnicoController.realizarCorrecciones}"
+							required="true">
+							<f:selectItem itemLabel="SI" itemValue="true" />
+							<f:selectItem itemLabel="NO" itemValue="false" />
+							<p:ajax process="@this"
+								update="pnlAgrupacionNoCorrecta pnlButtons" />
+						</p:selectOneRadio>
+					</p:panelGrid>
+					<h:panelGroup id="pnlAgrupacionNoCorrecta">
+						<p:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="header w25, null"
+							rendered="#{revisarAgrupacionTecnicoController.realizarCorrecciones ne null and !revisarAgrupacionTecnicoController.realizarCorrecciones}">
+							<p:outputLabel value="Comentario *" style="color: white" />
+							<p:inputTextarea id="txtComentario" maxlength="6000" rows="5"
+								required="true" style="resize: none;" autoResize="false"
+								value="#{revisarAgrupacionTecnicoController.comentarioNoCorrecciones}" />
+
+						</p:panelGrid>
+					</h:panelGroup>
+				</h:panelGroup>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					id="pnlAAAPrincipal"
+					rendered="#{revisarAgrupacionTecnicoController.panelMostrar eq 2}">
+					<p:fieldset
+						legend="Listado de Autorizaciones Administrativas Ambientales"
+						toggleable="true" toggleSpeed="500" collapsed="false">
+						<p:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="header w25, null" id="pnlFiltros">
+							<p:outputLabel value="Sector" style="color: white" />
+							<h:panelGroup id="pnlFiltrosSector">
+								<p:selectOneMenu styleClass="w50"
+									value="#{revisarAgrupacionTecnicoController.tipoSector}"
+									converter="selectItemConverter">
+									<f:selectItem itemLabel="#{labels['common.item.choose']}"
+										itemValue="" noSelectionOption="true" />
+									<f:selectItems
+										value="#{revisarAgrupacionTecnicoController.listaTipoSector}"
+										var="item" itemLabel="#{item.nombre}" itemValue="#{item}" />
+									<p:ajax process="@this" update="pnlFiltrosSector" />
+								</p:selectOneMenu>
+
+								<p:panelGrid columns="4" styleClass="panel_data w100"
+									style="margin-top: 10px;"
+									columnClasses="header w25, w25, header w25, w25"
+									rendered="#{revisarAgrupacionTecnicoController.tipoSector ne null and revisarAgrupacionTecnicoController.tipoSector.id eq 1}">
+									<p:outputLabel value="Área" style="color: white" />
+									<p:inputText
+										value="#{revisarAgrupacionTecnicoController.filtroArea}"
+										styleClass="w50"
+										onchange="javascript:this.value = this.value.toUpperCase();" />
+
+									<p:outputLabel value="Bloque" style="color: white" />
+									<p:inputText
+										value="#{revisarAgrupacionTecnicoController.filtroBloque}"
+										styleClass="w50"
+										onchange="javascript:this.value = this.value.toUpperCase();" />
+
+								</p:panelGrid>
+
+								<p:panelGrid columns="2" styleClass="panel_data w50"
+									style="margin-top: 10px;"
+									columnClasses="header w25, w25, header w25, w25"
+									rendered="#{revisarAgrupacionTecnicoController.tipoSector ne null and revisarAgrupacionTecnicoController.tipoSector.id eq 2}">
+									<p:outputLabel value="Concesión" style="color: white" />
+									<p:inputText
+										value="#{revisarAgrupacionTecnicoController.filtroConcesion}"
+										styleClass="w50"
+										onchange="javascript:this.value = this.value.toUpperCase();" />
+								</p:panelGrid>
+
+							</h:panelGroup>
+
+							<p:outputLabel value="Nombre Proyecto" style="color: white" />
+							<p:inputText
+								value="#{revisarAgrupacionTecnicoController.filtroProyecto}"
+								styleClass="w100"
+								onchange="javascript:this.value = this.value.toUpperCase();" />
+
+							<p:outputLabel value="Operador" style="color: white" />
+							<p:inputText
+								value="#{revisarAgrupacionTecnicoController.filtroOperador}"
+								styleClass="w100"
+								onchange="javascript:this.value = this.value.toUpperCase();" />
+
+						</p:panelGrid>
+
+						<div class="buttons main">
+							<p:commandButton value="Buscar" style="height: 28px !important;"
+								action="#{revisarAgrupacionTecnicoController.buscarAutorizaciones()}"
+								icon="ui-icon-search" process="@this form" update="tblProyectos" />
+						</div>
+					</p:fieldset>
+
+					<br />
+					<p:dataTable id="tblProyectos" widgetVar="tblProyectos"
+						value="#{revisarAgrupacionTecnicoController.proyectos}"
+						var="proyecto" rowKey="#{proyecto}" styleClass="cssTblProyectos"
+						selection="#{revisarAgrupacionTecnicoController.proyectoSeleccionado}"
+						rows="10" paginator="true" paginatorAlwaysVisible="false"
+						paginatorPosition="bottom"
+						currentPageReportTemplate="{currentPage} de {totalPages}"
+						emptyMessage="#{labels['common.table.empty']}">
+						<f:facet name="header">
+							<h:outputText
+								value="Selección de la Autorización Administrativa Ambiental Principal" />
+						</f:facet>
+
+						<p:column headerText="Código" styleClass="alCenter w15">
+							<h:outputText value="#{proyecto.codigo}" />
+						</p:column>
+						<p:column headerText="Nombre" styleClass="w25">
+							<h:outputText value="#{proyecto.nombre}" />
+						</p:column>
+						<p:column headerText="Nombres Operador" styleClass="w25">
+							<h:outputText value="#{proyecto.nombreProponente}" />
+						</p:column>
+						<p:column headerText="Estado Proyecto" styleClass="alCenter w15">
+							<h:outputText value="#{proyecto.estado}" />
+						</p:column>
+						<p:column headerText="Sector" styleClass="alCenter w15">
+							<h:outputText value="#{proyecto.sector}" />
+						</p:column>
+						<p:column headerText="Selección" selectionMode="single"
+							styleClass="alCenter w10" />
+					</p:dataTable>
+
+				</p:panelGrid>
+
+				<br />
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					id="pnlAAASecundarias"
+					rendered="#{revisarAgrupacionTecnicoController.panelMostrar eq 3}">
+					<p:dataTable id="tblProyectosSecundarios" widgetVar="tblProyectos"
+						value="#{revisarAgrupacionTecnicoController.autorizacionesSecundarias}"
+						var="proyecto" rowKey="#{proyecto}" styleClass="cssTblProyectos"
+						selection="#{revisarAgrupacionTecnicoController.listaSecundariasSeleccionadas}"
+						rows="10" paginator="true" paginatorAlwaysVisible="false"
+						currentPageReportTemplate="{currentPage} de {totalPages}"
+						rowsPerPageTemplate="5,10,15" frozenRows="1"
+						rowStyleClass="#{proyecto.codigo eq revisarAgrupacionTecnicoController.proyectoSeleccionado.codigo ? 'cssRowPrincipal' : null}"
+						emptyMessage="#{labels['common.table.empty']}">
+						<f:facet name="header">
+							<h:outputText
+								value="Selección de las Autorizaciones Administrativas Ambientales Secundarias" />
+						</f:facet>
+
+						<p:column headerText="Código" styleClass="alCenter w15">
+							<h:outputText value="#{proyecto.codigo}" />
+						</p:column>
+						<p:column headerText="Nombre" styleClass="w25">
+							<h:outputText value="#{proyecto.nombre}" />
+						</p:column>
+						<p:column headerText="Nombres Operador" styleClass="w25">
+							<h:outputText value="#{proyecto.nombreProponente}" />
+						</p:column>
+						<p:column headerText="Estado Proyecto" styleClass="alCenter w15">
+							<h:outputText value="#{proyecto.estado}" />
+						</p:column>
+						<p:column headerText="Sector" styleClass="alCenter w15">
+							<h:outputText value="#{proyecto.sector}" />
+						</p:column>
+						<p:column headerText="Selección" styleClass="alCenter w10">
+							<p:selectBooleanCheckbox
+								value="#{proyecto.seleccionadoSecundario}"
+								disabled="#{proyecto.codigo eq revisarAgrupacionTecnicoController.proyectoSeleccionado.codigo}">
+							</p:selectBooleanCheckbox>
+						</p:column>
+					</p:dataTable>
+
+				</p:panelGrid>
+			</h:panelGroup>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Siguiente" process="@this" id="btnSiguientePrincipal"
+						action="#{revisarAgrupacionTecnicoController.siguienteObservaciones()}"
+						update="pnlDatos pnlButtons" icon="ui-icon-arrowthick-1-e"
+						rendered="#{revisarAgrupacionTecnicoController.panelMostrar eq 1 and (revisarAgrupacionTecnicoController.realizarCorrecciones eq null or revisarAgrupacionTecnicoController.realizarCorrecciones)}"
+						disabled="#{revisarAgrupacionTecnicoController.realizarCorrecciones eq null or !revisarAgrupacionTecnicoController.realizarCorrecciones}"
+						oncomplete="removeDisabled()" />
+					<p:commandButton value="Siguiente" process="@this" id="btnSiguienteSecundario"
+						action="#{revisarAgrupacionTecnicoController.siguiente()}"
+						update="pnlDatos pnlButtons" icon="ui-icon-arrowthick-1-e"
+						rendered="#{revisarAgrupacionTecnicoController.panelMostrar eq 2}"
+						disabled="#{revisarAgrupacionTecnicoController.realizarCorrecciones eq null or !revisarAgrupacionTecnicoController.realizarCorrecciones}"
+						oncomplete="removeDisabled()" />
+					<p:commandButton value="Enviar" process="form"
+						action="#{revisarAgrupacionTecnicoController.finalizarAgrupacion()}"
+						rendered="#{revisarAgrupacionTecnicoController.panelMostrar eq 1 and revisarAgrupacionTecnicoController.realizarCorrecciones ne null and !revisarAgrupacionTecnicoController.realizarCorrecciones}"
+						update="pnlDatos pnlButtons" icon="ui-icon-check"
+						oncomplete="removeDisabled()">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+					<p:commandButton value="Enviar" process="form"
+						action="#{revisarAgrupacionTecnicoController.enviarRevision()}"
+						rendered="#{revisarAgrupacionTecnicoController.panelMostrar eq 3}"
+						update="pnlDatos pnlButtons" icon="ui-icon-check"
+						oncomplete="removeDisabled()">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+</ui:composition>

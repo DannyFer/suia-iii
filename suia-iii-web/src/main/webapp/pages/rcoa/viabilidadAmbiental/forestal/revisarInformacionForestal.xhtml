@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="content">
+		<f:event type="preRenderView"
+			listener="#{revisarInformacionForestalController.validarTareaBpm()}" />
+
+
+		<h:form id="form">
+
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Documentos del Proyecto" />
+				</f:facet>
+
+				<p:panelGrid columns="2" styleClass="panel_data w50"
+					columnClasses="header w85, null">
+					<h:outputText value="#{proyectosBean.proyecto.codigo}"
+						rendered="#{!empty proyectosbean.proyecto.codigo}" />
+
+					<p:outputLabel value="Oficio del #{labels['roca.lc.certificado.categorizacion']}"
+						style="color: white" />
+					<p:commandButton icon="ui-icon-search"
+						styleClass="button-small primary toLeft" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{revisarInformacionForestalController.descargar(1)}" />
+					</p:commandButton>
+					<p:outputLabel value="Mapa del #{labels['roca.lc.certificado.categorizacion']}"
+						style="color: white" />
+					<p:commandButton icon="ui-icon-search"
+						styleClass="button-small primary toLeft" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{revisarInformacionForestalController.descargar(2)}" />
+					</p:commandButton>
+					<p:outputLabel value="Coordenadas del proyecto"
+						style="color: white" />
+					<p:commandButton icon="ui-icon-search"
+						styleClass="button-small primary toLeft" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{revisarInformacionForestalController.descargar(3)}" />
+					</p:commandButton>
+					<p:outputLabel for="docRespuestas"
+						value="Información de Viabilidad Ambiental" style="color: white" />
+					<p:commandButton id="docRespuestas" icon="ui-icon-arrowthick-1-s"
+						styleClass="button-small primary toLeft" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{revisarInformacionForestalController.descargar(4)}" />
+					</p:commandButton>
+				</p:panelGrid>
+			</p:panelGrid>
+			<br />
+			<h:outputText
+				value="Para continuar por favor descargue la información proporcionada por el operador"
+				styleClass="encabezado text-red" />
+			<br />
+			<br />
+			<p:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25, null">
+				<p:outputLabel value="¿Existe conflicto legal?"
+					for="existeConflicto" style="color: white" />
+				<p:selectOneRadio
+					value="#{revisarInformacionForestalController.viabilidadProyecto.existeConflictoLegal}"
+					required="true" id="existeConflicto">
+					<f:selectItem itemLabel="Sí" itemValue="true" />
+					<f:selectItem itemLabel="No" itemValue="false" />
+					<p:ajax event="change" process="@this" update="pnlConflictos pnlInspeccion"
+						listener="#{revisarInformacionForestalController.actualizarExisteConflicto()}" />
+				</p:selectOneRadio>
+			</p:panelGrid>
+			<h:panelGroup id="pnlConflictos">
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null"
+					rendered="#{revisarInformacionForestalController.viabilidadProyecto.existeConflictoLegal}">
+					<p:outputLabel for="txtDetalleConflicto"
+						value="Detalle del problema legal identificado"
+						style="color: white" />
+					<p:inputTextarea id="txtDetalleConflicto" maxlength="10000" rows="3"
+						required="true" style="resize: none;" autoResize="false"
+						value="#{revisarInformacionForestalController.viabilidadProyecto.detalleConflictoLegal}" />
+
+					<p:outputLabel
+						value="Adjuntar documentos de análisis para jurídico *"
+						style="color: white" />
+					<p:outputPanel id="pnlDocRespaldo">
+						<p:fileUpload id="docRespaldo" multiple="false"
+							fileUploadListener="#{revisarInformacionForestalController.uploadFileJuridico}"
+							sizeLimit="10485760" allowTypes="/(\.|\/)(pdf)$/"
+							label="Seleccionar (pdf 10Mb)" uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Debe adjuntar un archivo no mayor de 10 Mb."
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" required="true" update="pnlDocRespaldo" />
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="button-small primary toLeft" title="Ver" ajax="false"
+							immediate="true"
+							rendered="#{revisarInformacionForestalController.documentoJuridico.nombre ne null}">
+							<p:fileDownload
+								value="#{revisarInformacionForestalController.descargarJuridico(revisarInformacionForestalController.documentoJuridico)}" />
+						</p:commandButton>
+						<h:outputText
+							value="#{revisarInformacionForestalController.documentoJuridico.nombre}"
+							rendered="#{revisarInformacionForestalController.documentoJuridico.nombre ne null}" />
+					</p:outputPanel>
+				</p:panelGrid>
+			</h:panelGroup>
+
+			<br />
+			<br />
+			<h:panelGroup id="pnlInspeccion">
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null"
+					rendered="#{revisarInformacionForestalController.viabilidadProyecto.existeConflictoLegal ne null and !revisarInformacionForestalController.viabilidadProyecto.existeConflictoLegal}">
+					<p:outputLabel value="¿Requiere inspección?"
+						for="requiereInspeccion" style="color: white" />
+					<p:selectOneRadio
+						value="#{revisarInformacionForestalController.viabilidadProyecto.requiereInspeccionTecnica}"
+						required="true" id="requiereInspeccion">
+						<f:selectItem itemLabel="Sí" itemValue="true" />
+						<f:selectItem itemLabel="No" itemValue="false" />
+						<p:ajax event="change" process="@this" />
+					</p:selectOneRadio>
+				</p:panelGrid>
+			</h:panelGroup>
+
+			<h:inputHidden
+				validator="#{revisarInformacionForestalController.validateDatosRevision}" />
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Guardar" process="@this form"
+						actionListener="#{revisarInformacionForestalController.guardarRevision()}"
+						update="pnlButtons" icon="ui-icon-disk" />
+					<p:commandButton value="Finalizar" process="@this"
+						disabled="#{!revisarInformacionForestalController.datosGuardados}"
+						action="#{revisarInformacionForestalController.finalizar()}" />
+				</div>
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+</ui:composition>

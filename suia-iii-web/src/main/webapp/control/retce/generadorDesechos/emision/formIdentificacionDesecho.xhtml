@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<h:form id="frmDialogIdentificacion">
+	<p:dialog header="Identificación desecho"
+		id="adicionarIdentificacionDesecho"
+		widgetVar="adicionarIdentificacionDesecho" modal="true"
+		resizable="false" width="800">
+		<h:panelGroup id="datosIdentificacionDesecho">
+
+			<h:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25, null" rowClasses="null, alt">
+				<p:outputLabel value="Desecho" for="desechoPeligroso"
+					styleClass="ui-label-form" />
+				<p:selectOneMenu id="desechoPeligroso"
+					disabled="#{identificacionDesechosBean.editar}"
+					value="#{identificacionDesechosBean.desechoSeleccionado}"
+					styleClass="w100" converter="selectItemConverter" required="true">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="" noSelectionOption="true" />
+					<f:selectItems
+						value="#{identificacionDesechosBean.getDesechosPendientes()}" />
+					<p:ajax process="@this"
+						listener="#{identificacionDesechosBean.limpiarInfoDesecho()}"
+						update="datosDesechoPeligrosoContainer datosDesechoPeligrosoEspecialContainer" />
+				</p:selectOneMenu>
+
+			</h:panelGrid>
+
+			<h:panelGrid columns="2" styleClass="panel_data w100"
+				id="datosDesechoPeligrosoContainer" columnClasses="header w25, null"
+				rowClasses="null, alt">
+				<p:outputLabel for="unidad" value="Unidad"
+					styleClass="ui-label-form" />
+				<p:selectOneMenu
+					value="#{identificacionDesechosBean.identificacionDesecho.tipoUnidad}"
+					id="unidad" styleClass="w100" required="true"
+					converter="selectItemConverter">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="" noSelectionOption="true" />
+					<f:selectItems itemLabel="#{tipo.descripcion}" itemValue="#{tipo}"
+						var="tipo" value="#{identificacionDesechosBean.listaTipoUnidad}" />
+					<p:ajax process="@this" />
+				</p:selectOneMenu>
+
+				<p:outputLabel for="cantidadAnterior"
+					value="Cantidad del año anterior (si lo tuviera)"
+					styleClass="ui-label-form" />
+				<h:panelGroup>
+					<pe:inputNumber id="cantidadAnterior" thousandSeparator=""
+						maxValue="9999999999.99" minValue="0"
+						value="#{identificacionDesechosBean.identificacionDesecho.cantidadAnioAnterior}">
+						<f:validateDoubleRange minimum="0.0" />
+					</pe:inputNumber>
+					<p:tooltip for="cantidadAnterior" escape="false" trackMouse="true"
+						value="Cantidad de desechos que no pudo ser gestionada hasta el 31 de diciembre del año anterior al de reporte" />
+				</h:panelGroup>
+
+				<p:outputLabel for="cantidadAnual"
+					value="Cantidad de generación anual" styleClass="ui-label-form" />
+				<h:panelGroup>
+					<pe:inputNumber required="true" id="cantidadAnual"
+						thousandSeparator="" maxValue="9999999999.99" minValue="0"
+						value="#{identificacionDesechosBean.identificacionDesecho.cantidadGeneracionAnual}">
+						<f:validateDoubleRange minimum="0.0" />
+					</pe:inputNumber>
+					<p:tooltip for="cantidadAnual" escape="false" trackMouse="true"
+						value="Cantidad de desechos generada desde el 01 de enero hasta el 31 de diciembre del presente año de reporte" />
+				</h:panelGroup>
+
+				<p:outputLabel for="cantidadNoGestionada"
+					value="Cantidad que no pudo ser gestionada"
+					styleClass="ui-label-form" />
+				<h:panelGroup>
+					<pe:inputNumber id="cantidadNoGestionada" thousandSeparator=""
+						maxValue="9999999999.99" minValue="0"
+						value="#{identificacionDesechosBean.identificacionDesecho.cantidadNoGestionada}">
+						<f:validateDoubleRange minimum="0.0" />
+						<p:ajax event="blur"
+							process="@this cantidadAnterior cantidadAnual"
+							listener="#{identificacionDesechosBean.validarCantidadNoGestionada(1)}"
+							update="cantidadNoGestionada" />
+					</pe:inputNumber>
+					<p:tooltip for="cantidadNoGestionada" escape="false"
+						trackMouse="true"
+						value="Cantidad de desechos que no pudieron ser gestionados hasta el 31 de diembre del presente año de reporte" />
+				</h:panelGroup>
+			</h:panelGrid>
+
+			<h:panelGroup id="datosDesechoPeligrosoEspecialContainer">
+				<h:panelGroup
+					rendered="#{identificacionDesechosBean.desechoSeleccionado.desechoES_04 or identificacionDesechosBean.desechoSeleccionado.desechoES_06}">
+					<br />
+					<br />
+					<h:outputText
+						rendered="#{identificacionDesechosBean.desechoSeleccionado.desechoES_04 or identificacionDesechosBean.desechoSeleccionado.desechoES_06}"
+						value="Reporte en unidades (U) únicamente para los desechos ES-04 y ES-06"
+						styleClass="encabezado1_1em alLeft ui-panel-title" />
+					<br />
+				</h:panelGroup>
+
+				<h:panelGrid styleClass="panel_data w100" columns="2"
+					rendered="#{identificacionDesechosBean.desechoSeleccionado.desechoES_04 or identificacionDesechosBean.desechoSeleccionado.desechoES_06}"
+					columnClasses="header w25, null" rowClasses="null, alt">
+					<p:outputLabel for="cantidadAnteriorU" styleClass="ui-label-form"
+						value="Cantidad del año anterior (si lo tuviera)" />
+					<h:panelGroup>
+						<p:inputText id="cantidadAnteriorU" thousandSeparator=""
+							maxlength="10"
+							value="#{identificacionDesechosBean.identificacionDesecho.cantidadAnioAnteriorUnidades}">
+							<pe:keyFilter mask="num" />
+						</p:inputText>
+						<p:tooltip for="cantidadAnteriorU" escape="false"
+							trackMouse="true"
+							value="Cantidad de desechos que no pudo ser gestionada hasta el 31 de diciembre del año anterior al de reporte" />
+					</h:panelGroup>
+
+					<p:outputLabel for="cantidadAnualU" styleClass="ui-label-form"
+						value="Cantidad de generación anual" />
+					<h:panelGroup>
+						<p:inputText required="true" id="cantidadAnualU"
+							thousandSeparator="" maxlength="10"
+							value="#{identificacionDesechosBean.identificacionDesecho.cantidadGeneracionAnualUnidades}">
+							<pe:keyFilter mask="num" />
+						</p:inputText>
+						<p:tooltip for="cantidadAnualU" escape="false" trackMouse="true"
+							value="Cantidad de desechos generada desde el 01 de enero hasta el 31 de diciembre del presente año de reporte" />
+					</h:panelGroup>
+
+					<p:outputLabel for="cantidadNoGestionadaU"
+						styleClass="ui-label-form"
+						value="Cantidad que no pudo ser gestionada" />
+
+					<h:panelGroup>
+						<p:inputText id="cantidadNoGestionadaU" thousandSeparator=""
+							maxlength="10"
+							value="#{identificacionDesechosBean.identificacionDesecho.cantidadNoGestionadaUnidades}">
+							<pe:keyFilter mask="num" />
+							<p:ajax event="blur"
+								process="@this cantidadAnteriorU cantidadAnualU"
+								listener="#{identificacionDesechosBean.validarCantidadNoGestionada(2)}"
+								update="cantidadNoGestionadaU" />
+						</p:inputText>
+						<p:tooltip for="cantidadNoGestionadaU" escape="false"
+							trackMouse="true"
+							value="Cantidad de desechos que no pudieron ser gestionados hasta el 31 de diembre del presente año de reporte" />
+					</h:panelGroup>
+
+				</h:panelGrid>
+			</h:panelGroup>
+			<br />
+			<div class="buttons">
+				<p:commandButton
+					value="#{identificacionDesechosBean.editar ? 'Actualizar' : 'Aceptar'}"
+					action="#{identificacionDesechosBean.aceptar()}"
+					oncomplete="handleDlgIdentificacionDesecho(xhr, status, args)"
+					process="@this datosIdentificacionDesecho"
+					update="datosIdentificacionDesecho :form:tblIdentificacion"
+					rendered="#{identificacionDesechosBean.identificacionDesecho.id eq null}" />
+				<p:commandButton
+					value="#{identificacionDesechosBean.editar ? 'Actualizar' : 'Aceptar'}"
+					action="#{identificacionDesechosBean.aceptar()}"
+					oncomplete="handleDlgIdentificacionDesecho(xhr, status, args)"
+					process="@this datosIdentificacionDesecho"
+					update="datosIdentificacionDesecho :form:tblIdentificacion"
+					rendered="#{identificacionDesechosBean.identificacionDesecho.id ne null}">
+					<p:confirm header="Confirmación"
+						message="¿Está seguro que desea modificar los datos del desecho? Este cambio afectará las demás secciones"
+						icon="ui-icon-alert" />
+				</p:commandButton>
+				<p:commandButton value="Cancelar" styleClass="secondary"
+					actionListener="#{identificacionDesechosBean.cancelar()}"
+					oncomplete="PF('adicionarIdentificacionDesecho').hide()"
+					process="@this"
+					update="datosIdentificacionDesecho :form:tblIdentificacion">
+					<p:resetInput target="@form" />
+				</p:commandButton>
+			</div>
+		</h:panelGroup>
+	</p:dialog>
+</h:form>
+
+<script type="text/javascript">
+	function handleDlgIdentificacionDesecho(xhr, status, args) {
+		if (args.validationFailed || !args.addDatosGenerales) {
+			PF('adicionarIdentificacionDesecho').show();
+		}
+		else {
+			PF('adicionarIdentificacionDesecho').hide();
+		}
+	}
+</script>
+</html>

@@ -1,0 +1,399 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:controles="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition
+	template="/prevencion/licenciamiento-ambiental/eia/verEIA.xhtml">
+	<ui:define name="content-eia">
+		<h:form id="form">
+			<p:growl id="msgs" globalOnly="true" />
+			<p:panel id="actividadPnl"
+				header="Descripción del proyecto, obra o actividad">
+
+				<!--Descripcion del proyecto-->
+					<p:separator />
+					<h:outputText styleClass="w100 text-red"
+						value="Adjuntar documento de Descripción del proyecto, obra o actividad" />
+					<p:separator />
+				<p:panelGrid styleClass="w100 separatorBottom" columns="1"
+					columnClasses="w100">
+					<f:facet name="header">
+						<h:outputText value="Descripción del proyecto, obra o actividad" />
+					</f:facet>
+
+				
+
+					<h:panelGrid columns="1">
+						<p:outputLabel for="nombreArchivoDescripcionHidden"
+							value="Seleccione documento (.pdf) *" id="lblDescripcion"
+							escape="false" />
+					</h:panelGrid>
+
+					<h:panelGrid styleClass="w50 toLeft" columns="2">
+						<h:outputText id="nombreDescripcion"
+							value="#{descripcionProyectoController.estudio.documentoDescripcion.nombre}" />
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="button-small primary toLeft" title="Ver"
+							action="#{descripcionProyectoController.descargar(0)}"
+							ajax="false"/>
+						<h:inputHidden id="nombreArchivoDescripcionHidden"
+							value="#{descripcionProyectoController.descripcionProyectoBean.nombreDocumentoDescripcion}" />
+					</h:panelGrid>
+
+				</p:panelGrid>
+
+				<br />
+
+				<!--Actividades-->
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText id="lblActivProy" value="Actividades del proyecto *" />
+					</f:facet>
+					<p:dataTable id="tblActividad" rowIndexVar="index"
+						value="#{descripcionProyectoController.descripcionProyectoBean.listaActividades}"
+						var="actividad" emptyMessage="#{labels['common.table.empty']}">
+						<p:column styleClass="w20px alCenter">
+							<h:outputText value="#{index + 1}" />
+						</p:column>
+						<p:column headerText="Fase">
+							<h:outputText
+								value="#{actividad.catalogoCategoriaFase.fase.nombre}" />
+						</p:column>
+
+						<p:column headerText="Actividad">
+							<h:outputText value="#{actividad.nombreActividad}" />
+						</p:column>
+
+						<p:column headerText="Nro Coordenadas">
+							<h:outputText value="#{actividad.coordenadasGeneral.size()}" />
+						</p:column>
+
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton update=":formActividad:adicionarActividad"
+								styleClass="button-small primary" process="@this"
+								icon="ui-icon-pencil"
+								actionListener="#{descripcionProyectoController.seleccionarActividadLicenciamiento(actividad)}"
+								oncomplete="PF('adicionarActividad').show()" />
+							
+						</p:column>
+
+					</p:dataTable>
+				</p:panelGrid>
+
+				<br />
+
+				<!--Sustancias químicas-->
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						
+						<mae:panelGridHeaderHelp value="Sustancias químicas"
+							render="false" conector="generalHelp"
+							image="#{request.contextPath}/resources/images/help-how.png"
+							help="#{helps['no.help.yet']}" />
+					</f:facet>			
+					
+					 <p:dataTable
+                            value="#{descripcionProyectoController.descripcionProyectoBean.sustanciaQuimicasSeleccionadas}"
+                            var="sustancia" id="tablaSustancias"
+                            emptyMessage="#{labels['common.table.empty']}">
+                        <p:column headerText="Nombre" styleClass="w60">
+                            <h:outputText value="#{sustancia.descripcion}"/>
+                        </p:column>
+                        <p:column headerText="Código" styleClass="w60">
+                            <h:outputText value="#{sustancia.codigoOnu}"/>
+                        </p:column>
+                    </p:dataTable>
+				</p:panelGrid>
+
+				<br />
+
+				<!--Cronograma de fases de proyecto-->
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<mae:panelGridHeaderHelp
+							value="Cronograma de fases de actividades" render="false"
+							conector="generalHelp"
+							image="#{request.contextPath}/resources/images/help-how.png"
+							help="#{helps['no.help.yet']}" />
+					</f:facet>
+
+					<p:dataTable value="#{descripcionProyectoController.calendario}"
+						var="actividadCal" id="tablaCalendario"
+						emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="Fase" styleClass="w60">
+							<h:outputText
+								value="#{actividadCal.catalogoCategoriaFase.fase.nombre}" />
+						</p:column>
+						<p:column headerText="Fecha inicio" styleClass="w15">
+							<h:outputText value="#{actividadCal.fechaInicio}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+						</p:column>
+						<p:column headerText="Fecha fin" styleClass="w15">
+							<h:outputText value="#{actividadCal.fechaFin}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+						</p:column>
+						
+					</p:dataTable>
+				</p:panelGrid>
+
+				<br />
+
+				<!--Materiales, insumos, equipos y herramientas-->
+				<p:panelGrid styleClass="w100 separatorBottom" columns="1"
+					columnClasses="w100">
+					<f:facet name="header">
+						<h:outputText value="Materiales, insumos, equipos y herramientas" />
+					</f:facet>
+
+					<h:panelGrid columns="1">
+						<p:outputLabel for="nombreArchivoInsumosHidden"
+							value="Seleccione documento (.pdf) *" id="lblInsumos"
+							escape="false" />
+					</h:panelGrid>
+
+					<h:panelGrid styleClass="w50 toLeft" columns="2">
+						<h:outputText id="nombreInsumos"
+							value="#{descripcionProyectoController.estudio.documentoInsumos.nombre}" />
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="button-small primary toLeft" title="Ver"
+							action="#{descripcionProyectoController.descargar(1)}"
+							ajax="false"/>
+						<h:inputHidden id="nombreArchivoInsumosHidden"
+							value="#{descripcionProyectoController.descripcionProyectoBean.nombreDocumentoInsumos}" />
+					</h:panelGrid>
+
+				</p:panelGrid>
+
+				<br />
+
+				
+			</p:panel>
+
+			<p:dialog id="deleteBookingDlg" header="Confirmación"
+				widgetVar="deleteBookingWdgt" modal="true" dynamic="true">
+				<h:panelGroup id="deleteBookingInner" layout="block"
+					style="margin:10px;">
+					<h:outputText
+						value="¿Está usted seguro de eliminar esta sustancia química?" />
+				</h:panelGroup>
+
+				<f:facet name="footer">
+					<h:panelGroup layout="block"
+						style="text-align:right; padding:2px; white-space:nowrap;">
+						<p:commandButton value="Eliminar" process="deleteBookingDlg"
+							update=":#{p:component('tablaSustancias')}"
+							action="#{descripcionProyectoController.eliminarSustanciaQuimica()}"
+							oncomplete="PF('deleteBookingWdgt').hide()" />
+						<p:commandButton type="button" value="Cerrar"
+							onclick="PF('deleteBookingWdgt').hide()" />
+					</h:panelGroup>
+				</f:facet>
+			</p:dialog>
+		</h:form>
+
+		<h:form id="formActividad">
+			<p:dialog header="Descripción de la actividad del proyecto"
+				id="adicionarActividad" widgetVar="adicionarActividad" modal="true"
+				width="600" resizable="false" draggable="false">
+				<h:panelGrid columns="1" id="actividadContainer">
+					<h:panelGrid columns="2" styleClass="w100 separatorBottom"
+						columnClasses="w50, field_mrg w50">
+						<p:outputLabel value="Fase" for="fase" styleClass="bold" />
+						<p:outputLabel value="Actividad" for="actividad" styleClass="bold" />
+
+						
+						<p:inputText id="fase"
+							value="#{descripcionProyectoController.descripcionProyectoBean.actividadLicenciamiento.catalogoCategoriaFase}"
+							maxlength="150" readonly="true" />
+						<p:inputText id="actividad"
+							value="#{descripcionProyectoController.descripcionProyectoBean.actividadLicenciamiento.nombreActividad}"
+							maxlength="150" readonly="true" />
+					</h:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="Coordenadas *" />
+						</f:facet>
+						<p:dataTable id="tblCoordenadas" rowIndexVar="index"
+							value="#{descripcionProyectoController.descripcionProyectoBean.listaCoordenadasGenerales}"
+							var="coordenadas" emptyMessage="#{labels['common.table.empty']}">
+							<p:column styleClass="w20px alCenter">
+								<h:outputText value="#{index + 1}" />
+							</p:column>
+							<p:column headerText="Coordenada X">
+								<h:outputText value="#{coordenadas.x}" />
+							</p:column>
+							<p:column headerText="Coordenada Y">
+								<h:outputText value="#{coordenadas.y}" />
+							</p:column>
+							<p:column headerText="Descripción">
+								<h:outputText value="#{coordenadas.descripcion}" />
+							</p:column>
+							<p:column styleClass="w40px alCenter">
+								<p:commandButton update=":formCoordenada:adicionarCoordenada"
+									styleClass="button-small primary" process="@this"
+									icon="ui-icon-pencil"
+									actionListener="#{descripcionProyectoController.seleccionarCoordenada(coordenadas)}"
+									oncomplete="PF('adicionarCoordenada').show()" />
+								
+							</p:column>
+						</p:dataTable>
+					</p:panelGrid>
+				</h:panelGrid>
+
+				<p:separator />
+
+				<div class="buttons">
+				
+					<p:commandButton value="Aceptar" type="button"
+						onclick="PF('adicionarActividad').hide()" styleClass="secondary" />
+				</div>
+
+				<script type="text/javascript">
+                    function showModalAddActividad(xhr, status, args) {
+                        if (args.addActividadLicenciamiento)
+                            PF('adicionarActividad').hide();
+                        else
+                            PF('adicionarActividad').show();
+                    }
+                </script>
+			</p:dialog>
+		</h:form>
+
+		<h:form id="formCoordenada">
+			<p:dialog header="Coordenadas" id="adicionarCoordenada"
+				widgetVar="adicionarCoordenada" modal="true" width="400"
+				resizable="false" draggable="false">
+				<h:panelGrid columns="2" id="adicionarCoordenadaContainer"
+					styleClass="w100" columnClasses="w50, field_mrg w50">
+					<p:outputLabel value="Coordenada X" for="coordenadaX"
+						styleClass="bold" />
+					<p:outputLabel value="Coordenada Y" for="coordenadaY"
+						styleClass="bold" />
+
+					<p:inputText id="coordenadaX"
+						value="#{descripcionProyectoController.descripcionProyectoBean.coordenadaGeneral.x}"
+						maxlength="15" readonly="true">
+						<pe:keyFilter mask="num" />
+					</p:inputText>
+
+					<p:inputText id="coordenadaY"
+						value="#{descripcionProyectoController.descripcionProyectoBean.coordenadaGeneral.y}"
+						maxlength="15" readonly="true">
+						<pe:keyFilter mask="num" />
+					</p:inputText>
+
+					<p:outputLabel value="Descripción" for="descripcion"
+						styleClass="bold" />
+					<h:outputText />
+					<p:inputText id="descripcion"
+						value="#{descripcionProyectoController.descripcionProyectoBean.coordenadaGeneral.descripcion}"
+						maxlength="150" readonly="true" />
+					<h:outputText />
+
+				</h:panelGrid>
+				<p:separator />
+
+				<div class="buttons">
+				
+					<p:commandButton value="Aceptar" type="button"
+						onclick="PF('adicionarCoordenada').hide()" styleClass="secondary" />
+				</div>
+
+				<script type="text/javascript">
+                    function showModalAddCoordenadas(xhr, status, args) {
+                        if (args.addCordenadas)
+                            PF('adicionarCoordenada').hide();
+                        else
+                            PF('adicionarCoordenada').show();
+                    }
+                </script>
+			</p:dialog>
+		</h:form>
+		<p:dialog header="Fases del proyecto"
+			id="agregarActividadCalendarioDlg"
+			widgetVar="agregarActividadCalendarioWdgt" modal="true"
+			resizable="false" width="300">
+			<h:form id="formDlg">
+				<h:panelGroup id="datosGenerales">
+					<h:panelGrid styleClass="w100 separatorBottom" columns="2"
+						columnClasses="alRight, field_mrg w66 alLeft">
+						<p:outputLabel value="Fase:" />
+						<h:outputText
+							value="#{descripcionProyectoController.fasesProyectoEia.catalogoCategoriaFase.fase.nombre}" />
+						<p:outputLabel for="startDate" value="Fecha inicio:" />
+						<p:calendar id="startDate" required="true"
+							value="#{descripcionProyectoController.fasesProyectoEia.fechaInicio}"
+							styleClass="w15">
+							<p:ajax event="dateSelect" update="endtDate" />
+						</p:calendar>
+						<p:outputLabel for="endtDate" value="Fecha fin:" />
+						<p:calendar id="endtDate"
+							value="#{descripcionProyectoController.fasesProyectoEia.fechaFin}"
+							styleClass="w15">
+							<f:attribute name="startDate"
+								value="#{descripcionProyectoController.fasesProyectoEia.fechaInicio}" />
+							<f:validator validatorId="dateRangeValidator" />
+						</p:calendar>
+					</h:panelGrid>
+				</h:panelGroup>
+				<div class="buttons">
+					<p:commandButton styleClass="buttonAceptar" value="Guardar"
+						update=":form:tablaCalendario,:formDlg:datosGenerales"
+						process="@this :formDlg:datosGenerales"
+						action="#{descripcionProyectoController.agregarFechasAFaseProyecto}" />
+
+				</div>
+			</h:form>
+		</p:dialog>
+
+		<h:form id="formSustanciaQuimica">
+			<p:dialog header="Seleccionar sustancia química"
+				id="adicionarSustanciaQuimica" widgetVar="adicionarSustanciaQuimica"
+				modal="true" resizable="false" width="600">
+				<h:panelGroup id="datosSustanciaQuimica">
+
+					 <h:panelGrid columns="1" columnClasses="w100">
+                        <p:dataTable id="tblSustanciasQuimicas" paginator="true"
+                                     paginatorPosition="bottom" rows="10" var="sustanciaQuimica"
+                                     value="#{descripcionProyectoController.descripcionProyectoBean.sustanciaQuimicasPeligrosas}"
+                                     emptyMessage="#{labels['common.table.empty']}">
+                            <p:column headerText="Sustancia Química"
+                                      filterBy="#{sustanciaQuimica.descripcion}" filterMatchMode="contains"
+                                      sortBy="#{sustanciaQuimica.descripcion}">
+                                <h:outputText value="#{sustanciaQuimica.descripcion}"/>
+                            </p:column>
+                            <p:column styleClass="alCenter w20px">
+                                <p:selectBooleanCheckbox
+                                        value="#{sustanciaQuimica.seleccionado}"/>
+                            </p:column>
+                        </p:dataTable>
+                    </h:panelGrid>
+					<div class="buttons">
+                        <p:commandButton styleClass="buttonAceptar" value="Aceptar"
+                                         update=":#{p:component('tablaSustancias')},:#{p:component('datosSustanciaQuimica')}"
+                                         action="#{descripcionProyectoController.agregarSustanciasQuimicasSeleccionadas}"/>
+
+                    </div>
+				</h:panelGroup>
+				<script type="text/javascript">
+			        function handleDatosConsultor(xhr, status, args) {
+			            if (args.validationFailed || !args.consultorCalificado) {
+			            	PF('adicionarSustanciaQuimica').show();
+			            }
+			            else {
+			                PF('adicionarSustanciaQuimica').hide();
+			            }
+			        }
+			    </script>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

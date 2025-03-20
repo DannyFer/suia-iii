@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{revisarDocumentacionProyectoVTBean.validarTareaBpm()}" />
+        <h:form>
+            <p:panelGrid columns="1" layout="grid" styleClass="w50 alLeft" columnClasses="w100">
+                <f:facet name="header">
+                    <h:outputText value="Documentos del proyecto" />
+                </f:facet>
+                <h:panelGrid styleClass="panel_data" columns="2" columnClasses="header, w20px alCenter" rowClasses="null, alt">
+
+                    <h:outputText value="Estudio para la viabilidad técnica" />
+                    <p:commandButton ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="button-small primary">
+                        <p:fileDownload value="#{revisarViabilidadBean.fileStreamPreguntasProponente()}" />
+                    </p:commandButton>
+
+                    <h:outputText value="Planos del diseño del proyecto" />
+                    <p:commandButton ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="button-small primary">
+                        <p:fileDownload value="#{revisarViabilidadBean.fileStreamPreguntasProponente()}" />
+                    </p:commandButton>
+
+                </h:panelGrid>
+
+            </p:panelGrid>
+        </h:form>
+
+        <br />
+
+        <h:form id="form">
+            <p:panelGrid columns="1" layout="grid" styleClass="w50 alLeft" columnClasses="w100">
+                <f:facet name="header">
+                    <h:outputText value="Inspección Técnica" />
+                </f:facet>
+                <p:outputLabel value="¿Requiere de una inspección técnica?" />
+                <p:selectOneRadio id="requiereInspeccion" value="#{revisarDocumentacionProyectoVTBean.requiereInspeccion}"
+                                  required="true" requiredMessage="Debe seleccionar si se requiere o no realizar una inspección.">
+                    <f:selectItem itemLabel="Si" itemValue="true" />
+                    <f:selectItem itemLabel="No" itemValue="false" />
+                    <p:ajax process="@this" update=":#{p:component('pnl_detalles_inspeccion')}" />
+                </p:selectOneRadio>
+
+                <h:panelGroup id="pnl_detalles_inspeccion">
+                    <h:panelGrid columns="1" style="margin-bottom:10px" styleClass="w50"
+                                 rendered="#{revisarDocumentacionProyectoVTBean.requiereInspeccion}">
+
+                        <p:outputLabel for="inspetionDate" value="Fecha inspección" />
+                        <p:calendar id="inspetionDate" required="true" value="#{revisarDocumentacionProyectoVTBean.fechaInspeccion}" pattern="dd/MM/yyyy" mindate="#{revisarDocumentacionProyectoVTBean.currentDate}" readonlyInput="true">
+                        </p:calendar>
+                    </h:panelGrid>
+                </h:panelGroup>
+            </p:panelGrid>
+
+            <div class="buttons main">
+                <p:commandButton value="Finalizar" action="#{revisarDocumentacionProyectoVTController.completarTarea()}" styleClass="primary" />
+            </div>
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

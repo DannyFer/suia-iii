@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml">
+
+	<ui:define name="context-extra">
+		<h:outputText value="Datos EsIA" />
+		<h:outputText value="Estudio de Impacto Ambiental" />
+		<h:outputLink target="_blank"
+			value="#{request.contextPath}/pages/rcoa/estudioImpactoAmbiental/verProyectoEIAResumen.jsf">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+	</ui:define>
+
+	<ui:define name="content">
+
+		<style type="text/css">
+.ui-fileupload-content {
+	border: none !important;
+	padding: 0px;
+}
+
+.ui-fileupload-buttonbar {
+	text-align: right !important;
+}
+</style>
+
+		<h:form id="form">
+
+			<h:outputText
+				value="Ingrese el expediente del Proceso de Participación Ciudadana del proyecto, obra o actividad, en cumplimiento del Art. 441 y 481 del RCOA"
+				styleClass="bold" />
+
+			<br />
+			<br />
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText
+						value="Adjuntar los archivos del Proceso de Participación Ciudadana *" />
+				</f:facet>
+
+				<p:outputLabel
+					value="Adjuntar los archivos de manera cronológica con las firmas de responsabilidad electrónica correspondientes y en formato .pdf o .rar, se sugiere que cada uno de los archivos tenga un máximo de 50MB, para lograr una subida optima de sus archivos" />
+
+				<p:fileUpload id="fileExpedientePPC" multiple="false"
+					fileUploadListener="#{ingresarExpedientePPCController.uploadDocPPC}"
+					sizeLimit="52428800" allowTypes="/(\.|\/)(rar|pdf)$/"
+					label="Añadir" uploadLabel="Subir"
+					invalidFileMessage="Tipo de archivo no válido"
+					invalidSizeMessage="Debe adjuntar un archivo no mayor de 50 Mb."
+					cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+					auto="true" required="true" styleClass="w75 alCenter"
+					update="tblExpedientePPC" />
+				<p:dataTable id="tblExpedientePPC" styleClass="w75 alcenter"
+					value="#{ingresarExpedientePPCController.listaDocumentosPPC}"
+					var="documento" emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Documento">
+						<h:outputText value="#{documento.nombreDocumento}" />
+					</p:column>
+					<p:column headerText="Acciones" styleClass="w70px alCenter">
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="primary" title="Descargar" ajax="false"
+							immediate="true">
+							<p:fileDownload
+								value="#{ingresarExpedientePPCController.descargarDocumento(documento)}" />
+						</p:commandButton>
+						<p:commandButton icon="ui-icon-trash" title="Eliminar"
+							process="@this" styleClass="primary"
+							actionListener="#{ingresarExpedientePPCController.eliminarDocumento(1, documento)}"
+							update="tblExpedientePPC" />
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+
+			<br />
+			<br />
+
+			<h:panelGrid styleClass="panel_data w100" columns="2"
+				columnClasses="header w40, bold">
+				<h:outputText
+					value="Tipo de Pronunciamiento del Proceso de Participación Ciudadana" />
+				<p:selectOneRadio id="pronunciamiento"
+					requiredMessage="El campo 'Tipo de Pronunciamiento del Proceso de Participación Ciudadana' es requerido"
+					value="#{ingresarExpedientePPCController.esPronunciamientoAprobado}"
+					required="true">
+					<f:selectItem itemLabel="Aprobación" itemValue="true" />
+					<f:selectItem itemLabel="Archivo" itemValue="false" />
+					<p:ajax process="@this" update="pnlExpediente" />
+				</p:selectOneRadio>
+			</h:panelGrid>
+
+			<h:panelGroup id="pnlExpediente">
+
+				<br />
+				<br />
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					rendered="#{ingresarExpedientePPCController.esPronunciamientoAprobado}">
+					<f:facet name="header">
+						<h:outputText
+							value="Adjuntar los archivos del Estudio de Impacto Ambiental (opcional)" />
+					</f:facet>
+
+					<h:outputText
+						value="En caso de que se haya modificado el contenido del Estudio de Impacto Ambiental como resultado de las observaciones realizadas en el Proceso de Participación Ciudadana, por favor subir la versión final del Estudio de Impacto Ambiental que incluya todas las modificaciones requeridas" />
+					<br />
+					<p:outputLabel
+						value="Adjuntar únicamente los capítulos del Estudio de impacto ambiental que han sido modificados en formato .pdf o .rar, se sugiere que cada uno de los archivos tenga un máximo de 50MB, para lograr una subida optima de sus archivos" />
+
+					<p:fileUpload id="fileEsIAModificado" multiple="false"
+						fileUploadListener="#{ingresarExpedientePPCController.uploadDocEstudio}"
+						sizeLimit="52428800" allowTypes="/(\.|\/)(rar|pdf)$/"
+						label="Añadir" uploadLabel="Subir"
+						invalidFileMessage="Tipo de archivo no válido"
+						invalidSizeMessage="Debe adjuntar un archivo no mayor de 50 Mb."
+						cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+						auto="true" required="true" styleClass="w75 alCenter"
+						update="tblEsIAModificado" />
+					<p:dataTable id="tblEsIAModificado" styleClass="w75 alcenter"
+						value="#{ingresarExpedientePPCController.listaDocumentosEsIA}"
+						var="documento" emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="Documento">
+							<h:outputText value="#{documento.nombreDocumento}" />
+						</p:column>
+						<p:column headerText="Acciones" styleClass="w70px alCenter">
+							<p:commandButton icon="ui-icon-arrowthick-1-s"
+								styleClass="primary" title="Descargar" ajax="false"
+								immediate="true">
+								<p:fileDownload
+									value="#{ingresarExpedientePPCController.descargarDocumento(documento)}" />
+							</p:commandButton>
+							<p:commandButton icon="ui-icon-trash" title="Eliminar"
+								process="@this" styleClass="primary"
+								actionListener="#{ingresarExpedientePPCController.eliminarDocumento(2, documento)}"
+								update="tblEsIAModificado" />
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+			</h:panelGroup>
+
+
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" immediate="true"
+					action="/bandeja/bandejaTareas.jsf?faces-redirect=true"
+					icon="ui-icon-cancel" styleClass="secondary">
+					<p:confirm
+						message="#{msg['message.confirmacion.cancelacion.tarea']}"
+						header="#{msg['header.confirmacion.cancelacion.tarea']}" />
+				</p:commandButton>
+
+				<p:commandButton value="Enviar" styleClass="primary"
+					action="#{ingresarExpedientePPCController.completarTarea()}"
+					title="#{msg['label.enviarDatos']}" icon="ui-icon-check"
+					widgetVar="btnEnviar" onstart="PF('btnEnviar').disable()"
+					update="@form">
+					<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+						header="#{msg['header.confirmacion.envio.tarea']}" />
+				</p:commandButton>
+			</div>
+
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

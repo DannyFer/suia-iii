@@ -1,0 +1,146 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+	<ui:define name="content">
+		<style type="text/css">
+.cssNoPago {
+	background: #fca752 !important;
+}
+
+.ui-state-highlight td {
+	background: #8dcfB0 !important;
+	color: #222222 !important;
+}
+
+.ui-state-hover td {
+	background: #8dcfB0 !important;
+}
+
+.ui-chkbox .ui-state-active .ui-icon {
+	background-image:
+		url("/suia-iii/javax.faces.resource/images/ui-icons_2e83ff_256x240.png.jsf?ln=primefaces-suia");
+}
+
+.ui-chkbox .ui-state-active {
+	background: white;
+}
+</style>
+
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				columnClasses="w100">
+				<f:facet name="header">
+	              Conciliación de Pago
+	              </f:facet>
+
+				<p:outputLabel value="Archivo BanEcuador" />
+				<h:outputText id="nombreArchivo"
+					value="#{empty generarConciliacionNUTController.documentoBanco.nombre ? 'Archivo(.txt)' : generarConciliacionNUTController.documentoBanco.nombre}" />
+				<h:panelGrid columns="1" columnClasses="w25">
+					<p:fileUpload id="fileUpload"
+						fileUploadListener="#{generarConciliacionNUTController.adjuntarDocumento}"
+						multiple="false" sizeLimit="31457280" allowTypes="/(\.|\/)(txt)$/"
+						label="Seleccionar" uploadLabel="Subir"
+						invalidFileMessage="Tipo de archivo no válido"
+						invalidSizeMessage="Tamaño de archivo no válido"
+						cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+						auto="true" update="@form">
+					</p:fileUpload>
+				</h:panelGrid>
+
+				<p:panel id="pnlListaNuts" styleClass="separatorTop"
+					rendered="#{generarConciliacionNUTController.guardarConciliacion}">
+					<f:facet name="header">
+						<h:outputText value="Transacciones pendientes de conciliación" />
+					</f:facet>
+					
+					<p:dataTable id="dtbNutsConcialicion" var="nutItem"
+						value="#{generarConciliacionNUTController.listaNuts}"
+						selection="#{generarConciliacionNUTController.listaNutsConciliacion}"
+						rowKey="#{nutItem.id}" disabledSelection="#{nutItem.id eq -1}">
+						<p:columnGroup type="header">
+							<p:row>
+								<p:column colspan="2" headerText="BanEcuador" />
+								<p:column colspan="6" headerText="MAE" />
+							</p:row>
+							<p:row>
+								<p:column headerText="Referencia" />
+								<p:column headerText="Valor" />
+								<p:column headerText="NUT" />
+								<p:column headerText="Referencia" />
+								<p:column headerText="Valor" />
+								<p:column headerText="Fecha pago" />
+								<p:column headerText="Comprobante" />
+								<p:column selectionMode="multiple" styleClass="alCenter" />
+							</p:row>
+						</p:columnGroup>
+
+						<p:column
+							styleClass="#{nutItem.estadosNut.id ne 3 ? 'cssNoConciliado' : null}">
+							<h:outputText
+								value="#{nutItem.registroBancario.referenciaDocumento}" />
+						</p:column>
+						<p:column
+							styleClass="#{nutItem.estadosNut.id ne 3 ? 'cssNoConciliado' : null}">
+							<h:outputText value="#{nutItem.registroBancario.valorPago}" />
+						</p:column>
+
+						<p:column
+							styleClass="#{nutItem.estadosNut.id ne 3 ? 'cssNoConciliado' : null}">
+							<h:outputText value="#{nutItem.nutCodigo}" />
+						</p:column>
+						<p:column
+							styleClass="#{nutItem.estadosNut.id ne 3 ? 'cssNoConciliado' : null}">
+							<h:outputText value="#{nutItem.bnfTramitNumber}" />
+						</p:column>
+						<p:column
+							styleClass="#{nutItem.estadosNut.id ne 3 ? 'cssNoConciliado' : null}">
+							<h:outputText value="#{nutItem.nutValor}" />
+						</p:column>
+						<p:column
+							styleClass="#{nutItem.estadosNut.id ne 3 ? 'cssNoConciliado' : null}">
+							<h:outputText value="#{nutItem.bnfFechaPago}">
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+							</h:outputText>
+						</p:column>
+						<p:column
+							styleClass="#{nutItem.estadosNut.id ne 3 ? 'cssNoConciliado alCenter' : 'alCenter'}">
+							<p:commandButton id="downloadComprobante"
+								rendered="#{nutItem.id ne -1 and nutItem.registroBancario == null}" icon="ui-icon-arrowthick-1-s"
+								ajax="false" styleClass="button-small primary" title="Ver"
+								immediate="true">
+								<p:fileDownload
+									value="#{generarConciliacionNUTController.getStreamContent(nutItem)}" />
+							</p:commandButton>
+						</p:column>
+						<p:column selectionMode="multiple" styleClass="alCenter" />
+					</p:dataTable>
+				</p:panel>
+
+				<t:div styleClass="buttons main">
+					<p:commandButton value="Buscar" icon="ui-icon-check"
+						actionListener="#{generarConciliacionNUTController.buscarNutsNoConciliados()}"
+						process="@this" update="@form">
+					</p:commandButton>
+					
+					<p:commandButton value="Conciliar" icon="ui-icon-check" id="btnConciliar"
+						actionListener="#{generarConciliacionNUTController.conciliar()}"
+						process="@this dtbNutsConcialicion" update="@form"
+						rendered="#{generarConciliacionNUTController.guardarConciliacion}">
+						<p:confirm message="¿Está seguro de realizar la conciliación?"
+							header="Confirmación" />
+					</p:commandButton>
+					
+					<p:commandButton value="Limpiar" icon="ui-icon-close"
+								ajax="true" process="@this" update="@form"
+								onclick="location.reload();" />
+				</t:div>
+			</p:panelGrid>
+		</h:form>
+	</ui:define>
+</ui:composition>

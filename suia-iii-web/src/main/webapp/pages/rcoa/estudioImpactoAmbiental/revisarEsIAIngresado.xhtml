@@ -1,0 +1,267 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="context-extra">
+		<h:outputText value="Datos" />
+		<h:outputText value="Estudio de Impacto Ambiental" />
+		<ui:remove>
+			<p:commandButton type="button" icon="ui-icon-search"
+				onclick="PF('modalShowTramiteEIA').show()"
+				styleClass="primary button-small" />
+		</ui:remove>
+		<h:outputLink target="_blank"
+			value="#{request.contextPath}/pages/rcoa/estudioImpactoAmbiental/defaultVer.jsf">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+	</ui:define>
+	<ui:define name="content">
+		<style>
+.ui-spinner-button {
+	right: 0 !important;
+}
+
+.spinner .ui-state-default .ui-icon {
+	background-image:
+		url("/suia-iii/javax.faces.resource/images/ui-icons_222222_256x240.png.jsf?ln=primefaces-suia")
+		!important;
+}
+
+.ui-spinner-input {
+	text-align: left !important;
+}
+</style>
+
+	<h:form id="formCamaronera" rendered="#{revisarEIAController.esActividadCamaronera}">
+		<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Información Acuerdo Concesión Camaronera" />
+					</f:facet>
+					
+					<h:panelGrid columns="4" columnClasses="null w30,null w20,null w30,null w20">
+					<p:outputLabel value="Número del acuerdo de la concesión camaronera" rendered="#{revisarEIAController.zonaCamaronera eq 'ALTA' ? true : false}"/>
+					<p:outputLabel value="Número del acuerdo de la concesión camaronera Tierras Privadas o Zonas Altas:" rendered="#{revisarEIAController.zonaCamaronera eq 'MIXTA' ? true : false}"/>
+					<p:inputText value="#{revisarEIAController.informacionProyectoEia.concesionCamaroneraAlta}" maxlength="25" 
+						rendered="#{revisarEIAController.zonaCamaronera eq 'MIXTA' ? true : revisarEIAController.zonaCamaronera eq 'ALTA' ? true : false}"
+						disabled="true">
+					</p:inputText>
+										
+					<p:outputLabel value="Autorización Administrativa o Título de Concesión camaronera:" 
+						rendered="#{revisarEIAController.zonaCamaronera eq 'ALTA' ? true : false}"/>
+					<p:outputLabel value="Autorización Administrativa o Título de Concesión camaronera Tierras Privadas o Zonas Altas:" 
+						rendered="#{revisarEIAController.zonaCamaronera eq 'MIXTA' ? true : false}"/>
+					  	<p:commandButton id="downloadDocumentoCamAlta"
+									icon="ui-icon-arrowthick-1-s"
+									styleClass="button-small primary" title="Ver" ajax="false"
+									immediate="true"
+									rendered="#{revisarEIAController.zonaCamaronera eq 'MIXTA' ? true : revisarEIAController.zonaCamaronera eq 'ALTA' ? true : false}">
+									<p:fileDownload value="#{revisarEIAController.descargarDocConcesionAlta()}" />
+						</p:commandButton>
+										
+					<p:outputLabel value="Número del acuerdo de la concesión camaronera Zona de Playa y Bahía:" rendered="#{revisarEIAController.zonaCamaronera eq 'MIXTA' ? true : false}"/>
+					<p:outputLabel value="Número del acuerdo de la concesión camaronera" rendered="#{revisarEIAController.zonaCamaronera eq 'PLAYA' ? true : false}"/>
+					<p:inputText value="#{revisarEIAController.informacionProyectoEia.concesionCamaroneraPlaya}" maxlength="25" disabled="true"
+						rendered="#{revisarEIAController.zonaCamaronera eq 'MIXTA' ? true : revisarEIAController.zonaCamaronera eq 'PLAYA' ? true : false}">
+						<p:ajax process="@this"/>
+					</p:inputText>					
+					<p:outputLabel value="Autorización Administrativa o Título de Concesión camaronera:" 
+						rendered="#{revisarEIAController.zonaCamaronera eq 'PLAYA' ? true : false}"/>
+					<p:outputLabel value="Autorización Administrativa o Título de Concesión camaronera Zona de Playa y Bahía:" 
+					rendered="#{revisarEIAController.zonaCamaronera eq 'MIXTA' ? true : false}"/>
+					<p:commandButton id="downloadDocumentoCamPlaya"
+									icon="ui-icon-arrowthick-1-s"
+									styleClass="button-small primary" title="Ver" ajax="false"
+									immediate="true"
+									rendered="#{revisarEIAController.zonaCamaronera eq 'MIXTA' ? true : revisarEIAController.zonaCamaronera eq 'PLAYA' ? true : false}">
+									<p:fileDownload value="#{revisarEIAController.descargarDocConcesionPlaya()}" />
+					</p:commandButton>
+				</h:panelGrid>
+				</p:panelGrid>
+
+
+</h:form>
+
+		<h:form id="form"
+			rendered="#{revisarEIAController.numeroRevision eq 1}">
+			<p:panelGrid id="pngConsultor" columns="1" layout="grid"
+				styleClass="w100">
+				<h:outputText
+					value="Revisar y Analizar Estudio de Impacto Ambiental"
+					styleClass="bold" />
+				<p:outputLabel value="Requiere equipo multidisciplinario"
+					for="txtEquipoMultidisciplinario" />
+				<p:selectOneRadio id="txtEquipoMultidisciplinario"
+					value="#{revisarEIAController.equipoMultidisciplinario}"
+					required="true">
+					<f:selectItem itemLabel="Si" itemValue="true" />
+					<f:selectItem itemLabel="No" itemValue="false" />
+					<p:ajax event="change" update="pnlAsignar" />
+				</p:selectOneRadio>
+
+				<h:panelGroup id="pnlAsignar">
+					<p:panelGrid columns="1" layout="grid"
+						rendered="#{revisarEIAController.equipoMultidisciplinario}">
+						<f:facet name="header">
+							<h:outputText value="Asignar equipo multidisciplinario" />
+						</f:facet>
+
+						<p:outputLabel for="equipo"
+							value="Seleccione las especialidades del equipo multidisciplinario"
+							rendered="#{revisarEIAController.agregarTecnicosEspecialistas}" />
+						<p:selectManyCheckbox id="equipo" layout="grid"
+							columns="1" rendered="#{revisarEIAController.agregarTecnicosEspecialistas}"
+							value="#{revisarEIAController.areasSeleccionadas}">
+							<f:selectItems var="area" value="#{revisarEIAController.areas}"
+								itemLabel='#{msg["label.prevencion.tdr.".concat(area)]}'
+								itemValue="#{area}" />
+						</p:selectManyCheckbox>
+
+
+						<h:outputText
+							value="Asignar tarea: Revisión del Estudio de Impacto Ambiental"
+							rendered="#{!revisarEIAController.agregarTecnicosEspecialistas}" />
+						<p:separator />
+						<p:dataTable id="tablaUsuarios"
+							value="#{revisarEIAController.listaUsuario}" var="usuario"
+							paginator="true" rows="10" paginatorPosition="bottom"
+							scrollable="true" 
+							rendered="#{!revisarEIAController.agregarTecnicosEspecialistas}">
+							<p:column styleClass="w20px alCenter">
+								<p:selectBooleanCheckbox value="#{usuario.selectable}">
+									<f:ajax execute="@this"
+										listener="#{revisarEIAController.updateSelectedUser(usuario)}" />
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column headerText="Usuario" styleClass="alCenter">
+								<h:outputText value="#{usuario.nombre}" />
+							</p:column>
+							<p:column headerText="Nombre" styleClass="alCenter">
+								<h:outputText value="#{usuario.nombrePersona}" />
+							</p:column>
+							<p:column headerText="Tareas" styleClass="alCenter">
+								<h:outputText value="#{usuario.numeroTramites}" />
+							</p:column>
+							<p:column headerText="Carga(%)" styleClass="alCenter">
+								<h:outputText value="#{usuario.carga}">
+									<f:convertNumber maxFractionDigits="2" />
+								</h:outputText>
+							</p:column>
+						</p:dataTable>
+						<br />
+
+						<h:panelGroup
+							rendered="#{revisarEIAController.areasApoyo.size() > 0}">
+							<h:outputText
+								value="Seleccione si desea la colaboración de Patrimonio Natural (Opcional)" />
+							<h:outputText styleClass="bold text-red alJustify"
+								value="Si no requiere el equipo de técnicos adicionales, dejar en blanco y presionar Siguiente" />
+							<p:selectManyCheckbox id="equipoApoyo" layout="grid" columns="1"
+								value="#{revisarEIAController.areasSeleccionadasApoyo}">
+								<f:selectItems var="area"
+									value="#{revisarEIAController.areasApoyo}"
+									itemLabel='#{msg["label.prevencion.tdr.".concat(area)]}'
+									itemValue="#{area}" />
+								<p:ajax process="@this" />
+							</p:selectManyCheckbox>
+						</h:panelGroup>
+					</p:panelGrid>
+					<h:inputHidden validator="#{revisarEIAController.validateDatos}" />
+				</h:panelGroup>
+
+			</p:panelGrid>
+
+
+			<p:outputPanel id="pnlButons">
+				<div class="buttons main">
+					<p:commandButton value="Siguiente" process="form"
+						action="#{revisarEIAController.finalizar()}"
+						icon="ui-icon-arrowthick-1-e">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:outputPanel>
+		</h:form>
+
+		<h:form id="formRevision" rendered="#{revisarEIAController.numeroRevision ne 1}">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<h:outputText
+					value="Revisar y Analizar Estudio de Impacto Ambiental"
+					styleClass="bold" />
+
+					<p:outputLabel value="Requiere equipo multidisciplinario"
+						for="txtEquipoMultidisciplinario" />
+					<p:selectOneRadio id="txtEquipoMultidisciplinario" styleClass="cssRadioDisabled"
+						value="#{revisarEIAController.equipoMultidisciplinario}"
+						required="true" disabled="true">
+						<f:selectItem itemLabel="Si" itemValue="true" />
+						<f:selectItem itemLabel="No" itemValue="false" />
+					</p:selectOneRadio>
+
+				<h:panelGroup
+					rendered="#{revisarEIAController.equipoMultidisciplinario}">
+					<p:dataTable id="dtbInformes" var="informe" styleClass="w66"
+						value="#{revisarEIAController.listaInformes}"
+						selection="#{revisarEIAController.informesSeleccionados}"
+						rowKey="#{informe.id}" emptyMessage="No ha seleccionado equipo de apoyo">
+						<p:ajax event="rowSelectCheckbox" update="@form" />
+						<p:column selectionMode="multiple" width="10%"  style="text-align:center">
+							<h:outputText value="#{informe.id}" rendered="false" />
+						</p:column>
+						<p:column headerText="Pronunciamiento" width="25%">
+							<h:outputText
+								value="#{informe.tipoPronunciamiento eq 1 ? 'Aprobación' : 'Observación' }" />
+						</p:column>
+						<p:column headerText="Nombre del técnico">
+							<h:outputText
+								value="#{revisarEIAController.getnombreTecnico(informe.usuarioCreacion)}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+
+				<ui:remove>
+				<br />
+
+				<p:outputLabel value="Requiere inspección" for="txtInspeccion" />
+				<p:selectOneRadio id="txtInspeccion" 
+					value="#{revisarEIAController.inspeccion}" required="true">
+					<f:selectItem itemLabel="Si" itemValue="true" />
+					<f:selectItem itemLabel="No" itemValue="false" />
+					<p:ajax event="change" update="pnlJustificacion" />
+				</p:selectOneRadio>
+				<h:panelGroup id="pnlJustificacion">
+					<p:outputPanel
+						rendered="#{revisarEIAController.inspeccion ne null and !revisarEIAController.inspeccion}">
+						<p:outputLabel value="Justificación" for="justificacion" />
+						<p:inputTextarea
+							placeholder="Entre como mínimo 1 y como máximo 500 caracteres."
+							value="#{revisarEIAController.informacionProyectoEia.justificacionInspeccion}"
+							id="justificacion" required="true" maxlength="500"
+							autoResize="false" rows="4">
+							<f:validateLength minimum="1" />
+						</p:inputTextarea>
+					</p:outputPanel>
+				</h:panelGroup>
+				</ui:remove>
+			</p:panelGrid>
+
+			<p:outputPanel id="pnlButons">
+				<div class="buttons main">
+					<p:commandButton value="Siguiente" process="formRevision"
+						action="#{revisarEIAController.enviarRevision()}"
+						icon="ui-icon-arrowthick-1-e">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:outputPanel>
+		</h:form>
+	</ui:define>
+</ui:composition>

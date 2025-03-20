@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<p:dialog header="Ubicación de puntos de muestreos" id="adicionarPuntoMuestreo" widgetVar="adicionarPuntoMuestreo"
+          modal="true" resizable="false" width="700">
+    <h:panelGroup id="panelPuntoMuestreo">
+        <h:panelGrid styleClass="w100 separatorBottom" columns="2" columnClasses="w50, field_mrg w50">
+            <p:outputLabel for="codigoParcela" value="Código de parcela"/>
+            <p:outputLabel for="areaParcela" value="Área de parcela (m2)"/>
+            <p:inputText id="codigoParcela" maxlength="20"
+                         value="#{inventarioForestalController.inventarioForestalBean.inventarioForestalPunto.codigoParcela}"
+                         required="true"/>
+            <p:inputText id="areaParcela" maxlength="5"
+                         value="#{inventarioForestalController.inventarioForestalBean.inventarioForestalPunto.areaParcela}"
+                         required="true">
+                <pe:keyFilter mask="num"/>
+            </p:inputText>
+        </h:panelGrid>
+        <h:panelGrid styleClass="w100 separatorBottom" columns="2" columnClasses="w50, field_mrg w50">
+            <p:outputLabel for="indiceSimpson" value="Índice de Simpson"/>
+            <p:outputLabel for="indiceShannon" value="Índice de Shannon"/>
+            <p:selectOneMenu id="indiceSimpson"
+                             value="#{inventarioForestalController.inventarioForestalBean.inventarioForestalPunto.indiceSimpson}"
+                             styleClass="w100">
+                <f:selectItem itemValue="0" itemLabel="Baja"></f:selectItem>
+                <f:selectItem itemValue="1" itemLabel="Media"></f:selectItem>
+                <f:selectItem itemValue="2" itemLabel="Alta"></f:selectItem>
+            </p:selectOneMenu>
+            <p:selectOneMenu id="indiceShannon"
+                             value="#{inventarioForestalController.inventarioForestalBean.inventarioForestalPunto.indiceShannon}"
+                             styleClass="w100">
+                <f:selectItem itemValue="0" itemLabel="Baja"></f:selectItem>
+                <f:selectItem itemValue="1" itemLabel="Media"></f:selectItem>
+                <f:selectItem itemValue="2" itemLabel="Alta"></f:selectItem>
+            </p:selectOneMenu>
+        </h:panelGrid>
+        <h:panelGrid styleClass="w100 separatorBottom" columns="2" columnClasses="w50, field_mrg w50">
+            <p:outputLabel for="nombreTablaVolumen" value="Nombre de la tabla de volumen"/>
+            <p:outputLabel for="nombreTablaIndiceValoresImportancia" value="Nombre de la tabla de índice de valores de importancia"/>
+            <p:inputTextarea id="nombreTablaVolumen" maxlength="250"
+                         value="#{inventarioForestalController.inventarioForestalBean.inventarioForestalPunto.nombreTablaVolumen}"
+                         required="true" autoResize="false"/>
+            <p:inputTextarea id="nombreTablaIndiceValoresImportancia" maxlength="250"
+                         value="#{inventarioForestalController.inventarioForestalBean.inventarioForestalPunto.nombreTablaIndiceValoresImportancia}"
+                         required="true" autoResize="false"/>
+        </h:panelGrid>
+
+        <p:panelGrid columns="1" layout="grid">
+            <f:facet name="header">
+                <p:commandButton id="btnAdicionarCoordenada" value="Adicionar" process="@this" update="panelCoordenadas"
+                                 oncomplete="PF('adicionarCoordenada').show()"
+                                 actionListener="#{inventarioForestalController.agregarCoordenada}"
+                                 styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick"
+                                 disabled="#{inventarioForestalController.inventarioForestalBean.listaCoordenadas.size() == 4}"/>
+                <h:outputText value="Coordenadas"/>
+            </f:facet>
+            <p:dataTable id="tableCoordenadas" rowIndexVar="index" emptyMessage="#{labels['common.table.empty']}"
+                         value="#{inventarioForestalController.inventarioForestalBean.listaCoordenadas}"
+                         var="coordenada">
+                <p:column headerText="Coordenada X">
+                    <h:outputText value="#{coordenada.x}"/>
+                </p:column>
+                <p:column headerText="Coordenada Y" styleClass="singleLine">
+                    <h:outputText value="#{coordenada.y}"/>
+                </p:column>
+                <p:column styleClass="w40px">
+                    <p:commandButton styleClass="button-small primary" process="@this" icon="ui-icon-pencil"
+                                     oncomplete="PF('adicionarCoordenada').show()"
+                                     update=":#{p:component('panelCoordenadas')}"
+                                     actionListener="#{inventarioForestalController.seleccionarCoordenada(coordenada)}"/>
+                    <p:commandButton styleClass="button-small primary" process="@this" icon="ui-icon-circle-close"
+                                     update=":#{p:component('tableCoordenadas')} :#{p:component('btnAdicionarCoordenada')}"
+                                     actionListener="#{inventarioForestalController.removerCoordenada(coordenada)}">
+                        <p:confirm header="Confirmación" message="¿Está seguro que desea eliminar?"
+                                   icon="ui-icon-alert"/>
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+        </p:panelGrid>
+    </h:panelGroup>
+
+    <p:separator/>
+
+    <div class="buttons">
+        <p:commandButton value="Aceptar" actionListener="#{inventarioForestalController.guardarPunto}"
+                         process="@this panelPuntoMuestreo" update="tablePuntosMuestreo panelPuntoMuestreo"
+                         oncomplete="handlePuntoMuestreo(xhr, status, args)"/>
+    </div>
+
+    <script type="text/javascript">
+        function handlePuntoMuestreo(xhr, status, args) {
+            if (!args.addPuntoMuestreo) {
+                PF('adicionarPuntoMuestreo').show();
+            }
+            else {
+                PF('adicionarPuntoMuestreo').hide();
+            }
+        }
+    </script>
+</p:dialog>
+
+<ui:include src="/prevencion/licenciamiento-ambiental/eia/inventarioForestal/formularios/coordenadaModal.xhtml"/>
+
+</html>

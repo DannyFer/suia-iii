@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<f:loadBundle var="labels" basename="ec.gob.ambiente.core.resources.labels_es" />
+		<h:form id="form">
+			<p:panel>
+				<f:facet name="header">
+					<h:outputText value="Listado de Proyectos Archivados" />
+				</f:facet>
+				<p:dataTable id="tableProyectos" widgetVar="tableProyectos" value="#{procesosArchivadosController.proyectosBean.proyectos}" sortBy="#{proyecto.codigo}" sortOrder="descending" var="proyecto" rows="10" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rowsPerPageTemplate="5,10,15" emptyMessage="#{labels['common.table.empty']}" styleClass="w100">
+					<p:column headerText="Código" filterBy="#{proyecto.codigo}" filterMatchMode="contains" styleClass="alCenter w15" sortBy="#{proyecto.codigo}">
+							<h:outputText value="#{proyecto.codigo}" />
+					</p:column>
+					<p:column headerText="Nombre" filterBy="#{proyecto.nombre}" filterMatchMode="contains" sortBy="#{proyecto.nombre}" styleClass="w66">
+						<h:outputText value="#{proyecto.nombre}" title="#{proyecto.nombre}" />
+					</p:column>
+					<p:column headerText="Registro" filterBy="#{proyecto.registro}" filterMatchMode="contains" sortBy="#{proyecto.registro}" styleClass="alCenter w15">
+						<h:outputText value="#{proyecto.registro}" />
+					</p:column>
+					<p:column style="display:none" headerText="Sector" filterBy="#{proyecto.sector}" filterMatchMode="equals" sortBy="#{proyecto.sector}" styleClass="alCenter w15">
+						<f:facet name="filter">
+							<p:selectOneMenu onchange="PF('tableProyectos').filter()" converter="selectItemConverter2" widgetVar="sectores">
+								<f:selectItem itemLabel="" itemValue="-1" />
+								<f:selectItems value="#{proyectosBean.sectoresItems}" />
+							</p:selectOneMenu>
+						</f:facet>
+						<h:outputText value="#{proyecto.sector}" />
+					</p:column>
+					<p:column style="display:none" headerText="Responsable" filterBy="#{proyecto.responsableSiglas}" filterMatchMode="contains" sortBy="#{proyecto.responsableSiglas}" styleClass="alCenter w15">
+						<h:outputText value="#{proyecto.responsableSiglas}" title="#{proyecto.responsable}" />
+					</p:column>
+					<p:column style="display:none" headerText="Permiso ambiental" filterBy="#{proyecto.categoriaNombrePublico}" filterMatchMode="equals" sortBy="#{proyecto.categoriaNombrePublico}" styleClass="alCenter w20">
+						<f:facet name="filter">
+							<p:selectOneMenu onchange="PF('tableProyectos').filter()" converter="selectItemConverter2" widgetVar="categorias">
+								<f:selectItem itemLabel="" itemValue="-1" />
+								<f:selectItems value="#{proyectosBean.categoriasItems}" />
+							</p:selectOneMenu>
+						</f:facet>
+						<h:outputText value="#{proyecto.categoriaNombrePublico}" />
+					</p:column>
+					<p:column headerText="Documentos" styleClass="alCenter w10">
+								<p:commandButton oncomplete="PF('dlg_verDocumentos').show();" update=":form:pnl_documentos" actionListener="#{procesosArchivadosController.verDocumentos(proyecto.id,proyecto.codigo,proyecto.motivoEliminar)}" styleClass="button-small primary" icon="ui-icon-zoomin" />
+					</p:column>
+					<p:column headerText="Reactivar" styleClass="alCenter w10" rendered="#{procesosArchivadosController.rolReactivar}">
+						<p:commandButton styleClass="button-small primary" icon="ui-icon-play" title="Reactivar Tareas" 
+						actionListener="#{procesosArchivadosController.proyectoListener(proyecto.codigo)}"
+						process="@this" update=":formAttached:reactivarProyecto" oncomplete="PF('reactivarProyecto').show()">						
+						</p:commandButton>
+					</p:column>	
+				</p:dataTable>				
+			</p:panel>
+				<p:dialog header="Documentos adjuntos al proceso" widgetVar="dlg_verDocumentos" modal="true" width="700">
+					<h:panelGrid columns="1" columnClasses="w25 alTop,field_mrg alTop" id="pnl_documentos">
+						<p:dataTable value="#{procesosArchivadosController.documentosList}" var="varDocumentos" emptyMessage="#{labels['common.table.empty']}">
+							<p:column headerText="Nombre documento" styleClass="singleLine">
+								<h:outputText value="#{varDocumentos.nombre}" />
+							</p:column>
+							<p:column headerText="Motivo" rendered="false">
+								<h:outputText value="#{procesosArchivadosController.motivo}" />
+							</p:column>
+							<p:column styleClass="alCenter w20px">
+								<p:commandButton ajax="false" id="btnDescargar" onclick="PrimeFaces.monitorDownload(start, stop);" icon=" ui-icon-arrowstop-1-s" styleClass="button-small primary" disabled="#{empty varDocumentos.contenidoDocumento}" title="#{empty varDocumentos.contenidoDocumento ? 'El documento no está disponible en el gestor documental' : 'Ver documento'}">
+									<p:fileDownload value="#{procesosArchivadosController.getStream(varDocumentos)}" />
+								</p:commandButton>
+							</p:column>
+						</p:dataTable>
+					</h:panelGrid>
+					<p:separator />
+					<div class="buttons">
+						<p:commandButton type="button" value="Cerrar" onclick="PF('dlg_verDocumentos').hide()" />
+					</div>
+				</p:dialog>
+		</h:form>		   	
+    	<h:form id="formAttached">
+			<p:dialog header="Reactivar proyecto" id="reactivarProyecto" widgetVar="reactivarProyecto" modal="true" width="500" resizable="false" closable="true" draggable="false">
+				<h:panelGrid columns="1" styleClass="w100">
+					<p:outputLabel value="Recuerde la responsabilidad de la acción que esta ejecutando."/>
+					<p:outputLabel value="Número de días que el proyecto se activará" for="dias" />
+					<pe:inputNumber id="dias" value="#{procesosArchivadosController.numDias}" required="true" minValue="0" maxValue="90" requiredMessage="Número de días es requerido"/>						
+					<p:outputLabel value="Ingrese el motivo por el cual desea reactivar el proyecto" for="motivo" />
+					<p:inputTextarea id="motivo" value="#{procesosArchivadosController.motivo}" required="true" autoResize="false" rows="3" maxlength="1000">
+						<f:validateLength minimum="20" />
+					</p:inputTextarea>					
+				</h:panelGrid>
+				 <p:outputLabel id="adjunto" value="Adjuntar Archivo: #{procesosArchivadosController.documentoAdjunto.nombre}" for="fileAdjunto"/>
+            			<p:fileUpload id="fileAdjunto" required="true" requiredMessage="Adjunto obligatorio"
+                                fileUploadListener="#{procesosArchivadosController.uploadFile}"
+                                multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                                label="Seleccionar" uploadLabel="Subir"
+                                invalidFileMessage="Tipo de archivo no válido"
+                                invalidSizeMessage="Tamaño de archivo no válido"
+                                cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                auto="true" update="adjunto">                            
+                        </p:fileUpload>                        
+				<div class="buttons">					
+					<p:commandButton process="@this motivo dias fileAdjunto" value="Reactivar" icon="ui-icon-check" actionListener="#{procesosArchivadosController.reactivarProyecto}" update=":formAttached:reactivarProyecto :form:tableProyectos" oncomplete="showModalReactivarProyecto(xhr, status, args)" />
+					<p:commandButton value="Cancelar" styleClass="secondary" icon="ui-icon-cancel" type="button" onclick="PF('reactivarProyecto').hide()" />
+				</div>
+			</p:dialog>
+		</h:form>
+		<script type="text/javascript">
+	        function showModalReactivarProyecto(xhr, status, args) {
+	        	PF('reactivarProyecto').show();
+	            if (args.reactivarProyecto) {
+	            	PF('reactivarProyecto').hide();
+	            }
+	        }
+	        /*function showModalReactivarRGD(xhr, status, args) {
+	        	PF('reactivarRGD').show();
+	            if (args.reactivarRGD) {
+	            	PF('reactivarRGD').hide();
+	            }
+	        }    */   
+    	</script>
+	</ui:define>
+</ui:composition>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+				xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui"
+				xmlns:f="http://java.sun.com/jsf/core" template="/WEB-INF/templates/default-task.xhtml"
+				xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+	<ui:define name="context-extra">
+
+	</ui:define>
+	<ui:define name="content">
+		<f:event type="preRenderView" listener="#{ingresarParticipacionSocialLABean.validarTareaBpm()}" />
+		<h:form>
+			<p:outputLabel rendered="#{!ingresarParticipacionSocialLABean.esEnte}" value="Estimado usuario, para
+				continuar con su proceso de Licenciamiento Ambiental debe iniciar el proceso de Evaluación Social del Proyecto. Presione el botón enviar."/>
+			<p:outputLabel rendered="#{ingresarParticipacionSocialLABean.esEnte}" value="Ingresar Evaluación Social del Proyecto."/>
+
+			<h:panelGrid cellpadding="2" styleClass="w100" rendered="#{ingresarParticipacionSocialLABean.esEnte}">
+
+				<p:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w50, w50">
+					<f:facet name="header">
+						<h:outputText value="Adjuntar Documento de Participación Social *" />
+						<mae:panelGridHeaderHelp conector="planoHelp" help="Adjuntar Documento de Participación Social." width="500px" value="" />
+					</f:facet>
+					<h:panelGrid columns="2" columnClasses="null, field_mrg" id="etiqueta">
+						<p:outputLabel value="#{empty ingresarParticipacionSocialLABean.nombreFichero ? 'Documento(.doc|.pdf|.zip|.rar)' : ingresarParticipacionSocialLABean.nombreFichero}" />
+						<p:commandButton id="download" icon="ui-icon-arrowthick-1-s" ajax="false" styleClass="button-small primary" title="Ver" immediate="true" rendered="#{not empty ingresarParticipacionSocialLABean.nombreFichero}">
+							<p:fileDownload value="#{ingresarParticipacionSocialLABean.getStreamContent()}" />
+						</p:commandButton>
+					</h:panelGrid>
+					<h:outputText />
+					<p:fileUpload fileUploadListener="#{ingresarParticipacionSocialLABean.adjuntarComprobante}" multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(doc|docx|pdf|rar|zip)$/i" label="Seleccionar" uploadLabel="Subir" invalidFileMessage="Tipo de archivo no válido" invalidSizeMessage="Tamaño de archivo no válido" cancelLabel="Cancelar" mode="advanced" dragDropSupport="false" auto="true" update="etiqueta download" />
+					<h:outputText />
+
+
+					<p:outputLabel value="Adjuntar Documento de Participación Social." for="archComprobanteHide" rendered="false" />
+
+					<h:inputHidden id="archComprobanteHide" required="#{!ingresarParticipacionSocialLABean.subido}" requiredMessage="El campo 'Adjuntar Documento de Participación Social' es requerido."></h:inputHidden>
+				</p:panelGrid>
+
+			</h:panelGrid>
+			<div class="buttons main">
+				<p:commandButton value="Enviar" action="#{ingresarParticipacionSocialLABean.iniciarProceso}" title="Enviar datos" icon="ui-icon-check" rendered="#{!ingresarParticipacionSocialLABean.esEnte}"/>
+				<p:commandButton value="Enviar" action="#{ingresarParticipacionSocialLABean.realizarTarea}" title="Enviar datos" icon="ui-icon-check" rendered="#{ingresarParticipacionSocialLABean.esEnte}"/>
+
+			</div>
+
+		</h:form>
+
+	</ui:define>
+</ui:composition>
+</html>

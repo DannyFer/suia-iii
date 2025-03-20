@@ -1,0 +1,119 @@
+<ui:composition template="/WEB-INF/templates/default.xhtml" 
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"	
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+	<ui:define name="content">
+	
+	<h:form id="form" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }">
+		<p:panelGrid columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="Desvincular Autorización Administrativa Ambiental"/>
+			</f:facet>				
+			<h:outputText value="Por favor ingrese el o los criterios de búsqueda del proyecto principal o proyecto a desvincular" />
+			<p:dataTable id="tableProyectos" widgetVar="tableProyectos" value="#{desvinculacionProyectoDigitalizacionController.listaAutorizacionPrincipal}"   
+				filterDelay="600" var="item" rows="10" paginator="true" paginatorAlwaysVisible="false" lazy="true"
+				paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rowsPerPageTemplate="5,10,15" 
+				emptyMessage="#{labels['common.table.empty']}">
+				<p:column style="width:16px">
+					<p:rowToggler/>
+				</p:column>
+				<p:column headerText="Código de proyecto" styleClass="w15" filterBy="#{item.codigo}" filterMatchMode="contains">
+					<h:outputText value="#{item.codigo}" style="word-wrap: break-word;"/>
+				</p:column>
+				<p:column headerText="Número de resolución" styleClass="w10" filterBy="#{item.resolucion}" filterMatchMode="contains">
+					<h:outputText value="#{item.resolucion}" style="word-wrap: break-word;"/>
+				</p:column>
+				<p:column headerText="Fecha de emisión" styleClass="w10" filterBy="#{item.fechaResolucion}" filterMatchMode="contains">
+					<h:outputText value="#{item.fechaResolucion}"/>
+				</p:column>
+				<p:column headerText="Nombre del Proyecto" filterBy="#{item.nombre}" filterMatchMode="contains">
+					<h:outputText value="#{item.nombre}"/>
+				</p:column>
+				<p:column headerText="Sector" filterBy="#{item.sector}" filterMatchMode="equals" styleClass="alCenter w15">
+					<f:facet name="filter">
+						<p:selectOneMenu onchange="PF('tableProyectos').filter()" converter="selectItemConverter2" widgetVar="sectores">
+							<f:selectItem itemLabel="" itemValue="-1" />
+							<f:selectItems value="#{proyectosBean.sectoresItems}" />
+						</p:selectOneMenu>
+					</f:facet>
+					<h:outputText value="#{item.sector}"/>
+				</p:column>
+				<p:column headerText="Tipo de Permiso Ambiental" styleClass="alCenter w20" filterBy="#{item.categoria}" filterMatchMode="equals">
+					<f:facet name="filter">
+						<p:selectOneMenu onchange="PF('tableProyectos').filter()" converter="selectItemConverter2" widgetVar="categorias">
+							<f:selectItem itemLabel="" itemValue="-1" />
+							<f:selectItems value="#{proyectosBean.categoriasItems}" />
+						</p:selectOneMenu>
+					</f:facet>
+					<h:outputText value="#{item.categoria}"/>
+				</p:column>
+				<p:rowExpansion>
+					<p:dataTable id="tableProyectosAsociados" value="#{item.listaProyectosAsociadosVer}"   
+						filterDelay="600" sortBy="#{proyecto.datosProyectosAsociados.codigo}" var="proyecto" rows="10" paginator="true" paginatorAlwaysVisible="false" 
+						paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rowsPerPageTemplate="5,10,15" 
+						emptyMessage="#{labels['common.table.empty']}">
+	
+						<p:column headerText="Tipo">
+							<h:outputText value="#{proyecto.datosProyectosAsociados.tipoProyecto}"/>
+						</p:column>
+						<p:column headerText="Código de trámite">
+							<h:outputText value="#{proyecto.datosProyectosAsociados.codigo}"/>
+						</p:column>
+						<p:column headerText="Código documento">
+							<h:outputText value="#{proyecto.datosProyectosAsociados.codigoDocumento}"/>
+						</p:column>
+						<p:column headerText="Nombre">
+							<h:outputText value="#{proyecto.datosProyectosAsociados.nombre}"/>
+						</p:column>
+						<p:column headerText="Sector">
+							<h:outputText value="#{proyecto.datosProyectosAsociados.sector}"/>
+						</p:column>
+						<p:column headerText="Tipo de Permiso Ambiental">
+							<h:outputText value="#{proyecto.datosProyectosAsociados.categoria}"/>
+						</p:column>
+						<p:column headerText="Responsable de emisión de la AAA">
+							<h:outputText value="#{proyecto.datosProyectosAsociados.areaEmisora}"/>
+						</p:column>
+						<p:column headerText="Responsable de Control y Seguimiento de la AAA" styleClass="alCenter w10">
+							<h:outputText value="#{proyecto.datosProyectosAsociados.areaControl}"/>
+						</p:column>
+						<p:column headerText="Desvincular" styleClass="alCenter w10">
+							<p:commandButton oncomplete="PF('dlgDesvincular').show();" rendered="#{proyecto.datosProyectosAsociados.tipoProyecto ne 'RGD Asociado'}" 
+									actionListener="#{desvinculacionProyectoDigitalizacionController.seleccionarProyecto(proyecto)}" 
+									update=":form:dlgDesvincular" styleClass="button-small primary" icon="ui-icon-play" />
+						</p:column>
+					</p:dataTable>				
+				</p:rowExpansion>
+			</p:dataTable>
+		</p:panelGrid>
+		
+		<div class="buttons main">
+			<p:commandButton  value="Regresar" actionListener="#{desvinculacionProyectoDigitalizacionController.redireccionarBandeja()}" process="@this" />
+		</div>
+		
+		<p:dialog header="Desvinculación de Proyectos" widgetVar="dlgDesvincular" modal="true" width="500" id="dlgDesvincular">
+			<h:outputText value="La Autorización Administrativa Ambiental #{desvinculacionProyectoDigitalizacionController.proyectoVinculado.datosProyectosAsociados.codigo} será desvinculada del proyecto regularizado con resolución N #{desvinculacionProyectoDigitalizacionController.proyectoVinculado.autorizacionAdministrativaAmbiental.resolucion} ¿Está seguro de realizar la desvinculación?" />
+			<div class="buttons">
+				<p:commandButton styleClass="primary" value="Si" oncomplete="PF('dlgDesvincular').hide();PF('dlgSeguirDesvinculando').show()" actionListener="#{desvinculacionProyectoDigitalizacionController.desvincularProyecto()}" update="tableProyectos"/>
+				<p:commandButton styleClass="secundary" type="button" value="No" onclick="PF('dlgDesvincular').hide()" />
+			</div>
+		</p:dialog>
+		
+		<p:dialog header="Desvinculación de Proyectos" widgetVar="dlgSeguirDesvinculando" modal="true" width="500" id="dlgSeguirDesvinculando">
+			<h:outputText value="¿Desea desvincular otra AAA del presente proyecto?" />
+			<div class="buttons">
+				<p:commandButton styleClass="primary" value="Si" oncomplete="PF('dlgSeguirDesvinculando').hide()" update="tableProyectos"/>
+				<p:commandButton styleClass="secundary" value="No" oncomplete="PF('dlgSeguirDesvinculando').hide()" actionListener="#{desvinculacionProyectoDigitalizacionController.inicioDesvinculacion()}" update="tableProyectos"/>
+			</div>
+		</p:dialog>
+		
+	</h:form>
+</ui:define>
+</ui:composition>

@@ -1,0 +1,366 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" 
+xmlns:ui="http://java.sun.com/jsf/facelets" 
+xmlns:h="http://java.sun.com/jsf/html" 
+xmlns:p="http://primefaces.org/ui"
+xmlns:pe="http://primefaces.org/ui/extensions"   
+xmlns:f="http://java.sun.com/jsf/core"
+xmlns:c="http://java.sun.com/jsp/jstl/core" 
+xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" >
+
+			<p:outputPanel id="pnlDatos1" style="text-transform: uppercase;">
+				<p:panel header="Editar Carga Trabajo" rendered="#{cargaTrabajoController.mostrarFormulario and cargaTrabajoController.editarFormulario}">
+				
+				<h:panelGrid columns="2" width="100%" columnClasses="col1,col2">
+					<h:outputLabel value="Fecha de registro de la información" />
+	                <p:calendar id="startDate" styleClass="calendarClass" value="#{cargaTrabajoController.cargaTrabajo.fechaRegistro}" pattern="dd/MM/yyyy hh:mm" readonly="true" disabled="true" >
+	                </p:calendar>
+	                <h:outputLabel value="Técnico asignado" />
+					<p:inputText styleClass="anchoTexto1" value="#{cargaTrabajoController.cargaTrabajo.usuario.persona.nombre}" readonly="true"/>
+					<h:outputLabel value="Unidad Administrativa (Dirección Provincial)" />
+					<p:inputTextarea rows="2" styleClass="anchoTexto1" value="#{cargaTrabajoController.unidadAdministrativa}" 
+					autoResize="false" readonly="true"/>
+	                <h:outputLabel value="Código trámite" rendered="#{!empty cargaTrabajoController.cargaTrabajo.codigoTramite}"/>
+					<p:inputText styleClass="anchoTexto2" value="#{cargaTrabajoController.cargaTrabajo.codigoTramite}" readonly="true" rendered="#{!empty cargaTrabajoController.cargaTrabajo.codigoTramite}"/>
+					
+					<h:outputLabel value="Servicio *" />
+					<p:selectOneMenu filterMatchMode="contains" disabled="#{!cargaTrabajoController.editarDatos}" 
+								required="true" requiredMessage="El campo  servicio es requerido"
+								value="#{cargaTrabajoController.tipoServicioId}" id="cmb_tipo_servicio"
+								style="width: 270px;" >
+						<f:selectItem itemLabel="Seleccione" itemValue="" />
+						<f:selectItems value="#{cargaTrabajoController.listaTipoServicio}" var="servicio" itemLabel="#{servicio.descripcion.toUpperCase()}" itemValue="#{servicio.id}"/>
+						<p:ajax  update=":#{p:component('pgObligaciones')},:#{p:component('labelObservaciones')}"  listener="#{cargaTrabajoController.habilitarObligaciones()}" ></p:ajax>
+					</p:selectOneMenu>
+					<h:outputLabel value="Sector *" />
+					<p:selectOneMenu filterMatchMode="contains" disabled="#{!cargaTrabajoController.editarDatos}"
+								required="true" requiredMessage="El campo  sector es requerido"
+								value="#{cargaTrabajoController.tipoSectorId}" id="cmb_tipo_sector"
+								 style="width: 270px; text-transform: uppercase;" >
+						<f:selectItem itemLabel="Seleccione" itemValue="" />
+						<f:selectItems value="#{cargaTrabajoController.listaTipoSector}" var="sector" itemLabel="#{sector.descripcion.toUpperCase()}" itemValue="#{sector.id}" />
+						<p:ajax  update=":#{p:component('pngBloque')},:#{p:component('pngBloqueLb')},:#{p:component('cmb_tipo_tramite')},:#{p:component('opOperadora')}"  listener="#{cargaTrabajoController.mostrarBloque()}" ></p:ajax>
+					</p:selectOneMenu>
+				</h:panelGrid>
+				<h:panelGrid columns="2" width="50%">
+					<p:outputLabel for="sorExisteProyectoSuia"
+						value="¿El proyecto cuenta con permiso ambiental emitido por el sistema SUIA?" />
+					<p:selectOneRadio id="sorExisteProyectoSuia" value="#{cargaTrabajoController.cargaTrabajo.existeCodigoSuia}" disabled="#{!cargaTrabajoController.editarDatos}">
+						<f:selectItem itemLabel="Sí" itemValue="true" />
+						<f:selectItem itemLabel="No" itemValue="false" />
+						<p:ajax  update=":#{p:component('pngBuscarProyecto')},:#{p:component('somProvincia')},:#{p:component('txtResolucion')},:#{p:component('idFecharesolucion')},:#{p:component('txtProyecto')},:#{p:component('pngBloqueLb')},:#{p:component('pngBloque')}"  listener="#{cargaTrabajoController.mostrarBusqueda()}" ></p:ajax>
+					</p:selectOneRadio>   
+				</h:panelGrid>
+				<h:panelGroup id="pngBuscarProyecto">
+					<h:panelGrid columns="2" width="100%" columnClasses="col1,col2" rendered="#{cargaTrabajoController.cargaTrabajo.existeCodigoSuia}">
+						<h:outputLabel value="No. registro de proyecto" />
+						<h:panelGrid columns="2" >
+						<h:form id="formBuscar">
+							<p:inputText id="txtCodigoProyecto" styleClass="anchoTexto2" style="text-transform: uppercase;" value="#{cargaTrabajoController.cargaTrabajo.codigo}" maxlength="40" readonly="#{!cargaTrabajoController.editarDatos}"/>
+							<p:commandButton id="cmbBuscar" value="#{labels['label.buscar.proyecto']}" styleClass="primary"
+									process="@form"
+									rendered="#{!cargaTrabajoController.presentacinFisica and cargaTrabajoController.editarDatos}"
+									update=":#{p:component('frmDatos')}"
+									action="#{cargaTrabajoController.buscarProyecto()}"
+									icon="ui-icon-search" >
+							</p:commandButton>
+						</h:form>
+						</h:panelGrid>
+					</h:panelGrid>
+					<h:panelGrid columns="2" width="100%" columnClasses="col1,col2" rendered="#{!cargaTrabajoController.cargaTrabajo.existeCodigoSuia}">
+						<h:outputLabel value="No. registro de proyecto en SUIA" />
+						<p:inputText id="txtCodigoProyecto" styleClass="anchoTexto2" style="text-transform: uppercase;" value="#{cargaTrabajoController.cargaTrabajo.codigo}" maxlength="40" readonly="#{!cargaTrabajoController.cargaTrabajo.existeCodigoSuia}" />
+					</h:panelGrid>
+				</h:panelGroup>
+				
+				<h:panelGrid id="pnlgDatos" columns="2" width="100%" columnClasses="col1,col2">
+					<h:outputLabel value="Prioridad *" />
+					<p:selectOneMenu id="somPrioridad" value="#{cargaTrabajoController.cargaTrabajo.prioridad}" style="width: 270px;text-transform: uppercase;" required="true" requiredMessage="El campo prioridad es requerido" disabled="#{!cargaTrabajoController.editarDatos}">
+                		<f:selectItems value="#{cargaTrabajoController.listaPrioridad}" 
+                               var="prioridad" itemLabel="#prioridad.description.toUpperCase()}" itemValue="#{prioridad.value}"/>
+                	</p:selectOneMenu>
+					<h:outputLabel value="Nombre del proyecto/concesión/actividad *" />
+					<p:inputTextarea id="txtProyecto" rows="4" styleClass="anchoTexto1" style="text-transform: uppercase;" value="#{cargaTrabajoController.cargaTrabajo.nombre}" readonly="#{cargaTrabajoController.cargaTrabajo.proyectoId != null}" disabled="#{!cargaTrabajoController.editarDatos}"
+									required="true" requiredMessage="El campo nombre del proyecto/concesión/actividad es requerido" 
+									autoResize="false" maxlength="256" />
+					<h:outputLabel value="No. resolución de permiso ambiental " />
+					<p:inputText id="txtResolucion" styleClass="anchoTexto2" style="text-transform: uppercase;" value="#{cargaTrabajoController.cargaTrabajo.numeroResolucion}" maxlength="32"
+								required="false" requiredMessage="El campo No. resolución de permiso ambiental es requerido"  readonly="#{!cargaTrabajoController.editarDatos}"
+								disabled="#{cargaTrabajoController.existeResolucion}"/>
+					<h:outputLabel id="labelObservaciones" value="Obligaciones ambientales " render="#{cargaTrabajoController.mostrarObligaciones}"/>
+					<h:panelGroup id="pgObligaciones">
+						<h:panelGrid columns="2" width="80%" columnClasses="'width: 170px',col1" rendered="#{cargaTrabajoController.mostrarObligaciones}">
+		      					<p:selectBooleanCheckbox styleClass="primary"  id="smch_auditoria" value="#{cargaTrabajoController.cargaTrabajo.auditoria}" itemLabel="Auditoría" >
+									<p:ajax update="fecha_auditoria" event="change"></p:ajax>
+								</p:selectBooleanCheckbox>
+								<h:panelGrid columns="2" id="fecha_auditoria">
+									<h:outputLabel value="Fecha" rendered="#{cargaTrabajoController.cargaTrabajo.auditoria}"/>
+									<p:calendar  style="width: 200px !important" value="#{cargaTrabajoController.cargaTrabajo.fechaAuditoria}" pattern="dd/MM/yyyy" readonlyInput="true"
+										rendered="#{cargaTrabajoController.cargaTrabajo.auditoria}"
+											required="#{cargaTrabajoController.cargaTrabajo.auditoria}" requiredMessage="El campo fecha de auditoría es requerido"
+											mindate="#{cargaTrabajoController.fechaActual}" navigator="true">
+								</p:calendar>
+								</h:panelGrid>
+		      					<p:selectBooleanCheckbox styleClass="primary"  id="smch_informe" value="#{cargaTrabajoController.cargaTrabajo.informe}" itemLabel="Informes ambientales de cumplimiento" >
+									<p:ajax update="fecha_informe" process="@this" event="change"></p:ajax>
+								</p:selectBooleanCheckbox>
+								<h:panelGrid columns="2" id="fecha_informe">
+									<h:outputLabel value="Fecha" rendered="#{cargaTrabajoController.cargaTrabajo.informe}"/>
+									<p:calendar style="width: 200px !important" value="#{cargaTrabajoController.cargaTrabajo.fechaInforme}" pattern="dd/MM/yyyy" readonlyInput="true"
+											rendered="#{cargaTrabajoController.cargaTrabajo.informe}"
+											required="#{cargaTrabajoController.cargaTrabajo.informe}" requiredMessage="El campo fecha de informe es requerido"
+											mindate="#{cargaTrabajoController.fechaActual}" navigator="true">
+								</p:calendar>
+								</h:panelGrid>
+		      					<p:selectBooleanCheckbox styleClass="primary"  id="smch_monitoreo" value="#{cargaTrabajoController.cargaTrabajo.monitoreo}" itemLabel="Monitoreo" >
+									<p:ajax update="fecha_monitoreo" event="change"></p:ajax>
+								</p:selectBooleanCheckbox>
+								<h:panelGrid columns="2" id="fecha_monitoreo">
+									<h:outputLabel value="Fecha" rendered="#{cargaTrabajoController.cargaTrabajo.monitoreo}"/>
+									<p:calendar style="width: 200px !important" value="#{cargaTrabajoController.cargaTrabajo.fechaMonitoreo}" pattern="dd/MM/yyyy" readonlyInput="true"
+											rendered="#{cargaTrabajoController.cargaTrabajo.monitoreo}"
+											required="#{cargaTrabajoController.cargaTrabajo.monitoreo}" requiredMessage="El campo fecha de monitoreo es requerido"
+											mindate="#{cargaTrabajoController.fechaActual}" navigator="true" >
+								</p:calendar>
+								</h:panelGrid>
+		      					<p:selectBooleanCheckbox styleClass="primary"  id="smch_tdr" value="#{cargaTrabajoController.cargaTrabajo.tdr}" itemLabel="TDR" >
+									<p:ajax update="fecha_tdr" event="change"></p:ajax>
+								</p:selectBooleanCheckbox>
+								<h:panelGrid columns="2" id="fecha_tdr">
+									<h:outputLabel value="Fecha" rendered="#{cargaTrabajoController.cargaTrabajo.tdr}"/>
+									<p:calendar style="width: 200px !important" value="#{cargaTrabajoController.cargaTrabajo.fechaTdr}" pattern="dd/MM/yyyy" readonlyInput="true"
+											rendered="#{cargaTrabajoController.cargaTrabajo.tdr}"
+											required="#{cargaTrabajoController.cargaTrabajo.tdr}" requiredMessage="El campo fecha de tdr es requerido"
+											mindate="#{cargaTrabajoController.fechaActual}" navigator="true">
+								</p:calendar>
+								</h:panelGrid>
+						</h:panelGrid>
+					</h:panelGroup>			
+					<h:outputLabel value="Fecha de resolución de permiso ambiental" />
+					<p:calendar id="idFecharesolucion" styleClass="calendarClass" value="#{cargaTrabajoController.cargaTrabajo.fechaResolucion}" pattern="dd/MM/yyyy" readonlyInput="true"
+								maxdate="#{cargaTrabajoController.fechaActual}" navigator="true"  yearRange="c-10:c"
+								disabled="#{cargaTrabajoController.existeFechaResolucion or !cargaTrabajoController.editarDatos}" >
+					</p:calendar>
+					<h:outputLabel value="Provincia de ubicación del proyecto *" />
+					<h:panelGroup id="pgProvincia">
+						<p:selectOneMenu id="somProvincia" value="#{cargaTrabajoController.provinciaId}" style="width: 270px; text-transform: uppercase;"
+								rendered="#{!cargaTrabajoController.cargaTrabajo.nivelNacional}" 
+								disabled="#{(!cargaTrabajoController.presentacinFisica and cargaTrabajoController.existeProvincia) or !cargaTrabajoController.editarDatos}" 
+								required="true" requiredMessage="El campo provincia es requerido">
+	                		<f:selectItem itemValue="" itemLabel="Seleccione" />
+	                		<f:selectItems value="#{ubicacionGeograficaController.ubicacionGeograficaBean.listaProvincia}" 
+	                               var="provincia" itemLabel="#{provincia.nombre}" itemValue="#{provincia.id}"/>
+	                               <f:selectItem itemLabel="VARIOS" itemValue="1767"/>
+	                               <f:selectItem itemLabel="NO APLICA" itemValue="1768"/>
+	                	</p:selectOneMenu>
+						<h:panelGrid style="" columns="2" columnClasses="col11">
+							<p:selectBooleanCheckbox id="ckValidar2"
+							disabled="#{(!cargaTrabajoController.presentacinFisica and cargaTrabajoController.existeProvincia) or !cargaTrabajoController.editarDatos}"
+							value="#{cargaTrabajoController.cargaTrabajo.nivelNacional}"
+							styleClass="primary">
+							<p:ajax update=":#{p:component('pgProvincia')}" event="change"></p:ajax>
+							</p:selectBooleanCheckbox>
+							<p:outputLabel value="Nivel nacional" style="width: 5%"/>
+						</h:panelGrid>
+					</h:panelGroup>
+                	
+				<h:panelGroup id="pngBloqueLb">
+					<h:outputLabel id="lbTxtBloque" value="Bloque " rendered="#{cargaTrabajoController.esHidrocarburos}"/>
+				</h:panelGroup>
+				<h:panelGroup id="pngBloque">
+					<p:selectOneMenu filter="true" filterMatchMode="contains" value="#{cargaTrabajoController.bloqueId}" id="cmb_bloque" style="width: 270px; text-transform: uppercase;" rendered="#{cargaTrabajoController.esHidrocarburos}" required="#{cargaTrabajoController.esHidrocarburos}" requiredMessage="El campo bloque es requerido" >
+								<f:selectItem itemLabel="Seleccione" itemValue="" />
+								<f:selectItems value="#{cargaTrabajoController.listaBloques}" 
+								var="bloque" itemLabel="#{bloque.descripcion}" itemValue="#{bloque.id}"/>
+					</p:selectOneMenu>
+				</h:panelGroup>
+					
+					<h:outputLabel value="Remitente/sujeto de control (obtenido del quipux) *" />
+					<p:outputPanel id="opOperadora">
+						<p:selectOneMenu filter="true" filterMatchMode="contains" disabled="#{!cargaTrabajoController.editarDatos}"
+									rendered="#{cargaTrabajoController.tipoSectorId eq '1534'}"
+									required="true" requiredMessage="El campo remitente es requerido"
+									value="#{cargaTrabajoController.operadoraId}" id="cmb_operadora"
+									style=" width: 270px;text-transform: uppercase;">
+									<f:selectItem itemLabel="Seleccione" itemValue="" />
+									<f:selectItems value="#{cargaTrabajoController.listaOperadoras}" 
+									var="operadora" itemLabel="#{operadora.descripcion}" itemValue="#{operadora.id}" />
+									<p:ajax  update=":#{p:component('opOperadora')}"  ></p:ajax>
+						</p:selectOneMenu>
+						<p:inputText id="txtRemitente" styleClass="anchoTexto1" style="text-transform: uppercase;" value="#{cargaTrabajoController.cargaTrabajo.remitente}" maxlength="265" readonly="#{!cargaTrabajoController.editarDatos}"
+									rendered="#{cargaTrabajoController.tipoSectorId ne '1534' or cargaTrabajoController.operadoraId eq '1646'}" 
+									required="true" requiredMessage="El campo remitente es requerido"  />
+					</p:outputPanel>
+					<h:outputLabel value="Asunto (obtenido del quipux) *" />
+					<p:inputText id="txtAsunto" styleClass="anchoTexto1" style="text-transform: uppercase;" value="#{cargaTrabajoController.cargaTrabajo.asunto}" maxlength="256" required="true" requiredMessage="El campo asunto es requerido" readonly="#{!cargaTrabajoController.editarDatos}" />
+					<!--  <h:outputLabel value="Estado del trámite *" />
+					<p:selectOneMenu value="#{cargaTrabajoController.cargaTrabajo.estadoTramite}" style="width: 270px"  required="true" requiredMessage="El campo estado del trámite es requerido" >
+                		<f:selectItems value="#{cargaTrabajoController.listaEstados}" 
+                               var="estado" itemLabel="#{estado.description}" itemValue="#{estado.value}"/>
+                         <p:ajax update=":#{p:component('pnlRevision')}" />
+                	</p:selectOneMenu> -->
+				</h:panelGrid>
+				</p:panel>
+
+				<p:outputPanel id="pnlRevision" >
+				<p:panel rendered="#{cargaTrabajoController.mostrarFormulario and cargaTrabajoController.editarFormulario and cargaTrabajoController.cargaTrabajoRevision ne null}" header="Revisión">
+					<h:panelGrid columns="2" width="100%" columnClasses="col1,col2">
+						<h:outputLabel value="Estado de la revisión *" />
+						<p:selectOneMenu value="#{cargaTrabajoController.cargaTrabajoRevision.estadoRevision}" style="width: 270px"  required="true" requiredMessage="El campo estado de la revisión es requerido" >
+	                		<f:selectItems value="#{cargaTrabajoController.listaEstados}" 
+	                               var="estado" itemLabel="#{estado.description.toUpperCase()}" itemValue="#{estado.value}"/>
+	                         <p:ajax update=":#{p:component('pnlRevision')}" />
+	                	</p:selectOneMenu>
+						<h:outputLabel value="Meta (mes tentativo de respuesta) *" />
+						<h:panelGroup>
+							<p:selectOneMenu value="#{cargaTrabajoController.cargaTrabajoRevision.anioMeta}" id="cmb_anio" style="width: 100px; text-transform: uppercase;"  
+										required="#{cargaTrabajoController.metaId ne 1946}" requiredMessage="El campo año es requerido">
+										<f:selectItem itemLabel="Seleccione" itemValue="" />
+										<f:selectItems value="#{cargaTrabajoController.listaAniosMeta}" 
+										var="anio" itemLabel="#{anio.toString()}" itemValue="#{anio.toString()}"/>
+							</p:selectOneMenu>
+							<p:selectOneMenu value="#{cargaTrabajoController.metaId}" id="cmb_mes" style="width: 170px"  required="true" requiredMessage="El campo meta es requerido">
+										<f:selectItem itemLabel="Seleccione" itemValue="" />
+										<f:selectItems value="#{cargaTrabajoController.listaMeses}" 
+										var="meta" itemLabel="#{meta.descripcion.toUpperCase()}" itemValue="#{meta.id}"/>
+		                               <p:ajax update="cmb_anio" ></p:ajax>
+							</p:selectOneMenu>
+						</h:panelGroup>
+						</h:panelGrid>
+					<p:panel header="Eventos de entrada" id="pnlEntradas">
+					<h:panelGrid columns="2" width="100%" columnClasses="col1,col2">
+						<h:outputLabel value="No. Documento (obtenido del quipux) *" />
+						<p:inputText value="#{cargaTrabajoController.cargaTrabajoRevision.documentoEntrada}" styleClass="anchoTexto2"  style="text-transform: uppercase;" maxlength="30" required="true" requiredMessage="El campo documento de entrada es requerido"/>
+						<h:outputLabel value="Fecha de entrada (fecha de ingreso de quipux) *" />
+						<p:calendar id="idFechaEntrada" styleClass="calendarClass" value="#{cargaTrabajoController.cargaTrabajoRevision.fechaEntrada}" pattern="dd/MM/yyyy" readonlyInput="true" navigator="true"
+						required="true" requiredMessage="El campo fecha de entrada es requerido" 
+						mindate="#{cargaTrabajoController.fechaInicial}" maxdate="#{cargaTrabajoController.fechaActual}">
+						<p:ajax event="dateSelect" update=":#{p:component('idfechaSalida')}" />
+						</p:calendar>
+						<h:outputLabel value="Tipo de trámite *" />
+						<p:selectOneMenu filter="true" filterMatchMode="contains"
+									required="true" requiredMessage="El campo tipo de trámite es requerido"
+									value="#{cargaTrabajoController.tipoTramiteId}" id="cmb_tipo_tramite"
+									style=" width: 650px;">
+									<f:selectItem itemLabel="Seleccione" itemValue="" />
+									<f:selectItems value="#{cargaTrabajoController.listaTipoTramite}" 
+									var="tramite" itemLabel="#{tramite.descripcion.toUpperCase()}" itemValue="#{tramite.id}" />
+						</p:selectOneMenu>
+					</h:panelGrid>
+				</p:panel>
+				<p:panel header="Eventos de Salida" id="pnlSalidas" rendered="#{cargaTrabajoController.cargaTrabajoRevision.estadoRevision eq 'T'}">
+					<h:panelGrid columns="2" width="100%" columnClasses="col1,col2"  rendered="#{cargaTrabajoController.cargaTrabajoRevision.estadoRevision eq 'T'}">
+						<h:outputLabel value="Documento de salida (No. de oficio obtenido del quipux) *" />
+						<p:inputText placeholder="" styleClass="anchoTexto2" style="text-transform: uppercase;" value="#{cargaTrabajoController.cargaTrabajoRevision.documentoSalida}" maxlength="30" required="true" requiredMessage="El campo documento de salida es requerido"/>
+						<h:outputLabel value="Fecha de salida (fecha de emisión del quipux) *" />
+						<p:calendar id="idfechaSalida" styleClass="calendarClass" value="#{cargaTrabajoController.cargaTrabajoRevision.fechaSalida}" pattern="dd/MM/yyyy" readonlyInput="true" mindate="#{cargaTrabajoController.cargaTrabajoRevision.fechaEntrada}" navigator="true" 
+									required="true" requiredMessage="El campo fecha de salida es requerido" maxdate="#{cargaTrabajoController.fechaActual}">
+						</p:calendar>
+						<h:outputLabel value="Pronunciamiento (del trámite ala emisión) *" />
+						<p:selectOneMenu value="#{cargaTrabajoController.cargaTrabajoRevision.pronunciamiento}" style="width: 270px;" required="true" requiredMessage="El campo pronunciamiento del trámite es requerido">
+	                		<f:selectItems value="#{cargaTrabajoController.listaPronunciamientos}" 
+	                               var="pronunciamiento" itemLabel="#{pronunciamiento.description.toUpperCase()}" itemValue="#{pronunciamiento.value}"/>
+	                               <p:ajax update=":#{p:component('txtObservacion')}, :#{p:component('txtplazo')}" listener="#{cargaTrabajoController.inicializarValores()}"></p:ajax>
+	                	</p:selectOneMenu>
+						<h:outputLabel value="Plazo (No. de días para respuesta) *" />
+						<p:inputText id="txtplazo" validatorMessage="El campo plazo (No. de días para respuesta) no se encuentra entre los valores permitidos 0 y 999." value="#{cargaTrabajoController.cargaTrabajoRevision.plazo}" styleClass="anchoTexto2"  maxlength="3" readonly="#{cargaTrabajoController.cargaTrabajoRevision.pronunciamiento eq 'A'}">
+							<f:validateDoubleRange minimum="0" maximum="999" />
+							<pe:keyFilter mask="num" />
+							<p:ajax process="txtplazo" immediate="true" />
+						</p:inputText>
+						<p:outputPanel>	
+							<h:outputLabel value="Quejas (incluir numero de quejas recibidas)" />
+							<mae:btnHelp help="#{formatearAyudaController.obtenerAyuda(helps['carga.control.quejasAyuda'])}" conector="quejasAyuda" />
+						</p:outputPanel>
+							<p:inputText id="txtQuejas" validatorMessage="El campo no. de quejas (incluir numero de quejas recibidas) no se encuentra entre los valores permitidos 0 y 999."  value="#{cargaTrabajoController.cargaTrabajoRevision.quejas}" styleClass="anchoTexto2" maxlength="3">
+								<f:validateDoubleRange minimum="0" maximum="999" />
+								<pe:keyFilter mask="num" />
+								<p:ajax process="txtQuejas" immediate="true" />
+							</p:inputText>
+						<h:outputLabel value="No. capacitaciones" rendered="#{cargaTrabajoController.tipoTramiteId eq 1941 
+														or cargaTrabajoController.tipoTramiteId eq 1626 }"/>
+						<p:inputText id="txtcapacitacion" validatorMessage="El campo No. de capacitaciones no se encuentra entre los valores permitidos 0 y 99." value="#{cargaTrabajoController.cargaTrabajoRevision.capacitaciones}" styleClass="anchoTexto2"  maxlength="3" readonly="#{cargaTrabajoController.cargaTrabajoRevision.pronunciamiento eq 'A'}"
+												rendered="#{cargaTrabajoController.tipoTramiteId eq 1941 or cargaTrabajoController.tipoTramiteId eq 1626 }">
+							<f:validateDoubleRange minimum="0" maximum="999" />
+							<pe:keyFilter mask="num" />
+							<p:ajax process="txtcapacitacion" immediate="true" />
+						</p:inputText>
+						<h:outputLabel value="Observaciones" />
+						<p:inputTextarea id="txtObservacion" value="#{cargaTrabajoController.cargaTrabajoRevision.observacion}" rows="4" styleClass="anchoTexto1" style="text-transform: uppercase;" 
+						required="#{cargaTrabajoController.cargaTrabajoRevision.pronunciamiento eq 'O'}" requiredMessage="El campo observaciones es requerido" autoResize="false" maxlength="256" />
+					</h:panelGrid>
+				</p:panel>
+				</p:panel>
+				</p:outputPanel>
+
+			<p:dataList id="listadoRevisiones" type="none" value="#{cargaTrabajoController.listaCargarTrabajoRevision}" var="revision" rowIndexVar="index" emptyMessage="" rendered="#{cargaTrabajoController.listaCargarTrabajoRevision.size() gt 0}">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{cargaTrabajoController.mostrarFormulario and cargaTrabajoController.editarFormulario }" >
+				<f:facet name="header">
+					<h:outputText value="Revisión #{(index + 1)}" />					
+					<p:commandButton styleClass="button-small toRight field_mrg" process="@this" update=":#{p:component('pnlRevision')}, :#{p:component('listadoRevisiones')}" 
+									actionListener="#{cargaTrabajoController.editarRevision(revision)}" icon="ui-icon-pencil" rendered="#{(index + 1) eq cargaTrabajoController.listaCargarTrabajoRevision.size()}" />
+				</f:facet>
+				<p:panel header="Eventos de entrada">
+					<h:panelGrid columns="2" width="100%" columnClasses="col1,col2">
+					<h:outputLabel value="Estado de la revisión " />
+						<p:selectOneMenu value="#{revision.estadoRevision}" style="width: 270px" disabled="true" >
+	                		<f:selectItems value="#{cargaTrabajoController.listaEstados}" 
+	                               var="estado" itemLabel="#{estado.description}" itemValue="#{estado.value}"/>
+	                	</p:selectOneMenu>
+						<h:outputLabel value="Meta (mes tentativo de respuesta) " />
+						<h:panelGroup>
+							<p:selectOneMenu value="#{revision.anioMeta}" style="width: 100px"  disabled="true">
+										<f:selectItem itemLabel="Seleccione" itemValue="" />
+										<f:selectItems value="#{cargaTrabajoController.listaAnios}" 
+										var="anio" itemLabel="#{anio.toString()}" itemValue="#{anio.toString()}"/>
+							</p:selectOneMenu>
+							<p:selectOneMenu value="#{(revision.meta eq null)?null:revision.meta.id}" style="width: 170px"  disabled="true">
+										<f:selectItem itemLabel="Seleccione" itemValue="" />
+										<f:selectItems value="#{cargaTrabajoController.listaMeses}" 
+										var="meta" itemLabel="#{meta.descripcion}" itemValue="#{meta.id}"/>
+							</p:selectOneMenu>
+						</h:panelGroup>
+						<h:outputLabel value="Documento de entrada (No. de oficio obtenido del quipux)" />
+						<p:inputText value="#{revision.documentoEntrada}" styleClass="anchoTexto2" maxlength="30" readonly="true"/>
+						<h:outputLabel value="Fecha de entrada (fecha de ingreso de quipux)" />
+						<p:calendar styleClass="calendarClass" value="#{revision.fechaEntrada}" pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" disabled="true">
+						</p:calendar>
+						<h:outputLabel value="Tipo de trámite" />
+						<p:selectOneMenu filter="true" filterMatchMode="contains" disabled="true"
+									value="#{(revision.tipoTramite eq null)?null:revision.tipoTramite.id}" id="cmb_tipo_tramite"
+									style=" width: 650px;">
+									<f:selectItem itemLabel="Seleccione" itemValue="" />
+									<f:selectItems value="#{cargaTrabajoController.listaTipoTramite}" 
+									var="tramite" itemLabel="#{tramite.descripcion}" itemValue="#{tramite.id}" />
+						</p:selectOneMenu>
+					</h:panelGrid>
+				</p:panel>
+
+				<p:panel header="Eventos de Salida" id="pnlSalidas" rendered="#{revision.estadoRevision eq 'T'}">
+					<h:panelGrid columns="2" width="100%" columnClasses="col1,col2"  rendered="#{revision.estadoRevision eq 'T'}">
+						<h:outputLabel value="Documento de salida (No. de oficio obtenido del quipux)" />
+						<p:inputText placeholder="" styleClass="anchoTexto2" value="#{revision.documentoSalida}" maxlength="30"  readonly="true"/>
+						<h:outputLabel value="Fecha de salida (fecha de emisión del quipux) " />
+						<p:calendar id="idfechaSalida" styleClass="calendarClass" value="#{revision.fechaSalida}" pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" disabled="true">
+						</p:calendar>
+						<h:outputLabel value="Pronunciamiento (del trámite ala emisión) " />
+						<p:selectOneMenu value="#{revision.pronunciamiento}" style="width: 270px;" disabled="true">
+	                		<f:selectItems value="#{cargaTrabajoController.listaPronunciamientos}" 
+	                               var="pronunciamiento" itemLabel="#{pronunciamiento.description}" itemValue="#{pronunciamiento.value}"/>
+	                               <p:ajax update=":#{p:component('txtObservacion')}"></p:ajax>
+	                	</p:selectOneMenu>
+						<h:outputLabel value="Plazo (No. de días para respuesta)" />
+						<p:inputText id="txtplazo" value="#{revision.plazo}" styleClass="anchoTexto2"  maxlength="3" readonly="true"/>
+						<h:outputLabel value="No. de Quejas (incluir numero de quejas recibidas)" />
+						<p:inputText id="txtQuejas"   value="#{revision.quejas}" styleClass="anchoTexto2" maxlength="3" readonly="true"/>
+						<h:outputLabel value="No. de capacitaciones" rendered="#{cargaTrabajoController.tipoTramiteId eq 1941 or cargaTrabajoController.tipoTramiteId eq 1626 }"/>
+						<p:inputText id="txtCapacitaciones"   value="#{revision.capacitaciones}" styleClass="anchoTexto2" maxlength="2" readonly="true" rendered="#{cargaTrabajoController.tipoTramiteId eq 1941 or cargaTrabajoController.tipoTramiteId eq 1626 }"/>
+						<h:outputLabel value="Observaciones" />
+						<p:inputTextarea id="txtObservacion" value="#{revision.observacion}" rows="4" styleClass="anchoTexto1" autoResize="false" maxlength="256" readonly="true"/>
+					</h:panelGrid>
+				</p:panel>
+			</p:panelGrid>
+			</p:dataList>
+
+			</p:outputPanel>
+
+</ui:composition>

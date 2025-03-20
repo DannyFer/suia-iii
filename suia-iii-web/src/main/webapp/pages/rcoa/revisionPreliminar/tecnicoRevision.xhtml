@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+	
+	<ui:define name="context-extra">
+		<h:outputText value="Revisar" rendered="#{revisarDiagnosticoAmbientalController.mostrarDiagnosticoAmbiantel}"/>
+		<h:outputText value="Diagnóstico Ambiental" rendered="#{revisarDiagnosticoAmbientalController.mostrarDiagnosticoAmbiantel}"/>
+		<p:commandButton action="#{revisarDiagnosticoAmbientalController.abrirDiagnosticoAmbiental()}" icon="ui-icon-search" styleClass="primary button-small" 
+				rendered="#{revisarDiagnosticoAmbientalController.mostrarDiagnosticoAmbiantel}"/>
+	</ui:define>
+	<ui:define name="content">
+
+		<style type="text/css">
+.cssRadioDisabled .ui-radiobutton .ui-state-active {
+	background: #008a8a !important;
+}
+</style>
+		<ui:remove>
+			<f:event type="preRenderView"
+				listener="#{revisarDiagnosticoAmbientalController.validarTareaBpm()}" />
+		</ui:remove>
+
+		<h:form id="form">
+			<h:panelGrid styleClass="w100" columns="1">
+
+				<p:panel>
+					<h:panelGrid columns="2" layout="grid" styleClass="w100">
+						<p:selectOneRadio id="tipo" required="true" disabled="true"
+							styleClass="cssRadioDisabled"
+							value="#{revisarDiagnosticoAmbientalController.existeObservacionRegistroPreliminar}">
+							<f:selectItem itemValue="false" itemLabel="Aprobación" />
+							<f:selectItem itemValue="true" itemLabel="Observación" />
+							<p:ajax process="tipo" immediate="true" />
+						</p:selectOneRadio>
+					</h:panelGrid>
+
+					<h:panelGrid columns="1" layout="grid" styleClass="w100" 
+						rendered="#{revisarDiagnosticoAmbientalController.existeObservacionRegistroPreliminar}">
+						<h:outputLabel value="¿Las observaciones pueden ser subsanadas? *"
+							styleClass="bold" />
+						<p:selectOneRadio id="observaciones" required="true"
+							value="#{revisarDiagnosticoAmbientalController.sonObservacionesSubsanables}"
+							requiredMessage="El campo '¿Las observaciones pueden ser subsanadas? es requerido">
+							<f:selectItem itemValue="true" itemLabel="Si" />
+							<f:selectItem itemValue="false" itemLabel="No" />
+							<p:ajax process="observaciones" immediate="true" />
+						</p:selectOneRadio>
+					</h:panelGrid>
+				</p:panel>
+
+				<br />
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Detalles de la revisión" />
+					</f:facet>
+
+					<h:outputLabel
+						rendered="#{revisarDiagnosticoAmbientalController.esProyectoNuevo}"
+						value="¿El proyecto se encuentra en operación? *" styleClass="bold" />
+					<p:selectOneRadio id="ejecucion" required="true" 
+						rendered="#{revisarDiagnosticoAmbientalController.esProyectoNuevo}"
+						value="#{revisarDiagnosticoAmbientalController.esProyectoEnEjecucion}"
+						requiredMessage="El campo '¿El proyecto se encuentra en operación?' es requerido">
+						<f:selectItem itemValue="true" itemLabel="Si" />
+						<f:selectItem itemValue="false" itemLabel="No" />
+						<p:ajax process="ejecucion" immediate="true"
+							update="pnlObsDiagnostico pnlMotivoDiagnostico" />
+					</p:selectOneRadio>
+					
+					<h:panelGroup id="pnlMotivoDiagnostico">
+						<h:panelGrid columns="2" styleClass="w90" columnClasses="w30, field_mrg w70" rendered="#{revisarDiagnosticoAmbientalController.esProyectoEnEjecucion}">
+							<h:outputLabel value="Motivo Ingreso diagnóstico ambiental *" />
+							<p:inputTextarea placeholder="Entre como mínimo 1 y como máximo 500 caracteres."  required="true" 
+							requiredMessage="El campo motivo de diagnóstico ambiental es requerido."
+							id="nombre" rows="2" styleClass="w100" autoResize="false" maxlength="500" value="#{revisarDiagnosticoAmbientalController.proyecto.motivoDiagnosico}" >
+								<f:validateLength minimum="1" />
+							</p:inputTextarea>
+						</h:panelGrid>
+					</h:panelGroup>
+				
+					<h:outputLabel for="obsDiagnostico"
+						rendered="#{!revisarDiagnosticoAmbientalController.esProyectoNuevo}"
+						value="¿Tiene observaciones por Diagnóstico Ambiental? *"
+						styleClass="bold" />
+					<p:selectOneRadio id="obsDiagnostico" required="true" disabled="true"
+						rendered="#{!revisarDiagnosticoAmbientalController.esProyectoNuevo}"
+						value="#{revisarDiagnosticoAmbientalController.existeObservacionDiagnostico}"
+						requiredMessage="El campo '¿Tiene observaciones por Diagnóstico Ambiental?' es requerido"
+						styleClass="cssRadioDisabled">
+						<f:selectItem itemValue="true" itemLabel="Si" />
+						<f:selectItem itemValue="false" itemLabel="No" />
+						<p:ajax process="obsDiagnostico" immediate="true"
+							update="pnlObsDiagnostico pnlFechaInicio" />
+					</p:selectOneRadio>
+
+					<ui:remove>
+						<h:outputLabel for="actualizacion"
+							value="¿El proyecto es una actualización de una Autorización Administrativa Ambiental? *"
+							styleClass="bold" />
+						<p:selectOneRadio id="actualizacion" required="true"
+							value="#{revisarDiagnosticoAmbientalController.esActualizacionAAA}"
+							requiredMessage="El campo '¿El proyecto es una actualización de una Autorización Administrativa Ambiental?' es requerido">
+							<f:selectItem itemValue="Si" itemLabel="Si" />
+							<f:selectItem itemValue="No" itemLabel="No" />
+							<p:ajax process="actualizacion" immediate="true" />
+						</p:selectOneRadio>
+					</ui:remove>
+
+					<h:panelGroup id="pnlFechaInicio">
+						<h:panelGrid columns="1" styleClass="w100" rendered="#{!revisarDiagnosticoAmbientalController.existeObservacionRegistroPreliminar}">
+							<h:outputLabel
+								value="Registrar la fecha en el que el operador debe iniciar la Regularización Ambiental *"
+								styleClass="bold" />
+							<h:panelGrid columns="1" styleClass="w15">
+								<p:calendar id="startDate" required="true" style="width: 25%;"
+									value="#{revisarDiagnosticoAmbientalController.proyecto.fechaInicioRegularizacionAmbiental}"
+									pattern="dd/MM/yyyy" readonlyInput="true"
+									requiredMessage="El campo 'Fecha en el que el operador debe iniciar la Regularización Ambiental' es requerido">
+								</p:calendar>
+							</h:panelGrid>
+						</h:panelGrid>
+					</h:panelGroup>
+
+					<h:inputHidden
+						validator="#{revisarDiagnosticoAmbientalController.validateDatos}" />
+				</p:panelGrid>
+				<h:panelGroup id="pnlObsDiagnostico">
+				<ui:remove>
+					<h:panelGroup
+						rendered="#{revisarDiagnosticoAmbientalController.esProyectoEnEjecucion or revisarDiagnosticoAmbientalController.existeObservacionDiagnostico}">
+						<observaciones:tablaObservacionesPreliminar
+							idComponent="obsDiagnosticoAmbiental"
+							seccion="Observaciones diagnostico ambiental" aparace="true"
+							mostrarSiVacio="true" idActualizar=":form:obsDiagnostico"
+							idClase="#{revisarDiagnosticoAmbientalController.proyecto.id}"
+							nombreClase="observacionesDiagnosticoAmbiental"
+							soloLectura="false" />
+					</h:panelGroup>
+				</ui:remove>
+				</h:panelGroup>
+			</h:panelGrid>
+			<br />
+			<h:panelGrid styleClass="w100" columns="1" id="pnlObsOficio"
+				rendered="#{revisarDiagnosticoAmbientalController.observacionesOficio.size() >0}">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Observaciones Ofico Pronuncimiento" />
+					</f:facet>
+					<observaciones:tablaObservacionesPreliminar idComponent="obsOficio"
+						seccion="Pronunciamiento observaciones no subsanables"
+						componenteActualizarEliminar="pnlObsOficio" aparace="true"
+						mostrarSiVacio="false"
+						idClase="#{revisarDiagnosticoAmbientalController.oficioPronunciamiento.id}"
+						nombreClase="oficioObservacionesNoSubsanables" soloLectura="true" />
+				</p:panelGrid>
+			</h:panelGrid>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+
+					<p:commandButton value="Enviar" process="form"
+						action="#{revisarDiagnosticoAmbientalController.finalizar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

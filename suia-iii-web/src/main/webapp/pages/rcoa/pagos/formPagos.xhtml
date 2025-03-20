@@ -1,0 +1,431 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+	 <script src="https://cdn.kushkipagos.com/kushki-checkout.js" ></script> 
+	 <script type="text/javascript">document.oncontextmenu = function(){return false;}</script> 
+	 	<style type="text/css">
+		.btnsHelp .ui-button .ui-icon {
+		background-image: url("/suia-iii/javax.faces.resource/images/ui-icons_222222_256x240.png.jsf?ln=primefaces-suia");
+		}
+		}
+		</style>
+		<h:form id="formPagoRcoa">
+			<p:outputPanel id="otpTipoPagos">
+				<h:panelGrid styleClass="panel_data w100" columns="2" id="pnlGenerarNut" rendered="#{pagoRcoaBean.generarNUT}"
+					columnClasses="header w25, bold w75" rowClasses="null, alt">
+					<h:outputText value="Forma de Pago" rendered="#{pagoRcoaBean.validaNutKushki}"/>
+					<h:panelGroup id="l2group" rendered="#{pagoRcoaBean.validaNutKushki}">
+					<p:selectOneMenu id="institucionBancariaNut" converter="selectItemConverter" disabled="#{pagoRcoaBean.generarNUT and (!pagoRcoaBean.validaNutKushki or pagoRcoaBean.documentosNUT.size() > 0)}"
+						value="#{pagoRcoaBean.institucionFinancieraNut}" styleClass="w100">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{pagoRcoaBean.institucionesFinancierasNut}"
+							var="institucion" itemLabel="#{institucion.nombreInstitucion}" itemValue="#{institucion}" />
+						<p:ajax update="otpTipoPagos pnl_transaccionesRcoa :#{p:component('panelKushki')}, :#{p:component('opTransacciones')}" event="change" process="@this" listener="#{generarNUTController.mostratVentana()}"/>
+					</p:selectOneMenu>
+					</h:panelGroup>
+					<h:outputText value="Forma de Pago" rendered="#{!pagoRcoaBean.validaNutKushki}" />
+					<h:panelGroup rendered="#{!pagoRcoaBean.validaNutKushki}">
+						<p:column style="text-align: left; background-color: #f5f5f5;">
+								<h:outputText value="#{pagoRcoaBean.entidad_Pagada}" style="text-align: left; background-color: #f5f5f5;"/>
+                    	</p:column>								
+					</h:panelGroup>
+				
+					<h:outputText value="Generar NUT" rendered="#{pagoRcoaBean.generarNUT and pagoRcoaBean.tipoPago eq 'NUT' and pagoRcoaBean.documentosNUT.size() == 0 and pagoRcoaBean.validaNutKushki}" />
+					<h:panelGroup rendered="#{pagoRcoaBean.generarNUT and pagoRcoaBean.tipoPago eq 'NUT' and pagoRcoaBean.documentosNUT.size() == 0 and pagoRcoaBean.validaNutKushki}">
+						<p:commandButton icon="	ui-icon-document" styleClass="primary button-small" rendered="#{pagoRcoaBean.generarNUT}"
+							action="#{generarNUTController.generarNUT()}" process="@this pnlValidar" update="pnlGenerarNut :formPagoInformacion">
+							<p:confirm header="Aviso" icon="ui-icon-alert" 
+								message="Al generar el NUT obtendrá la orden de pago de su trámite en la institución bancaria seleccionada, ¿Está seguro de solicitar la generación del mismo?"/>
+						</p:commandButton>
+						<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+							<p:commandButton value="Cancelar" type="button"
+								styleClass="ui-confirmdialog-no primary toRight" icon="ui-icon-closethick" />
+							<p:commandButton value="Generar" type="button"
+								styleClass="ui-confirmdialog-yes primary toRight" icon="ui-icon-check" />
+						</p:confirmDialog>
+					</h:panelGroup>
+					<h:outputText value="Descargar NUT" rendered="#{pagoRcoaBean.documentosNUT.size() > 0 and pagoRcoaBean.validaNutKushki}" />
+					<h:panelGroup rendered="#{pagoRcoaBean.documentosNUT.size() > 0}">
+						<p:dataTable styleClass="noHeader borderless" value="#{pagoRcoaBean.documentosNUT}" var="documento">
+							<p:column style="text-align: left; background-color: #f5f5f5;">
+								<h:outputText value="#{documento.nombre}" />
+								<p:commandButton icon="ui-icon-arrowthick-1-s" styleClass="button-small primary" title="Ver"
+									style="margin-left: 10px" ajax="false" immediate="true">
+									<p:fileDownload value="#{generarNUTController.descargar(documento)}" />
+								</p:commandButton>
+							</p:column>
+						</p:dataTable>
+					</h:panelGroup>				
+				</h:panelGrid>
+			</p:outputPanel>
+			
+			<h:panelGroup id="pnlValidar">
+				<h:inputHidden validator="#{generarNUTController.validateValorProyecto}" />
+			</h:panelGroup>
+			<p:panelGrid id="pnl_transaccionesRcoa" rendered="#{!pagoRcoaBean.generarNUT or pagoRcoaBean.esEnteAcreditado}" columns="3"
+							layout="grid" styleClass="w100" columnClasses="w33, field_mrg w33, field_mrg w33">
+				<f:facet name="header">
+					<mae:panelGridHeaderHelp value="Ingreso de transacciones" conector="generalHelp" render="false" 
+							image="#{request.contextPath}/resources/images/help-how.png" help="#{helps['no.help.yet']}" />
+				</f:facet>
+				<p:outputLabel for="institucionBancaria" value="Instituci&oacute;n bancaria" />
+				<p:outputLabel for="numeroTransaccion" value="N&uacute;mero de comprobante" />
+				<h:outputText />
+				<p:selectOneMenu id="institucionBancaria" converter="selectItemConverter" required="true" 
+					disabled="#{pagoRcoaBean.cumpleMontoProyecto}"
+					value="#{pagoRcoaBean.transaccionFinanciera.institucionFinanciera}" styleClass="w100">
+					<f:selectItems value="#{pagoRcoaBean.institucionesFinancieras}"
+						var="institucion" itemLabel="#{institucion.nombreInstitucion}" itemValue="#{institucion}" />
+					<p:ajax update="pnl_transaccionesRcoa" event="change" process="@this"/>
+				</p:selectOneMenu>
+				<pe:inputNumber id="numeroTransaccion" placeholder="Ej: 584777"
+					thousandSeparator="" maxValue="9999999999" minValue="0"
+					required="true" requiredMessage="El campo N&uacute;mero de comprobante es requerido" autocomplete="off" disabled="#{pagoRcoaBean.cumpleValorRegistro}" 
+					value="#{pagoRcoaBean.transaccionFinanciera.numeroTransaccion}">
+					<f:validateDoubleRange minimum="1" />
+				</pe:inputNumber>
+				<p:commandButton value="Adicionar" icon="ui-icon-plusthick" disabled="#{pagoRcoaBean.cumpleValorRegistro}" action="#{generarNUTController.guardarTransaccion(1)}" 
+				styleClass="primary" update=":#{p:component('opTransacciones')}, :#{p:component('pnl_transaccionesRcoa')}" process="@this numeroTransaccion institucionBancaria pnlValidar"/>
+			</p:panelGrid>
+
+			<br />
+			<p:panelGrid id="pnl_transaccionesRcoa_cobertura" columns="3" layout="grid" 
+				styleClass="w100" rendered="#{!pagoRcoaBean.generarNUT and pagoRcoaBean.mostrarPnlCobertura}"
+				columnClasses="w50, field_mrg w30, field_mrg w20">
+				<f:facet name="header">
+					<mae:panelGridHeaderHelp value="Ingreso de transacciones cobertura vegetal"
+						conector="generalHelp" render="false"
+						image="#{request.contextPath}/resources/images/help-how.png"
+						help="#{helps['no.help.yet']}" />
+				</f:facet>
+				<p:outputLabel for="institucionBancariaCobertura" value="Institución bancaria" />
+				<p:outputLabel for="numeroTransaccionCobertura" value="Número de comprobante" />
+				<h:outputText />
+				
+				<p:selectOneMenu id="institucionBancariaCobertura" converter="selectItemConverter" required="true" disabled="#{pagoRcoaBean.cumpleMontoCobertura}"
+					value="#{pagoRcoaBean.transaccionFinancieraCobertura.institucionFinanciera}" styleClass="w100">
+					<f:selectItems value="#{pagoRcoaBean.institucionesFinancierasCobertura}"
+						var="institucion" itemLabel="#{institucion.nombreInstitucion}" itemValue="#{institucion}" />
+					<p:ajax update="pnl_transaccionesRcoa_cobertura" event="change" process="@this"/>
+				</p:selectOneMenu>
+				<pe:inputNumber id="numeroTransaccionCobertura" placeholder="Ej: 584777"
+					thousandSeparator="" maxValue="9999999999" minValue="0"
+					required="true" autocomplete="off" disabled="#{pagoRcoaBean.cumpleMontoCobertura}" 
+					value="#{pagoRcoaBean.transaccionFinancieraCobertura.numeroTransaccion}">
+					<f:validateDoubleRange minimum="1" />
+				</pe:inputNumber>
+				<p:commandButton value="Adicionar" icon="ui-icon-plusthick"
+					disabled="#{pagoRcoaBean.cumpleMontoCobertura}"
+					action="#{generarNUTController.guardarTransaccion(2)}"
+					styleClass="primary"
+					update=":#{p:component('opTransacciones')}, :#{p:component('pnl_transaccionesRcoa_cobertura')}"
+					process="@this institucionBancariaCobertura numeroTransaccionCobertura pnlValidar" />
+			</p:panelGrid>
+		</h:form>
+		
+		<h:form id="formTransactionLista">
+			<p:outputPanel id="opTransacciones">
+				<p:dataTable id="dt_transacciones" rendered="#{pagoRcoaBean.datoFormaspago and not empty pagoRcoaBean.transaccionesFinancieras and (!pagoRcoaBean.institucionFinancieraNut.pagoEnLinea or pagoRcoaBean.esEnteAcreditado)}"
+							value="#{pagoRcoaBean.transaccionesFinancieras}" var="transaccionFinanciera" emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Instituci&oacute;n financiera">
+						<h:outputText value="#{transaccionFinanciera.institucionFinanciera.nombreInstitucion}" />
+					</p:column>
+					<p:column headerText="Concepto de pago">
+						<h:outputText value="#{generarNUTController.getConceptoPago(transaccionFinanciera.tipoPago)}" />
+					</p:column>
+					<p:column headerText="N&uacute;mero de comprobante" styleClass="w33 alCenter">
+						<h:outputText value="#{transaccionFinanciera.numeroTransaccion}" />
+					</p:column>
+					<p:column headerText="Monto" styleClass="w15 alCenter">
+						<h:outputText value="#{transaccionFinanciera.montoTransaccion}" rendered="#{transaccionFinanciera.montoPago eq null}">
+							<f:convertNumber pattern="#0.00" />
+						</h:outputText>
+						<h:outputText value="#{transaccionFinanciera.montoPago}" rendered="#{transaccionFinanciera.montoPago ne null}">
+							<f:convertNumber pattern="#0.00" />
+						</h:outputText>
+					</p:column>
+					<p:column styleClass="w20px alCenter" rendered="#{!pagoRcoaBean.generarNUT or pagoRcoaBean.esEnteAcreditado}">
+						<p:commandButton icon="ui-icon-trash" styleClass="primary button-small"
+							rendered="#{transaccionFinanciera.id == null}" process="dt_transacciones"
+							actionListener="#{generarNUTController.eliminarTransacion(transaccionFinanciera)}"
+							update=":#{p:component('formTransactionLista')}, :#{p:component('dt_transacciones')}, :#{p:component('pnl_transaccionesRcoa')}, :#{p:component('pnl_transaccionesRcoa_cobertura')}"/>
+					</p:column>
+				</p:dataTable>
+			</p:outputPanel>
+		</h:form>		
+		
+		<h:form id="formKushki">	
+			<p:panelGrid id="panelKushki" columns="2" styleClass="w100" columnClasses="w50 null, w50 null">
+			<p:panelGrid id="panelKushkiPrimer" columns="1" styleClass="w100" rendered="#{pagoRcoaBean.institucionFinancieraNut.pagoEnLinea}">
+				<p:panelGrid id="panelKushkiTercer" columns="1" styleClass="w100" rendered="#{pagoRcoaBean.esEnteAcreditado}">
+				<f:facet name="header">
+					<h:outputText value="Valor a pagar utilizando el Sistema de Pagos" />
+				</f:facet>
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, w50 alCenter" rowClasses="null, alt">
+				<h:outputText value="Valor a pagar Pago en Línea:" />
+				<h:panelGroup>
+				<h:outputText value="$ " />
+				<h:outputText id="valorPagoentidad" value="#{pagoRcoaBean.valorAPagar}">
+				<f:convertNumber pattern="#0.00" />
+				</h:outputText>
+				</h:panelGroup>	
+				</h:panelGrid>					
+			</p:panelGrid>
+			<h:panelGrid rowClasses="null, alt" style="margin: 0 auto;">
+				<h:inputHidden id="idKushki" value="#{pagoKushkiController.idKushki }"/>			
+				<img id="mae_pago2" src="#{request.contextPath}/resources/images/imagentarjetas1.png" />	
+				<h:inputHidden id="publick" value="#{pagoKushkiController.llavepublicak }"/>
+				<h:inputHidden id="ambienteuso" value="#{pagoKushkiController.ambientesistema }"/>	
+			</h:panelGrid>
+				
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w100">
+				<f:facet name="header">
+					<h:outputText value="Datos del Usuario" />
+				</f:facet>
+				
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, w50 alCenter" rowClasses="null, alt">	 
+				<h:outputText value="Operador:" />
+				<h:outputText value="#{proyectosBean.proponente}" />
+				
+				<h:outputText value="Proyecto:" />
+				<h:outputText value="#{pagoRcoaBean.tramite}" />
+				
+				<h:outputText value="Valor a cancelar con pago en línea:" />
+				<h:panelGroup>
+				<h:outputText value="$ " />
+				<h:outputText id="valorVP" value="#{pagoRcoaBean.valorAPagar}">
+				<f:convertNumber pattern="#0.00" />
+				</h:outputText>
+				</h:panelGroup>				
+				
+				</h:panelGrid>
+				</p:panelGrid>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w100">
+				<f:facet name="header">
+					<h:outputText value="Servicios de Transacción" />
+				</f:facet>
+				
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, w50 alCenter" rowClasses="null, alt">				
+								
+				<h:outputText value="Valor de la transacción bancaria:" />
+
+				
+						<h:panelGroup styleClass="btnsHelp">
+						     <h:outputText value="$ " />
+							<h:outputText id="valorSB" value="#{pagoKushkiController.valorServicioBancario}"
+								for="valorSB" >
+								<f:convertNumber pattern="#0.00" />
+								</h:outputText>
+							<mae:panelGridHeaderHelp value="" conector="transaccionHelp"
+								help="#{helps['help.trasaccion.valor']}" width="300px" />
+						</h:panelGroup>
+				
+				
+				<h:outputText value="Comisión por el servicio (Kushki):" />
+										
+						<h:panelGroup styleClass="btnsHelp">
+						     <h:outputText value="$ " />
+							<h:outputText id="valorCS" value="#{pagoKushkiController.valorComisionKushki}"
+								for="valorCS" >
+								<f:convertNumber pattern="#0.00" />
+								</h:outputText>
+							<mae:panelGridHeaderHelp value="" conector="tarifaHelp"  image="#{request.contextPath}/resources/images/tarifas.png"
+								help="#{helps['help.tarifa.valor']}" width="300px" />
+						</h:panelGroup>
+																
+				</h:panelGrid>	
+				
+				</p:panelGrid>
+								
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w100">
+				<f:facet name="header">
+					<h:outputText value="Valor a pagar incluyendo Servicios de Transacción" />
+				</f:facet>					
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, w50 alCenter" rowClasses="null, alt">
+				<h:outputText value="Valor Total a Pagar:" />
+				<h:panelGroup>
+				<h:outputText value="$ " />
+				<h:outputText id="ValorPagoKushki" value="#{pagoKushkiController.valorServicioBancario + pagoKushkiController.valorComisionKushki + pagoRcoaBean.valorAPagar}">
+				<f:convertNumber pattern="#0.00" />
+				</h:outputText>
+				</h:panelGroup>	
+				</h:panelGrid>			
+				</p:panelGrid>
+				
+				
+				<p:panelGrid columns="1" layout="grid" styleClass="imgNoBorder" columnClasses="imgNoBorder">
+				<f:facet name="header">
+					<h:outputText value="Medio de Transacción" />
+				</f:facet>	
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, w50 alCenter" rowClasses="null, alt">
+				<h:outputText value="Forma de Pago:" />
+				<h:panelGroup>
+				<h:outputText id="ResultadoPagoKushki" update="ResultadoPagoKushki" value="Pago en línea.">
+				</h:outputText>
+				</h:panelGroup>
+
+				</h:panelGrid>			
+				</p:panelGrid>
+
+				</p:panelGrid>
+					
+				<p:panelGrid id="panelKushkiSegundo" columns="1" styleClass="noBorder" columnClasses="imgNoBorder" rendered="#{pagoRcoaBean.institucionFinancieraNut.pagoEnLinea}">
+
+ 				<form id="my-form" style="width: 450%;" action="#{pagoKushkiController.RegistroPago()}" method="post">							
+    				<input type="hidden" name="valor_pago_token" value="#{pagoRcoaBean.valorAPagar}"></input>
+    				<input type="hidden" name="usuario_token" value="#{proyectosBean.proponente}"></input>
+    				<input type="hidden" name="tramite_nombre" value="#{pagoRcoaBean.tramite}"></input>  				
+    				<input type="hidden" name="valor_pagar_original" value="#{pagoRcoaBean.valorAPagar}"></input>
+    				<input type="hidden" name="valor_transaccion" value="#{pagoKushkiController.valorServicioBancario}"></input>
+    				<input type="hidden" name="comision_servicio" value="#{pagoKushkiController.valorComisionKushki}"></input>
+    				<input type="hidden" name="codigo_financiero" value="#{pagoRcoaBean.institucionFinancieraNut.id}"></input>
+    				<input type="hidden" name="tipo_proyecto" value="#{pagoRcoaBean.tipoProyecto}"></input>   				
+				</form>
+							
+
+				<script type="text/javascript">
+					var valorKushkiaux = document.getElementById("formPagoInformacion:formKushki:valorVP").innerHTML;
+					var valorKushki = parseFloat(valorKushkiaux.replace(/,/g, '.'));
+					var idk = document.getElementById("formPagoInformacion:formKushki:idKushki").value;
+					var pkkushki = document.getElementById("formPagoInformacion:formKushki:publick").value;
+					var ambiente = document.getElementById("formPagoInformacion:formKushki:ambienteuso").value;
+					let myBool = (ambiente.toLowerCase() === 'true');
+					var kushki = new KushkiCheckout({    				
+    				kformId: idk,
+    				form: "my-form",
+    				publicMerchantId: pkkushki,
+    				inTestEnvironment: myBool,
+    				amount: {
+     					subtotalIva: 0,
+     					iva: 0,
+     					subtotalIva0: valorKushki,
+     						}
+    				});
+				</script>								
+				</p:panelGrid>		
+				</p:panelGrid> 									
+	</h:form>	
+	
+						
+			
+		<p:dialog header="Pago en línea" id="dlgPagoEnLinea" closable="false" widgetVar="dlgPagoEnLinea" modal="true" width="400" resizable="true" draggable="true">		
+		<h:form id="formConfirmationV2">			
+			
+				<div class="buttons">
+					<p:commandButton value="Aceptar" styleClass="primary" onclick="PF('dlgPagoEnLinea').hide();PF('statusDialog').show();"  widgetVar="sendMore"  />
+					<p:commandButton value="Cancelar" onclick="PF('dlgPagoEnLinea').hide();PF('statusDialog').show();" styleClass="secondary" widgetVar="sendCancel" />
+				</div>
+				
+				</h:form>		
+		</p:dialog>
+		
+		<p:dialog header="Pago en línea no realizado" id="dlgErrorMsj" closable="false" widgetVar="dlgErrorMsj" modal="true" width="400" resizable="true" draggable="false">				
+			<h:outputText id="msjError1" value="#{pagoKushkiController.errorMensj }"></h:outputText>
+			<br></br>
+			<br></br>
+			<h:outputText id="msjError2" value="#{pagoKushkiController.detailErrorMsj}"></h:outputText>
+			<br></br>				
+			<div class="buttons">
+				<p:commandButton value="Aceptar" styleClass="primary" process="@this"
+					actionListener="#{pagoKushkiController.redireccionar_error()}"
+					onclick="PF('statusDialog').show();"
+					update="dlgErrorMsj" />
+			</div>				
+		</p:dialog>
+											
+
+		<p:dialog header="Pago en línea exitoso" id="dlgSuccessMsj" closable="false" widgetVar="dlgSuccessMsj" modal="true" width="400" resizable="true" draggable="false">			
+			<h:outputText id="msjSuccess1" value="#{pagoKushkiController.successMsj}">	</h:outputText>
+			<br></br>
+			<br></br>
+			<h:outputText id="msjSuccess2" value="#{pagoKushkiController.detailSuccessMsj}"></h:outputText>
+			<br></br>	
+			<div class="buttons">
+				<p:commandButton value="Aceptar" styleClass="primary" 
+					actionListener="#{pagoKushkiController.redireccionar_pago()}"  process="@this"
+					onclick="PF('statusDialog').show();"
+					update="dlgSuccessMsj" />
+			</div>
+		</p:dialog>
+
+		<p:dialog header="Informacion Pago en línea" id="dlgMsjInfo" closable="false" widgetVar="dlgMsjInfo" modal="true" width="400" resizable="true" draggable="false">			
+			<h:outputText id="msjSuccessInfo1" value="Mensaje información pagos">	</h:outputText>
+			<br></br>
+			<br></br>
+			<h:outputText id="msjSuccessInfo2" value="Proceder con los pagos faltantes y click en el botón enviar"></h:outputText>
+			<br></br>	
+			<div class="buttons">
+				<p:commandButton value="Aceptar" styleClass="primary" 
+					actionListener="#{pagoKushkiController.pago_info()}"  process="@this"
+					update="dlgMsjInfo" />
+			</div>
+		</p:dialog>		
+		
+
+		<p:dialog header="Mantenimiento Sistema de Pago en Línea" id="dlgMntPago" closable="false" widgetVar="dlgMntPago" modal="true" width="400" resizable="true" draggable="false">			
+			<h:outputText id="msjSuccessMnt1" value="#{pagoKushkiController.msjMnt}">	</h:outputText>
+			<br></br>
+			<br></br>
+			<h:outputText id="msjSuccessMnt2" value="#{pagoKushkiController.successMnt}"></h:outputText>
+			<br></br>	
+			<div class="buttons">
+				<p:commandButton value="Cerrar" styleClass="primary" 
+					actionListener="#{pagoKushkiController.redireccionar_mantenimiento()}"  process="@this"
+					onclick="PF('statusDialog').show();"
+					update="dlgMntPago" />
+			</div>
+		</p:dialog>	
+		
+		<p:dialog header="Información Sistema de Pago en Línea" id="dlgPagoMax" closable="false" widgetVar="dlgPagoMax" modal="true" width="400" resizable="true" draggable="false">			
+			<h:outputText id="msjSuccessPago1" value="El monto a pagar: $"></h:outputText>
+			<h:outputText id="msjSuccessPago2" value="#{pagoRcoaBean.valorAPagar}"></h:outputText>
+			<h:outputText id="msjSuccessPago3" value=" supera el monto máximo permitido por el sistema para realizar el Pago en Línea, por favor utilizar otro medio de pago."></h:outputText><br></br>
+			<h:outputText id="msjSuccessPago4" value="Solo se permiten montos hasta un valor de: $"></h:outputText>
+			<h:outputText id="msjSuccessPago5" value="#{pagoRcoaBean.montoMaximopago}"></h:outputText>
+			<br></br>	
+			<div class="buttons">
+				<p:commandButton value="Aceptar" styleClass="primary" 
+					actionListener="#{pagoKushkiController.redireccionar_error()}"  process="@this"
+					onclick="PF('statusDialog').show();"
+					update="dlgPagoMax" />
+			</div>
+		</p:dialog>	
+		
+		<p:dialog header="Información Sistema de Pago en Línea" id="dlgPagoMin" closable="false" widgetVar="dlgPagoMin" modal="true" width="400" resizable="true" draggable="false">			
+			<h:outputText id="msjSuccessMin1" value="El monto a pagar: $"></h:outputText>
+			<h:outputText id="msjSuccessMin2" value="#{pagoRcoaBean.valorAPagar}"></h:outputText>
+			<h:outputText id="msjSuccessMin3" value=" no supera el monto mínimo permitido por el sistema para realizar el Pago en Línea, por favor utilizar otro medio de pago."></h:outputText><br></br>
+			<h:outputText id="msjSuccessMin4" value="Solo se permiten montos iguales o superiores a un valor de: $"></h:outputText>
+			<h:outputText id="msjSuccessMin5" value="#{pagoRcoaBean.montoMinimopago}"></h:outputText>
+			<br></br>	
+			<div class="buttons">
+				<p:commandButton value="Aceptar" styleClass="primary" 
+					actionListener="#{pagoKushkiController.redireccionar_error()}"  process="@this"
+					onclick="PF('statusDialog').show();"
+					update="dlgPagoMin" />
+			</div>
+		</p:dialog>			
+						
+		<p:dialog width="500" id="dlgAviso" header="Aviso" widgetVar="dlgAviso" modal="true" resizable="false">
+				<h:panelGrid styleClass="w100" columns="1">
+					<h:outputText value="En caso de no contar con su comprobante de pago, generar el NUT para el pago de su trámite en la institución bancaria seleccionada. ¿Está seguro de solicitar la generación del mismo? " />
+					<br/>
+					<h:outputText value="En caso de contar con el comprobante del pago realizado, dar click en &quot;No generar&quot;." styleClass="bold"/>
+				</h:panelGrid>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Generar" styleClass="primary"
+						type="button" onclick="PF('dlgAviso').hide()" />
+					<p:commandButton value="No generar" styleClass="primary" actionListener="#{generarNUTController.mostrarVersionAnterior()}" 
+						process="@this"/>
+					<p:commandButton value="Cerrar" styleClass="primary"
+						type="button" onclick="PF('dlgAviso').hide()" />
+				</div>
+			</p:dialog>
+</html>

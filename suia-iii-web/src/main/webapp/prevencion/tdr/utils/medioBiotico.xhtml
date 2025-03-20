@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<f:loadBundle var="helps" basename="ec.gob.ambiente.core.resources.helps_es" />
+<p:dialog header="#{msg['label.bioticEnvironment']}"
+	widgetVar="bioticDialog" resizable="false" id="bioticDlg"
+	styleClass="bioticDlg" modal="false" >
+	<h:form id="frmMedioBiotico">
+	<p:messages id="messagesBiotic"></p:messages>
+	<p:panel>
+		<h:panelGrid columns="1">
+			<p:outputLabel value="#{msg['label.instructionEnviroment']}"
+				styleClass="bold" />
+			<h:outputText />
+			<h:panelGrid columns="2">
+				<p:outputLabel value="#{msg['label.environment']}" styleClass="bold" />
+				<p:selectOneMenu
+					value="#{ingresarTDRBean.medioBiotico.catalogoGeneral}"
+					id="cmb_medioBiotico" requiredMessage="Es requerido">
+					<f:selectItems value="#{ingresarTDRBean.catalogoMedioBiotico}"
+						var="mfisico" itemValue="#{mfisico}"
+						itemLabel="#{mfisico.descripcion}" />
+					<f:converter converterId="selectItemConverter" />
+				</p:selectOneMenu>
+
+				<p:outputLabel value="#{msg['label.environmentIsApplicable']} *"
+					styleClass="bold" />
+				<p:selectOneRadio id="rbt_isAplicable_mb"
+					value="#{ingresarTDRBean.habilita}">
+					<f:selectItem itemLabel="Sí" itemValue="true" />
+					<f:selectItem itemLabel="No" itemValue="false" />
+					<p:ajax process="@this" update="aBiotico bBiotico"></p:ajax>
+				</p:selectOneRadio>
+			</h:panelGrid>
+
+			<p:outputPanel id="aBiotico">
+				<h:panelGroup id="pg_medioBiotico"
+					rendered="#{ingresarTDRBean.habilita}">
+					<h:panelGrid columns="2">
+						<h:outputText />
+						<h:outputText />
+						<p:outputLabel value="#{msg['label.informationType']}"
+							styleClass="bold" />
+						<p:selectOneMenu
+							value="#{ingresarTDRBean.medioBiotico.tipoInformacion}">
+							<f:selectItem itemLabel="Primaria" itemValue="Primaria" />
+							<f:selectItem itemLabel="Secundaria" itemValue="Secundaria" />
+						</p:selectOneMenu>
+
+						<h:outputText />
+						<h:outputText />
+						<p:outputLabel value="#{msg['label.applicableMethodology']}"
+							styleClass="bold" />
+					</h:panelGrid>
+					<control:imputConTextoEnriquecido
+						requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.applicableMethodology']}  #{msg['label.prevencion.tdr.requerido']}."
+		
+						valor="#{ingresarTDRBean.medioBiotico.metodogia}"
+						soloLectura="#{ingresarTDRBean.procesoIniciado}" requerido="true" />
+				</h:panelGroup>
+			</p:outputPanel>
+			<p:outputPanel id="bBiotico">
+				<h:panelGroup id="pg_jmb" rendered="#{!ingresarTDRBean.habilita}">
+					<h:outputText />
+					<h:outputText />
+					<p:outputLabel value="#{msg['label.prevencion.tdr.justifique']} *" />
+					<control:imputConTextoEnriquecido
+						requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.justifique']}  #{msg['label.prevencion.tdr.requerido']}."
+		
+						valor="#{ingresarTDRBean.medioBiotico.justificacion}"
+						soloLectura="#{ingresarTDRBean.procesoIniciado}" requerido="true" />
+				</h:panelGroup>
+			</p:outputPanel>
+		</h:panelGrid>
+		<f:facet name="footer">
+			<div class="buttons">
+				<p:commandButton id="saveEnviromentBiotico"
+					value="#{msg['button.guardar']}"
+					onclick="PF('bioticDialog').hide()"
+					actionListener="#{ingresarTDRBean.adicionarMedioBiotico()}"
+					update=":#{p:component('bioticGroupDatatable')}"
+					process="frmMedioBiotico, @this" />
+				<p:commandButton value="#{msg['button.cancelar']}" process="@this"
+					immediate="true" onclick="PF('bioticDialog').hide()"
+					icon="ui-icon-close"></p:commandButton>
+			</div>
+		</f:facet>
+	</p:panel>
+	</h:form>
+</p:dialog>
+
+
+<p:dialog header="Medio Biotico" widgetVar="medioBioticoEditDialog"
+	resizable="false" modal="false">
+	<h:form id="frmMedioBioticoEdit">
+		<p:panel>
+			<h:panelGrid styleClass="w100 separatorBottom" columns="1"
+				columnClasses="w50, field_mrg">
+				<p:outputLabel value="#{msg['label.instructionEnviroment']}"
+					styleClass="bold" />
+				<h:outputText />
+				<h:panelGrid columns="2">
+					<p:outputLabel value="#{msg['label.environment']}"
+						styleClass="bold" />
+					<p:outputLabel
+						value="#{ingresarTDRBean.medioBiotico.catalogoGeneral.descripcion}" />
+
+					<p:outputLabel value="#{msg['label.environmentIsApplicable']} *"
+						styleClass="bold" />
+					<p:selectOneRadio id="rbt_isAplicable_mbEdit"
+						value="#{ingresarTDRBean.habilita}">
+						<f:selectItem itemLabel="Sí" itemValue="true" />
+						<f:selectItem itemLabel="No" itemValue="false" />
+						<p:ajax process="@this" update="aBioticEdit bBioticEdit"></p:ajax>
+					</p:selectOneRadio>
+				</h:panelGrid>
+
+				<p:outputPanel id="aBioticEdit">
+					<h:panelGroup id="pg_medioBioticoEdit"
+						rendered="#{ingresarTDRBean.habilita}">
+						<h:panelGrid columns="2">
+							<h:outputText />
+							<h:outputText />
+							<p:outputLabel value="#{msg['label.informationType']}"
+								styleClass="bold" />
+							<p:selectOneMenu
+								value="#{ingresarTDRBean.medioBiotico.tipoInformacion}">
+								<f:selectItem itemLabel="Primaria" itemValue="Primaria" />
+								<f:selectItem itemLabel="Secundaria" itemValue="Secundaria" />
+							</p:selectOneMenu>
+
+							<h:outputText />
+							<h:outputText />
+							<p:outputLabel value="#{msg['label.applicableMethodology']}"
+								styleClass="bold" />
+						</h:panelGrid>
+						<control:imputConTextoEnriquecido
+							requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.applicableMethodology']}  #{msg['label.prevencion.tdr.requerido']}."
+		
+							valor="#{ingresarTDRBean.medioBiotico.metodogia}"
+							soloLectura="#{ingresarTDRBean.procesoIniciado}" requerido="true" />
+					</h:panelGroup>
+				</p:outputPanel>
+				<p:outputPanel id="bBioticEdit">
+					<h:panelGroup id="pg_jmbEdit"
+						rendered="#{!ingresarTDRBean.habilita}">
+						<h:outputText />
+						<h:outputText />
+						<p:outputLabel value="#{msg['label.prevencion.tdr.justifique']} *" />
+						<control:imputConTextoEnriquecido
+							requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.justifique']}  #{msg['label.prevencion.tdr.requerido']}."
+		
+							valor="#{ingresarTDRBean.medioBiotico.justificacion}"
+							soloLectura="#{ingresarTDRBean.procesoIniciado}" requerido="true" />
+					</h:panelGroup>
+				</p:outputPanel>
+			</h:panelGrid>
+
+			<p:separator />
+			<div class="buttons">
+				<p:commandButton id="updateBioticEnviroment"
+					value="#{msg['button.guardar']}"
+					actionListener="#{ingresarTDRBean.adicionarMedioBiotico()}"
+					onclick="PF('medioBioticoEditDialog').hide()"
+					update=":#{p:component('bioticGroupDatatable')}"
+					process="frmMedioBioticoEdit, @this" />
+				<p:commandButton value="#{msg['button.cancelar']}" immediate="true"
+					onclick="PF('medioBioticoEditDialog').hide()" process="@this" />
+			</div>
+		</p:panel>
+	</h:form>
+</p:dialog>
+</html>

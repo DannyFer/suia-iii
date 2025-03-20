@@ -1,0 +1,270 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+	<h:panelGroup>
+		<p:panelGrid id="manifiestoRecepcionGrid" columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="Manifiesto Único - Recepción"/>
+			</f:facet>
+
+			<p:dataTable id="manifiestoRecepcionTable" var="manifiestoRecepcion" value="#{gestorDesechosPeligrososController.listManifiestoRecepcion}">
+				<f:facet name="header">
+					<h:outputText value="Manifiesto Único - Recepción"/>
+					<p:commandButton icon="ui-icon-plus" value="#{msg['button.agregar']}" process="manifiestoRecepcionTable" update=":form:tabView:manifiestoRecepcionGrid" 
+						style="float:right" oncomplete="PF('manifiestoRecepcionDiag').show()"/>
+				</f:facet>
+				<p:column style="width:16px">
+		            <p:rowToggler />
+		        </p:column>
+				<p:column headerText="Identificación de manifiesto">
+					<h:outputText value="#{manifiestoRecepcion.numeroManifiesto}"/>
+				</p:column>
+				<p:column headerText="Adjunto">
+					<h:outputText value="#{manifiestoRecepcion.adjuntoManifiesto.nombre}"/>
+				</p:column>
+				<p:column headerText="N° de registro de generador de desechos peligrosos y especiales / N° de licencia de gestor">
+					<h:outputText value="#{manifiestoRecepcion.numeroRGD}"/>
+				</p:column>
+				<p:column headerText="Fecha de recepción de los residuos y desechos  peligrosos y especiales">
+					<h:outputText value="#{manifiestoRecepcion.fechaRecepcion}">
+						<f:convertDateTime pattern="dd-MM-yyyy"/>
+					</h:outputText>
+				</p:column>
+				<p:rowExpansion>
+					<p:dataTable id="desechoRecepcionTable" var="desechoRecepcion" value="#{manifiestoRecepcion.listDesechoRecepcion}"
+					paginator="true" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rows="5" rowsPerPageTemplate="5,10,15">
+						<f:facet name="header">
+							<h:outputText value="Identificación del desecho"/>
+						</f:facet>
+						<p:column headerText="Nombre del residuo o desecho peligroso o especial">
+							<h:outputText value="#{desechoRecepcion.desechoPeligroso.descripcion}"/>
+						</p:column>
+						<p:column headerText="Código">
+							<h:outputText value="#{desechoRecepcion.clave}"/>
+						</p:column>
+						<p:column headerText="Unidad">
+							<h:outputText value="#{desechoRecepcion.unidadDesechoRecepcion.descripcion}"/>
+						</p:column>
+						<p:column headerText="Cantidad recibida">
+							<h:outputText value="#{desechoRecepcion.cantidad}"/>
+						</p:column>
+						<p:column headerText="Reporte en unidades (U) únicamente para los desechos ES-04 y ES-06">
+							<h:outputText value="#{desechoRecepcion.reporteUnidades}"/>
+						</p:column>
+						<p:column headerText="Acción">
+							<center>
+								<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process="desechoRecepcionTable" 
+								update=":form:tabView:exportacionAlmacenamientoGrid :form:tabView:sumatoriaAlmacenamientoGrid desechoRecepcionTable" 
+								actionListener="#{gestorDesechosPeligrososController.eliminarDesechoGestorRecepcion(desechoRecepcion)}">
+									<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar el desecho peligroso?" icon="ui-icon-alert" />
+								</p:commandButton>
+							</center>
+						</p:column>
+					</p:dataTable>
+
+					<p:dataTable id="transferenciaRecepcionTable" var="empresaRecepcion" value="#{manifiestoRecepcion.listEmpresasRecepcion}"
+					paginator="true" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rows="5" rowsPerPageTemplate="5,10,15">
+						<f:facet name="header">
+							<h:outputText value="Transferencia"/>
+						</f:facet>
+						<p:column headerText="Fecha de transferencia (fecha de recepción de la sección destinatario del manifiesto único)">
+							<h:outputText value="#{empresaRecepcion.fechaTransferencia}">
+								<f:convertDateTime pattern="dd-MM-yyyy"/>
+							</h:outputText>
+						</p:column>
+						<p:column headerText="Empresa gestora">
+							<h:outputText value="#{empresaRecepcion.sedePrestadorServiciosDesechos.prestadorServiciosDesechos.nombre}"/>
+						</p:column>
+						<p:column headerText="Número de autorización">
+							<h:outputText value="#{empresaRecepcion.sedePrestadorServiciosDesechos.codigoPermisoAmbiental}"/>
+						</p:column>
+						<p:column headerText="Acción">
+							<center>
+								<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process="transferenciaRecepcionTable" 
+								update="transferenciaRecepcionTable" 
+								actionListener="#{gestorDesechosPeligrososController.eliminarEmpresaGestoraRecepcion(empresaRecepcion)}">
+									<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar la empresa gestora?" icon="ui-icon-alert" />
+								</p:commandButton>
+							</center>
+						</p:column>
+					</p:dataTable>
+				</p:rowExpansion>
+
+				<p:column headerText="Acción">
+					<center>
+						<p:commandButton icon="ui-icon-pencil" title="#{msg['button.editar']}" styleClass="secondary"  process=":form:tabView:manifiestoRecepcionTable" 
+							oncomplete="PF('manifiestoRecepcionDiag').show()"
+							update=":form:tabView:manifiestoRecepcionGrid :formDialogs:manifiestoRecepcionDiag" 
+							actionListener="#{gestorDesechosPeligrososController.editarManifiestoRecepcion(item)}" />
+						<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process=":form:tabView:manifiestoRecepcionTable" 
+							update=":form:tabView:manifiestoRecepcionGrid"
+							actionListener="#{gestorDesechosPeligrososController.eliminarManifiestoRecepcion(item)}"/>
+					</center>
+				</p:column>
+			</p:dataTable>
+		</p:panelGrid>
+		
+		<p:panelGrid id="sumatoriaAlmacenamientoGrid" columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="Sumatoria Manifiesto - Recepción"/>
+			</f:facet>
+			<p:dataTable id="sumatoriaAlmacenamientoTable" var="item" value="#{gestorDesechosPeligrososController.listTotalManifiestoAlmacenamiento}">
+				<f:facet name="header">
+				</f:facet>
+				<p:column headerText="Nombre del residuo o desecho peligroso o especial">
+					<h:outputText value="#{item.desechoPeligroso.descripcion}"/>
+				</p:column>
+				<p:column headerText="Código">
+					<h:outputText value="#{item.desechoPeligroso.clave}"/>
+				</p:column>
+				<p:column headerText="Total">
+					<h:outputText value="#{item.totalDesecho}"/>
+				</p:column>
+				<p:column headerText="Reporte en unidades (U) únicamente para los desechos ES-04 y ES-06">
+					<h:outputText value="#{item.totalUnidadesES}"/>
+				</p:column>
+			</p:dataTable>
+		</p:panelGrid>
+
+	</h:panelGroup>
+
+	<h:panelGroup>
+		<p:panelGrid id="manifiestoTransferenciaGrid" columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="Manifiesto Único - Transferencia:"/>
+			</f:facet>
+
+			<p:dataTable id="manifiestoTransferenciaTable" var="manifiestoRecepcion"  value="#{gestorDesechosPeligrososController.listManifiestoTransferencia}">
+				<f:facet name="header">
+					<h:outputText value="Manifiesto Único - Transferencia"/>
+					<p:commandButton icon="ui-icon-plus" value="#{msg['button.agregar']}" process="manifiestoTransferenciaTable" update=":form:tabView:manifiestoTransferenciaGrid" 
+						style="float:right" oncomplete="PF('manifiestoTransferenciaDiag').show()"/>
+				</f:facet>
+				<p:column style="width:16px">
+		            <p:rowToggler />
+		        </p:column>
+				<p:column headerText="Identificación de manifiesto">
+					<h:outputText value="#{manifiestoRecepcion.numeroManifiesto}"/>
+				</p:column>
+				<p:column headerText="Adjunto">
+					<h:outputText value="#{manifiestoRecepcion.adjuntoManifiesto.nombre}"/>
+				</p:column>
+				<p:rowExpansion>
+					<p:dataTable id="desechoTransferenciaTable" var="desechoTransferencia" value="#{manifiestoRecepcion.listDesechoTransferencia}">
+						<f:facet name="header">
+							<h:outputText value="Identificación del desecho - Transferencia"/>
+						</f:facet>
+						<p:column headerText="Nombre del residuo o desecho peligroso o especial">
+							<h:outputText value="#{desechoTransferencia.desechoPeligroso.descripcion}"/>
+						</p:column>
+						<p:column headerText="Código">
+							<h:outputText value="#{desechoTransferencia.desechoPeligroso.clave}"/>
+						</p:column>
+						<p:column headerText="Unidad">
+							<h:outputText value="#{desechoTransferencia.unidadDesechoRecepcion.descripcion}"/>
+						</p:column>
+						<p:column headerText="Cantidad recibida">
+							<h:outputText value="#{desechoTransferencia.cantidad}"/>
+						</p:column>
+						<p:column headerText="Reporte en unidades (U) únicamente para los desechos ES-04 y ES-06">
+							<h:outputText value="#{desechoTransferencia.reporteUnidades}"/>
+						</p:column>
+						<p:column headerText="Acción">
+							<center>
+								<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process="desechoTransferenciaTable" 
+								update=":form:tabView:manifiestoTransferenciaGrid :formDialogs:manifiestoTransferenciaDiag :form:tabView:exportacionAlmacenamientoGrid"
+								actionListener="#{gestorDesechosPeligrososController.eliminarDesechoGestorTransferencia(item)}"/>
+							</center>
+						</p:column>
+					</p:dataTable>
+					
+					<p:dataTable id="transferenciaTransferenciaTable" var="empresaTransferencia"  value="#{manifiestoRecepcion.listEmpresasTransferencia}">
+						<f:facet name="header">
+							<h:outputText value="Transferencia"/>
+						</f:facet>
+						<p:column headerText="Fecha de transferencia (fecha de recepción de la sección destinatario del manifiesto único)">
+							<h:outputText value="#{empresaTransferencia.fechaTransferencia}">
+								<f:convertDateTime pattern="dd-MM-yyyy"/>
+							</h:outputText>
+						</p:column>
+						<p:column headerText="Empresa gestora">
+							<h:outputText value="#{empresaTransferencia.sedePrestadorServiciosDesechos.prestadorServiciosDesechos.nombre}"/>
+						</p:column>
+						<p:column headerText="Número de autorización">
+							<h:outputText value="#{empresaTransferencia.sedePrestadorServiciosDesechos.codigoPermisoAmbiental}"/>
+						</p:column>
+						<p:column headerText="Acción">
+							<center>
+								<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process="transferenciaTransferenciaTable" 
+									update=":form:tabView:manifiestoTransferenciaGrid" 
+									actionListener="#{gestorDesechosPeligrososController.eliminarEmpresaGestoraTransferencia(item)}"/>
+							</center>
+						</p:column>
+					</p:dataTable>
+				</p:rowExpansion>
+				<p:column headerText="Acción">
+					<center>
+						<p:commandButton icon="ui-icon-pencil" title="#{msg['button.editar']}" styleClass="secondary"  process=":form:tabView:manifiestoTransferenciaTable" 
+						oncomplete="PF('manifiestoTransferenciaDiag').show()"
+						update=":form:tabView:manifiestoTransferenciaGrid :formDialogs:manifiestoTransferenciaDiag"
+						actionListener="#{gestorDesechosPeligrososController.editarManifiestoTransferencia(item)}" />
+						<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process=":form:tabView:manifiestoTransferenciaTable" 
+						update=":form:tabView:manifiestoTransferenciaGrid :form:tabView:sumatoriaAlmacenamientoGrid :form:tabView:exportacionAlmacenamientoGrid" 
+						actionListener="#{gestorDesechosPeligrososController.eliminarManifiestoTransferencia(item)}"/>
+					</center>
+				</p:column>
+			</p:dataTable>
+		</p:panelGrid>
+	</h:panelGroup>
+
+	<h:panelGroup>
+		<p:panelGrid id="exportacionAlmacenamientoGrid" columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="Exportacion"/>
+				<mae:panelGridHeaderHelp value="" conector="desechoHelp" help="#{helps['desecho.seleccionar']}" width="500px" />
+			</f:facet>
+			<p:dataTable var="item" value="#{gestorDesechosPeligrososController.listDesechoGestorAlmacenamientoExportacion}">
+				<f:facet name="header">
+				</f:facet>
+				<p:column headerText="Nombre del residuo o desecho peligroso o especial">
+					<h:outputText value="#{item.desechoPeligroso.descripcion}"/>
+				</p:column>
+				<p:column headerText="Código">
+					<h:outputText value="#{item.desechoPeligroso.clave}"/>
+				</p:column>
+				<p:column headerText="Cantidad">
+					<h:outputText value="#{item.cantidad}"/>
+				</p:column>
+				<p:column headerText="País de destino">
+					<h:outputText value="#{item.pais.nombre}"/>
+				</p:column>
+				<p:column headerText="Notificación">
+					<h:outputText value="#{item.documentoNotificacion.nombre}"/>
+				</p:column>
+				<p:column headerText="Autorización">
+					<h:outputText value="#{item.documentoAutorizacion.nombre}"/>
+				</p:column>
+				<p:column headerText="Documento de movimiento">
+					<h:outputText value="#{item.documentoMovimiento.nombre}"/>
+				</p:column>
+				<p:column headerText="Acta de destrucción">
+					<h:outputText value="#{item.documentoDestruccion.nombre}"/>
+				</p:column>
+			</p:dataTable>
+		</p:panelGrid>
+	</h:panelGroup>
+	
+	<h:panelGroup>
+		<p:panelGrid id="observacionesAlmacenamientoGrid" columns="1" layout="grid" styleClass="w100" rendered="#{gestorDesechosPeligrososController.verObservaciones}">
+			<f:facet name="header">
+				<h:outputText value="Observaciones"/>
+			</f:facet>
+			<p:dataTable var="item" value="#{gestorDesechosPeligrososController.listObservacionesAlmacenamiento}">
+				<p:column headerText="Campo">
+					<h:outputText value="#{item.campo}"/>
+				</p:column>
+				<p:column headerText="Detalle">
+					<h:outputText value="#{item.descripcion}"/>
+				</p:column>
+			</p:dataTable>
+		</p:panelGrid>
+	</h:panelGroup>
+</html>

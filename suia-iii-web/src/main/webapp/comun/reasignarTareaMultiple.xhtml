@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<h:form>
+			<p:panel>
+				<f:facet name="header">
+					<h:outputText value="Asignar tarea: #{reasignarTareaMultipleComunBean.taskName}" />
+				</f:facet>
+
+				<h:panelGrid columns="1" styleClass="separatorTop">
+					<p:dataTable id="tablaVariables" value="#{reasignarTareaMultipleComunBean.values}" var="value">
+						<f:facet name="header">
+							<h:outputText value="Asignación" />
+						</f:facet>
+						<p:column headerText="Rol solicitado" styleClass="w35">
+							<h:outputText value="#{value.visibleName}" />
+						</p:column>
+						<p:column headerText="Usuario asignado" styleClass="w35">
+							<h:outputText value="#{value.user.nombre}" styleClass="result" />
+						</p:column>
+						<p:column styleClass="w10 alCenter">
+							<p:commandLink value="Seleccionar" actionListener="#{reasignarTareaMultipleComunBean.selectVariable(value, false)}" oncomplete="PF('seleccionar').show()" update="@form" />
+						</p:column>
+						<p:column styleClass="w10 alCenter">
+							<p:commandLink value="Remover" actionListener="#{reasignarTareaMultipleComunBean.selectVariable(value, true)}" update="@form" />
+						</p:column>
+					</p:dataTable>
+					<br />
+
+					<p:dialog minWidth="150" width="800" id="seleccionar" styleClass="seleccionar" header="Usuarios disponibles" widgetVar="seleccionar" modal="true" resizable="false">
+						<p:dataTable id="tablaUsuarios" value="#{reasignarTareaMultipleComunBean.users}" var="user" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" rows="7" sortBy="#{user.carga}" sortOrder="ascending">
+							<p:column styleClass="w20px alCenter">
+								<p:selectBooleanCheckbox disabled="#{!user.available}" value="#{user.selectable}" styleClass="selectable-ck">
+									<p:ajax oncomplete="PF('seleccionar').show()" update="@form" listener="#{reasignarTareaMultipleComunBean.updateSelectedUser(user)}" />
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column headerText="Usuario" sortBy="#{user.nombre}" styleClass="w25">
+								<h:outputText value="#{user.nombre}" />
+							</p:column>
+							<p:column headerText="Nombre" sortBy="#{user.nombrePersona}" styleClass="w45">
+								<h:outputText value="#{user.nombrePersona}" />
+							</p:column>
+							<p:column headerText="Total de tareas" sortBy="#{user.numeroTramites}" styleClass="w10 alCenter">
+								<h:outputText value="#{user.numeroTramites}" />
+							</p:column>
+							<p:column headerText="Carga (%)" sortBy="#{user.carga}" styleClass="w15 alCenter">
+								<h:outputText value="#{user.carga}">
+									<f:convertNumber maxFractionDigits="2" />
+								</h:outputText>
+							</p:column>
+						</p:dataTable>
+						<p:separator />
+						<div class="buttons">
+							<p:commandButton type="button" value="Cerrar" onclick="PF('seleccionar').hide()" />
+						</div>
+					</p:dialog>
+				</h:panelGrid>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton disabled="#{!reasignarTareaMultipleComunBean.complete}" value="Reasignar" action="#{reasignarTareaMultipleComunBean.executeOperationAction()}" icon="ui-icon-check" />
+					<p:commandButton value="Cancelar" immediate="true" action="/bandeja/bandejaTareas.jsf?faces-redirect=true" icon="ui-icon-cancel" styleClass="secondary" />
+				</div>
+			</p:panel>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

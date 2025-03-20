@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:ui="http://java.sun.com/jsf/facelets">
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:f="http://java.sun.com/jsf/core" template="/WEB-INF/templates/default-task.xhtml" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+	<ui:define name="content">
+		<h:form id="frmDatos">
+			<h:panelGrid cellpadding="2" styleClass="w100">
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w50">
+					<f:facet name="header">
+						<h:outputText value="Aprobación de TDR's *" />
+					</f:facet>
+
+					<h:panelGrid columns="1" styleClass="w100" columnClasses="w50, field_mrg w50">
+						<p:outputLabel for="pronunciamiento" value="Tipo Pronunciamiento" style="color: #222222;" />
+						<p:selectOneRadio id="pronunciamiento" value="#{subirDocumentosAprobacionTDRLAController.pronunciamientoSeleccionado}" required="true" converter="selectItemConverter">
+							<f:selectItems value="#{subirDocumentosAprobacionTDRLAController.estadosAprobacionTdr}" var="c" itemLabel="#{c.nombre}" itemValue="#{c}" />
+						</p:selectOneRadio>
+					</h:panelGrid>
+
+					<h:outputText value="Archivo de respaldo *" />
+					<h:panelGrid columns="2" columnClasses="null, field_mrg" id="gridRespaldos">
+						<p:outputLabel value="#{empty subirDocumentosAprobacionTDRLAController.respaldoAprobacionTdr.nombre ? 'Archivos(.pdf|.rar|.zip)' : subirDocumentosAprobacionTDRLAController.respaldoAprobacionTdr.nombre}" />
+						<p:commandButton id="downloadRespaldos" icon="ui-icon-arrowthick-1-s" ajax="false" styleClass="button-small primary" title="Ver" immediate="true" rendered="#{not empty subirDocumentosAprobacionTDRLAController.respaldoAprobacionTdr.nombre}">
+							<p:fileDownload value="#{subirDocumentosAprobacionTDRLAController.getStreamContent()}" />
+						</p:commandButton>
+					</h:panelGrid>
+					<p:fileUpload id="fileUploadRespaldos" fileUploadListener="#{subirDocumentosAprobacionTDRLAController.adjuntarDocumento}" multiple="false" sizeLimit="31457280" allowTypes="/(\.|\/)(zip|rar|pdf)$/" label="Seleccionar" uploadLabel="Subir"
+						invalidFileMessage="Tipo de archivo no válido" invalidSizeMessage="Tamaño de archivo no válido" cancelLabel="Cancelar" mode="advanced" dragDropSupport="false" auto="true" update="gridRespaldos downloadRespaldos">
+					</p:fileUpload>
+
+					<h:outputText />
+					<p:outputLabel value="Comprobante (Archivo PDF)" for="archComprobanteHide" rendered="false" />
+
+				</p:panelGrid>
+
+			</h:panelGrid>
+
+			<div class="buttons main">
+				<p:commandButton value="Finalizar" action="#{subirDocumentosAprobacionTDRLAController.finalizarCarga}" title="Finalizar carga de archivos" icon="ui-icon-check">
+					<p:confirm header="Confirmación" message="¿Está seguro aprobar/reestructurar los TDR's del proyecto?" icon="ui-icon-alert" />
+				</p:commandButton>
+			</div>
+
+		</h:form>
+
+	</ui:define>
+</ui:composition>
+</html>

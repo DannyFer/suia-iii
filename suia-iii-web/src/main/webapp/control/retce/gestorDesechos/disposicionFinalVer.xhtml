@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+	
+	<h:panelGroup>
+		<p:panelGrid columns="1" layout="grid"
+			styleClass="w100" columnClasses="w25, field_mrg w25">
+			
+			<p:dataTable var="eliminacion" value="#{gestorDesechosPeligrososVerController.listaDesechosDisFinal}">
+				<f:facet name="header">
+					<h:outputText value="Tipos de eliminación" />
+				</f:facet>
+				<p:column style="width:16px">
+		            <p:rowToggler 
+		            rendered="#{eliminacion.listGestorDesechosEliminacionSustanciasRETCE.size() > 0}" />
+		        </p:column>
+				<p:column headerText="Nombre del Desecho">
+					<h:outputText value="#{eliminacion.desechoPeligroso.descripcion}" />
+				</p:column>
+				<p:column headerText="Código">
+					<h:outputText value="#{eliminacion.desechoPeligroso.clave}" />
+				</p:column>
+				<p:column headerText="Modalidad">
+					<h:outputText value="#{eliminacion.eliminacionDesecho.tipoEliminacionDesecho.tipoEliminacionDesecho.nombre}" />
+				</p:column>
+				<p:column headerText="Clave">
+					<h:outputText value="#{eliminacion.eliminacionDesecho.tipoEliminacionDesecho.clave}" />
+				</p:column>
+				<p:column headerText="Unidad">
+					<h:outputLabel value="#{eliminacion.unidadMedida.descripcion}"/>
+				</p:column>
+				<p:column headerText="Cantidad">
+					<h:outputLabel value="#{eliminacion.cantidad}"/>
+				</p:column>
+				<p:rowExpansion>
+					<p:dataTable var="sustancia" value="#{eliminacion.listGestorDesechosEliminacionSustanciasRETCE}"
+					rendered="#{eliminacion.listGestorDesechosEliminacionSustanciasRETCE.size() > 0}">
+						<f:facet name="header">
+							<h:outputText value="Sustancias RETCE" />
+						</f:facet>
+						<p:column headerText="Sustancias identificadas">
+							<h:outputText value="#{sustancia.catalogoSustancias}" />
+						</p:column>
+						<p:column headerText="Cantidad (t/año">
+							<h:outputLabel value="#{sustancia.cantidadDesechoRetce}"/>
+						</p:column>
+						<p:column headerText="Método de estimación">
+							<h:outputLabel value="#{sustancia.metodoEstimacion}"/>
+						</p:column>
+						<p:column headerText="Cálculo">
+							<center>
+								<p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" 
+								title="Descargar" value="Descargar" rendered="#{sustancia.adjuntoCalculo.nombre != null}">
+									<p:fileDownload value="#{gestorDesechosPeligrososVerController.getStreamedContentDocumento(sustancia.adjuntoCalculo)}"/>
+								</p:commandButton>
+							</center>
+						</p:column>
+					</p:dataTable>
+				</p:rowExpansion>
+			</p:dataTable>
+		</p:panelGrid>
+		
+		<p:panelGrid columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="Sumatoria Eliminación"/>
+			</f:facet>
+			<p:dataTable var="item" value="#{gestorDesechosPeligrososVerController.listTotalManifiestoDisposicion}">
+				<f:facet name="header">
+				</f:facet>
+				<p:column headerText="Nombre del residuo o desecho peligroso o especial">
+					<h:outputText value="#{item.desechoPeligroso.descripcion}"/>
+				</p:column>
+				<p:column headerText="Código">
+					<h:outputText value="#{item.desechoPeligroso.clave}"/>
+				</p:column>
+				<p:column headerText="Total">
+					<h:outputText value="#{item.totalDesecho}"/>
+				</p:column>
+				<p:column headerText="Reporte en unidades (U) únicamente para los desechos ES-04 y ES-06">
+					<h:outputText value="#{item.totalUnidadesES}"/>
+				</p:column>
+			</p:dataTable>
+		</p:panelGrid>
+		
+		<p:panelGrid id="observacionesGridDisposicion" columns="1" layout="grid" styleClass="w100" rendered="#{gestorDesechosPeligrososVerController.verObservaciones}">
+			<observaciones:tablaObservaciones idComponent="observacionesDisposicionFinal"
+					componenteActualizarEliminar="observacionesDisposicionFinal"
+					seccion="GestorDesechosPeligrososDisposicionFinal"
+					nombreClase="GestorDesechosPeligrosos"
+					idClase="#{gestorDesechosPeligrososVerController.gestorDesechosPeligrosos.id}"		
+					aparace="true"
+					mostrarSiVacio="true"
+					soloLectura="false"/>
+		</p:panelGrid>
+	</h:panelGroup>
+		
+
+			
+</html>

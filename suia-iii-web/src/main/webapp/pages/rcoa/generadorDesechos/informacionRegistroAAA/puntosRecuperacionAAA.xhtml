@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<h:panelGroup id="puntosRecuperacion">
+	<p:panelGrid columns="1" layout="grid" styleClass="buttonAddPuntosRecuperacionContainer w100">
+	
+		<f:facet name="header">	
+		<h:outputText value="Identificación de los puntos de generación dentro de la instalación regulada *" />
+				<p:commandButton value="Adicionar"
+					oncomplete="PF('adicionarPunto').toggle()"
+					actionListener="#{puntosRecuperacionRgdBean.cancelar()}"
+					styleClass="buttonAddPuntosRecuperacion button-small-text toRight field_mrg"
+					process="@this" update="adicionarPunto" icon="ui-icon-plusthick"/>				
+							
+				<mae:panelGridHeaderHelp
+					value="Ubicación de los puntos de generación dentro de la instalación regulada *"
+					conector="puntosRecuperacionHelp"
+					help="#{helps['generadorDesecho.puntosRecuperacion']}"
+					width="600px" rendered="false" />
+				
+		</f:facet>
+		
+
+		<ui:include src="/pages/rcoa/generadorDesechos/informacionRegistroAAA/puntosRecuperacionAddAAA.xhtml"/>
+
+		<p:dataList id="listadoPuntos" type="none" value="#{puntosRecuperacionRgdBean.puntosRecuperacion}" var="punto" rowIndexVar="index" emptyMessage=" "
+		paginator="true" rows="10" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+		paginatorPosition="bottom" paginatorAlwaysVisible="false">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<p:commandButton styleClass="button-small toRight field_mrg" process="@this" update=":form:listadoPuntos" actionListener="#{puntosRecuperacionRgdBean.eliminar(punto)}" icon="ui-icon-trash">
+						<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar este punto de recuperación/generación?" icon="ui-icon-alert" />
+					</p:commandButton>
+					<p:commandButton styleClass="button-small toRight field_mrg" process="@this" update=":form:adicionarPunto" actionListener="#{puntosRecuperacionRgdBean.editar(punto)}" icon="ui-icon-pencil" oncomplete="PF('adicionarPunto').toggle()" />
+					<h:outputText value="Punto #{(index + 1)}" />
+				</f:facet>
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w25, null" rowClasses="null, alt" id="carga" >
+					<h:outputText value="Nombre del punto de generación" />
+					<p:inputTextarea value="#{punto.nombre}" rows="2" styleClass="w100" readonly="true" />
+					<h:outputText value="Origen de la generación" />
+					<p:inputTextarea value="#{punto.nombresGeneracion}" rows="2" styleClass="w100" readonly="true" />
+				</h:panelGrid>
+				
+				<t:aliasBeansScope>
+					<t:aliasBean alias="#{formasCoordenadasAliasBean}" value="#{punto.formasPuntoRecuperacionRgdRcoa}" />
+					<ui:include src="/pages/rcoa/generadorDesechos/informacionRegistro/verCoordenadas.xhtml" />
+				</t:aliasBeansScope>
+				<p:dataTable id="tablaUbicacionesArea" value="#{punto.listaUbicacion}" var="ubicacion" emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Provincia">
+						<h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+					</p:column>
+					<p:column headerText="Cantón">
+						<h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}">
+						</h:outputText>
+					</p:column>
+					<p:column headerText="Parroquia" >
+						<h:outputText value="#{ubicacion.nombre}"/>
+				    </p:column>
+				</p:dataTable>
+			</p:panelGrid>
+		</p:dataList>
+	</p:panelGrid>
+</h:panelGroup>
+
+	<p:dialog width="300" id="seleccionarGeneracionArea" widgetVar="seleccionarGeneracionArea"
+			header="Seleccione el origen de la generación" modal="true" resizable="false">
+		<p:outputPanel id="pnllistaGeneracion">
+			<p:selectOneRadio id="menuGeneracion" value="#{puntosRecuperacionRgdBean.puntoRecuperacion.puntoGeneracion}" 
+						layout="grid" columns="1" converter="selectItemConverter" >
+			<f:selectItems value="#{puntosRecuperacionRgdBean.listaOrigenGeneracion}" 
+						var="generacion" itemValue="#{generacion}" itemLabel="#{generacion.clave} - #{generacion.nombre}" />	
+						<p:ajax event="change" listener="#{puntosRecuperacionRgdBean.limpiarOtraGeneracion}" process="@this"  update="pnlOtraGeneracionArea otraGeneracionArea"/>					
+			</p:selectOneRadio>
+			<h:panelGrid id="pnlOtraGeneracionArea" columns="1"
+					styleClass="noBorders w100" lang="grid">
+					<p:inputText id="otraGeneracionArea" value="#{puntosRecuperacionRgdBean.puntoRecuperacion.generacionOtros}" maxlength="50"
+						rendered="#{puntosRecuperacionRgdBean.puntoRecuperacion.puntoGeneracion.clave eq 'OT'}" required="true">
+						<p:ajax process="@this"/>
+						</p:inputText>
+			</h:panelGrid>
+		</p:outputPanel>
+			<div class="buttons">
+				<p:commandButton icon="ui-icon-cancel" value="Cerrar" process="seleccionarGeneracionArea" update="@form"	
+					styleClass="secondary" actionListener="#{puntosRecuperacionRgdBean.actualizarGeneracion}"/>
+			</div>
+	</p:dialog>
+</html>

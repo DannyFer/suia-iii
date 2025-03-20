@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+<ui:composition template="/WEB-INF/templates/default-task.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+	<ui:define name="context-extra">
+		<h:outputText value="Código RGDP"
+			rendered="#{contextoTareaEIAController.tieneRgd}" />
+		<h:outputText
+			value="#{contextoTareaEIAController.proyecto.codigoRgdAsociado}"
+			rendered="#{contextoTareaEIAController.tieneRgd}" />
+		<h:outputLink target="_blank"
+			rendered="#{contextoTareaEIAController.tieneRgd}"
+			value="#{contextoTareaEIAController.redireccionarRgd()}">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+
+		<h:outputText value="Código RSQ"
+			rendered="#{contextoTareaEIAController.tieneRsq}" />
+		<h:outputText
+			value="#{contextoTareaEIAController.proyecto.codigoRsqAsociado}"
+			rendered="#{contextoTareaEIAController.tieneRsq}" />
+		<h:outputLink target="_blank"
+			rendered="#{contextoTareaEIAController.tieneRsq}"
+			value="#{contextoTareaEIAController.redireccionarRsq()}">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+
+		<h:outputText value="Código ART"
+			rendered="#{contextoTareaEIAController.tieneArt}" />
+		<h:outputText value="#{contextoTareaEIAController.art.solicitud}"
+			rendered="#{contextoTareaEIAController.tieneArt}" />
+		<p:commandButton ajax="false" icon="ui-icon-search"
+			styleClass="primary button-small" immediate="true"
+			rendered="#{contextoTareaEIAController.tieneArt}">
+			<p:fileDownload
+				value="#{contextoTareaEIAController.descargarOficoArt()}" />
+		</p:commandButton>
+
+		<h:outputText value="Datos" />
+		<h:outputText value="Estudio de Impacto Ambiental" />
+		<h:outputLink target="_blank"
+			value="#{request.contextPath}/pages/rcoa/estudioImpactoAmbiental/verProyectoEIAResumen.jsf">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+	</ui:define>
+
+	<ui:define name="content">
+
+		<style type="text/css">
+.ui-datepicker-unselectable span {
+	background: #b9b5b5 !important;
+}
+</style>
+
+
+		<h:form id="form"
+			onkeypress="if (event.keyCode == 13) {return false; }">
+			<p:panelGrid id="ingresoPolizaGrid" columns="3" layout="grid"
+				styleClass="w100" columnClasses="w33, w33, w33">
+				<f:facet name="header">
+					<p:outputLabel value="Ingreso de la Póliza de garantía" />
+				</f:facet>
+				<p:outputLabel
+					value="¿El operador ha entregado la Póliza de garantía original?" />
+				<p:selectOneRadio disabled="#{emisionLicenciaAmbientalConfirmarPolizaController.esEmpresaPublica}"
+					value="#{emisionLicenciaAmbientalConfirmarPolizaController.resolucionAmbiental.entregoPolizaGarantia}"
+					required="true" requiredMessage="Seleccione si o no">
+					<f:selectItem itemValue="true" itemLabel="Si" />
+					<f:selectItem itemValue="false" itemLabel="No" />
+					<p:ajax update="@form"></p:ajax>
+				</p:selectOneRadio>
+				<br />
+				<p:outputLabel value="Número de Oficio de recepción de la póliza"
+					rendered="#{emisionLicenciaAmbientalConfirmarPolizaController.resolucionAmbiental.entregoPolizaGarantia}" />
+				<p:inputText required="true"
+					requiredMessage="Número de póliza requerida"
+					rendered="#{emisionLicenciaAmbientalConfirmarPolizaController.resolucionAmbiental.entregoPolizaGarantia}"
+					maxlength="200"
+					value="#{emisionLicenciaAmbientalConfirmarPolizaController.resolucionAmbiental.numeroOficioRecepcionPoliza}">
+				</p:inputText>
+				<br />
+				<p:outputLabel value="Fecha de ingreso de la Póliza"
+					rendered="#{emisionLicenciaAmbientalConfirmarPolizaController.resolucionAmbiental.entregoPolizaGarantia}" />
+				<p:calendar styleClass="calendarClass"
+					rendered="#{emisionLicenciaAmbientalConfirmarPolizaController.resolucionAmbiental.entregoPolizaGarantia}"
+					value="#{emisionLicenciaAmbientalConfirmarPolizaController.resolucionAmbiental.fechaRecepcionPoliza}"
+					maxdate="#{emisionLicenciaAmbientalConfirmarPolizaController.fechaActual}"
+					pattern="dd/MM/yyyy" readonlyInput="true" navigator="true"
+					required="true"
+					requiredMessage="Fecha de ingreso de la Póliza es requerido">
+				</p:calendar>
+				<br />
+			</p:panelGrid>
+			<br />
+
+			<p:panelGrid id="datosPolizaGrid" columns="3" layout="grid"
+				styleClass="w100" columnClasses="w50, w50"
+				rendered="#{emisionLicenciaAmbientalConfirmarPolizaController.resolucionAmbiental.entregoPolizaGarantia}">
+				<f:facet name="header">
+					<p:outputLabel value="Datos de la Póliza de garantía" />
+				</f:facet>
+				<p:outputLabel value="Monto de la Póliza" />
+				<pe:inputNumber thousandSeparator=""
+					value="#{emisionLicenciaAmbientalConfirmarPolizaController.resolucionAmbiental.montoPoliza}"
+					required="true" id="valorContrato"
+					requiredMessage="Monto de la Póliza es requerido"
+					validatorMessage="Monto de la Póliza no debe ser Cero"
+					autocomplete="off" maxValue="999999999999.99">
+					<f:validateDoubleRange minimum="0.01" />
+				</pe:inputNumber>
+				<br />
+
+				<p:outputLabel value="Vigencia de la Póliza" />
+				<h:panelGroup>
+					<p:outputLabel value="Desde" />
+					<br />
+					<p:calendar styleClass="calendarClass"
+						value="#{emisionLicenciaAmbientalConfirmarPolizaController.resolucionAmbiental.fechaInicioPoliza}"
+						pattern="dd/MM/yyyy" readonlyInput="true" navigator="true"
+						required="true"
+						requiredMessage="Fecha de incio de vigencia es requerido">
+						<p:ajax event="dateSelect" update="fechaFin" process="@this" />
+					</p:calendar>
+				</h:panelGroup>
+				<h:panelGroup id="fechaFin">
+					<p:outputLabel value="Hasta" />
+					<br />
+					<p:calendar styleClass="calendarClass"
+						value="#{emisionLicenciaAmbientalConfirmarPolizaController.resolucionAmbiental.fechaFinPoliza}"
+						pattern="dd/MM/yyyy" readonlyInput="true" navigator="true"
+						mindate="#{emisionLicenciaAmbientalConfirmarPolizaController.resolucionAmbiental.fechaInicioPoliza}"
+						required="true"
+						requiredMessage="Fecha de fin de vigencia es requerido">
+					</p:calendar>
+				</h:panelGroup>
+			</p:panelGrid>
+
+			<div class="buttons main">
+				<p:commandButton value="Enviar" title="Enviar" icon="ui-icon-check"
+					immediate="false" process=":form"
+					action="#{emisionLicenciaAmbientalConfirmarPolizaController.enviar}">
+					<p:confirm header="Confirmación"
+						message="¿Está seguro que desea finalizar la solicitud?"
+						icon="ui-icon-alert" />
+				</p:commandButton>
+			</div>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

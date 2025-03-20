@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:controles-prime="http://java.sun.com/jsf/composite/controles-prime">
+    <ui:define name="content">
+        <style>
+            .col1 {
+                width: 30%;
+            }
+            .col2 {
+                width: 70%;
+            }
+        </style>
+        <p:growl globalOnly="true" id="msgs"/>
+        <h:form id="frmListaUsuario" >
+            <p:dataTable widgetVar="usuariostbl"
+                         value="#{usuarioController.usuarioBean.listaEntityUsuario}"
+                         rendered="#{usuarioController.usuarioBean.verListaUsuario}"
+                         var="usuario" paginator="true" rows="10">
+                <p:column headerText="Usuario" filterBy="#{usuario.nombre}"
+                          filterMatchMode="contains">
+                    <h:outputText value="#{usuario.nombre}"/>
+                </p:column>
+                <ui:remove>
+                 <p:column headerText="Nombre usuario" filterBy="#{usuario.nombreUsuario}" rendered="#{usuarioController.validarUsuarioIngresado()}"
+                          filterMatchMode="contains">
+                    <h:outputText value="#{usuario.nombreUsuario}"/>
+                </p:column>
+                </ui:remove>
+                
+                 <p:column headerText="Nombre usuario" filterBy="#{usuario.nombreUsuario}"
+                          filterMatchMode="contains">
+                    <h:outputText value="#{usuario.nombreUsuario}"/>
+                </p:column>
+                
+                <p:column headerText="Provincia" filterBy="#{usuario.provincia}"
+                          filterMatchMode="contains">
+                    <h:outputText value="#{usuario.provincia}"/>
+                </p:column>
+                
+                <p:column headerText="Fecha creación">
+                    <h:outputText value="#{usuario.fechaCreacion}" >
+                        <f:convertDateTime pattern="dd-MM-yyyy"/>
+                    </h:outputText>
+                </p:column>
+                <p:column headerText="Rol(es) del Usuario" filterBy="#{usuario.roles}"
+                          filterMatchMode="contains">
+                    <h:outputText value="#{usuario.roles}" />
+                </p:column>
+                <p:column headerText="Acción">
+                    <p:commandButton icon="ui-icon-pencil" action="#{usuarioController.seleccionarUsuario(usuario)}" title="Editar"
+                                     update=":#{p:component('frmListaUsuario')},:#{p:component('frmDatosUsuario')}" styleClass="primary"/>
+                    <p:commandButton icon="ui-icon-newwin" action="#{usuarioController.seleccionarUsuarioAsignar(usuario)}"
+                                     update=":#{p:component('frmListaUsuario')},:#{p:component('fmrAsignarRol')}" title="Asignar Roles" styleClass="primary"/>
+                </p:column>
+            </p:dataTable>
+            <h:panelGroup rendered="#{usuarioController.usuarioBean.verListaUsuario}">
+                <p:commandButton styleClass="primary" value="Nuevo" action="#{usuarioController.nuevo()}"
+                                 update=":#{p:component('frmListaUsuario')},:#{p:component('frmDatosUsuario')}" />
+            </h:panelGroup>
+        </h:form>
+        <h:form id="frmDatosUsuario" >
+            <ui:include src="accionesUsuario/datosUsuario.xhtml" />
+        </h:form>
+        <h:form id="fmrAsignarRol"> 
+            <ui:include src="accionesUsuario/asignarRol.xhtml" />
+
+        </h:form>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,327 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<h:form id="form">
+			<p:panelGrid id="panelPrincipal" columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Emisión de registro de generador de desechos especiales y/o peligrosos" />
+				</f:facet>
+				<p:outputLabel value="Motivo de la emisión" styleClass="bold" for="motivo" rendered="#{motivoRegistroGeneradorDesechosController.iniciarDesechos}"/>
+				<h:panelGrid styleClass="w50" columns="1" columnClasses="w100"
+				rendered="#{motivoRegistroGeneradorDesechosController.iniciarDesechos}">
+					<p:selectOneMenu value="#{motivoRegistroGeneradorDesechosController.tipoMotivo}" styleClass="w100" required="true" id="motivo">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+						<f:selectItem itemLabel="Emisión por libre voluntad (no asociada a proyecto)" itemValue="#{motivoRegistroGeneradorDesechosController.motivoNoAsociado}"/>
+						<f:selectItem itemLabel="Emisión por disposición legal (asociada a proyecto)" itemValue="#{motivoRegistroGeneradorDesechosController.motivoAsociado}" />
+						<p:ajax update="proyectoContainer" />
+					</p:selectOneMenu>
+				</h:panelGrid>
+				<p:separator />
+				<h:panelGroup id="proyectoContainer">
+				
+				<p:panelGrid rendered="#{motivoRegistroGeneradorDesechosController.tipoMotivo == motivoRegistroGeneradorDesechosController.motivoNoAsociado}" visible="true" width="450" resizable="false" widgetVar="infoRegistro" header="Información" style="text-align: justify;" >
+					<p:outputLabel  value="Aplicable a importadores que generan desechos peligrosos y/o especiales sujetos a responsabilidad
+					extendida." />
+			</p:panelGrid>
+			
+					<h:panelGroup rendered="#{motivoRegistroGeneradorDesechosController.tipoMotivo == motivoRegistroGeneradorDesechosController.motivoAsociado}">
+								<p:outputLabel value="Aplicable a toda actividad que genere desechos peligrosos y/o especiales, la misma que debe contar
+								con el proceso de regularización ambiental."/>
+							<p:panelGrid columns="1" layout="grid" styleClass="w100">
+							    <f:facet name="header">
+									<h:outputText value="¿Su proyecto obtuvo regularización de manera física, por el sistema SUIA ó por un ente acreditado?" />
+								</f:facet>
+						<ui:remove>
+							<p:commandButton styleClass="primary extraLarge"
+									value="Seleccionar proyecto"
+									actionListener="#{motivoRegistroGeneradorDesechosController.seleccionarProyecto}"
+									process="@this" update="@form"
+									rendered="#{empty motivoRegistroGeneradorDesechosController.proyectoCustom}" />
+						</ui:remove>
+								<h:panelGrid columns="2" style="margin-bottom:10px"
+									cellpadding="5">
+									<p:outputLabel for="registroGeneradorDesechosItem1"
+										value="¿El proyecto cuenta con Permiso Ambiental emitido por el sistema SUIA?" />
+									<p:selectOneRadio id="registroGeneradorDesechosItem1" disabled="#{motivoRegistroGeneradorDesechosController.disableItem1}"
+										value="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoSuia}">
+										<f:selectItem itemLabel="Sí" itemValue="true" />
+										<f:selectItem itemLabel="No" itemValue="false" />
+										<p:ajax process="@this" update=":#{p:component('proyectoContainer')}" listener="#{motivoRegistroGeneradorDesechosController.validarItems()}"/>
+									</p:selectOneRadio>
+									
+									<p:outputLabel for="registroGeneradorDesechosItem2"
+										value="¿El proyecto cuenta con Permiso Ambiental emitido por los entes acreditados y que fueron registrados en el sistema SUIA?" />
+									<p:selectOneRadio id="registroGeneradorDesechosItem2" disabled="#{motivoRegistroGeneradorDesechosController.disableItem2}"
+										value="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoEnte}">
+										<f:selectItem itemLabel="Sí" itemValue="true" />
+										<f:selectItem itemLabel="No" itemValue="false" />
+										<p:ajax process="@this" update=":#{p:component('proyectoContainer')}" listener="#{motivoRegistroGeneradorDesechosController.validarItems}"/>
+									</p:selectOneRadio>
+									
+									<p:outputLabel for="registroGeneradorDesechosItem3"
+										value="¿El proyecto cuenta con Permiso Ambiental emitido de manera física fuera del sistema SUIA?" />
+									<p:selectOneRadio id="registroGeneradorDesechosItem3" disabled="#{motivoRegistroGeneradorDesechosController.disableItem3}"
+										value="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoFisico}">
+										<f:selectItem itemLabel="Sí" itemValue="true" />
+										<f:selectItem itemLabel="No" itemValue="false" />
+										<p:ajax process="@this" update=":#{p:component('proyectoContainer')}" listener="#{motivoRegistroGeneradorDesechosController.validarItems}" />
+									</p:selectOneRadio>
+								</h:panelGrid>
+						</p:panelGrid>
+						<!-- aqui -->
+						<p:separator rendered="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoSuia || motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoEnte}"/>
+						
+						<p:panel id="panelBuscar"
+							rendered="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoSuia || motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoEnte || motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoFisico}">
+							<f:facet name="header" >
+								<h:outputText value="#{labels['label.buscar.proyecto']}" />
+								<p:separator rendered="#{motivoRegistroGeneradorDesechosController.buscarProyecto}" />
+								<h:outputText styleClass="w100 text-red bold" rendered="#{motivoRegistroGeneradorDesechosController.buscarProyecto and motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoSuia}"
+									value="#{labels['msg.informacion.informativoProcesoDesechoItem1']}" />
+								<h:outputText styleClass="w100 text-red bold" rendered="#{motivoRegistroGeneradorDesechosController.buscarProyecto and motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoEnte}"
+									value="#{labels['msg.informacion.informativoProcesoDesechoItem2']}" />
+								<h:outputText styleClass="w100 text-red bold" rendered="#{motivoRegistroGeneradorDesechosController.buscarProyecto and motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoFisico}"
+									value="#{labels['msg.informacion.informativoProcesoDesechoItem3']}" />
+								<p:separator rendered="#{motivoRegistroGeneradorDesechosController.buscarProyecto}"/>
+							</f:facet>
+							
+							
+							<h:panelGrid styleClass="w70 separatorBottom" columns="2"
+								columnClasses="w50, field_mrg w50" rendered="#{motivoRegistroGeneradorDesechosController.buscarProyecto}">
+								<p:outputLabel for="numReg"
+									value="Código de proyecto" />
+								<p:inputText id="numReg"
+									value="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.codigoProyecto}"
+									required="true" maxlength="250" />
+							</h:panelGrid>
+							<div class="buttons main  ">
+								<p:commandButton value="#{labels['label.buscar.proyecto']}" rendered="#{motivoRegistroGeneradorDesechosController.buscarProyecto}"
+									update=":#{p:component('panelPreguntaLicenciaFisica')},:#{p:component('panelBuscar')}"
+									action="#{motivoRegistroGeneradorDesechosController.buscarProyecto}"
+									process="panelBuscar" icon="ui-icon-search" />
+							</div>
+
+							<p:panel id="panelLicenciasFisicas"
+								rendered="#{motivoRegistroGeneradorDesechosController.habilitarPanelLicenciaFisica || motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoFisico}">
+								<f:facet name="header">
+									<h:outputText value="Datos proyecto" />
+								</f:facet>
+								<h:outputText styleClass="w100 text-red bold" rendered="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoFisico}"
+									value="#{labels['msg.informacion.informativoProcesoDesechoItem3']}" />
+								<p:separator rendered="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoFisico}"/>
+								<h:panelGrid styleClass="w70 separatorBottom" columns="2"
+									columnClasses="w50, field_mrg w50">
+									<p:outputLabel value="Código de proyecto:" for="codProyecto" rendered="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoSuia || motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoEnte}"/>
+									<p:inputText id="codProyecto" rendered="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoSuia || motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoEnte}"
+										value="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.codigoProyecto}"
+										required="true" maxlength="250" />
+									<p:tooltip for="codProyecto" escape="false" showDelay="1200"
+										trackMouse="true">
+										<h:outputText value="#{helps['registro.nombreDesecho']}"
+											escape="false" />
+									</p:tooltip>
+									<p:outputLabel />
+									<p:outputLabel for="numRegLicencia"	value="Código de permiso ambiental" rendered="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoEnte || motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoFisico}"/>
+									<p:inputText id="numRegLicenciaA" value="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.codigoPermisoAmbiental}"
+										required="true" maxlength="250" rendered="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoEnte}"/>
+									<p:inputText id="numRegLicencia" value="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.codigoPermisoAmbiental}"
+										required="true" maxlength="250" rendered="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoFisico}"/>	
+									<p:tooltip for="numRegLicencia" escape="false" showDelay="100"
+										trackMouse="true">
+										<h:outputText value="Si su proyecto pertenece al sistema de Sector y Subsector, por favor colocar el código de proyecto"
+											escape="false" />
+									</p:tooltip>
+									<p:outputLabel />
+									<p:outputLabel for="fecRegLicencia" value="Fecha de otorgamiento del permiso ambiental" 
+												rendered="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoEnte || motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoFisico}"/>
+									<p:calendar id="fecRegLicencia" value="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.fechaPermisoAmbiental}" navigator="true" locale="es" maxdate="#{motivoRegistroGeneradorDesechosController.fechaActual}"
+										required="true" rendered="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoEnte || motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoFisico}" readonlyInput="true"/>
+									<p:outputLabel for="nombreArchivoHidden"
+										value="Adjuntar permiso ambiental otorgado por el sistema (.pdf)" />
+									<h:outputText id="nombreArchivo"
+										value="#{motivoRegistroGeneradorDesechosController.documentoLicencia.nombre}" />
+									<h:inputHidden id="nombreArchivoHidden" required="true"
+										value="#{motivoRegistroGeneradorDesechosController.documentoLicencia.nombre}" />
+									<p:fileUpload
+										fileUploadListener="#{motivoRegistroGeneradorDesechosController.handleFileUpload}"
+										value="#{motivoRegistroGeneradorDesechosController.file}"
+										sizeLimit="2048576" allowTypes="/(\.|\/)(pdf)$/"
+										label="Seleccionar" uploadLabel="Subir" auto="true"
+										update="nombreArchivo,nombreArchivoHidden"
+										cancelLabel="Cancelar"
+										invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+										invalidSizeMessage="Debe adjuntar un archivo no mayor de 2 Mb."
+										required="true" mode="advanced" styleClass="w50 ">
+										<f:attribute name="indice" id="indice" value="1" />
+									</p:fileUpload>
+								</h:panelGrid>
+								<div class="buttons main">
+									<p:commandButton value="Volver a buscar" rendered="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoSuia || motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoEnte}"
+										action="#{motivoRegistroGeneradorDesechosController.volverPanelBuscar}"
+										update="@form" process="@this" />
+								</div>
+							</p:panel>
+							<p:panel header="Proyecto no encontrado"
+								rendered="#{motivoRegistroGeneradorDesechosController.volverBuscarProyecto}">
+								<h:outputText
+									value="Por favor verifique el Código de proyecto del permiso ambiental manual y vuelva a intertar, si el problema persiste por favor comuníquese con mesa de ayuda." />
+								<div class="buttons main">
+									<p:commandButton value="Volver a buscar" rendered="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoSuia || motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoEnte}"
+										action="#{motivoRegistroGeneradorDesechosController.volverPanelBuscar}"
+										update="@form" process="@this" />
+								</div>
+							</p:panel>
+
+							<mae-components:readOnly>
+								<p:panel columns="1" layout="grid" styleClass="mw50"
+									columnClasses="w50, field_mrg w50"
+									rendered="#{motivoRegistroGeneradorDesechosController.habilitaPanelProyectoEncontrado}">
+									<h:panelGrid styleClass="panel_data w100" columns="2"
+										columnClasses="header, null" rowClasses="null, alt">
+										<h:outputText value="Código proyecto" />
+										<h:outputText id="itcodproy"
+											value="#{motivoRegistroGeneradorDesechosController.registroAmbiental.codigoProyecto}" />
+										<h:outputText value="Nombre proyecto" />
+										<h:outputText id="itproy"
+											value="#{motivoRegistroGeneradorDesechosController.registroAmbiental.nombreProyecto}" />
+										<h:outputText value="Fecha registro proyecto" />
+										<h:outputText id="itfec"
+											value="#{motivoRegistroGeneradorDesechosController.registroAmbiental.fechaProyecto}">
+											<f:convertDateTime pattern="dd/MM/yyyy" />
+										</h:outputText>
+										<h:outputText value="Sector" />
+										<h:outputText id="itsec"
+											value="#{motivoRegistroGeneradorDesechosController.registroAmbiental.sector}" />
+										<h:outputText value="Subsector/Actividad" />
+										<h:outputText id="itsubsec"
+											value="#{motivoRegistroGeneradorDesechosController.registroAmbiental.subSectorOactividad}" />
+									</h:panelGrid>
+									<div class="buttons main">
+									<p:commandButton value="Volver a buscar" rendered="#{motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoSuia ||motivoRegistroGeneradorDesechosController.registroGeneradorDesechosAsociado.permisoEnte}"
+										action="#{motivoRegistroGeneradorDesechosController.volverPanelBuscar}"
+										update="@form" process="@this" />
+								</div>
+								</p:panel>
+							</mae-components:readOnly>
+
+						</p:panel>
+						<p:separator/>
+						
+
+						<!-- fin aqui -->
+					</h:panelGroup>
+				</h:panelGroup>
+			</p:panelGrid>
+
+			<t:div styleClass="buttons main">
+				<p:commandButton value="Aceptar" icon="ui-icon-check" action="#{motivoRegistroGeneradorDesechosController.aceptar()}" />
+			</t:div>
+			
+			
+			<!-- DE AQUI -->
+
+			
+
+			<p:dialog id="dlContinuar" widgetVar="continuarDialog" modal="true"
+				closable="false" showEffect="fade" hideEffect="fade"
+				resizable="false">
+				<f:facet name="header">Informaci&oacute;n</f:facet>
+				<p:panel>
+					<h:panelGrid columns="1" styleClass="w100">
+						<p:outputLabel value="#{motivoRegistroGeneradorDesechosController.mensaje}" />
+						<p:panelGrid
+							rendered="#{motivoRegistroGeneradorDesechosController.pathImagen !=null }">
+							<img id="mensaje_img"
+								style="display: block; margin: 0 auto 0 auto;"
+								src="#{request.contextPath}#{motivoRegistroGeneradorDesechosController.pathImagen}"  alt=""/>
+						</p:panelGrid>
+					</h:panelGrid>
+					<p:spacer />
+					<div class="buttons">
+						<p:commandButton value="Aceptar12" styleClass="primary"
+							action="#{motivoRegistroGeneradorDesechosController.continuar()}"
+							oncomplete="PF('continuarDialog').hide();" />
+					</div>
+				</p:panel>
+			</p:dialog>
+
+		</h:form>
+		<p:dialog widgetVar="preguntaLicenciaFisicaWdgt" modal="true"
+			width="400" resizable="false" closable="true">
+			<h:form>
+				<h:panelGrid id="panelPreguntaLicenciaFisica">
+					<h:outputText
+						value="Considerando que cuenta con un permiso ambiental otorgado por el sistema SUIA, para el inicio del proceso de registro generador de desechos." />
+					<p:outputLabel value="¿Desea adjuntar el documento en formato .pdf respectivo?"
+						for="radioBtnLicenciaFisica" />
+					<p:selectOneRadio id="radioBtnLicenciaFisica"
+						value="#{motivoRegistroGeneradorDesechosController.proyectoConLicenciaFisica}"
+						required="true">
+						<f:selectItem itemLabel="Si" itemValue="true"/>
+						<f:selectItem itemLabel="No" itemValue="false" />
+						<p:ajax process="@this" listener="#{motivoRegistroGeneradorDesechosController.listenerLicenciaFisica}" 
+							update=":#{p:component('panelPrincipal')}"/>
+					</p:selectOneRadio>
+				</h:panelGrid>
+
+
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Aceptar" styleClass="buttonAceptar"
+						action="#{motivoRegistroGeneradorDesechosController.aceptarPreguntaLicenciaFisica}"
+						update=":#{p:component('form')}" process="@form" />
+				</div>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog widgetVar="preguntaLicenciaFisicaOtroUsuarioWdgt" modal="true"
+				  width="400" resizable="false" closable="true">
+			<h:form>
+				<h:panelGrid id="panelPreguntaLicenciaFisicaOtroUsuario">
+					<h:outputText
+							value="Estimado usuario el código de proyecto ingresado no se encuentra asociado a su usuario o no fue encontrado en el sistema, por favor verifique la información de sus proyectos para poder iniciar el proceso de Aprobación de requisitos técnicos. " />
+				</h:panelGrid>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Aceptar" styleClass="buttonAceptar"
+									 oncomplete="PF('preguntaLicenciaFisicaOtroUsuarioWdgt').hide();"/>
+				</div>
+			</h:form>
+		</p:dialog>
+			<!-- HASTA AQUI -->
+
+
+		<p:dialog id="sinPermisoDlg" header="Informativo"
+				  widgetVar="sinPermisoWdgt" modal="true" closable="false" height="100" width="480" resizable="false">
+			<h:panelGroup id="permisoInner" layout="block" style="margin:10px;">
+				<h:outputText
+						value="#{helps['identif.proyecto.mensaje.informativo.sin.permiso']}"
+						styleClass="bold text-red alJustify" />
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Aceptar" styleClass="primary"
+									 onclick="PF('sinPermisoWdgt').hide();"/>
+				</div>
+			</h:panelGroup>
+		</p:dialog>
+
+		<p:dialog id="conGeneradorDlg" header="Informativo"
+				  widgetVar="conGeneradorWdgt" modal="true" closable="false" height="100" width="480" resizable="false">
+			<h:panelGroup id="generadorInner" layout="block" style="margin:10px;">
+				<h:outputText
+						value="#{helps['identif.proyecto.mensaje.informativo.generador.iniciado']}"
+						styleClass="bold text-red alJustify" />
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Aceptar" styleClass="primary"
+									 action="#{identificarProyectoComunBean.redirectTo('/procesos/procesos.jsf')}"
+									 oncomplete="PF('conGeneradorWdgt').hide();"/>
+				</div>
+			</h:panelGroup>
+		</p:dialog>
+
+	</ui:define>
+</ui:composition>
+</html>

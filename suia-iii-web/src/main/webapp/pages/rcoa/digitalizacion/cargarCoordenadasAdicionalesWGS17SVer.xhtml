@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+	<p:panelGrid columns="1" layout="grid" styleClass="buttonAdjuntarCoordenadasContainer w100" rendered="#{ingresoDigitalizacionProyectosController.mostrarOtrasCoordenadas}">
+		<p:outputLabel value="#{labels['label.proceso.digitalizacion.coordenadas.wgs8417s']}"/>				
+		<p:dataTable id="tbl_coordenadas_wgspsad" rowIndexVar="index" value="#{cargarCoordenadasWGSBean.coordinatesWrappersGeo}" var="item" emptyMessage="#{labels['common.table.empty']}">
+			<p:subTable value="#{item.coordenadas}" var="coordenada">
+				<p:columnGroup type="header">
+					<p:row>
+						<p:column headerText="#{item.tipoForma}" styleClass="alCenter w100 table-column-header" colspan="3" />
+					</p:row>
+					<p:row>
+						<p:column headerText="Shape" styleClass="alCenter table-column-header" />
+						<p:column headerText="X" styleClass="alCenter table-column-header" />
+						<p:column headerText="Y" styleClass="alCenter table-column-header" />				
+					</p:row>
+				</p:columnGroup>
+				<p:column headerText="Shape" styleClass="alCenter">
+					<h:outputText value="#{coordenada.orden}" />
+				</p:column>
+				<p:column headerText="X" styleClass="alCenter">
+					<h:outputText value="#{coordenada.x.intValue()}" />
+				</p:column>
+				<p:column headerText="Y" styleClass="alCenter">
+					<h:outputText value="#{coordenada.y.intValue()}" />
+				</p:column>		
+			</p:subTable>
+		</p:dataTable>
+		<h:outputText value="Información obtenida automáticamente en función de la información limítrofe vigente" />
+		<p:dataTable id="tablaUbicacionesWgspsad" value="#{cargarCoordenadasWGSBean.ubicacionesSeleccionadas}" var="ubicacion" emptyMessage="#{labels['common.table.empty']}">
+			<p:column headerText="Provincia">
+				<h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+			</p:column>
+			<p:column headerText="Cantón">
+				<h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}">
+				</h:outputText>
+			</p:column>
+			<p:column headerText="Parroquia" >
+			<h:outputText value="#{ubicacion.nombre}"/>
+		    </p:column>
+		</p:dataTable>
+		
+		<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{not empty cargarCoordenadasWGSBean.areasProtegidasWgs or not empty cargarCoordenadasWGSBean.bosquesProtectoresWgs}">
+			<f:facet name="header">
+				<h:outputText value="Interseca con" />
+			</f:facet>
+				<h:panelGrid columns="2" id="pnlAreasProtegidas">
+					<p:dataTable id="tbl_snap" rowIndexVar="index" var="item"
+						emptyMessage="#{labels['common.table.empty']}" value="#{cargarCoordenadasWGSBean.areasProtegidasWgs}">
+						<p:column headerText="SISTEMA NACIONAL DE ÁREAS PROTEGIDAS - SNAP" styleClass="alCenter w15">
+							<h:outputText value="#{item}" />
+						</p:column>
+					</p:dataTable>
+					<p:dataTable id="tbl_bosques" rowIndexVar="index" var="item" value="#{cargarCoordenadasWGSBean.bosquesProtectoresWgs}"
+						emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="BOSQUES PROTECTORES" styleClass="alCenter w15">
+							<h:outputText value="#{item}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+		</p:panelGrid>
+		<h:panelGrid layout="grid" styleClass="panel_data w100" columnClasses="header w25,null w75" columns="2" rendered="#{ingresoDigitalizacionProyectosController.tieneDiferenciaInterseccion}">
+			<h:outputText value="Diferencias entre información de intersección al emitir la resolución de la AAA y la información digitalizada*"/>
+			<p:inputTextarea id="txtDescripcion" value="#{ingresoDigitalizacionProyectosController.autorizacionAdministrativa.justificacionInterseccion}" rows="4" styleClass="w100"  
+				disabled="true" autoResize="false" maxlength="500" >
+			<p:ajax process="@this"/>
+			</p:inputTextarea>
+		</h:panelGrid>
+	</p:panelGrid>
+</html>

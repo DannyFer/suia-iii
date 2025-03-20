@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<p:commandButton id="#{empresaPrestadoraServiciosAliasBean.btnSeleccionar}" value="#{!empresaPrestadoraServiciosAliasBean.seleccionMultiple ? 'Seleccionar' : 'Adicionar'}" oncomplete="PF('#{empresaPrestadoraServiciosAliasBean.dialogseleccionarEmpresa}').show()" process="@this" update="#{empresaPrestadoraServiciosAliasBean.dialogseleccionarEmpresa}" styleClass="button-small-text toRight field_mrg" icon="#{!empresaPrestadoraServiciosAliasBean.seleccionMultiple ? 'ui-icon-check' : 'ui-icon-plusthick'}" />
+		<h:outputText value="#{!empresaPrestadoraServiciosAliasBean.seleccionMultiple ? 'Empresa prestadora de servicios ' : 'Empresa(s) prestadora(s) de servicios'} #{empresaPrestadoraServiciosAliasBean.esResponsabilidadExtendida?'*':''}" />
+	</f:facet>
+	<p:dataTable id="#{empresaPrestadoraServiciosAliasBean.tbl_empresas}" value="#{empresaPrestadoraServiciosAliasBean.sedesSeleccionadas}" var="sede" emptyMessage="#{labels['common.table.empty']}">
+		<p:column headerText="Empresa">
+			<h:outputText value="#{sede.prestadorServiciosDesechos}" />
+			<h:inputText value="#{empresaPrestadoraServiciosAliasBean.nombreOtraEmpresa}" size="50" maxlength="200" rendered="#{empresaPrestadoraServiciosAliasBean.mostrarOtraEampresaEliminacion}" required="true" requiredMessage="El campo empresa es requerido"/>
+		</p:column>
+		<p:column headerText="Gestión anual (T)" styleClass="w15 alCenter" rendered="#{!empresaPrestadoraServiciosAliasBean.transporte and !empresaPrestadoraServiciosAliasBean.mostrarOtraEampresaEliminacion}">
+			<h:outputText value="#{sede.capacidadGestionAnualToneladas}" />
+		</p:column>
+		<p:column headerText="Gestión anual (U)" styleClass="w15 alCenter" rendered="#{(empresaPrestadoraServiciosAliasBean.desechoSeleccionado.desechoES_04 or empresaPrestadoraServiciosAliasBean.desechoSeleccionado.desechoES_06) and !empresaPrestadoraServiciosAliasBean.transporte and !empresaPrestadoraServiciosAliasBean.mostrarOtraEampresaEliminacion}">
+			<h:outputText value="#{sede.capacidadGestionAnualUnidades}" />
+		</p:column>
+		<p:column headerText="Permiso ambiental" rendered="#{registroGeneradorDesechoBean.generadorDesechosPeligrosos.responsabilidadExtendida}">
+			<p:outputLabel id="adjuntarPermisoAmb" value="#{empresaPrestadoraServiciosAliasBean.permisoUpload(sede.id) ne '' ? empresaPrestadoraServiciosAliasBean.permisoUpload(sede.id) : 'Permiso ambiental (.pdf)*'}" />
+			<p:fileUpload fileUploadListener="#{empresaPrestadoraServiciosAliasBean.uploadListenerPermiso}" multiple="false" 
+				sizeLimit="209715200" allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar" uploadLabel="Subir" invalidFileMessage="Tipo de archivo no válido" 
+				invalidSizeMessage="Tamaño de archivo no válido" cancelLabel="Cancelar" mode="advanced" dragDropSupport="false" auto="true" update="adjuntarPermisoAmb" 
+				 >
+    			<f:attribute name="empresaId" value="#{sede.id}" />
+    		</p:fileUpload>
+		</p:column>
+		<p:column styleClass="w20px">
+			<p:commandButton update=":form:#{empresaPrestadoraServiciosAliasBean.tbl_empresas} :form:#{empresaPrestadoraServiciosAliasBean.tableEmpresas}" styleClass="button-small primary" process="@this" icon="ui-icon-circle-close" actionListener="#{empresaPrestadoraServiciosAliasBean.eliminarSedeSeleccionada(sede)}" />
+		</p:column>
+	</p:dataTable>
+</p:panelGrid>
+</html>

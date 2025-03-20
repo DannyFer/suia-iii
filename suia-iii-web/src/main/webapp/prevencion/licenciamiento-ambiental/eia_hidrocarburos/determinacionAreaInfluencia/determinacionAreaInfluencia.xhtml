@@ -1,0 +1,100 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:controles="http://java.sun.com/jsf/composite/controles-prime"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+    <ui:define name="content">
+        <ui:include src="../contenido/menu.xhtml" />
+        <div class="content">
+            <h:form id="frmDatos">
+                <p:panel header="Determinación de áreas de influencia del proyecto">
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="*Adjuntar Documento:"/>
+                        <p:fileUpload fileUploadListener="#{determinacionAreasInfluenciaController.handleFileUpload}" mode="advanced"
+                                      label="Seleccione" update="txtNombreAnexo"
+                                      auto="true" sizeLimit="100000" allowTypes="/(\.|\/)(pdf)$/" />                        
+                        <h:outputLabel value="Documento:" />
+                        <p:commandLink id="txtNombreAnexo"/>
+                    </h:panelGrid>
+                    <br/>
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="" rendered="#{registroProyectoBean.mostrarUbicacionGeografica}">
+                        <f:facet name="header">
+                            <p:commandButton value="Adicionar"  styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick" action="#{determinacionAreasInfluenciaController.aniadirDirecta()}" update=":#{p:component('frmDatos')}"/>
+                            <mae:panelGridHeaderHelp value="Área de influencia Directa" conector="ubicacionHelp" image="#{request.contextPath}/resources/images/proyecto-mapa.png" help="" />
+
+                        </f:facet>
+                        <p:dataTable value="#{determinacionAreasInfluenciaController.determinacionAreasInfluenciaBean.listaAreasInfluenciaProyectosDirecta}" var="det">
+                            <f:facet name="header">
+                                Área de influencia Directa
+                            </f:facet>
+                            <p:column headerText="Acciones">
+                                <center>
+                                    <p:commandButton icon="ui-icon-trash" title="Eliminar" action="#{determinacionAreasInfluenciaController.eliminarDetalle(det)}" update=":#{p:component('frmDatos')}"/>
+                                </center>
+                            </p:column>
+                            <p:column headerText="Infraestructura y/o actividades del proyecto">
+                                <controles:todoTextoComoIngrese identificador="txtActividades" valor="#{det.infraestructuraActividadesProyecto}" longitud="500" tamanio="30" requerido="true"/>
+                            </p:column>
+                            <p:column headerText="Propietarios">
+                                <controles:todoTextoComoIngrese identificador="txtPropietarios" valor="#{det.propietarios}" longitud="500" tamanio="30"/>
+                            </p:column>
+                            <p:column headerText="Comunidades, centros poblados, etc">
+                                <controles:todoTextoComoIngrese identificador="txtPropietarios" valor="#{det.comunidadesCentrosPoblados}" longitud="500" tamanio="30" requerido="true"/>
+                            </p:column>
+                        </p:dataTable>
+                    </p:panelGrid>
+
+                    <br/>
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="" rendered="#{registroProyectoBean.mostrarUbicacionGeografica}">
+                        <f:facet name="header">
+                            <p:commandButton value="Generar influencia indirecta"  styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick" action="#{determinacionAreasInfluenciaController.generarInfluenciaIndirecta()}" update=":#{p:component('frmDatos')}"/>
+                            <mae:panelGridHeaderHelp value="Área de influencia indirecta / Distancias entre los elementos del proyecto" conector="ubicacionHelp" image="#{request.contextPath}/resources/images/proyecto-mapa.png" help="" />
+
+                        </f:facet>                    
+                        <br/>
+                        <p:dataTable value="#{determinacionAreasInfluenciaController.determinacionAreasInfluenciaBean.listaAreasInfluenciaProyectosInDirecta}" var="detIn">
+                            <f:facet name="header">
+                                Área de influencia indirecta
+                            </f:facet>
+                            <p:column headerText="Infraestructura y/o actividades del proyecto">
+                                <h:outputText value="#{detIn.infraestructuraActividadesProyecto}"/>
+                            </p:column>
+                            <p:column headerText="Parroquia, Territorios de nacionalidades indigenas, etc">
+                                <controles:todoTextoComoIngrese longitud="500" tamanio="30" identificador="txtParroquia" valor="#{detIn.territoriosIndigenas}" requerido="true"/>
+                            </p:column>
+                            <p:column headerText="Otras jurisdicciones">
+                                <controles:todoTextoComoIngrese longitud="500" tamanio="30" identificador="txtOtrasjuri" valor="#{detIn.otrasJurisdicciones}" requerido="true"/>
+                            </p:column>
+                        </p:dataTable>
+                        <br/>
+                        <p:dataTable value="#{determinacionAreasInfluenciaController.determinacionAreasInfluenciaBean.listaDistanciaElementosProyecto}" var="detDis">
+                            <f:facet name="header">
+                                Distancias entre los elementos del proyecto y los elementos sensibles del medio social
+                            </f:facet>
+                            <p:column headerText="Infraestructura y/o actividades del proyecto">
+                                <h:outputText value="#{detDis.infraestructuraActividadesProyecto}"/>
+                            </p:column>
+                            <p:column headerText="Elementos sencibles">
+                                <controles:combo identificador="cmbElementosSencibles" lista="#{combosFaunaController.listaElementosSensibles}" valor="#{detDis.idCatalogoElementosSensibles}" requerido="true"/>
+                            </p:column>
+                            <p:column headerText="Descripción de elementos sencibles">
+                                <controles:todoTextoComoIngrese longitud="500" tamanio="30" identificador="txtOtrasjuri" valor="#{detDis.descripcionElementosSensibles}" requerido="true"/>
+                            </p:column>
+                            <p:column headerText="Distancia en (m)">
+                                <controles:soloTextoNumeros longitud="10" tamanio="15" identificador="txtOtrasjuri" valor="#{detDis.distanciaMetros}" requerido="true"/>
+                            </p:column>
+                        </p:dataTable>
+                    </p:panelGrid>
+                    <br/>
+                    <div class="buttons main">
+                        <p:commandButton value="Aceptar" icon="ui-icon-check" action="#{determinacionAreasInfluenciaController.guardar()}" update=":#{p:component('frmDatos')}"/>
+                        <p:commandButton value="Cancelar" styleClass="secondary" icon="ui-icon-cancel" immediate="true" action="#{determinacionAreasInfluenciaController.cancelar()}"/>
+                    </div>
+                </p:panel>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>

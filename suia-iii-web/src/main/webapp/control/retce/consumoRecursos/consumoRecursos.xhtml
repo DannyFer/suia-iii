@@ -1,0 +1,327 @@
+<ui:composition template="/WEB-INF/templates/default.xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+	<ui:define name="content">
+
+		<script type="text/javascript">
+		$(document).ready(function() {
+			$('.wizard-custom-btn-back').hide();
+			$('.wizard-custom-btn-only-end').hide();
+			$('.wizard-custom-btn-back .wizard-custom-btn-only-not-end').hide();
+		});
+	</script>
+
+		<style type="text/css">
+.ui-fileupload-content {
+	border: none !important;
+	padding: 0px;
+}
+</style>
+
+		<f:event type="preRenderView"
+			listener="#{consumoRecursosController.validarData()}" />
+			
+		<link rel="stylesheet" type="text/css"
+			href="#{request.contextPath}/resources/css/plugin/wizard.css" />
+
+		<h:form id="form">
+			<p:panel style="text-align:center;">
+				<f:facet name="header">
+					<h:outputText
+						value="REGISTRO DE EMISIONES Y TRANSFERENCIA DE CONTAMINANTES EN EL ECUADOR"
+						styleClass="uppercase" />
+					<br />
+					<h:outputText value="REPORTE DE CONSUMO DE RECURSOS (EN EL PROCESO PRODUCTIVO)"
+						styleClass="uppercase" />
+				</f:facet>
+			</p:panel>
+			<p:panelGrid columns="4" styleClass="panel_data w100"
+				style="margin-bottom: 15px;"
+				columnClasses="header w25, null w25, header w25, null w25"
+				rowClasses="null, alt">
+				<h:outputText value="Número de trámite" />
+				<h:outputText
+					value="#{consumoRecursosController.consumoRecursos.codigoTramite}" />
+
+				<h:outputText value="Año de declaración" />
+				<h:outputText
+					value="#{consumoRecursosController.consumoRecursos.anioDeclaracion}" />
+
+			</p:panelGrid>
+
+
+
+			<p:wizard widgetVar="wizard"
+				flowListener="#{wizardBean.onFlowProcess}" showNavBar="false"
+				nextLabel="Siguiente" backLabel="Atrás" id="wizardEmision">
+				<p:tab id="paso2" titletip="Consumo de combustibles">
+					<ui:include
+						src="/control/retce/consumoRecursos/consumoCombustible.xhtml" />
+				</p:tab>
+				<p:tab id="paso3" titletip="Consumo de energía">
+					<ui:include
+						src="/control/retce/consumoRecursos/consumoEnergia.xhtml" />
+				</p:tab>
+				<p:tab id="paso4" titletip="Aprovechamiento de agua">
+					<ui:include
+						src="/control/retce/consumoRecursos/aprovechamientoAgua.xhtml" />
+					<h:inputHidden
+						validator="#{consumoRecursosController.validateConsumoRecursos}" />
+				</p:tab>
+				<p:tab id="paso5" titletip="Finalizar registro">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="FINALIZAR REGISTRO" />
+						</f:facet>
+						<h:panelGrid styleClass="w100" columns="1">
+							<h:inputHidden
+								validator="#{consumoRecursosController.validateConsumoRecursos}" />
+
+							<p:panelGrid columns="2" styleClass="panel_data w100"
+								columnClasses="header w25,null w75" id="tecnicoGrid">
+								<f:facet name="header">
+									<h:outputText value="Información del técnico que reporta"
+										style="color:#222222;" />
+								</f:facet>
+
+								<p:outputLabel styleClass="ui-label-form" value="Cédula / RUC"
+									for="cedulaRuc" />
+								<p:inputText id="cedulaRuc"
+									value="#{consumoRecursosController.tecnicoResponsable.identificador}"
+									required="true" requiredMessage="Cédula/RUC es requerido"
+									maxlength="13">
+									<p:ajax event="blur"
+										listener="#{consumoRecursosController.validarCedulaListener}"
+										update="tecnicoGrid" />
+								</p:inputText>
+
+								<p:outputLabel styleClass="ui-label-form"
+									value="Nombre / Razón Social" for="nombreTecnico" />
+								<p:inputText id="nombreTecnico"
+									value="#{consumoRecursosController.tecnicoResponsable.nombre}"
+									required="true" requiredMessage="Nombre es requerido"
+									maxlength="200" disabled="true" />
+
+								<p:outputLabel styleClass="ui-label-form"
+									value="Correo electrónico" for="correoTecnico" />
+								<p:inputText id="correoTecnico"
+									value="#{consumoRecursosController.tecnicoResponsable.correo}"
+									required="true"
+									requiredMessage="Correo electrónico es requerido" />
+
+								<p:outputLabel styleClass="ui-label-form" value="Teléfono"
+									for="telefonoTecnico" />
+								<p:inputText id="telefonoTecnico"
+									value="#{consumoRecursosController.tecnicoResponsable.telefono}"
+									required="true" requiredMessage="Teléfono es requerido"
+									maxlength="30">
+									<pe:keyFilter regEx="/[\d\-]/" />
+								</p:inputText>
+
+								<p:outputLabel styleClass="ui-label-form" value="Celular"
+									for="celularTecnico" />
+								<p:inputText id="celularTecnico"
+									value="#{consumoRecursosController.tecnicoResponsable.celular}"
+									required="true" requiredMessage="Celular es requerido"
+									maxlength="15">
+									<pe:keyFilter regEx="/[\d\-]/" />
+								</p:inputText>
+							</p:panelGrid>
+
+							<br />
+							<br />
+
+							<p:panel styleClass="alJustify">
+								<f:facet name="header">
+									<h:outputText value="DECLARACIÓN JURAMENTADA" />
+								</f:facet>
+								<h:outputText
+									value="#{consumoRecursosController.mensajeResponsabilidad}"
+									styleClass="alJustify bold" />
+								<br />
+								<h:panelGrid columns="2">
+									<p:selectBooleanCheckbox
+										value="#{consumoRecursosController.aceptarCondiciones}"
+										id="aceptarCondiciones">
+										<p:ajax process="@this" update="btnFinalizar" />
+									</p:selectBooleanCheckbox>
+									<p:outputLabel value="Acepto la responsabilidad"
+										for="aceptarCondiciones" />
+								</h:panelGrid>
+							</p:panel>
+
+						</h:panelGrid>
+					</p:panelGrid>
+				</p:tab>
+			</p:wizard>
+
+			<div class="buttons main">
+				<p:commandButton value="Atrás" icon="ui-icon-arrowthick-1-w"
+					oncomplete="PF('wizard').back();reloadWizard();"
+					styleClass="wizard-custom-btn-back" process="@this"
+					update="wizardEmision,btnSiguiente"
+					action="#{consumoRecursosController.btnAtras}" />
+				<p:commandButton id="btnGuardar" value="Guardar" title="Guardar"
+					icon="ui-icon-disk" styleClass="wizard-custom-btn-only-not-end"
+					actionListener="#{consumoRecursosController.guardar()}"
+					update="btnSiguiente" />
+				<p:commandButton id="btnSiguiente" value="Siguiente"
+					icon="ui-icon-arrowthick-1-e"
+					oncomplete="PF('wizard').next();reloadWizard();"
+					styleClass="wizard-custom-btn-next"
+					update="wizardEmision,btnSiguiente"
+					disabled="#{!consumoRecursosController.habilitarSiguiente}"
+					action="#{consumoRecursosController.btnSiguiente}" />
+				<p:commandButton value="Finalizar" id="btnFinalizar"
+					action="#{consumoRecursosController.aceptar()}" update="@this"
+					disabled="#{!consumoRecursosController.aceptarCondiciones}"
+					styleClass="wizard-custom-btn-only-end" icon="ui-icon-check">
+					<p:confirm header="Confirmación"
+						message="¿Está seguro/a que desea enviar la información?"
+						icon="ui-icon-alert" />
+				</p:commandButton>
+			</div>
+
+			<h:outputScript name="/plugin/wizard.js" library="js" />
+		</h:form>
+
+		<h:form id="frmDialogs">
+			<p:dialog id="adicionarDocumento" widgetVar="adicionarDocumento"
+				width="500" header="Medios de verificación">
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null">
+					<p:outputLabel value="Medio de verificación" style="color: white" />
+					<p:outputPanel id="pnlDocumento">
+						<p:fileUpload id="documento"
+							fileUploadListener="#{consumoRecursosController.uploadFileDocumento}"
+							multiple="false" sizeLimit="20971520"
+							allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar (pdf 20Mb)"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" required="true" update="pnlDocumento" />
+						<p:commandButton id="downloadDoc" icon="ui-icon-arrowthick-1-s"
+							styleClass="button-small primary toLeft" title="Ver" ajax="false"
+							immediate="true"
+							rendered="#{consumoRecursosController.documentoMedio.nombre ne null}">
+							<p:fileDownload
+								value="#{consumoRecursosController.descargar(documentoMedio)}" />
+						</p:commandButton>
+					</p:outputPanel>
+				</p:panelGrid>
+
+				<br />
+				<div class="buttons">
+					<p:commandButton value="Adicionar"
+						action="#{consumoRecursosController.agregarDocumento}"
+						styleClass="primary alLeft" process="@this"
+						update=":form:tblDocumentosCombustible :form:tblDocumentosEnergia :form:tblDocumentosAgua pnlDocumento"
+						oncomplete="PF('adicionarDocumento').hide()" />
+				</div>
+
+			</p:dialog>
+
+			<p:dialog id="verLaboratorio" widgetVar="verLaboratorio" width="600"
+				header="Datos Laboratorio">
+				<h:panelGrid columns="2" styleClass="panel_data w100"
+					id="pnlDatosLaboratorio" columnClasses="header w25, null"
+					rowClasses="null, alt">
+					<h:outputText value="RUC" />
+					<h:outputText
+						value="#{consumoRecursosController.sustanciaRetce.datosLaboratorio.ruc}" />
+					<h:outputText value="Nombre o Razón Social" />
+					<h:outputText
+						value="#{consumoRecursosController.sustanciaRetce.datosLaboratorio.nombre}" />
+
+					<h:outputText value="N° de Registro de SAE" />
+					<h:outputText
+						value="#{consumoRecursosController.sustanciaRetce.datosLaboratorio.numeroRegistroSAE}" />
+
+					<h:outputText value="Vigencia del registro" />
+					<h:outputText
+						value="#{consumoRecursosController.sustanciaRetce.datosLaboratorio.fechaVigenciaRegistro}" />
+
+					<h:outputText
+						value="Informe de monitoreo emitido por el laboratorio" />
+					<p:commandButton icon="ui-icon-arrowthick-1-s"
+						styleClass="button-small primary toLeft" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{consumoRecursosController.descargar(consumoRecursosController.sustanciaRetce.datosLaboratorio.documentoLaboratorio)}" />
+					</p:commandButton>
+				</h:panelGrid>
+				<br />
+			</p:dialog>
+
+			<p:dialog id="verFuentesAprovechamiento"
+				widgetVar="verFuentesAprovechamiento" width="700"
+				header="Fuentes de aprovechamiento: Superficial, Subterránea, Marina">
+				<br />
+				<h:panelGrid columns="2" styleClass="panel_data w100"
+					id="pnlDatosFuentes" columnClasses="header w30, null"
+					rowClasses="null, alt">
+					<h:outputText
+						value="Ubicación del punto de aprovechamiento (Coordenadas)" />
+					<h:panelGrid columns="4" styleClass="panel_data w100"
+						columnClasses="header w20, null, header w20, null"
+						rowClasses="null, alt">
+						<p:outputLabel value="X" styleClass="ui-label-form" />
+						<h:outputText
+							value="#{consumoRecursosController.consumoAgua.coordenadaX}" />
+
+						<p:outputLabel value="Y" styleClass="ui-label-form" />
+						<h:outputText
+							value="#{consumoRecursosController.consumoAgua.coordenadaY}" />
+					</h:panelGrid>
+
+					<h:outputText value="Nombre del cuerpo hídrico" />
+					<h:outputText
+						value="#{consumoRecursosController.consumoAgua.nombreCuerpoHidrico}" />
+
+					<h:outputText value="No. de Resolución de autorización" />
+					<h:outputText
+						value="#{consumoRecursosController.consumoAgua.nroResolucionAutorizacion}" />
+
+					<h:outputText value="Documento resolución"
+						rendered="#{consumoRecursosController.consumoAgua.resolucionAprovechamiento ne null}" />
+					<p:commandButton icon="ui-icon-arrowthick-1-s"
+						styleClass="button-small primary" title="Ver" ajax="false"
+						immediate="true"
+						rendered="#{consumoRecursosController.consumoAgua.resolucionAprovechamiento ne null}">
+						<p:fileDownload
+							value="#{consumoRecursosController.descargar(consumoRecursosController.consumoAgua.resolucionAprovechamiento)}" />
+					</p:commandButton>
+
+					<h:outputText value="Vigencia de autorización" />
+					<h:panelGrid columns="4" styleClass="panel_data w100"
+						columnClasses="header w20, null, header w20, null"
+						rowClasses="null, alt">
+						<h:outputText value="Desde" />
+						<h:outputText
+							value="#{consumoRecursosController.consumoAgua.vigenciaDesde}" />
+
+						<h:outputText value="Hasta" />
+						<h:outputText
+							value="#{consumoRecursosController.consumoAgua.vigenciaHasta}" />
+					</h:panelGrid>
+
+					<h:outputText value="Cuenca hidrográfica" />
+					<h:outputText
+						value="#{consumoRecursosController.consumoAgua.cuencaHidrografica}" />
+				</h:panelGrid>
+				<br />
+				<br />
+			</p:dialog>
+		</h:form>
+
+	</ui:define>
+
+</ui:composition>

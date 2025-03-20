@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="content">
+        <f:event type="preRenderView"
+                 listener="#{asignarEquipoMultidisciplinarioPronunciamientoBean.validarTareaBpm()}"/>
+
+       <ui:include src="contexto.xhtml"/>
+
+
+        <h:form>
+
+            <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                <f:facet name="header">
+                    <h:outputText value="Asignar equipo de apoyo *"/>
+                </f:facet>
+                <h:panelGrid styleClass="w100" columns="1">
+                    <p:outputLabel value="Seleccione las especialidades del equipo de apoyo" for="equipo"/>
+                    <p:selectManyCheckbox id="equipo" required="true" layout="grid" columns="1"
+                                          value="#{asignarEquipoMultidisciplinarioPronunciamientoBean.areasSeleccionadas}">
+                        <f:selectItems var="area" value="#{asignarEquipoMultidisciplinarioPronunciamientoBean.areas}"
+                                       itemLabel='#{asignarEquipoMultidisciplinarioPronunciamientoController.obtenerNombreArea(area)}'
+                                       itemValue="#{area}"/>
+                    </p:selectManyCheckbox>
+                </h:panelGrid>
+            </p:panelGrid>
+
+            <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                         rendered="#{equipoMultidisciplinarioContextoBean.mostrarIndicaciones}">
+                <f:facet name="header">
+                    <h:outputText value="Indicaciones"/>
+                </f:facet>
+                <h:panelGrid styleClass="w100" columns="1">
+                    <p:outputLabel value="Ingrese los indicaciones necesarias para el equipo de apoyo." for="respuesta"/>
+                    <p:inputTextarea maxlength="2200" scrollHeight="10" required="true" id="respuesta" rows="6"
+                                     style="height: 70px;overflow: auto;"
+                                     disabled="#{!equipoMultidisciplinarioContextoBean.mostrarIndicaciones}"
+                                     value="#{asignarEquipoMultidisciplinarioPronunciamientoBean.indicaciones}"
+                                     autoResize="true" widgetVar="100px"/>
+                </h:panelGrid>
+            </p:panelGrid>
+
+            <div class="buttons main">
+                <p:commandButton value="Enviar"
+                                 action="#{asignarEquipoMultidisciplinarioPronunciamientoController.asignarEquipoMultidiciplinario}"
+                                 title="Enviar datos" icon="ui-icon-check">
+                    <p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+                               header="#{msg['header.confirmacion.envio.tarea']}"/>
+                </p:commandButton>
+                <p:commandButton value="Cancelar" immediate="true"
+                                 action="/bandeja/bandejaTareas.jsf?faces-redirect=true" icon="ui-icon-cancel"
+                                 styleClass="secondary">
+                    <p:confirm message="#{msg['message.confirmacion.cancelacion.tarea']}"
+                               header="#{msg['header.confirmacion.cancelacion.tarea']}"/>
+                </p:commandButton>
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>

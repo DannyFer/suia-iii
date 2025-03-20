@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:t="http://myfaces.apache.org/tomahawk"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+    <ui:define name="content">
+      
+       
+        <h:form id="form">
+        <h:outputText value="Elaborar Pronunciamiento" styleClass="bold" />					
+			
+		<h:panelGrid columns="2" columnClasses="header, null">
+        	<p:outputLabel value="Descargar Informe de Inspección Snap" rendered="#{pronunciamientoDirectorCAController.informeSnap ne null}"/>
+            <p:commandButton ajax="false" immediate="true" rendered="#{pronunciamientoDirectorCAController.informeSnap ne null}"                	
+            	onclick="PrimeFaces.monitorDownload(start, stop);"
+                styleClass="primary"
+                icon="ui-icon-arrowthick-1-s">
+                <p:fileDownload value="#{pronunciamientoDirectorCAController.descargarSnap()}"/>
+            </p:commandButton> 
+            
+            <p:outputLabel value="Descargar Informe de Inspección Forestal" rendered="#{pronunciamientoDirectorCAController.informeForestal ne null}"/>
+            <p:commandButton ajax="false" immediate="true" rendered="#{pronunciamientoDirectorCAController.informeForestal ne null}"              	
+            	onclick="PrimeFaces.monitorDownload(start, stop);"
+                styleClass="primary"
+                icon="ui-icon-arrowthick-1-s">
+                <p:fileDownload value="#{pronunciamientoDirectorCAController.descargarForestal()}"/>
+            </p:commandButton>                 
+        </h:panelGrid>        
+   
+        
+       <h:panelGrid columns="2" columnClasses="header, null" rendered="#{pronunciamientoDirectorCAController.verPdfSnap or pronunciamientoDirectorCAController.verPdfForestal}">
+        	<p:outputLabel value="Tipo de pronunciamiento:" for="pronunciamiento"/>
+            <p:selectOneRadio id="pronunciamiento" required="true"  value="#{pronunciamientoDirectorCAController.pronunciamiento.pronunciamientoFavorable}" layout="grid" columns="1">
+                        	<f:selectItem itemLabel="Favorable" itemValue="true"/>
+                            <f:selectItem itemLabel="No Favorable" itemValue="false"/>
+                            <p:ajax listener="#{pronunciamientoDirectorCAController.actualizarPronunciamiento()}" update="panelDocumentoPronunciamiento"/>
+             </p:selectOneRadio>
+             
+                         
+        </h:panelGrid>
+        
+        <h:panelGrid styleClass="w100" id="panelDocumentoPronunciamiento" rendered="#{pronunciamientoDirectorCAController.verPdfSnap}">
+			<object type="application/pdf" id="informePronunciamiento"
+					data="#{pronunciamientoDirectorCAController.urlPdf}?pfdrid_c=true"
+					height="600" width="100%" />
+		</h:panelGrid>
+        	
+		
+		<h:panelGrid id="buttons" style="float:right">
+			<t:div styleClass="buttons main">			                 
+         	
+         	<p:commandButton value="Aceptar" 
+             	action="#{pronunciamientoDirectorCAController.guardar()}"
+                icon="ui-icon-check" update=":#{p:component('form')}"/>
+                
+            <ui:remove>
+            <h:panelGrid styleClass="w100" columns="2" 
+            rendered="#{!pronunciamientoDirectorCAController.verPdfSnap and !pronunciamientoDirectorCAController.verPdfForestal}">
+			<p:outputLabel value=""/>
+			<p:outputLabel value=""/>
+			<h:outputText value="¿Cuenta con Token?" styleClass="encabezado" style="alCenter"/>
+			<p:selectOneRadio id="verificaToken" value="#{pronunciamientoDirectorCAController.token}" style="alCenter">
+										<f:selectItem itemLabel="Sí" itemValue="true" />
+										<f:selectItem itemLabel="No" itemValue="false" />
+										<p:ajax event="change" update=":form" listener="#{pronunciamientoDirectorCAController.guardarToken}"/>
+			</p:selectOneRadio>
+		</h:panelGrid>
+            
+            <p:commandButton value="Firmar Inf. Snap" type="button" styleClass="large" 
+            	icon="ui-icon-key" rendered="#{pronunciamientoDirectorCAController.informeSnap ne null and !pronunciamientoDirectorCAController.verPdfSnap and !pronunciamientoDirectorCAController.token}"  
+            	onclick="PF('signDialogSnap').show();"/>            
+            <p:commandButton value="Firmar Inf. Forestal" type="button" styleClass="large" 
+            	icon="ui-icon-key" rendered="#{pronunciamientoDirectorCAController.informeForestal ne null and !pronunciamientoDirectorCAController.verPdfForestal and !pronunciamientoDirectorCAController.token}"  
+            	onclick="PF('signDialogForestal').show();"/>	
+            
+            <p:commandButton value="Firmar Inf. Snap" type="button" styleClass="large" 
+            	icon="ui-icon-key" rendered="#{pronunciamientoDirectorCAController.informeSnap ne null and !pronunciamientoDirectorCAController.verPdfSnap and pronunciamientoDirectorCAController.token}"  
+            	onclick="window.location.href='#{pronunciamientoDirectorCAController.firmarSnap()}'"/>
+            <p:commandButton value="Firmar Inf. Forestal" type="button" styleClass="large" 
+            	icon="ui-icon-key" rendered="#{pronunciamientoDirectorCAController.informeForestal ne null and !pronunciamientoDirectorCAController.verPdfForestal and pronunciamientoDirectorCAController.token}"  
+            	onclick="window.location.href='#{pronunciamientoDirectorCAController.firmarForestal()}'"/>	     
+            
+            <p:commandButton value="Enviar" rendered="#{!pronunciamientoDirectorCAController.verPdfSnap and !pronunciamientoDirectorCAController.verPdfForestal}"
+            	action="#{pronunciamientoDirectorCAController.enviar()}"
+                icon="ui-icon-check" update=":#{p:component('form')}"/>   
+                </ui:remove>                                                                                      
+         </t:div>
+		
+		</h:panelGrid>
+		
+		
+		<p:dialog header="Firma Electronica" id="signDialogSnap" widgetVar="signDialogSnap" closeOnEscape="false" modal="true" resizable="false" width="auto" height="auto" position="center top">                
+                <p:panel>
+                    <h:panelGrid columns="2" cellpadding="10" style="text-align:right !important">
+                     	<p:outputLabel value="1. Descargue el documento" styleClass="bold"/>
+                        <p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary" immediate="true"
+                                actionListener="#{pronunciamientoDirectorCAController.descargarFirmarOficio}">
+                            <p:fileDownload
+                                    value="#{pronunciamientoDirectorCAController.streamSnap}"/>
+                        </p:commandButton>                        
+                                            
+                        <p:outputLabel value="2. Adjunte el documento firmado " styleClass="bold"/>
+                        <p:fileUpload
+                                fileUploadListener="#{pronunciamientoDirectorCAController.uploadFileSnap}"
+                                multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                                label="Seleccionar" uploadLabel="Subir"
+                                invalidFileMessage="Tipo de archivo no válido"
+                                invalidSizeMessage="Tamaño de archivo no válido"
+                                cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                auto="true" update="signDialogSnap">                            
+                        </p:fileUpload>
+                    </h:panelGrid>
+                </p:panel>                
+            </p:dialog>
+            
+            <p:dialog header="Firma Electronica" id="signDialogForestal" widgetVar="signDialogForestal" closeOnEscape="false" modal="true" resizable="false" width="auto" height="auto" position="center top">                
+                <p:panel>
+                    <h:panelGrid columns="2" cellpadding="10" style="text-align:right !important">
+                     	<p:outputLabel value="1. Descargue el documento" styleClass="bold"/>
+                        <p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary" immediate="true"
+                                actionListener="#{pronunciamientoDirectorCAController.descargarFirmarForestal}">
+                            <p:fileDownload
+                                    value="#{pronunciamientoDirectorCAController.descargarForestal()}"/>
+                        </p:commandButton>                        
+                                            
+                        <p:outputLabel value="2. Adjunte el documento firmado " styleClass="bold"/>
+                        <p:fileUpload
+                                fileUploadListener="#{pronunciamientoDirectorCAController.uploadFileForestal}"
+                                multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                                label="Seleccionar" uploadLabel="Subir"
+                                invalidFileMessage="Tipo de archivo no válido"
+                                invalidSizeMessage="Tamaño de archivo no válido"
+                                cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                auto="true" update="signDialogForestal">                            
+                        </p:fileUpload>
+                    </h:panelGrid>
+                </p:panel>                
+            </p:dialog>
+		
+        
+         </h:form>
+         
+         <h:form id="formDialogs">
+
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600px" height="auto">
+				<p:panel>
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel value="Firmar certificado" styleClass="bold" />
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold"
+							rendered="#{!pronunciamientoDirectorCAController.ambienteProduccion}" />
+						<p:selectOneRadio id="verificaToken"
+							value="#{pronunciamientoDirectorCAController.token}"
+							rendered="#{!pronunciamientoDirectorCAController.ambienteProduccion}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change"
+								update=":formDialogs:pnlFirmaManual :formDialogs:pnlFirmaToken"
+								listener="#{pronunciamientoDirectorCAController.guardarToken}" />
+						</p:selectOneRadio>
+
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{pronunciamientoDirectorCAController.ambienteProduccion}" />
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{pronunciamientoDirectorCAController.ambienteProduccion}" />
+
+						<h:panelGroup id="pnlFirmaToken">
+							<p:commandButton value="Firmar documento" type="button"
+								styleClass="primary" icon="ui-icon-key"
+								rendered="#{pronunciamientoDirectorCAController.token}"
+								onclick="window.location.href='#{pronunciamientoDirectorCAController.firmarOficio()}'" />
+
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!pronunciamientoDirectorCAController.token}">
+							<p:outputLabel value="1. Descargar el Informe" styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload
+									value="#{pronunciamientoDirectorCAController.buscarInformacion()}" />
+							</p:commandButton>
+							<p:outputLabel for="uploadRequired"
+								value="2. Adjuntar el Certificado firmado"
+								styleClass="bold" />
+							<p:fileUpload id="Idfirmada"
+								fileUploadListener="#{pronunciamientoDirectorCAController.firmarOficio()}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreDocFirmado"
+								rendered="#{!pronunciamientoDirectorCAController.token}">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreDocFirmado"
+								value="#{pronunciamientoDirectorCAController.nombreDocumentoFirmado}" />
+						</h:panelGrid>
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!pronunciamientoDirectorCAController.token and !pronunciamientoDirectorCAController.informacionSubida}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialog').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						action="#{pronunciamientoDirectorCAController.enviar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+
+			<p:separator />
+
+		</h:form>
+          
+       
+         
+        
+    </ui:define>
+</ui:composition>

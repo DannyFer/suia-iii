@@ -1,0 +1,341 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+	<ui:define name="context-extra">
+		<h:outputText value="Datos" />
+		<h:outputText value="Estudio de Impacto Ambiental" />
+		<h:outputLink target="_blank"
+			value="#{request.contextPath}/pages/rcoa/estudioImpactoAmbiental/verProyectoEIAResumen.jsf">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+	</ui:define>
+
+	<ui:define name="content">
+		<f:event type="preRenderView" listener="#" />
+
+		<h:form id="form">
+			<p:tabView id="tab">
+				<p:tab title="Resolución">
+					<h:panelGrid styleClass="w100" id="resolucionData">
+						<object id="pdf_resolucion" type="application/pdf"
+							data="#{emisionLicenciaAutoridadZonalController.documentoResolucion.informePath}?pfdrid_c=true"
+							width="100%" height="500px">
+							Su navegador no soporta la visualización de pdf. Puede descargar
+							el documento presionando el siguiente botón:
+							<p:commandButton value="Descargar" styleClass="primary"
+								ajax="false" icon="ui-icon-arrowthick-1-s">
+								<p:fileDownload
+									value="#{emisionLicenciaAutoridadZonalController.getStream(emisionLicenciaAutoridadZonalController.documentoResolucion.nombreFichero, emisionLicenciaAutoridadZonalController.documentoResolucion.archivoInforme)}" />
+							</p:commandButton>
+						</object>
+					</h:panelGrid>
+					<br />
+					<br />
+				</p:tab>
+
+				<p:tab title="Oficio RGD"
+					rendered="#{emisionLicenciaAutoridadZonalController.visualizarRgd}">
+					<h:panelGrid styleClass="w100" id="pnlOficioRgd">
+						<object id="pdf_resolucion" type="application/pdf"
+							data="#{emisionLicenciaAutoridadZonalController.pathReporteOficioRgd}?pfdrid_c=true"
+							width="100%" height="500px">
+							Su navegador no soporta la visualización de pdf. Puede descargar
+							el documento presionando el siguiente botón:
+							<p:commandButton value="Descargar" styleClass="primary"
+								ajax="false" icon="ui-icon-arrowthick-1-s">
+								<p:fileDownload
+									value="#{emisionLicenciaAutoridadZonalController.getStream(emisionLicenciaAutoridadZonalController.nombreReporteOficioRgd, emisionLicenciaAutoridadZonalController.archivoReporteOficioRgd)}" />
+							</p:commandButton>
+						</object>
+					</h:panelGrid>
+					<br />
+					<br />
+				</p:tab>
+
+				<p:tab title="Registro de Generador"
+					rendered="#{emisionLicenciaAutoridadZonalController.visualizarRgd}">
+					<h:panelGrid styleClass="w100" id="pnlRegistroRgd">
+						<object id="pdf_oficioPronunciamiento" type="application/pdf"
+							data="#{emisionLicenciaAutoridadZonalController.pathReporteRgd}?pfdrid_c=true"
+							width="100%" height="500px">
+							Su navegador no soporta la visualización de pdf. Puede descargar
+							el documento presionando el siguiente botón:
+							<p:commandButton value="Descargar" styleClass="primary"
+								ajax="false" icon="ui-icon-arrowthick-1-s">
+								<p:fileDownload
+									value="#{emisionLicenciaAutoridadZonalController.getStream(emisionLicenciaAutoridadZonalController.nombreReporteRgd, emisionLicenciaAutoridadZonalController.archivoReporteRgd)}" />
+							</p:commandButton>
+						</object>
+						<br />
+						<br />
+					</h:panelGrid>
+				</p:tab>
+
+				<p:tab title="Registro de sustancias Quimicas"
+					rendered="#{emisionLicenciaAutoridadZonalController.visualizarRsq}">
+					<h:panelGrid styleClass="w100" id="pnlRegistroRsq">
+						<object id="pdf_oficioPronunciamiento" type="application/pdf"
+							data="#{emisionLicenciaAutoridadZonalController.pathReporteRsq}?pfdrid_c=true"
+							width="100%" height="500px">
+							Su navegador no soporta la visualización de pdf. Puede descargar
+							el documento presionando el siguiente botón:
+							<p:commandButton value="Descargar" styleClass="primary"
+								ajax="false" icon="ui-icon-arrowthick-1-s">
+								<p:fileDownload
+									value="#{emisionLicenciaAutoridadZonalController.getStream(emisionLicenciaAutoridadZonalController.nombreReporteRsq, emisionLicenciaAutoridadZonalController.archivoReporteRsq)}" />
+							</p:commandButton>
+						</object>
+						<br />
+						<br />
+					</h:panelGrid>
+				</p:tab>
+			</p:tabView>
+			<br />
+			<br />
+
+			<div class="buttons main">
+				<p:commandButton value="Firmar" styleClass="large"
+					icon="ui-icon-key"
+					update=":formDialog:pnlFirmaE"
+					actionListener="#{emisionLicenciaAutoridadZonalController.guardarDocumentos}"
+					process="@this" onclick="PF('signDialog').show();" />
+			</div>
+		</h:form>
+
+		<h:form id="formDialog">
+			<p:dialog id="signDialog" widgetVar="signDialog"
+				header="Firma de Autorizaciones Administrativas Ambientales"
+				modal="true" resizable="false" width="600px" closable="false">
+				<p:panel>
+					<br />
+					<h:panelGrid styleClass="w100" columns="2"
+						rendered="#{!emisionLicenciaAutoridadZonalController.firmaSoloToken}"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold" />
+						<p:selectOneRadio id="verificaToken"
+							value="#{emisionLicenciaAutoridadZonalController.token}"
+							rendered="#{!emisionLicenciaAutoridadZonalController.firmaSoloToken}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change" update="pnlFirmaE"
+								listener="#{emisionLicenciaAutoridadZonalController.guardarToken}" />
+						</p:selectOneRadio>
+						<br />
+					</h:panelGrid>
+					<h:panelGroup id="pnlFirmaE">
+						<h:panelGroup id="pnlFirmaManual"
+							rendered="#{!emisionLicenciaAutoridadZonalController.token}">
+							<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+								style="text-align:right !important"
+								columnClasses="w70, w30 alCenter">
+								<p:outputLabel
+									value="Descargar la Resolución de Licencia Ambiental"
+									styleClass="bold" />
+								<p:commandButton value="Descargar" ajax="false"
+									icon="ui-icon-arrowthick-1-s" styleClass="primary"
+									immediate="true">
+									<p:fileDownload
+										value="#{emisionLicenciaAutoridadZonalController.descargarDocumentoFirma(1)}" />
+								</p:commandButton>
+								<p:outputLabel for="uploadRequired1"
+									value="Adjuntar la Resolución de Licencia Ambiental firmado"
+									styleClass="bold" />
+								<p:fileUpload
+									fileUploadListener="#{emisionLicenciaAutoridadZonalController.uploadListener}"
+									multiple="false" sizeLimit="5242880"
+									allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+									uploadLabel="Subir"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Tamaño de archivo no válido"
+									cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+									auto="true" update="lblNombreDocFirmado1">
+									<f:attribute name="tipoDocumento" value="1" />
+								</p:fileUpload>
+								<p:outputLabel value="" />
+								<h:outputText id="lblNombreDocFirmado1"
+									value="#{emisionLicenciaAutoridadZonalController.documentoFirmado.nombre}" />
+
+								<h:inputHidden id="uploadRequired1"
+									required="#{!emisionLicenciaAutoridadZonalController.subido1}" />
+							</h:panelGrid>
+							<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+								columnClasses="w70, w30 alCenter"
+								style="text-align:right !important"
+								rendered="#{emisionLicenciaAutoridadZonalController.visualizarRgd}">
+								<p:outputLabel
+									value="Descargar el Oficio de aprobación de Generador de residuos y desechos peligrosos y/o especiales"
+									styleClass="bold" />
+								<p:commandButton value="Descargar" ajax="false"
+									icon="ui-icon-arrowthick-1-s" styleClass="primary"
+									immediate="true">
+									<p:fileDownload
+										value="#{emisionLicenciaAutoridadZonalController.descargarDocumentoFirma(2)}" />
+								</p:commandButton>
+								<p:outputLabel for="uploadRequired2"
+									value="Adjuntar el Oficio de aprobación de Generador de residuos y desechos peligrosos y/o especiales firmado"
+									styleClass="bold" />
+								<p:fileUpload
+									fileUploadListener="#{emisionLicenciaAutoridadZonalController.uploadListener}"
+									multiple="false" sizeLimit="5242880"
+									allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+									uploadLabel="Subir"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Tamaño de archivo no válido"
+									cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+									auto="true" update="lblNombreDocFirmado2">
+									<f:attribute name="tipoDocumento" value="2" />
+								</p:fileUpload>
+								<p:outputLabel value="" />
+								<h:outputText id="lblNombreDocFirmado2"
+									value="#{emisionLicenciaAutoridadZonalController.documentoOficioRgdFirmado.nombre}" />
+
+								<h:inputHidden id="uploadRequired2"
+									required="#{!emisionLicenciaAutoridadZonalController.subido2}" />
+							</h:panelGrid>
+							<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+								columnClasses="w70, w30 alCenter"
+								style="text-align:right !important"
+								rendered="#{emisionLicenciaAutoridadZonalController.visualizarRgd}">
+								<p:outputLabel
+									value="Descargar el Registro de Generador de residuos y desechos peligrosos y/o especiales"
+									styleClass="bold" />
+								<p:commandButton value="Descargar" ajax="false"
+									icon="ui-icon-arrowthick-1-s" styleClass="primary"
+									immediate="true">
+									<p:fileDownload
+										value="#{emisionLicenciaAutoridadZonalController.descargarDocumentoFirma(3)}" />
+								</p:commandButton>
+								<p:outputLabel for="uploadRequired3"
+									value="Adjuntar el Registro de Generador de residuos y desechos peligrosos y/o especiales firmado"
+									styleClass="bold" />
+								<p:fileUpload
+									fileUploadListener="#{emisionLicenciaAutoridadZonalController.uploadListener}"
+									multiple="false" sizeLimit="5242880"
+									allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+									uploadLabel="Subir"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Tamaño de archivo no válido"
+									cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+									auto="true" update="lblNombreDocFirmado3">
+									<f:attribute name="tipoDocumento" value="3" />
+								</p:fileUpload>
+								<p:outputLabel value="" />
+								<h:outputText id="lblNombreDocFirmado3"
+									value="#{emisionLicenciaAutoridadZonalController.documentoPermisoRgdFirmado.nombre}" />
+
+								<h:inputHidden id="uploadRequired3"
+									required="#{!emisionLicenciaAutoridadZonalController.subido3}" />
+							</h:panelGrid>
+							<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+								columnClasses="w70, w30 alCenter"
+								style="text-align:right !important"
+								rendered="#{emisionLicenciaAutoridadZonalController.visualizarRsq}">
+								<p:outputLabel
+									value="Descargar el Registro de Sustancias Químicas"
+									styleClass="bold" />
+								<p:commandButton value="Descargar" ajax="false"
+									icon="ui-icon-arrowthick-1-s" styleClass="primary"
+									immediate="true">
+									<p:fileDownload
+										value="#{emisionLicenciaAutoridadZonalController.descargarDocumentoFirma(4)}" />
+								</p:commandButton>
+								<p:outputLabel for="uploadRequired4"
+									value="Adjuntar el Registro de Sustancias Químicas firmado"
+									styleClass="bold" />
+								<p:fileUpload
+									fileUploadListener="#{emisionLicenciaAutoridadZonalController.uploadListener}"
+									multiple="false" sizeLimit="5242880"
+									allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+									uploadLabel="Subir"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Tamaño de archivo no válido"
+									cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+									auto="true" update="lblNombreDocFirmado4">
+									<f:attribute name="tipoDocumento" value="4" />
+								</p:fileUpload>
+								<p:outputLabel value="" />
+								<h:outputText id="lblNombreDocFirmado4"
+									value="#{emisionLicenciaAutoridadZonalController.documentoPermisoRsqFirmado.nombre}" />
+								<h:inputHidden id="uploadRequired4"
+									required="#{!emisionLicenciaAutoridadZonalController.subido4}" />
+							</h:panelGrid>
+						</h:panelGroup>
+
+						<h:panelGroup id="pnlFirmaToken"
+							rendered="#{emisionLicenciaAutoridadZonalController.token}">
+							<h:panelGrid styleClass="w100" columns="2"
+								columnClasses="w75, w25 alCenter">
+								<h:outputLabel value="Firma de Resolución de Licencia Ambiental"
+									styleClass="bold" />
+								<p:commandButton value="Firmar" type="button"
+									styleClass="primary" icon="ui-icon-key"
+									rendered="#{emisionLicenciaAutoridadZonalController.token}"
+									onclick="window.location.href='#{emisionLicenciaAutoridadZonalController.urlAlfresco}'" />
+								<br />
+							</h:panelGrid>
+							<h:panelGrid styleClass="w100" columns="2"
+								columnClasses="w75, w25 alCenter"
+								rendered="#{emisionLicenciaAutoridadZonalController.visualizarRgd}">
+								<h:outputLabel
+									value="Firma del Oficio de aprobación de Generador de residuos y desechos peligrosos y/o especiales"
+									styleClass="bold" />
+								<p:commandButton value="Firmar" type="button"
+									styleClass="primary" icon="ui-icon-key"
+									rendered="#{emisionLicenciaAutoridadZonalController.token}"
+									onclick="window.location.href='#{emisionLicenciaAutoridadZonalController.urlAlfrescoOficioRgd}'" />
+								<br />
+							</h:panelGrid>
+
+							<h:panelGrid styleClass="w100" columns="2"
+								columnClasses="w75, w25 alCenter"
+								rendered="#{emisionLicenciaAutoridadZonalController.visualizarRgd}">
+								<h:outputLabel
+									value="Firma del Registro de Generador de residuos y desechos peligrosos y/o especiales"
+									styleClass="bold" />
+								<p:commandButton value="Firmar" type="button"
+									styleClass="primary" icon="ui-icon-key"
+									rendered="#{emisionLicenciaAutoridadZonalController.token}"
+									onclick="window.location.href='#{emisionLicenciaAutoridadZonalController.urlAlfrescoPermisoRgd}'" />
+								<br />
+							</h:panelGrid>
+
+							<h:panelGrid styleClass="w100" columns="2"
+								columnClasses="w75, w25 alCenter"
+								rendered="#{emisionLicenciaAutoridadZonalController.visualizarRsq}">
+								<h:outputLabel value="Firma del Registro de Sustancias Químicas"
+									styleClass="bold" />
+								<p:commandButton value="Firmar" type="button"
+									styleClass="primary" icon="ui-icon-key"
+									rendered="#{emisionLicenciaAutoridadZonalController.token}"
+									onclick="window.location.href='#{emisionLicenciaAutoridadZonalController.urlAlfrescoPermisoRsq}'" />
+							</h:panelGrid>
+						</h:panelGroup>
+					</h:panelGroup>
+
+					<br />
+				</p:panel>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialogOficio').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						action="#{emisionLicenciaAutoridadZonalController.finalizar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

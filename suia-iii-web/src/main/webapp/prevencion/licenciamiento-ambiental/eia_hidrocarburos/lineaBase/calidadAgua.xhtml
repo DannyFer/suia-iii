@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+		<ui:define name="content">
+		<ui:include src="../contenido/menu.xhtml" />
+		<div class="content">
+		<f:loadBundle var="labels" basename="ec.gob.ambiente.core.resources.labels_es" />
+      <h:form id="frmCalidadAgua" enctype="multipart/form-data">
+       	<p:growl id="msgs" globalOnly="true" />         
+             <p:panel >
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+					<p:commandButton value="Adicionar" action="#{calidadAguaController.agregarCalidadAgua()}" immediate="true" update=":#{p:component('frmAgua')}"
+						 onclick="PF('dlgAgua').show()" id="btnCalidadAgua"   icon="ui-icon-plusthick" styleClass="button-small-text toRight field_mrg" >
+						<p:tooltip id="ttAgua" for="btnCalidadAgua"
+							value="Agregar Calidad del Agua"></p:tooltip>
+					</p:commandButton>
+					<mae:panelGridHeaderHelp value="Calidad del Agua" conector="calidadAguaHelp"  help="#{helps['no.help.yet']}" />
+					</f:facet>
+				<p:dataTable id="tblAgua" paginator="true" rows="10" value="#{calidadAguaController.medioFisicoBean.listaCalidadAgua}" 
+							var="calidadAgua" paginatorPosition="bottom" scrollable="true" scrollWidth="720" emptyMessage="#{labels['common.table.empty']}">
+					<p:columnGroup type="header">
+						<p:row>
+							<p:column colspan="11" 	headerText="Calidad del Agua" width="1200"/>
+						</p:row>
+						<p:row>
+							<p:column rowspan="2" headerText="Acciones" width="80"/>
+							<p:column rowspan="2" headerText="Parámetro" width="750" />
+							<p:column rowspan="2" headerText="Laboratorio" width="100"/>
+							<p:column rowspan="2" headerText="Tabla comparativa" width="200"/>
+							<p:column rowspan="2" headerText="Límite" width="60"/>
+							<p:column rowspan="2" headerText="Código" width="60"/>
+							<p:column rowspan="2" headerText="Cuerpo Hídrico" width="60"/>
+							<p:column rowspan="2" headerText="Usos del Agua" width="60"/>
+							<p:column colspan="2" headerText="Coordenadas UTM (WGS 84)" width="150"/>
+							<p:column rowspan="2" headerText="Resultado" width="60"/>
+						</p:row>
+						<p:row>
+							<p:column headerText="X" width="75"/>
+							<p:column headerText="Y" width="75"/>
+						</p:row>
+						</p:columnGroup>
+						<p:column>
+					 <p:commandButton icon="ui-icon-pencil" action="#{calidadAguaController.seleccionarCalidadAgua(calidadAgua)}"
+                                 title="Editar"
+                                 oncomplete="PF('dlgAgua').show();" update=":#{p:component('frmAgua')}"/>
+                	<p:commandButton icon="ui-icon-trash" action="#{calidadAguaController.eliminarCalidadAgua(calidadAgua)}"
+                                 title="Remover"
+                                 update=":#{p:component('tblAgua')}"/>
+					</p:column>
+					<p:column styleClass="#{calidadAgua.color}">
+						<h:outputText value="#{calidadAgua.parametro.descripcion}" />
+					</p:column>
+					<p:column styleClass="#{calidadAgua.color}">
+						<h:outputText value="#{calidadAgua.laboratorio.descripcion}" />
+					</p:column>
+					<p:column styleClass="#{calidadAgua.color}">
+						<h:outputText value="#{calidadAgua.tabla}" />
+					</p:column>
+					<p:column styleClass="#{calidadAgua.color}">
+						<h:outputText value="#{calidadAgua.parametro.valor} #{calidadAgua.parametro.codigo}" />
+					</p:column>
+					<p:column styleClass="#{calidadAgua.color}">
+						<h:outputText value="#{calidadAgua.codigo}" />
+					</p:column>
+					<p:column styleClass="#{calidadAgua.color}">
+						<h:outputText value="#{calidadAgua.cuerpoHidrico}" />
+					</p:column>
+					<p:column styleClass="#{calidadAgua.color}">
+						<h:outputText value="#{calidadAgua.usoAgua}" />
+					</p:column>
+					<p:column styleClass="#{calidadAgua.color}"> 
+						<h:outputText value="#{calidadAgua.coordenadaGeneral.x}" >
+						 <f:convertNumber pattern="##########.##"/>
+						</h:outputText>
+					</p:column>
+					<p:column styleClass="#{calidadAgua.color}">
+						<h:outputText value="#{calidadAgua.coordenadaGeneral.y}" >
+						 <f:convertNumber pattern="##########.##"/>
+						</h:outputText>
+					</p:column>
+					<p:column styleClass="#{calidadAgua.color}">
+						<h:outputText value="#{calidadAgua.resultado}" />
+					</p:column>
+				</p:dataTable>
+				</p:panelGrid>
+				</p:panel>
+			<div class="buttons main">
+				<p:commandButton id="btnGuardar" value="Guardar" icon="ui-icon-check" action="#{calidadAguaController.guardar()}" 
+								update=":#{p:component('tblAgua')}"/>
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel" action="#{calidadAguaController.cancelar()}" process="@this">
+					<p:confirm header="Confirmación" message="¿Está seguro de cancelar?" icon="ui-icon-alert" />
+				</p:commandButton>
+			</div>	
+	</h:form>
+	
+	<p:dialog id="agregarAgua" header="Calidad del Agua" widgetVar="dlgAgua" modal="true" 
+				width="400" resizable="false">
+	<h:form id="frmAgua">
+	<h:panelGrid columns="2" styleClass="w100 alCenter" columnClasses="alRight, field_mrg w66 alLeft" id="pngAgua">
+		<p:outputLabel value="Parámetro *" />
+		<p:selectOneMenu  id="cmbParametros" converter="selectItemGroupConverter"  style="width:100%"
+				value="#{calidadAguaController.medioFisicoBean.calidadAgua.parametro}">
+		<f:selectItems value="#{calidadAguaController.medioFisicoBean.parametrosCalidad}"/>
+		<p:ajax listener="#{calidadAguaController.cargarUnidad()}" update="txtLimite"/>
+		</p:selectOneMenu>
+	
+		<p:outputLabel value="Laboratorio" for="cmbLaboratorio"/>
+		<p:selectOneMenu
+					value="#{calidadAguaController.medioFisicoBean.calidadAgua.laboratorio}"
+					required="true" id="cmbLaboratorio"
+					converter="selectItemConverter2" style="width:100%">
+					<f:selectItems value="#{calidadAguaController.medioFisicoBean.laboratorios}" />
+		</p:selectOneMenu>
+		<p:outputLabel value="Límite" for="txtLimite"/>
+		<p:inputText id="txtLimite" value="#{calidadAguaController.medioFisicoBean.calidadAgua.parametro.valor} #{calidadAguaController.medioFisicoBean.calidadAgua.parametro.codigo}" required="true"
+			 onkeypress="return NumCheckDouble(event,this);" readonly="true" requiredMessage="El campo Límite es requerido."/>
+		<p:outputLabel value="Tabla Comparativa" for="txtTabla"/>
+		<p:inputText id="txtTabla" value="#{calidadAguaController.medioFisicoBean.calidadAgua.tabla}" required="true" requiredMessage="El campo tabla comparativa es requerido."/>
+		<p:outputLabel value="Código" for="txtCodigo"/>
+		<p:inputText id="txtCodigo" value="#{calidadAguaController.medioFisicoBean.calidadAgua.codigo}" required="true" requiredMessage="El campo código es requerido."/>
+		<p:outputLabel value="Cuerpo Hídrico" for="txtCuerpo"/>
+		<p:inputText id="txtCuerpo" value="#{calidadAguaController.medioFisicoBean.calidadAgua.cuerpoHidrico}" required="true" requiredMessage="El campo cuerpo hídrico es requerido."/>
+		<p:outputLabel value="Usos Agua" for="txtAgua"/>
+		<p:inputText id="txtAgua" value="#{calidadAguaController.medioFisicoBean.calidadAgua.usoAgua}" required="true" requiredMessage="El campo usos agua es requerido."/>
+		<p:outputLabel value="Coordenada X" for="txtX"/>
+		<p:inputText id="txtX" required="true" value="#{radiacionController.medioFisicoBean.calidadAgua.coordenadaGeneral.x}"
+					 onkeypress="return NumCheckDouble(event,this);" requiredMessage="El campo coordenada x es requerido.">
+		</p:inputText>
+		<p:outputLabel value="Coordenada Y" for="txtY"/>
+		<p:inputText id="txtY" required="true" value="#{radiacionController.medioFisicoBean.calidadAgua.coordenadaGeneral.y}"
+		 			onkeypress="return NumCheckDouble(event,this);" requiredMessage="El campo coordenada y es requerido.">
+		 </p:inputText>
+		<p:outputLabel value="Resultado" for="txtResultado"/>
+		<p:inputText id="txtResultado" value="#{radiacionController.medioFisicoBean.calidadAgua.resultado}" required="true"
+					 onkeypress="return NumCheckDouble(event,this);" requiredMessage="El campo resultado es requerido."/>
+		
+	</h:panelGrid>
+	<p:separator />
+	<div class="buttons">
+		<p:commandButton action="#{calidadAguaController.agregarAListaCalidadAgua()}"  value="Agregar" update=":#{p:component('msgs')}, :#{p:component('tblAgua')}"  
+				oncomplete="handlAguaRequest(xhr, status, args)" />
+	</div>
+	</h:form>
+</p:dialog>
+<script type="text/javascript">
+        function handlAguaRequest(xhr, status, args) {
+            if (args.validationFailed || !args.aguaIn) {
+                PF('dlgAgua').jq.effect("shake", {times: 5}, 100);
+            }
+            else {
+                PF('dlgAgua').hide();
+                $('#loginLink').fadeOut();
+            }
+        }
+    </script>
+    </div>
+    </ui:define>
+    </ui:composition>

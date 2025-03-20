@@ -1,0 +1,214 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:controles="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:hh="http://java.sun.com/jsf/html"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition
+	template="/prevencion/licenciamiento-ambiental/eia/verEIA.xhtml">
+	<ui:define name="content-eia">
+		<h:form id="frmDatos">
+
+			<p:panel header="Plan Monitoreo">
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					id="panelGridMonitoreo">
+					<f:facet name="header">
+						<h:outputText value="Plan Monitoreo" />
+					</f:facet>
+					<f:facet name="header"/>
+
+					<p:dataTable id="tablaPlanMonitoreo"
+						value="#{planMonitoreoEIAController.listaPlanMonitoreoEia}"
+						var="ide" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Componenete ambiental">
+							<h:outputText value="#{ide.componente}" />
+						</p:column>
+						<p:column headerText="Tipo de componente">
+							<h:outputText value="#{ide.tipoComponente}" />
+						</p:column>
+						<p:column headerText="Normativa">
+							<h:outputText value="#{ide.normativas.descripcion}" />
+						</p:column>
+						<p:column headerText="Coordenada X" rendered="#{planMonitoreoEIAController.exPost}"> 
+							<h:outputText value="#{ide.coordenadaX}" />
+						</p:column>
+						<p:column headerText="Coordenada Y" rendered="#{planMonitoreoEIAController.exPost}">
+							<h:outputText value="#{ide.coordenadaY}" />
+						</p:column>
+						<p:column headerText="Frecuencia de muestreo">
+							<h:outputText value="#{ide.frecuencia}" />
+						</p:column>
+						<p:column headerText="Periodicidad de presentación de informe">
+							<h:outputText value="#{ide.periodicidad}" />
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton icon="ui-icon-pencil"
+								styleClass="button-small primary"
+								action="#{planMonitoreoEIAController.editarPlanMonitoreo(ide)}"
+								update=":frmDlg3:dlg3" process="@this"
+								oncomplete="PF('dlg3').show()" />
+						</p:column>
+					</p:dataTable>
+
+				</p:panelGrid>
+			</p:panel>
+
+
+		</h:form>
+
+		<h:form id="frmDlg3">
+			<p:dialog id="dlg3" header="Plan de monitoreo" widgetVar="dlg3"
+				modal="true" width="600" resizable="false" draggable="false">
+
+				<h:panelGrid id="panelDatosHDialogo" columns="1"
+					styleClass="w100 separatorBottom"
+					columnClasses="w50, field_mrg w50">
+
+					<p:outputLabel for="componente" value="Componente ambiental" />
+
+					<p:inputText id="componente" required="true" readonly="true"
+						value="#{planMonitoreoEIAController.planMonitoreoEia.componente}"
+						styleClass="w100" />
+
+
+					<p:outputLabel for="tipoComponente" value="Tipo componente" />
+
+					<p:inputText id="tipoComponente" required="true"
+						readonly="true"
+						value="#{planMonitoreoEIAController.planMonitoreoEia.tipoComponente}"
+						styleClass="w100" />
+
+					<p:outputLabel for="normativa" value="Normativa" />
+				
+					<p:inputText id="normativa" required="true" readonly="true"
+						value="#{planMonitoreoEIAController.planMonitoreoEia.normativas}"
+						styleClass="w100" />
+
+					<p:outputLabel for="coordenadaX" value="Coordenada X" rendered="#{planMonitoreoEIAController.exPost}" />
+					<p:inputText id="coordenadaX" required="true" rendered="#{planMonitoreoEIAController.exPost}"
+						value="#{planMonitoreoEIAController.planMonitoreoEia.coordenadaX}"
+						styleClass="w100" readonly="true">
+						<pe:keyFilter regEx="/[\d]/" />
+					</p:inputText>
+
+					<p:outputLabel for="coordenadaY" value="Coordenada Y" rendered="#{planMonitoreoEIAController.exPost}" />
+					<p:inputText id="coordenadaY" required="true" rendered="#{planMonitoreoEIAController.exPost}" readonly="true"
+						value="#{planMonitoreoEIAController.planMonitoreoEia.coordenadaY}"
+						styleClass="w100">
+						<pe:keyFilter regEx="/[\d]/" />
+					</p:inputText>
+
+					<p:outputLabel for="frecuencia" value="Frecuencia de muestreo" />
+					<p:inputText id="frecuencia" required="true" readonly="true"
+						value="#{planMonitoreoEIAController.planMonitoreoEia.frecuencia}"
+						styleClass="w100">
+						<pe:keyFilter regEx="/[\d]/" />
+					</p:inputText>
+
+					<p:outputLabel for="periodicidad"
+						value="Periodicidad de presentación de informe" />
+					
+					<p:inputText id="periodicidad" required="true" readonly="true"
+						value="#{planMonitoreoEIAController.planMonitoreoEia.periodicidad}"
+						styleClass="w100">
+						<pe:keyFilter regEx="/[\d]/" />
+					</p:inputText>
+
+					<p:dataTable id="tablaTablas"
+						value="#{planMonitoreoEIAController.planMonitoreoEia.tablasPlanMonitoreo}"
+						var="tab" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Tabla">
+							<h:outputText value="#{tab.descripcion}" />
+						</p:column>
+						<p:column headerText="Parámetros">
+							<h:outputText value="#{tab.parametrosPlanMonitoreo.size()}" />
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton icon="ui-icon-pencil"
+								styleClass="button-small primary"
+								action="#{planMonitoreoEIAController.editarTabla(tab)}"
+								update=":frmDlg4:dlg4" process="@this"
+								oncomplete="PF('dlg4').show()" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton
+						actionListener="#{planMonitoreoEIAController.agregarPlanMonitoreo()}"
+						process="@this :frmDlg3:dlg3" value="Aceptar"
+						update=":frmDatos:tablaPlanMonitoreo panelDatosHDialogo"
+						oncomplete="showModalPlanMonitoreo(xhr, status, args)" />
+					<p:commandButton value="Cancelar" type="button"
+						onclick="PF('dlg3').hide()" styleClass="secondary" />
+				</div>
+
+				<script type="text/javascript">
+					function showModalPlanMonitoreo(xhr, status, args) {
+	    				if (args.planMonitoreo)
+							PF('dlg3').hide();
+	    				else
+	    					PF('dlg3').show();
+					}
+				</script>
+
+			</p:dialog>
+		</h:form>
+
+
+		<h:form id="frmDlg4">
+			<p:dialog id="dlg4" header="Parámetros" widgetVar="dlg4" modal="true"
+				width="600" resizable="false" draggable="false">
+
+				<h:panelGrid id="panelDatosHDialogoP" columns="1">
+
+					<p:outputLabel for="tabla" value="Tabla" />
+
+					<p:inputText id="tabla" required="true" readonly="true"
+						value="#{planMonitoreoEIAController.tablasPlanMonitoreo.descripcion}"
+						styleClass="w100" />
+
+					<p:dataTable id="tablaParametros"
+						value="#{planMonitoreoEIAController.tablasPlanMonitoreo.parametrosPlanMonitoreo}"
+						var="tab" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Tabla">
+							<h:outputText value="#{tab.descripcion}" />
+						</p:column>
+					</p:dataTable>
+
+
+
+				</h:panelGrid>
+
+				<p:separator />
+				<div class="buttons">
+
+					<p:commandButton value="Aceptar" type="button"
+						onclick="PF('dlg4').hide()" styleClass="secondary" />
+				</div>
+
+				<script type="text/javascript">
+					function showModalPlanMonitoreoP(xhr, status, args) {
+	    				if (args.planMonitoreoP)
+							PF('dlg4').hide();
+	    				else
+	    					PF('dlg4').show();
+					}
+				</script>
+			</p:dialog>
+		</h:form>
+
+	</ui:define>
+</ui:composition>
+</html>

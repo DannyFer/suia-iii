@@ -1,0 +1,196 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:controles-prime="http://java.sun.com/jsf/composite/controles-prime"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+
+    <h:form rendered="#{faunaController.faunaBean.idTipoMuestreo != null}">
+        <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="">
+            <f:facet name="header">
+                <p:commandButton value="Adicionar"  styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick" 
+                                 action="#{faunaController.agregarPuntoMuestreo(1)}" update=":#{p:component('pnlPuntoMuestreo1')}" 
+                                 oncomplete="PF('dlgPuntoMuetreo1').show();"                />
+                <mae:panelGridHeaderHelp value="Puntos de muestreo" conector="ubicacionHelp" image="#{request.contextPath}/resources/images/proyecto-mapa.png" help="" />
+
+            </f:facet>
+            <p:dataTable id="tblClCoordenadas1" value="#{faunaController.faunaBean.listaPuntosMuestreo1}" 
+                         var="coordenada" rows="5" scrollable="true" scrollWidth="700" emptyMessage="#{labels['common.table.empty']}"
+                         paginator="true" paginatorPosition="bottom">
+                <p:columnGroup type="header">
+                    <p:row>
+                        <p:column rowspan="2" headerText="Acciones" width="60"/>
+                        <p:column rowspan="2" headerText="Punto de Muestreo (Código)" width="150"/>
+                        <p:column colspan="6" width="540" headerText="Coordenadas UTM WGS 84 (coordenada de inicio y coordenada de fin) (puede ingresar solo una coordenada)" />
+                        <p:column rowspan="2" headerText="Fecha de muestreo (DD/MM/AÑO)" width="100"/>
+                        <p:column rowspan="2" headerText="Esfuerzo de muestreo (hora/hombre)" width="100"/>
+                        <p:column rowspan="2" headerText="Características cuerpo de agua" width="200"
+                                  rendered="#{faunaController.faunaBean.grupoTaxonomicoSeleccionado.id == faunaController.faunaBean.idIctiofauna or faunaController.faunaBean.grupoTaxonomicoSeleccionado.id == faunaController.faunaBean.idMacroinvertebradosAcuaticos}"/>
+                    </p:row>
+                    <p:row>
+                        <p:column headerText="x1" width="90"/>
+                        <p:column headerText="y1" width="90"/>
+                        <p:column headerText="Altura1" width="90"/>
+                        <p:column headerText="x2" width="90"/>
+                        <p:column headerText="y2" width="90"/>
+                        <p:column headerText="Altura2" width="90"/>
+                    </p:row>
+                </p:columnGroup>
+
+                <p:column>
+                    <div class="buttons-inline">
+                        <p:commandButton icon="ui-icon-pencil" action="#{faunaController.seleccionarCoordenada1(coordenada)}"
+                                         title="Editar" styleClass="primary"
+                                         oncomplete="PF('dlgPuntoMuetreo1').show();" update=":#{p:component('pnlPuntoMuestreo1')}"/>
+                        <p:commandButton icon="ui-icon-trash" action="#{faunaController.removerCoordeenada1(coordenada)}"
+                                         title="Remover" styleClass="secondary"
+                                         update="tblClCoordenadas1"/>
+                    </div>
+                </p:column>
+
+                <p:column >
+                    <h:outputText value="#{coordenada.codigo}"/>
+                </p:column>
+
+                <p:column >
+                    <h:outputText value="#{coordenada.coordenada.x}" >
+                        <f:convertNumber maxFractionDigits="2" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column>
+                    <h:outputText value="#{coordenada.coordenada.y}" >
+                        <f:convertNumber maxFractionDigits="2" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column>
+                    <h:outputText value="#{coordenada.coordenada.z}" >
+                        <f:convertNumber maxFractionDigits="2" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column>
+                    <h:outputText value="#{coordenada.coordenada1.x}" >
+                        <f:convertNumber maxFractionDigits="2" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column>
+                    <h:outputText value="#{coordenada.coordenada1.y}" >
+                        <f:convertNumber maxFractionDigits="2" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column>
+                    <h:outputText value="#{coordenada.coordenada1.z}" >
+                        <f:convertNumber maxFractionDigits="2" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column>
+                    <h:outputText value="#{coordenada.fechaMuestreo}" >
+                        <f:convertDateTime pattern="dd/MM/yyyy" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column>
+                    <h:outputText value="#{coordenada.esfuerzoMuestreo}" >
+                    </h:outputText>
+                </p:column>
+                <p:column rendered="#{faunaController.faunaBean.grupoTaxonomicoSeleccionado.id == faunaController.faunaBean.idIctiofauna or faunaController.faunaBean.grupoTaxonomicoSeleccionado.id == faunaController.faunaBean.idMacroinvertebradosAcuaticos}">
+                    <h:outputText value="#{coordenada.caracteristicasCuerpoAgua}" >
+                    </h:outputText>
+                </p:column>
+            </p:dataTable>
+        </p:panelGrid>
+    </h:form>
+
+    <p:dialog header="Punto de Muestreo" widgetVar="dlgPuntoMuetreo1" modal="true" resizable="false" draggable="false"
+              style="overflow: auto;" width="600" height="250">  
+        <h:form id="formActualiza1">
+            <p:panel>
+                <h:panelGrid id="pnlPuntoMuestreo1" columns="4">
+                    <h:outputLabel value="Punto de Muestreo (Código)*" />
+                    <controles-prime:todoTextoComoIngrese identificador="txtCodigoDlg1" valor="#{faunaController.faunaBean.puntosMuestreo1.codigo}"
+                                                          longitud="6" tamanio="10" 
+                                                          requerido="true" />
+
+                    <h:outputLabel value="Fecha de muestreo (DD/MM/AÑO)*" />
+                    <controles-prime:calendario identificador="calFechaMuestreoDlg1" valor="#{faunaController.faunaBean.puntosMuestreo1.fechaMuestreo}"
+                                                requerido="true" patron="dd/MM/yyyy" ingresoCajaTexto="false"/>
+
+                    <h:outputLabel value="X1*" />
+                    <controles-prime:soloTextoNumerosDecimales identificador="txtX1Dlg1" 
+                                                               valor="#{faunaController.faunaBean.puntosMuestreo1.coordenada.x}"
+                                                               requerido="true" tamanio="10"
+                                                               longitud="6"/>
+
+                    <h:outputLabel value="X2" />
+                    <controles-prime:soloTextoNumerosDecimales identificador="txtX2Dlg1" 
+                                                               valor="#{faunaController.faunaBean.puntosMuestreo1.coordenada1.x}"
+                                                               requerido="false" tamanio="10"
+                                                               longitud="6"/>
+
+                    <h:outputLabel value="Y1*" />
+                    <controles-prime:soloTextoNumerosDecimales identificador="txtY1Dlg1" 
+                                                               valor="#{faunaController.faunaBean.puntosMuestreo1.coordenada.y}"
+                                                               requerido="true" tamanio="10"
+                                                               longitud="6"/>
+
+                    <h:outputLabel value="Y2" />
+                    <controles-prime:soloTextoNumerosDecimales identificador="txtY2Dlg1" 
+                                                               valor="#{faunaController.faunaBean.puntosMuestreo1.coordenada1.y}"
+                                                               requerido="false" tamanio="10"
+                                                               longitud="6"/>
+
+                    <h:outputLabel value="Altura1*" />
+                    <controles-prime:soloTextoNumerosDecimales identificador="txtAltura1Dlg1" 
+                                                               valor="#{faunaController.faunaBean.puntosMuestreo1.coordenada.z}"
+                                                               requerido="true" tamanio="10"
+                                                               longitud="6"/>
+
+                    <h:outputLabel value="Altura2" />
+                    <controles-prime:soloTextoNumerosDecimales identificador="txtAltura2Dlg1" 
+                                                               valor="#{faunaController.faunaBean.puntosMuestreo1.coordenada1.z}"
+                                                               requerido="false" tamanio="10"
+                                                               longitud="6"/>
+
+                    <h:outputLabel value="Esfuerzo de muestreo (hora/hombre)*" />
+                    <controles-prime:todoTextoComoIngrese identificador="txtEsfuerzoMuestreo1" 
+                                                          valor="#{faunaController.faunaBean.puntosMuestreo1.esfuerzoMuestreo}"
+                                                          requerido="true" tamanio="20"
+                                                          longitud="100"/>
+
+                    <h:outputLabel value="Características cuerpo de agua*"
+                                   rendered="#{faunaController.faunaBean.grupoTaxonomicoSeleccionado.id == faunaController.faunaBean.idIctiofauna or faunaController.faunaBean.grupoTaxonomicoSeleccionado.id == faunaController.faunaBean.idMacroinvertebradosAcuaticos}"/>
+                    <controles-prime:todoTextoComoIngrese identificador="txtCaracteristicasAguaDlg" valor="#{faunaController.faunaBean.puntosMuestreo1.caracteristicasCuerpoAgua}"
+                                                          longitud="100" tamanio="20" 
+                                                          requerido="true"
+                                                          rendered="#{faunaController.faunaBean.grupoTaxonomicoSeleccionado.id == faunaController.faunaBean.idIctiofauna or faunaController.faunaBean.grupoTaxonomicoSeleccionado.id == faunaController.faunaBean.idMacroinvertebradosAcuaticos}"/>
+
+
+                </h:panelGrid>
+                <br/>
+                <center>
+                    <p:commandButton value="Guardar" action="#{faunaController.guardarCoordenada1()}"
+                                     oncomplete="handlePuntoRequest1(xhr, status, args)" styleClass="primary"
+                                     update="formActualiza1, :#{p:component('msgs')}, :#{p:component('tblClCoordenadas1')}"/>
+                </center>
+            </p:panel>
+        </h:form>
+    </p:dialog>
+    <script type="text/javascript">
+        function handlePuntoRequest1(xhr, status, args) {
+            if (args.validationFailed || !args.puntoIn1) {
+                PF('dlgPuntoMuetreo1').jq.effect("shake", {times: 5}, 100);
+            }
+            else {
+                PF('dlgPuntoMuetreo1').hide();
+                $('#loginLink').fadeOut();
+            }
+        }
+    </script>
+</ui:composition>

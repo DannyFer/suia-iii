@@ -1,0 +1,213 @@
+<ui:composition template="/WEB-INF/templates/default.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+	<ui:define name="content">
+	<f:event type="preRenderView"
+			listener="#{generadorDesechosPeligrososController.validarData()}" />
+
+		<style type="text/css">
+tr[aria-selected="true"] .ui-radiobutton-box {
+	border-color: #FFFFFF !important;
+}
+
+tr[aria-selected="true"] .ui-icon {
+	background-image:
+		url("/suia-iii/javax.faces.resource/images/ui-icons_ffffff_256x240.png.jsf?ln=primefaces-suia");
+}
+</style>
+
+		<h:form id="form">
+
+			<p:panel style="text-align:center;">
+				<f:facet name="header">
+					<h:outputText
+						value="REGISTRO DE EMISIONES Y TRANSFERENCIA DE CONTAMINANTES EN EL ECUADOR"
+						styleClass="uppercase" />
+					<br />
+					<h:outputText
+						value="DECLARACIÓN DE GENERADOR DE RESIDUOS Y DESECHOS PELIGROSOS Y ESPECIALES (ASOCIADO A RGD)"
+						styleClass="uppercase" />
+				</f:facet>
+			</p:panel>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{!generadorDesechosPeligrososController.reporteHabilitado}">
+				<h:outputText styleClass="bold text-red alJustify" 
+					value="Estimado usuario el periodo establecido para registro de la declaración es del #{generadorDesechosPeligrososController.inicioReporte} al #{generadorDesechosPeligrososController.finReporte} de cada año, por tal motivo no podrá ingresar una nueva declaración." />
+			</p:panelGrid>
+			<br />
+
+			<p:dataTable styleClass="w80" id="tblDeclaraciones"
+				value="#{generadorDesechosPeligrososController.listaDeclaracionesRgd}"
+				var="item" paginator="true" paginatorAlwaysVisible="false"
+				paginatorPosition="bottom"
+				currentPageReportTemplate="{currentPage} de {totalPages}" rows="25">
+				<f:facet name="header">
+					<p:commandButton value="#{msg['button.agregar']}"
+						disabled="#{!generadorDesechosPeligrososController.reporteHabilitado}"
+						icon="ui-icon-plus"
+						action="#{generadorDesechosPeligrososController.agregarDeclaracion()}"
+						update=":form:pnlNuevaDeclaracion" style="float:right"
+						title="Agregar" />
+				</f:facet>
+				<p:column headerText="Código del proyecto">
+					<h:outputText value="#{item.informacionProyecto.codigo}" />
+				</p:column>
+				<p:column headerText="Código del RGDP">
+					<h:outputText
+						value="#{item.codigoGeneradorDesechosPeligrosos}" />
+				</p:column>
+				<p:column headerText="Número de trámite">
+					<h:outputText
+						value="#{item.codigoGenerador ne null ? item.codigoGenerador : 'N/A' }" />
+				</p:column>
+				<p:column headerText="Año de reporte">
+					<h:outputText value="#{item.anioDeclaracion}" escape="false" />
+				</p:column>
+				<p:column styleClass="w15">
+					<center>
+						<p:commandButton icon="ui-icon-search" title="Ver reporte"
+							styleClass="secondary" process="@this"
+							action="#{generadorDesechosPeligrososController.verInfoReporte(item, 1)}"
+							rendered="#{item.registroFinalizado}" />
+						<p:commandButton icon="ui-icon-pencil" title="Editar"
+							process="@this" styleClass="secondary"
+							action="#{generadorDesechosPeligrososController.verInfoReporte(item, 0)}"
+							rendered="#{!item.registroFinalizado and generadorDesechosPeligrososController.reporteHabilitado}"
+							update=":form:pnlNuevaDeclaracion" />
+						<p:commandButton icon="ui-icon-trash" title="Eliminar"
+							process="@this" styleClass="secondary"
+							action="#{generadorDesechosPeligrososController.eliminarConsumo(item)}"
+							rendered="#{!item.registroFinalizado}" update="tblDeclaraciones">
+							<p:confirm header="Confirmación"
+								message="¿Está seguro que desea eliminar?" icon="ui-icon-alert" />
+						</p:commandButton>
+						<p:commandButton icon="ui-icon-document"
+							styleClass="primary" title="Descargar Aprobación" ajax="false"
+							immediate="true" rendered="#{item.tramiteFinalizado}">
+							<p:fileDownload
+								value="#{generadorDesechosPeligrososController.descargar(item)}" />
+						</p:commandButton>
+					</center>
+				</p:column>
+			</p:dataTable>
+			<br />
+
+			<h:panelGroup id="pnlNuevaDeclaracion">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					rendered="#{generadorDesechosPeligrososController.agregarNuevo}">
+					<f:facet name="header">
+						<h:outputText value="Nueva declaración" />
+					</f:facet>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<h:outputText styleClass="w100"
+							value="Si no visualiza el código de registro de generador de desechos peligrosos, proceda de la siguiente manera:" />
+						<p:separator />
+
+						<h:outputText escape="true" styleClass="w100 bold"
+							value="Registro de generador de desechos peligrosos emitido en físico: " />
+						<h:outputText escape="true"
+							value="Debe realizar la actualización de su registro de generador de desechos peligrosos y especiales en el módulo de actualización de registro de generador de desechos peligrosos." />
+						<h:outputText escape="true" styleClass="w100 bold"
+							value="Registro de generador de desechos peligrosos en trámite: " />
+						<h:outputText escape="true"
+							value="Una vez que usted obtenga la aprobación del registro de generador de desechos peligrosos y especiales usted podrá reportar la información correspondiente a esta sección." />
+					</p:panelGrid>
+					<br />
+					<p:dataTable
+						value="#{generadorDesechosPeligrososController.listaGeneradores}"
+						rendered="#{generadorDesechosPeligrososController.listaGeneradores.size() gt 0}"
+						id="tableDesechos" var="desecho"
+						emptyMessage="#{labels['common.table.empty']}"
+						sortBy="#{desecho.codigo}" sortOrder="ASCENDING" rows="10"
+						paginator="true" paginatorAlwaysVisible="false"
+						paginatorPosition="bottom"
+						selection="#{generadorDesechosPeligrososController.generadorSeleccionado}"
+						disabledSelection="#{desecho.responsabilidadExtendida}"
+						rowKey="#{desecho.id}">
+						<p:column
+							headerText="Código del registro de generador de desechos peligrosos"
+							styleClass="w40">
+							<h:outputText value="#{desecho.solicitud}" />
+						</p:column>
+						<p:column headerText="Fecha de obtención de RGDP" styleClass="w20">
+							<h:outputText value="#{desecho.fecha}" />
+						</p:column>
+						<p:column selectionMode="single"
+							style="width:16px; text-align:center" />
+						<p:ajax event="rowSelectRadio"
+							listener="#{generadorDesechosPeligrososController.seleccionarRgd()}" />
+					</p:dataTable>
+					<br />
+					<p:dataTable
+						value="#{generadorDesechosPeligrososController.listaGeneradoresRcoa}"
+						rendered="#{generadorDesechosPeligrososController.listaGeneradoresRcoa.size() gt 0}"
+						id="tableDesechosRcoa" var="desecho"
+						emptyMessage="#{labels['common.table.empty']}"
+						sortBy="#{desecho.codigo}" sortOrder="ASCENDING" rows="10"
+						paginator="true" paginatorAlwaysVisible="false"
+						paginatorPosition="bottom"
+						selection="#{generadorDesechosPeligrososController.generadorSeleccionadoRcoa}"
+						disabledSelection="#{desecho.esResponsabilidadExtendida}"
+						rowKey="#{desecho.id}">
+						<p:column
+							headerText="Código del registro de generador de desechos peligrosos"
+							styleClass="w40">
+							<h:outputText value="#{desecho.codigo}" />
+						</p:column>
+						<p:column headerText="Fecha de obtención de RGDP" styleClass="w20">
+							<h:outputText value="#{generadorDesechosPeligrososController.fechaRGD}" />
+						</p:column>
+						<p:column selectionMode="single"
+							style="width:16px; text-align:center" />
+						<p:ajax event="rowSelectRadio"
+							listener="#{generadorDesechosPeligrososController.seleccionarRgdRcoa()}" />
+					</p:dataTable>
+
+					<p:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25,null w75">
+						<p:outputLabel value="Año de declaración" for="cmb_anio"
+							styleClass="ui-label-form" />
+						<p:selectOneMenu
+							value="#{generadorDesechosPeligrososController.generadorDesechosRetce.anioDeclaracion}"
+							id="cmb_anio" required="true">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}"
+								itemValue="" noSelectionOption="true" />
+							<f:selectItems
+								value="#{generadorDesechosPeligrososController.listaAnios}"
+								var="anio" itemLabel="#{anio.toString()}" itemValue="#{anio}" />
+							<p:ajax process="@this" />
+						</p:selectOneMenu>
+					</p:panelGrid>
+
+					<h:inputHidden
+						validator="#{generadorDesechosPeligrososController.validateSeleccionProyecto}" />
+
+					<div class="buttons main">
+						<p:commandButton value="Reportar" id="btnReportarr"
+							action="#{generadorDesechosPeligrososController.iniciarReporte()}"
+							icon="ui-icon-check" styleClass="primary">
+							<p:confirm header="Confirmación"
+								message="¿Está seguro que desea iniciar el reporte?"
+								icon="ui-icon-alert" />
+						</p:commandButton>
+						<p:commandButton value="Cerrar" styleClass="secondary"
+							actionListener="#{generadorDesechosPeligrososController.cerrarNuevoGenerador()}"
+							process="@this" update="pnlNuevaDeclaracion">
+							<p:resetInput target="@form" />
+						</p:commandButton>
+					</div>
+				</p:panelGrid>
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+</ui:composition>

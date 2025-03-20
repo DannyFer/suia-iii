@@ -1,0 +1,384 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+	<ui:composition 
+		template="/WEB-INF/templates/default-task.xhtml"
+		xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:p="http://primefaces.org/ui"	
+		xmlns:pe="http://primefaces.org/ui/extensions"
+		xmlns:t="http://myfaces.apache.org/tomahawk"
+		xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+		xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+		xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+		<ui:define name="content">
+			
+			<h:form id="form" onkeypress="if (event.keyCode == 13) {return false; }">
+				<p:panel style="text-align:center;">
+					<f:facet name="header">
+						<h:outputText value="Inventario Forestal Certificado Ambiental" styleClass="uppercase"/>
+					</f:facet>
+				</p:panel>
+
+				<p:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w50, field_mrg w50">
+					<f:facet name="header">
+						<h:outputText value="Superficie del proyecto y Superficie del desbroce de cobertura vegetal nativa"/>
+					</f:facet>
+					<p:outputLabel value="Superficie del proyecto, obra o actividad (ha):"/>
+					<p:outputLabel value="Superficie total de desbroce de cobertura vegetal nativa (ha):"/>
+					
+					<p:inputText disabled="true" value="#{inventarioForestalCertificadoController.inventarioForestalAmbiental.superficieProyecto}" />
+					<pe:inputNumber id="superficieDesbroce" thousandSeparator="" maxValue="#{inventarioForestalCertificadoController.inventarioForestalAmbiental.superficieProyecto}" minValue="0" 
+					value="#{inventarioForestalCertificadoController.inventarioForestalAmbiental.superficieDesbroce}">
+						<f:validateDoubleRange minimum="0.0001" />
+						<p:ajax update=":form:tblSumatoria" 
+							listener="#{inventarioForestalCertificadoController.editarSuperficieDesbroce}" process="@this"/>
+					</pe:inputNumber>
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w100">
+					<f:facet name="header">
+						<p:commandButton value="Adjuntar" onclick="PF('adjuntarCoordenadasDiag').show()" styleClass="buttonAdjuntarCoordenadas button-small-text toRight field_mrg" type="button" icon="ui-icon-document"/>
+						<p:commandButton value="Descargar plantilla" styleClass="button-small-text toRight field_mrg" icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true">
+							<p:fileDownload value="#{inventarioForestalCertificadoController.plantillaCoordenadasDesbroce}" />
+						</p:commandButton>
+						<p:commandButton styleClass="button-small toRight field_mrg" ajax="false" immediate="true" icon="ui-icon-help">
+							<p:fileDownload value="" />
+						</p:commandButton>
+						<h:outputText value="Sistema de referencia UTM WGS84 zona 17sur"/>
+					</f:facet>
+					<p:outputLabel value="El archivo de coordenadas debe marcar el sitio en el que se realiza el Muestreo o Censo del Inventario Forestal"/>
+					
+					<p:dataTable id="tblCoordenadas" rowIndexVar="index" value="#{inventarioForestalCertificadoController.coordinatesWrappers}" var="item" emptyMessage="#{labels['common.table.empty']}">
+						<p:subTable value="#{item.coordenadas}" var="coordenada">
+							<p:columnGroup type="header">
+								<p:row>
+									<p:column headerText="Área Geográfica" styleClass="alCenter table-column-header" />
+									<p:column headerText="Shape" styleClass="alCenter table-column-header" />
+									<p:column headerText="X" styleClass="alCenter table-column-header" />
+									<p:column headerText="Y" styleClass="alCenter table-column-header" />
+								</p:row>
+							</p:columnGroup>
+							<p:column headerText="Área Geográfica" styleClass="alCenter w5">
+								<h:outputText value="#{coordenada.areaGeografica}" />
+							</p:column>
+							<p:column headerText="Shape" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.ordenCoordenada}" />
+							</p:column>
+							<p:column headerText="X" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.x.intValue()}" />
+							</p:column>
+							<p:column headerText="Y" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.y.intValue()}" />
+							</p:column>
+						</p:subTable>
+					</p:dataTable>
+					
+					<p:panelGrid columns="3" layout="grid" styleClass="w100" columnClasses="w25, w5, field_mrg w70">
+						<p:outputLabel value="Fecha de elaboración del Censo Forestal"/>
+						<p:calendar id="fechaElaboracion" styleClass="calendarClass" value="#{inventarioForestalCertificadoController.fechaElaboracion}"
+							maxdate="#{inventarioForestalCertificadoController.currentDate}" immediate="true"
+							pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" >
+							<p:ajax event="dateSelect" 
+							listener="#{inventarioForestalCertificadoController.asignarFechaElaboracion}" process="@this"/>
+						</p:calendar>
+						<br/>
+					</p:panelGrid>
+				</p:panelGrid>
+
+				<p:panelGrid id="especiesGrid" columns="1" layout="grid" styleClass="w100" columnClasses="w100">
+					<f:facet name="header">
+						<h:outputText value="Registro de especies forestales"/>
+					</f:facet>
+					<p:outputLabel value="Para registrar la información de las especies, el sistema ofrece dos opciones de registro: Mediante un archivo Excel y/o mediante un formulario, 
+					usted puede registrar las especies con cualquiera de las dos opciones."/>
+					<p:outputLabel value="Cargar información de especies mediante un archivo Excel"/>
+					
+					<p:panelGrid columns="3" layout="grid" styleClass="w100" columnClasses="w10, field_mrg w10, field_mrg w80">
+						<h:outputLink
+						value="#{request.contextPath}/pages/rcoa/inventarioForestal/archivo/FormatoEspeciesCertificado.xls"
+						title="Ingrese la información de las especies conforme al formato adjunto">
+						Descargar Formato Excel
+					</h:outputLink>
+					    <h:panelGroup>
+						<p:commandButton value="Cargar Excel" actionListener="#{inventarioForestalCertificadoController.validacionEspeciesArchivo}" 							
+							styleClass="primary" icon="ui-icon-document" process="@this"/>
+					</h:panelGroup>
+					    <p:outputLabel value="Cargue el archivo Excel (xls) con la información de las especies que va a recolectar. El archivo debe estar lleno de acuerdo al formato indicado."/>
+					</p:panelGrid>
+					
+					<p:outputLabel value="Registro de especies mediante formulario"/>
+					<p:dataTable id="tblEspecies" rowIndexVar="index" value="#{inventarioForestalCertificadoController.listRegistroEspeciesForestales}" var="especie" emptyMessage="#{labels['common.table.empty']}"
+					rows="10" paginatorAlwaysVisible="false" paginator="true" paginatorPosition="bottom" >
+						<f:facet name="header">
+							<p:commandButton icon="ui-icon-plus" value="#{msg['button.agregar']}" process="tblEspecies" update=":formDialogs:especiesDiag" 
+							style="float:right" actionListener="#{inventarioForestalCertificadoController.validacionEspecies}" >
+							<p:resetInput target=":formDialogs:especiesDiag" />
+							</p:commandButton>
+						</f:facet>
+						<p:columnGroup type="header">
+				            <p:row>
+				                <p:column rowspan="2" headerText="Número del individuo" />
+				                <p:column colspan="3" headerText="Taxnomía" />
+				                <p:column rowspan="2" headerText="DAP (Diámetro a la altura del pecho (m))" />
+				                <p:column rowspan="2" headerText="Altura total (m)" />
+				                <p:column rowspan="2" headerText="AB (Área basa (m2))" />
+				                <p:column rowspan="2" headerText="Volumen total (m3)" />
+				                <p:column rowspan="2" headerText="Acciones" />
+				            </p:row>
+				            <p:row>
+				                <p:column headerText="Familia" />
+				                <p:column headerText="Género" />
+				                <p:column headerText="Especie" />
+				            </p:row>
+				        </p:columnGroup>
+				        <p:column styleClass="alCenter w5">
+				        	<h:outputText value="#{index+1}" />
+				        </p:column>
+				        <p:column>
+				        	<h:outputText value="#{especie.familiaEspecie.hiclScientificName}" />
+				        </p:column>
+				        <p:column>
+				        	<h:outputText value="#{especie.generoEspecie.hiclScientificName}" />
+				        </p:column>
+				        <p:column>
+				        	<h:outputText value="#{especie.especieEspecie.sptaScientificName}" />
+				        	<h:outputText value=" - #{especie.especieEspecie.sptaOtherScientificName}" rendered="#{especie.especieEspecie.id == 0}" />
+				        </p:column>
+				        <p:column styleClass="alCenter">
+				        	<h:outputText value="#{especie.diametroEspecie}">
+				        		<f:convertNumber pattern="#0.0000" />
+			        		</h:outputText>
+				        </p:column>
+				        <p:column styleClass="alCenter">
+				        	<h:outputText value="#{especie.alturaEspecie}" >
+				        		<f:convertNumber pattern="#0.0000" />
+			        		</h:outputText>
+				        </p:column>
+				        <p:column styleClass="alCenter">
+				        	<h:outputText value="#{especie.areaBasalEspecie}" >
+				        		<f:convertNumber pattern="#0.0000" />
+			        		</h:outputText>
+				        </p:column>
+				        <p:column styleClass="alCenter">
+				        	<h:outputText value="#{especie.volumenTotalEspecie}" >
+				        		<f:convertNumber pattern="#0.0000" />
+			        		</h:outputText>
+				        </p:column>
+				        <p:column styleClass="alCenter w15">
+							<center>
+								<p:commandButton icon="ui-icon-pencil" title="#{msg['button.editar']}" styleClass="secondary"  process=":form:tblEspecies" 
+									update=":form:especiesGrid :formDialogs:especiesDiag"
+									actionListener="#{inventarioForestalCertificadoController.editarEspecie(especie)}" oncomplete="PF('especiesDiag').show()"/>
+								<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process=":form:tblEspecies" 
+									update=":form:especiesGrid :form:tblSumatoria"
+									actionListener="#{inventarioForestalCertificadoController.eliminarEspecie(especie)}"/>
+							</center>
+						</p:column>
+					</p:dataTable>
+
+					<p:dataTable id="tblSumatoria" rowIndexVar="index" value="#{inventarioForestalCertificadoController.listCertificadoAmbientalSumatoria}" var="inventario" emptyMessage="#{labels['common.table.empty']}"
+					rows="10" paginatorAlwaysVisible="false" paginator="true" paginatorPosition="bottom" >
+						<f:facet name="header">
+							<p:outputLabel value="Sumatoria de datos"/>
+							<ui:remove>
+							<p:commandButton value="Realizar cálculo" update=":form:tblSumatoria" style="float:right" styleClass="primary" 
+							action="#{inventarioForestalCertificadoController.sumatoriaEspecies}" icon="ui-icon-check" process="@this"/>
+							</ui:remove>
+						</f:facet>
+						<p:column headerText="Supericie total de desbroce">
+							<h:outputText value="#{inventario.superficieDesbroce}" >
+								<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+						</p:column>
+						<p:column headerText="Sumatoria del área basal">
+							<h:outputText value="#{inventario.sumatoriaAreaBasal}" >
+								<f:convertNumber pattern="#0.0000" />
+			        		</h:outputText>
+						</p:column>
+						<p:column headerText="Sumatoria del volumen total">
+							<h:outputText value="#{inventario.sumatoriaVolumenTotal}" >
+								<f:convertNumber pattern="#0.0000" />
+			        		</h:outputText>
+						</p:column>
+						<p:column headerText="Valor del m3 de Madera en pie">
+							<h:outputText value="#{inventario.valorMaderaPie}" >
+								<f:convertNumber pattern="#0.0000" />
+			        		</h:outputText>
+						</p:column>
+						<p:column headerText="Pago por desbroce de cobertura vegetal nativa">
+							<h:outputText value="#{inventario.pagoDesbroceCobertura}" >
+								<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+				
+				<p:panelGrid id="tecnicoGrid" columns="1" layout="grid" styleClass="w100" columnClasses="w100">
+					<f:facet name="header">
+						<p:outputLabel value="Datos del profesional responsable del Inventario Forestal"/>
+					</f:facet>
+					<p:panelGrid columns="3" layout="grid" styleClass="w100" columnClasses="w25, w5, field_mrg w70">
+						<p:outputLabel value="Cédula / Passaporte *" for="documentoResponsable" />
+						<p:inputMask id="documentoResponsable" mask="9999999999" maxlength="10"
+						value="#{inventarioForestalCertificadoController.especialistaAmbiental.identificacion}">
+						<p:ajax process="@this"/>
+						</p:inputMask>
+					<p:commandButton value="Validar" update="tecnicoGrid"
+						action="#{inventarioForestalCertificadoController.validarCedula}"
+						style="margin-right:20px;" styleClass="primary" 
+						process="@this"/>
+
+					<p:outputLabel value="Nombres y Apellidos *" for="nombreResponsable" />
+						<p:inputText id="nombreResponsable"
+						value="#{inventarioForestalCertificadoController.especialistaAmbiental.nombre}"
+						maxlength="200" disabled="true"/>
+						<br/>
+	
+						<p:outputLabel value="Título Académico *" for="tituloResponsable" />
+						<p:inputText id="tituloResponsable"
+						value="#{inventarioForestalCertificadoController.especialistaAmbiental.titulo}"
+						maxlength="30" disabled="true"/>
+						<br/>
+	
+						<p:outputLabel value="Registro Senescyt" for="senecytRegistro" />
+						<p:inputText id="senecytRegistro"
+						value="#{inventarioForestalCertificadoController.especialistaAmbiental.numeroRegistro}"
+						maxlength="100" disabled="true" />
+						<br/>
+					</p:panelGrid>
+				<p:outputLabel value="Para el pago por desbroce en la ejecución de proyectos, obras o actividades, debe calcular el volumen total de productos maderables 
+				y no maderables determinados con el censo forestal multiplicado por la tasa establecida por la Autoridad Ambiental Nacional (Madera en pie)"/>
+				</p:panelGrid>
+
+				<p:panelGrid id="observacionesInventarioCertificado" columns="1" layout="grid" styleClass="w100" >
+					<observaciones:tablaObservacionesInventarioForestal idComponent="observacionesInventarioCertificado"
+						componenteActualizarEliminar="observacionesInventarioCertificado"
+						seccion="InventarioForestalAmbiental"
+						nombreClase="InventarioForestalAmbiental"
+						idClase="#{inventarioForestalCertificadoController.inventarioForestalAmbiental.id}" 
+						aparace="true"
+						mostrarSiVacio="true"
+						soloLectura="true"/>
+				</p:panelGrid>
+
+				<div class="buttons main">
+					<p:commandButton value="Guardar" title="Guardar" icon="ui-icon-disk" process="@form" immediate="true"
+						update="enviar"
+						action="#{inventarioForestalCertificadoController.guardar}">
+					</p:commandButton>
+					<p:commandButton id="enviar"  value="Enviar" title="Enviar" icon="ui-icon-check" process="@this" immediate="true"
+						disabled="#{!inventarioForestalCertificadoController.guardaTramite}"
+						action="#{inventarioForestalCertificadoController.enviar}">
+						<p:confirm header="Confirmación" message="¿Está seguro que desea finalizar la solicitud?" icon="ui-icon-alert" />
+					</p:commandButton>
+				</div>
+			</h:form>
+			
+			<h:form id="formDialogs">
+				<p:dialog id="especiesDiag" widgetVar="especiesDiag" header="Información de las especies a registrar" width="600px" closable="false" style=" position: absolute;">
+					<p:panelGrid id="espciesGridDiag" columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+						<h:outputText value="Taxonomía Nivel: *"/>						
+						<p:selectOneRadio id="rdTaxonomia" value="#{inventarioForestalCertificadoController.registroEspeciesForestales.nivelTaxonomia}" unselectable="true" 
+						required="true" requiredMessage="Taxonomía requerida">
+				            <f:selectItem itemLabel="Género" itemValue="G" />
+				            <f:selectItem itemLabel="Especie" itemValue="E" />
+				            <p:ajax update="espciesGridDiag" 
+							listener="#{inventarioForestalCertificadoController.desbloquearTaxonomia}" />
+				        </p:selectOneRadio>
+				        <h:outputText value="Familia:" />
+				        <p:selectOneMenu id="cmbFamilia" value="#{inventarioForestalCertificadoController.objFamilia}" style="width: 100%" 
+				        required="true" requiredMessage="Familia requerido"
+				        converter="selectItemConverter" filter="true" filterMatchMode="startsWith" disabled="#{inventarioForestalCertificadoController.blockFamilia}">
+				            <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="#{null}" noSelectionOption="true"/>
+				            <f:selectItems value="#{inventarioForestalCertificadoController.listFamilia}" 
+							var="familia" itemLabel="#{familia.hiclScientificName}" itemValue="#{familia}"/>
+							<p:ajax update="cmbGenero" 
+							listener="#{inventarioForestalCertificadoController.obtenerListaGeneroPorFamilia}" />
+				        </p:selectOneMenu>
+				        <h:outputText value="Género:"/>
+				        <p:selectOneMenu id="cmbGenero" value="#{inventarioForestalCertificadoController.objGenero}" styleClass="w100" 
+				        required="true" requiredMessage="Genero requerido" 
+				        converter="selectItemConverter" filter="true" filterMatchMode="startsWith" disabled="#{inventarioForestalCertificadoController.blockGenero}">
+				            <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="#{null}" noSelectionOption="true"/>
+				            <f:selectItems value="#{inventarioForestalCertificadoController.listGenero}" 
+							var="genero" itemLabel="#{genero.hiclScientificName}" itemValue="#{genero}"/>
+							<p:ajax update="cmbEspecie" 
+							listener="#{inventarioForestalCertificadoController.obtenerListaEspecies}" />
+				        </p:selectOneMenu>
+				        <h:outputText value="Especie:"/>
+				        <p:selectOneMenu id="cmbEspecie" value="#{inventarioForestalCertificadoController.objEspecie}" styleClass="w100" 
+				        required="true" requiredMessage="Especie requerida" 
+				        converter="selectItemConverter" disabled="#{inventarioForestalCertificadoController.blockEspecie}">
+				            <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="#{null}" noSelectionOption="true"/>
+				            <f:selectItems value="#{inventarioForestalCertificadoController.listEspecie}" var="especie" itemLabel="#{especie.sptaScientificName}" itemValue="#{especie}"/>
+							<p:ajax update="otroEspecie" listener="#{inventarioForestalCertificadoController.desbloquearOtraEspecies}" />
+				        </p:selectOneMenu>
+				        <h:outputText value="Otro:"/>
+				        <p:inputText id="otroEspecie" value="#{inventarioForestalCertificadoController.registroEspeciesForestales.otroEspecie}" maxlength="20"  disabled="#{inventarioForestalCertificadoController.blockOtro}"/>
+				        <h:outputText value="DAP (Diámetro a la latura del pecho (m))"/>
+				        <pe:inputNumber thousandSeparator="" maxValue="9999999999.9999" minValue="0" requiredMessage="DAP requerida"
+						value="#{inventarioForestalCertificadoController.registroEspeciesForestales.diametroEspecie}" validatorMessage="El campo DAP es menor al valor mínimo permitido de 0.0001">
+							<f:validateDoubleRange minimum="0.0001"/>
+							<p:ajax event="blur" update="areaEspecie" listener="#{inventarioForestalCertificadoController.calculoAreaBasal}" process="@this"/>
+						</pe:inputNumber>
+				        <h:outputText value="Altura total (m)"/>
+				        <pe:inputNumber required="true" thousandSeparator="" maxValue="9999999999.9999" minValue="0" requiredMessage="Altura requerida"
+						value="#{inventarioForestalCertificadoController.registroEspeciesForestales.alturaEspecie}" validatorMessage="El campo Altura total es menor al valor mínimo permitido de 0.0001">
+							<f:validateDoubleRange minimum="0.0001" />
+							<p:ajax event="blur" update="volumenTotal @this" listener="#{inventarioForestalCertificadoController.calculoVolumenTotal}" process="@this"/>
+						</pe:inputNumber>
+				        <h:outputText value="AB (Área basal (m2))"/>
+				        <p:inputText id="areaEspecie" value="#{inventarioForestalCertificadoController.registroEspeciesForestales.areaBasalEspecie}" disabled="true" />
+				        <h:outputText value="Volumen total (m3)"/>
+						<p:inputText id="volumenTotal" value="#{inventarioForestalCertificadoController.registroEspeciesForestales.volumenTotalEspecie}" disabled="true" />
+					</p:panelGrid>
+					<t:div styleClass="buttons">
+						<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('especiesDiag').hide()" styleClass="secondary"
+						update=":formDialogs:especiesDiag :form:tblSumatoria" actionListener="#{inventarioForestalCertificadoController.resetEspecies()}" immediate="true"/>
+					<p:commandButton icon="ui-icon-plus"
+						value="#{msg['button.guardar']}"
+						process="especiesDiag"
+						update=":form:tblEspecies espciesGridDiag"
+						actionListener="#{inventarioForestalCertificadoController.agregarEspecies()}" />
+				</t:div>
+				</p:dialog>
+				
+				<p:dialog id="adjuntarEspeciesDiag" widgetVar="adjuntarEspeciesDiag" header="Adjuntar especies" modal="true" resizable="false">
+					<p:panelGrid columns="1" columnClasses="label, value">
+						<h:outputText value="Seleccione el archivo excel (.xls)" />
+						<p:fileUpload uploadLabel="Subir" auto="true" cancelLabel="Cancelar" label="Seleccionar" 
+						mode="advanced" dragDropSupport="false" process="adjuntarEspeciesDiag :form:superficieDesbroce"
+						multiple="false" allowTypes="/(\.|\/)(xls)$/" 
+						invalidFileMessage="El archivo es inválido." invalidSizeMessage="El archivo es demasiado grande."
+						immediate="true"
+						oncomplete="PF('adjuntarEspeciesDiag').hide()"
+						fileUploadListener="#{inventarioForestalCertificadoController.handleFileUploadEspecies}"
+						update=":form:tblEspecies :form:tblSumatoria" />
+					</p:panelGrid>
+					<div class="buttons">
+						<p:commandButton type="button" value="Cerrar" onclick="PF('adjuntarEspeciesDiag').hide()" />
+					</div>
+				</p:dialog>
+
+				<p:dialog id="adjuntarCoordenadasDiag" widgetVar="adjuntarCoordenadasDiag" header="Adjuntar coordenadas" modal="true" resizable="false">
+					<p:panelGrid columns="1" columnClasses="label, value">
+						<h:outputText value="Seleccione el archivo excel (.xls)" />
+						<p:fileUpload uploadLabel="Subir" auto="true" cancelLabel="Cancelar" label="Seleccionar" 
+						mode="advanced" dragDropSupport="false" process="adjuntarCoordenadasDiag :form:superficieDesbroce"
+						multiple="false" allowTypes="/(\.|\/)(xls)$/" 
+						invalidFileMessage="El archivo es inválido." invalidSizeMessage="El archivo es demasiado grande."
+						immediate="true" 
+						oncomplete="PF('adjuntarCoordenadasDiag').hide()"
+						fileUploadListener="#{inventarioForestalCertificadoController.handleFileUploadCoordenadas}"
+						update=":form:tblCoordenadas" />
+					</p:panelGrid>
+					<div class="buttons">
+						<p:commandButton type="button" value="Cerrar" onclick="PF('adjuntarCoordenadasDiag').hide()" />
+					</div>
+				</p:dialog>
+			</h:form>
+		</ui:define>
+	</ui:composition>
+</html>

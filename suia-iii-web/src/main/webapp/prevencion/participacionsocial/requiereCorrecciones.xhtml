@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+        >
+<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}"
+                      target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small"
+                             icon="ui-icon-search"/>
+        </h:outputLink>
+
+    </ui:define>
+    <ui:define name="content">
+        <f:loadBundle var="labels"
+                      basename="ec.gob.ambiente.core.resources.labels_es"/>
+        <h:form id="form">
+            <f:event type="preRenderView"
+                     listener="#{ingresarDocumentacionComplementariaController.validarTareaBpm2()}"/>
+
+            <p:panel>
+                <p:outputLabel for="requiere-modificaciones"
+                               value="¿La información requiere modificaciones?"
+                               rendered="#{ingresarDocumentacionComplementariaBean.revisar}"/>
+                <p:selectOneRadio id="requiere-modificaciones"
+                                  value="#{ingresarDocumentacionComplementariaBean.informacionCompleta}"
+                                  required="#{ingresarDocumentacionComplementariaBean.revisar}"
+                                  rendered="#{ingresarDocumentacionComplementariaBean.revisar}">
+                    <f:selectItem itemLabel="Si" itemValue="true"/>
+                    <f:selectItem itemLabel="No" itemValue="false"/>
+                </p:selectOneRadio>
+
+                <p:separator/>
+
+
+                <p:fragment>
+                    <h:panelGroup id="pnl2">
+
+                        <observaciones:tablaObservaciones aparace="true"
+                                                          soloLectura="#{!mediosVerificacionController.mediosVerificacionBean.revisar}"
+                                                          mostrarSiVacio="#{mediosVerificacionController.mediosVerificacionBean.revisar}"
+                                                          idClase="#{mediosVerificacionController.mediosVerificacionBean.proyectosBean.proyecto.id}"
+                                                          nombreClase="ParticipacionSocial"
+                                                          seccion="ingresarCorreccionesDocumentacion"
+                                                          rol="admin"
+                                                          componenteActualizarEliminar="pnl2"/>
+                    </h:panelGroup>
+                </p:fragment>
+
+                <div class="buttons main">
+
+                    <p:commandButton value="Enviar"
+                                     action="#{ingresarDocumentacionComplementariaController.finalizar2}"
+                                     icon="ui-icon-check"/>
+                </div>
+
+
+            </p:panel>
+
+
+        </h:form>
+
+
+    </ui:define>
+</ui:composition>
+</html>

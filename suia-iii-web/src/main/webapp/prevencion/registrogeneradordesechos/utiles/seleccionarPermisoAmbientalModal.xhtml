@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<p:dialog header="Seleccionar permiso ambiental" id="dialogoSeleccionarPermiso" widgetVar="dialogoSeleccionarPermiso" modal="true" resizable="false" width="800">
+
+	<h:panelGroup rendered="#{empty permisoAmbientalBean.prestadoresServiciosDesechosPeligrosos}">
+		<h:outputText value="Estimado Usuario: De acuerdo con la base de datos del Ministerio del Ambiente y Agua, Usted no cuenta con una licencia ambiental, permiso ambiental u oficio mediante el cual se le habilite a la eliminación o disposición final de su(s) desecho(s) peligroso(s) o especial(es) dentro de sus propias instalaciones, por lo tanto usted debe proseguir el trámite considerando las siguientes opciones:" styleClass="bold text-red alJustify" escape="false" />
+		<br />
+		<h:outputText value="1. Si usted cuenta con el permiso ambiental y no aparece dentro de esta opción, debe notificar a Mesa de Ayuda del SUIA, para que bajo los mecanismos internos correspondientes, su permiso ambiental sea incorporado a la base de datos. Hasta entonces por favor guarde la información ingresada hasta el momento y espere a las instrucciones de Mesa de Ayuda; ó" styleClass="bold text-red alJustify" />
+		<br />
+		<h:outputText value="2. Si usted NO cuenta con el permiso ambiental, por favor cierre el cuadro “Seleccionar permiso ambiental”, de click en el botón “Atrás” y responda “NO” a la pregunta: “¿Realiza la eliminación o disposición final de sus desechos dentro del establecimiento o instalación?“, con esto podrá continuar con el trámite, lo cual significa que debe eliminar o disponer sus desechos con gestores (prestadores de servicio) que cuentan con la licencia ambiental correspondiente." styleClass="bold text-red alJustify" escape="false" />
+	</h:panelGroup>
+
+	<p:dataTable styleClass="bold text-red #{empty permisoAmbientalBean.prestadoresServiciosDesechosPeligrosos ? 'noShow' :''}" value="#{permisoAmbientalBean.prestadoresServiciosDesechosPeligrosos}" id="tablePermisos" var="permiso" emptyMessage="#{labels['common.table.empty']}" sortBy="#{permiso.sedePrestadorServiciosDesechos.prestadorServiciosDesechos.nombre}" sortOrder="ASCENDING" rows="10" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+		<p:column styleClass="w20px alCenter">
+			<p:selectBooleanCheckbox value="#{permiso.seleccionado}">
+				<p:ajax process="@this" event="change" update=":form:tbl_permisos :form:permisosCantidadesContainer tablePermisos :form:#{adicionarTipoEliminacionAliasBean.tipoEliminacionDesechoContainer}" oncomplete="PF('dialogoSeleccionarPermiso').hide()" listener="#{permisoAmbientalBean.updateDatosAsociadosPermiso()}" />
+			</p:selectBooleanCheckbox>
+		</p:column>
+		<p:column headerText="Nombre" sortBy="#{permiso.sedePrestadorServiciosDesechos.prestadorServiciosDesechos.nombre}">
+			<h:outputText value="#{permiso.sedePrestadorServiciosDesechos.prestadorServiciosDesechos.nombre}" />
+		</p:column>
+		<p:column headerText="Provincia" sortBy="#{permiso.sedePrestadorServiciosDesechos.ubicacionesGeografica.ubicacionesGeografica}">
+			<h:outputText value="#{permiso.sedePrestadorServiciosDesechos.ubicacionesGeografica.ubicacionesGeografica}" />
+		</p:column>
+		<p:column headerText="Cantón" sortBy="#{permiso.sedePrestadorServiciosDesechos.ubicacionesGeografica}">
+			<h:outputText value="#{permiso.sedePrestadorServiciosDesechos.ubicacionesGeografica}" />
+		</p:column>
+		<p:column headerText="Permiso ambiental" sortBy="#{permiso.sedePrestadorServiciosDesechos.codigoPermisoAmbiental}">
+			<h:outputText value="#{permiso.sedePrestadorServiciosDesechos.codigoPermisoAmbiental}" />
+		</p:column>
+		<p:column headerText="Tipo eliminación" sortBy="#{permiso.tipoEliminacionDesecho}">
+			<h:outputText value="#{permiso.tipoEliminacionDesecho}" />
+		</p:column>
+		<p:column headerText="Fase gestión" sortBy="#{permiso.faseGestionDesecho}">
+			<h:outputText value="#{permiso.faseGestionDesecho}" />
+		</p:column>
+	</p:dataTable>
+
+
+	<p:separator />
+	<div class="buttons">
+
+		<p:commandButton value="Aceptar" process="@this" oncomplete="PF('dialogoSeleccionarPermiso').hide()" />
+	</div>
+</p:dialog>
+
+</html>

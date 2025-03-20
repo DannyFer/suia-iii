@@ -1,0 +1,2272 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+	<ui:define name="content">
+	<p:panel header="Contexto de la Actividad" styleClass="separatorTop">
+        <style>
+            .menu-ficha {
+                font-size: 100%;
+                color: #222222;
+            }
+        </style>
+        <script>
+            $(document).ready(function () {
+
+                var url = window.location.pathname,
+                        urlRegExp = new RegExp(url.replace(/\/$/, '') + "$"); // create regexp to match current url pathname and remove trailing slash if present as it could collide with the link in navigation in case trailing slash wasn't present there
+                // now grab every link from the navigation
+                $('#menu-principal a').each(function () {
+                    // and test its normalized href against the url pathname regexp
+                    if (urlRegExp.test(this.href.replace(/\/$/, ''))) {
+                        $(this).addClass(' bold');
+                    }
+                });
+            })
+        </script>
+        <h:form>
+            <h:panelGrid columns="2" styleClass="mw50 panel_data" rowClasses="null, alt" columnClasses="header w25, null, alCenter w20px">						
+				
+				<h:outputText value="Proponente" />
+				<h:outputText value="#{proyectosBean.proponente}" />
+				
+				<h:outputText value="Código" />
+                <h:outputText value="#{proyectosBean.proyecto.codigo}" rendered="#{!fichaMineria020Controller.esProyectoRcoa}"/>
+                <h:outputText value="#{fichaMineria020Controller.proyectoLicenciaCoa.codigoUnicoAmbiental}" rendered="#{fichaMineria020Controller.esProyectoRcoa}"/>
+                    
+                <h:outputText value="Fecha de registro" />
+                <h:outputText value="#{proyectosBean.proyecto.fechaRegistro}" rendered="#{!fichaMineria020Controller.esProyectoRcoa}">
+                        <f:convertDateTime pattern="dd/MM/yyyy" />
+                </h:outputText>
+                <h:outputText value="#{fichaMineria020Controller.proyectoLicenciaCoa.fechaCreacion}" rendered="#{fichaMineria020Controller.esProyectoRcoa}">
+                    <f:convertDateTime pattern="dd/MM/yyyy" />
+                </h:outputText>
+                
+                <h:outputText value="Nombre:"/>
+                <h:outputText value="#{proyectosBean.proyecto.nombre}" />
+                
+                <h:outputText value="Actividad:" />
+				<h:outputText
+					value="#{proyectosBean.proyecto.catalogoCategoria.descripcion}"
+					rendered="#{!fichaMineria020Controller.esProyectoRcoa}" />
+				<h:outputText
+					value="#{fichaMineria020Controller.actividadPrincipal.catalogoCIUU.nombre}"
+					rendered="#{fichaMineria020Controller.esProyectoRcoa}" />
+
+
+				</h:panelGrid>
+			
+			<p:dialog width="800" height="500" position="top" id="modalShowFlow" styleClass="modalShowFlow" header="Detalles del flujo"
+				widgetVar="modalShowFlow" modal="true" resizable="true">
+				<p:panel header="Diagrama" collapsed="false" toggleable="false" styleClass="alCenter">
+					<img src="#{request.contextPath}/resources/images/flujo.png" />
+				</p:panel>
+				<p:panel header="Historial de actividades" collapsed="true" toggleable="true" rendered="false">
+					<h:outputText value="Loading..." />
+				</p:panel>
+				<p:panel header="Variables del flujo" collapsed="true" toggleable="true" rendered="false">
+					<h:outputText value="Loading..." />
+				</p:panel>
+			</p:dialog>
+			
+			<p:dialog width="700"  id="modalShowTramite" header="Resumen del proyecto" widgetVar="modalShowTramite" modal="true" resizable="false">
+               <h:panelGrid  styleClass="panel_data w100" columns="2" columnClasses="header w25, null" rowClasses="null, alt">
+                    <h:outputText value="Código" />
+                    <h:outputText value="#{proyectosBean.proyecto.codigo}" rendered="#{!fichaMineria020Controller.esProyectoRcoa}"/>
+                    <h:outputText value="#{fichaMineria020Controller.proyectoLicenciaCoa.codigoUnicoAmbiental}" rendered="#{fichaMineria020Controller.esProyectoRcoa}"/>
+                    <h:outputText value="Fecha de registro" />
+                    <h:outputText value="#{proyectosBean.proyecto.fechaRegistro}" rendered="#{!fichaMineria020Controller.esProyectoRcoa}">
+                        <f:convertDateTime pattern="dd/MM/yyyy" />
+                    </h:outputText>
+                    <h:outputText value="#{fichaMineria020Controller.proyectoLicenciaCoa.fechaCreacion}" rendered="#{fichaMineria020Controller.esProyectoRcoa}">
+                        <f:convertDateTime pattern="dd/MM/yyyy" />
+                    </h:outputText>
+                    <h:outputText value="Nombre:"/>
+                    <h:outputText value="#{proyectosBean.proyecto.nombre}" />
+                    <h:outputText value="Actividad:" />
+                    <h:outputText
+                            value="#{proyectosBean.proyecto.catalogoCategoria.descripcion}" rendered="#{!fichaMineria020Controller.esProyectoRcoa}"/>
+                     <h:outputText
+                            value="#{fichaMineria020Controller.actividadPrincipal.catalogoCIUU.nombre}" rendered="#{fichaMineria020Controller.esProyectoRcoa}"/>
+                    <h:outputText value="Ver detalles del proyecto" />
+                    <p:commandLink action="#{proyectosBean.seleccionar(proyectosBean.proyecto)}" rendered="#{!fichaMineria020Controller.esProyectoRcoa}">
+                        <h:outputText value="Ver detalles" />
+                    </p:commandLink>
+                    <p:commandLink action="#{proyectosBean.seleccionar(fichaMineria020Controller.proyectoLicenciaCoa, true)}" 
+                    	rendered="#{fichaMineria020Controller.esProyectoRcoa}">
+                        <h:outputText value="Ver detalles" />
+                    </p:commandLink>
+                </h:panelGrid>
+
+			</p:dialog>
+
+			<p:dialog width="500" height="150" id="modalShowProponente" header="Proponente" 
+				widgetVar="modalShowProponente" modal="true" resizable="false">
+				<h:panelGrid styleClass="w100" columns="1" id="pnlProponente">
+					<h:panelGrid styleClass="panel_data mw50" columns="2" columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="Nombre" />
+						<h:outputText value="#{proyectosBean.proponente}" />
+					</h:panelGrid>
+					<br />
+					<h:outputText value="Ubicación geográfica" styleClass="bold" />
+					<p:dataTable value="#{proyectosBean.ubicacionProponente}" var="ubicacion">
+						<p:column headerText="Provincia">
+							<h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+						</p:column>
+						<p:column headerText="Cantón">
+							<h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+						</p:column>
+						<p:column headerText="Parroquia">
+							<h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+			</p:dialog>
+		</h:form>
+    </p:panel>
+    <br />
+	
+	<p:panel id="menu-principal">
+        <f:facet name="header">
+            <h:outputText value="Registro Ambiental Minería" styleClass="encabezado1_1em alLeft ui-panel-title" />
+        </f:facet>
+        <h:form>
+				<ul>
+					<li><p:commandLink
+							action="#{fichaMineria020Controller.activeIndex(1)}"
+							update=":frmFicha020">
+							<h:outputText value="1. Proyecto, obra o actividad" class="menu-ficha" />
+						</p:commandLink></li>
+
+					<li><p:commandLink
+							action="#{fichaMineria020Controller.activeIndex(2)}"
+							update=":frmFicha020">
+							<h:outputText value="2. Actividad ecónomica"
+								class="menu-ficha" />
+						</p:commandLink></li>
+					<li><p:commandLink
+							action="#{fichaMineria020Controller.activeIndex(3)}"
+							update=":frmFicha020">
+							<h:outputText value="3. Ficha técnica"
+								class="menu-ficha" />
+						</p:commandLink></li>
+					<li><p:commandLink
+							action="#{fichaMineria020Controller.activeIndex(4)}"
+							update=":frmFicha020">
+							<h:outputText value="4. Antecedentes del proyecto"
+								class="menu-ficha" />
+						</p:commandLink></li>
+					<li><p:commandLink
+							action="#{fichaMineria020Controller.activeIndex(5)}"
+							update=":frmFicha020">
+							<h:outputText value="5. Resumen del proyecto"
+								class="menu-ficha" />
+						</p:commandLink></li>
+					<li><p:commandLink
+							action="#{fichaMineria020Controller.activeIndex(6)}"
+							update=":frmFicha020">
+							<h:outputText value="6. Descripción del proyecto "
+								class="menu-ficha" />
+						</p:commandLink></li>
+					<li><p:commandLink
+							action="#{fichaMineria020Controller.activeIndex(7)}"
+							update=":frmFicha020">
+							<h:outputText value="7. Requerimientos del proyecto "
+								class="menu-ficha" />
+						</p:commandLink></li>
+					<li><p:commandLink
+							action="#{fichaMineria020Controller.activeIndex(8)}"
+							update=":frmFicha020">
+							<h:outputText value="8. Área de influencia social directa e indirecta"
+								class="menu-ficha" />
+						</p:commandLink></li>
+					<li><p:commandLink
+							action="#{fichaMineria020Controller.activeIndex(9)}"
+							update=":frmFicha020">
+							<h:outputText value="9. Línea Base"
+								class="menu-ficha" />
+						</p:commandLink></li>
+					<li><p:commandLink
+							action="#{fichaMineria020Controller.activeIndex(10)}"
+							update=":frmFicha020">
+							<h:outputText value="10. Marco legal"
+								class="menu-ficha" />
+						</p:commandLink></li>
+					<li><p:commandLink
+							action="#{fichaMineria020Controller.activeIndex(11)}"
+							update=":frmFicha020">
+							<h:outputText value="11. Descripción de actividades e identificación de impactos ambientales"
+								class="menu-ficha" />
+						</p:commandLink></li>
+					<li><p:commandLink
+							action="#{fichaMineria020Controller.activeIndex(12)}"
+							update=":frmFicha020">
+							<h:outputText value="12. Plan de manejo ambiental"
+								class="menu-ficha" />
+						</p:commandLink></li>
+					<li><p:commandLink
+							action="#{fichaMineria020Controller.activeIndex(13)}"
+							update=":frmFicha020">
+							<h:outputText value="13. Cronograma valorado de actividades"
+								class="menu-ficha" />
+						</p:commandLink></li>
+					<li><p:commandLink
+							action="#{fichaMineria020Controller.activeIndex(14)}"
+							update=":frmFicha020">
+							<h:outputText value="14. Anexos"
+								class="menu-ficha" />
+						</p:commandLink></li>					
+				</ul>
+			</h:form>
+    </p:panel>
+	<div class="content">
+		<h:form id="frmFicha020">			
+				<p:panel header="1. PROYECTO, OBRA O ACTIVIDAD" rendered="#{fichaMineria020Controller.index==1}">
+					<h:outputText value="#{fichaMineria020Controller.proyecto.nombre}"/>
+					<f:facet name="footer">
+						<t:div styleClass="buttons main">
+							<p:commandButton value="Siguiente" update=":frmFicha020"
+								action="#{fichaMineria020Controller.activeIndex(2)}"
+								icon="ui-icon-arrowthick-1-e" />
+						</t:div>
+					</f:facet>
+				</p:panel>
+				
+				<p:panel header="2. ACTIVIDAD ECONÓMICA" rendered="#{fichaMineria020Controller.index==2}">
+					<h:outputText value="#{fichaMineria020Controller.proyecto.catalogoCategoria.descripcion}" 
+					rendered="#{!fichaMineria020Controller.esProyectoRcoa}" />
+					<h:outputText value="#{fichaMineria020Controller.actividadPrincipal.catalogoCIUU.nombre}" 
+					rendered="#{fichaMineria020Controller.esProyectoRcoa}" />
+					<f:facet name="footer">
+						<t:div styleClass="buttons main">
+							<p:commandButton value="Atrás"
+								action="#{fichaMineria020Controller.activeIndex(1)}"
+								update=":frmFicha020" icon="ui-icon-arrowthick-1-w" />
+							<p:commandButton value="Siguiente" update=":frmFicha020"
+								action="#{fichaMineria020Controller.activeIndex(3)}"
+								icon="ui-icon-arrowthick-1-e" />
+						</t:div>
+					</f:facet>
+				</p:panel>
+				
+				<p:panel id="idPanel3" header="3. FICHA TÉCNICA" rendered="#{fichaMineria020Controller.index==3}">
+					<p:panelGrid style="width: 100%;">
+						<p:row>
+							<p:column colspan="3" style="background-color: #c5e1e1;">
+								<h:outputText value="3.1 Datos de la Concesión" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Código del proyecto SUIA:" />
+							</p:column>
+							<p:column colspan="2">
+								<h:outputText
+									value="#{fichaMineria020Controller.proyecto.codigo}" rendered="#{!fichaMineria020Controller.esProyectoRcoa}" />
+
+								<h:outputText
+									value="#{fichaMineria020Controller.proyectoLicenciaCoa.codigoUnicoAmbiental}" rendered="#{fichaMineria020Controller.esProyectoRcoa}" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Superficie:" />
+							</p:column>
+							<p:column colspan="2">
+								<ui:repeat value="#{fichaMineria020Controller.superficie}" var="item">
+									<div>#{item}</div>
+								</ui:repeat>
+							</p:column>
+						</p:row>
+						<ui:remove>
+						<p:row>
+							<p:column>
+								<h:outputText value="Fecha de inicio de actividades:" />
+							</p:column>
+							<p:column colspan="2">
+								<h:outputText value="xx/xx/xxxx" />
+							</p:column>
+						</p:row>
+						</ui:remove>
+						<p:row>
+							<p:column colspan="3" style="background-color: #c5e1e1;">
+								<h:outputText value="3.2 Ubicación Geográfica" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Provincia:" />
+							</p:column>
+							<p:column colspan="2">
+								<h:outputText value="#{fichaMineria020Controller.provincia}" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Cantón:" />
+							</p:column>
+							<p:column colspan="2">
+								<h:outputText value="#{fichaMineria020Controller.canton}" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Parroquia:" />
+							</p:column>
+							<p:column colspan="2">
+								<h:outputText value="#{fichaMineria020Controller.parroquia}" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Tipo de zona" />
+							</p:column>
+							<p:column colspan="2">
+								<h:outputText rendered="#{!fichaMineria020Controller.esProyectoRcoa}"
+									value="#{fichaMineria020Controller.proyecto.tipoPoblacion.nombre}" />
+								<h:outputText rendered="#{fichaMineria020Controller.esProyectoRcoa}"
+									value="#{fichaMineria020Controller.proyectoLicenciaCoa.tipoPoblacion.nombre}" />
+							</p:column>
+						</p:row>
+
+						<p:row>
+							<p:column colspan="3">
+								<h:outputText value="Coordenadas Geográficas(WGS84)" />
+							</p:column>
+						</p:row>
+
+					</p:panelGrid>
+					<p:dataTable rowIndexVar="index"
+						value="#{fichaMineria020Controller.proyecto.formasProyectos}"
+						rendered="#{!fichaMineria020Controller.esProyectoRcoa}"
+						var="item" emptyMessage="#{labels['common.table.empty']}">
+						<p:subTable value="#{item.coordenadas}" var="coordenada">
+
+							<f:facet name="header">
+								<h:outputText
+									value="Grupo de coordenadas #{index + 1} (#{item.tipoForma})" />
+							</f:facet>
+							<p:columnGroup type="header">
+								<p:row>
+									<p:column headerText="Shape"
+										styleClass="alCenter table-column-header" />
+									<p:column headerText="X"
+										styleClass="alCenter table-column-header" />
+									<p:column headerText="Y"
+										styleClass="alCenter table-column-header" />
+								</p:row>
+							</p:columnGroup>
+							<p:column headerText="Shape" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.orden}" />
+							</p:column>
+							<p:column headerText="X" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.x}" />
+							</p:column>
+							<p:column headerText="Y" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.y}" />
+							</p:column>
+						</p:subTable>
+					</p:dataTable>
+
+					<p:dataTable rowIndexVar="index" value="#{fichaMineria020Controller.coordenadasImplantacion}" var="item" 
+					rendered="#{fichaMineria020Controller.esProyectoRcoa}"
+					emptyMessage="#{labels['common.table.empty']}">
+						<p:subTable value="#{item.coordenadas}" var="coordenada">
+							<p:columnGroup type="header">
+								<p:row>
+									<p:column headerText="Grupo de coordenadas #{index + 1} (#{item.tipoForma})" styleClass="alCenter w100 table-column-header" colspan="3" />
+								</p:row>
+								<p:row>
+									<p:column headerText="Shape" styleClass="alCenter table-column-header" />
+									<p:column headerText="X" styleClass="alCenter table-column-header" />
+									<p:column headerText="Y" styleClass="alCenter table-column-header" />
+								</p:row>
+							</p:columnGroup>
+							<p:column headerText="Shape" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.ordenCoordenada}" />
+							</p:column>
+							<p:column headerText="X" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.x.intValue()}" />
+							</p:column>
+							<p:column headerText="Y" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.y.intValue()}" />
+							</p:column>
+						</p:subTable>
+					</p:dataTable>
+
+					<p:panel>
+						<h:outputText value="Coordenadas Geográficas(PSAD 56) Derecho Minero" />
+						<p:dataTable rowIndexVar="index" id="tableCoordenadas"
+							value="#{fichaMineria020Controller.listaCoordenadas}" var="item"
+							emptyMessage="#{labels['common.table.empty']}">
+
+							<p:column headerText="Shape" styleClass="alCenter w15">
+								<h:outputText value="#{index + 1}" />
+							</p:column>
+							<p:column headerText="X" styleClass="alCenter w15">
+								<h:outputText value="#{item.x}" />
+							</p:column>
+							<p:column headerText="Y" styleClass="alCenter w15">
+								<h:outputText value="#{item.y}" />
+							</p:column>							
+						</p:dataTable>
+					</p:panel>
+					<p:panelGrid style="width: 100%;" id="panelGridMineria">
+						<p:row>
+							<p:column colspan="3" style="background-color: #c5e1e1;">
+								<h:outputText value="3.3 Datos del Titular Minero" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Titular Minero:" />
+							</p:column>
+							<p:column colspan="2">
+								<h:outputText value="#{fichaMineria020Controller.titular}" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Representante Legal:" />
+							</p:column>
+							<p:column colspan="2">
+								<h:outputText value="#{fichaMineria020Controller.representanteLegal}"/>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Domicilio: " />
+							</p:column>
+							<p:column colspan="2">
+								<h:outputText value="#{fichaMineria020Controller.direccion}" />
+							</p:column>
+						</p:row>
+						<ui:remove>
+						<p:row>
+							<p:column>
+								<h:outputText value="Casillero Judicial: " />
+							</p:column>
+							<p:column colspan="2">
+								<h:outputText value="xxxxxxxxx" />
+							</p:column>
+						</p:row>
+						</ui:remove>
+						<p:row>
+							<p:column>
+								<h:outputText value="Correo electrónico: " />
+							</p:column>
+							<p:column colspan="2">
+								<h:outputText value="#{fichaMineria020Controller.email}" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Teléfono convencional: " />
+							</p:column>
+							<p:column colspan="2">
+								<h:outputText value="#{fichaMineria020Controller.telefono}" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Teléfono celular: " />
+							</p:column>
+							<p:column colspan="2">
+								<h:outputText value="#{fichaMineria020Controller.cell}" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column colspan="3" style="background-color: #c5e1e1;">
+								<h:outputText value="3.4 Datos del Consultor calificado por el MAE " />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Nombre del consultor o compañía consultora:" />
+							</p:column>
+							<p:column colspan="2">
+								<h:outputText value="#{fichaMineria020Controller.consultor.nombre}" />								
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Número de registro de calificación del consultor:" />
+							</p:column>
+							<p:column colspan="2">
+								<h:outputText value="#{fichaMineria020Controller.consultor.registro}" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Correo electrónico:" />
+							</p:column>
+							<p:column colspan="2">
+								<h:outputText value="#{fichaMineria020Controller.consultor.email}" />
+							</p:column>
+						</p:row>	
+						<p:row>
+							<p:column>
+								<h:outputText value="Teléfono:" />
+							</p:column>
+							<p:column colspan="2">
+								<h:outputText value="#{fichaMineria020Controller.consultor.telefono}" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column colspan="3">
+								<h:outputText value="Equipo Multidisciplinario  " />
+							</p:column>
+						</p:row>	
+						<p:row>
+							<p:column colspan="3">
+								<p:dataTable rowIndexVar="index" id="tableEquipoMultidisciplinario"
+									value="#{fichaMineria020Controller.listaEquipoMultidis}"
+									var="item" emptyMessage="#{labels['common.table.empty']}">
+									
+									<p:column headerText="N°" styleClass="alCenter w15">
+										<h:outputText value="#{index + 1}" />
+									</p:column>
+									<p:column headerText="Nombre" styleClass="alCenter w15">
+										<h:outputText value="#{item.name}" />
+									</p:column>
+									<p:column headerText="Formación Profesional" styleClass="alCenter w15">
+										<h:outputText value="#{item.vocationalTraining}" />
+									</p:column>
+									<p:column headerText="Componente (biótico, social, ambiental, cartográfico, entre otros)" styleClass="alCenter w15">
+										<h:outputText value="#{item.component}" />
+									</p:column>																							
+								</p:dataTable>
+							</p:column>
+						</p:row>	
+					</p:panelGrid>
+					<p:separator></p:separator>
+					<f:facet name="footer">
+						<t:div styleClass="buttons main">
+							<p:commandButton value="Atrás"
+								action="#{fichaMineria020Controller.activeIndex(2)}"
+								update=":frmFicha020" icon="ui-icon-arrowthick-1-w"/>							
+							<p:commandButton value="Siguiente" update=":frmFicha020"
+								action="#{fichaMineria020Controller.activeIndex(4)}"
+								icon="ui-icon-arrowthick-1-e" />
+						</t:div>
+
+					</f:facet>
+				</p:panel>
+				<p:panel header="4. ANTECEDENTES DEL PROYECTO" rendered="#{fichaMineria020Controller.index==4}">
+					<p:panelGrid style="width: 100%;">
+						<p:row>
+							<p:column style="width: 25%;">
+								<h:outputText
+									value="Permiso de ejecución del proyecto (título minero)" />
+							</p:column>
+							<p:column>
+								<p:inputTextarea style="width: 100%;"
+									value="#{fichaMineria020Controller.perforacionExplorativa.projectExecutionPermit}"
+									rows="5" autoResize="false" disabled="true"/>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Certificado de Intersección" />
+							</p:column>
+							<p:column>
+								<p:inputTextarea style="width: 100%;" readonly="true"
+									value="#{fichaMineria020Controller.perforacionExplorativa.intersectionCertificate}"
+									rows="5" autoResize="false" disabled="true"/>
+
+							</p:column>
+						</p:row>
+						<p:row rendered="#{fichaMineria020Controller.viabilidad == true}">
+							<p:column>
+								<h:outputText
+									value="Certificado de Viabilidad emitido por la Dirección Nacional Forestal (en caso de intersección)" />
+							</p:column>
+							<p:column>
+								<p:panelGrid styleClass="w100alCenter">
+									<p:outputLabel
+										value="Descargue su Certificado de Viabilidad   "
+										styleClass="bold" />
+									<p:commandButton value="Descargar" ajax="false"
+										icon="ui-icon-arrowthick-1-s"
+										onclick="$('.oculto').removeAttr('style');"
+										styleClass="primary" disabled="">
+
+									</p:commandButton>
+								</p:panelGrid>
+								<p:inputTextarea style="width: 100%;"
+									value="#{fichaMineria020Controller.perforacionExplorativa.feasibilityCertificate}"
+									rows="5" autoResize="false" />
+							</p:column>
+						</p:row>
+						<p:row rendered="#{fichaMineria020Controller.viabilidad == true}">
+							<p:column>
+								<h:outputText
+									value="Permisos Ambientales anteriores (en caso de haber obtenido registros anteriores)" />
+							</p:column>
+							<p:column>
+								<h:panelGrid columns="2" layout="grid"
+									rendered="#{fichaAmbientalGeneralFinalizarControllerV2.showLinkSurvey()}">
+									<p>Descargar Ficha Ambiental</p>
+
+									<p:commandButton value="Descargar" ajax="false"
+										icon="ui-icon-arrowthick-1-s" styleClass="primary" />
+
+									<p>Descargar Resolución</p>
+
+									<p:commandButton value="Descargar" ajax="false"
+										styleClass="primary" icon="ui-icon-arrowthick-1-s" />
+								</h:panelGrid>
+
+							</p:column>
+						</p:row>
+					</p:panelGrid>
+					<p:separator></p:separator>
+
+					<f:facet name="footer">
+						<t:div styleClass="buttons main">
+							<p:commandButton value="Atrás"
+								action="#{fichaMineria020Controller.activeIndex(3)}"
+								update=":frmFicha020" icon="ui-icon-arrowthick-1-w"/>							
+							<p:commandButton value="Siguiente" update=":frmFicha020"
+								action="#{fichaMineria020Controller.activeIndex(5)}"
+								icon="ui-icon-arrowthick-1-e" />
+						</t:div>
+					</f:facet>
+
+				</p:panel>			
+				
+				<p:panel header="5. RESUMEN DEL PROYECTO" rendered="#{fichaMineria020Controller.index==5}">
+					<p:inputTextarea style="width: 100%;" value="#{fichaMineria020Controller.perforacionExplorativa.projectSummary}" rows="5" autoResize="false" disabled="true"/>
+					<p:separator></p:separator>
+					<f:facet name="footer">
+						<t:div styleClass="buttons main">
+							<p:commandButton value="Atrás"
+								action="#{fichaMineria020Controller.activeIndex(4)}"
+								update=":frmFicha020" icon="ui-icon-arrowthick-1-w"/>							
+							<p:commandButton value="Siguiente" update=":frmFicha020"
+								action="#{fichaMineria020Controller.activeIndex(6)}"
+								icon="ui-icon-arrowthick-1-e" />
+						</t:div>
+					</f:facet>
+				</p:panel>
+				<p:panel header="6. DESCRIPCIÓN DEL PROYECTO"
+					rendered="#{fichaMineria020Controller.index==6}">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						columnClasses="w50, field_mrg w50">
+					<p>
+						<h:outputText
+							value="1. Describir la totalidad de actividades a desarrollarse dentro del proyecto incluyendo los recursos a ser utilizados y las áreas a ser intervenidas." />
+					</p>
+					<p>
+						<control:imputConTextoEnriquecido soloLectura="true"
+							valor="#{fichaMineria020Controller.perforacionExplorativa.intervenedAreas}"/>
+					</p>
+
+					<p>
+						<h:outputText
+							value="2. Describir las técnicas de exploración a emplearse, indicando las herramientas requeridas para su desarrollo, el número, ubicación y dimensiones de cada una de las plataformas." />
+					</p>
+					<p>
+						<control:imputConTextoEnriquecido soloLectura="true"
+							valor="#{fichaMineria020Controller.perforacionExplorativa.explorationTechniques}"/>
+					</p>
+
+					<p>
+						<h:outputText
+							value="3. Detallar las actividades que se desarrollarán durante las etapas de cierre de proyecto, sea este progresivo o las que sean aplicables al cese definitivo de la actividad y rehabilitación de áreas intervenidas. " />
+					</p>
+					<p>
+						<control:imputConTextoEnriquecido soloLectura="true"
+							valor="#{fichaMineria020Controller.perforacionExplorativa.projectClosureStages}"/>
+					</p>
+
+					<p>
+						<h:outputText
+							value="4. En relación a la infraestructura y actividades complementarias de la actividad (temporales), describir lo siguiente:" />
+					</p>
+					<p>
+						<control:imputConTextoEnriquecido soloLectura="true"
+							valor="#{fichaMineria020Controller.perforacionExplorativa.infrastructureComplementaryActivities}"/>
+					</p>
+					<h:outputText
+								value="Accesos y/o trochas hacia los sitios de desarrollo de las actividades, indicando sus dimensiones, características, los usos potenciales. (su ancho normal será de hasta 1,5 metros de acuerdo al artículo 87 del RAAM). " />
+					
+							<p>
+								<control:imputConTextoEnriquecido soloLectura="true"
+									valor="#{fichaMineria020Controller.perforacionExplorativa.accessesTrails}"/>
+							</p>
+					<h:outputText
+								value="Áreas a ser desbrozadas para realizar las actividades mineras, implantación de infraestructura temporal. " />
+					
+							<p>
+								<control:imputConTextoEnriquecido soloLectura="true"
+									valor="#{fichaMineria020Controller.perforacionExplorativa.temporaryInfrastructureImplementation}"/>
+							</p>
+							<h:outputText
+								value="Características constructivas y dimensiones de campamentos temporales, pozos sépticos, piscinas de tratamiento de lodos de perforación, áreas de depósito de testigos, capa orgánica, plataformas, entre otros. " />
+						
+							<p>
+								<control:imputConTextoEnriquecido soloLectura="true"
+									valor="#{fichaMineria020Controller.perforacionExplorativa.temporaryCamps}"/>
+							</p>
+							<h:outputText
+								value="Incluir información sobre la maquinaria, equipos, materiales que se utilizarán en el desarrollo del proyecto; así como las cantidades, características y uso." />
+						
+							<p>
+								<p:dataTable id="tblMaquinaria"
+									value="#{fichaMineria020Controller.listaMaquinariaEquipos}"
+									var="item" emptyMessage="#{labels['common.table.empty']}">
+									<f:facet name="header">
+										<h:outputText value="Maquinaria, equipos y materiales" />										
+									</f:facet>
+									<p:column
+										headerText="Denominación de la maquinaria, equipos y materiales"
+										styleClass="alCenter w15">
+										<h:outputText value="#{item.name}" />
+									</p:column>
+									<p:column headerText="Cantidad(unidades)"
+										styleClass="alCenter w15">
+										<h:outputText value="#{item.unit}" />
+									</p:column>
+									<p:column headerText="Características"
+										styleClass="alCenter w15">
+										<h:outputText value="#{item.characteristics}" />
+									</p:column>
+									<p:column headerText="Uso / Proceso" styleClass="alCenter w15">
+										<h:outputText value="#{item.process}" />
+									</p:column>
+								</p:dataTable>
+							</p>
+							<h:outputText
+								value="Indicar las fuentes de abastecimiento de agua, energía eléctrica, combustibles, sustancias químicos y aditivos, etc. Además, se registrar en tablas su identificación, cantidad y uso. " />
+						
+							<p>
+								<p:dataTable id="tblInsumos"
+									value="#{fichaMineria020Controller.listaMaterialInsumo}"
+									var="item" emptyMessage="#{labels['common.table.empty']}">
+									<f:facet name="header">
+										<h:outputText value="Materiales / Insumos" />										
+									</f:facet>
+
+									<p:column
+										headerText="Material (combustibles, insumos, productos químicos)"
+										styleClass="alCenter w15">
+										<h:outputText
+											value="#{item.sustanciaQuimicaPeligrosa.descripcion}" />
+									</p:column>
+									<p:column headerText="Cantidad(unidades)"
+										styleClass="alCenter w15">
+										<h:outputText value="#{item.value} #{item.unit}" />
+									</p:column>
+									<p:column headerText="Proceso en el que es empleado"
+										styleClass="alCenter w15">
+										<h:outputText value="#{item.process}" />
+									</p:column>
+									<p:column headerText="No. CAS /ONU" styleClass="alCenter w15">
+										<h:outputText value="#{item.casonu}" />
+									</p:column>									
+								</p:dataTable>
+							</p>
+					
+
+					<p>
+						<h:outputText
+							value="5. Indicar el manejo de residuos peligrosos y no peligrosos, registrar el tipo de residuos generados, cantidades, manejo y disposición final de los mismos." />
+					</p>
+					<p>
+						<p:dataTable id="tblDesechosNoPeligrosos"
+							value="#{fichaMineria020Controller.listadesechonopeligrosos}"
+							var="item" emptyMessage="#{labels['common.table.empty']}">
+							<f:facet name="header">
+								<h:outputText
+									value="Registro de generación de residuos y desechos no peligrosos" />								
+							</f:facet>
+
+							<p:column
+								headerText="Tipo de residuo/ desecho (Orgánico, Papel, Cartón, Plástico, Vidrio, etc.)"
+								styleClass="alCenter w15">
+								<h:outputText value="#{item.wasteType}" />
+							</p:column>
+							<p:column
+								headerText="Cantidad Generada aproximada /Mes (kg, ton, etc.)"
+								styleClass="alCenter w15">
+								<h:outputText value="#{item.value} #{item.unit}" />
+							</p:column>
+							<p:column headerText="Reducción, tratamiento"
+								styleClass="alCenter w15">
+								<h:outputText value="#{item.treatment}" />
+							</p:column>
+							<p:column headerText="Disposición Final"
+								styleClass="alCenter w15">
+								<h:outputText value="#{item.finalArrangement}" />
+							</p:column>							
+						</p:dataTable>
+					</p>
+					<p>
+						<p:dataTable id="listadesechopeligrosos"
+							value="#{fichaMineria020Controller.listadesechopeligrosos}"
+							var="item" emptyMessage="#{labels['common.table.empty']}">
+							<f:facet name="header">
+								<h:outputText
+									value="Registro de generación de desechos y residuos peligrosos y/o especiales" />								
+							</f:facet>
+
+							<p:column headerText="Tipo de Desecho" styleClass="alCenter w15">
+								<h:outputText value="#{item.wasteType}" />
+							</p:column>
+							<p:column headerText="Código (AM NO. 142 o el que lo reemplace)"
+								styleClass="alCenter w15">
+								<h:outputText value="#{item.code}" />
+							</p:column>
+							<p:column headerText="CRTIB" styleClass="alCenter w15">
+								<h:outputText value="#{item.crtib}" />
+							</p:column>
+							<p:commandButton value="Guardar" update=":frmFicha020"
+								action="#{componenteSocialSDController.guardarDatos()}"
+								icon="ui-icon-disk" styleClass="primary" />
+							<p:column headerText="Cantidad Generada aproximada /Mes"
+								styleClass="alCenter w15">
+								<h:outputText value="#{item.value} #{item.unit}" />
+							</p:column>
+							<p:column headerText="Proceso o unidad operativa"
+								styleClass="alCenter w15">
+								<h:outputText value="#{item.process}" />
+							</p:column>
+							<p:column headerText="Tipo de Eliminación o Disposición final"
+								styleClass="alCenter w15">
+								<h:outputText value="#{item.finalArrangement}" />
+							</p:column>							
+						</p:dataTable>
+
+					</p>
+					<p>
+						<h:outputText
+							value="6. Detallar el requerimiento de mano de obra calificada y no calificada, a quienes se contrata en lo local, cuántas personas, en qué funciones, y especificar los servicios complementarios, como alojamiento-campamentos, alimentación, etc." />
+					</p>
+					<p>
+						<control:imputConTextoEnriquecido soloLectura="true"
+							valor="#{fichaMineria020Controller.perforacionExplorativa.qualifiedHandWork}"/>
+					</p>
+
+					<p>
+						<h:outputText
+							value="7. Incluir un diagrama de flujo en base a las cantidades de uso de agua en las actividades del proyecto. El diagrama de flujo deberá contener los caudales de entrada, pérdidas, salida y recirculación. Cuando exista un proceso de recirculación, especificar la cantidad efectiva a recircular." />
+					</p>
+					<p>
+						<control:imputConTextoEnriquecido soloLectura="true"
+							valor="#{fichaMineria020Controller.perforacionExplorativa.baseFlowDiagram}"/>
+					</p>
+					</p:panelGrid>
+					<p:separator></p:separator>
+					<f:facet name="footer">
+						<t:div styleClass="buttons main">
+							<p:commandButton value="Atrás"
+								action="#{fichaMineria020Controller.activeIndex(5)}"
+								update=":frmFicha020" icon="ui-icon-arrowthick-1-w" />							
+							<p:commandButton value="Siguiente" update=":frmFicha020"
+								action="#{fichaMineria020Controller.activeIndex(7)}"
+								icon="ui-icon-arrowthick-1-e" />
+						</t:div>
+					</f:facet>
+				</p:panel>
+				<p:panel header="7. REQUERIMIENTOS DEL PROYECTO" rendered="#{fichaMineria020Controller.index==7}">
+					<p:panelGrid style="width: 100%;">
+						<p:row>
+							<p:column>
+								<h:outputText value="Agua de Consumo Humano:"/>
+							</p:column>
+							<p:column>
+								<p:selectOneRadio value="#{fichaMineria020Controller.perforacionExplorativa.waterHumanConsumption}" disabled="true">
+									<f:selectItem itemLabel="SI" itemValue="true" />
+									<f:selectItem itemLabel="NO" itemValue="false" />
+									<p:ajax update="waterHumanConsumption" event="change" listener="#{fichaMineria020Controller.resetValue('waterHumanConsumption')}"/>									
+								</p:selectOneRadio>
+							</p:column>
+							<p:column>
+								<h:outputText value="Consumo de agua (l/s): "/>
+							</p:column>
+							<p:column>
+								<p:inputText id="waterHumanConsumption" value="#{fichaMineria020Controller.perforacionExplorativa.waterConsumption}" maxlength="10" 
+								disabled="true">
+									<pe:keyFilter regEx="/[\d\.]/"/>
+								</p:inputText>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Agua para perforación:" />
+							</p:column>
+							<p:column>
+								<p:selectOneRadio value="#{fichaMineria020Controller.perforacionExplorativa.waterDrilling}" disabled="true">
+									<f:selectItem itemLabel="SI" itemValue="true" />
+									<f:selectItem itemLabel="NO" itemValue="false" />
+									<p:ajax update="waterDrilling" event="change" listener="#{fichaMineria020Controller.resetValue('waterDrilling')}"/>
+								</p:selectOneRadio>
+							</p:column>
+							<p:column>
+								<h:outputText value="Consumo de agua para perforación(l/s):"/>
+							</p:column>
+							<p:column>
+								<p:inputText id="waterDrilling" value="#{fichaMineria020Controller.perforacionExplorativa.waterConsumptionDrilling}" maxlength="10"
+								disabled="true">
+									<pe:keyFilter regEx="/[\d\.]/" />
+								</p:inputText>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Energía Eléctrica:"/>
+							</p:column>
+							<p:column>
+								<p:selectOneRadio value="#{fichaMineria020Controller.perforacionExplorativa.electricPower}" disabled="true">
+									<f:selectItem itemLabel="SI" itemValue="true" />
+									<f:selectItem itemLabel="NO" itemValue="false" />
+									<p:ajax update="electricPower" event="change" listener="#{fichaMineria020Controller.resetValue('electricPower')}"/>
+								</p:selectOneRadio>
+							</p:column>
+							<p:column>
+								<h:outputText value="Consumo de energía eléctrica (kW):"/>
+							</p:column>
+							<p:column>
+								<p:inputText id="electricPower" value="#{fichaMineria020Controller.perforacionExplorativa.electricPowerConsumption}" maxlength="10"
+								disabled="true">
+									<pe:keyFilter regEx="/[\d\.]/" />
+								</p:inputText>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Consumo combustible:"/>
+							</p:column>
+							<p:column>
+								<p:selectOneRadio value="#{fichaMineria020Controller.perforacionExplorativa.fuelConsumption}" disabled="true">
+									<f:selectItem itemLabel="SI" itemValue="true" />
+									<f:selectItem itemLabel="NO" itemValue="false" />
+									<p:ajax update="fuelConsumption" event="change" listener="#{fichaMineria020Controller.resetValue('fuelConsumption')}"/>
+								</p:selectOneRadio>
+							</p:column>
+							<p:column>
+								<h:outputText value="Consumo y tipo de combustible:"/>
+							</p:column>
+							<p:column>
+								<p:inputText id="fuelConsumption" value="#{fichaMineria020Controller.perforacionExplorativa.fuelTypeConsumption}" maxlength="50"
+								disabled="true"/>
+							</p:column>
+						</p:row>
+					</p:panelGrid>
+					<p:separator></p:separator>
+					<f:facet name="footer">
+						<t:div styleClass="buttons main">
+							<p:commandButton value="Atrás"
+								action="#{fichaMineria020Controller.activeIndex(6)}"
+								update=":frmFicha020" icon="ui-icon-arrowthick-1-w"/>							
+							<p:commandButton value="Siguiente" update=":frmFicha020"
+								action="#{fichaMineria020Controller.activeIndex(8)}"
+								icon="ui-icon-arrowthick-1-e" />
+						</t:div>
+					</f:facet>
+				</p:panel>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						columnClasses="w50, field_mrg w50" rendered="#{fichaMineria020Controller.index==8}">
+						<f:facet name="header">
+							<mae:panelGridHeaderHelp value="8. AREA DE INFLUENCIA SOCIAL DIRECTA E INDIRECTA"
+								conector="generalHelp"
+								help="#{helps['registroMineria.areainfluecia.social']}" />
+						</f:facet>
+				
+					<p><h:outputText value="Área de influencia Directa Física"/></p>
+					<p><control:imputConTextoEnriquecido valor="#{fichaMineria020Controller.perforacionExplorativa.directPhysicalinfluence}" soloLectura="true"/></p>
+					
+					<p><h:outputText value="Área de influencia Directa Biótica"/></p>
+					<p><control:imputConTextoEnriquecido valor="#{fichaMineria020Controller.perforacionExplorativa.directBioticInfluence}" soloLectura="true"/></p>
+					
+					<p><h:outputText value="Área de influencia Directa Social"/></p>
+					<p><control:imputConTextoEnriquecido valor="#{fichaMineria020Controller.perforacionExplorativa.directSocialInfluence}" soloLectura="true"/></p>
+					
+					<p><h:outputText value="Área de influencia Indirecta Social"/></p>
+					<p><control:imputConTextoEnriquecido valor="#{fichaMineria020Controller.perforacionExplorativa.indirectSocialInfluence}" soloLectura="true"/></p>
+					
+				</p:panelGrid>
+				<p:panel rendered="#{fichaMineria020Controller.index==8}">
+					<f:facet name="footer">
+						<t:div styleClass="buttons main">
+							<p:commandButton value="Atrás"
+								action="#{fichaMineria020Controller.activeIndex(7)}"
+								update=":frmFicha020" icon="ui-icon-arrowthick-1-w"/>
+							<p:commandButton value="Siguiente" update=":frmFicha020"
+								action="#{fichaMineria020Controller.activeIndex(9)}"
+								icon="ui-icon-arrowthick-1-e" />
+						</t:div>
+					</f:facet>
+				</p:panel>
+				<p:panel header="9. LINEA BASE" rendered="#{fichaMineria020Controller.index==9}">
+					<p:outputPanel>					
+						<p:panel>
+						<f:facet name="header">
+						<mae:panelGridHeaderHelp value="COMPONENTE BIÓTICO"
+												 conector="areaInfluencia"
+												 help="#{componenteBioticoSDController.mensajeBiotico}" />
+					</f:facet>
+						
+							<p:panelGrid columns="1" layout="grid" styleClass="w100"
+								columnClasses="w100, field_mrg w100">
+								<f:facet name="header">
+									<p:outputLabel value="Cobertura Vegetal *" />
+								</f:facet>
+								<p:dataTable var="cobertura"
+									value="#{componenteBioticoSDController.coberturaVegetalPadreList}">
+									<p:columnGroup type="header">
+										<p:row>
+											<p:column headerText="" />
+											<p:column headerText="Marcar" />
+										</p:row>
+									</p:columnGroup>
+									<p:subTable var="coberturaHija"
+										value="#{cobertura.catalogoGeneralBioticoList}">
+										<f:facet name="header">
+											<h:outputText id="itemDescripcion" style="width:25px;text-align:center"
+												value="#{cobertura.descripcion}" />
+										</f:facet>
+										<p:column style="width:25px;text-align:center">
+											<p:outputLabel value="#{coberturaHija.descripcion}"></p:outputLabel>
+										</p:column>
+										<p:column style="width:25px;text-align:center">
+											<p:selectBooleanCheckbox
+												value="#{coberturaHija.seleccionado}" disabled="true">
+											</p:selectBooleanCheckbox>
+										</p:column>
+									</p:subTable>
+								</p:dataTable>
+							</p:panelGrid>
+							<p:panelGrid columns="1" layout="grid" styleClass="w100"
+								columnClasses="w100, field_mrg w100">
+								<f:facet name="header">
+									<p:outputLabel value="Pisos Zoogeográficos *" />
+								</f:facet>
+								<p:dataTable var="piso"
+									value="#{componenteBioticoSDController.pisosZooGeograficosList}"
+									rowIndexVar="index">
+									<p:column headerText="No." style="width:5px;">
+										<p:outputLabel value="#{index + 1}"></p:outputLabel>
+									</p:column>
+									<p:column headerText="Pisos Zoogeográficos">
+										<p:outputLabel value="#{piso.descripcion}"></p:outputLabel>
+									</p:column>
+									<p:column headerText="Simbología">
+										<p:outputLabel value="#{piso.ayuda}"></p:outputLabel>
+									</p:column>
+									<p:column style="width:35px;text-align:center"
+										headerText="Marcar">
+										<p:selectBooleanCheckbox value="#{piso.seleccionado}" disabled="true">
+										</p:selectBooleanCheckbox>
+									</p:column>
+								</p:dataTable>
+							</p:panelGrid>
+							<p:panelGrid columns="1" layout="grid" styleClass="w100"
+								columnClasses="w100, field_mrg w100">
+								<f:facet name="header">
+									<p:outputLabel value="Componente biótico nativo *" />
+								</f:facet>
+								<p:dataTable var="nativo" rowIndexVar="rowIndex"
+									value="#{componenteBioticoSDController.componenteBioticoNativoList}">
+									<p:column headerText="No." style="width:5px;">
+										<p:outputLabel value="#{rowIndex + 1}"></p:outputLabel>
+									</p:column>
+									<p:column headerText="Componentes Bióticos nativos">
+										<p:outputLabel value="#{nativo.descripcion}"></p:outputLabel>
+									</p:column>
+									<p:column style="width:35px;text-align:center"
+										headerText="Marcar">
+										<p:selectBooleanCheckbox value="#{nativo.seleccionado}" disabled="true">
+										</p:selectBooleanCheckbox>
+									</p:column>
+								</p:dataTable>
+							</p:panelGrid>
+							<p:panelGrid columns="1" layout="grid" styleClass="w100"
+								columnClasses="w100, field_mrg w100">
+								<f:facet name="header">
+									<p:outputLabel value="Componente biótico introducido *" />
+								</f:facet>
+								<p:dataTable var="introducido" rowIndexVar="index"
+									value="#{componenteBioticoSDController.componenteBioticoIntroducidoList}">
+									<p:column headerText="No." style="width:5px;">
+										<p:outputLabel value="#{index + 1}"></p:outputLabel>
+									</p:column>
+									<p:column headerText="Componentes Bióticos introducidos">
+										<p:outputLabel value="#{introducido.descripcion}"></p:outputLabel>
+									</p:column>
+									<p:column style="width:35px;text-align:center"
+										headerText="Marcar">
+										<p:selectBooleanCheckbox value="#{introducido.seleccionado}" disabled="true">
+										</p:selectBooleanCheckbox>
+									</p:column>
+								</p:dataTable>
+							</p:panelGrid>
+							<p:panelGrid columns="1" layout="grid" styleClass="w100"
+								columnClasses="w100, field_mrg w100">
+								<f:facet name="header">
+									<p:outputLabel value="Aspectos ecológicos *" />
+								</f:facet>
+								<p:dataTable var="aspecto" rowIndexVar="index"
+									value="#{componenteBioticoSDController.aspectosEcologicosList}">
+									<p:column headerText="No." style="width:5px;">
+										<p:outputLabel value="#{index + 1}"></p:outputLabel>
+									</p:column>
+									<p:column headerText="Aspectos ecológicos">
+										<p:outputLabel value="#{aspecto.descripcion}"></p:outputLabel>
+									</p:column>
+									<p:column style="width:35px;text-align:center"
+										headerText="Marcar">
+										<p:selectBooleanCheckbox value="#{aspecto.seleccionado}" disabled="true">
+										</p:selectBooleanCheckbox>
+									</p:column>
+								</p:dataTable>
+							</p:panelGrid>
+							<p:panelGrid columns="1" layout="grid" styleClass="w100"
+								columnClasses="w100, field_mrg w100">
+								<f:facet name="header">
+									<p:outputLabel value="Áreas Sensibles *" />
+								</f:facet>
+								<p:dataTable var="area" rowIndexVar="index"
+									value="#{componenteBioticoSDController.areasSensiblesList}">
+									<p:column headerText="No." style="width:5px;">
+										<p:outputLabel value="#{index + 1}"></p:outputLabel>
+									</p:column>
+									<p:column headerText="Áreas Sensibles">
+										<p:outputLabel value="#{area.descripcion}"></p:outputLabel>
+									</p:column>
+									<p:column style="width:35px;text-align:center"
+										headerText="Marcar">
+										<p:selectBooleanCheckbox value="#{area.seleccionado}" disabled="true">
+										</p:selectBooleanCheckbox>
+									</p:column>
+								</p:dataTable>
+							</p:panelGrid>
+							
+						</p:panel>
+					</p:outputPanel>
+					
+					<p:outputPanel>
+						<p:panel header="COMPONENTE FÍSICO">
+							<p:panelGrid columns="3" layout="grid" styleClass="w100" columnClasses="w100, field_mrg w100">
+								<f:facet name="header">
+									<p:outputLabel value="Clima *" />
+								</f:facet>
+								
+								<h:panelGrid columns="3" cellpadding="5" styleClass="w100" columnClasses="field_mrg w40, field_mrg w35, w25">
+								<p:outputLabel value="Precipitación Anual:" for="precipitacion" />
+								<p:inputText id="precipitacion" maxlength="4" required="true" requiredMessage="El campo Precipitación Anual es obligatorio."
+									value="#{componenteFisicoController.componenteFisico.precipitacionAnual}" disabled="true">
+								<pe:keyFilter regEx="/[0-9_]/i" />
+								</p:inputText>								
+								<p:outputLabel value="mm"/>
+								
+								<p:outputLabel value="Temperatura media anual:"
+									for="temperatura" />
+								<p:inputText id="temperatura" maxlength="2" required="true" requiredMessage="El campo Temperatura media anual es obligatorio"
+									value="#{componenteFisicoController.componenteFisico.temperaturaMediaAnual}" disabled="true">
+									<pe:keyFilter regEx="/[0-9_]/i" />
+									</p:inputText>
+									<h:outputLabel value="°C" />
+								</h:panelGrid>
+							</p:panelGrid>
+
+							<p:panelGrid columns="3" layout="grid" styleClass="w100"
+								columnClasses="w100, field_mrg w100">
+								<f:facet name="header">
+									<p:outputLabel value="Altitud *" />
+								</f:facet>
+								
+								<h:panelGrid columns="3" cellpadding="5" styleClass="w100" columnClasses="null, field_mrg null, null">
+								
+								<p:outputLabel value="Altitud" for="altitud" />
+								<p:inputText id="altitud" maxlength="4" value="#{componenteFisicoController.componenteFisico.altitud}"
+									required="true" requiredMessage="El campo Altitud es obligatorio" disabled="true">
+								<pe:keyFilter regEx="/[0-9_]/i" />
+								</p:inputText>
+								<h:outputLabel value="msnm" />
+							</h:panelGrid>
+								
+							</p:panelGrid>
+							<p:panelGrid columns="1" layout="grid" styleClass="w100"
+								columnClasses="w100, field_mrg w100">
+								<f:facet name="header">
+									<mae:panelGridHeaderHelp value="Componente Hídrico *"
+										conector="generalHelp"
+										help="Colocar los nombres de los ríos, quebradas y otro cuerpo hídrico existente en el 
+                                                     proyecto o concesión minera, sustentado en el mapa hidrológico que se adjunte en 
+                                                     formato pdf en los anexos." />
+								</f:facet>
+								<p:outputLabel value="Componente hídrico:" for="componenteHidrico" />
+
+								<control:imputConTextoEnriquecido
+									valor="#{componenteFisicoController.componenteFisico.componenteHidrico}"
+									soloLectura="true" requerido="true"
+									requiredMessage="El campo componente hídrico es requerido" id="componenteHidrico" />
+
+							</p:panelGrid>
+							<p:panelGrid columns="1" layout="grid" styleClass="w100"
+								columnClasses="w100, field_mrg w100">
+								<f:facet name="header">
+									<mae:panelGridHeaderHelp value="Geomorfología *"
+										conector="generalHelp"
+										help="Se refiere al ángulo de inclinación de las vertientes, 
+                                                     con respecto a la horizontal. Está expresado en porcentaje" />
+								</f:facet>
+								<p:dataTable id="pendiente" var="pendiente"
+									tableStyle="border:0px; width:300px"
+									emptyMessage="No existen registros"
+									value="#{componenteFisicoController.pendienteSuelo}"
+									selection="#{componenteFisicoController.pendientesSeleccionadas}"
+									rowKey="#{pendiente.id}" style="margin-bottom:0">
+									<p:column headerText="Pendiente"
+										style="width:75px; text-align:right">
+										<h:outputText value="#{pendiente.descripcion}" />
+									</p:column>
+									<p:column style="width:25px;text-align:center">
+										<p:selectBooleanCheckbox value="#{pendiente.seleccionado}" disabled="true">
+										</p:selectBooleanCheckbox>
+									</p:column>
+								</p:dataTable>
+							</p:panelGrid>							
+						</p:panel>
+					</p:outputPanel>
+
+					<p:outputPanel>
+						<p:panel>
+						
+						<f:facet name="header">
+						<mae:panelGridHeaderHelp value="COMPONENTE SOCIAL"
+												 conector="componenteSocial"
+												 help="Definir en este numeral los siguientes aspectos de manera bibliográfica. *En este numeral
+												 la caracterización socio-económica se realizará a nivel del AIIS sobre la base de información secundaria 
+												 (INEC, PDOT, SIISE, entre otros.)" />
+						</f:facet>
+						
+						<p:panelGrid columns="1" layout="grid" styleClass="w100"
+								columnClasses="w100, field_mrg w100">
+								<p:outputLabel value="1. #{msg['label.componente.social.1']} *" for="comunidad" />	
+						
+						 <control:imputConTextoEnriquecido
+                            valor="#{componenteSocialSDController.componenteSocial.comunidades}"
+                            soloLectura="true"
+                            requerido="true"
+                            requiredMessage="El campo #{msg['label.componente.social.1']} es requerido."
+                            id="comunidad"/>	                           
+                                                        
+                        <p:outputLabel value="Documento de #{msg['label.componente.social.1']}"/>
+                        <p:outputLabel id="labelDocComunidades" value="#{empty componenteSocialSDController.documentoComunidades.nombre ? 'Documento:(.pdf)': componenteSocialSDController.documentoComunidades.nombre}" />
+                        
+                        
+                        <p:commandButton id="downloadComunidades"
+										 rendered="#{not empty componenteSocialSDController.documentoComunidades.nombre}"
+										 icon="ui-icon-arrowthick-1-s" ajax="false"
+										 styleClass="button-small primary" title="Ver" immediate="true">
+							<p:fileDownload
+									value="#{componenteSocialSDController.getStreamContentComunidades()}" />
+						</p:commandButton>
+											
+						<p:separator />					
+											
+						<p:outputLabel value="2. #{msg['label.componente.social.2']} *" for="poblacion" />
+						<control:imputConTextoEnriquecido
+                            valor="#{componenteSocialSDController.componenteSocial.poblaciones}"
+                            soloLectura="true"
+                            requerido="true"
+                            requiredMessage="El campo #{msg['label.componente.social.2']} es requerido."
+                            id="poblacion"/>					
+										
+						<p:separator />	
+						
+						<p:outputLabel value="3. #{msg['label.componente.social.3']} *" for="predio" />
+												
+						<control:imputConTextoEnriquecido
+                            valor="#{componenteSocialSDController.componenteSocial.predios}"
+                            soloLectura="true"
+                            requerido="true"
+                            requiredMessage="El campo #{msg['label.componente.social.3']} es requerido."
+                            id="predio"/>			
+                            
+                            
+                        <p:outputLabel value="Documento de #{msg['label.componente.social.3']}"/>
+                        <p:outputLabel id="labelDocPredios" value="#{empty componenteSocialSDController.documentoPredios.nombre ? 'Documento:(.pdf)': componenteSocialSDController.documentoPredios.nombre}" />											
+						
+						 <p:commandButton id="downloadPredios"
+										 rendered="#{not empty componenteSocialSDController.documentoPredios.nombre}"
+										 icon="ui-icon-arrowthick-1-s" ajax="false"
+										 styleClass="button-small primary" title="Ver" immediate="true">
+							<p:fileDownload
+									value="#{componenteSocialSDController.getStreamContentPredios()}" />
+						</p:commandButton>
+												
+						<p:separator />	
+						
+						<p:outputLabel value="4. #{msg['label.componente.social.4']} *" for="infraestructura" />
+						
+						<control:imputConTextoEnriquecido
+                            valor="#{componenteSocialSDController.componenteSocial.infraestructura}"
+                            soloLectura="true"
+                            requerido="true"
+                            requiredMessage="El campo #{msg['label.componente.social.4']} es requerido."
+                            id="infraestructura"/>	
+                            
+                        <p:outputLabel value="Documento de #{msg['label.componente.social.4']}"/>
+                        <p:outputLabel id="labelDocInfraestructura" value="#{empty componenteSocialSDController.documentoInfraestructura.nombre ? 'Documento:(.pdf)': componenteSocialSDController.documentoInfraestructura.nombre}" />		
+                        
+                         <p:commandButton id="downloadInfraestructura"
+										 rendered="#{not empty componenteSocialSDController.documentoInfraestructura.nombre}"
+										 icon="ui-icon-arrowthick-1-s" ajax="false"
+										 styleClass="button-small primary" title="Ver" immediate="true">
+							<p:fileDownload
+									value="#{componenteSocialSDController.getStreamContentInfraestructura()}" />
+						</p:commandButton>
+                            
+                        <p:separator />										
+						
+						<p:outputLabel value="5. #{msg['label.componente.social.5']} *" for="asentamientos" />
+						<control:imputConTextoEnriquecido
+                            valor="#{componenteSocialSDController.componenteSocial.asentamientosGruposEtnicos}"
+                            soloLectura="true"
+                            requerido="true"
+                            requiredMessage="El campo #{msg['label.componente.social.5']} es requerido."
+                            id="asentamientos"/>	
+                        
+                        <p:separator />											
+						
+						<p:outputLabel value="6. #{msg['label.componente.social.6']} *" for="infSalud" />
+						
+						<control:imputConTextoEnriquecido
+                            valor="#{componenteSocialSDController.componenteSocial.infraestructuraSaludPublica}"
+                            soloLectura="true"
+                            requerido="true"
+                            requiredMessage="El campo #{msg['label.componente.social.6']} es requerido."
+                            id="infSalud"/>
+                            
+                            
+                        <p:outputLabel value="Documento de #{msg['label.componente.social.6']}"/>
+                        <p:outputLabel id="labelDocInfSalud" value="#{empty componenteSocialSDController.documentoInfraestructuraSalud.nombre ? 'Documento:(.pdf)': componenteSocialSDController.documentoInfraestructuraSalud.nombre}" />	
+						
+						 <p:commandButton id="downloadInfSalud"
+										 rendered="#{not empty componenteSocialSDController.documentoInfraestructuraSalud.nombre}"
+										 icon="ui-icon-arrowthick-1-s" ajax="false"
+										 styleClass="button-small primary" title="Ver" immediate="true">
+							<p:fileDownload
+									value="#{componenteSocialSDController.getStreamContentInfraestructuraSalud()}" />
+						</p:commandButton>
+												
+						<p:separator />					
+						
+						<p:outputLabel value="7. #{msg['label.componente.social.7']} *" for="elementosCulturales" />
+						<control:imputConTextoEnriquecido
+                            valor="#{componenteSocialSDController.componenteSocial.elementosCulturales}"
+                            soloLectura="true"
+                            requerido="true"
+                            requiredMessage="El campo #{msg['label.componente.social.7']} es requerido."
+                            id="elementosCulturales"/>
+                            
+							</p:panelGrid>
+							<p:separator></p:separator>
+							<f:facet name="footer">
+								<t:div styleClass="buttons main">
+									<p:commandButton value="Atrás"
+										action="#{fichaMineria020Controller.activeIndex(8)}"
+										update=":frmFicha020" icon="ui-icon-arrowthick-1-w"/>									
+									<p:commandButton value="Siguiente" update=":frmFicha020"
+										action="#{fichaMineria020Controller.activeIndex(10)}"
+										icon="ui-icon-arrowthick-1-e" />
+								</t:div>
+							</f:facet>
+						</p:panel>
+					</p:outputPanel>
+				</p:panel>
+				
+				<p:panel header="10. MARCO LEGAL"
+					rendered="#{fichaMineria020Controller.index==10}">
+					<ui:include src="marcolegal.xhtml" />
+					<p:separator></p:separator>
+					<f:facet name="footer">
+						<t:div styleClass="buttons main">
+							<p:commandButton value="Atrás"
+								action="#{fichaMineria020Controller.activeIndex(9)}"
+								update=":frmFicha020" icon="ui-icon-arrowthick-1-w" />							
+							<p:commandButton value="Siguiente"
+								action="#{fichaMineria020Controller.activeIndex(11)}"
+								update=":frmFicha020" icon="ui-icon-arrowthick-1-e" />
+						</t:div>
+					</f:facet>
+				</p:panel>
+				<p:panel header="11. DESCRIPCIÓN DE ACTIVIDADES E IDENTIFICACIÓN DE IMPACTOS AMBIENTALES" rendered="#{fichaMineria020Controller.index==11}">
+					<ui:include src="ingresoActividadImpactoSDVer.xhtml" />
+				</p:panel>
+				<p:panel header="12. PLAN DE MANEJO AMBIENTAL"
+					rendered="#{fichaMineria020Controller.index==12}">
+					<p:outputPanel id="frmPMA020">					
+						<p:panel style="border: none;">
+							<br />
+							<p:outputLabel
+								value="Todas los subplanes del plan manejo ambiental, así como las medidas propuestas, indicadores, medios de verificación y frecuencia deben ser cumplidos en su totalidad y de manera obligatoria por el titular minero."></p:outputLabel>
+							<br />
+							<br />
+							<p:outputLabel
+								value="* Las medidas propuestas, indicadores, medios de verificación y frecuencia no son modificables, en caso de requerir nuevas medidas puede incluir en el subplan correspondiente."></p:outputLabel>
+							<c:forEach var="actividad1" begin="0"
+								items="#{planManejoAmbiental020Controller.parameters}">
+								<p:dataGrid columns="1" value="#{actividad1.key}"
+									var="actividadttt">
+
+									<div class="#{actividad.key}">
+										<p:dataTable id="tbl" var="plan" value="#{actividad1.value}"
+											style="border: none;"
+											emptyMessage="#{labels['common.table.empty']}">
+											<f:facet name="header">#{actividad1.key}												
+											</f:facet>
+											<p:columnGroup type="header">
+												<p:row>
+													<p:column headerText="MEDIDAS PROPUESTAS" />
+													<p:column headerText="INDICADOR" />
+													<p:column headerText="MEDIO DE VERIFICACIÓN" />
+													<p:column headerText="FRECUENCIA" styleClass="alLeft" />
+													<p:column headerText="PRESUPUESTO" styleClass="alCenter" />
+												</p:row>
+											</p:columnGroup>
+											<p:column styleClass="tblUno"
+												rendered="#{(plan.descripcion eq 'Otros' or plan.planManejoAmbiental020.descripcion eq '')}">
+												<f:facet name="header">
+													<h:outputText value="MEDIDAS PROPUESTAS" />
+												</f:facet>
+												<h:outputText align="justify"
+													value="#{(plan.planManejoAmbiental020 eq null)?plan.medidasPropuestas:plan.planManejoAmbiental020.medidasPropuestas}" />
+											</p:column>
+											<p:column styleClass="tblUno"
+												rendered="#{(plan.descripcion eq 'Otros' or plan.planManejoAmbiental020.descripcion eq '')}">
+												<f:facet name="header">
+													<h:outputText value="INDICADOR" />
+												</f:facet>
+												<h:outputText align="justify"
+													value="#{(plan.planManejoAmbiental020 eq null)?plan.indicador:plan.planManejoAmbiental020.indicador}" />
+											</p:column>
+											<p:column styleClass="tblUno"
+												rendered="#{(plan.descripcion eq 'Otros' or plan.planManejoAmbiental020.descripcion eq '')}">
+												<f:facet name="header">
+													<h:outputText value="MEDIO DE VERIFICACIÓN" />
+												</f:facet>
+												<h:outputText align="justify"
+													value="#{(plan.planManejoAmbiental020 eq null)?plan.verificacionMedios:plan.planManejoAmbiental020.verificacionMedios}" />
+											</p:column>
+											<p:column styleClass="tblUno"
+												rendered="#{(plan.descripcion eq 'Otros' or plan.planManejoAmbiental020.descripcion eq '')}">
+												<f:facet name="header">
+													<h:outputText value="FRECUENCIA" />
+												</f:facet>
+												<h:outputText align="justify"
+													value="#{(plan.planManejoAmbiental020 eq null)?plan.frecuencia:plan.planManejoAmbiental020.frecuencia}" />
+											</p:column>
+
+											<p:column styleClass="alCenter" colspan="5"
+												rendered="#{plan.descripcion ne 'Otros' and  !(plan.planManejoAmbiental020.descripcion eq '')}">
+												<strong> <h:outputText
+														value="#{(plan.planManejoAmbiental020 eq null)?plan.descripcion:plan.planManejoAmbiental020.descripcion}" />
+												</strong>
+											</p:column>
+
+											<p:column styleClass="tblUno"
+												rendered="#{(plan.descripcion eq 'Otros' or plan.planManejoAmbiental020.descripcion eq '')}">
+												<f:facet name="header">
+													<h:outputText value="PRESUPUESTO" />
+												</f:facet>
+												<p:inputText value="#{plan.calificacion}"
+													style="width: 100%;"
+													converterMessage="Se debe ingresar un número"
+													validatorMessage="El campo Presupuesto' no se encuentra entre los valores permitidos, debe ser mayor que 0 y menor que 999999.99."
+													requiredMessage="El campo 'Presupuesto' es requerido."
+													onkeypress="return numbersonly(this, event, true);"
+													maxlength="6" required="true" disabled="true">
+													<pe:keyFilter mask="num" />
+													<f:convertNumber pattern="#0.00"/>
+													<f:validateDoubleRange minimum="1.00" maximum="999999.99"/>
+												</p:inputText>
+											</p:column>
+										</p:dataTable>
+									</div>
+								</p:dataGrid>
+							</c:forEach>
+							<p:separator></p:separator>
+							<f:facet name="footer">
+								<t:div styleClass="buttons main">
+									<p:commandButton value="Atrás"
+										action="#{fichaMineria020Controller.activeIndex(11)}"
+										update=":frmFicha020" icon="ui-icon-arrowthick-1-w" />									
+									<p:commandButton value="Siguiente"
+										action="#{fichaMineria020Controller.activeIndex(13)}"
+										update=":frmFicha020" icon="ui-icon-arrowthick-1-e" />
+								</t:div>
+							</f:facet>
+						</p:panel>
+					</p:outputPanel>
+				</p:panel>
+				<p:panel header="13. CRONOGRAMA VALORADO DE ACTIVIDADES"
+					rendered="#{fichaMineria020Controller.index==13}">					
+					
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						id="panelGridCronograma">
+
+						<p:dataTable id="tablaCronograma"
+							value="#{fichaMineria020Controller.listaCronogramaPma}" var="ide"
+							paginator="true" rows="10" paginatorPosition="bottom"
+							emptyMessage="#{labels['common.table.empty']}"
+							paginatorAlwaysVisible="false">
+							<f:facet name="header">
+							Cronograma valorado de actividades
+						</f:facet>
+
+							<p:columnGroup type="header">
+								<p:row>
+									<p:column rowspan="2" headerText="Subplan" width="100" />
+									<p:column colspan="12" headerText="Meses" width="400" />
+									<p:column rowspan="2" headerText="Presupuesto" width="100" />
+								</p:row>
+
+								<p:row>
+									<p:column headerText="1" />
+									<p:column headerText="2" />
+									<p:column headerText="3" />
+									<p:column headerText="4" />
+									<p:column headerText="5" />
+									<p:column headerText="6" />
+									<p:column headerText="7" />
+									<p:column headerText="8" />
+									<p:column headerText="9" />
+									<p:column headerText="10" />
+									<p:column headerText="11" />
+									<p:column headerText="12" />
+								</p:row>
+							</p:columnGroup>
+							<p:column>
+								<h:outputText value="#{ide.tipoPlanManejoAmbiental.tipo}" />
+							</p:column>
+							<p:column>
+								<p:selectBooleanCheckbox value="#{ide.month1}" disabled="true">
+
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column>
+								<p:selectBooleanCheckbox value="#{ide.month2}" disabled="true">
+
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column>
+								<p:selectBooleanCheckbox value="#{ide.month3}" disabled="true">
+
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column>
+								<p:selectBooleanCheckbox value="#{ide.month4}" disabled="true">
+
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column>
+								<p:selectBooleanCheckbox value="#{ide.month5}" disabled="true">
+
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column>
+								<p:selectBooleanCheckbox value="#{ide.month6}" disabled="true">
+
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column>
+								<p:selectBooleanCheckbox value="#{ide.month7}" disabled="true">
+
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column>
+								<p:selectBooleanCheckbox value="#{ide.month8}" disabled="true">
+
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column>
+								<p:selectBooleanCheckbox value="#{ide.month9}" disabled="true">
+
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column>
+								<p:selectBooleanCheckbox value="#{ide.month10}" disabled="true">
+
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column>
+								<p:selectBooleanCheckbox value="#{ide.month11}" disabled="true">
+
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column>
+								<p:selectBooleanCheckbox value="#{ide.month12}" disabled="true">
+
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column styleClass="w100 alRight">
+								<p:outputLabel id="presupuesto" maxlength="10"
+									value="#{ide.budget}" />
+							</p:column>
+							<p:columnGroup id="total" type="footer">
+								<p:row>
+									<p:column colspan="13" styleClass="alRight" footerText="Total:" />
+									<p:column footerText="#{fichaMineria020Controller.total}" />
+								</p:row>
+							</p:columnGroup>
+
+						</p:dataTable>
+
+					</p:panelGrid>
+					<p:separator></p:separator>
+
+					<f:facet name="footer">
+						<t:div styleClass="buttons main">
+							<p:commandButton value="Atrás"
+								action="#{fichaMineria020Controller.activeIndex(12)}"
+								update=":frmFicha020" icon="ui-icon-arrowthick-1-w"/>							
+							<p:commandButton value="Siguiente"
+										action="#{fichaMineria020Controller.activeIndex(14)}"
+										update=":frmFicha020"
+										icon="ui-icon-arrowthick-1-e" />
+						</t:div>
+					</f:facet>
+				</p:panel>
+				
+				<p:panel header="14. ANEXOS"
+					rendered="#{fichaMineria020Controller.index==14}">					
+					
+					<h:panelGrid style="width:100%">
+					<p:row>
+					<p:column colspan="2">
+						<p:outputLabel
+						value="Documentos legales (Certificado de Intersección, Títulos Mineros, Registro Ambiental)" />	
+					</p:column>					
+					</p:row>
+					<p:row>
+					<p:column>
+					<p:outputLabel id="labelDocumentosLegales"
+						value="#{empty componenteSocialSDController.documentoLegal.nombre ? 'Documento:(.pdf)': componenteSocialSDController.documentoLegal.nombre}" />
+					</p:column>
+					<p:column>
+					 <p:commandButton id="downloadDocLegales"
+										 rendered="#{not empty componenteSocialSDController.documentoLegal.nombre}"
+										 icon="ui-icon-arrowthick-1-s" ajax="false"
+										 styleClass="button-small primary" title="Ver" immediate="true">
+							<p:fileDownload
+									value="#{componenteSocialSDController.getStreamContentDocumentoLegal()}" />
+						</p:commandButton>
+					</p:column>
+					</p:row>		
+					
+					
+					<p:row>
+					<p:column colspan="2">
+						<p:outputLabel	value="Registro fotográfico de reconocimiento general del proyecto" />	
+					</p:column>					
+					</p:row>
+					<p:row>
+					<p:column>
+					<p:outputLabel id="labelDocumentosFotografico"
+						value="#{empty componenteSocialSDController.documentoregistroFotografico.nombre ? 'Documento:(.pdf)': componenteSocialSDController.documentoregistroFotografico.nombre}" />
+					</p:column>
+					<p:column>
+					 <p:commandButton id="downloadDocFotografico"
+										 rendered="#{not empty componenteSocialSDController.documentoregistroFotografico.nombre}"
+										 icon="ui-icon-arrowthick-1-s" ajax="false"
+										 styleClass="button-small primary" title="Ver" immediate="true">
+							<p:fileDownload
+									value="#{componenteSocialSDController.getStreamContentDocumentoRegistroFotografico()}" />
+						</p:commandButton>
+					</p:column>
+					</p:row>	
+					
+					<p:row>
+					<p:column colspan="2">
+						<p:outputLabel value="Mapas (Ubicación, uso suelos, geológico, cobertura vegetal, hidrológico, asentamientos humanos, predios y comunidades) en formato pdf" />
+					</p:column>					
+					</p:row>
+					<p:row>
+					<p:column>
+					<p:outputLabel id="labelDocumentosMapa"
+						value="#{empty componenteSocialSDController.documentoMapa.nombre ? 'Documento:(.pdf)': componenteSocialSDController.documentoMapa.nombre}" />
+					</p:column>
+					<p:column>
+					 <p:commandButton id="downloadDocMapa"
+										 rendered="#{not empty componenteSocialSDController.documentoMapa.nombre}"
+										 icon="ui-icon-arrowthick-1-s" ajax="false"
+										 styleClass="button-small primary" title="Ver" immediate="true">
+							<p:fileDownload
+									value="#{componenteSocialSDController.getStreamContentDocumentoMapa()}" />
+						</p:commandButton>
+					</p:column>
+					</p:row>		
+					
+					<p:row>
+					<p:column colspan="2">
+						<p:outputLabel
+						value="Declaración juramentada de que el valor de la póliza o garantía corresponde al 100% del valor del Plan de Manejo Ambiental." />
+					</p:column>					
+					</p:row>
+					<p:row>
+					<p:column>
+					<p:outputLabel id="labelDocumentosPoliza"
+						value="#{empty componenteSocialSDController.documentoPoliza.nombre ? 'Documento:(.pdf)': componenteSocialSDController.documentoPoliza.nombre}" />
+					</p:column>
+					<p:column>
+					  <p:commandButton id="downloadDocPoliza"
+										 rendered="#{not empty componenteSocialSDController.documentoPoliza.nombre}"
+										 icon="ui-icon-arrowthick-1-s" ajax="false"
+										 styleClass="button-small primary" title="Ver" immediate="true">
+							<p:fileDownload
+									value="#{componenteSocialSDController.getStreamContentDocumentoPoliza()}" />
+						</p:commandButton>		
+					</p:column>
+					</p:row>					
+						
+						</h:panelGrid>					
+
+					<f:facet name="footer">
+						<t:div styleClass="buttons main">
+							<p:commandButton value="Atrás"
+								action="#{fichaMineria020Controller.activeIndex(13)}"
+								update=":frmFicha020" icon="ui-icon-arrowthick-1-w"/>							
+							
+						</t:div>
+					</f:facet>
+				</p:panel>
+
+
+				
+
+				<p:panel id="idFinRegistro"
+					rendered="#{fichaMineria020Controller.index==15}">
+					<p class="allJustify">#{fichaMineria020Controller.mensaje}</p>
+					<h:panelGrid columns="2" style="margin-bottom:10px" cellpadding="5">
+						<h:outputLabel for="condiciones"
+							value="He leído y comprendo las condiciones" />
+
+						<p:selectBooleanCheckbox id="condiciones"
+							value="#{fichaMineria020Controller.condiciones}"
+							required="true">
+							<p:ajax update=":frmFicha020:idFinRegistro" />
+						</p:selectBooleanCheckbox>						
+					</h:panelGrid>
+					<f:facet name="footer">
+						<t:div styleClass="buttons main">
+							<p:commandButton value="Atrás"
+								action="#{fichaMineria020Controller.activeIndex(12)}"
+								update=":frmFicha020" icon="ui-icon-arrowthick-1-w"/>							
+							<p:commandButton value="Ver ficha" disabled="#{!fichaMineria020Controller.condiciones}"
+								action="#{fichaMineria020Controller.enviarFicha}"
+								update="@form" />
+						</t:div>
+					</f:facet>
+				</p:panel>
+				
+				<p:panel id="dlgVerFicha" header="VISTA PREVIA"
+					rendered="#{fichaMineria020Controller.index==16}">
+					<t:div styleClass="buttons main">
+						<h:commandButton value="Atrás" update=":frmFicha020" style="background: #28B9F8; border: #28B9F8; width: 125px; height: 40px; font-weight: bold; color: #FFFFFF; margin: 2px;"
+							action="#{fichaMineria020Controller.activeIndex(15)}"
+							icon="ui-icon-arrowthick-1-w" />
+						<h:commandButton value="Finalizar" style="background: #28B9F8; border: #28B9F8; width: 125px; height: 40px; font-weight: bold; color: #FFFFFF; margin: 2px;"
+							action="#{fichaMineria020Controller.finalizar}"/>
+					</t:div>
+					<p:separator></p:separator>
+					<object data="#{fichaMineria020Controller.file}?pfdrid_c=true"
+						height="500px" width="100%">
+						Your browser can't display pdf,
+						<h:outputLink value="#{fichaMineria020Controller.file}">click</h:outputLink>
+						to download pdf instead.
+					</object>
+				</p:panel>
+
+
+				<p:dialog id="idConsultores" widgetVar="idConsultores" width="800">
+					<p:dataTable value="#{fichaMineria020Controller.listconsultores}"
+						var="item" rows="10" paginator="true" paginatorPosition="bottom">
+						 <p:column    
+                                style="width:180px;text-align:left" 
+                                filterBy="#{item.ruc}" 
+                                headerText="CÃ©dula/RUC"  >  
+                                <h:outputText value="#{item.ruc}" />
+                         </p:column>
+						
+						<p:column    
+                                style="width:180px;text-align:left" 
+                                filterBy="#{item.nombre}" 
+                                headerText="Nombres"  >  
+                                <h:outputText value="#{item.nombre}" />
+                         </p:column>				
+						
+						<p:column>
+							<p:commandButton value="Seleccionar"
+								action="#{fichaMineria020Controller.cargarConsultor(item)}"
+								update=":frmFicha020:idPanel3" oncomplete="PF('idConsultores').hide()"/>
+						</p:column>
+					</p:dataTable>
+				</p:dialog>
+
+				<p:dialog id="idCoordenadasGeo" widgetVar="idCoordenadasGeo"
+					width="400">
+					<p:panel>
+						<p:panelGrid style="width: 100%;">
+							<p:row>
+								<p:column>
+									<h:outputText value="Coor. X" />
+								</p:column>
+								<p:column>
+									<p:inputText value="#{fichaMineria020Controller.coordendas.x}" style="width: 100%;">
+										<pe:keyFilter regEx="/[\d\.]/" />
+									</p:inputText>
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column>
+									<h:outputText value="Coor. Y" />
+								</p:column>
+								<p:column>
+									<p:inputText value="#{fichaMineria020Controller.coordendas.y}" style="width: 100%;"/>
+								</p:column>
+							</p:row>
+						</p:panelGrid>
+						<p:commandButton value="Adicionar"
+							action="#{fichaMineria020Controller.adicionarCoordenada}"
+							styleClass="primary" update=":frmFicha020:idPanel3"
+							oncomplete="PF('idCoordenadasGeo').hide()" />
+					</p:panel>
+				</p:dialog>
+
+				<p:dialog id="idEquipoMultidisiplinario"
+					widgetVar="idEquipoMultidisiplinario" width="600">
+					<p:panelGrid style="width: 100%;">
+						<p:row>
+							<p:column>
+								<h:outputText value="Nombre:" />
+							</p:column>
+							<p:column>
+								<p:inputText
+									value="#{fichaMineria020Controller.equipoMultidisciplinario.name}"
+									style="width: 100%;" maxlength="50"/>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Formación Profesional:" />
+							</p:column>
+							<p:column>
+								<p:inputText
+									value="#{fichaMineria020Controller.equipoMultidisciplinario.vocationalTraining}"
+									style="width: 100%;" maxlength="254"/>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Componente:" />
+							</p:column>
+							<p:column>
+								<p:inputText 
+									value="#{fichaMineria020Controller.equipoMultidisciplinario.component}"
+									style="width: 100%;" maxlength="254"/>
+							</p:column>
+						</p:row>
+					</p:panelGrid>
+					<p:commandButton value="Adicionar"
+						action="#{fichaMineria020Controller.adicionarEquipoMultidis}"
+						styleClass="primary" update=":frmFicha020:panelGridMineria"
+						oncomplete="PF('idEquipoMultidisiplinario').hide()" />
+				</p:dialog>
+				
+				
+				<p:dialog id="dlgPuntosFaltantes" header="Puntos Requeridos" modal="true" width="450" visible="#{fichaMineria020Controller.panelErrores}">
+					<p:panel id="pnlPuntosFaltantes">
+					<p:dataTable value="#{fichaMineria020Controller.listaErrores.entrySet().toArray()}" var="entry">
+						<p:column>
+						<h:commandLink value="#{entry.key}" action="#{fichaMineria020Controller.activeIndex(entry.value)}" />
+						</p:column>
+					</p:dataTable>
+					</p:panel>
+				</p:dialog>
+			</h:form>
+			
+			
+			
+			<h:form id="frmDialogMaquinaria">
+				<p:dialog id="idMaquinariaEquipo" widgetVar="idMaquinariaEquipo"
+					width="600">
+					<p:panelGrid style="width: 100%;" id="pnlMaquinaria">
+						<p:row>
+							<p:column>
+								<h:outputText
+									value="Denominación de la maquinaria, equipos y materiales" />
+							</p:column>
+							<p:column>
+								<p:inputText required="true" requiredMessage="Maquinaria, equipos y materiales es Requerido"
+									value="#{fichaMineria020Controller.maquinariaEquipos.name}"
+									style="width: 100%;" maxlength="255" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Cantidad(unidades)" />
+							</p:column>
+							<p:column>
+								<p:inputText required="true" requiredMessage="Cantidad(unidades) es Requerido"
+									value="#{fichaMineria020Controller.maquinariaEquipos.unit}"
+									style="width: 100%;" maxlength="255">
+									<pe:keyFilter mask="int" />
+								</p:inputText>
+
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Características" />
+							</p:column>
+							<p:column>
+								<p:inputText required="true" requiredMessage="Características es Requerido"
+									value="#{fichaMineria020Controller.maquinariaEquipos.characteristics}"
+									style="width: 100%;" maxlength="255" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Uso / Proceso" />
+							</p:column>
+							<p:column>
+								<p:inputText required="true" requiredMessage="Uso / Proceso es Requerido"
+									value="#{fichaMineria020Controller.maquinariaEquipos.process}"
+									style="width: 100%;" maxlength="255" />
+							</p:column>
+						</p:row>
+					</p:panelGrid>
+					<p:commandButton value="#{fichaMineria020Controller.edicionMaquinaria ? 'Modificar' : 'Adicionar'}"
+						action="#{fichaMineria020Controller.adicionarMaquinariaEquipo}"
+						styleClass="primary" update=":frmFicha020:tblMaquinaria :frmDialogMaquinaria:pnlMaquinaria"
+						oncomplete="if(!args.validationFailed) PF('idMaquinariaEquipo').hide()" />
+				</p:dialog>
+			</h:form>
+			
+			<h:form id="frmDialogInsumo">
+				<p:dialog id="idMaterialInsumo" widgetVar="idMaterialInsumo"
+					width="600">
+					<p:panelGrid style="width: 100%;" id="pnlInsumos">
+						<p:row>
+							<p:column width="60%">
+								<h:outputText
+									value="Material(combustibles, insumos, productos químicos)" />
+							</p:column>
+							<p:column colspan="2">
+								<p:selectOneMenu id="sustanciaQuimica"
+                                                 value="#{fichaMineria020Controller.sustanciaQuimicaSeleccionada}"
+                                                 style="width:250px" converter="selectItemConverter"  panelStyle="width:180px"
+                                                 filter="true" filterMatchMode="startsWith"
+                                                 required="true" requiredMessage="Material es Requerido">
+                                    <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                                  itemValue="" noSelectionOption="true" />
+                                    <f:selectItems itemDescription="#{sustancia.descripcion}"
+                                                   var="sustancia"
+                                                   value="#{fichaMineria020Controller.sustanciaQuimicasPeligrosas}" />
+                                    <p:ajax event="change" process="@this"
+                                            update="@(.cssNroCas)"></p:ajax>
+                                </p:selectOneMenu>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Cantidad(unidades)" />
+							</p:column>
+							<p:column>
+								<pe:inputNumber required="true" requiredMessage="Cantidad(unidades) es Requerido"
+									thousandSeparator="" maxValue="99999.99"
+									value="#{fichaMineria020Controller.materialInsumo.value}">
+								</pe:inputNumber>
+							</p:column>
+							<p:column>
+								<p:selectOneMenu converter="selectItemConverter"
+									id="unidadMedida"
+									value="#{fichaMineria020Controller.unidadSeleccionada}"
+									required="true" requiredMessage="Medida es Requerido">
+									<f:selectItem itemLabel="#{labels['common.item.choose']}"
+										itemValue="" noSelectionOption="true" />
+									<f:selectItems
+										value="#{fichaMineria020Controller.listaUnidades}"
+										var="unidadMedida" itemLabel="#{unidadMedida.siglas}"
+										itemValue="#{unidadMedida}" />
+									<p:ajax event="change"
+										listener="#{fichaMineria020Controller.unidadSelecionada(2)}" />
+								</p:selectOneMenu>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Proceso en el que es empleado" />
+							</p:column>
+							<p:column colspan="2">
+								<p:inputText required="true" requiredMessage="Proceso es Requerido"
+									value="#{fichaMineria020Controller.materialInsumo.process}" style="width: 100%;" maxlength="255"/>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="No. CAS /ONU" />
+							</p:column>
+							<p:column colspan="2">
+								<p:outputLabel styleClass="cssNroCas" style="color: black !important;"
+								required="true" requiredMessage="No. CAS /ONU es Requerido"
+									value="#{fichaMineria020Controller.sustanciaQuimicaSeleccionada.numeroCas} / #{fichaMineria020Controller.sustanciaQuimicaSeleccionada.codigoOnu}"/>
+							</p:column>
+						</p:row>
+					</p:panelGrid>
+					<p:commandButton value="#{fichaMineria020Controller.edicionInsumo ? 'Modificar' : 'Adicionar'}"
+						action="#{fichaMineria020Controller.adicionarMaterialInsumo}"
+						styleClass="primary" 
+						update=":frmFicha020:tblInsumos :frmDialogInsumo:pnlInsumos"
+						oncomplete="if(!args.validationFailed) PF('idMaterialInsumo').hide()" />
+				</p:dialog>
+			</h:form>
+			
+			<h:form id="frmDialogDesechoNoPeligroso">
+				<p:dialog id="idDesechosNoPeligrosos"
+					widgetVar="idDesechosNoPeligrosos" width="600">
+					<p:panelGrid style="width: 100%;" id="pnlDesechosNoPeligrosos">
+						<p:row>
+							<p:column width="60%">
+								<h:outputText
+									value="Tipo de residuo/ desecho (Orgánico, Papel, Cartón, Plástico, Vidrio, etc.)" />
+							</p:column>
+							<p:column colspan="2">
+								<p:inputText required="true" requiredMessage="Tipo de residuo/ desecho es Requerido"
+									value="#{fichaMineria020Controller.desechonopeligrosos.wasteType}" style="width: 100%;" maxlength="255"/>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Cantidad(unidades) " />
+							</p:column>
+							<p:column>
+								<pe:inputNumber required="true" requiredMessage="Cantidad(unidades) es Requerido"
+									thousandSeparator="" maxValue="99999.99"
+									value="#{fichaMineria020Controller.desechonopeligrosos.value}">
+								</pe:inputNumber>
+							</p:column>
+							<p:column>
+								<p:selectOneMenu converter="selectItemConverter"
+									value="#{fichaMineria020Controller.unidadSeleccionada}"
+									required="true" requiredMessage="Medida es Requerido">
+									<f:selectItem itemLabel="#{labels['common.item.choose']}"
+										itemValue="" noSelectionOption="true" />
+									<f:selectItems
+										value="#{fichaMineria020Controller.listaUnidadesMasa}"
+										var="unidadMedida" itemLabel="#{unidadMedida.siglas}"
+										itemValue="#{unidadMedida}" />
+									<p:ajax event="change"
+										listener="#{fichaMineria020Controller.unidadSelecionada(3)}" />
+								</p:selectOneMenu>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Reducción, tratamiento " />
+							</p:column>
+							<p:column colspan="2">
+								<p:inputText required="true" requiredMessage="Reducción, tratamiento es Requerido"
+									value="#{fichaMineria020Controller.desechonopeligrosos.treatment}" style="width: 100%;" maxlength="255"/>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Disposición Final " />
+							</p:column>
+							<p:column colspan="2">
+								<p:inputText required="true" requiredMessage="Disposición Final es Requerido"
+									value="#{fichaMineria020Controller.desechonopeligrosos.finalArrangement}" style="width: 100%;" maxlength="255"/>
+							</p:column>
+						</p:row>
+					</p:panelGrid>
+					<p:commandButton value="#{fichaMineria020Controller.edicionDesechoNoPeligroso ? 'Modificar' : 'Adicionar'}"
+						action="#{fichaMineria020Controller.adicionarDesechoNoPeligroso}"
+						styleClass="primary" 
+						update=":frmFicha020:tblDesechosNoPeligrosos :frmDialogDesechoNoPeligroso:pnlDesechosNoPeligrosos"
+						oncomplete="if(!args.validationFailed) PF('idDesechosNoPeligrosos').hide()" />
+				</p:dialog>
+			</h:form>
+			
+			<h:form id="frmDialog">
+				<p:dialog id="idDesechosPeligrosos" widgetVar="idDesechosPeligrosos"
+					width="600">
+					<p:panelGrid style="width: 100%;" id="idDesechosPeligrososPanel">
+						<p:row>
+							<p:column width="60%">
+								<h:outputText value="Tipo de Desecho" />
+							</p:column>
+							<p:column colspan="2">
+								<p:inputText rendered="false"
+									value="#{fichaMineria020Controller.desechopeligrosos.wasteType}"
+									style="width: 100%;" maxlength="255" />
+								<p:selectOneMenu id="desechoPeligroso"
+									value="#{fichaMineria020Controller.desechoPeligrosoSeleccionado}"
+									styleClass="w100" converter="selectItemConverter"
+									required="true" requiredMessage="Tipo de Desecho es Requerido">
+									<f:selectItem itemLabel="#{labels['common.item.choose']}"
+										itemValue="" noSelectionOption="true" />
+									<f:selectItems
+										value="#{fichaMineria020Controller.desechosPeligrosoDisponibles}" />
+									<p:ajax process="@this" update="desechoCode desechoCrtib"
+										listener="#{fichaMineria020Controller.seleccionarDesecho}" />
+								</p:selectOneMenu>
+							</p:column>
+						</p:row>
+
+						<p:row>
+							<p:column>
+								<h:outputText value="Código (AM NO. 142 o el que lo reemplace)" />
+							</p:column>
+							<p:column colspan="2">
+								<p:inputText id="desechoCode" readonly="true" required="true"
+									value="#{fichaMineria020Controller.desechopeligrosos.code}"
+									style="width: 100%;" maxlength="25" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="CRTIB" />
+							</p:column>
+							<p:column colspan="2">
+								<p:inputText id="desechoCrtib" readonly="true" required="true"
+									value="#{fichaMineria020Controller.desechopeligrosos.crtib}"
+									style="width: 100%;" maxlength="255" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Cantidad Generada aproximada /Mes" />
+							</p:column>
+							<p:column>
+								<pe:inputNumber required="true" requiredMessage="Cantidad(unidades) es Requerido"
+									thousandSeparator="" maxValue="99999.99"
+									value="#{fichaMineria020Controller.desechopeligrosos.value}">
+								</pe:inputNumber>
+							</p:column>
+							<p:column>
+								<p:selectOneMenu converter="selectItemConverter"
+									style="width:250px"
+									value="#{fichaMineria020Controller.unidadSeleccionada}"
+									required="true"
+									requiredMessage="Medida es Requerido">
+									<f:selectItem itemLabel="#{labels['common.item.choose']}"
+										itemValue="" noSelectionOption="true" />
+									<f:selectItems
+										value="#{fichaMineria020Controller.listaUnidades}"
+										var="unidadMedida" itemLabel="#{unidadMedida.siglas}"
+										itemValue="#{unidadMedida}" />
+									<p:ajax event="change"
+										listener="#{fichaMineria020Controller.unidadSelecionada(4)}" />
+								</p:selectOneMenu>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Proceso o unidad operativa" />
+							</p:column>
+							<p:column colspan="2">
+								<p:inputText required="true"
+									requiredMessage="Proceso o unidad operativa es Requerido"
+									value="#{fichaMineria020Controller.desechopeligrosos.process}"
+									style="width: 100%;" maxlength="255" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Tipo de Eliminación o Disposición final" />
+							</p:column>
+							<p:column colspan="2">
+								<p:inputText required="true"
+									requiredMessage="Tipo de Eliminación o Disposición final es Requerido"
+									value="#{fichaMineria020Controller.desechopeligrosos.finalArrangement}"
+									style="width: 100%;" maxlength="255" />
+							</p:column>
+						</p:row>
+					</p:panelGrid>
+					<p:commandButton value="#{fichaMineria020Controller.edicionDesechoPeligroso ? 'Modificar' : 'Adicionar'}"
+						action="#{fichaMineria020Controller.adicionarDesechoPeligroso}"
+						styleClass="primary"
+						update=":frmFicha020:listadesechopeligrosos :frmDialog:idDesechosPeligrososPanel"
+						oncomplete="if(!args.validationFailed) PF('idDesechosPeligrosos').hide();" />
+				</p:dialog>
+			</h:form>
+			
+			
+			
+			<h:form id="formDetallePlan">
+				<p:dialog header="Detalle Plan" id="dlgActividad"
+					widgetVar="dlgActividad" modal="true" resizable="false"
+					rendered="true" draggable="false" width="450">
+
+					<h:panelGrid id="pnlActividad" columns="2" styleClass="w100"
+						columnClasses="w30,null">
+						<h:outputLabel value="Medidas Propuestas" />
+						<p:inputTextarea rows="3" maxlength="255" style="width: 100%;"
+							value="#{planManejoAmbiental020Controller.planManejoProyecto.medidasPropuestas}"
+							required="true"
+							requiredMessage="El campo 'Medidas Propuestas' es requerido.">
+						</p:inputTextarea>
+						<h:outputLabel value=" Indicador:" />
+						<p:inputTextarea rows="3" maxlength="255" style="width: 100%;"
+							value="#{planManejoAmbiental020Controller.planManejoProyecto.indicador}"
+							required="true"
+							requiredMessage="El campo 'Indicador:' es requerido. ">
+
+						</p:inputTextarea>
+						<h:outputLabel value="
+							Medio de Verificación" />
+						<p:inputTextarea rows="3" maxlength="255" style="width: 100%;"
+							value="#{planManejoAmbiental020Controller.planManejoProyecto.verificacionMedios}"
+							required="true"
+							requiredMessage="El campo 'Medio de Verificación' es requerido.">
+
+						</p:inputTextarea>
+						<h:outputLabel value=" Frecuencia" />
+						<p:inputTextarea rows="3" maxlength="255" style="width: 100%;"
+							value="#{planManejoAmbiental020Controller.planManejoProyecto.frecuencia}"
+							requiredMessage="El campo 'Frecuencia' es requerido."
+							required="true">
+
+						</p:inputTextarea>
+						<h:outputLabel value="Presupuesto" />
+						<p:inputText
+							value="#{planManejoAmbiental020Controller.planManejoProyecto.calificacion}"
+							style="width: 100%;"
+							converterMessage="Se debe ingresar un número"
+							validatorMessage="El campo Presupuesto' no se encuentra entre los valores permitidos, debe ser mayor que 0 y menor que 999999.99."
+							requiredMessage="El campo 'Presupuesto' es requerido."
+							onkeypress="return numbersonly(this, event, true);" maxlength="9"
+							required="true">
+							<pe:keyFilter mask="num" />
+							<f:validateDoubleRange minimum="1.00" maximum="999999.99" />
+							<f:convertNumber pattern="#0.00" />
+						</p:inputText>
+					</h:panelGrid>
+					<br />
+					<center>
+						<p:commandButton value="Guardar"
+							update=":formDetallePlan:pnlActividad, :frmFicha020:frmPMA020"
+							action="#{planManejoAmbiental020Controller.guardarPlanOtros()}"
+							styleClass="primary" />
+					</center>
+
+				</p:dialog>
+			</h:form>
+			
+		</div>
+	</ui:define>
+</ui:composition>

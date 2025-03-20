@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+     <ui:define name="context-extra">
+		<h:outputText value="Datos" />
+		<h:outputText value="Emisiones Atmosféricas" />
+		<h:outputLink value="#{request.contextPath}/control/retce/emisionesAtmosfericasVer.jsf">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>		
+	</ui:define>
+    
+    <ui:define name="content">
+        <h:form id="form">
+            <p:panelGrid columns="1" layout="grid" styleClass="w100" id="oficioGrid"
+                         columnClasses="w100">
+                <f:facet name="header" >
+                   
+                <mae:panelGridHeaderHelp value="Oficio de Pronunciamiento"
+                                             conector="generalHelp"
+                                             help="Para completar el oficio, por favor ingrese la información requerida en las secciones correspondientes. Para previsualizar el documento presione Guardar." />
+               
+                </f:facet>
+                <object id="pdf_informe" type="application/pdf" 
+                        data="#{oficioEmisionesController.urlPdf}?pfdrid_c=true"
+                        width="100%" height="600px">
+                    Su navegador no soporta la visualización de pdf. Puede descargar el
+                    documento presionando el siguiente botón:
+                    <p:commandButton value="Descargar" styleClass="primary"
+                                     ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+                        <p:fileDownload value="#{oficioEmisionesController.stream}"/>
+                    </p:commandButton>
+                </object>
+
+                <br/>
+                <br/>
+					
+            	<p:panel id="panelOficio">                           
+                	<h:panelGrid columns="1" layout="grid" styleClass="w100" cellpadding="4" cellspacing="4"
+                	rendered="#{oficioEmisionesController.habilitarElaborar}">
+                    	<p:outputLabel value="Asunto" for="asunto"/>
+                    	<p:inputTextarea id="asunto" required="true" value="#{oficioEmisionesController.oficio.asunto}"
+                    	autoResize="false" rows="4" maxlength="2500" requiredMessage="Asunto es requerido."/>
+                    	
+                    	<p:outputLabel value="Pronunciamiento" for="pronunciamiento"/>
+                    	<control:imputConTextoEnriquecido id="pronunciamiento" 
+                    	valor="#{oficioEmisionesController.oficio.pronunciamiento}"
+						soloLectura="false" requerido="true" requiredMessage="Pronunciamiento es requerido."/>
+						                    	
+                	</h:panelGrid>
+                	
+                	 <h:panelGrid columns="1" styleClass="w100" id="pronunciamiento-wrapper"
+                             rendered="#{oficioEmisionesController.revisar}"
+                             columnClasses="w50, field_mrg w50">
+                    <p:outputLabel for="requiere-modificaciones"
+                                   value="¿Requiere modificaciones el Oficio?"
+                           />
+                    <p:selectOneRadio id="requiere-modificaciones"
+                                      value="#{oficioEmisionesController.requiereModificaciones}"
+                                      required="true">
+                        <f:selectItem itemLabel="Si"
+                                      itemValue="true"/>
+                        <f:selectItem itemLabel="No"
+                                      itemValue="false"/>
+                        <p:ajax event="change" update="@this"> </p:ajax>
+                    </p:selectOneRadio>
+                </h:panelGrid>
+                	                	
+            	</p:panel>
+               
+               </p:panelGrid>
+               
+                <h:panelGroup id="pnlOficio">
+						<observaciones:tablaObservaciones idComponent="panelOficioObs"
+							componenteActualizarEliminar="pnlOficio"
+							seccion="OficioEmisionesRetce"
+							nombreClase="oficioEmisionesRetce"
+							idClase="#{oficioEmisionesController.oficio.id}"							
+							aparace="#{oficioEmisionesController.habilitarObservaciones}"
+							mostrarSiVacio="#{!oficioEmisionesController.habilitarObservaciones}"
+							soloLectura="true" 
+							/>
+					</h:panelGroup>	
+            
+               
+
+          <div class="buttons main" id="buttons">
+				<p:commandButton value="Atrás" icon="ui-icon-arrowthick-1-w"
+					update="@form" process="@this"
+					action="#{oficioEmisionesController.atras()}"/>
+				<p:commandButton value="Guardar" icon="ui-icon-disk"
+					update=":form:oficioGrid :form:btnEnviar"
+					action="#{oficioEmisionesController.guardar()}" />				
+				<p:commandButton value="Enviar" icon="ui-icon-check"
+					update="@form" id="btnEnviar"
+					action="#{oficioEmisionesController.enviar}"
+					disabled="#{!oficioEmisionesController.oficioGenerado}" />
+			</div>
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>

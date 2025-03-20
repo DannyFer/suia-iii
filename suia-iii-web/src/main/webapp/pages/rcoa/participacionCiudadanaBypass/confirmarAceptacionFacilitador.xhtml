@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml">
+
+	<ui:define name="context-extra">
+		<h:outputText value="Datos" />
+		<h:outputText value="Estudio de Impacto Ambiental" />
+		<h:outputLink target="_blank"
+			value="#{request.contextPath}/pages/rcoa/estudioImpactoAmbiental/verProyectoEIAResumen.jsf">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+
+		<h:outputText value="Factura" />
+		<h:outputText value="Pago Facilitadores" />
+		<p:commandButton icon="ui-icon-arrowthick-1-s"
+			styleClass="button-small primary"
+			action="#{confirmarAceptacionFacilitadorController.descargarFactura()}"
+			ajax="false" />
+
+
+		<h:outputText value="Número de facilitadores" />
+		<h:outputText
+			value="#{confirmarAceptacionFacilitadorController.numeroFacilitadores}" />
+		<p:outputLabel></p:outputLabel>
+
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form id="form">
+
+			<h3>#{msg['label.participacionsocial.notificarAceptacionAsignacion']}</h3>
+			<p:outputLabel for="correcto"
+				value="#{confirmarAceptacionFacilitadorController.mensajeUsuario}"
+				styleClass="bold" />
+			<p:selectOneRadio id="correcto"
+				value="#{confirmarAceptacionFacilitadorController.correcto}"
+				required="true">
+				<f:selectItem itemLabel="Aceptar" itemValue="true" />
+				<f:selectItem itemLabel="Rechazar" itemValue="false" />
+				<p:ajax update=":form"
+					listener="#{confirmarAceptacionFacilitadorController.seleccionar()}" />
+			</p:selectOneRadio>
+
+			<br></br>
+
+			<p:dialog id="aceptarDialog" widgetVar="aceptarDialog"
+				visible="#{confirmarAceptacionFacilitadorController.verDialogos==1}"
+				header="Documentos necesarios para el Proceso de Participación Ciudadana"
+				modal="true" closable="false" width="500px" resizable="false">
+				<p:panel>
+					<h:panelGrid columns="1" styleClass="w100">
+						<p:outputLabel styleClass="bold text-red alJustify"
+							rendered="#{!confirmarAceptacionFacilitadorController.existeFacilitadorPrincipal}"
+							value="#{confirmarAceptacionFacilitadorController.mensajeAprobacion}" />
+
+						<p:outputLabel styleClass="bold text-red alJustify"
+							rendered="#{confirmarAceptacionFacilitadorController.existeFacilitadorPrincipal}"
+							value="#{confirmarAceptacionFacilitadorController.mensajeAprobacionFA}" />
+						<br />
+						<p:outputLabel styleClass="bold"
+							value="Formatos para el Proceso de Participación Ciudadana: *" />
+						<p:commandButton value="Descargar" ajax="false"
+							icon="ui-icon-arrowthick-1-s" styleClass="oculto primary">
+							<p:fileDownload
+								value="#{confirmarAceptacionFacilitadorController.stream}" />
+						</p:commandButton>
+					</h:panelGrid>
+				</p:panel>
+				<div class="buttons">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						icon="ui-icon-close"
+						action="#{confirmarAceptacionFacilitadorController.cerrar}"
+						update="@form" process="@this" />
+					<p:commandButton value="Aceptar" styleClass="primary"
+						icon="ui-icon-check"
+						action="#{confirmarAceptacionFacilitadorController.aceptar}"
+						update="@form" process="@this" />
+				</div>
+			</p:dialog>
+
+
+			<p:dialog id="rechazarDialog"
+				visible="#{confirmarAceptacionFacilitadorController.verDialogos==2}"
+				widgetVar="rechazarDialog" width="500px" header="Información"
+				modal="true" closable="false" resizable="false">
+				<p:panel>
+					<h:panelGrid columns="1" styleClass="w100">
+						<p:outputLabel styleClass="bold text-red alJustify"
+							value="Justificación" />
+						<p:inputTextarea id="observacion" maxlength="400"
+							value="#{confirmarAceptacionFacilitadorController.facilitador.justificacion}"
+							required="#{confirmarAceptacionFacilitadorController.correcto!=null and !confirmarAceptacionFacilitadorController.correcto}"
+							rows="3" autoResize="false"
+							requiredMessage="Ingrese una observación" />
+						<br />
+						<p:outputLabel styleClass="bold text-red alJustify"
+							value="Adjuntar documento de justificación * (.pdf) 20 MB" />
+						<p:fileUpload
+							fileUploadListener="#{confirmarAceptacionFacilitadorController.uploadDocumentoJustificativo}"
+							multiple="false" sizeLimit="20480000"
+							allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Tamaño de archivo no válido"
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" required="true" update="documentoRechazo">
+							<f:attribute name="clave" value="documentoJustificacion" />
+						</p:fileUpload>
+						<p:outputLabel id="documentoRechazo"
+							value="#{confirmarAceptacionFacilitadorController.documentoJustificacion.nombreDocumento}" />
+					</h:panelGrid>
+					<h:inputHidden
+						validator="#{confirmarAceptacionFacilitadorController.validateDatos}" />
+				</p:panel>
+				<div class="buttons">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						icon="ui-icon-close"
+						action="#{confirmarAceptacionFacilitadorController.cerrar}"
+						update="@form" process="@this" />
+					<p:commandButton value="Guardar" styleClass="primary"
+						icon="ui-icon-disk"
+						action="#{confirmarAceptacionFacilitadorController.cerrar}"
+						update="@form" process="rechazarDialog" />
+				</div>
+			</p:dialog>
+
+
+			<div class="buttons main">
+				<p:commandButton value="Enviar" styleClass="primary"
+					action="#{confirmarAceptacionFacilitadorController.completarTarea()}"
+					title="#{msg['label.enviarDatos']}" icon="ui-icon-check"
+					widgetVar="btnEnviar" onstart="PF('btnEnviar').disable()"
+					update="@form"
+					disabled="#{confirmarAceptacionFacilitadorController.habilitarEnviar}">
+					<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+						header="#{msg['header.confirmacion.envio.tarea']}" />
+				</p:commandButton>
+			</div>
+
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

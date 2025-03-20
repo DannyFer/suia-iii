@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<f:loadBundle var="helps" basename="ec.gob.ambiente.core.resources.helps_es" />
+<p:dialog header="Seleccionar desecho" id="seleccionarDesecho" widgetVar="seleccionarDesecho" modal="true" resizable="false" width="600">
+	<h:panelGrid styleClass="w100 separatorBottom" columns="2" columnClasses="w50, field_mrg" rendered="#{empty idDesecho}">
+		<p:outputLabel for="#{adicionarDesechosAliasRcoaBean.filtroDesecho}" value="Filtro" styleClass="bold" />
+		<h:outputText />
+		<h:panelGroup>
+			<p:inputText id="filtroDesecho" value="#{adicionarDesechosAliasRcoaBean.filter}" styleClass="w100" title="#{helps['registro.desecho.filtro']}" />
+			<p:tooltip for="filtroDesecho" escape="false" showDelay="1200" trackMouse="true" />
+		</h:panelGroup>
+		<h:panelGroup>
+			<div class="buttons-inline">
+				<p:commandButton icon="ui-icon-check" styleClass="primary" process="@this filtroDesecho" actionListener="#{adicionarDesechosAliasRcoaBean.init()}" update="seleccionarDesecho" oncomplete="PF('#{adicionarDesechosAliasRcoaBean.dialogoDesecho}').show()" />
+				<p:commandButton icon="ui-icon-refresh" styleClass="secondary" process="@this" actionListener="#{adicionarDesechosAliasRcoaBean.reset()}" update="seleccionarDesecho" oncomplete="PF('#{adicionarDesechosAliasRcoaBean.dialogoDesecho}').show()" />
+			</div>
+		</h:panelGroup>
+	</h:panelGrid>
+
+	<p:tree value="#{adicionarDesechosAliasRcoaBean.catalogo}" id="arbolCatalogoDesecho" var="catalogo" dynamic="true" selectionMode="multiple" styleClass="w100 h200px" rendered="#{!adicionarDesechosAliasRcoaBean.catalogo.leaf}">
+		<p:treeNode expandedIcon="ui-icon-folder-open" collapsedIcon="ui-icon-folder-collapsed" type="folder">
+			<h:outputText value="#{catalogo}" />
+		</p:treeNode>
+		<p:treeNode icon="ui-icon-document" type="document">
+			<span style="font-weight: bold; margin-right: 10px;">#{catalogo.clave}</span><h:outputText value=" #{catalogo}" />
+		</p:treeNode>
+		<p:ajax event="expand" update="arbolCatalogoDesecho" listener="#{adicionarDesechosAliasRcoaBean.onNodeExpand}" />
+		<p:ajax event="select" update=":form:desechoContainer" listener="#{adicionarDesechosAliasRcoaBean.onNodeSelect}" oncomplete="PF('seleccionarDesecho').hide()"/>
+		<p:ajax event="unselect" update=":form:desechoContainer" listener="#{adicionarDesechosAliasRcoaBean.onNodeUnselect}" />
+	</p:tree>
+	<p:panel rendered="#{adicionarDesechosAliasRcoaBean.catalogo.leaf}" styleClass="h200px alCenter">
+		<h:outputText value="No se encontraron resultados" styleClass="bold" />
+	</p:panel>
+	<p:separator />
+	<div class="buttons">
+		<p:commandButton type="button" value="Aceptar" onclick="PF('#{adicionarDesechosAliasRcoaBean.dialogoDesecho}').hide()"/>
+	</div>
+	
+	
+</p:dialog>
+
+<p:dialog widgetVar="dialogDesechoRepetido" modal="true" resizable="false" width="400" header="Nota">
+	<div>
+		<p>El desecho seleccionado ya se encuentra listado, en caso de que, de todas maneras requiera seleccionarlo no olvide que la descripción y cantidades deben ser diferentes</p>		 
+	</div>
+	<div class="buttons">
+		<p:commandButton value="Aceptar" actionListener="#{adicionarDesechosAliasRcoaBean.ingresarDesecho()}" process="@this" update=":form:desechoContainer form:tableDesechos"/>
+	</div>
+</p:dialog>
+
+
+<ui:remove>
+<p:dialog widgetVar="dialognotadesecho" modal="true" resizable="false" width="400" header="Nota">
+	<div>
+		<p>El registro de generador debe contemplar los desechos peligrosos y/o especiales generados:</p>
+		<ul>
+		<li>Propios de su actividad o servicio (fuentes espec&iacute;ficas)</li>
+		<li style="text-align: justify;"><span>Y los desechos de fuente no espec&iacute;fica en caso de generarlos (Ej. Bater&iacute;as usadas plomo-&aacute;cido, cartuchos de impresi&oacute;n de tinta o toner usados, luminarias, l&aacute;mparas, tubos fluoresentes, focos ahorradores usuados que contengan mercurio, entre otros)</span></li>
+		</ul> 
+	</div>
+	<div class="buttons">
+		<p:commandButton type="button" value="Aceptar" onclick="PF('#{adicionarDesechosAliasRcoaBean.dialogoDesecho}').show(),PF('dialognotadesecho').hide()" />
+	</div>
+</p:dialog>
+</ui:remove>
+</html>

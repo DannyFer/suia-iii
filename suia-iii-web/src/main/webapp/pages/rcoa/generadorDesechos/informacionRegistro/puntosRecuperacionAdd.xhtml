@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<p:panel id="adicionarPunto" widgetVar="adicionarPunto" toggleable="true" toggleOrientation="vertical" styleClass="colapsablePanel" collapsed="true">
+	<p:ajax event="toggle" listener="#{puntosRecuperacionRgdBean.toggleHandle}" update=":form:adicionarPunto" process="@this" />
+	<h:panelGroup id="containerPuntoRecuperacion">
+		<h:panelGroup rendered="#{puntosRecuperacionRgdBean.panelAdicionarVisible}">
+			<h:panelGroup id="datosGeneralesPunto">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Información por punto de generación" />
+					</f:facet>
+
+					<h:panelGrid styleClass="w100 separatorBottom" columns="3" columnClasses="w33, field_mrg w33,field_mrg w33">
+						<p:outputLabel for="puntoNombre" value="Nombre" />
+						<p:outputLabel for="puntoTelefono" value="Teléfono" />
+						<p:outputLabel for="puntoCorreo" value="Correo" />
+						<p:inputText id="puntoNombre" styleClass="w100" value="#{puntosRecuperacionRgdBean.puntoRecuperacion.nombre}"
+									 required="true" maxlength="100" onkeypress="return soloLetras(event);"/>						
+						<p:inputText id="puntoTelefono" styleClass="w100" value="#{puntosRecuperacionRgdBean.puntoRecuperacion.telefono}"
+									 required="true" maxlength="13" onkeypress="return numbersonly(event);">
+							<f:validateLength minimum="7" />
+						</p:inputText>
+						<p:inputText id="puntoCorreo" styleClass="w100" value="#{puntosRecuperacionRgdBean.puntoRecuperacion.correo}"
+									 required="true" maxlength="50">
+							<t:validateEmail />
+						</p:inputText>
+					</h:panelGrid>
+
+					<h:panelGroup id="datosDireccion">
+						<p:outputLabel value="Dirección" for="direccionRecuperacion" styleClass="bold" />
+						<p:inputTextarea value="#{puntosRecuperacionRgdBean.puntoRecuperacion.direccion}"
+										 id="direccionRecuperacion" rows="2" styleClass="w100" autoResize="false" maxlength="150"
+										 required="true" />
+					</h:panelGroup>
+
+				</p:panelGrid>
+			</h:panelGroup>
+
+			<h:panelGroup id="containerCoordenadas">
+				<p:panelGrid columns="1" layout="grid" styleClass="buttonAdjuntarCoordenadasContainer w100">
+					<f:facet name="header">
+						<p:commandButton value="Adjuntar" onclick="PF('adjuntarCoordenadas').show()" styleClass="buttonAdjuntarCoordenadas button-small-text toRight field_mrg" type="button" icon="ui-icon-document" />
+						<p:commandButton rendered="#{!empty cargarCoordenadasRcoaBean.plantillaCoordenadas}" value="Descargar plantilla" styleClass="button-small-text toRight field_mrg" icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true">
+							<p:fileDownload value="#{cargarCoordenadasRcoaBean.plantillaCoordenadas}" />
+						</p:commandButton>
+						<ui:remove>
+						<p:commandButton styleClass="button-small toRight field_mrg" ajax="false" immediate="true" icon="ui-icon-help">
+							<p:fileDownload value="#{cargarCoordenadasRcoaBean.ayudaCoordenadas}" />
+						</p:commandButton>
+						</ui:remove>
+						<h:outputText value="Sistema de referencia [Formato: sistema WGS84, zona 17S] *" />
+					</f:facet>
+					<ui:include src="/pages/rcoa/generadorDesechos/informacionRegistro/cargarCoordenadas.xhtml" />
+					<h:panelGroup>
+						<t:aliasBeansScope>
+							<t:aliasBean alias="#{adicionarUbicacionesAliasBean}" value="#{adicionarUbicacionesRcoaBean}" />
+							<ui:include src="/pages/rcoa/generadorDesechos/informacionRegistro/adicionarUbicaciones.xhtml" />
+						</t:aliasBeansScope>
+					</h:panelGroup>
+				</p:panelGrid>
+			</h:panelGroup>
+			<h:inputHidden validator="#{puntosRecuperacionRgdBean.validateData}" />
+		</h:panelGroup>
+	</h:panelGroup>
+
+	<div class="buttons">
+		<p:commandButton value="#{puntosRecuperacionRgdBean.editar ? 'Actualizar' : 'Aceptar'}"
+						 actionListener="#{puntosRecuperacionRgdBean.aceptar('RGDRCOA')}"
+						 oncomplete="tooglePuntoRecuperacion(xhr, status, args)"
+						 process="@this adicionarPunto" update="adicionarPunto :form:listadoPuntos" />
+		<p:commandButton value="Cancelar" styleClass="secondary" actionListener="#{puntosRecuperacionRgdBean.cancelar()}"
+						 oncomplete="PF('adicionarPunto').toggle()" process="@this" update="adicionarPunto">
+			<p:resetInput target="@form" />
+		</p:commandButton>
+	</div>
+	
+	<p:separator />
+</p:panel>
+
+<script type="text/javascript">
+	function tooglePuntoRecuperacion(xhr, status, args) {
+	    if(args.addPunto) {
+	    	PF('adicionarPunto').toggle();
+	    }            
+	}
+</script>
+
+</html>

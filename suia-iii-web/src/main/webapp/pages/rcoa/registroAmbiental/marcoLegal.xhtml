@@ -1,0 +1,115 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	
+	<style type="text/css">
+	.ui-widget-content .ui-datalist-content{
+	    border: none;
+	    background: transparent;
+	    background-image: none;
+	}
+	</style>
+	<p:panel header="MARCO LEGAL REFERENCIAL">
+		<h:form id="formMarcoReferencial">
+			<h:panelGroup id="pnlgMarco">
+				<br/>
+				<h:outputText value="Usted deber&aacute; ajustarse al siguiente marco legal" />
+				<p:dataList value="#{marcoLegalReferencialController.listaNormativa}" var="normativa" type="ordered" 
+					style="border: none;">
+			        <f:facet name="header">
+			            Normativas
+			        </f:facet>
+			         #{normativa.label}
+			    </p:dataList>
+				<p:dataTable id="tbl_marco_legal" rendered="false"
+					value="#{marcoLegalReferencialController.catalogoGenerals}" var="normativa"
+					emptyMessage="#{labels['common.table.empty']}">
+					<f:facet name="header">Normativas</f:facet>
+					<p:column style="width:16px">
+						<p:rowToggler />
+					</p:column>
+					<p:column>
+						<h:outputText value="#{normativa.descripcion}" />
+					</p:column>
+					<p:rowExpansion>
+						<p:panelGrid columns="2">
+							<p:subTable value="#{normativa.articulos}" var="articulo">
+								<p:column style="text-align: justify">
+									<h:outputText value="#{articulo.articulo}" escape="false" />
+								</p:column>
+							</p:subTable>
+						</p:panelGrid>
+					</p:rowExpansion>
+				</p:dataTable>
+				<br />
+				<p:outputLabel value="*Para completar exitosamente el Registro Ambiental usted debe leer y aceptar las Normativas legales que aplican a su Proyecto, obra o actividad."></p:outputLabel>
+				<table border="0">
+					<tr>
+						<td><p:outputLabel
+								value="He le&iacute;do y comprendo las Normativas" for="ckValidar"/></td>
+						<td><p:selectBooleanCheckbox id="ckValidar" 
+								value="#{marcoLegalReferencialController.validarMarcoLegal}"
+								disabled="#{marcoLegalReferencialController.habilitarIngreso}"
+								styleClass="primary" required="true">	
+								<p:ajax update=":formMarcoReferencial:pnlgMarco" process="@this" />							
+							</p:selectBooleanCheckbox></td>
+					</tr>
+				</table>
+				<br/>
+				<div class="buttons main">
+					<p:commandButton value="Guardar" id="btnGuardar"	icon="ui-icon-disk"	immediate="true" disabled="#{!marcoLegalReferencialController.validarMarcoLegal or marcoLegalReferencialController.habilitarIngreso}"
+						action="#{marcoLegalReferencialController.guardar}" update=":formMarcoReferencial" />
+					<p:commandButton value="Siguiente" immediate="true" disabled="#{!marcoLegalReferencialController.validarDatos and !marcoLegalReferencialController.habilitarIngreso}"
+						process="@this" action="#{registroAmbientalController.siguiente()}" update=":formMarcoReferencial"
+						icon="ui-icon-arrowthick-1-e" />
+				</div>
+			</h:panelGroup>
+		</h:form>
+		
+		<h:form>
+		<p:remoteCommand autoRun="false" actionListener="#{marcoLegalReferencialController.mostrarMensaje()}" process="@this" oncomplete="showModalProyectosNoFinalizados(xhr, status, args)" />
+				<p:dialog header="" id="dlgNotificacion11" widgetVar="dlgNotificacion11" modal="true" resizable="false" showHeader="false"
+					rendered="true" draggable="false" width="700">
+					<h:panelGrid columns="1">
+					<p class="allJustify" style="text-align: justify;padding-left: 25px; font-weight: bold;"	>Estimada(o) Usuaria(o):</p>
+						<p class="allJustify" style="text-align: justify;padding-right: 25px;padding-left: 25px; white-space: pre-line;	word-wrap: break-word;"	escape="false">
+						Para salvaguardar la integridad de los servicios que brinda esta Cartera de Estado, se le indica que, el <strong>Registro Ambiental</strong> requiere de la presentación de un <strong>Plan de Manejo Ambiental</strong>, el cual al ser emitido deberá implementarse desde el inicio de su proyecto, obra o actividad.  Por su contenido técnico, la PERSONA RESPONSABLE de elaborar este Plan debe contar con el pertinente título de Tercer Nivel registrado en la SENESCYT, en concordancia con la Constitución de la República del Ecuador artículos 83.12 y 396 inciso tercero, Ley Orgánica de Educación Superior y, Ley de Ejercicio Profesional de la Ingeniería. Con ello, se evita incurrir en el ejercicio ilegal de la profesión sancionado en el Código Orgánico Integral Penal.
+						<br/><br/>El Registro Ambiental no requiere que la Persona Responsable se encuentre registrada como Consultor Ambiental de esta institución; pudiendo ser quien, además, implemente dicho Plan.
+						</p>
+						<f:facet name="footer">
+							<div style="text-align: center;">
+									<p:commandButton value="Entendido"	styleClass="primary" oncomplete="PF('dlgNotificacion11').hide();" >
+									<p:effect type="pulsate" event="click"  delay="500" speed="3000"  />
+									</p:commandButton>
+							</div>
+						</f:facet>
+					</h:panelGrid>
+				</p:dialog>
+				
+				<p:dialog header="Atención" id="dlgNotificacionBloqueo" widgetVar="dlgNotificacionBloqueo" modal="true" resizable="false"
+					rendered="true" draggable="false" width="600">
+					<h:panelGrid columns="1" width="100%">
+						<p:outputLabel>mensaje el  especialista buscado no tiene el titulo registrado en el senecyt</p:outputLabel>
+						<br/>
+						<f:facet name="footer">
+							<div style="text-align: center;">
+									<p:commandButton value="Aceptar" ajax="false" 	styleClass="primary" onclick="PF('dlgNotificacionBloqueo').hide()" />
+							</div>
+						</f:facet>
+					</h:panelGrid>
+				</p:dialog>
+			</h:form>
+	</p:panel>
+
+		<script type="text/javascript">
+		        function showModalProyectosNoFinalizados(xhr, status, args) {
+	            if (args.mostrarNoMensaje) {
+	            	PF('dlgNotificacion11').show();
+	            }
+	        }
+    	</script>
+    	
+</html>

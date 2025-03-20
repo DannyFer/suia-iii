@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+<ui:composition>
+	<f:loadBundle var="helps"
+		basename="ec.gob.ambiente.core.resources.helps_es" />
+	<f:loadBundle var="msg"
+		basename="ec.gob.ambiente.core.resources.messages_es" />
+	<h:panelGrid columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<h:outputText
+				value="#{msg['label.prevencion.tdr.identEvalValoracImpactosAmbientalesYAnalisisRiesgos']}"
+				styleClass="encabezado1_4em alLeft" />
+		</f:facet>
+		<h:outputText />
+		<h:outputText />
+		<p:outputLabel
+			value="#{msg['label.prevencion.tdr.metodologiaEvaluacionImpactos']}: *" />
+		<control:imputConTextoEnriquecido
+			valor="#{ingresarTDRBean.tdrEia.tdelImpactAssessmentMethodology}"
+			requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.metodologiaEvaluacionImpactos']} #{msg['label.prevencion.tdr.requerido']}."
+			soloLectura="#{ingresarTDRBean.procesoIniciado}"  requerido="true" />
+
+		<h:outputText />
+		<h:outputText />
+		<p:outputLabel
+			value="#{msg['label.prevencion.tdr.metodologiaAnalisisRiesgos']}: *" />
+		<control:imputConTextoEnriquecido
+		requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.metodologiaAnalisisRiesgos']} #{msg['label.prevencion.tdr.requerido']}."
+		
+			valor="#{ingresarTDRBean.tdrEia.tdelRiskAnalysisMethodology}"
+			soloLectura="#{ingresarTDRBean.procesoIniciado}"  requerido="true" />
+	</h:panelGrid>
+
+
+
+	<p:fragment>
+		<h:panelGrid columns="2" rendered="#{ingresarTDRBean.procesoIniciado}">
+			<p:outputLabel for="commentRadio"
+				value="#{msg['label.prevencion.tdr.observacionLabel']}"
+				styleClass="bold" />
+			<p:selectOneRadio required="true" id="commentRadio"
+				value="#{ingresarTDRBean.observacionTdrEiaLiciencia.obs_identificacionEvaluacionValoracion}">
+				<f:selectItem itemLabel="Sí" itemValue="true" />
+				<f:selectItem itemLabel="No" itemValue="false" />
+				<p:ajax process="@this" update="commentValue"></p:ajax>
+			</p:selectOneRadio>
+		</h:panelGrid>
+	</p:fragment>
+	<h:panelGroup id="commentValue"
+		rendered="#{ingresarTDRBean.procesoIniciado}">
+		<p:outputLabel value="#{msg['label.prevencion.tdr.justifique']} *"
+			rendered="#{ingresarTDRBean.observacionTdrEiaLiciencia.obs_identificacionEvaluacionValoracion}" />
+		<control:imputConTextoEnriquecido
+			requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.justifique']} #{msg['label.prevencion.tdr.requerido']}."
+			valor="#{ingresarTDRBean.observacionTdrEiaLiciencia.identificacionEvaluacionValoracion}"
+			requerido="#{ingresarTDRBean.observacionTdrEiaLiciencia.obs_identificacionEvaluacionValoracion}"
+			rendered="#{ingresarTDRBean.observacionTdrEiaLiciencia.obs_identificacionEvaluacionValoracion}" />
+	</h:panelGroup>
+
+
+	<p:separator />
+	<div class="buttons">
+		<p:commandButton id="saveComment"
+			rendered="#{ingresarTDRBean.procesoIniciado}"
+			value="#{msg['button.guardar']}"
+			actionListener="#{ingresarObservacionesTDRController.guardarObservacion(6)}"
+			update=":formularioTDR" icon="ui-icon-disk"></p:commandButton>
+
+		<p:commandButton value="#{msg['button.guardar']}"
+			rendered="#{!ingresarTDRBean.procesoIniciado}"
+			update=":formularioTDR"
+			action="#{ingresarTDRController.guardarFichaTecnicaSimple()}" />
+		<p:commandButton value="#{msg['button.limpiar']}"
+			rendered="#{!ingresarTDRBean.procesoIniciado}" styleClass="secondary"
+			icon="ui-icon-document"
+			actionListener="#{ingresarTDRBean.limpiarFormulario(6)}"
+			update=":formularioTDR" process="@this">
+			<p:resetInput target=":formularioTDR" />
+		</p:commandButton>
+	</div>
+</ui:composition>
+</html>

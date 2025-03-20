@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+    <h:form id="frmInsumos">
+        <p:panelGrid id="pnlInsumos" columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+            <f:facet name="header">
+                <mae:panelGridHeaderHelp value="Insumos"
+                	conector="generalHelp" help="#{helps['registroMineria.materialesInsumos']}" 
+                    image="#{request.contextPath}/resources/images/help-how.png"/>
+            </f:facet>
+            <h:panelGrid columns="3" layout="grid" cellpadding="0" cellspacing="10">
+                <p:outputLabel value="Tipo de insumo *" for="cmbInsumos:cpcmbInsumos"/>
+                <p:outputLabel value="Insumo *" for="cmbHijosInsumos:cpcmbHijosInsumos"/>
+                <h:inputHidden />
+                                
+                <control:comboAjax valor="#{descripcionActividadMineraController.descripcionActividadMineraBean.idInsumos}" id="cmbInsumos" identificador="cmbInsumos" lista="#{descripcionActividadMineraController.descripcionActividadMineraBean.listaInsumos}"  ajax="#{descripcionActividadMineraController.cargarHijosInsumos()}" idComponenteActualizar="pnlInsumos"/>
+                <control:comboAjax valor="#{descripcionActividadMineraController.descripcionActividadMineraBean.idHijosInsumos}" id="cmbHijosInsumos" identificador="cmbHijosInsumos" lista="#{descripcionActividadMineraController.descripcionActividadMineraBean.listaHijosInsumos}" idComponenteActualizar="pnlInsumos" ajax="#{descripcionActividadMineraController.cargarOtrosHijosInsumos()}"/>
+                <h:inputHidden />
+                
+                <p:outputLabel value="Cantidad *" for="txtCantidad:cptxtCantidad" rendered="#{!descripcionActividadMineraController.descripcionActividadMineraBean.apareceOtrosHijosInsumos}"/>
+                <p:outputLabel value="Unidad Medida *" rendered="#{!descripcionActividadMineraController.descripcionActividadMineraBean.apareceOtrosHijosInsumos}"/>
+                <h:outputLabel value=""  rendered="#{descripcionActividadMineraController.descripcionActividadMineraBean.apareceOtrosHijosInsumos}"/>
+                <h:outputLabel value=""  rendered="#{descripcionActividadMineraController.descripcionActividadMineraBean.apareceOtrosHijosInsumos}"/>
+                <h:inputHidden/>
+                
+                <control:soloTextoNumeros id="txtCantidad" identificador="txtCantidad" valor="#{descripcionActividadMineraController.descripcionActividadMineraBean.fichaMineriaInsumos.cantidadHijoInsumo}" longitud="10" tamanio="10" rendered="#{!descripcionActividadMineraController.descripcionActividadMineraBean.apareceOtrosHijosInsumos}"/>
+                <p:selectOneMenu converter="selectItemConverter" style="width:250px" id="unidadMedida" rendered="#{!descripcionActividadMineraController.descripcionActividadMineraBean.apareceOtrosHijosInsumos}"
+                	value="#{descripcionActividadMineraController.descripcionActividadMineraBean.fichaMineriaInsumos.unidadMedida}">
+                    <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+                    <f:selectItems value="#{descripcionActividadMineraController.descripcionActividadMineraBean.catalogoUnidadMedida}"
+                        var="unidadMedida" itemLabel="#{unidadMedida.siglas}" itemValue="#{unidadMedida}" />
+                </p:selectOneMenu>    
+                <p:commandButton value="Adicionar" styleClass="primary" action="#{descripcionActividadMineraController.agregarInsumo()}" update=":#{p:component('pnlInsumos')}" rendered="#{!descripcionActividadMineraController.descripcionActividadMineraBean.apareceOtrosHijosInsumos}"/>
+            </h:panelGrid>
+
+            <h:panelGrid columns="4" layout="grid"
+                         id="pnlOtros" cellpadding="0" cellspacing="10">
+                <p:outputLabel value="Otros insumo *" for="txtOtrosInsumos:cptxtOtrosInsumos" rendered="#{descripcionActividadMineraController.descripcionActividadMineraBean.apareceOtrosInsumos}"/>
+                <p:outputLabel value="Otros insumo *" for="txtOtrosMateriales:cptxtOtrosMateriales" rendered="#{descripcionActividadMineraController.descripcionActividadMineraBean.apareceOtrosHijosInsumos}"/>
+                <p:outputLabel value="Cantidad *" for="txtCantidad1:cptxtCantidad1" rendered="#{descripcionActividadMineraController.descripcionActividadMineraBean.apareceOtrosHijosInsumos}"/>
+                <p:outputLabel value="Unidad Medida *" rendered="#{descripcionActividadMineraController.descripcionActividadMineraBean.apareceOtrosHijosInsumos}"/>
+                <h:inputHidden/>
+                <control:todoTextoComoIngrese id="txtOtrosInsumos" identificador="txtOtrosInsumos" valor="#{descripcionActividadMineraController.descripcionActividadMineraBean.fichaMineriaInsumos.insumoOtro}" rendered="#{descripcionActividadMineraController.descripcionActividadMineraBean.apareceOtrosInsumos}" requerido="#{descripcionActividadMineraController.descripcionActividadMineraBean.apareceOtrosInsumos}" tamanio="30" longitud="100"/>
+                <control:todoTextoComoIngrese id="txtOtrosMateriales" identificador="txtOtrosMateriales" valor="#{descripcionActividadMineraController.descripcionActividadMineraBean.fichaMineriaInsumos.hijoInsumoOtro}" rendered="#{descripcionActividadMineraController.descripcionActividadMineraBean.apareceOtrosHijosInsumos}" requerido="#{descripcionActividadMineraController.descripcionActividadMineraBean.apareceOtrosHijosInsumos}" tamanio="45" longitud="100"/>            
+                <control:soloTextoNumeros id="txtCantidad1" identificador="txtCantidad1" valor="#{descripcionActividadMineraController.descripcionActividadMineraBean.fichaMineriaInsumos.cantidadHijoInsumo}" longitud="10" tamanio="10" rendered="#{descripcionActividadMineraController.descripcionActividadMineraBean.apareceOtrosHijosInsumos}"/>
+                <p:selectOneMenu converter="selectItemConverter" style="width:200px" id="unidadMedida1" rendered="#{descripcionActividadMineraController.descripcionActividadMineraBean.apareceOtrosHijosInsumos}"
+                	value="#{descripcionActividadMineraController.descripcionActividadMineraBean.fichaMineriaInsumos.unidadMedida}">
+                    <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+                    <f:selectItems value="#{descripcionActividadMineraController.descripcionActividadMineraBean.catalogoUnidadMedida}"
+                        var="unidadMedida" itemLabel="#{unidadMedida.siglas}" itemValue="#{unidadMedida}" />
+                </p:selectOneMenu>             
+                <p:commandButton value="Adicionar" styleClass="primary" action="#{descripcionActividadMineraController.agregarInsumo()}" update=":#{p:component('pnlInsumos')}" rendered="#{descripcionActividadMineraController.descripcionActividadMineraBean.apareceOtrosHijosInsumos}"/>
+            </h:panelGrid>        
+
+            <p:dataTable value="#{descripcionActividadMineraController.descripcionActividadMineraBean.listaInsumosAgregados}" var="insumos"
+                         paginator="true" paginatorPosition="bottom" rows="5" emptyMessage="#{labels['common.table.empty']}">
+                <p:column headerText="#{msg['label.numero']}" width="5%">
+					<h:outputText
+						value="#{insumos.indice+1}" />
+				</p:column>
+                <p:column width="30%" headerText="Tipo de insumo">
+                    <h:outputText value="#{insumos.catalogoInsumo.descripcion}"/>
+                </p:column>
+                <p:column width="20%" headerText="Insumo">
+                    <h:outputText value="#{insumos.idCatalogoHijoInsumo==null?insumos.hijoInsumoOtro:insumos.catalogoHijoInsumo.descripcion.equals('Otros')?insumos.hijoInsumoOtro:insumos.catalogoHijoInsumo.descripcion}"/>
+                </p:column>
+                <p:column width="15%" headerText="Cantidad">
+                    <h:outputText value="#{insumos.cantidadHijoInsumo}"/>
+                </p:column>
+                <p:column width="15%" headerText="Unidad Medida">
+                    <h:outputText value="#{insumos.unidadMedida.siglas}"/>
+                </p:column>
+                <p:column width="15%" headerText="Acciones">
+                    <div class="buttons-inline alCenter">
+                        <p:commandButton icon="ui-icon-pencil" styleClass="primary" action="#{descripcionActividadMineraController.seleccionarInsumo(insumos,1)}"                                                                                         update=":#{p:component('pnlInsumos')}" />
+                        <p:commandButton icon="ui-icon-trash" styleClass="secondary"
+                                         action="#{descripcionActividadMineraController.eliminarInsumo(insumos.indice)}"
+                                         update=":#{p:component('pnlInsumos')}"/>
+                    </div>
+                </p:column>
+            </p:dataTable>
+        </p:panelGrid>
+    </h:form>
+</ui:composition>

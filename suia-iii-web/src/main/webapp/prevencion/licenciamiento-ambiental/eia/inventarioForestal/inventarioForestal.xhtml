@@ -1,0 +1,1067 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:pe="http://primefaces.org/ui/extensions"
+	  xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	  xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<ui:composition
+		template="/prevencion/licenciamiento-ambiental/eia/default.xhtml">
+	<ui:define name="content-eia">
+		<h:form id="frmDatos">
+			<p:outputLabel value="¿Su proyecto tiene inventario forestal?" />
+			<p:selectOneRadio required="true"
+							  value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.tieneInventarioForestal}">
+				<f:selectItem itemLabel="Sí" itemValue="true" />
+				<f:selectItem itemLabel="No" itemValue="false" />
+				<p:ajax process="@this"
+						update="@form" />
+			</p:selectOneRadio>
+			
+			<!--MarielaG para mostrar historico -->
+			<!-- cuando se ingresa el inventario en la modificacion -->
+			<h:panelGrid columns="1" styleClass="w100 uppercase"
+				columnClasses="w100"
+				rendered="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.numeroNotificacion != null}">
+				<p:outputLabel value="Inventario forestal nuevo ingreso" styleClass="bold text-orange"/>
+			</h:panelGrid>
+			<!--fin historico -->
+			
+			<!-- MarielaG para mostrar historico -->
+			<h:panelGrid styleClass="panel_data" columns="2"
+				columnClasses="header background-orange, null"
+				rowClasses="null, alt"
+				rendered="#{inventarioForestalController.inventarioForestalBean.inventarioForestalOriginal != null and !inventarioForestalController.inventarioForestalBean.inventarioForestal.tieneInventarioForestal.equals(inventarioForestalController.inventarioForestalBean.inventarioForestalOriginal.tieneInventarioForestal)}">
+				<h:outputText styleClass="ui-widget" value="Tiene inventario forestal original" />
+				<h:outputText styleClass="ui-widget bold"
+					value="#{inventarioForestalController.inventarioForestalBean.inventarioForestalOriginal.tieneInventarioForestal ? 'SI' : 'NO'}" />
+			</h:panelGrid>
+			<!-- fin historico -->
+			
+			
+			<h:panelGrid columns="1"
+						 rendered="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.tieneInventarioForestal}"
+						 id="inventarioForestal">
+				<p:panel header="Inventario forestal">
+
+					<p:separator />
+					<h:outputText styleClass="w100 text-red"
+								  value="Debe adjuntar el informe del inventario forestal" />
+					<p:separator />
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+								 id="panelGridAdjuntos">
+						<f:facet name="header">
+							<h:outputText value="Inventario forestal *" />
+
+						</f:facet>
+						<h:panelGroup id="panelAdjuntos">
+							<p:outputLabel id="etiqueta"
+										   value="#{empty inventarioForestalController.inventarioForestalBean.documentoGeneral.nombre ? 'Documento (pdf)' : inventarioForestalController.inventarioForestalBean.documentoGeneral.nombre}" />
+							<span class="w10"></span>
+							<p:commandButton id="download"
+											 rendered="#{not empty inventarioForestalController.inventarioForestalBean.documentoGeneral.nombre}"
+											 icon="ui-icon-arrowthick-1-s" ajax="false"
+											 styleClass="button-small primary" title="Ver" immediate="true">
+								<p:fileDownload
+										value="#{inventarioForestalController.getStreamContent(0)}" />
+							</p:commandButton>
+						</h:panelGroup>
+						<p:fileUpload id="fileUploadDocumentoGeneral"
+									  fileUploadListener="#{inventarioForestalController.uploadListenerDocumentos}"
+									  multiple="false" sizeLimit="10485760"
+									  allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar"
+									  uploadLabel="Subir"
+									  invalidFileMessage="Tipo de archivo no válido"
+									  invalidSizeMessage="Debe adjuntar un archivo no mayor de 10 Mb."
+									  cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+									  auto="true" update="panelGridAdjuntos" />
+									  									  
+									  
+						<!-- MarielaG para mostrar historico DOCUMENTOS HISTORICO-->
+						<h:panelGrid styleClass="panel_data" columns="2"
+							rendered="#{inventarioForestalController.listaDocumentoGeneralHistorico.size() > 0}"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt">
+							<h:outputText value="Historial de documentos" />
+							<p:commandButton styleClass="button-small primary"
+								process="@this" icon="ui-icon-search"
+								action="#{inventarioForestalController.fillHistorialDocumentos(0)}"
+								update=":formDocumentosOriginal:documentosOriginalesDlg"
+								oncomplete="PF('documentosOriginalesDlg').show()" />
+						</h:panelGrid>
+						<!-- fin historico -->
+						
+					</p:panelGrid>
+					<h:inputHidden id="campoOcultoAdjuntoGeneral"
+								   validator="#{inventarioForestalController.validateAdjunto}" />
+					<br />
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+								 id="panelGridGeneral">
+						<h:panelGrid styleClass="w100 separatorBottom" columns="3"
+									 columnClasses="w33, w33">
+							<p:outputLabel for="areaIntervencionProyecto"
+										   value="Área de intervención del proyecto (ha)" />
+							<p:outputLabel for="areaAfectacionRemocionCoverturaVegetal"
+										   value="Área de afectación por remoción de cobertura vegetal (ha)" />
+							<p:outputLabel for="superficieMuestreo"
+										   value="Superficie de muestreo (ha)" />
+							<p:inputText id="areaIntervencionProyecto" maxlength="5"
+										 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.areaInversionProyecto}"
+										 required="true">
+								<pe:keyFilter mask="num" />
+							</p:inputText>
+							<p:inputText id="areaAfectacionRemocionCoverturaVegetal"
+										 maxlength="5"
+										 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.areaPorRemocionDeCoverturaVejetal}"
+										 required="true">
+								<pe:keyFilter mask="num" />
+							</p:inputText>
+							<p:inputText id="superficieMuestreo" maxlength="5"
+										 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.superficieMuestreo}"
+										 required="true">
+								<pe:keyFilter mask="num" />
+							</p:inputText>
+						</h:panelGrid>
+					</p:panelGrid>
+					
+					 <!-- MarielaG para mostrar historico INFO GENERAL-->
+						<h:panelGrid styleClass="panel_data" columns="2"
+							rendered="#{inventarioForestalController.infoGeneralChanged}"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt">
+							<h:outputText value="Historial información general" />
+							<p:commandButton styleClass="button-small primary"
+								process="@this" icon="ui-icon-search"
+								oncomplete="PF('infoOriginalDlg').show()" />
+						</h:panelGrid>
+						<!-- fin historico -->
+					
+					<br />
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+								 id="panelGridPuntos">
+						<f:facet name="header">
+							<h:outputText value="Ubicación de puntos de muestreos" />
+						</f:facet>
+						<f:facet name="header">
+							<p:commandButton
+									styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg"
+									icon="ui-icon-plusthick" value="Adicionar"
+									update="panelPuntoMuestreo" process="@this"
+									actionListener="#{inventarioForestalController.agregarPunto}"
+									oncomplete="PF('adicionarPuntoMuestreo').show();" />
+						</f:facet>
+						<p:dataTable id="tablePuntosMuestreo"
+									 value="#{inventarioForestalController.inventarioForestalBean.listaInventarioForestalPuntos}"
+									 paginator="true" rows="10" paginatorPosition="bottom"
+									 rowIndexVar="index" var="puntoMuestreo"
+									 emptyMessage="#{labels['common.table.empty']}"
+									 paginatorAlwaysVisible="false">
+							<p:column headerText="Código de parcela">
+								<h:outputText value="#{puntoMuestreo.codigoParcela}" />
+							</p:column>
+							<p:column headerText="Área de la parcela (m2)">
+								<h:outputText value="#{puntoMuestreo.areaParcela}" />
+							</p:column>
+							<p:column headerText="Índice de Simpson">
+								<h:outputText
+										value="#{inventarioForestalController.cargarTipoIndice(puntoMuestreo.indiceSimpson)}" />
+							</p:column>
+							<p:column headerText="Índice de Shannon">
+								<h:outputText
+										value="#{inventarioForestalController.cargarTipoIndice(puntoMuestreo.indiceShannon)}" />
+							</p:column>
+
+							<p:column styleClass="w15 alCenter">
+								<p:commandButton icon="ui-icon-pencil"
+												 styleClass="button-small primary"
+												 update=":#{p:component('panelPuntoMuestreo')}" process="@this"
+												 oncomplete="PF('adicionarPuntoMuestreo').show()"
+												 actionListener="#{inventarioForestalController.seleccionarPunto(puntoMuestreo)}" />
+								<p:commandButton icon="ui-icon-circle-close"
+												 styleClass="button-small primary"
+												 update=":#{p:component('tablePuntosMuestreo')}" process="@this"
+												 actionListener="#{inventarioForestalController.removerPunto(puntoMuestreo)}">
+									<p:confirm header="Confirmación"
+											   message="¿Está seguro que desea eliminar este Punto de muestreo?"
+											   icon="ui-icon-alert" />
+								</p:commandButton>
+								
+								<p:commandButton icon="ui-icon-search"
+									rendered="#{puntoMuestreo.registroModificado or puntoMuestreo.nuevoEnModificacion}"
+									styleClass="button-small orange"
+									update=":#{p:component('panelPuntoMuestreo')} :formPuntos:puntosDlg" process="@this"
+									oncomplete="PF('adicionarPuntoMuestreo').show()"
+									actionListener="#{inventarioForestalController.seleccionarPunto(puntoMuestreo)}" />
+								
+							</p:column>
+						</p:dataTable>
+						
+						<!--MarielaG para mostrar historico PUNTOS ELIMINADOS-->
+						<h:panelGrid columns="1" styleClass="w100 uppercase"
+							columnClasses="w100"
+							rendered="#{inventarioForestalController.inventarioForestalBean.listaInventarioForestalPuntosEliminados.size() > 0}">
+							<p:outputLabel value="Ubicación de puntos de muestreos eliminados"
+								styleClass="bold text-orange" />
+						</h:panelGrid>
+						
+						<p:dataTable id="tblPuntosEliminados" rowIndexVar="index"
+							rendered="#{inventarioForestalController.inventarioForestalBean.listaInventarioForestalPuntosEliminados.size() > 0}"
+							value="#{inventarioForestalController.inventarioForestalBean.listaInventarioForestalPuntosEliminados}"
+							var="puntoMuestreo" emptyMessage="#{labels['common.table.empty']}">
+							<p:column headerText="Código de parcela">
+                                <h:outputText value="#{puntoMuestreo.codigoParcela}"/>
+                            </p:column>
+                            <p:column headerText="Área de la parcela (m2)">
+                                <h:outputText value="#{puntoMuestreo.areaParcela}"/>
+                            </p:column>
+                            <p:column headerText="Índice de Simpson">
+                                <h:outputText
+                                        value="#{inventarioForestalController.cargarTipoIndice(puntoMuestreo.indiceSimpson)}"/>
+                            </p:column>
+                            <p:column headerText="Índice de Shannon">
+                                <h:outputText
+                                        value="#{inventarioForestalController.cargarTipoIndice(puntoMuestreo.indiceShannon)}"/>
+                            </p:column>
+
+                            <p:column styleClass="w40px alCenter">
+                                <p:commandButton icon="ui-icon-search" styleClass="button-small primary"
+                                                 update=":#{p:component('panelPuntoMuestreo')}" process="@this"
+                                                 oncomplete="PF('adicionarPuntoMuestreo').show()"
+                                                 actionListener="#{inventarioForestalController.seleccionarPuntoEliminado(puntoMuestreo)}"/>
+                            </p:column>
+						</p:dataTable>
+						<!--fin historico -->
+						
+						
+					</p:panelGrid>
+					<h:inputHidden id="campoOcultoPuntosMuestreo"
+								   validator="#{inventarioForestalController.validatePuntosMuestreo}" />
+
+					<ui:include
+							src="/prevencion/licenciamiento-ambiental/eia/inventarioForestal/formularios/puntosMuestreoModal.xhtml" />
+					<br />
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+								 id="panelGridVolumen">
+						<f:facet name="header">
+							<h:outputText value="Tabla de volumen" />
+							<mae:panelGridHeaderHelp conector="riesgoHelp"
+													 help="#{helps['eia.inventarioForestal.adjuntoTablaVolumen']}"
+													 width="500px" value="" />
+
+						</f:facet>
+						<p:panelGrid columns="2" layout="grid" styleClass="w100">
+							<f:facet name="header">
+								<h:outputText value="Plantilla tabla de volumen" />
+							</f:facet>
+							<p:outputLabel id="etiquetaDescargarPlantillaVolumen"
+										   value="Descargar" />
+							<p:commandButton id="downloadPlantillaVolumen" rendered="true"
+											 icon="ui-icon-arrowthick-1-s" ajax="false"
+											 styleClass="button-small primary" title="Ver" immediate="true">
+								<p:fileDownload
+										value="#{inventarioForestalController.descargarPlantilla(1)}" />
+							</p:commandButton>
+						</p:panelGrid>
+						<br />
+						<h:panelGroup id="panelAdjuntosVolumen">
+							<p:outputLabel id="etiquetaVolumen"
+										   value="#{empty inventarioForestalController.inventarioForestalBean.adjuntosVolumen.nombre ? 'Adjuntar documento(zip|rar|xls|xlsx)' : inventarioForestalController.inventarioForestalBean.adjuntosVolumen.nombre}" />
+							<span class="w10"></span>
+							<p:commandButton id="downloadVolumen"
+											 rendered="#{not empty inventarioForestalController.inventarioForestalBean.adjuntosVolumen.nombre}"
+											 icon="ui-icon-arrowthick-1-s" ajax="false"
+											 styleClass="button-small primary" title="Ver" immediate="true">
+								<p:fileDownload
+										value="#{inventarioForestalController.getStreamContent(1)}" />
+							</p:commandButton>
+						</h:panelGroup>
+						<p:fileUpload id="fileUploadVolumen"
+									  fileUploadListener="#{inventarioForestalController.uploadListenerAdjuntoVolumen}"
+									  multiple="false" sizeLimit="10485760"
+									  allowTypes="/(\.|\/)(zip|rar|xls|xlsx)$/" label="Seleccionar"
+									  uploadLabel="Subir"
+									  invalidFileMessage="Tipo de archivo no válido"
+									  invalidSizeMessage="Debe adjuntar un archivo no mayor de 10 Mb."
+									  cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+									  auto="true" update="panelGridVolumen" />
+					
+					  <!-- MarielaG para mostrar historico DOCUMENTOS HISTORICO-->
+						<h:panelGrid styleClass="panel_data" columns="2"
+							rendered="#{inventarioForestalController.listaAdjuntoVolumenHistorico.size() > 0}"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt">
+							<h:outputText value="Historial de documentos" />
+							<p:commandButton styleClass="button-small primary"
+								process="@this" icon="ui-icon-search"
+								action="#{inventarioForestalController.fillHistorialDocumentos(1)}"
+								update=":formDocumentosOriginal:documentosOriginalesDlg"
+								oncomplete="PF('documentosOriginalesDlg').show()" />
+						</h:panelGrid>
+						<!-- fin historico -->					
+					
+					</p:panelGrid>
+					<h:inputHidden id="campoOcultoAdjuntoVolumen"
+								   validator="#{inventarioForestalController.validateAdjuntoVolumen}" />
+
+					<br />
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+								 id="panelGridIndice">
+						<f:facet name="header">
+							<h:outputText value="Tabla de índices de valor de importancia " />
+							<mae:panelGridHeaderHelp conector="riesgoHelp"
+													 help="#{helps['eia.inventarioForestal.adjuntoTablaIndice']}"
+													 width="500px" value="" />
+						</f:facet>
+
+						<p:panelGrid columns="2" layout="grid" styleClass="w100">
+							<f:facet name="header">
+								<h:outputText value=" Plantilla índices de valor de importancia" />
+							</f:facet>
+							<p:outputLabel id="etiquetaDescargarPlantillaIndice"
+										   value="Descargar" />
+							<p:commandButton id="downloadPlantillaIndice" rendered="true"
+											 icon="ui-icon-arrowthick-1-s" ajax="false"
+											 styleClass="button-small primary" title="Ver" immediate="true">
+								<p:fileDownload
+										value="#{inventarioForestalController.descargarPlantilla(2)}" />
+							</p:commandButton>
+						</p:panelGrid>
+						<br />
+						<h:panelGroup id="panelAdjuntosIndice">
+							<p:outputLabel id="etiquetaIndice"
+										   value="#{empty inventarioForestalController.inventarioForestalBean.adjuntosIndice.nombre ? 'Adjuntar documento(zip|rar|xls|xlsx)' : inventarioForestalController.inventarioForestalBean.adjuntosIndice.nombre}" />
+							<span class="w10"></span>
+							<p:commandButton id="downloadIndice"
+											 rendered="#{not empty inventarioForestalController.inventarioForestalBean.adjuntosIndice.nombre}"
+											 icon="ui-icon-arrowthick-1-s" ajax="false"
+											 styleClass="button-small primary" title="Ver" immediate="true">
+								<p:fileDownload
+										value="#{inventarioForestalController.getStreamContent(2)}" />
+							</p:commandButton>
+						</h:panelGroup>
+						<p:fileUpload id="fileUploadIndice"
+									  fileUploadListener="#{inventarioForestalController.uploadListenerAdjuntoIndice}"
+									  multiple="false" sizeLimit="10485760"
+									  allowTypes="/(\.|\/)(zip|rar|xls|xlsx)$/" label="Seleccionar"
+									  uploadLabel="Subir"
+									  invalidFileMessage="Tipo de archivo no válido"
+									  invalidSizeMessage="Debe adjuntar un archivo no mayor de 10 Mb."
+									  cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+									  auto="true" update="panelGridIndice" />
+					
+					 <!-- MarielaG para mostrar historico DOCUMENTOS HISTORICO-->
+						<h:panelGrid styleClass="panel_data" columns="2"
+							rendered="#{inventarioForestalController.listaAdjuntoIndiceHistorico.size() > 0}"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt">
+							<h:outputText value="Historial de documentos" />
+							<p:commandButton styleClass="button-small primary"
+								process="@this" icon="ui-icon-search"
+								action="#{inventarioForestalController.fillHistorialDocumentos(2)}"
+								update=":formDocumentosOriginal:documentosOriginalesDlg"
+								oncomplete="PF('documentosOriginalesDlg').show()" />
+						</h:panelGrid>
+						<!-- fin historico -->
+					
+					</p:panelGrid>
+					<h:inputHidden id="campoOcultoAdjuntoIndice"
+								   validator="#{inventarioForestalController.validateAdjuntoIndice}" />
+					<br />
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+								 id="panelEspecies">
+						<f:facet name="header">
+							<h:outputText value="Especies bajo categoría de amenaza" />
+						</f:facet>
+
+						<h:panelGrid columns="1" styleClass="w100"
+									 id="pronunciamiento-wrapper" columnClasses="w50, field_mrg w50">
+							<p:outputLabel for="tieneEspeciesCategoriaAmenaza"
+										   value="¿Tiene especies bajo categoría de amenaza?"></p:outputLabel>
+							<p:selectOneRadio id="tieneEspeciesCategoriaAmenaza"
+											  value="#{inventarioForestalController.tieneEspeciesCategoriaAmenaza}">
+								<f:selectItem itemLabel="Si" itemValue="true" />
+								<f:selectItem itemLabel="No" itemValue="false" />
+								<p:ajax
+										update="frmDatos:panelTableEspecies frmDatos:panelJustificacionEspecies"></p:ajax>
+							</p:selectOneRadio>
+						</h:panelGrid>
+
+						<h:panelGrid id="panelTableEspecies"
+									 class="#{inventarioForestalController.tieneEspeciesCategoriaAmenaza eq true ? '' : 'noShow'}">
+							<p:panelGrid columns="1" layout="grid" styleClass="w100">
+								<f:facet name="header">
+									<h:outputText
+											value="Registro de especies bajo categoría de amenaza (CITES) " />
+								</f:facet>
+								<f:facet name="header">
+									<p:commandButton
+											styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg"
+											icon="ui-icon-plusthick" value="Adicionar"
+											update="panelEspecie" process="@this"
+											actionListener="#{inventarioForestalController.agregarEspecie}"
+											oncomplete="PF('adicionarEspecie').show();" />
+								</f:facet>
+
+								<p:dataTable id="tableEspecies"
+											 value="#{inventarioForestalController.inventarioForestalBean.listaEspeciesBajoCategoriaAmenazas}"
+											 paginator="true" rows="10" paginatorPosition="bottom"
+											 rowIndexVar="index" var="especie"
+											 emptyMessage="#{labels['common.table.empty']}"
+											 paginatorAlwaysVisible="false">
+									<p:column headerText="Nombre científico">
+										<h:outputText
+												value="#{inventarioForestalController.nombreCientificoEspecie(especie)}" />
+									</p:column>
+									<p:column headerText="Nombre común">
+										<h:outputText value="#{especie.nombreComun}" />
+									</p:column>
+									<p:column headerText="Frecuencia">
+										<h:outputText value="#{especie.frecuencia}" />
+									</p:column>
+									<p:column headerText="Usos">
+										<h:outputText value="#{especie.usos}" />
+									</p:column>
+									<p:column styleClass="w40px alCenter">
+										<p:commandButton icon="ui-icon-pencil"
+														 styleClass="button-small primary"
+														 update=":#{p:component('panelEspecie')}" process="@this"
+														 oncomplete="PF('adicionarEspecie').show()"
+														 actionListener="#{inventarioForestalController.seleccionarEspecie(especie)}" />
+										<p:commandButton icon="ui-icon-circle-close"
+														 styleClass="button-small primary"
+														 update=":#{p:component('tableEspecies')}" process="@this"
+														 actionListener="#{inventarioForestalController.removerEspecie(especie)}">
+											<p:confirm header="Confirmación"
+													   message="¿Está seguro que desea eliminar la Especie?"
+													   icon="ui-icon-alert" />
+										</p:commandButton>
+										
+										<p:commandButton icon="ui-icon-search"
+											rendered="#{especie.registroModificado}"
+											styleClass="button-small orange"
+											action="#{inventarioForestalController.mostrarEspeciesOriginales(especie)}"
+											update=":formEspeciesOriginal:especiesOriginalDlg"
+											process="@this"
+											oncomplete="PF('especiesOriginalDlg').show()" />
+										<!-- registro NUEVO -->
+										<h:outputText value="Nuevo" styleClass="bold text-orange"
+											rendered="#{especie.nuevoEnModificacion}" />
+										
+									</p:column>
+								</p:dataTable>
+								
+								<!-- MarielaG para mostrar historico ESPECIES CITES-->
+								<h:panelGrid styleClass="panel_data" columns="2"
+									rendered="#{inventarioForestalController.inventarioForestalBean.listaEspeciesCitesEliminadasBdd.size() > 0}"
+									columnClasses="header background-orange, null"
+									rowClasses="null, alt">
+									<h:outputText id="headerEspecieHistorico"
+										value="Especies eliminadas" />
+									<p:commandButton styleClass="button-small primary"
+										process="@this" icon="ui-icon-search"
+										action="#{inventarioForestalController.fillEspeciesEliminadas()}"
+										update=":formEspeciesOriginal:especiesOriginalDlg"
+										oncomplete="PF('especiesOriginalDlg').show()" />
+								</h:panelGrid>
+								<!-- fin historico -->								
+								
+							</p:panelGrid>
+						</h:panelGrid>
+
+						<h:panelGrid id="panelJustificacionEspecies"
+									 class="#{inventarioForestalController.tieneEspeciesCategoriaAmenaza eq false ? '' : 'noShow'}"
+									 columns="1" styleClass="w100">
+							<p:outputLabel for="justificacionEspecies" value="Justificación" />
+							<p:inputTextarea id="justificacionEspecies" maxlength="1000"
+											 autoResize="false" rows="4" cols="100"
+											 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.justificacionEspeciesBajoCategoriaAmenaza}">
+							</p:inputTextarea>
+							<h:panelGrid rendered="#{inventarioForestalController.inventarioForestalBean.justificacionHistorial.size() > 0}">
+						
+							<h:outputText value="Especies bajo categoría de amenaza historial" styleClass="bold text-orange" />
+							
+							<p:dataTable id="tableJustificacionEspecies"
+												 value="#{inventarioForestalController.inventarioForestalBean.justificacionHistorial}"											 
+												 
+												 paginator="true" rows="10" paginatorPosition="bottom"
+												 rowIndexVar="index" var="justificacion"
+												 emptyMessage="#{labels['common.table.empty']}"
+												 paginatorAlwaysVisible="false">
+										<p:column headerText="Fecha Modificación">
+											<h:outputText
+													value="#{justificacion.fechaCreacion}" />
+										</p:column>
+										<p:column headerText="Justificación">
+											<h:outputText value="#{justificacion.justificacionEspeciesBajoCategoriaAmenaza}" />
+										</p:column>																	
+									</p:dataTable>
+							
+							</h:panelGrid>
+						</h:panelGrid>							
+																		
+					</p:panelGrid>
+					<ui:include
+							src="/prevencion/licenciamiento-ambiental/eia/inventarioForestal/formularios/especieModal.xhtml" />
+
+					<br />
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+								 id="panelGridResultados">
+						<f:facet name="header">
+							<h:outputText value="Resultados" />
+						</f:facet>
+
+						<h:panelGrid styleClass="w100 separatorBottom" columns="3"
+									 columnClasses="w33, w33">
+							<p:outputLabel for="promedioAB" value="Promedio de AB/ha en m2" />
+							<p:outputLabel for="volumenTotalAreaMuestreada"
+										   value="Volumen total en el área muestreada en m3" />
+							<p:outputLabel for="volumenComercialAreaMuestreada"
+										   value="Volumen comercial en el área muestreada en m3" />
+							<p:inputText id="promedioAB" maxlength="10"
+										 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.promedioAb}"
+										 required="true">
+								<pe:keyFilter mask="num" />
+							</p:inputText>
+							<p:inputText id="volumenTotalAreaMuestreada" maxlength="10"
+										 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.volumenTotal}"
+										 required="true">
+								<pe:keyFilter mask="num" />
+							</p:inputText>
+							<p:inputText id="volumenComercialAreaMuestreada" maxlength="10"
+										 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.volumenComercial}"
+										 required="true">
+								<pe:keyFilter mask="num" />
+							</p:inputText>
+						</h:panelGrid>
+						<h:panelGrid styleClass="w100 separatorBottom" columns="3"
+									 columnClasses="w33, w33">
+							<p:outputLabel for="volumenTotalPromedio"
+										   value="Volumen total promedio por hectárea en m3" />
+							<p:outputLabel for="volumenComercialPromedio"
+										   value="Volumen comercial promedio por hectárea en m3" />
+							<p:outputLabel for="volumenTotalExtrapolado"
+										   value="Volumen total extrapolado para el área total a afectarce en m3" />
+							<p:inputText id="volumenTotalPromedio" maxlength="10"
+										 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.volumenTotalPromedio}"
+										 required="true">
+								<pe:keyFilter mask="num" />
+							</p:inputText>
+							<p:inputText id="volumenComercialPromedio" maxlength="10"
+										 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.volumenComercialPromedio}"
+										 required="true">
+								<pe:keyFilter mask="num" />
+							</p:inputText>
+							<p:inputText id="volumenTotalExtrapolado" maxlength="10"
+										 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.volumenTotalExtrapolado}"
+										 required="true">
+								<pe:keyFilter mask="num" />
+							</p:inputText>
+						</h:panelGrid>
+						<h:panelGrid styleClass="w100 separatorBottom" columns="3"
+									 columnClasses="w33, w33">
+							<p:outputLabel for="volumenTotalHectarea"
+										   value="Volumen comercial extrapolado para el área total a afectarce en m3" />
+							<p:spacer></p:spacer>
+							<p:spacer></p:spacer>
+							<p:inputText id="volumenTotalHectarea" maxlength="10"
+										 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.volumenComercialExtrapolado}"
+										 required="true">
+								<pe:keyFilter mask="num" />
+							</p:inputText>
+							<p:spacer></p:spacer>
+							<p:spacer></p:spacer>
+						</h:panelGrid>
+						
+						<!-- MarielaG para mostrar historico RESULTADOS-->
+						<h:panelGrid styleClass="panel_data" columns="2"
+							rendered="#{inventarioForestalController.resultadosChanged}"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt">
+							<h:outputText value="Historial resultados" />
+							<p:commandButton styleClass="button-small primary"
+								process="@this" icon="ui-icon-search"
+								oncomplete="PF('resultadosDlg').show()" />
+						</h:panelGrid>
+						<!-- fin historico -->
+						
+					</p:panelGrid>
+					<br />
+					<h:panelGroup id="pnlValoracionEconomica">
+						<p:panelGrid columns="1" layout="grid" styleClass="w100">
+							<f:facet name="header">
+								<h:outputText
+										value="Valoración económica de bienes y servicios ecosistémicos" />
+							</f:facet>
+
+							<p:outputLabel
+									value="¿Su proyecto tiene remoción de cobertura vegetal nativa?"
+									for="remocionVegetal" />
+							<p:selectOneRadio id="remocionVegetal" required="true"
+											  value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.remocionVegetal}">
+								<f:selectItem itemLabel="Sí" itemValue="true" />
+								<f:selectItem itemLabel="No" itemValue="false" />
+								<p:ajax process="@this"
+										update=":#{p:component('pgTablaValoracion')}"
+										listener="#{inventarioForestalController.tieneRemocionVegetal()}" />
+							</p:selectOneRadio>
+							
+							 <!-- MarielaG para mostrar historico -->
+							<h:panelGrid styleClass="panel_data" columns="2"
+								columnClasses="header background-orange, null"
+								rowClasses="null, alt"
+								rendered="#{inventarioForestalController.inventarioForestalBean.inventarioForestalOriginal != null and !inventarioForestalController.inventarioForestalBean.inventarioForestal.remocionVegetal.equals(inventarioForestalController.inventarioForestalBean.inventarioForestalOriginal.remocionVegetal)}">
+								<h:outputText id="consultor_orginal" value="Remoción de cobertura vegetal nativa original" />
+								<h:outputText styleClass="bold" 
+								value="#{inventarioForestalController.inventarioForestalBean.inventarioForestalOriginal.remocionVegetal ? 'SI' : 'NO'}" />
+							</h:panelGrid>
+							<!-- fin historico -->
+
+							<h:panelGroup id="pgTablaValoracion">
+								<h:panelGrid styleClass="panel_data w100" columns="3"
+											 columnClasses="header w30, w30, w40" rowClasses="null, alt"
+											 rendered="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.remocionVegetal}">
+									<p:spacer></p:spacer>
+									<h:outputText styleClass="header" value="Valores" />
+									<h:outputText styleClass="header"
+												  value="#{inventarioForestalController.proyectoEstrategico ? 'Justificación si es 0 el valor':''}" />
+
+
+									<h:outputText value="Valor por captura de carbono"
+												  rendered="#{inventarioForestalController.proyectoEstrategico?true:false}" />
+									<p:inputText maxlength="10" styleClass="valor"
+												 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.capturaDeCarbono}"
+												 rendered="#{inventarioForestalController.proyectoEstrategico?true:false}">
+										<pe:keyFilter mask="num" />
+										<p:ajax
+												listener="#{inventarioForestalController.calcularMontoTotalValoracion}"
+												process="@(.valor)"
+												update="montoTotalValoracion capturaDeCarbonoDescripcion" />
+									</p:inputText>
+									<p:inputText id="capturaDeCarbonoDescripcion"
+												 label="Valor por captura de carbono, justificación"
+												 maxlength="255"
+												 styleClass="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.capturaDeCarbono gt 0 ? 'noShow' :''}"
+												 required="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.capturaDeCarbono eq 0}"
+												 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.capturaDeCarbonJustificacion}"
+												 rendered="#{inventarioForestalController.proyectoEstrategico?true:false}">
+									</p:inputText>
+
+									<h:outputText value="Valor por turismo y belleza escénica"
+												  rendered="#{inventarioForestalController.proyectoEstrategico?true:false}" />
+									<p:inputText maxlength="10" styleClass="valor"
+												 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.turismoBellezaEscenica}"
+												 rendered="#{inventarioForestalController.proyectoEstrategico?true:false}">
+										<pe:keyFilter mask="num" />
+										<p:ajax
+												listener="#{inventarioForestalController.calcularMontoTotalValoracion}"
+												process="@(.valor)"
+												update="montoTotalValoracion turismoBellezaEscenicaDescripcion" />
+									</p:inputText>
+									<p:inputText id="turismoBellezaEscenicaDescripcion"
+												 label="Valor por turismo y belleza escénica, justificación"
+												 maxlength="255"
+												 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.turismoBellezaEscenicaJustificacion}"
+												 styleClass="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.turismoBellezaEscenica gt 0 ? 'noShow' :''}"
+												 required="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.turismoBellezaEscenica eq 0}"
+												 rendered="#{inventarioForestalController.proyectoEstrategico?true:false}">
+									</p:inputText>
+
+									<h:outputText value="Valor por recurso agua"
+												  rendered="#{inventarioForestalController.proyectoEstrategico?true:false}" />
+									<p:inputText maxlength="10" styleClass="valor"
+												 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.recursoAgua}"
+												 rendered="#{inventarioForestalController.proyectoEstrategico?true:false}">
+										<pe:keyFilter mask="num" />
+										<p:ajax
+												listener="#{inventarioForestalController.calcularMontoTotalValoracion}"
+												process="@(.valor)"
+												update="montoTotalValoracion recursoAguaDescripcion" />
+									</p:inputText>
+									<p:inputText id="recursoAguaDescripcion"
+												 label="Valor por recurso agua, justificción" maxlength="255"
+												 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.recursoAguaJustificacion}"
+												 styleClass="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.recursoAgua gt 0 ? 'noShow' :''}"
+												 required="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.recursoAgua eq 0}"
+												 rendered="#{inventarioForestalController.proyectoEstrategico?true:false}">
+									</p:inputText>
+
+									<h:outputText
+											value="Valor por productos forestales maderables y no maderables" />
+									<p:inputText maxlength="10" styleClass="valor"
+												 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.productosForestalesMaderablesYNoMaderables}">
+										<pe:keyFilter mask="num" />
+										<p:ajax
+												rendered="#{inventarioForestalController.proyectoEstrategico?true:false}"
+												listener="#{inventarioForestalController.calcularMontoTotalValoracion}"
+												process="@(.valor)"
+												update="montoTotalValoracion productosForestalesMaderablesYNoMaderablesDescripcion"></p:ajax>
+
+										<p:ajax
+												rendered="#{inventarioForestalController.proyectoEstrategico?false:true}"
+												listener="#{inventarioForestalController.calcularMontoTotalValoracion}"
+												process="@(.valor)" update="montoTotalValoracion"></p:ajax>
+									</p:inputText>
+									<p:inputText
+											id="productosForestalesMaderablesYNoMaderablesDescripcion"
+											label="Valor por productos forestales maderables y no maderables, justificación"
+											maxlength="255"
+											value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.productosForestalesMaderablesYNoMaderablesJustificacion}"
+											styleClass="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.productosForestalesMaderablesYNoMaderables gt 0 ? 'noShow' :''}"
+											required="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.productosForestalesMaderablesYNoMaderables eq 0}"
+											rendered="#{inventarioForestalController.proyectoEstrategico?true:false}">
+									</p:inputText>
+									<p:spacer
+											rendered="#{inventarioForestalController.proyectoEstrategico?false:true}"></p:spacer>
+
+									<h:outputText value="Valor  por plantas medicinales"
+												  rendered="#{inventarioForestalController.proyectoEstrategico?true:false}" />
+									<p:inputText maxlength="10" styleClass="valor"
+												 rendered="#{inventarioForestalController.proyectoEstrategico?true:false}"
+												 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.plantasMedicinales}">
+										<pe:keyFilter mask="num" />
+										<p:ajax
+												listener="#{inventarioForestalController.calcularMontoTotalValoracion}"
+												process="@(.valor)"
+												update="montoTotalValoracion plantasMedicinalesDescripcion"></p:ajax>
+									</p:inputText>
+									<p:inputText id="plantasMedicinalesDescripcion"
+												 label="Valor  por plantas medicinales, justificación"
+												 maxlength="255"
+												 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.plantasMedicinalesJustificacion}"
+												 styleClass="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.plantasMedicinales gt 0 ? 'noShow' :''}"
+												 required="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.plantasMedicinales eq 0}"
+												 rendered="#{inventarioForestalController.proyectoEstrategico?true:false}">
+									</p:inputText>
+
+									<h:outputText value="Valor  por plantas ornamentales"
+												  rendered="#{inventarioForestalController.proyectoEstrategico?true:false}" />
+									<p:inputText maxlength="10" styleClass="valor"
+												 rendered="#{inventarioForestalController.proyectoEstrategico?true:false}"
+												 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.plantasOrnamentales}">
+										<pe:keyFilter mask="num" />
+										<p:ajax
+												listener="#{inventarioForestalController.calcularMontoTotalValoracion}"
+												process="@(.valor)"
+												update="montoTotalValoracion plantasOrnamentalesDescripcion"></p:ajax>
+									</p:inputText>
+									<p:inputText id="plantasOrnamentalesDescripcion"
+												 label="Valor  por plantas ornamentales, justificación"
+												 maxlength="255"
+												 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.plantasOrnamentalesJustificacion}"
+												 styleClass="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.plantasOrnamentales gt 0 ? 'noShow' :''}"
+												 required="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.plantasOrnamentales eq 0}"
+												 rendered="#{inventarioForestalController.proyectoEstrategico?true:false}">
+									</p:inputText>
+
+									<h:outputText value="Valor  por artesanías"
+												  rendered="#{inventarioForestalController.proyectoEstrategico?true:false}" />
+									<p:inputText maxlength="10" styleClass="valor"
+												 rendered="#{inventarioForestalController.proyectoEstrategico?true:false}"
+												 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.artesanias}">
+										<pe:keyFilter mask="num" />
+										<p:ajax
+												listener="#{inventarioForestalController.calcularMontoTotalValoracion}"
+												process="@(.valor)"
+												update="montoTotalValoracion artesaniasDescripcion"></p:ajax>
+									</p:inputText>
+									<p:inputText id="artesaniasDescripcion"
+												 label="Valor por artesanías, justificación" maxlength="255"
+												 value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.artesaniasJustificacion}"
+												 styleClass="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.artesanias gt 0 ? 'noShow' :''}"
+												 required="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.artesanias eq 0}"
+												 rendered="#{inventarioForestalController.proyectoEstrategico?true:false}">
+									</p:inputText>
+
+									<h:outputText value="Monto total de valoración" />
+									<h:outputText id="montoTotalValoracion" styleClass="w30"
+												  value="#{inventarioForestalController.montoTotalValoracion}" />
+								</h:panelGrid>
+								
+								<!-- MarielaG para mostrar historico VALORACION-->
+								<h:panelGrid styleClass="panel_data" columns="2"
+									rendered="#{inventarioForestalController.valoracionChanged}"
+									columnClasses="header background-orange, null"
+									rowClasses="null, alt">
+									<h:outputText value="Historial valorarión económica" />
+									<p:commandButton styleClass="button-small primary"
+										process="@this" icon="ui-icon-search"
+										oncomplete="PF('valoracionDlg').show()" />
+								</h:panelGrid>
+								<!-- fin historico -->
+								
+							</h:panelGroup>
+						</p:panelGrid>
+					</h:panelGroup>
+					<h:inputHidden id="campoOcultoValoracionEconomica"
+								   validator="#{inventarioForestalController.validateValoracionEconomica}" />
+				</p:panel>
+			</h:panelGrid>
+			<div class="buttons main">
+				<p:commandButton value="Atrás" immediate="true" process="@this"
+								 action="/prevencion/licenciamiento-ambiental/eia/areaInfluencia/areaInfluencia.jsf?faces-redirect=true"
+								 icon="ui-icon-arrowthick-1-w" />
+
+				<p:commandButton value="Guardar" icon="ui-icon-check"
+								 process="@this panelGridGeneral panelGridResultados pnlValoracionEconomica panelJustificacionEspecies frmDatos:campoOcultoAdjuntoGeneral frmDatos:campoOcultoAdjuntoVolumen frmDatos:campoOcultoAdjuntoIndice frmDatos:campoOcultoPuntosMuestreo frmDatos:campoOcultoValoracionEconomica"
+								 actionListener="#{inventarioForestalController.guardar}"
+								 update="@form" />
+
+				<p:commandButton value="Siguiente" immediate="true" process="@this"
+								 action="/prevencion/licenciamiento-ambiental/eia/impactoAmbiental/identificacionEvaluacionImpactos.jsf?faces-redirect=true"
+								 icon="ui-icon-arrowthick-1-e" />
+
+			</div>
+		</h:form>
+		
+		<!-- MarielaG para mostrar historico DOCUMENTOS-->
+		<h:form id="formDocumentosOriginal">
+			<p:dialog header="Historial de documentos"
+				id="documentosOriginalesDlg" widgetVar="documentosOriginalesDlg"
+				modal="true" resizable="false" width="600">
+				<h:panelGroup id="datosDocumentosOriginal">
+					<p:dataTable value="#{inventarioForestalController.listaDocumentosHistorico}"
+						var="doc" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText
+								value="#{doc.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Documento">
+							<h:outputText value="#{doc.nombre}" />
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton id="download_historico" rendered="true"
+								icon="ui-icon-search" ajax="false"
+								styleClass="button-small background-orange" title="Ver"
+								immediate="true">
+								<p:fileDownload
+									value="#{inventarioForestalController.getStreamContentOriginal(doc)}" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+		<!-- MarielaG para mostrar historico INFO GENERAL-->
+		<h:form id="formInfoOriginal">
+			<p:dialog
+				header="Historial de información general"
+				id="infoOriginalDlg" widgetVar="infoOriginalDlg"
+				modal="true" resizable="false" width="600">
+				<h:panelGroup id="datosInfoOriginal">
+					<p:dataTable id="tableInfo"
+						value="#{inventarioForestalController.inventarioForestalBean.infoGeneralHistorial}" var="info"
+						emptyMessage="#{labels['common.table.empty']}"
+						tableStyle="table-layout: auto">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText value="#{info.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Área de intervención del proyecto (ha)">
+							<h:outputText value="#{info.areaInversionProyecto}" />
+						</p:column>
+						<p:column headerText="Área de afectación por remoción de covertura vegetal (ha)">
+							<h:outputText value="#{info.areaPorRemocionDeCoverturaVejetal}" />
+						</p:column>
+						<p:column headerText="Superficie de muestreo (ha)">
+							<h:outputText value="#{info.superficieMuestreo}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+
+		<!-- MarielaG para mostrar historico ESPECIES-->
+		<h:form id="formEspeciesOriginal">
+			<p:dialog header="Registro de especies original"
+				id="especiesOriginalDlg"
+				widgetVar="especiesOriginalDlg" modal="true"
+				resizable="false" width="600">
+				<h:panelGroup id="datosEspeciesOriginal">
+					<p:dataTable id="tableEspeciesOrg"
+						value="#{inventarioForestalController.inventarioForestalBean.especiesHistorial}"
+						paginator="true" rows="10" paginatorPosition="bottom"
+						rowIndexVar="index" var="especie"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Nombre científico">
+							<h:outputText
+								value="#{inventarioForestalController.nombreCientificoEspecie(especie)}" />
+						</p:column>
+						<p:column headerText="Nombre común">
+							<h:outputText value="#{especie.nombreComun}" />
+						</p:column>
+						<p:column headerText="Frecuencia">
+							<h:outputText value="#{especie.frecuencia}" />
+						</p:column>
+						<p:column headerText="Usos">
+							<h:outputText value="#{especie.usos}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+		<!-- MarielaG para mostrar historico RESULTADOS--> 
+		<h:form id="formResultados">
+			<p:dialog
+				header="Historial de resultados"
+				id="resultadosDlg" widgetVar="resultadosDlg"
+				modal="true" resizable="false" width="700">
+				<h:panelGroup id="datosResultados">
+					<p:dataTable id="tableResultados"
+						value="#{inventarioForestalController.inventarioForestalBean.resultadosHistorial}" var="info"
+						emptyMessage="#{labels['common.table.empty']}"
+						tableStyle="table-layout: auto">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText value="#{info.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Promedio de AB/ha en m2">
+							<h:outputText value="#{info.promedioAb}" />
+						</p:column>
+						<p:column headerText="Volumen total en el área muestreada en m3">
+							<h:outputText value="#{info.volumenTotal}" />
+						</p:column>
+						<p:column headerText="Volumen comercial en el área muestreada en m3">
+							<h:outputText value="#{info.volumenComercial}" />
+						</p:column>
+						<p:column headerText="Volumen total promedio por hectárea en m3">
+							<h:outputText value="#{info.volumenTotalPromedio}" />
+						</p:column>
+						<p:column headerText="Volumen comercial promedio por hectárea en m3">
+							<h:outputText value="#{info.volumenComercialPromedio}" />
+						</p:column>
+						<p:column headerText="Volumen total extrapolado para el área total a afectarce en m3">
+							<h:outputText value="#{info.volumenTotalExtrapolado}" />
+						</p:column>
+						<p:column headerText="Volumen comercial extrapolado para el área total a afectarce en m3">
+							<h:outputText value="#{info.volumenComercialExtrapolado}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+
+		<!-- MarielaG para mostrar historico VALORACION-->
+		<h:form id="formValoracion">
+			<p:dialog header="Historial de valoración económica" id="valoracionDlg"
+				widgetVar="valoracionDlg" modal="true" resizable="false" width="#{inventarioForestalController.proyectoEstrategico ? 800:500}">
+				<h:panelGroup id="datosValoracion">
+					<p:dataTable id="tableValoracion"
+						value="#{inventarioForestalController.inventarioForestalBean.valoracionHistorial}"
+						var="info" emptyMessage="#{labels['common.table.empty']}"
+						tableStyle="table-layout: auto">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText
+								value="#{info.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Valor por captura de carbono"
+							rendered="#{inventarioForestalController.proyectoEstrategico?true:false}">
+							<h:outputText value="#{info.capturaDeCarbono}" />
+						</p:column>
+						<p:column headerText="Valor por turismo y belleza escénica" 
+							rendered="#{inventarioForestalController.proyectoEstrategico?true:false}">
+							<h:outputText value="#{info.turismoBellezaEscenica}" />
+						</p:column>
+						<p:column headerText="Valor por recurso agua" 
+							rendered="#{inventarioForestalController.proyectoEstrategico?true:false}">
+							<h:outputText value="#{info.recursoAgua}" />
+						</p:column>
+						<p:column headerText="Valor por productos forestales maderables y no maderables">
+							<h:outputText value="#{info.productosForestalesMaderablesYNoMaderables}" />
+						</p:column>
+						<p:column headerText="Valor por plantas medicinales" 
+							rendered="#{inventarioForestalController.proyectoEstrategico?true:false}">
+							<h:outputText value="#{info.plantasMedicinales}" />
+						</p:column>
+						<p:column headerText="Valor por plantas ornamentales" 
+							rendered="#{inventarioForestalController.proyectoEstrategico?true:false}">
+							<h:outputText value="#{info.plantasOrnamentales}" />
+						</p:column>
+						<p:column headerText="Valor por artesanías" 
+							rendered="#{inventarioForestalController.proyectoEstrategico?true:false}">
+							<h:outputText value="#{info.artesanias}" />
+						</p:column>
+						<p:column headerText="Monto total de valoración">
+							<h:outputText value="#{info.totalValoracion}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+
+		<!-- MarielaG para mostrar historico PUNTOS-->
+		<h:form id="formPuntos">
+			<p:dialog header="Historial de puntos"
+				id="puntosDlg" widgetVar="puntosDlg" modal="true"
+				resizable="false"
+				width="600">
+				<h:panelGroup id="datosPuntos">
+					<p:dataTable id="tblPuntos" rowIndexVar="index"
+						value="#{inventarioForestalController.inventarioForestalBean.listaInventarioPuntosHistorial}"
+						var="puntoMuestreo" emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText
+								value="#{puntoMuestreo.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Código de parcela">
+							<h:outputText value="#{puntoMuestreo.codigoParcela}" />
+						</p:column>
+						<p:column headerText="Área de la parcela (m2)">
+							<h:outputText value="#{puntoMuestreo.areaParcela}" />
+						</p:column>
+						<p:column headerText="Índice de Simpson">
+							<h:outputText
+								value="#{inventarioForestalController.cargarTipoIndice(puntoMuestreo.indiceSimpson)}" />
+						</p:column>
+						<p:column headerText="Índice de Shannon">
+							<h:outputText
+								value="#{inventarioForestalController.cargarTipoIndice(puntoMuestreo.indiceShannon)}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+		<!-- MarielaG para mostrar historico COORDENADAS-->
+		<h:form id="formCoordenadas">
+			<p:dialog header="Historial de coordenadas"
+				id="coordenadasDlg" widgetVar="coordenadasDlg" modal="true"
+				resizable="false"
+				width="600">
+				<h:panelGroup id="datosCoordenadas">
+					<p:dataTable id="tblCoordenadas" rowIndexVar="index"
+						value="#{inventarioForestalController.inventarioForestalBean.listaCoordenadasHistorial}"
+						var="coordenada" emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText
+								value="#{coordenada.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Coordenada X">
+							<h:outputText value="#{coordenada.x}" />
+						</p:column>
+						<p:column headerText="Coordenada Y" styleClass="singleLine">
+							<h:outputText value="#{coordenada.y}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+		
+	</ui:define>
+</ui:composition>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<style type="text/css">
+.max-limite {
+	color: red;
+}
+</style>
+
+		<p:panelGrid id="pnlNormativa" columns="1" layout="grid"
+			styleClass="w100"
+			rendered="#{emisionesAtmosfericasController.mostrarEstadoFuente}">
+			<f:facet name="header">
+				<h:outputText value="NORMATIVA VIGENTE" />
+			</f:facet>
+
+			<p:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25,null w75">
+				
+				<h:outputText value="Fuente Fija de Combustión:" />
+				<h:outputText
+					value="#{emisionesAtmosfericasController.fuenteFijaCombustion.fuente}" />
+				<h:outputText value="Tipo de combustible:"
+					rendered="#{emisionesAtmosfericasController.idTipoCombustible eq null ? false : true}" />
+				<h:outputText
+					value="#{emisionesAtmosfericasController.detalleEmision.tipoCombustible.descripcion}"
+					rendered="#{emisionesAtmosfericasController.idTipoCombustible eq null ? false : true}" />
+					
+				<h:outputText value="Tabla:" />
+				<h:outputText value="#{emisionesAtmosfericasController.detalleEmision.tipoCombustible eq null ?
+					emisionesAtmosfericasController.detalleEmision.fuenteFijaCombustion.nombreTabla : 
+					emisionesAtmosfericasController.detalleEmision.tipoCombustible.nombreTabla}"/>
+					
+				<h:outputText value="Autorización: *"
+					rendered="#{emisionesAtmosfericasController.mostrarAutorizacion}" />
+				<p:selectOneMenu id="autorizacion"
+					value="#{emisionesAtmosfericasController.idAutorizacion}"
+					required="true" style="width:100%" filter="true"
+					filterMatchMode="contains"
+					rendered="#{emisionesAtmosfericasController.mostrarAutorizacion}" 
+					requiredMessage="El campo Autorización es requerido.">
+					<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+					<f:selectItems
+						value="#{emisionesAtmosfericasController.listaAutorizacionesEmisiones}"
+						var="item" itemLabel="#{item.descripcion}" itemValue="#{item.id}" />
+					<p:ajax event="change"
+						listener="#{emisionesAtmosfericasController.cargarTablaParametros()}"
+						update="idParametro" />
+				</p:selectOneMenu>
+
+			</p:panelGrid>
+
+		</p:panelGrid>	
+	
+	<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{emisionesAtmosfericasController.mostrarLimites}">
+		<p:panelGrid columns="1" layout="grid" styleClass="w100" id="idParametro">				
+
+				<p:dataTable id="dtDatos"
+					value="#{emisionesAtmosfericasController.listaLimitesMaximoPermitidos}"
+					var="limite" emptyMessage="#{labels['common.table.empty']}" >
+					<p:column headerText="Parámetro">
+						<h:outputText value="#{emisionesAtmosfericasController.obtenerParametro(limite)}" />
+					</p:column>
+					<p:column headerText="Límites Permisibles" rendered="true">
+						<h:outputText value="#{limite.valor}" />
+					</p:column>
+					<p:column headerText="Parámetro" rendered="true">
+						<h:outputText value="#{limite.id}" />
+					</p:column>
+					<p:column headerText="Unidad">
+						<h:outputText value="#{limite.parametro.unidad}" />
+					</p:column>
+					<p:column headerText="Resultados" styleClass="#{emisionesAtmosfericasController.validarValorLimite(limite) ? 'max-limite' : ''}">
+						<h:outputText value="#{emisionesAtmosfericasController.cargarReporte(limite)}" />
+					</p:column>
+
+					<p:column styleClass="w60px alCenter" headerText="Ingrese Valores">
+						<p:commandButton
+							update=":dialogform:adicionarDatos :dialogform:elementoContainer"
+							styleClass="button-small primary" process="@this"
+							icon="ui-icon-pencil" oncomplete="PF('adicionarDatos').show()"
+							actionListener="#{emisionesAtmosfericasController.cargarIngresoDatos(limite)}">							
+						</p:commandButton>
+
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+	</p:panelGrid>
+	<br/>
+	<h:panelGrid styleClass="alCenter w50" columns="2">
+		<h:outputText value="¿Desea Añadir Fuentes y Reportes a las Fuentes?" styleClass="encabezado"
+			style="text-align:right" />
+		<p:selectOneRadio value="#{emisionesAtmosfericasController.masReportes}">
+			<f:selectItem itemLabel="Sí" itemValue="true" />
+			<f:selectItem itemLabel="No" itemValue="false" />
+			<p:ajax event="change" update=":form:pnlButons" />
+		</p:selectOneRadio>
+	</h:panelGrid>
+	<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{!emisionesAtmosfericasController.mostrarLimites}">
+	
+		<div>
+			El combustible seleccionado no tiene que reportar datos de emisiones.
+		</div>
+		
+		
+	</p:panelGrid>
+</html>

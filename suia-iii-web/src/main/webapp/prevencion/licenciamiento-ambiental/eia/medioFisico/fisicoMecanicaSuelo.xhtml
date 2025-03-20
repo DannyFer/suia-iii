@@ -1,0 +1,235 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/prevencion/licenciamiento-ambiental/eia/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+        >
+        <ui:define name="content-eia">
+
+        <div  >
+            <f:loadBundle var="labels" basename="ec.gob.ambiente.core.resources.labels_es"/>
+            <h:form id="frmMecanica" enctype="multipart/form-data">
+                <p:growl id="msgs" globalOnly="true"/>
+                <p:panel>
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" >
+                        <f:facet name="header">
+                            <p:commandButton value="Adicionar"
+                                             action="#{fisicoMecanicaController.agregarFisicoMecananica()}"
+                                             immediate="true" update=":#{p:component('frmFisicoMecanica')}"
+                                             onclick="PF('dlgFisicoMecanica').show()" id="btnFisicoMecanica"
+                                             icon="ui-icon-plusthick" styleClass="button-small-text toRight field_mrg">
+                                <p:tooltip id="ttFisicoMecanica" for="btnFisicoMecanica"
+                                           value="Agregar Características Físico-Mecánicas del suelo"/>
+                            </p:commandButton>
+                            <mae:panelGridHeaderHelp value=""
+                                                     conector="fisicoMecanicaHelp" help="#{helps['no.help.yet']}"/>
+
+                            <p:outputLabel value="Físico-Mecánicas de los suelos" for="compHid"/>
+                            <h:inputHidden id="compHid" required="#{fisicoMecanicaController.medioFisicoBean.listaFisicoMecanica.isEmpty()}"/>
+                        </f:facet>
+                        <p:panel style="overflow: auto">
+                        <p:dataTable id="tblFisicoMecanica" paginator="true" rows="10"
+                                     value="#{fisicoMecanicaController.medioFisicoBean.listaFisicoMecanica}"
+                                     var="fisicoMecanica" paginatorPosition="bottom" scrollable="false" scrollWidth="710"
+                                     emptyMessage="#{labels['common.table.empty']}">
+                            <p:columnGroup type="header">
+                                <p:row>
+                                    <p:column colspan="13" headerText="Características Físico-Mecánicas de los suelos"
+                                              width="1200"/>
+
+                                </p:row>
+                                <p:row>
+                                    <p:column rowspan="2" headerText="Código" width="60"/>
+                                    <p:column colspan="2" headerText="Coordenadas UTM (WGS 84)" width="120"/>
+                                    <p:column colspan="9" headerText="Parámetros Físico-Mecánicos" width="600"/>
+                                    <p:column rowspan="2" headerText="Acciones" width="230"/>
+                                </p:row>
+                                <p:row>
+                                    <p:column headerText="X" width="60"/>
+                                    <p:column headerText="Y" width="60"/>
+                                    <p:column headerText="Humedad Relativa %" width="100"/>
+                                    <p:column headerText="Límite Líquido (LL) %" width="70"/>
+                                    <p:column headerText="Límite Plástico (LP) %" width="90"/>
+                                    <p:column headerText="Índice de Plasticidad (IP) %" width="140"/>
+                                    <p:column headerText="Arcilla %" width="70"/>
+                                    <p:column headerText="Limo %" width="65"/>
+                                    <p:column headerText="Arena %" width="65"/>
+                                    <p:column headerText="Grava %" width="65"/>
+                                    <p:column headerText="Gravedad %" width="80"/>
+                                </p:row>
+                            </p:columnGroup>
+                            <p:column>
+                                <h:outputText value="#{fisicoMecanica.codigo}"/>
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{fisicoMecanica.coordenadaGeneral.x}">
+                                    <f:convertNumber pattern="##########.##"/>
+                                </h:outputText>
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{fisicoMecanica.coordenadaGeneral.y}">
+                                    <f:convertNumber pattern="##########.##"/>
+                                </h:outputText>
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{fisicoMecanica.humedad}"/>
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{fisicoMecanica.limiteLiquido}"/>
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{fisicoMecanica.limitePlastico}"/>
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{fisicoMecanica.plasticidad}"/>
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{fisicoMecanica.arcilla}"/>
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{fisicoMecanica.limo}"/>
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{fisicoMecanica.arena}"/>
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{fisicoMecanica.grava}"/>
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{fisicoMecanica.gravedad}"/>
+                            </p:column>
+                            <p:column>
+                                <p:commandButton icon="ui-icon-pencil" styleClass="button-small primary"
+                                                 action="#{fisicoMecanicaController.seleccionarFisicoMecanica(fisicoMecanica)}"
+                                                 title="Editar"
+                                                 oncomplete="PF('dlgFisicoMecanica').show();"
+                                                 update=":#{p:component('frmFisicoMecanica')}"/>
+                                <p:commandButton icon="ui-icon-trash" styleClass="button-small primary"
+                                                 action="#{fisicoMecanicaController.eliminarFisicoMecanica(fisicoMecanica)}"
+                                                 title="Remover"
+                                                 update=":#{p:component('tblFisicoMecanica')}"/>
+                            </p:column>
+                        </p:dataTable>
+                        </p:panel>
+                    </p:panelGrid>
+                </p:panel>
+
+                <div class="buttons main">
+                    <p:commandButton value="Atrás" immediate="true" process="@this"
+                                     action="/prevencion/licenciamiento-ambiental/eia/medioFisico/hidrologia.jsf?id=12&amp;faces-redirect=true"
+                                     icon="ui-icon-arrowthick-1-w" />
+                    <p:commandButton id="btnGuardar" value="Guardar" icon="ui-icon-check"
+                                     action="#{fisicoMecanicaController.guardar()}"
+                                     update=":#{p:component('tblFisicoMecanica')}"/>
+                    <p:commandButton value="Siguiente" immediate="true" process="@this"
+                                     action="/prevencion/licenciamiento-ambiental/eia/medioFisico/calidadAgua.jsf?id=12&amp;faces-redirect=true"
+                                     icon="ui-icon-arrowthick-1-e" />
+
+                </div>
+            </h:form>
+
+            <p:dialog id="agregarFisicoMecanica" header="Características Físico-Mecanicas de los suelos"
+                      widgetVar="dlgFisicoMecanica" modal="true" width="450" resizable="false">
+                <h:form id="frmFisicoMecanica">
+                    <p:panel id="pnlFisicoMecanica" styleClass="pnlFisicoMecanica">
+                        <h:panelGrid columns="2" styleClass="w100 alCenter"
+                                     columnClasses="alRight, field_mrg w66 alLeft">
+                            <p:outputLabel value="Código" for="txtCodigo"/>
+                            <p:inputText id="txtCodigo" maxlength="50" required="true"
+                                         value="#{fisicoMecanicaController.medioFisicoBean.fisicoMecanica.codigo}" />
+                            <p:outputLabel value="Coordenada X" for="txtX"/>
+                            <pe:inputNumber id="txtX" required="true"  decimalPlaces="2" thousandSeparator=""
+                                         value="#{fisicoMecanicaController.medioFisicoBean.fisicoMecanica.coordenadaGeneral.x}"
+                                         >
+                                <f:validateLength minimum="6"></f:validateLength>
+                            </pe:inputNumber>
+                            <p:outputLabel value="Coordenada Y" for="txtY"/>
+                            <pe:inputNumber id="txtY" required="true"  decimalPlaces="2" thousandSeparator=""
+                                            value="#{fisicoMecanicaController.medioFisicoBean.fisicoMecanica.coordenadaGeneral.y}">
+                                <f:validateLength minimum="7" ></f:validateLength>
+                            </pe:inputNumber>
+                            <p:outputLabel value="Humedad Relativa %" for="txtHumedad"/>
+                            <pe:inputNumber   thousandSeparator="" id="txtHumedad" required="true" decimalPlaces="2" maxlength="5"
+                                         value="#{fisicoMecanicaController.medioFisicoBean.fisicoMecanica.humedad}">
+                                <f:validateDoubleRange minimum="0.00" maximum="100.00"/>
+                                
+                            </pe:inputNumber>
+                            <p:outputLabel value="Límite Líquido %" for="txtLiquido"/>
+                            <pe:inputNumber   thousandSeparator="" id="txtLiquido" required="true" decimalPlaces="2" maxlength="5"
+                                         value="#{fisicoMecanicaController.medioFisicoBean.fisicoMecanica.limiteLiquido}">
+                                <f:validateDoubleRange minimum="0.00" maximum="100.00"/>
+                            </pe:inputNumber>
+                            <p:outputLabel value="Límite Plastico %" for="txtPlastico"/>
+                            <pe:inputNumber   thousandSeparator="" id="txtPlastico" required="true" decimalPlaces="2" maxlength="5"
+                                         value="#{fisicoMecanicaController.medioFisicoBean.fisicoMecanica.limitePlastico}"
+                                         >
+                                <f:validateDoubleRange minimum="0.00" maximum="100.00"/>
+                            </pe:inputNumber>
+                            <p:outputLabel value="Plasticidad %" for="txtPlasticidad"/>
+                            <pe:inputNumber   thousandSeparator="" id="txtPlasticidad" required="true" decimalPlaces="2" maxlength="5"
+                                         value="#{fisicoMecanicaController.medioFisicoBean.fisicoMecanica.plasticidad}"
+                                         >
+                                <f:validateDoubleRange minimum="0.00" maximum="100.00"/>
+                            </pe:inputNumber>
+                            <p:outputLabel value="Arcilla %" for="txtArcilla"/>
+                            <pe:inputNumber   thousandSeparator="" id="txtArcilla" required="true" decimalPlaces="2" maxlength="5"
+                                         value="#{fisicoMecanicaController.medioFisicoBean.fisicoMecanica.arcilla}"
+                                         >
+                                <f:validateDoubleRange minimum="0.00" maximum="100.00"/>
+                            </pe:inputNumber>
+                            <p:outputLabel value="Limo %" for="txtLimo"/>
+                            <pe:inputNumber   thousandSeparator="" id="txtLimo" required="true" decimalPlaces="2" maxlength="5"
+                                         value="#{fisicoMecanicaController.medioFisicoBean.fisicoMecanica.limo}"
+                                         >
+                                <f:validateDoubleRange minimum="0.00" maximum="100.00"/>
+                            </pe:inputNumber>
+                            <p:outputLabel value="Arena %" for="txtArena"/>
+                            <pe:inputNumber   thousandSeparator="" id="txtArena" required="true" decimalPlaces="2" maxlength="5"
+                                         value="#{fisicoMecanicaController.medioFisicoBean.fisicoMecanica.arena}"
+                                         >
+                                <f:validateDoubleRange minimum="0.00" maximum="100.00"/>
+                            </pe:inputNumber>
+                            <p:outputLabel value="Grava %" for="txtGrava"/>
+                            <pe:inputNumber   thousandSeparator="" id="txtGrava" required="true" decimalPlaces="2" maxlength="5"
+                                         value="#{fisicoMecanicaController.medioFisicoBean.fisicoMecanica.grava}"
+                                         >
+                                <f:validateDoubleRange minimum="0.00" maximum="100.00"/>
+                            </pe:inputNumber>
+                            <p:outputLabel value="Gravedad %" for="txtGravedad"/>
+                            <pe:inputNumber  thousandSeparator="" id="txtGravedad" required="true" decimalPlaces="2" maxlength="5"
+                                         value="#{fisicoMecanicaController.medioFisicoBean.fisicoMecanica.gravedad}"
+                                           >
+                                <f:validateDoubleRange minimum="0.00" maximum="100.00"/>
+                            </pe:inputNumber>
+                        </h:panelGrid>
+                    </p:panel>
+
+                    <p:separator/>
+
+                    <div class="buttons">
+                        <p:commandButton action="#{fisicoMecanicaController.agregarAListaFisicoMecanica()}"
+                                         value="Agregar"
+                                         update=":#{p:component('msgs')}, :#{p:component('tblFisicoMecanica')}, @(.pnlFisicoMecanica)"
+                                         oncomplete="handlFisicoMecanicaRequest(xhr, status, args)"/>
+                    </div>
+                </h:form>
+            </p:dialog>
+            <script type="text/javascript">
+                function handlFisicoMecanicaRequest(xhr, status, args) {
+                    if (args.validationFailed || !args.fisicoMecanicaIn) {
+                        PF('dlgFisicoMecanica').jq.effect("shake", {times: 5}, 100);
+                    }
+                    else {
+                        PF('dlgFisicoMecanica').hide();
+                        $('#loginLink').fadeOut();
+                    }
+                }
+            </script>
+        </div>
+    </ui:define>
+</ui:composition>

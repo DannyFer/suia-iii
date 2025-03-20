@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<f:loadBundle var="helps"
+	basename="ec.gob.ambiente.core.resources.helps_es" />
+<p:dialog header="#{msg['label.socialEnvironment']}"
+	widgetVar="socialDialog" resizable="false" id="socialDlg"
+	styleClass="socialDlg" modal="false">
+	<h:form id="frmMedioSocial">
+		<p:messages id="messagesSocial"></p:messages>
+		<p:panel>
+			<h:panelGrid columns="1">
+				<p:outputLabel value="#{msg['label.instructionEnviroment']}"
+					styleClass="bold" />
+				<h:outputText />
+				<h:panelGrid columns="2">
+					<p:outputLabel value="#{msg['label.environment']}"
+						styleClass="bold" />
+					<p:selectOneMenu
+						value="#{ingresarTDRBean.medioSocial.catalogoGeneral}"
+						id="cmb_medioSocial" requiredMessage="Es requerido">
+						<f:selectItems value="#{ingresarTDRBean.catalogoMedioSocial}"
+							var="mfisico" itemValue="#{mfisico}"
+							itemLabel="#{mfisico.descripcion}" />
+						<f:converter converterId="selectItemConverter" />
+					</p:selectOneMenu>
+
+					<p:outputLabel value="#{msg['label.environmentIsApplicable']} *"
+						styleClass="bold" />
+					<p:selectOneRadio id="rbt_isAplicable_mb"
+						value="#{ingresarTDRBean.habilita}">
+						<f:selectItem itemLabel="Sí" itemValue="true" />
+						<f:selectItem itemLabel="No" itemValue="false" />
+						<p:ajax process="@this" update="aSocial bSocial"></p:ajax>
+					</p:selectOneRadio>
+				</h:panelGrid>
+
+				<p:outputPanel id="aSocial">
+					<h:panelGroup id="pg_medioSocial"
+						rendered="#{ingresarTDRBean.habilita}">
+						<h:panelGrid columns="2">
+							<h:outputText />
+							<h:outputText />
+							<p:outputLabel value="#{msg['label.informationType']}"
+								styleClass="bold" />
+							<p:selectOneMenu
+								value="#{ingresarTDRBean.medioSocial.tipoInformacion}">
+								<f:selectItem itemLabel="Primaria" itemValue="Primaria" />
+								<f:selectItem itemLabel="Secundaria" itemValue="Secundaria" />
+							</p:selectOneMenu>
+
+							<h:outputText />
+							<h:outputText />
+							<p:outputLabel value="#{msg['label.applicableMethodology']}"
+								styleClass="bold" />
+						</h:panelGrid>
+						<control:imputConTextoEnriquecido
+							requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.applicableMethodology']} #{msg['label.prevencion.tdr.requerido']}." 
+							valor="#{ingresarTDRBean.medioSocial.metodogia}"
+							soloLectura="#{ingresarTDRBean.procesoIniciado}" requerido="true" />
+					</h:panelGroup>
+				</p:outputPanel>
+				<p:outputPanel id="bSocial">
+					<h:panelGroup id="pg_jmb" rendered="#{!ingresarTDRBean.habilita}">
+						<h:outputText />
+						<h:outputText />
+						<p:outputLabel value="#{msg['label.prevencion.tdr.justifique']} *" />
+						<control:imputConTextoEnriquecido
+							requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.justifique']} #{msg['label.prevencion.tdr.requerido']}."
+							valor="#{ingresarTDRBean.medioSocial.justificacion}"
+							soloLectura="#{ingresarTDRBean.procesoIniciado}" requerido="true" />
+					</h:panelGroup>
+				</p:outputPanel>
+			</h:panelGrid>
+			<f:facet name="footer">
+				<div class="buttons">
+					<p:commandButton id="saveEnviromentSocial"
+						value="#{msg['button.guardar']}"
+						onclick="PF('socialDialog').hide()"
+						actionListener="#{ingresarTDRBean.adicionarMedioSocial()}"
+						update=":#{p:component('socialGroupDatatable')}"
+						process="frmMedioSocial, @this" />
+					<p:commandButton value="#{msg['button.cancelar']}" process="@this"
+						immediate="true" onclick="PF('socialDialog').hide()"
+						icon="ui-icon-close"></p:commandButton>
+				</div>
+			</f:facet>
+		</p:panel>
+	</h:form>
+</p:dialog>
+
+
+<p:dialog header="Medio Social" widgetVar="medioSocialEditDialog"
+	resizable="false" modal="false">
+	<h:form id="frmMedioSocialEdit">
+		<p:panel>
+			<h:panelGrid styleClass="w100 separatorBottom" columns="1"
+				columnClasses="w50, field_mrg">
+				<p:outputLabel value="#{msg['label.instructionEnviroment']}"
+					styleClass="bold" />
+				<h:outputText />
+				<h:panelGrid columns="2">
+					<p:outputLabel value="#{msg['label.environment']}"
+						styleClass="bold" />
+					<p:outputLabel
+						value="#{ingresarTDRBean.medioSocial.catalogoGeneral.descripcion}" />
+
+					<p:outputLabel value="#{msg['label.environmentIsApplicable']} *"
+						styleClass="bold" />
+					<p:selectOneRadio id="rbt_isAplicable_mbEdit"
+						value="#{ingresarTDRBean.habilita}">
+						<f:selectItem itemLabel="Sí" itemValue="true" />
+						<f:selectItem itemLabel="No" itemValue="false" />
+						<p:ajax process="@this" update="aSocialEdit bSocialEdit"></p:ajax>
+					</p:selectOneRadio>
+				</h:panelGrid>
+
+				<p:outputPanel id="aSocialEdit">
+					<h:panelGroup id="pg_medioSocialEdit"
+						rendered="#{ingresarTDRBean.habilita}">
+						<h:panelGrid columns="2">
+							<h:outputText />
+							<h:outputText />
+							<p:outputLabel value="#{msg['label.informationType']}"
+								styleClass="bold" />
+							<p:selectOneMenu
+								value="#{ingresarTDRBean.medioSocial.tipoInformacion}">
+								<f:selectItem itemLabel="Primaria" itemValue="Primaria" />
+								<f:selectItem itemLabel="Secundaria" itemValue="Secundaria" />
+							</p:selectOneMenu>
+
+							<h:outputText />
+							<h:outputText />
+							<p:outputLabel value="#{msg['label.applicableMethodology']}"
+								styleClass="bold" />
+						</h:panelGrid>
+						<control:imputConTextoEnriquecido
+							requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.applicableMethodology']} #{msg['label.prevencion.tdr.requerido']}."
+							valor="#{ingresarTDRBean.medioSocial.metodogia}"
+							soloLectura="#{ingresarTDRBean.procesoIniciado}" requerido="true" />
+					</h:panelGroup>
+				</p:outputPanel>
+				<p:outputPanel id="bSocialEdit">
+					<h:panelGroup id="pg_jmbEdit"
+						rendered="#{!ingresarTDRBean.habilita}">
+						<h:outputText />
+						<h:outputText />
+						<p:outputLabel value="#{msg['label.prevencion.tdr.justifique']} *" />
+						<control:imputConTextoEnriquecido
+							requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.justifique']} #{msg['label.prevencion.tdr.requerido']}."
+							valor="#{ingresarTDRBean.medioSocial.justificacion}"
+							soloLectura="#{ingresarTDRBean.procesoIniciado}" requerido="true" />
+					</h:panelGroup>
+				</p:outputPanel>
+			</h:panelGrid>
+
+			<p:separator />
+			<div class="buttons">
+				<p:commandButton id="updateSocialEnviroment"
+					value="#{msg['button.guardar']}"
+					actionListener="#{ingresarTDRBean.adicionarMedioSocial()}"
+					onclick="PF('medioSocialEditDialog').hide()"
+					update=":#{p:component('socialGroupDatatable')}"
+					process="frmMedioSocialEdit, @this" />
+				<p:commandButton value="#{msg['button.cancelar']}" immediate="true"
+					onclick="PF('medioSocialEditDialog').hide()" process="@this" />
+			</div>
+		</p:panel>
+	</h:form>
+</p:dialog>
+
+</html>

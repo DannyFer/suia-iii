@@ -1,0 +1,94 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<p:panel id="adicionarDocumentoExportacion"
+	widgetVar="adicionarDocumentoExportacion" toggleable="true"
+	toggleOrientation="vertical" styleClass="colapsablePanel"
+	collapsed="true">
+	<p:ajax event="toggle"
+		listener="#{exportacionDesechosBean.toggleHandleDocumentos}"
+		update=":form:adicionarDocumentoExportacion" process="@this" />
+	<h:panelGroup id="infoDocumentoExportacion">
+		<h:panelGroup
+			rendered="#{exportacionDesechosBean.panelDocumentosVisible}">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Información documento" width="600px" />
+				</f:facet>
+				<h:panelGrid columns="2" styleClass="panel_data w100"
+					id="datosDocumentosExportacionContainer"
+					columnClasses="header w25, null" rowClasses="null, alt">
+					<p:outputLabel value="Tipo documento" for="tipoDocumento"
+						styleClass="ui-label-form" />
+					<p:selectOneMenu id="tipoDocumento"
+						value="#{exportacionDesechosBean.faseDocumento}" styleClass="w100"
+						required="true">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}"
+							itemValue="" noSelectionOption="true" />
+						<f:selectItem itemLabel="Fase 1 - Notificación" itemValue="1" />
+						<f:selectItem itemLabel="Fase 2 - Autorización" itemValue="2" />
+						<f:selectItem itemLabel="Fase 3 - Documento de movimiento"
+							itemValue="3" />
+						<f:selectItem itemLabel="Fase 3 - Acta de destrucción"
+							itemValue="4" />
+						<p:ajax process="@this" />
+					</p:selectOneMenu>
+
+					<p:outputLabel value="Documento" for="fileExportacion"
+						styleClass="ui-label-form" />
+					<p:outputPanel id="pnlDocUpload">
+						<p:fileUpload id="fileExportacion"
+							fileUploadListener="#{exportacionDesechosBean.uploadFileExportacion}"
+							multiple="false" sizeLimit="20971520"
+							allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar (pdf 20Mb)"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" required="true" update="pnlDocUpload" />
+						<p:commandButton id="downloadDocExportacion"
+							icon="ui-icon-arrowthick-1-s"
+							styleClass="button-small primary toLeft" title="Ver" ajax="false"
+							immediate="true"
+							rendered="#{exportacionDesechosBean.nuevoDocumento.nombre ne null}">
+							<p:fileDownload
+								value="#{exportacionDesechosBean.descargar(exportacionDesechosBean.nuevoDocumento)}" />
+						</p:commandButton>
+					</p:outputPanel>
+				</h:panelGrid>
+
+				<div class="buttons">
+					<p:commandButton value="Aceptar" styleClass="primary"
+						actionListener="#{exportacionDesechosBean.aceptarDocumento()}"
+						oncomplete="toogleDocumentoExportacion(xhr, status, args)"
+						process="@this infoDocumentoExportacion"
+						update="infoDocumentoExportacion tblDocumentosExportacion" />
+					<p:commandButton value="Cancelar" styleClass="secondary"
+						actionListener="#{exportacionDesechosBean.cancelar()}"
+						oncomplete="PF('adicionarDocumentoExportacion').toggle()"
+						process="@this" update="infoDocumentoExportacion">
+						<p:resetInput target="@form" />
+					</p:commandButton>
+				</div>
+			</p:panelGrid>
+		</h:panelGroup>
+	</h:panelGroup>
+
+</p:panel>
+
+<script type="text/javascript">
+	function toogleDocumentoExportacion(xhr, status, args) {
+		if(args.addDocumentoExportacion) {
+			PF('adicionarDocumentoExportacion').toggle();
+		}
+	}
+</script>
+</html>

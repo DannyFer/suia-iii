@@ -1,0 +1,246 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:controles="http://java.sun.com/jsf/composite/controles-prime"
+	  xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	  xmlns:hh="http://java.sun.com/jsf/html">
+<ui:composition
+		template="/prevencion/licenciamiento-ambiental/eia/default.xhtml">
+	<ui:define name="content-eia">
+		<h:form id="frmDatos">
+
+			<p:panel header="Plan de hallazgos">
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+							 id="panelGridPlan">
+					<f:facet name="header">
+						<h:outputText value="Plan de hallazgos *" />
+					</f:facet>
+					<f:facet name="header">
+
+						<p:commandButton
+								styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg"
+								icon="ui-icon-plusthick" value="Adicionar" update=":frmDlg3:dlg3"
+								process="@this"
+								action="#{planHallazgosEIAController.inicializarPlan}"
+								oncomplete="PF('dlg3').show();" />
+
+					</f:facet>
+
+					<p:dataTable id="tablePlan"
+								 value="#{planHallazgosEIAController.listaPlanHallazgos}"
+								 var="ide" paginator="true" rows="10" paginatorPosition="bottom"
+								 emptyMessage="#{labels['common.table.empty']}"
+								 paginatorAlwaysVisible="false">
+						<p:column headerText="No conformidad">
+							<h:outputText value="#{ide.hallazgos.evidencia}" />
+						</p:column>
+						<p:column headerText="Medidas propuestas">
+							<h:outputText value="#{ide.medidaPropuesta}" />
+						</p:column>
+						<p:column headerText="Medios de verificación">
+							<h:outputText value="#{ide.medioVerificacion}" />
+						</p:column>
+						<p:column headerText="Responsable">
+							<h:outputText value="#{ide.responsable}" />
+						</p:column>
+						<p:column headerText="Fecha inicio">
+							<h:outputText value="#{ide.fechaInicio}" >
+								<f:convertDateTime type="date" pattern="dd-MM-yyyy"/>
+							</h:outputText>
+						</p:column>
+						<p:column headerText="Fecha fin">
+							<h:outputText value="#{ide.fechaFin}" >
+								<f:convertDateTime type="date" pattern="dd-MM-yyyy"/>
+							</h:outputText>
+						</p:column>
+						<p:column styleClass="alCenter" style="width:50px;">
+							<p:commandButton icon="ui-icon-pencil"
+											 styleClass="button-small primary"
+											 action="#{planHallazgosEIAController.editarPlan(ide)}"
+											 update=":frmDlg3:dlg3" process="@this"
+											 oncomplete="PF('dlg3').show()" />
+							<p:commandButton icon="ui-icon-circle-close"
+											 styleClass="button-small primary"
+											 action="#{planHallazgosEIAController.removerPlan(ide)}"
+											 update=":frmDatos:tablePlan" process="@this">
+								<p:confirm header="Confirmación"
+										   message="¿Está seguro que desea eliminar este Plan de hallazgo?"
+										   icon="ui-icon-alert" />
+							</p:commandButton>
+							
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{ide.registroModificado}"
+								styleClass="button-small orange"
+								action="#{planHallazgosEIAController.mostrarPlanesOriginales(ide)}"
+								update=":formPlanesOriginales:planesOriginalesDlg" process="@this"
+								oncomplete="PF('planesOriginalesDlg').show()" />
+								
+							<h:outputText value="Nuevo" styleClass="bold text-orange" rendered="#{ide.nuevoEnModificacion}"/>
+							
+						</p:column>
+					</p:dataTable>
+
+					<!-- MarielaG para mostrar historico REGISTROS ELIMINADOS-->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{planHallazgosEIAController.listaPlanHallazgosEliminadosBdd.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText id="headerPlanHistorico"
+							value="Plan de hallazgos eliminados" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-search"
+							action="#{planHallazgosEIAController.fillPlanesEliminados()}"
+							update=":formPlanesOriginales:planesOriginalesDlg"
+							oncomplete="PF('planesOriginalesDlg').show()" />
+					</h:panelGrid>
+					<!-- fin historico -->
+
+
+				</p:panelGrid>
+			</p:panel>
+
+			<div class="buttons main">
+				<p:commandButton value="Atrás" immediate="true" process="@this"
+								 action="/prevencion/licenciamiento-ambiental/eia/identificacionHallazgos/identificacionHallazgos.jsf?id=9&amp;faces-redirect=true"
+								 icon="ui-icon-arrowthick-1-w"/>
+
+				<p:commandButton value="Guardar" icon="ui-icon-check"
+								 update=":frmDatos" process="@this"
+								 actionListener="#{planHallazgosEIAController.guardar}" />
+
+
+				<p:commandButton value="Siguiente" immediate="true" process="@this" rendered="#{eia.proyectosBean.getProyecto().getTipoEstudio().getId() eq 2}"
+								 action="/prevencion/licenciamiento-ambiental/eia/analisisRiesgo/analisisRiesgo.jsf?id=19&amp;faces-redirect=true"
+								 icon="ui-icon-arrowthick-1-e"/>
+			</div>
+
+		</h:form>
+
+		<h:form id="frmDlg3">
+			<p:dialog id="dlg3" header="Plan de hallazgos"
+
+					  widgetVar="dlg3" modal="true" width="600" resizable="false"
+					  draggable="false">
+
+				<h:panelGrid id="panelDatosHDialogo" columns="1"
+							 styleClass="w100 separatorBottom"
+							 columnClasses="w50, field_mrg w50">
+
+					<p:outputLabel for="conformidad" value="No conformidad" />
+					<p:selectOneMenu id="conformidad" required="true" styleClass="w100"
+									 value="#{planHallazgosEIAController.planHallazgosEia.hallazgos}"
+									 converter="selectItemConverter">
+
+						<f:selectItem itemLabel="#{labels['common.item.choose']}"
+									  itemValue="" noSelectionOption="true" />
+						<f:selectItems
+								value="#{planHallazgosEIAController.listaIdentificacionHallazgos}"
+								var="con" itemLabel="#{con.evidencia}"
+								itemValue="#{con}"/>
+					</p:selectOneMenu>
+
+					<p:outputLabel for="medidas" value="Medidas propuestas" />
+					<p:inputTextarea id="medidas" required="true" cols="100" rows="4"
+									 autoResize="false"
+									 value="#{planHallazgosEIAController.planHallazgosEia.medidaPropuesta}"
+									 scrollHeight="10"/>
+
+					<p:outputLabel for="medios" value="Medios de verificación" />
+					<p:inputTextarea id="medios" required="true" cols="100" rows="4"
+									 autoResize="false"
+									 value="#{planHallazgosEIAController.planHallazgosEia.medioVerificacion}"
+									 scrollHeight="10"/>
+
+					<p:outputLabel for="responsable" value="Responsable" />
+					<p:inputTextarea id="responsable" required="true" cols="100" rows="4"
+									 autoResize="false"
+									 value="#{planHallazgosEIAController.planHallazgosEia.responsable}"
+									 scrollHeight="10"/>
+
+					<p:outputLabel for="fechaInicio" value="Fecha inicio" />
+					<p:calendar id="fechaInicio" value="#{planHallazgosEIAController.planHallazgosEia.fechaInicio}" locale="es" navigator="true" pattern="dd-MM-yyyy" required="true"
+								mindate="#{planHallazgosEIAController.planHallazgosEia.fechaFin}">
+						<p:ajax event="dateSelect" update="fechaFin" process="@this" listener="#{planHallazgosEIAController.validarFechaIni}" />
+					</p:calendar>
+
+					<p:outputLabel for="fechaFin" value="Fecha fin" />
+					<p:calendar id="fechaFin" value="#{planHallazgosEIAController.planHallazgosEia.fechaFin}" locale="es" navigator="true" pattern="dd-MM-yyyy" required="true"
+								mindate="#{planHallazgosEIAController.planHallazgosEia.fechaInicio}">
+						<p:ajax event="dateSelect" update="fechaInicio" process="@this" />
+					</p:calendar> 
+
+
+				</h:panelGrid>
+
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton
+							actionListener="#{planHallazgosEIAController.agregarPlan}"
+							process="@this :frmDlg3:dlg3" value="Aceptar"
+							update=":frmDatos:tablePlan panelDatosHDialogo"
+							oncomplete="showModalHallazgo(xhr, status, args)" />
+					<p:commandButton value="Cancelar" type="button"
+									 onclick="PF('dlg3').hide()" styleClass="secondary" />
+				</div>
+
+				<script type="text/javascript">
+					function showModalHallazgo(xhr, status, args) {
+						if (args.hallazgo)
+							PF('dlg3').hide();
+						else
+							PF('dlg3').show();
+					}
+				</script>
+
+			</p:dialog>
+		</h:form>
+		
+		<!-- MarielaG para mostrar historico registros --> 
+		<h:form id="formPlanesOriginales">
+			<p:dialog header="Historial plan de hallazgos"
+				id="planesOriginalesDlg"
+				widgetVar="planesOriginalesDlg" modal="true"
+				resizable="false" width="800">
+				<h:panelGroup id="datosOriginales">
+					<p:dataTable 
+						value="#{planHallazgosEIAController.listaPlanHallazgosHistorico}" var="ide"
+						paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText value="#{ide.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="No conformidad">
+							<h:outputText value="#{ide.hallazgos.evidencia}" />
+						</p:column>
+						<p:column headerText="Medidas propuestas">
+							<h:outputText value="#{ide.medidaPropuesta}" />
+						</p:column>
+						<p:column headerText="Medios de verificación">
+							<h:outputText value="#{ide.medioVerificacion}" />
+						</p:column>
+						<p:column headerText="Responsable">
+							<h:outputText value="#{ide.responsable}" />
+						</p:column>
+						<p:column headerText="Fecha inicio">
+							<h:outputText value="#{ide.fechaInicio}">
+								<f:convertDateTime type="date" pattern="dd-MM-yyyy" />
+							</h:outputText>
+						</p:column>
+						<p:column headerText="Fecha fin">
+							<h:outputText value="#{ide.fechaFin}">
+								<f:convertDateTime type="date" pattern="dd-MM-yyyy" />
+							</h:outputText>
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+	</ui:define>
+</ui:composition>
+</html>

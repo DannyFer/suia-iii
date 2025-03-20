@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<h:panelGroup id="puntosRecuperacion">
+	<p:panelGrid columns="1" layout="grid" styleClass="buttonAddPuntosRecuperacionContainer w100">
+		<f:facet name="header">
+			<p:commandButton value="Adicionar" oncomplete="PF('adicionarPunto').toggle()"
+							 actionListener="#{puntosRecuperacionBean.cancelar()}"
+							 styleClass="buttonAddPuntosRecuperacion button-small-text toRight field_mrg"
+							 process="@this" update="adicionarPunto" icon="ui-icon-plusthick" />
+			<mae:panelGridHeaderHelp value="Ubicación de los establecimientos de generación o puntos de recuperación *"
+									 conector="puntosRecuperacionHelp" help="#{helps['generadorDesecho.puntosRecuperacion']}"
+									 width="600px" />
+		</f:facet>
+
+		<ui:include src="/prevencion/registrogeneradordesechos/utiles/puntosRecuperacionAdd.xhtml" />
+
+		<p:dataList id="listadoPuntos" type="none" value="#{puntosRecuperacionBean.puntosRecuperacion}" var="punto" rowIndexVar="index" emptyMessage="#{labels['common.table.empty']}"
+		paginator="true" rows="10" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+		paginatorPosition="bottom">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<p:commandButton styleClass="button-small toRight field_mrg" process="@this" update=":form:listadoPuntos" actionListener="#{puntosRecuperacionBean.eliminar(punto)}" icon="ui-icon-trash">
+						<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar este punto de recuperación/generación?" icon="ui-icon-alert" />
+					</p:commandButton>
+					<p:commandButton styleClass="button-small toRight field_mrg" process="@this" update=":form:adicionarPunto" actionListener="#{puntosRecuperacionBean.editar(punto)}" icon="ui-icon-pencil" oncomplete="PF('adicionarPunto').toggle()" />
+					<h:outputText value="Punto #{(index + 1)}" />
+				</f:facet>
+				<h:panelGrid styleClass="w100" columns="2" columnClasses="w50 alTop, w50 field_mrg alTop">
+					<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+						<h:outputText value="Nombre" />
+						<h:outputText value="#{punto.nombre}" />
+						<h:outputText value="Teléfono" />
+						<h:outputText value="#{punto.telefono}" />
+						<h:outputText value="Correo" />
+						<h:outputText value="#{punto.correo}" />
+					</h:panelGrid>
+					<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt" id="carga" >
+						<h:outputText value="Provincia" />
+						<h:outputText value="#{punto.ubicacionesGeografica.ubicacionesGeografica.ubicacionesGeografica}" />
+						<h:outputText value="Cantón" />
+						<h:outputText value="#{punto.ubicacionesGeografica.ubicacionesGeografica}" />
+						<h:outputText value="Parroquia" />
+						<h:outputText value="#{punto.ubicacionesGeografica}" />
+					</h:panelGrid>
+				</h:panelGrid>
+				<h:panelGrid styleClass="panel_data mw50" columns="2" columnClasses="header, null" rowClasses="null, alt"
+							rendered="#{puntosRecuperacionBean.validarDocumentoUsoSuelos()}">
+					<h:outputText rendered="#{not empty punto.certificadoUsoSuelos}" value="Certificado/informe de compatibilidad de uso de suelos" />
+					<p:commandButton rendered="#{not empty punto.certificadoUsoSuelos}" icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true">
+						<p:fileDownload value="#{puntosRecuperacionBean.getStreamContent(punto.certificadoUsoSuelos)}" />
+					</p:commandButton>
+					<h:outputText rendered="#{not empty punto.certificadoCompatibilidadUsoSuelos}" value="Solicitud de emisión de informe de compatibilidad de uso de suelo o afines" />
+					<p:commandButton rendered="#{not empty punto.certificadoCompatibilidadUsoSuelos}" icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true">
+						<p:fileDownload value="#{puntosRecuperacionBean.getStreamContent(punto.certificadoCompatibilidadUsoSuelos)}" />
+					</p:commandButton>
+				</h:panelGrid>
+				<p:outputLabel value="Dirección" styleClass="bold" />
+				<p:inputTextarea value="#{punto.direccion}" rows="2" styleClass="w100" readonly="true" />
+				<t:aliasBeansScope>
+					<t:aliasBean alias="#{formasCoordenadasAliasBean}" value="#{punto.formasPuntoRecuperacion}" />
+					<ui:include src="/comun/verCoordenadas.xhtml" />
+				</t:aliasBeansScope>
+			</p:panelGrid>
+		</p:dataList>
+	</p:panelGrid>
+</h:panelGroup>
+</html>

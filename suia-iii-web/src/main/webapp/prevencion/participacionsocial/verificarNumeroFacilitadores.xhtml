@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}" target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+        <h:outputText value="Número de facilitadores"/>
+        <h:outputText value="#{verificarNumeroFacilitadoresAdicionalesPSBean.numeroFacilitadores}"/>
+        <p:commandButton styleClass="primary button-small"
+                         icon="ui-icon-search" oncomplete="PF('dlg2').show();"
+                         update="modal"/>
+
+        <p:dialog header="Facilitadores" widgetVar="dlg2" modal="true" id="modal" styleClass="alLeft"
+                  height="400" width="400">
+            <h:outputText escape="false" value="#{verificarNumeroFacilitadoresAdicionalesPSBean.facilitadores}"/>
+        </p:dialog>
+    </ui:define>
+    <ui:define name="content">
+        <h:form id="form">
+            <f:event type="preRenderView"
+                     listener="#{verificarNumeroFacilitadoresAdicionalesPSController.validarTareaBpm()}"/>
+
+            <p:outputLabel styleClass="bold" for="requiereFacilitador"
+                           rendered="true"
+                           value="¿El PPS requiere facilitadores socioambientales adicionales?"/>
+
+            <p:selectOneRadio id="requiereFacilitador"
+                              disabled="#{verificarNumeroFacilitadoresAdicionalesPSBean.soloLectura}"
+                              value="#{verificarNumeroFacilitadoresAdicionalesPSBean.requiereFacilitador}"
+                              required="true"
+                              rendered="true">
+                <f:selectItem itemLabel="Si" itemValue="true"/>
+                <f:selectItem itemLabel="No" itemValue="false"/>
+                <p:ajax update=":form"/>
+            </p:selectOneRadio>
+            <h:panelGrid
+                    rendered="#{verificarNumeroFacilitadoresAdicionalesPSBean.requiereFacilitador}">
+                <p:outputLabel value="#{msg['label.nroFacilitadores']}"
+                               rendered="#{verificarNumeroFacilitadoresAdicionalesPSBean.requiereFacilitador}"
+                               for="facilitador"/>
+                <h:panelGroup
+                        rendered="#{verificarNumeroFacilitadoresAdicionalesPSBean.requiereFacilitador}">
+                    <p:inputText maxlength="2" styleClass="spinner" onkeypress="return numbersonly(this, event)"
+                                 required="#{verificarNumeroFacilitadoresAdicionalesPSBean.requiereFacilitador}"
+                                 value="#{verificarNumeroFacilitadoresAdicionalesPSBean.numeroFacilitadoresAdicionales}"
+                                 id="facilitador">
+                        <f:validateDoubleRange minimum="1" maximum="20"/>
+
+                        <pe:keyFilter mask="num"/>
+                    </p:inputText>
+                </h:panelGroup>
+            </h:panelGrid>
+
+
+            <div class="buttons main">
+                <p:commandButton value="Enviar" styleClass="primary"
+                                 action="#{verificarNumeroFacilitadoresAdicionalesPSController.iniciarTarea}"
+                                 title="Enviar datos" icon="ui-icon-check">
+                    <p:confirm message="#{msg['message.confirmacion.envio.tarea']}" header="#{msg['header.confirmacion.envio.tarea']}" />
+                </p:commandButton>
+            </div>
+
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

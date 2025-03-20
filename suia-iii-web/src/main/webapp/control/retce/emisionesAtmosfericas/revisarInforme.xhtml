@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="context-extra">
+		<h:outputText value="Datos" />
+		<h:outputText value="Emisiones Atmosféricas" />
+		<h:outputLink value="#{request.contextPath}/control/retce/emisionesAtmosfericasVer.jsf" onclick="window.open(this.href);return false;">
+			<p:commandButton type="button" styleClass="primary button-small" 
+				icon="ui-icon-search" />					
+		</h:outputLink>		
+	</ui:define>
+
+	<ui:define name="content">
+		<f:event type="preRenderView"
+			listener="#{revisionInformeOficioEmisionesController.validarTareaBpm()}" />
+		<h:form id="form">
+			<h:panelGroup id="pnlDatos">
+				<h:panelGrid styleClass="w100" id="pnlDocumentos"
+					rendered="#{revisionInformeOficioEmisionesController.panelMostrar eq 1 or revisionInformeOficioEmisionesController.panelMostrar eq 2}">
+					<object id="pdf_informe" type="application/pdf" 
+                        data="#{revisionInformeOficioEmisionesController.urlPdf}?pfdrid_c=true"
+                        width="100%" height="600px">
+                    Su navegador no soporta la visualización de pdf. Puede descargar el
+                    documento presionando el siguiente botón:
+                    <p:commandButton value="Descargar" styleClass="primary"
+                                     ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+                        <p:fileDownload value="#{revisionInformeOficioEmisionesController.stream}"/>
+                    </p:commandButton>
+                </object>
+                
+                <br />
+					<br />
+
+					<h:panelGroup id="informeData"
+						rendered="#{revisionInformeOficioEmisionesController.panelMostrar eq 1}">
+						<h:panelGrid columns="2" layout="grid" styleClass="w50"
+							cellpadding="4" cellspacing="4" id="pnlPronunciamientoInforme">
+							<f:event type="preRenderView"
+								listener="#{revisionInformeOficioEmisionesController.validarExisteObservacionesInformeOficio()}" />
+							<p:outputLabel value="Tipo de pronunciamiento:" styleClass="bold" />
+							<h:outputText
+								value="Pronunciamiento #{revisionInformeOficioEmisionesController.informeTecnicoRetce.esReporteAprobacion ? 'Aprobación':'Observación'}" />
+							<p:outputLabel value="¿El Informe y Oficio están correctos?"
+								styleClass="bold" />
+							<p:selectOneRadio
+								value="#{revisionInformeOficioEmisionesController.informeOficioCorrectos}"
+								disabled="true">
+								<f:selectItem itemLabel="Si" itemValue="#{true}" />
+								<f:selectItem itemLabel="No" itemValue="#{false}" />
+							</p:selectOneRadio>
+						</h:panelGrid>
+
+						<h:panelGroup id="pnlObsInformeTecnico">
+							<observaciones:tablaObservaciones idComponent="obsInformeTecnico"
+								seccion="informeEmisionesRetce"
+								idActualizar=":form:informeData" aparace="true"
+								mostrarSiVacio="true"
+								idClase="#{revisionInformeOficioEmisionesController.informeTecnicoRetce.id}"
+								nombreClase="informeEmisionesRetce" soloLectura="false"/>
+						</h:panelGroup>
+					</h:panelGroup>
+
+					<h:panelGroup id="oficioData"
+						rendered="#{revisionInformeOficioEmisionesController.panelMostrar eq 2}">
+						<h:panelGrid columns="2" layout="grid" styleClass="w50"
+							cellpadding="4" cellspacing="4" id="pnlPronunciamientoOficio">	
+							
+							<f:event type="preRenderView"
+								listener="#{revisionInformeOficioEmisionesController.validarExisteObservacionesInformeOficio()}" />						
+							<p:outputLabel value="Tipo de pronunciamiento:" styleClass="bold" />
+							<h:outputText
+								value="Pronunciamiento #{revisionInformeOficioEmisionesController.informeTecnicoRetce.esReporteAprobacion ? 'Aprobación':'Observación'}" />
+							<p:outputLabel value="¿El Informe y Oficio están correctos?"
+								styleClass="bold" />
+							<p:selectOneRadio
+								value="#{revisionInformeOficioEmisionesController.informeOficioCorrectos}"
+								disabled="true">
+								<f:selectItem itemLabel="Si" itemValue="#{true}" />
+								<f:selectItem itemLabel="No" itemValue="#{false}" />
+							</p:selectOneRadio>
+						</h:panelGrid>
+						
+						<h:panelGroup id="pnlObsOficio">
+							<observaciones:tablaObservaciones idComponent="obsOficio"
+								seccion="OficioEmisionesRetce"
+								idActualizar=":form:pnlPronunciamientoOficio :form:pnlButtons" aparace="true"
+								mostrarSiVacio="true"
+								idClase="#{revisionInformeOficioEmisionesController.oficio.id}"
+								nombreClase="oficioEmisionesRetce" soloLectura="false" />
+						</h:panelGroup>
+						
+					</h:panelGroup>
+				</h:panelGrid>
+
+				<h:panelGroup id="pnlFirma"
+					rendered="#{revisionInformeOficioEmisionesController.panelMostrar eq 3}">
+					<h:panelGrid styleClass="alCenter w100" columns="1">
+						<h:outputText value="Firmar y enviar oficio"
+							styleClass="encabezado1_4em" />
+						<h:panelGrid styleClass="alCenter w66" columns="1">
+							<p:panel styleClass="alCenter">
+								<h:form>
+									<h:panelGrid styleClass="alCenter w50" columns="2">
+										<h:outputText value="Cuenta con token?"
+											styleClass="encabezado" style="text-align:right" />
+										<p:selectOneRadio id="verificaToken"
+											value="#{revisionInformeOficioEmisionesController.token}">
+											<f:selectItem itemLabel="Sí" itemValue="true" />
+											<f:selectItem itemLabel="No" itemValue="false" />
+											<p:ajax event="change" update=":form"
+												listener="#{revisionInformeOficioEmisionesController.guardarToken}" />
+										</p:selectOneRadio>
+									</h:panelGrid>
+								</h:form>
+							</p:panel>
+						</h:panelGrid>
+					</h:panelGrid>
+				</h:panelGroup>
+
+			</h:panelGroup>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Atrás" icon="ui-icon-arrowthick-1-w"
+						update="pnlDatos pnlButtons" process="@this"
+						action="#{revisionInformeOficioEmisionesController.atras}"
+						rendered="#{revisionInformeOficioEmisionesController.panelMostrar eq 2}"/>
+					<p:commandButton value="Siguiente" immediate="true"
+						action="#{revisionInformeOficioEmisionesController.siguiente()}"
+						update="pnlDatos pnlButtons pnlDocumentos" icon="ui-icon-arrowthick-1-e"
+						rendered="#{revisionInformeOficioEmisionesController.panelMostrar eq 1}" />
+					<p:commandButton value="Enviar" icon="ui-icon-check"
+						action="#{revisionInformeOficioEmisionesController.enviar}"
+						rendered="#{(!revisionInformeOficioEmisionesController.esAutoridad and revisionInformeOficioEmisionesController.panelMostrar eq 2) or (revisionInformeOficioEmisionesController.esAutoridad and !revisionInformeOficioEmisionesController.informeOficioCorrectos and revisionInformeOficioEmisionesController.panelMostrar eq 2)}">
+						<p:confirm
+							message="#{!revisionInformeOficioEmisionesController.informeOficioCorrectos ? '¿Está seguro que desea enviar la información para Revisión?' : '¿Está seguro que desea enviar la información'}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+					<p:commandButton value="Firmar" icon="ui-icon-check"
+						action="#{revisionInformeOficioEmisionesController.guardarInformeOficio()}"
+						rendered="#{revisionInformeOficioEmisionesController.esAutoridad and revisionInformeOficioEmisionesController.informeOficioCorrectos and revisionInformeOficioEmisionesController.panelMostrar eq 2}"
+						update="pnlDatos pnlButtons">
+						<p:confirm message="¿Está seguro que los documentos están correctos? Se procederá a la firma del oficio de pronunciamiento."
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+						</p:commandButton>
+					<p:commandButton value="Firmar documento" type="button"
+						styleClass="large" icon="ui-icon-key"
+						rendered="#{revisionInformeOficioEmisionesController.panelMostrar eq 3 and !revisionInformeOficioEmisionesController.token}"						
+						onclick="PF('signDialog').show();" />
+					<p:commandButton value="Firmar documento" type="button"
+						styleClass="large" icon="ui-icon-key"
+						rendered="#{revisionInformeOficioEmisionesController.panelMostrar eq 3 and revisionInformeOficioEmisionesController.token}"
+						onclick="window.location.href='#{revisionInformeOficioEmisionesController.firmarDocumento()}'"/>
+					<p:commandButton value="Enviar"
+						action="#{revisionInformeOficioEmisionesController.completarTarea()}"
+						rendered="#{revisionInformeOficioEmisionesController.panelMostrar eq 3}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+
+			
+
+		</h:form>
+
+		<h:form id="formDialogs">
+		<p:dialog header="Firma Electronica" id="signDialog" widgetVar="signDialog" closeOnEscape="false" modal="true" resizable="false" width="auto" height="auto" position="center top">
+				<p:panel>
+					<h:panelGrid columns="2" cellpadding="10"
+						style="text-align:right !important">
+						<p:outputLabel
+							value="1. Descargue el oficio"
+							styleClass="bold" />
+						<p:commandButton value="Descargar" ajax="false"
+							icon="ui-icon-arrowthick-1-s" styleClass="primary"
+							immediate="true">
+							<p:fileDownload
+								value="#{revisionInformeOficioEmisionesController.descargar()}" />
+						</p:commandButton>
+						<p:outputLabel for="uploadRequired"
+							value="2. Adjunte el oficio firmado"
+							styleClass="bold" />
+						<p:fileUpload
+							fileUploadListener="#{revisionInformeOficioEmisionesController.uploadListenerDocumentos}"
+							multiple="false" sizeLimit="5242880"
+							allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Tamaño de archivo no válido"
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update=":form :formDialogs:nombreDocumento">							
+							<f:attribute name="clave" value=":form" />							
+						</p:fileUpload>
+						<p:outputLabel value=""/>
+						<h:outputText id="nombreDocumento" value="#{revisionInformeOficioEmisionesController.documento.nombre}"/>
+						
+					</h:panelGrid>
+				</p:panel>
+				<h:inputHidden id="uploadRequired"
+					required="#{!revisionInformeOficioEmisionesController.token and !revisionInformeOficioEmisionesController.subido}" />
+				<p:separator />
+				<div style="display: block; width: 100%; text-align: right;">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialog').hide()" icon="ui-icon-close" />
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

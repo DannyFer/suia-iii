@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+    <h:form id="fmrDatosEspecie">
+        <p:panelGrid columns="2" layout="grid" styleClass="w100">
+            <f:facet name="header">
+                <mae:panelGridHeaderHelp value="Registro de especies bajo categoría de amenaza" conector="ubicacionHelp" image="#{request.contextPath}/resources/images/proyecto-mapa.png" help="" />
+
+            </f:facet>
+            <h:outputLabel value="*Aplica" />
+            <p:selectOneRadio id="console" value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.estadoAplicaEspecie}">
+                <f:selectItem itemLabel="Si" itemValue="Si" />
+                <f:selectItem itemLabel="No" itemValue="No" />
+                <p:ajax event="change" update=":#{p:component('fmrDatosEspecie')}" />
+        </p:selectOneRadio>
+        <h:outputLabel value="Justificación :" rendered="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.estadoAplicaEspecie == 'No'}" />
+        <p:inputTextarea maxlength="250" rendered="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.estadoAplicaEspecie == 'No'}" 
+                         value="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.justificacion}"/>
+    </p:panelGrid>
+
+    <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="" rendered="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.estadoAplicaEspecie == 'Si'}">
+        <f:facet name="header">
+            <p:commandButton value="Adicionar"  styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick" 
+                             action="#{inventarioForestalController.agregarEspecie()}" update=":#{p:component('frmEspecie')}" 
+                             oncomplete="PF('dlgEspecie').show();"                />
+            <mae:panelGridHeaderHelp value="Registro de especies bajo categoría de amenaza (CITES) - Utilizar libro rojo del Ecuador" conector="ubicacionHelp" image="#{request.contextPath}/resources/images/proyecto-mapa.png" help="" />
+
+        </f:facet>
+        <p:dataTable id="tblClEspecie" value="#{inventarioForestalController.inventarioForestalBean.listaEspeciesBajoCategoriaAmenazas}"
+                     var="especie" paginator="true" rows="10" paginatorPosition="bottom" scrollable="true" scrollWidth="750"
+                     emptyMessage="#{labels['common.table.empty']}">
+            <p:column headerText="Acciones" width="60">
+                <div class="buttons-inline">
+                    <p:commandButton icon="ui-icon-pencil" action="#{inventarioForestalController.seleccionarEspecie(especie)}"
+                                     title="Editar" styleClass="primary"
+                                     oncomplete="PF('dlgEspecie').show();" update=":#{p:component('frmEspecie')}"/>
+                    <p:commandButton icon="ui-icon-trash" action="#{inventarioForestalController.removerEspecie(especie)}"
+                                     title="Remover" styleClass="secondary"
+                                     update="tblClEspecie"/>
+                </div>
+            </p:column>
+            <p:column headerText="Frecuencia" width="50">
+                <center>
+                    <h:outputText value="#{especie.frecuencia}"/>
+                </center>
+            </p:column>
+            <p:column headerText="Nombre Científico" width="240">
+                <center>
+                    <h:outputText value="#{especie.nombreCientifico}"/>
+                </center>
+            </p:column>
+            <p:column headerText="Nombre común" width="240">
+                <center>
+                    <h:outputText value="#{especie.nombreComun}" />
+                </center>
+            </p:column>
+            <p:column headerText="Usos" width="240">
+                <center>
+                    <h:outputText value="#{especie.usos}" />
+                </center>
+            </p:column>
+        </p:dataTable>
+    </p:panelGrid>
+    <p:panelGrid columns="4" layout="grid" styleClass="w100">
+        <f:facet name="header">
+            Resultados
+        </f:facet>
+        <h:outputLabel value="*Promedio de AB/ha en m2" />
+        <h:outputLabel value="*Volumen total promedio por hectarea en m3" />
+        <h:outputLabel value="*Volumen comercial promedio por hectarea en m3" />
+        <h:outputLabel value="*Ingresar monto de valoración (USD)" />
+        <control:soloTextoNumerosDecimales identificador="txtPromedioAb" 
+                                           valor="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.promedioAb}"
+                                           tamanio="10"
+                                           longitud="6"/>
+        <control:soloTextoNumerosDecimales identificador="txtVolumenTotalPromedio" 
+                                           valor="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.volumenTotalPromedio}"
+                                           tamanio="10"
+                                           longitud="6"/>
+        <control:soloTextoNumerosDecimales identificador="txtVolumenComercialPromedio" 
+                                           valor="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.volumenComercialPromedio}"
+                                           tamanio="10"
+                                           longitud="6"/>
+        <control:soloTextoNumerosDecimales identificador="txtMOntoValoracion" 
+                                           valor="#{inventarioForestalController.inventarioForestalBean.inventarioForestal.montoValoracion}"
+                                           tamanio="10"
+                                           longitud="6"/>
+
+    </p:panelGrid>
+    <br/>
+    <div class="buttons main">
+        <p:commandButton value="Guardar" action="#{inventarioForestalController.guardar()}" 
+                         icon="ui-icon-check"
+                         update=":#{p:component('frmDatos')}, :#{p:component('fmrDatosEspecie')}, :#{p:component('frmDatosVolumen')}, :#{p:component('frmDatosIndice')}, :#{p:component('frmCoordenada')}"/>
+        <p:commandButton value="Cancelar" action="/pages/eia/inventarioForestal/inventarioForestal.jsf" 
+                         styleClass="secondary" icon="ui-icon-cancel"
+                         ajax="false" immediate="true"/>
+    </div>
+</h:form>
+
+<p:dialog header="Especie" widgetVar="dlgEspecie" modal="true" resizable="false" draggable="false"
+          style="overflow: auto;" width="668" height="150">  
+    <h:form id="frmEspecie">
+        <p:panel>
+            <h:panelGrid columns="4">
+                <h:outputLabel value="*Frecuencia" />
+                <control:soloTextoNumerosDecimales identificador="txtFrecuenciaEsp" 
+                                                   valor="#{inventarioForestalController.inventarioForestalBean.especieCategoriaAmenaza.frecuencia}"
+                                                   requerido="true" tamanio="10"
+                                                   longitud="6"/>
+
+                <h:outputLabel value="*Nombre Científico:"/>
+                <control:todoTextoComoIngrese valor="#{inventarioForestalController.inventarioForestalBean.especieCategoriaAmenaza.nombreCientifico}" identificador="txtNombreCientificoEsp" tamanio="30" longitud="100" requerido="true"/>
+                <h:outputLabel value="*Nombre común:"/>
+                <control:todoTextoComoIngrese valor="#{inventarioForestalController.inventarioForestalBean.especieCategoriaAmenaza.nombreComun}" identificador="txtNombreComunEsp" tamanio="30" longitud="100" requerido="true"/>
+                <h:outputLabel value="*Usos:"/>
+                <control:todoTextoComoIngrese valor="#{inventarioForestalController.inventarioForestalBean.especieCategoriaAmenaza.usos}" identificador="txtUsosEsp" tamanio="30" longitud="100" requerido="true"/>
+
+
+
+
+            </h:panelGrid>
+            <br/>
+            <center>
+                <p:commandButton action="#{inventarioForestalController.guardarEspecie()}" value="Agregar" 
+                                 oncomplete="handleEspecieRequest(xhr, status, args)" styleClass="primary"
+                                 update="frmEspecie, :#{p:component('msgs')}, :#{p:component('tblClEspecie')}"/>
+            </center>
+        </p:panel>
+    </h:form>
+</p:dialog>
+<script type="text/javascript">
+    function handleEspecieRequest(xhr, status, args) {
+        if (args.validationFailed || !args.puntoEspecie) {
+            PF('dlgEspecie').jq.effect("shake", {times: 5}, 100);
+        }
+        else {
+            PF('dlgEspecie').hide();
+            $('#loginLink').fadeOut();
+        }
+    }
+</script>
+
+</ui:composition>

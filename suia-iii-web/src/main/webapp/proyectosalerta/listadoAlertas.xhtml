@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components">
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<f:loadBundle var="labels"
+			basename="ec.gob.ambiente.core.resources.labels_es" />
+		<h:form id="form">
+			<p:panel>
+				<f:facet name="header">
+					<h:outputText value="Listado de proyectos" />
+				</f:facet>
+
+				<p:dataTable id="tableProyectosAlertas"
+					widgetVar="tableProyectosAlertas"
+					value="#{alertarnotificacionesController.proyectos}"
+					sortBy="#{proyecto.codigo}" sortOrder="descending" var="proyecto"
+					rows="10" paginator="true" paginatorAlwaysVisible="false"
+					paginatorPosition="bottom"
+					currentPageReportTemplate="{currentPage} de {totalPages}"
+					rowsPerPageTemplate="5,10,15"
+					emptyMessage="#{labels['common.table.empty']}"
+					filteredValue="#{alertarnotificacionesController.filteredProyectos}">
+					<p:column headerText="Código" filterBy="#{proyecto.codigo}"
+						filterMatchMode="contains" styleClass="alCenter w15">
+						<h:outputText value="#{proyecto.codigo}" />
+					</p:column>
+
+					<p:column headerText="Nombre" filterBy="#{proyecto.nombre}"
+						filterMatchMode="contains" sortBy="#{proyecto.nombre}"
+						styleClass="w25">
+						<h:outputText value="#{proyecto.nombre}"
+							title="#{proyecto.nombre}" />
+					</p:column>
+
+					<p:column headerText="Documento"
+						filterBy="#{proyecto.descripcioncatdoc}"
+						filterMatchMode="contains" sortBy="#{proyecto.descripcioncatdoc}"
+						styleClass="alCenter w15">
+						<h:outputText value="#{proyecto.descripcioncatdoc}" />
+					</p:column>
+					
+					<p:column headerText="Fecha de Presentación"
+												styleClass="alCenter w15">
+						<h:outputText value="#{proyecto.fechapresentado}" />
+					</p:column>
+
+					<p:column styleClass="alCenter w40px">
+						<p:commandButton disabled="#{proyecto.presentado}"
+							actionListener="#{alertarnotificacionesController.marcar(proyecto)}"
+							process="@this" update=":formDelete:eliminarProyecto"
+							icon="ui-icon-check" styleClass="button-small primary"
+							oncomplete="PF('eliminarProyecto').show()" />
+					</p:column>
+				</p:dataTable>
+			</p:panel>
+
+		</h:form>
+
+		<h:form id="formDelete">
+			<p:dialog header="Novedades de presentar el documento"
+				id="eliminarProyecto" widgetVar="eliminarProyecto" modal="true"
+				width="500" resizable="false" closable="true" draggable="false">
+				<h:panelGrid columns="1" styleClass="w100">
+					<p:outputLabel value="Descripción de documento presentado."
+						for="motivo" />
+					<p:inputTextarea id="motivo" value="#{proyec}" required="true"
+						autoResize="false" rows="3" maxlength="1000">
+						<f:validateLength minimum="20" />
+					</p:inputTextarea>
+					<p:outputLabel value="Presento Documento" for="presentado" />
+					<p:selectOneRadio id="presentado"
+						value="#{alertarnotificacionesController.presentado}">
+						<f:selectItem itemLabel="SI" itemValue="true" />
+						<f:selectItem itemLabel="NO" itemValue="false" />
+					</p:selectOneRadio>
+
+				</h:panelGrid>
+				<div class="buttons">
+					<p:commandButton value="Aceptar" icon="ui-icon-check"
+						actionListener="#{alertarnotificacionesController.aceptarDocumento()}"
+						update=":formDelete:eliminarProyecto :form:tableProyectosAlertas"
+						oncomplete="showModalEliminarProyecto(xhr, status, args)">
+						<p:confirm header="Confirmación"
+							message="Esto finalizara el ingreso de documentos. ¿Está seguro de completar la tarea?"
+							icon="ui-icon-alert" />
+					</p:commandButton>
+
+					<p:commandButton value="Cancelar" styleClass="secondary"
+						icon="ui-icon-cancel" type="button"
+						onclick="PF('eliminarProyecto').hide()" />
+				</div>
+			</p:dialog>
+		</h:form>
+
+		<script type="text/javascript">
+	        function showModalEliminarProyecto(xhr, status, args) {
+	        	PF('eliminarProyecto').show();
+	            if (args.eliminarProyecto) {
+	            	PF('eliminarProyecto').hide();
+	            }
+	        }
+	        
+    	</script>
+
+	</ui:define>
+</ui:composition>
+</html>

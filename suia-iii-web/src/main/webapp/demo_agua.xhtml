@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:controles-prime="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<h:head>
+	<h:outputStylesheet name="suia-layout2.css" library="css" />
+	<h:outputStylesheet name="suia-styles.css" library="css" />
+	<h:outputStylesheet name="suia-pf-custom.css" library="css" />
+	<h:outputScript name="util.js" library="js" />
+	<link rel="shortcut icon"
+		href="#{request.contextPath}/resources/images/arbol.ico" />
+	<title>#{labels['label.siglas.institucion']}</title>
+</h:head>
+
+<style>
+.ui-panel-titlebar {
+	text-align: center !important;
+}
+</style>
+
+
+
+
+<h:body>
+	<div>
+		<div class="header-left-part"></div>
+		<div id="header" class="containerHeader">
+			<div class="header-right-part"></div>
+			<div class="clear"></div>
+			<div class="header-right-part-bar"></div>
+			<div class="clear"></div>
+		</div>
+
+		<div class="container bordercontainer">
+			<div id="page">
+				<div id="content">
+					<ui:include src="/WEB-INF/templates/status.xhtml" />
+					<p:growl globalOnly="true" id="msgs" />
+
+
+					<h:form id="form"
+						onkeypress="if (event.keyCode == 13) { return false; }">
+
+						<p:panel id="parte2">
+							<f:facet name="header">
+								<h:outputText id='txtTitulo'
+									style="color:#008a8a ;  font-size: large; "
+									value="CONSTRUCCIÓN PARTICIPATIVA - LEY DE RECURSOS HÍDRICOS" />
+							</f:facet>
+							<br></br>
+							<p:panelGrid id="formulario1" columns="2"
+								styleClass="panel_data w100" columnClasses="header w25,null w75">
+
+
+
+
+
+								<h:outputText value="Número de Cédula *" />
+								<h:panelGroup id="cedulaGroup">
+
+
+
+
+
+									<p:inputMask mask="9999999999" maxlength="10" id="cedula"
+										value="#{demoController.cedulaProponente}"
+										style="width:400px!important"
+										required="#{!demoController.esOrg}"
+										requiredMessage="Número de Cédula es requerido">
+										<p:ajax process="@this" />
+									</p:inputMask>
+
+
+									<ui:remove>
+										<p:commandButton value="Validar" styleClass="primary"
+											actionListener="#{demoController.validarCedulaRepLegal}"
+											process="@this cedulaGroup" update="@this Nombre cedula" />
+									</ui:remove>
+								</h:panelGroup>
+
+								<h:outputText value="Nombre *" />
+								<p:inputText id="Nombre"
+									value="#{demoController.nombreProponente}" maxlength="50"
+									required="#{!demoController.esOrg}"
+									requiredMessage="Nombre es requerido" readonly="false"
+									disabled="false">
+									<p:ajax process="@this" />
+								</p:inputText>
+
+
+								<h:outputText value="E-mail*" />
+								<p:inputText id="email" value="#{demoController.email}"
+									maxlength="50" required="true"
+									requiredMessage="e-mail es requerido"
+									validatorMessage="Correo electrónico no valido">
+									<f:validateRegex
+										pattern="[\w\.-]*[a-zA-Z0-9_]@[\w\.-]*[a-zA-Z0-9]\.[a-zA-Z][a-zA-Z\.]*[a-zA-Z]" />
+									<p:ajax process="@this" />
+								</p:inputText>
+
+
+
+								<h:outputText value="Pertenece a una organización" />
+
+								<p:selectBooleanCheckbox value="#{demoController.esOrg}">
+									<p:ajax process="@this " update="@this organizacion ruc"
+										listener="#{demoController.esOrganizacion}" />
+								</p:selectBooleanCheckbox>
+
+								<h:outputText value="RUC *" />
+								<h:panelGroup id="RUCGroup">
+
+									<p:inputMask mask="9999999999999" id="ruc"
+										value="#{demoController.rucProponente}"
+										style="width:400px!important"
+										required="#{demoController.esOrg}"
+										requiredMessage="RUC es requerido" maxlength="13"
+										disabled="#{!demoController.esOrg}"
+										readonly="#{!demoController.esOrg}">
+										<p:ajax process="@this" />
+									</p:inputMask>
+
+
+									<ui:remove>
+										<p:commandButton id="validarRuc" value="Validar RUC"
+											styleClass="primary"
+											actionListener="#{demoController.validarRucRepLegal}"
+											process="@this RUCGroup" update="@this organizacion ruc"
+											disabled="#{!demoController.esOrg}"
+											readonly="#{!demoController.esOrg}" />
+									</ui:remove>
+								</h:panelGroup>
+
+
+
+								<h:outputText value="Nombre Organización" />
+								<p:inputText id="organizacion"
+									value="#{demoController.organizacion}" maxlength="50"
+									required="#{demoController.esOrg}"
+									requiredMessage="Nombre es requerido" rendered="true"
+									disabled="#{!demoController.esOrg}"
+									readonly="#{!demoController.esOrg}">
+									<p:ajax process="@this" />
+								</p:inputText>
+							</p:panelGrid>
+
+
+
+							<p:panelGrid id="formulario2" columns="2"
+								styleClass="panel_data w100" columnClasses="header w25,null w75">
+
+								<ui:remove>
+									<h:outputText value="Mesa de Trabajo *" for="idMesaDeTrabajo" />
+									<p:selectOneMenu id="idMesaDeTrabajo" required="true"
+										requiredMessage="Se debe selccionar una Mesa de Trabajo"
+										value="#{demoController.mesaSeleccionada}" style="width:100%"
+										styleClass="w75">
+										<f:selectItem itemLabel="Seleccionar la Mesa de Trabajo ..."
+											itemValue="" />
+										<f:selectItems value="#{demoController.mesaDeTrabajoOpciones}"
+											var="item" itemLabel="#{item}" itemValue="#{item}" />
+										<p:ajax update="idArticulos" />
+									</p:selectOneMenu>
+
+
+									<h:outputText value="Artículo *" for="idArticulos" />
+									<p:selectOneMenu id="idArticulos" required="true"
+										requiredMessage="Se debe selccionar un Artículo"
+										value="#{demoController.articuloSeleccionado}"
+										style="width:100%" styleClass="w75">
+										<f:selectItem itemLabel="Seleccione el Articulo ..."
+											itemValue="" />
+										<f:selectItems value="#{demoController.atriculosLista}"
+											var="item" itemLabel="#{item}" itemValue="#{item}" />
+										<p:ajax update="@this" />
+									</p:selectOneMenu>
+								</ui:remove>
+
+
+								<h:outputText value="Provincia *" for="provincia" />
+								<p:selectOneMenu id="provincia"
+									value="#{demoController.provinciaSeleccionada}"
+									styleClass="w100" required="true"
+									requiredMessage="Provincia es requerido"
+									converter="selectItemConverter">
+									<f:selectItem itemLabel="Seleccione..."
+										noSelectionOption="true" />
+									<f:selectItems value="#{demoController.provinciasLista}"
+										var="item" itemLabel="#{item}" itemValue="#{item.nombre}" />
+
+
+									<p:ajax update="canton dirZonal"
+										listener="#{demoController.direccionZonal()}" />
+								</p:selectOneMenu>
+
+								<h:outputText value="Dirección Zonal *" />
+								<h:inputText id="dirZonal" disabled="true" styleClass="w100"
+									value="#{demoController.direccionZonal}" />
+
+								<h:outputText value="Cantón *" for="canton" />
+								<p:selectOneMenu id="canton"
+									value="#{demoController.cantonSeleccionado}" styleClass="w100"
+									required="true" requiredMessage="Cantón es requerido"
+									converter="selectItemConverter">
+									<f:selectItem itemLabel="Seleccione..."
+										noSelectionOption="true" />
+									<f:selectItems value="#{demoController.cantonesLista}"
+										var="item" itemLabel="#{item.nombre}" itemValue="#{item}" />
+									<p:ajax process="@this" update="parroquia" />
+								</p:selectOneMenu>
+
+
+
+								<h:outputText value="Parroquia *" for="parroquia" />
+								<p:selectOneMenu id="parroquia"
+									value="#{demoController.ubicacionOpinion}" styleClass="w100"
+									required="true" requiredMessage="Parroquia es requerido"
+									converter="selectItemConverter">
+									<f:selectItem itemLabel="Seleccione..."
+										noSelectionOption="true" />
+									<f:selectItems value="#{demoController.parroquiasLista}"
+										var="item" itemLabel="#{item.nombre}" itemValue="#{item}" />
+									<p:ajax process="@this" />
+								</p:selectOneMenu>
+
+
+
+
+								<h:outputText value="Propuesta *" for="propuesta" />
+								<p:inputTextarea id="propuesta" rows="3" cols="33"
+									value="#{demoController.propuesta}" required="true"
+									requiredMessage="El campo Propuesta es obligatorio"
+									maxlength="300" />
+
+								<h:outputText value="Justificación *" for="justificacion" />
+								<p:inputTextarea id="justificacion" rows="3" cols="33"
+									value="#{demoController.justificacion}" required="true"
+									requiredMessage="El campo Justificación es obligatorio"
+									maxlength="300" />
+
+								<h:outputText value="Anexo" />
+								<p:panelGrid columns="3"
+									columnClasses="null w25,null w60, null w25">
+
+									<p:fileUpload
+										fileUploadListener="#{demoController.uploadListenerInformacionFirmada}"
+										multiple="false" sizeLimit="20971520" label="Seleccionar"
+										uploadLabel="Subir"
+										invalidFileMessage="Tipo de archivo no válido"
+										invalidSizeMessage="Tamaño de archivo no válido (20 MB)"
+										update="idAnexo" cancelLabel="Cancelar" mode="advanced"
+										dragDropSupport="false" auto="true">
+										<f:attribute name="clave" value=":form" />
+									</p:fileUpload>
+
+									<h:outputText value="#{demoController.nombreDocumentoFirmado}"
+										id="idAnexo" />
+
+									<h:outputText value="Límite de tamaño de archivo 20 MB" />
+
+								</p:panelGrid>
+
+							</p:panelGrid>
+
+
+
+
+
+
+							<p:panelGrid id="formulario3" columns="2"
+								styleClass="panel_data w100" columnClasses="header w25,null w75">
+
+								<h:outputText value="Nota" for="nota" />
+
+								<p:panelGrid id="formulario4" columns="2"
+									styleClass="panel_data w100" columnClasses="null w85,null w15">
+
+									<p>#{demoController.notas.get(1)}</p>
+
+									<p:selectBooleanCheckbox style="align:rigth"
+										value="#{demoController.aceptarTerminos}" itemLabel="Aceptar">
+										<p:ajax process="@this "
+											update="@this guardar btnGuardar dialogo"
+											listener="#{demoController.aceptar}" />
+									</p:selectBooleanCheckbox>
+
+								</p:panelGrid>
+
+
+
+
+							</p:panelGrid>
+
+
+
+
+
+							<div align="right">
+
+
+								<p:commandButton id="btnGuardar"
+									disabled="#{!demoController.habilitarGuardar}" value="Guardar"
+									actionListener="#{demoController.actualizarDialogoGuardar()}"
+									 styleClass="primary" icon="ui-icon-disk"
+									update="@this Nombre dialogo">
+
+
+								</p:commandButton>
+
+								
+
+								<p:dialog id="dialogo" header="Confirmación" widgetVar="dlg1"
+									minHeight="40" width="550" showEffect="fade">
+									<p class="p-m-0"
+										style="text-align: justify; text-justify: inter-word;">
+
+										Yo,
+										#{demoController.mensajeCedula}#{demoController.mensajeRUC};
+										declaro bajo juramento que toda la información ingresada
+										corresponde a la realidad y reconozco la responsabilidad que
+										genera la falsedad u ocultamiento de proporcionar datos falsos
+										o errados, como consta en el PROYECTO DE LEY ORGÁNICA PARA LA
+										OPTIMIZACIÓN Y EFICIENCIA DE TRÁMITES ADMINISTRATIVOS ,
+										Capítulo II, NORMAS COMUNES EN MATERIA DE TRÁMITES
+										ADMINISTRATIVOS, Sección I, DE LA PLANIFICACIÓN, CREACIÓN Y
+										SIMPLIFICACIÓN DE TRÁMITES ADMINISTRATIVOS, " <i> Art.
+											10.- Veracidad de la información.- Las entidades reguladas
+											por esta Ley presumirán que las declaraciones, documentos y
+											actuaciones de las personas efectuadas en virtud de trámites
+											administrativos son verdaderas, bajo aviso a la o al
+											administrado de que, en caso de verificarse lo contrario, el
+											trámite y resultado final de la gestión podrán ser negados y
+											archivados, o los documentos emitidos carecerán de validez
+											alguna, sin perjuicio de las sanciones y otros efectos
+											jurídicos establecidos en la ley. El listado de actuaciones
+											anuladas por la entidad en virtud de lo establecido en este
+											inciso estará disponible para las demás entidades del
+											Estado.(...)</i>"
+									</p>
+
+									<p class="p-m-0"
+										style="text-align: justify; text-justify: inter-word;">
+										Además, con respecto a la participación de los espacios, en la
+										Constitución de la República del Ecuador, en su TÍTULO I,
+										ELEMENTOS CONSTITUTIVOS DEL ESTADO, Capítulo segundo, Derechos
+										del buen vivir, Sección tercera, Comunicación e Información,
+										consta:</p>
+
+									<p class="p-m-0"
+										style="text-align: justify; text-justify: inter-word;">
+										"<i>Art 16.- Todas las personas, en forma individual o
+											colectiva, tienen derecho a: <br /> (...) <br />5.-
+											Integrar los espacios de participación previstos en la
+											Constitución en el campo de la comunicación.
+										</i>"
+									</p>
+
+
+									<p:commandButton value="Aceptar" icon="ui-icon-check"
+										id="guardar" process="@this formulario1 formulario2"
+										styleClass="primary"
+										actionListener="#{demoController.guardar}"
+										disabled="#{!demoController.habilitarGuardar}"
+										onclick="PF('dlg1').hide()" update="@form ">
+
+									</p:commandButton>
+
+
+
+								</p:dialog>
+							</div>
+						</p:panel>
+
+
+
+
+
+
+
+
+
+
+
+
+					</h:form>
+				</div>
+			</div>
+		</div>
+
+		<ui:insert name="footer">
+			<ui:include src="/WEB-INF/templates/footer.xhtml" />
+		</ui:insert>
+
+	</div>
+</h:body>
+</html>
+

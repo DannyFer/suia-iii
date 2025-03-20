@@ -1,0 +1,104 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:controles="http://java.sun.com/jsf/composite/controles-prime"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+    <ui:define name="content">
+        <ui:include src="../contenido/menu.xhtml" />
+        <div class="content">
+            <h:form id="frmDatos">
+                <p:panel header="Identificación de Sitios contaminados o fuentes de contaminación">
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="*Adjuntar Documento:"/>
+                        <p:fileUpload fileUploadListener="#{identificacionSitiosContaminadosEiaController.handleFileUpload}" mode="advanced"
+                                      label="Seleccione" update="txtNombreAnexo"
+                                      auto="true" sizeLimit="100000" allowTypes="/(\.|\/)(pdf)$/" />                        
+                        <h:outputLabel value="Documento:" />
+                        <p:commandLink id="txtNombreAnexo"/>
+                    </h:panelGrid>
+                    <br/>
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="">
+                        <f:facet name="header">
+                            <p:commandButton value="Adicionar"  styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick" 
+                                             action="#{identificacionSitiosContaminadosEiaController.nuevoSitio()}" oncomplete="PF('dlgSitiosContaminados').show();" update=":#{p:component('frmSitiosContaminados')}"/>
+                            <mae:panelGridHeaderHelp value="Identificación de Sitios contaminados" conector="ubicacionHelp" image="#{request.contextPath}/resources/images/proyecto-mapa.png" help="" />
+                        </f:facet>
+                        <p:dataTable value="#{identificacionSitiosContaminadosEiaController.identificacionSitiosContaminadosEiaBean.listaIdentificacionSitiosContaminadosEia}"
+                                     var="si" id="detalle">
+
+                            <p:column headerText="Acciones">
+                                <div class="buttons-inline">
+                                    <p:commandButton icon="ui-icon-pencil" styleClass="primary" title="Editar" action="#{identificacionSitiosContaminadosEiaController.editarDetalle(si)}" update=":#{p:component('frmSitiosContaminados')}" oncomplete="PF('dlgSitiosContaminados').show();"/>
+                                    <p:commandButton icon="ui-icon-trash" styleClass="secondary" title="Eliminar" action="#{identificacionSitiosContaminadosEiaController.eliminarDetalle(si)}" update=":#{p:component('detalle')}"/>
+                                </div>
+                            </p:column>
+                            <p:column headerText="Sitios contaminados">
+                                <center>
+                                    <h:outputText value="#{si.sitiosContaminados}"/>
+                                </center>
+                            </p:column>
+                            <p:column headerText="Fuentes de contaminación">
+                                <center>
+                                    <h:outputText value="#{si.fuentesContaminacion}"/>
+                                </center>
+                            </p:column>
+                            <p:column headerText="Coordenadas UTM/Minería tambien PSAD (X Y)">
+                                <center>
+                                    <p:panelGrid columns="2">
+                                        <h:outputText value="#{si.x}"/>
+                                        <h:outputText value="#{si.y}"/>
+                                    </p:panelGrid>
+                                </center>
+                            </p:column>
+                        </p:dataTable>
+                    </p:panelGrid>
+                    <br/>
+                    <div class="buttons main">
+                        <p:commandButton value="Aceptar" icon="ui-icon-check" action="#{identificacionSitiosContaminadosEiaController.guardar()}" update=":#{p:component('frmDatos')}"/>
+                        <p:commandButton value="Cancelar" styleClass="secondary" icon="ui-icon-cancel" immediate="true" action="#{identificacionSitiosContaminadosEiaController.cancelar()}"/>
+                    </div>
+                </p:panel>
+            </h:form>
+            <p:dialog header="Sitios contaminados" widgetVar="dlgSitiosContaminados" modal="true" resizable="false" draggable="false"
+                      style="overflow: auto;" width="868" height="450">  
+                <h:form id="frmSitiosContaminados">
+                    <p:panel>
+                        <h:panelGrid columns="4">
+                            <h:outputLabel value="*Sitios contaminados:"/>
+                            <controles:todoAreaTexto identificador="txtSitios" valor="#{identificacionSitiosContaminadosEiaController.identificacionSitiosContaminadosEiaBean.identificacionSitiosContaminadosEia.sitiosContaminados}"
+                                                     requerido="true" longitud="500" tamanio="30"/>
+                            <h:outputLabel value="*Fuentes de contaminación:"/>
+                            <controles:todoAreaTexto identificador="txtFuentes" valor="#{identificacionSitiosContaminadosEiaController.identificacionSitiosContaminadosEiaBean.identificacionSitiosContaminadosEia.fuentesContaminacion}"
+                                                     requerido="true" longitud="500" tamanio="30"/>
+                            <h:outputLabel value="*X:"/>
+                            <controles:soloTextoNumerosDecimales identificador="txtX" valor="#{identificacionSitiosContaminadosEiaController.identificacionSitiosContaminadosEiaBean.identificacionSitiosContaminadosEia.x}" requerido="true" longitud="6" tamanio="10"/>
+                            <h:outputLabel value="*Y:"/>
+                            <controles:soloTextoNumerosDecimales identificador="txtY" valor="#{identificacionSitiosContaminadosEiaController.identificacionSitiosContaminadosEiaBean.identificacionSitiosContaminadosEia.y}" requerido="true" longitud="6" tamanio="10"/>
+                        </h:panelGrid>
+                        <center>
+                            <p:commandButton action="#{identificacionSitiosContaminadosEiaController.agregarSitio()}" value="Agregar" 
+                                             oncomplete="handleIndividuoRequest1(xhr, status, args)" styleClass="primary"
+                                             update="frmSitiosContaminados, :#{p:component('frmDatos')}"/>
+
+                        </center>
+                    </p:panel>
+                </h:form>
+            </p:dialog>            
+            <script type="text/javascript">
+                function handleIndividuoRequest1(xhr, status, args) {
+                    if (args.validationFailed || !args.sitiosContaminados) {
+                        PF('dlgSitiosContaminados').jq.effect("shake", {times: 5}, 100);
+                    }
+                    else {
+                        PF('dlgSitiosContaminados').hide();
+                        $('#loginLink').fadeOut();
+                    }
+                }
+            </script>
+
+        </div>
+    </ui:define>
+</ui:composition>

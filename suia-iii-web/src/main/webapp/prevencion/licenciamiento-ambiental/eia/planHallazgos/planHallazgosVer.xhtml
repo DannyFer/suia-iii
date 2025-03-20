@@ -1,0 +1,130 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:controles="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:hh="http://java.sun.com/jsf/html">
+<ui:composition
+	template="/prevencion/licenciamiento-ambiental/eia/verEIA.xhtml">
+	<ui:define name="content-eia">
+		<h:form id="frmDatos">
+
+			<p:panel header="Plan de hallazgos">
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					id="panelGridPlan">
+					<f:facet name="header">
+						<h:outputText value="Plan de hallazgos *" />
+					</f:facet>
+					<f:facet name="header" />
+
+					<p:dataTable id="tablePlan"
+						value="#{planHallazgosEIAController.listaPlanHallazgos}" var="ide"
+						paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="No conformidad">
+							<h:outputText value="#{ide.hallazgos.evidencia}" />
+						</p:column>
+						<p:column headerText="Medidas propuestas">
+							<h:outputText value="#{ide.medidaPropuesta}" />
+						</p:column>
+						<p:column headerText="Medios de verificación">
+							<h:outputText value="#{ide.medioVerificacion}" />
+						</p:column>
+						<p:column headerText="Responsable">
+							<h:outputText value="#{ide.responsable}" />
+						</p:column>
+						<p:column headerText="Fecha inicio">
+							<h:outputText value="#{ide.fechaInicio}">
+								<f:convertDateTime type="date" pattern="dd-MM-yyyy" />
+							</h:outputText>
+						</p:column>
+						<p:column headerText="Fecha fin">
+							<h:outputText value="#{ide.fechaFin}">
+								<f:convertDateTime type="date" pattern="dd-MM-yyyy" />
+							</h:outputText>
+						</p:column>
+						<!-- MarielaG para mostrar historico HALLAZGOS MODIFICADOS-->
+						<p:column styleClass="w40px alCenter" 
+						rendered="#{planHallazgosEIAController.totalPlanesModificados > 0}">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{ide.registroModificado}"
+								styleClass="button-small orange"
+								action="#{planHallazgosEIAController.mostrarPlanesOriginales(ide)}"
+								update=":formPlanesOriginales:planesOriginalesDlg" process="@this"
+								oncomplete="PF('planesOriginalesDlg').show()" />
+ 								<!-- HALLAZGOS NUEVO -->
+							<h:outputText value="Nuevo" styleClass="bold text-orange" rendered="#{ide.nuevoEnModificacion}"/>
+						</p:column>
+						<!-- fin historico -->
+					</p:dataTable>
+
+					<!-- MarielaG para mostrar historico REGISTROS ELIMINADOS-->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{planHallazgosEIAController.listaPlanHallazgosEliminadosBdd.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText id="headerPlanHistorico"
+							value="Plan de hallazgos eliminados" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-search"
+							action="#{planHallazgosEIAController.fillPlanesEliminados()}"
+							update=":formPlanesOriginales:planesOriginalesDlg"
+							oncomplete="PF('planesOriginalesDlg').show()" />
+					</h:panelGrid>
+					<!-- fin historico -->
+				</p:panelGrid>
+			</p:panel>
+
+
+		</h:form>
+		
+		<!-- MarielaG para mostrar historico registros --> 
+		<h:form id="formPlanesOriginales">
+			<p:dialog header="Historial plan de hallazgos"
+				id="planesOriginalesDlg"
+				widgetVar="planesOriginalesDlg" modal="true"
+				resizable="false" width="800">
+				<h:panelGroup id="datosOriginales">
+					<p:dataTable 
+						value="#{planHallazgosEIAController.listaPlanHallazgosHistorico}" var="ide"
+						paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText value="#{ide.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="No conformidad">
+							<h:outputText value="#{ide.hallazgos.evidencia}" />
+						</p:column>
+						<p:column headerText="Medidas propuestas">
+							<h:outputText value="#{ide.medidaPropuesta}" />
+						</p:column>
+						<p:column headerText="Medios de verificación">
+							<h:outputText value="#{ide.medioVerificacion}" />
+						</p:column>
+						<p:column headerText="Responsable">
+							<h:outputText value="#{ide.responsable}" />
+						</p:column>
+						<p:column headerText="Fecha inicio">
+							<h:outputText value="#{ide.fechaInicio}">
+								<f:convertDateTime type="date" pattern="dd-MM-yyyy" />
+							</h:outputText>
+						</p:column>
+						<p:column headerText="Fecha fin">
+							<h:outputText value="#{ide.fechaFin}">
+								<f:convertDateTime type="date" pattern="dd-MM-yyyy" />
+							</h:outputText>
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+	</ui:define>
+</ui:composition>
+</html>

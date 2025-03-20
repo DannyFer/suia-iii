@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:composite="http://java.sun.com/jsf/composite">
+
+<composite:interface>
+	<composite:attribute name="areas" />
+	<composite:attribute name="columns" default="1" />
+	<composite:attribute name="areasDisponibles" default="" />
+	<composite:attribute name="requiereApoyo" default="no" />
+	<composite:attribute name="label"
+		default="¿Se requiere acompa&ntilde;amiento de otro t&eacute;cnico? * :" />
+</composite:interface>
+
+<composite:implementation>
+
+	<h:panelGrid columns="1" cellpadding="10">
+		<f:event type="postAddToView"
+			listener="#{solicitarApoyoCC.initValue(cc.attrs.areasDisponibles, cc.attrs.requiereApoyo)}" />
+
+
+		<h:outputLabel value="#{cc.attrs.label}" />
+		<p:selectOneRadio id="opcion" value="#{cc.attrs.requiereApoyo}"
+			required="true">
+			<f:selectItem itemLabel="Si" itemValue="true" />
+			<f:selectItem itemLabel="No" itemValue="false" />
+			<p:ajax update="@this, grid_apoyo" process="@this"
+				listener="#{solicitarApoyoCC.actualizarValor(cc.attrs.requiereApoyo)}" />
+		</p:selectOneRadio>
+
+		<p:outputPanel autoUpdate="true">
+			<p:selectManyCheckbox id="grid_apoyo" value="#{cc.attrs.areas}"
+				rendered="#{solicitarApoyoCC.requiereApoyo}" styleClass="w100"
+				layout="grid" columns="#{cc.attrs.columns}">
+				<f:selectItems value="#{solicitarApoyoCC.areasApoyo}" var="area"
+					itemLabel="#{area}" itemValue="#{area}" />
+			</p:selectManyCheckbox>
+		</p:outputPanel>
+	</h:panelGrid>
+</composite:implementation>
+
+</html>

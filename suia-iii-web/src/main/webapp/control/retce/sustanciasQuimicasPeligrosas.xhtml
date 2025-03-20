@@ -1,0 +1,521 @@
+<ui:composition template="/WEB-INF/templates/default.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+	<ui:define name="content">
+
+<style type="text/css">
+.ui-fileupload-content {
+	border: none !important;
+	padding: 0px;
+}
+</style>
+
+
+<h:form id="formGeneral" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }" rendered="#{!sustanciasQuimicasPeligrosasRetceController.verFormulario}">			
+			<p:panel style="text-align:center;">
+				<f:facet name="header">
+					<h:outputText value="REGISTRO DE EMISIONES Y TRANSFERENCIA DE CONTAMINANTES EN EL ECUADOR" styleClass="uppercase"/><br/>
+					<h:outputText value="SUSTANCIAS QUÍMICAS" styleClass="uppercase"/>
+				</f:facet>
+			</p:panel>
+			
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Reportes de Sustancias Químicas"/>
+				</f:facet>
+				<p:dataTable id="sustanciasTable" value="#{sustanciasQuimicasPeligrosasRetceController.listaReporteSustanciasQuimicas}" 
+					var="item" emptyMessage="#{labels['common.table.empty']}"
+					paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" 
+					currentPageReportTemplate="{currentPage} de {totalPages}" rows="5">				
+					<f:facet name="header">
+						<p:commandButton value="#{msg['button.agregar']}" icon="ui-icon-plus" 
+						actionListener="#{sustanciasQuimicasPeligrosasRetceController.crearRegistro()}" 
+						process="@this" update="@all"  style="float:right" resetValues="true"/>
+					</f:facet>
+					<p:column headerText="Código del Proyecto">
+						<h:outputText value="#{item.informacionProyecto.codigo}"/>
+					</p:column>											
+					<p:column headerText="Número de Reporte">
+						<h:outputText value="#{item.codigo}"/>
+					</p:column>
+					<p:column styleClass="w15" headerText="Acciones">
+						<center>
+							<p:commandButton icon="ui-icon-search" title="Ver" styleClass="primary" 
+							process="@this" update="@all" action="#{sustanciasQuimicasPeligrosasRetceController.seleccionarReporteSustancia(item)}"
+							rendered="#{item.enviado}"/>
+							<p:commandButton icon="ui-icon-pencil" title="Editar" styleClass="secondary" 
+							process="@this" update="@all" action="#{sustanciasQuimicasPeligrosasRetceController.seleccionarReporteSustancia(item)}"
+							rendered="#{!item.enviado}"/>
+							<p:commandButton icon="ui-icon-trash" title="Eliminar" styleClass="secondary" 
+							process="@this" update="@all" action="#{sustanciasQuimicasPeligrosasRetceController.eliminarReporte(item)}"
+							rendered="#{!item.enviado}">
+								<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar?" icon="ui-icon-alert"/>
+							</p:commandButton>					
+						</center>												
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+		</h:form>
+
+
+		<h:form id="formTable" onShow="removeDisabled();" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }" rendered="#{sustanciasQuimicasPeligrosasRetceController.verFormulario}">
+		
+		<p:panel style="text-align:center;">
+			<f:facet name="header">
+				<h:outputText value="REGISTRO DE EMISIONES Y TRANSFERENCIA DE CONTAMINANTES EN EL ECUADOR" styleClass="uppercase"/><br/>
+					<h:outputText value="SUSTANCIAS QUÍMICAS" styleClass="uppercase"/>
+				</f:facet>
+			</p:panel>			
+
+			<p:panelGrid id="pnlSustancias" columns="1" layout="grid"
+				styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="SUSTANCIAS QUÍMICAS" />
+				</f:facet>
+
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+
+					<h:outputText value="Proyecto"/>
+					<h:outputText id="codigoProyecto" value="#{sustanciasQuimicasPeligrosasRetceController.reporteSustanciasQuimicas.informacionProyecto.codigo}"/>
+					<h:outputText value="Nombre Proyecto"/>
+					<h:outputText id="nombreProyecto" value="#{sustanciasQuimicasPeligrosasRetceController.reporteSustanciasQuimicas.informacionProyecto.nombreProyecto}"/>
+
+					<h:outputText value="Proceso en que se usa la sustancia química:" />	
+					
+					
+				<p:selectOneMenu id="proceso"
+						value="#{sustanciasQuimicasPeligrosasRetceController.idProcesoSustancia}"
+						required="true" style="width:100%" filter="true"
+						filterMatchMode="contains"
+						requiredMessage="El campo Proceso en que se usa la sustancia química es requerido."
+						disabled="#{sustanciasQuimicasPeligrosasRetceController.reporteSustanciasQuimicas.enviado}">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+						<f:selectItems
+							value="#{sustanciasQuimicasPeligrosasRetceController.listaCatalogoProcesosSustanciaQuimica}"
+							var="item" itemLabel="#{item.descripcion}" itemValue="#{item.id}" />
+							
+							<p:ajax event="change"
+							listener="#{sustanciasQuimicasPeligrosasRetceController.procesoListener}"/>
+							
+				</p:selectOneMenu>
+				
+					<h:outputText value="Seleccione el tipo de sustancia" />
+					<p:selectOneMenu id="tipoSus"
+						value="#{sustanciasQuimicasPeligrosasRetceController.idTipoSustancia}"
+						required="true" style="width:100%" filter="true"
+						filterMatchMode="contains"
+						requiredMessage="El campo Seleccione el tipo de sustancia es requerido."
+						disabled="#{sustanciasQuimicasPeligrosasRetceController.reporteSustanciasQuimicas.enviado}">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+						<f:selectItems
+							value="#{sustanciasQuimicasPeligrosasRetceController.listaCatalogoTipoSustanciaQuimica}"
+							var="item" itemLabel="#{item.descripcion}" itemValue="#{item.id}" />
+						<p:ajax event="change"
+							listener="#{sustanciasQuimicasPeligrosasRetceController.tipoSustanciaListener}"
+							update=":formTable:mezclas :formTable:sustanciaElegida :formTable:componentes :formTable:dtDatos :formTable:envase" />
+					</p:selectOneMenu>
+				</p:panelGrid>
+
+				<p:panelGrid id="mezclas" columns="2" styleClass="panel_data w100"
+					columnClasses="header w25,null w75">
+
+					<h:outputText id="nombreMezcla" value="Nombre de la sustancia química / mezcla:" disabled="#{sustanciasQuimicasPeligrosasRetceController.reporteSustanciasQuimicas.enviado}"/>
+
+					<h:panelGroup
+						rendered="#{!sustanciasQuimicasPeligrosasRetceController.mostrarMezcla}">
+						<p:commandButton value="Agregar"
+							update=":form:adicionarDatos :form:sustanciaMezcla"
+							styleClass="secondary" process="@this" icon="ui-icon-plus"
+							actionListener="#{sustanciasQuimicasPeligrosasRetceController.cargarSustanciaPura()}"
+							rendered="#{!sustanciasQuimicasPeligrosasRetceController.reporteSustanciasQuimicas.enviado}">
+
+						</p:commandButton>
+
+						<h:panelGroup id="pnlDescripcionSustancia">
+							<p:inputText disabled="true" id="descripcionSustanciaHidden"
+								required="true"
+								value="#{sustanciasQuimicasPeligrosasRetceController.detalleSustanciaMezcla.sustanciaQuimica.descripcion}"
+								rendered="#{!sustanciasQuimicasPeligrosasRetceController.mostrarMezcla}" />
+						</h:panelGroup>
+
+					</h:panelGroup>					
+
+					<p:inputText id="sustanciaElegida"
+						value="#{sustanciasQuimicasPeligrosasRetceController.sustanciaQuimicaRetce.nombreMezcla}"
+						required="true"
+						requiredMessage="El campo Nombre de la sustancia química / mezcla es requerido."
+						rendered="#{sustanciasQuimicasPeligrosasRetceController.mostrarMezcla}"
+						maxlength="50"
+						disabled="#{sustanciasQuimicasPeligrosasRetceController.reporteSustanciasQuimicas.enviado}" />
+
+					<h:outputText id="componentes" value="Componentes de la mezcla:"
+						rendered="#{sustanciasQuimicasPeligrosasRetceController.mostrarMezcla}" />
+
+					<p:dataTable id="dtDatos"
+						rendered="#{sustanciasQuimicasPeligrosasRetceController.mostrarMezcla}"
+						value="#{sustanciasQuimicasPeligrosasRetceController.listaDetallesSustancias}"
+						var="sustancia" emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="Sustancia Química Peligrosa" style="text-align:center;">
+							<h:outputText value="#{sustancia.sustanciaQuimica.descripcion}" />
+						</p:column>
+						<p:column headerText="Porcentaje de la sustancia química en la mezcla" style="text-align:center;">
+							<h:outputText value="#{sustancia.porcentajeSustanciaEnMezcla}" />
+						</p:column>
+						<p:column headerText="Estado Físico" style="text-align:center;">
+							<h:outputText value="#{sustancia.catalogoEstado.descripcion}" />
+						</p:column>
+						<p:column headerText="Cantidad anual utilizada de sustancia química / mezcla (t) en el proceso" style="text-align:center;">
+							<h:outputText value="#{sustancia.cantidadAnual}" />
+						</p:column>
+
+						<p:column styleClass="w15 alCenter" rendered="#{!sustanciasQuimicasPeligrosasRetceController.reporteSustanciasQuimicas.enviado}">
+							<f:facet name="header">
+								<p:commandButton value="Agregar"
+									styleClass="secondary" process="@this" icon="ui-icon-plus"
+									oncomplete="PF('adicionarDatos').show()"
+									actionListener="#{sustanciasQuimicasPeligrosasRetceController.agregarSustanciaPura()}"
+									update=":form:panelMezcla"
+									>
+								</p:commandButton>
+							</f:facet>
+							<center>
+								<p:commandButton icon="ui-icon-pencil" title="Editar"
+									process="@this" styleClass="primary"
+									oncomplete="PF('adicionarDatos').show()"
+									actionListener="#{sustanciasQuimicasPeligrosasRetceController.editarSustancia(sustancia)}"
+									update=":form:panelMezcla">
+								</p:commandButton>
+								<p:commandButton icon="ui-icon-trash" title="Eliminar"
+									process="@this" styleClass="primary"
+									actionListener="#{sustanciasQuimicasPeligrosasRetceController.eliminarSustanciaMezcla(sustancia)}"
+									update=":formTable:mezclas">
+									<p:confirm header="Confirmación"
+										message="¿Está seguro que desea eliminar la sustancias?"
+										icon="ui-icon-alert" />
+								</p:commandButton>
+							</center>
+						</p:column>
+
+						<p:columnGroup type="footer">
+							<p:row>
+								<p:column colspan="1" style="text-align:right"
+									footerText="Porcentaje Total:" />
+								<p:column style="text-align:center" footerText="#{sustanciasQuimicasPeligrosasRetceController.porcentajeTotal}" />
+							</p:row>
+						</p:columnGroup>
+					</p:dataTable>
+					
+					<h:outputText id="estadoFisSus" value="Estado Físico:"
+						rendered="#{!sustanciasQuimicasPeligrosasRetceController.mostrarMezcla}" />
+					
+					<p:inputText disabled="true" id="estadoFisicoSusta"
+								required="true"
+								value="#{sustanciasQuimicasPeligrosasRetceController.detalleSustanciaMezcla.catalogoEstado.descripcion}"
+								rendered="#{!sustanciasQuimicasPeligrosasRetceController.mostrarMezcla}" />
+
+					<h:outputText id="txtCantidad" value="Cantidad anual utilizada de sustancia química / mezcla (t) en el proceso"  rendered="#{!sustanciasQuimicasPeligrosasRetceController.mostrarMezcla}"
+					disabled="true"/>
+													
+					<pe:inputNumber required="true" id="cantSustancia"
+							requiredMessage="Cantidad anual utilizada de sustancia química / mezcla (t) en el proceso es requerido"
+							validatorMessage="Cantidad anual utilizada de sustancia química / mezcla (t) en el proceso no debe ser Cero"
+							maxValue="9999999999" decimalPlaces="0" thousandSeparator=""
+							value="#{sustanciasQuimicasPeligrosasRetceController.detalleSustanciaMezcla.cantidadAnual}"
+							disabled="true"
+							rendered="#{!sustanciasQuimicasPeligrosasRetceController.mostrarMezcla}">
+						</pe:inputNumber>
+					
+				</p:panelGrid>
+
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">				
+
+				<h:outputText value="Tipo de envase de almacenamiento*" />					 
+					 
+					 <p:selectOneMenu id="envase"
+						value="#{sustanciasQuimicasPeligrosasRetceController.idEnvase}"
+						required="true" style="width:100%" filter="true"
+						filterMatchMode="contains"
+						requiredMessage="El campo Tipo de envase de almacenamiento es requerido."
+						disabled="#{sustanciasQuimicasPeligrosasRetceController.reporteSustanciasQuimicas.enviado}">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+						<f:selectItems
+							value="#{sustanciasQuimicasPeligrosasRetceController.listaCatalogoEnvaseAlmacenamiento}"
+							var="item" itemLabel="#{item.descripcion}" itemValue="#{item.id}" />
+
+						<p:ajax event="change"
+							listener="#{sustanciasQuimicasPeligrosasRetceController.tipoEnvaseListener}"
+							update=":formTable:pnlTipoEnvase" />
+
+					</p:selectOneMenu>												
+				</p:panelGrid>	
+				
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75" id="pnlTipoEnvase">
+
+                <h:outputText value="Ingrese el otro tipo de envase de almacenamiento" rendered="#{sustanciasQuimicasPeligrosasRetceController.mostrarOtroEnvase}"/>
+				
+				<p:inputText id="tipEnvase"
+						value="#{sustanciasQuimicasPeligrosasRetceController.sustanciaQuimicaRetce.otroEnvase}"	
+						required="#{sustanciasQuimicasPeligrosasRetceController.mostrarOtroEnvase}"	
+						disabled="#{sustanciasQuimicasPeligrosasRetceController.reporteSustanciasQuimicas.enviado}"
+						rendered="#{sustanciasQuimicasPeligrosasRetceController.mostrarOtroEnvase}"
+						maxlength="10">
+					</p:inputText>
+					
+					</p:panelGrid>
+
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75" id="pnlanio">
+					<p:outputLabel value="Año de declaración" for="cmb_anio"
+							styleClass="ui-label-form" />
+					<p:selectOneMenu
+						value="#{sustanciasQuimicasPeligrosasRetceController.reporteSustanciasQuimicas.anioDeclaracion}"
+						id="cmb_anio" required="true">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}"
+							itemValue="" noSelectionOption="true" />
+						<f:selectItems
+							value="#{sustanciasQuimicasPeligrosasRetceController.listaAnios}"
+							var="anio" itemLabel="#{anio.toString()}" itemValue="#{anio}" />
+					</p:selectOneMenu>
+				</p:panelGrid>
+			</p:panelGrid>
+
+			<div class="buttons main">
+					<p:commandButton
+						actionListener="#{sustanciasQuimicasPeligrosasRetceController.agregar()}"
+						process="@form" value="Agregar" styleClass="primary"
+						update="@form :formTable:pnlTipoEnvase"
+						rendered="#{!sustanciasQuimicasPeligrosasRetceController.reporteSustanciasQuimicas.enviado}"/>
+					<p:commandButton value="Cancelar" styleClass="secondary"
+						process="@this" actionListener="#{sustanciasQuimicasPeligrosasRetceController.cancelar()}"
+						update="@form"
+						rendered="#{!sustanciasQuimicasPeligrosasRetceController.reporteSustanciasQuimicas.enviado}">
+					</p:commandButton>
+				</div>
+
+
+				<p:separator/>
+
+				<p:panelGrid columns="1" styleClass="panel_data w100" layout="grid">
+
+					<f:facet name="header">
+						<h:outputText value="Sustancias Químicas" />
+					</f:facet>
+
+					<p:dataTable id="dtbSustancias"
+						value="#{sustanciasQuimicasPeligrosasRetceController.listaSustanciasQuimicasRetce}"
+						var="sustancia" emptyMessage="#{labels['common.table.empty']}">
+
+						<p:column headerText="Proceso" style="word-wrap: break-word;">
+							<h:outputText value="#{sustancia.catalogoGeneralProceso.descripcion}"  />
+						</p:column>
+						<p:column headerText="Tipo de Sustancia">
+							<h:outputText value="#{sustancia.catalogoGeneralTipoSustancia.descripcion}" />
+						</p:column>
+						<p:column headerText="Sustancia Química Peligrosa">
+							<h:outputText value="#{sustanciasQuimicasPeligrosasRetceController.nombreMezcla(sustancia)}" />
+						</p:column>
+						<p:column headerText="Estado Físico Sustancia Química Peligrosa">
+							<h:outputText value="#{sustancia.estadoFisico}" />
+						</p:column>
+							<p:column headerText="Tipo envase de almacenamiento" style="word-wrap: break-word;">
+							<h:outputText value="#{sustancia.catalogoGeneralEnvase.descripcion eq 'Otros' ? sustancia.otroEnvase : sustancia.catalogoGeneralEnvase.descripcion}" />
+						</p:column>
+						<p:column headerText="Año de reporte" style="word-wrap: break-word;">
+							<h:outputText value="#{sustancia.reporteSustanciaQuimica.anioDeclaracion}" />
+						</p:column>
+
+						<p:column styleClass="w15 alCenter" headerText="Acciones">
+							<center>
+							
+							<p:commandButton icon="ui-icon-search" title="Ver"
+									process="@this" styleClass="primary"
+									update=":formTable:pnlSustancias :formTable:mezclas :formTable:proceso :formTable:envase"
+									actionListener="#{sustanciasQuimicasPeligrosasRetceController.editarSustanciaGeneral(sustancia)}"
+									rendered="#{sustanciasQuimicasPeligrosasRetceController.reporteSustanciasQuimicas.enviado}">
+								</p:commandButton>
+								
+								<p:commandButton icon="ui-icon-pencil" title="Editar"
+									process="@this" styleClass="primary"
+									update=":formTable:pnlSustancias :formTable:mezclas :formTable:proceso :formTable:envase"
+									actionListener="#{sustanciasQuimicasPeligrosasRetceController.editarSustanciaGeneral(sustancia)}"
+									rendered="#{!sustanciasQuimicasPeligrosasRetceController.reporteSustanciasQuimicas.enviado}">
+								</p:commandButton>
+								
+								<p:commandButton icon="ui-icon-trash" title="Eliminar"
+									process="@this" styleClass="primary"
+									actionListener="#{sustanciasQuimicasPeligrosasRetceController.eliminarSustanciaQuimicaPeligrosa(sustancia)}"
+									update=":formTable:dtbSustancias :formTable:dtResumen"
+									rendered="#{!sustanciasQuimicasPeligrosasRetceController.reporteSustanciasQuimicas.enviado}">
+									<p:confirm header="Confirmación"
+										message="¿Está seguro que desea eliminar la sustancias?"
+										icon="ui-icon-alert" />
+								</p:commandButton>
+							</center>
+						</p:column>
+					</p:dataTable>
+
+				</p:panelGrid>
+				
+
+				<p:separator/>
+
+				<p:panelGrid columns="1" styleClass="panel_data w100" layout="grid">
+
+					<f:facet name="header">
+						<h:outputText value="Cantidad anual utilizada de sustancia química / mezcla (t) en el proceso" />
+					</f:facet>
+
+					<p:dataTable id="dtResumen"
+						value="#{sustanciasQuimicasPeligrosasRetceController.listaSustanciaMezclaResumen}"
+						var="sustancia" emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="Sustancia Química Peligrosa">
+							<h:outputText
+								value="#{sustancia.nombreMezcla}" />
+						</p:column>
+						<p:column headerText="Cantidad anual (t)">
+							<h:outputText value="#{sustancia.cantidadAnual}" />
+						</p:column>
+					</p:dataTable>
+
+				</p:panelGrid>
+				
+				<p:separator/>
+
+								
+				<div class="buttons main">
+				<p:commandButton
+						value="#{sustanciasQuimicasPeligrosasRetceController.habilitarIngreso?'Cerrar':'Cancelar'}" styleClass="secondary" 
+						action="#{sustanciasQuimicasPeligrosasRetceController.ocultarFormulario}"
+						process="@this" update="@all"/>	
+					<p:commandButton
+						actionListener="#{sustanciasQuimicasPeligrosasRetceController.guardar()}"
+						process="@this" value="Guardar" styleClass="primary"
+						rendered="#{!sustanciasQuimicasPeligrosasRetceController.reporteSustanciasQuimicas.enviado}"/>
+					
+					<p:commandButton
+						process="@this" value="Enviar" styleClass="secondary" 						 
+						rendered="#{!sustanciasQuimicasPeligrosasRetceController.reporteSustanciasQuimicas.enviado}"
+						onclick="PF('finalizeDlg').show();"/>	
+				</div>
+
+		</h:form>
+
+
+		<h:form id="form">
+
+			<p:dialog header="Ingreso de Sustancias Químicas"
+				id="adicionarDatos" widgetVar="adicionarDatos" modal="true"
+				width="700" resizable="false" draggable="true" closable="false">
+
+				<p:panelGrid id="sustanciaMezcla" columns="1" styleClass="w100"
+					layout="grid">
+					<f:facet name="header">
+						<p:commandButton value="Seleccionar"
+							oncomplete="PF('seleccionarSustanciaQuimica').show()"
+							styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg"
+							icon="ui-icon-check"
+							update=":#{p:component('seleccionarSustanciaQuimica')},codigoSustanciaHidden"
+							actionListener="#{agregarSustanciasQuimicasBean.reset()}"
+							process="@this" />
+						<mae:panelGridHeaderHelp value="Sustancia *"
+							conector="sustanciaHelp" help="Seleccione las sustancias"
+							width="500px" />
+					</f:facet>
+					<h:panelGroup id="panelMezcla">
+						<h:outputText id="nombreMezcla" value="Nombre de la sustancia química:" />
+
+						<h:panelGroup id="pnlClaveSustancia">
+							<p:inputText disabled="true" id="codigoSustanciaHidden"
+								required="true"
+								value="#{agregarSustanciasQuimicasBean.sustanciaSeleccionada.descripcion}" />
+						</h:panelGroup>
+
+						<h:outputText id="porcentajeSustancia"
+							value="Porcentaje de la sustancia química en la mezcla:"
+							rendered="#{sustanciasQuimicasPeligrosasRetceController.mostrarMezcla}" />
+							
+						<pe:inputNumber required="true" id="porcentajeSus"
+							requiredMessage="Porcentaje de la sustancia química en la mezcla es Requerido"
+							validatorMessage="Porcentaje de la sustancia química en la mezcla no debe ser Cero"
+							maxValue="100" decimalPlaces="0"
+							value="#{sustanciasQuimicasPeligrosasRetceController.detalleSustanciaMezcla.porcentajeSustanciaEnMezcla}"
+							rendered="#{sustanciasQuimicasPeligrosasRetceController.mostrarMezcla}">
+						</pe:inputNumber>
+																
+							
+						<h:outputText value="Estado físico:" for="estadoFisico" />
+						
+						<p:selectOneMenu id="estadoFisico"
+						value="#{sustanciasQuimicasPeligrosasRetceController.idEstadoFisico}"
+						required="true" style="width:100%" filter="true"
+						filterMatchMode="contains"
+						requiredMessage="El campo Estado físico es requerido.">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+						<f:selectItems
+							value="#{sustanciasQuimicasPeligrosasRetceController.listaCatalogoEstadoFisico}"
+							var="item" itemLabel="#{item.descripcion}" itemValue="#{item.id}" />
+
+						<p:ajax event="change"
+							listener="#{sustanciasQuimicasPeligrosasRetceController.estadoFisicoListener}"
+							 />
+					</p:selectOneMenu>
+
+					<h:outputText value="Cantidad anual utilizada de sustancia química / mezcla (t) en el proceso" />
+													
+					<pe:inputNumber required="true" id="cantidadSus"
+							requiredMessage="Cantidad anual utilizada de sustancia química / mezcla (t) en el proceso es requerido"
+							validatorMessage="Cantidad anual utilizada de sustancia química / mezcla (t) en el proceso no debe ser Cero"
+							maxValue="9999999999" decimalPlaces="0" thousandSeparator=""
+							value="#{sustanciasQuimicasPeligrosasRetceController.detalleSustanciaMezcla.cantidadAnual}">
+						</pe:inputNumber>					
+
+					</h:panelGroup>
+				</p:panelGrid>
+
+				<div class="buttons">
+
+					<p:commandButton
+						actionListener="#{sustanciasQuimicasPeligrosasRetceController.agregarSustancia()}"
+						process="@form" value="Guardar"
+						update=":formTable:dtDatos :form:sustanciaMezcla 
+                                     :formTable:pnlDescripcionSustancia :formTable:descripcionSustanciaHidden :formTable:estadoFisicoSusta :formTable:cantSustancia" />
+					<p:commandButton value="Cancelar" styleClass="secondary"
+						onclick="PF('adicionarDatos').hide()" 
+						actionListener="#{sustanciasQuimicasPeligrosasRetceController.cancelarSustancia()}">
+					</p:commandButton>
+				</div>
+
+			</p:dialog>
+
+
+			<p:dialog header="Seleccionar sustancia química"
+				id="seleccionarSustanciaQuimica"
+				widgetVar="seleccionarSustanciaQuimica" modal="true"
+				resizable="false" width="600">
+				<h:form>
+					<ui:include	src="/prevencion/registroProyecto/utiles/registroModalSustanciaQuimica.xhtml" />
+				</h:form>
+			</p:dialog>
+			
+			<p:dialog modal="true" id="finalizeDlg" widgetVar="finalizeDlg"  header="Cláusula"
+			resizable="false" width="650px">
+			
+			<p align="justify">#{sustanciasQuimicasPeligrosasRetceController.mensajeResponsabilidad}</p>			
+				
+				<t:div styleClass="buttons main">
+				<p:commandButton icon="ui-icon-check" value="Enviar" actionListener="#{sustanciasQuimicasPeligrosasRetceController.enviar()}" update="@all" styleClass="large"
+				 oncomplete="PF('finalizeDlg').hide();" immediate="true" process="@this"/>
+				<p:commandButton icon="ui-icon-cancel" value="Cancelar" onclick="PF('finalizeDlg').hide();" process="@this" styleClass="secondary"/>	
+				
+			</t:div>
+			</p:dialog>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

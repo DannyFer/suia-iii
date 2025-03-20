@@ -1,0 +1,280 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:t="http://myfaces.apache.org/tomahawk"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{descripcionProyectoPmaBean.validarTareaBpmV2()}"/>
+        <ui:include src="contenido/menu.xhtml"/>
+<style>
+            ul.error {
+                padding: 0;
+            }
+
+ul.error li {
+	list-style: none;
+}
+</style>
+        <div class="content">
+            <p:panel id="parte1" header="8. INVENTARIO FORESTAL">
+                <h:panelGrid columns="1" layout="grid" styleClass="w100" cellpadding="4" cellspacing="4">
+                    <h:form id="ficha">
+                        <p:outputLabel value="¿Su proyecto tiene remoción de cobertura vegetal nativa?"
+                                       for="remocionVegetal"/>
+                        <p:selectOneRadio id="remocionVegetal" required="true"
+                                          value="#{inventarioForestalPmaBean.inventarioForestalPma.remocionVegetal}">
+                            <f:selectItem itemLabel="Sí" itemValue="true"/>
+                            <f:selectItem itemLabel="No" itemValue="false"/>
+                            <p:ajax process="@this" update=":#{p:component('pnl_remocion_vegetal')}"/>
+                        </p:selectOneRadio>
+
+						<!-- MarielaG para mostrar historico INVENTARIO-->
+						<h:panelGrid styleClass="panel_data" columns="2"
+							rendered="#{inventarioForestalPmaBean.listaHistorialInventario.size() > 0}"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt">
+							<h:outputText value="Historial Inventario" />
+							<p:commandButton styleClass="button-small background-orange "
+								process="@this" icon="ui-icon-search"
+								update=":formInventarioHistorial:inventarioHistorialDlg"
+								oncomplete="PF('inventarioHistorialDlg').show()" />
+						</h:panelGrid>
+						<!-- fin historico -->
+
+						<h:panelGroup id="pnl_remocion_vegetal">
+                            <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                         rendered="#{inventarioForestalPmaBean.inventarioForestalPma.remocionVegetal}">
+                                <f:facet name="header">
+                                    <mae:panelGridHeaderHelp render="false" value="Remoción de cobertura vegetal nativa"
+                                                             conector="generalHelp"
+                                                             image="#{request.contextPath}/resources/images/help-how.png"
+                                                             help="#{helps['no.help.yet']}"/>
+                                </f:facet>
+
+								<h:panelGrid columns="2">
+                                    <p:outputLabel value="Descargar plantilla del inventario forestal"/>
+                                    <p:commandButton value="Descargar" ajax="false" id="btnDescargar" immediate="true"
+                                                     onclick="PrimeFaces.monitorDownload(start, stop);"
+                                                     styleClass="primary"
+                                                     icon="ui-icon-arrowthick-1-s">
+                                        <p:fileDownload
+                                                value="#{inventarioForestalPmaBean.descargarPlantillaInventarioForestal()}"/>
+                                    </p:commandButton>
+                                </h:panelGrid>
+
+                                <h:outputText value="Seleccione el archivo excel (.xls)"/>
+
+                                <h:panelGrid styleClass="w25" cellpalding="2" columns="3">
+                                    <h:outputText id="nombreArchivoInventario"
+                                                  value="#{inventarioForestalPmaBean.inventarioForestalPma.inventarioForestal.nombre}"/>
+                                    <p:commandButton ajax="false" immediate="true"
+                                                     rendered="#{!(inventarioForestalPmaBean.inventarioForestalPma.inventarioForestal.id==null)}"
+                                                     onclick="PrimeFaces.monitorDownload(start, stop);"
+                                                     styleClass="primary"
+                                                     icon="ui-icon-arrowthick-1-s">
+                                        <p:fileDownload
+                                                value="#{inventarioForestalPmaBean.descargar()}"/>
+                                    </p:commandButton>
+                                    <!-- MarielaG para historico -->
+									<p:commandButton styleClass="button-small orange"
+										process="@this" icon="ui-icon-search" title="Ver Historial"
+										rendered="#{inventarioForestalPmaBean.listaHistorialPlantilla.size() > 0}"
+										action="#{inventarioForestalPmaBean.fillHistorialInventario(1)}"
+										update=":formInventarioHistorial:inventarioHistorialDlg"
+										oncomplete="PF('inventarioHistorialDlg').show()" />
+									<!-- fin historico -->
+									<h:inputHidden id="nombreArchivoInventarioHidden"
+										value="#{inventarioForestalPmaBean.nombreFileInventarioForestal}" />
+								</h:panelGrid>
+
+                                <p:fileUpload id="filePlano"
+                                              fileUploadListener="#{inventarioForestalPmaBean.fileUploadListenerInventarioForestal}"
+                                              value="#{inventarioForestalPmaBean.file}" sizeLimit="1048576"
+                                              allowTypes="/(\.|\/)(xls|xlsx)$/" label="Seleccionar"
+                                              uploadLabel="Subir" auto="true"
+                                              update=":#{p:component('nombreArchivoInventario')},:#{p:component('nombreArchivoInventarioHidden')}"
+                                              cancelLabel="Cancelar"
+                                              invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo XLS o XLSX"
+                                              invalidSizeMessage="Debe adjuntar un archivo no mayor de 1 Mb."
+                                              styleClass="w50 toLeft" mode="advanced">
+                                </p:fileUpload>
+
+                                <h:panelGrid columns="1" layout="grid" styleClass="w50" cellpadding="2"
+                                             cellspacing="2">
+                                    <p:outputLabel for="textCantidadMadera" value="Cantidad de madera en pie (m3)"/>
+									<h:panelGrid columns="2">
+										<p:inputText id="textCantidadMadera" required="true"
+											value="#{inventarioForestalPmaBean.inventarioForestalPma.maderaEnPie}">
+											<f:validateDoubleRange minimum="0.1" maximum="500000" />
+											<f:validateRequired disabled="false" />
+											<pe:keyFilter mask="num" />
+										</p:inputText>
+										<!-- MarielaG para historico -->
+										<p:commandButton styleClass="button-small orange"
+											process="@this" icon="ui-icon-search" title="Ver Historial"
+											rendered="#{inventarioForestalPmaBean.listaHistorialMaderaEnPie.size() > 0}"
+											action="#{inventarioForestalPmaBean.fillHistorialInventario(2)}"
+											update=":formInventarioHistorial:inventarioHistorialDlg"
+											oncomplete="PF('inventarioHistorialDlg').show()" />
+										<!-- fin historico -->
+									</h:panelGrid>
+								</h:panelGrid>
+                            </p:panelGrid>
+                        </h:panelGroup>
+                        
+                        
+            <p:dialog header="Registro Ambiental" id="dialogo" onShow="#{fichaAmbientalGeneralControllerV2.validarPagos()}"
+                          styleClass="ventana" widgetVar="dlg1" modal="true" height="500px"
+                          width="90%">
+                    <br/>
+
+                    <div align="left">
+                        <h:outputText
+                                value="Nota: En caso de que necesite realizar cambios en su registro ambiental cierre la ventana y seleccione la sección en la cual desea modificar la información."
+                                styleClass="encabezado text-red"/>
+                    </div>
+                    <h:panelGroup id="pgPdf">                        
+                        <object data="#{fichaAmbientalGeneralImprimirBean.pdf}?pfdrid_c=true"
+                                height="390px" width="100%">
+                            Su navegador no soporta la visualización de pdf. Puede descargar
+                            el documento presionando el siguiente botón:
+                            <p:commandButton value="Descargar" styleClass="primary"
+                                             ajax="false" icon="ui-icon-arrowthick-1-s"
+                                             action="#{fichaAmbientalGeneralImprimirBean.descargarFichaTecnico()}"/>
+                        </object>
+                    </h:panelGroup>
+                </p:dialog>
+                <p:dialog id="dlg2" header="Registro Ambiental incompleto"
+					widgetVar="dlg2" modal="true" height="300">
+					<h:outputText
+						value="Para finalizar el Registro Ambiental debe completar los siguientes puntos:" />
+					<ul class="error alLeft text-red ">
+						<li><h:outputLink
+								value="#{request.contextPath}/prevencion/categoria2/v2/fichaAmbiental/default.jsf"
+								rendered="#{!fichaAmbientalGeneralMenuBean.fichaAmbiental.validarDescripcionProyectoObraActividad}">
+								<h:outputText value="1 Información del proyecto"
+									class="text-red " />
+							</h:outputLink></li>
+						<li><h:outputLink
+								value="#{request.contextPath}/prevencion/categoria2/v2/fichaAmbiental/proyectoObra.jsf"
+								rendered="#{!fichaAmbientalGeneralMenuBean.fichaAmbiental.validarDatosGenerales}">
+								<h:outputText value="2 Datos generales" class="text-red " />
+							</h:outputLink></li>
+						<li><h:outputLink
+								value="#{request.contextPath}/prevencion/categoria2/v2/fichaAmbiental/marcoReferencial.jsf"
+								rendered="#{!fichaAmbientalGeneralMenuBean.fichaAmbiental.validarMarcoLegalReferencial}">
+								<h:outputText value="3 Marco legal referencial"
+									class="text-red " />
+							</h:outputLink></li>
+						<li><h:outputLink
+								value="#{request.contextPath}/prevencion/categoria2/v2/fichaAmbiental/descripcionProceso.jsf"
+								rendered="#{!fichaAmbientalGeneralMenuBean.fichaAmbiental.validarDescripcionProceso}">
+								<h:outputText value="4 Descripción del proyecto"
+									class="text-red " />
+							</h:outputLink></li>
+						<li><h:outputLink
+								value="#{request.contextPath}/prevencion/categoria2/v2/fichaAmbiental/descripcionArea.jsf"
+								rendered="#{!fichaAmbientalGeneralMenuBean.fichaAmbiental.validarDescripcionAreaImplantacion}">
+								<h:outputText value="5 Descripción del área de implantación"
+									class="text-red " />
+							</h:outputLink></li>
+						<li><h:outputLink
+								value="#{request.contextPath}/prevencion/categoria2/v2/fichaAmbiental/impactoAmbientales.jsf"
+								rendered="#{!fichaAmbientalGeneralMenuBean.fichaAmbiental.validarPrincipalesImpactosAmbientales}">
+								<h:outputText value="6 Principales impactos ambientales"
+									class="text-red " />
+							</h:outputLink></li>
+						<li><h:outputLink
+								value="#{request.contextPath}/prevencion/categoria2/v2/fichaAmbiental/cronogramaValorado.jsf"
+								rendered="#{!fichaAmbientalGeneralMenuBean.fichaAmbiental.validarCronogramaValoradoPlanManejoAmbiental}">
+								<h:outputText value="7 Plan de manejo ambiental (PMA)"
+									class="text-red " />
+							</h:outputLink></li>
+						<li><h:outputLink
+								value="#{request.contextPath}/prevencion/categoria2/v2/fichaAmbiental/inventarioForestal.jsf"
+								rendered="#{!fichaAmbientalGeneralMenuBean.fichaAmbiental.validarInventarioForestal}">
+								<h:outputText value="8 Inventario forestal" class="text-red " />
+							</h:outputLink></li>						
+					</ul>
+
+                </p:dialog>
+
+                        <t:div styleClass="buttons main">
+                            <p:commandButton value="Atrás" immediate="true" process="@this"
+                                             action="/prevencion/categoria2/v2/fichaAmbiental/cronogramaValorado.jsf?faces-redirect=true"
+                                             icon="ui-icon-arrowthick-1-w"/>
+                            <p:commandButton value="Guardar"
+                                             action="#{inventarioForestalPmaBean.guardar()}"
+                                             icon="ui-icon-disk" update="@form"/>
+                            <p:commandButton value="Visualizar registro"							
+											 styleClass="extraLarge buttonVisualizarFicha"
+											 action="#{fichaAmbientalGeneralImprimirBean.cargarDatosBandeja}"
+											 rendered="#{fichaAmbientalGeneralControllerV2.completado and !fichaAmbientalGeneralControllerV2.ppc()}"
+											 update=":#{p:component('pgPdf')}" onclick="PF('dlg1').show();"
+											 icon="ui-icon-check" process="@this"/>							
+							<p:commandButton value="Visualizar registro"							
+											 styleClass="extraLarge buttonVisualizarFicha"
+											 rendered="#{!fichaAmbientalGeneralControllerV2.completado and !fichaAmbientalGeneralControllerV2.ppc()}"
+											 onclick="PF('dlg2').show();" icon="ui-icon-check" type="button"/>
+                            <p:commandButton value="Siguientes" immediate="true" rendered="#{fichaAmbientalGeneralControllerV2.ppc1()}"
+                                             process="@this"
+                                             action="/prevencion/categoria2/v2/fichaAmbiental/participacionCiudadanaDescargar.jsf?faces-redirect=true"
+                                             icon="ui-icon-arrowthick-1-e"/>
+
+							<p:commandButton value="Siguiente" immediate="true" rendered="#{!fichaAmbientalGeneralControllerV2.ppc1()}"
+								process="@this"
+								action="/prevencion/categoria2/v2/fichaAmbiental/envioFicha.jsf?faces-redirect=true"
+								icon="ui-icon-arrowthick-1-e" />
+
+						</t:div>
+                    </h:form>
+                </h:panelGrid>
+            </p:panel>
+        </div>
+
+		<!-- MarielaG para mostrar historicos -->
+		<h:form id="formInventarioHistorial">
+			<p:dialog
+				header="#{inventarioForestalPmaBean.nombreHistorial}"
+				id="inventarioHistorialDlg" widgetVar="inventarioHistorialDlg"
+				modal="true" resizable="false" width="600">
+				<h:panelGroup>
+					<h:panelGrid columns="1" columnClasses="w100">
+						<p:dataTable id="tableHistorial" rowIndexVar="index"
+							value="#{inventarioForestalPmaBean.listaHistorialInventario}"
+							var="item" emptyMessage="#{labels['common.table.empty']}">
+							<p:column headerText="Plantilla" 
+								rendered="#{inventarioForestalPmaBean.opcionHistorial eq 0 or inventarioForestalPmaBean.opcionHistorial eq 1}">
+								<h:outputText value="#{item.inventarioForestal.nombre}" />
+							</p:column>
+							<p:column headerText="Descargar" styleClass="w15 alCenter"
+								rendered="#{inventarioForestalPmaBean.opcionHistorial eq 0 or inventarioForestalPmaBean.opcionHistorial eq 1}">
+								<p:commandButton ajax="false" immediate="true"
+									styleClass="primary" icon="ui-icon-arrowthick-1-s">
+									<p:fileDownload
+										value="#{inventarioForestalPmaBean.descargarArchivoHistorico(item.inventarioForestal)}" />
+								</p:commandButton>
+							</p:column>
+							<p:column headerText="Cantidad de madera en pie (m3)" 
+								rendered="#{inventarioForestalPmaBean.opcionHistorial eq 0 or inventarioForestalPmaBean.opcionHistorial eq 2}">
+								<h:outputText value="#{item.maderaEnPie}" />
+							</p:column>
+							<p:column headerText="Fecha Modificación" styleClass="w20">
+								<h:outputText value="#{item.fechaHistorico}">
+									<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+								</h:outputText>
+							</p:column>
+						</p:dataTable>
+					</h:panelGrid>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+	</ui:define>
+</ui:composition>

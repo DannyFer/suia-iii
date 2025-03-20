@@ -1,0 +1,697 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+
+<script type="text/javascript">
+		$(document.getElementById('form:tabGenerador:dtGridAutogestion_content')).addClass("sinborde")
+		$(document.getElementById('form:tabGenerador:dtGridAutogestion_content')).addClass("sinmargen")
+		
+		$(document.getElementById('form:tabGenerador:dtGridAutogestionDesechos_content')).addClass("sinborde")
+		$(document.getElementById('form:tabGenerador:dtGridAutogestionDesechos_content')).addClass("sinmargen")
+	</script>
+
+<style type="text/css">
+.sinborde {
+	border: none !important;
+}
+
+.sinmargen {
+	padding: none !important;
+}
+
+.headerSinBorde .ui-widget-header {
+	border: none !important;
+}
+
+.subTabla tr td {
+	border-right: 1px solid #aaaaaa !important;
+	border-bottom: 1px solid #aaaaaa !important;
+	border-left: none !important;
+	border-top: none !important;
+}
+
+.ui-datatable table {
+	height: 100%;
+}
+
+.btnCenter {
+	text-align: center !important;
+}
+</style>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100"
+	style="margin-top: 15px !important;">
+	<f:facet name="header">
+		<h:outputText value="GESTIÓN INTERNA (AUTOGESTIÓN)" />
+	</f:facet>
+
+	<h:panelGrid columns="1" styleClass="w100">
+		<p:outputLabel value="¿Realiza gestión interna (autogestión)?"
+			for="realizaAutogestionVer" />
+		<p:selectOneRadio
+			value="#{generadorDesechosPeligrososVerController.generadorDesechosRetce.realizaAutogestion}"
+			required="true" id="realizaAutogestionVer" disabled="true">
+			<f:selectItem itemLabel="Sí" itemValue="true" />
+			<f:selectItem itemLabel="No" itemValue="false" />
+			<p:ajax process="@this" update="pnlAutogestionVer" />
+		</p:selectOneRadio>
+		<h:outputText />
+		<h:panelGrid styleClass="panel_data" columns="2"
+			rendered="#{generadorDesechosPeligrososVerController.listaRealizaAutogestionHistorial ne null}"
+			columnClasses="header background-orange, null" rowClasses="null, alt">
+			<h:outputText value="Historial autogestion" />
+			<p:commandButton styleClass="button-small orange"
+				icon="ui-icon-search" process="@this"
+				update=":form:tabGenerador:tblVerHistorialRealizaAutogestion"
+				oncomplete="PF('verHistorialRealizaAutogestion').show()"
+				immediate="true" title="Ver Historial" />
+		</h:panelGrid>
+	</h:panelGrid>
+</p:panelGrid>
+
+<h:panelGroup id="pnlAutogestionVer">
+	<p:panelGrid columns="1" layout="grid" styleClass="w100"
+		rendered="#{generadorDesechosPeligrososVerController.generadorDesechosRetce.realizaAutogestion}">
+		<f:facet name="header">
+			<h:outputText value="Información autogestión" />
+		</f:facet>
+
+		<p:panelGrid columns="2" styleClass="panel_data w50"
+			columnClasses="header w25, null w25, null w5 btnCenter"
+			rendered="#{generadorDesechosPeligrososVerController.listaAutogestionHistorial eq null and (generadorDesechosPeligrososVerController.listaDocumentosAutorizacionHistorial eq null or generadorDesechosPeligrososVerController.listaDocumentosAutorizacionHistorial.size() == 0)}">
+			<h:outputText value="Número de autorización" />
+			<h:outputText
+				value="#{generadorDesechosPeligrososVerController.generadorDesechosRetce.numeroAutorizacion}" />
+
+
+			<h:outputText value="Autorización" />
+			<p:commandButton icon="ui-icon-arrowthick-1-s"
+				styleClass="button-small primary toLeft" title="Ver" ajax="false"
+				immediate="true">
+				<p:fileDownload
+					value="#{generadorDesechosPeligrososVerController.descargar(generadorDesechosPeligrososVerController.documentoAutorizacion)}" />
+			</p:commandButton>
+
+		</p:panelGrid>
+
+		<p:panelGrid columns="3" styleClass="panel_data w50"
+			columnClasses="header w25, null w25, null w5 btnCenter"
+			rendered="#{(generadorDesechosPeligrososVerController.listaAutogestionHistorial ne null and generadorDesechosPeligrososVerController.listaAutogestionHistorial.size() > 0) or (generadorDesechosPeligrososVerController.listaDocumentosAutorizacionHistorial ne null and generadorDesechosPeligrososVerController.listaDocumentosAutorizacionHistorial.size() > 0)}">
+			<h:outputText value="Número de autorización" />
+			<h:outputText
+				value="#{generadorDesechosPeligrososVerController.generadorDesechosRetce.numeroAutorizacion}" />
+			<p:commandButton icon="ui-icon-search"
+				styleClass="button-small orange"
+				oncomplete="PF('verHistorialAutogestion').show()"
+				update=":form:tabGenerador:tblVerHistorialAutogestion"
+				rendered="#{generadorDesechosPeligrososVerController.listaAutogestionHistorial ne null and generadorDesechosPeligrososVerController.listaAutogestionHistorial.size() > 0}"
+				title="Ver Historial" />
+			<h:outputText value=""
+				rendered="#{generadorDesechosPeligrososVerController.listaAutogestionHistorial eq null}" />
+
+			<h:outputText value="Autorización" />
+			<p:commandButton icon="ui-icon-arrowthick-1-s"
+				styleClass="button-small primary toLeft" title="Ver" ajax="false"
+				immediate="true">
+				<p:fileDownload
+					value="#{generadorDesechosPeligrososVerController.descargar(generadorDesechosPeligrososVerController.documentoAutorizacion)}" />
+			</p:commandButton>
+			<p:commandButton icon="ui-icon-search"
+				styleClass="button-small orange"
+				oncomplete="PF('verHistorialDocumentos').show()"
+				action="#{generadorDesechosPeligrososVerController.verHistorialDocumentos(1)}"
+				update=":frmDialogs:tblVerHistorialDocumentos"
+				rendered="#{generadorDesechosPeligrososVerController.listaDocumentosAutorizacionHistorial ne null and generadorDesechosPeligrososVerController.listaDocumentosAutorizacionHistorial.size() > 0}"
+				title="Ver Historial" />
+			<h:outputText value=""
+				rendered="#{generadorDesechosPeligrososVerController.listaDocumentosAutorizacionHistorial eq null or generadorDesechosPeligrososVerController.listaDocumentosAutorizacionHistorial.size() == 0}" />
+
+		</p:panelGrid>
+
+	</p:panelGrid>
+
+	<p:panelGrid columns="1" layout="grid" styleClass="w100"
+		rendered="#{generadorDesechosPeligrososVerController.generadorDesechosRetce.realizaAutogestion}">
+		<f:facet name="header">
+			<h:outputText value="Desechos autogestión" />
+		</f:facet>
+
+		<p:dataGrid id="dtGridAutogestionDesechos" styleClass="alCenter"
+			value="#{generadorDesechosPeligrososVerController.listaDesechosAutogestion}"
+			var="desechoPrincipal" columns="1">
+			<div class="#{desechoPrincipal.id}">
+				<p:panelGrid id="pnl1" columns="1" layout="grid" styleClass="w100">
+
+
+					<p:dataTable
+						value="#{desechoPrincipal.listaDesechosEliminacionAutogestion}"
+						var="desechoEliminado"
+						emptyMessage="#{labels['common.table.empty']}">
+						<f:facet name="header">
+							<h:outputText style="text-transform: uppercase"
+								value="#{desechoPrincipal.desechoPeligroso.descripcion}  #{desechoPrincipal.desechoPeligroso.clave}" />
+						</f:facet>
+
+						<p:columnGroup type="header">
+							<p:row>
+								<p:column headerText="Eliminación o disposición final"
+									rowspan="2" />
+								<p:column headerText="Operación" rowspan="2" />
+								<p:column headerText="Clave" rowspan="2" style="width: 8%" />
+								<p:column headerText="Unidad" rowspan="2" style="width: 8%" />
+								<p:column headerText="Cantidad (t/año)" rowspan="2" styleClass="w10"  />
+								<p:column headerText="Desechos Generados" colspan="4" styleClass="w40"/>
+								<p:column headerText="" rowspan="2" style="width: 33px;"
+									rendered="#{desechoPrincipal.mostrarHistorialDesecho}"
+									styleClass="alCenter table-column-header" />
+							</p:row>
+							<p:row>
+								<p:column headerText="Nombre del residuo o desecho "
+									styleClass="w20px" />
+								<p:column headerText="Código" styleClass="w20px" />
+								<p:column headerText="Unidad" styleClass="w20px" />
+								<p:column headerText="Cantidad" styleClass="w20px" />
+							</p:row>
+						</p:columnGroup>
+						<p:column>
+							<h:outputText
+								value="#{desechoEliminado.tipoEliminacion.tipoEliminacionDesecho.tipoEliminacionDesecho eq null ?
+								desechoEliminado.tipoEliminacion.tipoEliminacionDesecho.nombre :
+								desechoEliminado.tipoEliminacion.tipoEliminacionDesecho.tipoEliminacionDesecho.nombre}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{desechoEliminado.tipoEliminacion.nombre}" />
+						</p:column>
+						<p:column style="width: 8%">
+							<h:outputText value="#{desechoEliminado.tipoEliminacion.clave}" />
+						</p:column>
+						<p:column style="width: 8%">
+							<h:outputText value="#{desechoEliminado.tipoUnidad.descripcion}" />
+						</p:column>
+						<p:column styleClass="w10 alCenter">
+							<h:outputText value="#{desechoEliminado.cantidad}" />
+						</p:column>
+						<p:column styleClass="w40 alCenter" colspan="4" style="padding:0px;">
+							<h:dataTable id="tblDesechosGeneradosVer"
+								style="height:100% !important;" styleClass="subTabla"
+								rendered="#{desechoEliminado.generaDesecho}"
+								value="#{desechoEliminado.listaDesechosGeneradosPorEliminacion}"
+								var="desecho">
+
+								<h:column styleClass="w20px">
+									<h:outputText
+										value="#{desecho.tipoDesechoGenerado.codigo.equals(autogestionDesechosBean.tipoDesechoPeligroso) ? desecho.desechoPeligroso.descripcion : desecho.descripcion}" />
+								</h:column>
+								<h:column styleClass="w20px">
+									<h:outputText
+										value="#{desecho.tipoDesechoGenerado.codigo.equals(autogestionDesechosBean.tipoDesechoPeligroso) ? desecho.desechoPeligroso.clave : 'N/A'}" />
+								</h:column>
+								<h:column styleClass="w10">
+									<h:outputText value="#{desecho.tipoUnidad.descripcion}" />
+								</h:column>
+								<h:column>
+									<h:outputText value="#{desecho.cantidad}" />
+								</h:column>
+							</h:dataTable>
+							<h:outputText value="N/A"
+								rendered="#{!desechoEliminado.generaDesecho}" />
+						</p:column>
+						<p:column style="text-align: center; width: 33px;"
+							rendered="#{desechoPrincipal.mostrarHistorialDesecho}">
+							<p:commandButton icon="ui-icon-search"
+								styleClass="button-small orange"
+								action="#{generadorDesechosPeligrososVerController.verHistorialDesechoEliminado(desechoEliminado)}"
+								oncomplete="PF('verHistorialDesechoEliminacion').show()"
+								update=":form:tabGenerador:pnlHistorialAutogestion"
+								rendered="#{desechoEliminado.mostrarHistorial}"
+								title="Ver Historial" />
+							<h:outputText styleClass="text-orange"
+								rendered="#{desechoEliminado.nuevoEnModificacion}" value="Nuevo" />
+						</p:column>
+
+					</p:dataTable>
+					<br />
+					<p:dataTable styleClass="headerSinBorde"
+						rendered="#{desechoPrincipal.listaSustanciasRetce.size() > 0}"
+						value="#{desechoPrincipal.listaSustanciasRetce}" var="item"
+						emptyMessage="#{labels['common.table.empty']}">
+						<f:facet name="header">
+							<h:outputText
+								value="Sustancias RETCE (voluntario hasta la expedición de norma)" />
+						</f:facet>
+						<p:column headerText="Sustancia">
+							<h:outputText
+								value="#{item.catologSustanciasRetce.descripcionProductoQuimico}" />
+						</p:column>
+						<p:column headerText="Cantidad (t/año)" styleClass="alCenter">
+							<h:outputText value="#{item.reporteToneladaAnio}" />
+						</p:column>
+						<p:column headerText="Método de estimación">
+							<h:outputText
+								value="#{item.catalogoMetodoEstimacion.descripcion}" />
+						</p:column>
+						<p:column headerText="Laboratorio" styleClass="w15 alCenter">
+							<p:commandButton icon="ui-icon-search" title="ver"
+								rendered="#{item.catalogoMetodoEstimacion.orden.equals(generadorDesechosPeligrososVerController.ordenMedicionDirecta)}"
+								process="@this"
+								update=":frmDialogs:verLaboratorio :frmDialogs:pnlDatosLaboratorio"
+								styleClass="#{item.listaHistorialLaboratorio ne null ? 'orange' : 'primary'}"
+								oncomplete="PF('verLaboratorio').show()"
+								actionListener="#{generadorDesechosPeligrososVerController.verDatosLaboratorio(item)}" />
+							<h:outputText value="N/A"
+								rendered="#{!item.catalogoMetodoEstimacion.orden.equals(generadorDesechosPeligrososVerController.ordenMedicionDirecta)}" />
+						</p:column>
+						<p:column
+							rendered="#{desechoPrincipal.mostrarHistorialSustancias}"
+							styleClass="alCenter" style="width: 33px;">
+							<p:commandButton icon="ui-icon-search"
+								styleClass="button-small orange"
+								action="#{generadorDesechosPeligrososVerController.verHistorialSustancias(item)}"
+								oncomplete="PF('verHistorialSustancias').show()"
+								update=":form:tabGenerador:pnlHistorialSustancias"
+								rendered="#{item.mostrarHistorial}" title="Ver Historial" />
+							<h:outputText styleClass="text-orange"
+								rendered="#{item.nuevoEnModificacion}" value="Nuevo" />
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+			</div>
+			<br />
+			<br />
+		</p:dataGrid>
+
+		<h:panelGrid styleClass="panel_data" columns="2"
+			rendered="#{generadorDesechosPeligrososVerController.listaHistorialDesechosEliminados != null}"
+			columnClasses="header background-orange, null" rowClasses="null, alt">
+			<h:outputText value="Desechos eliminados" />
+			<p:commandButton styleClass="button-small orange"
+				icon="ui-icon-search" process="@this"
+				update=":form:tabGenerador:pnlHistorialDesechosEliminados"
+				oncomplete="PF('verHistorialDesechosEliminados').show()"
+				immediate="true" title="Ver Historial" />
+		</h:panelGrid>
+	</p:panelGrid>
+
+	<ui:remove>
+		<p:panelGrid columns="1" layout="grid" styleClass="w100"
+			rendered="#{generadorDesechosPeligrososVerController.generadorDesechosRetce.realizaAutogestion}">
+			<f:facet name="header">
+				<h:outputText value="Desechos autogestión" />
+			</f:facet>
+
+			<p:dataGrid id="dtGridAutogestion" emptyMessage="Sin resultados."
+				value="#{generadorDesechosPeligrososVerController.listaDesechosAutogestion}"
+				var="desechoPrincipal" columns="1">
+				<div class="#{desechoPrincipal.id}">
+
+					<p:panelGrid id="pnlDesechosAutogestion" columns="1" layout="grid"
+						styleClass="w100">
+						<p:dataGrid id="dtGridDesechoAuto"
+							value="#{desechoPrincipal.listaDesechosEliminacionAutogestion}"
+							var="desechoEliminadoPrincipal" columns="1">
+							<f:facet name="header">
+								<h:outputText style="text-transform: uppercase"
+									value="#{desechoPrincipal.desechoPeligroso.descripcion}  #{desechoPrincipal.desechoPeligroso.clave}" />
+							</f:facet>
+
+							<div class="#{desechoEliminadoPrincipal.id}">
+								<p:dataTable value="#{desechoEliminadoPrincipal}"
+									var="desechoEliminado" styleClass="headerSinBorde"
+									emptyMessage="#{labels['common.table.empty']}">
+									<f:facet name="header">
+										<h:outputText value="Tipo de eliminación y desechos generados" />
+									</f:facet>
+									<p:column headerText="Eliminación o disposición final">
+										<h:outputText
+											value="#{desechoEliminado.tipoEliminacion.tipoEliminacionDesecho.tipoEliminacionDesecho eq null ?
+										desechoEliminado.tipoEliminacion.tipoEliminacionDesecho.nombre :
+										desechoEliminado.tipoEliminacion.tipoEliminacionDesecho.tipoEliminacionDesecho.nombre}" />
+									</p:column>
+									<p:column headerText="Operación">
+										<h:outputText
+											value="#{desechoEliminado.tipoEliminacion.nombre}" />
+									</p:column>
+									<p:column headerText="Clave">
+										<h:outputText
+											value="#{desechoEliminado.tipoEliminacion.clave}" />
+									</p:column>
+									<p:column headerText="Unidad">
+										<h:outputText
+											value="#{desechoEliminado.tipoUnidad.descripcion}" />
+									</p:column>
+									<p:column headerText="Cantidad (t/año)" styleClass="alCenter">
+										<h:outputText value="#{desechoEliminado.cantidad}" />
+									</p:column>
+								</p:dataTable>
+								<p:dataTable id="tblDesechosGeneradosVer"
+									value="#{desechoEliminadoPrincipal.listaDesechosGeneradosPorEliminacion}"
+									var="desecho" emptyMessage="#{labels['common.table.empty']}">
+
+									<p:column headerText="Nombre del residuo o desecho ">
+										<h:outputText
+											value="#{desecho.tipoDesechoGenerado.codigo.equals(autogestionDesechosBean.tipoDesechoPeligroso) ? desecho.desechoPeligroso.descripcion : desecho.descripcion}" />
+									</p:column>
+									<p:column headerText="Código" styleClass="w15">
+										<h:outputText
+											value="#{desecho.tipoDesechoGenerado.codigo.equals(autogestionDesechosBean.tipoDesechoPeligroso) ? desecho.desechoPeligroso.clave : 'N/A'}" />
+									</p:column>
+									<p:column headerText="Unidad" styleClass="w10">
+										<h:outputText value="#{desecho.tipoUnidad.descripcion}" />
+									</p:column>
+									<p:column headerText="Cantidad" styleClass="w10 center">
+										<h:outputText value="#{desecho.cantidad}" />
+									</p:column>
+								</p:dataTable>
+								<br />
+							</div>
+						</p:dataGrid>
+						<p:dataTable styleClass="headerSinBorde"
+							rendered="#{desechoPrincipal.listaSustanciasRetce.size() > 0}"
+							value="#{desechoPrincipal.listaSustanciasRetce}" var="item"
+							emptyMessage="#{labels['common.table.empty']}">
+							<f:facet name="header">
+								<h:outputText
+									value="Sustancias RETCE (voluntario hasta la expedición de norma)" />
+							</f:facet>
+							<p:column headerText="Sustancia">
+								<h:outputText
+									value="#{item.catologSustanciasRetce.descripcionProductoQuimico}" />
+							</p:column>
+							<p:column headerText="Cantidad (t/año)" styleClass="alCenter">
+								<h:outputText value="#{item.reporteToneladaAnio}" />
+							</p:column>
+							<p:column headerText="Método de estimación">
+								<h:outputText
+									value="#{item.catalogoMetodoEstimacion.descripcion}" />
+							</p:column>
+							<p:column headerText="Laboratorio" styleClass="w15 alCenter">
+								<p:commandButton icon="ui-icon-search" title="ver"
+									rendered="#{item.catalogoMetodoEstimacion.orden.equals(generadorDesechosPeligrososVerController.ordenMedicionDirecta)}"
+									process="@this"
+									update=":frmDialogs:verLaboratorio :frmDialogs:pnlDatosLaboratorio"
+									styleClass="button-small secondary"
+									oncomplete="PF('verLaboratorio').show()"
+									actionListener="#{generadorDesechosPeligrososVerController.verDatosLaboratorio(item)}" />
+								<h:outputText value="N/A"
+									rendered="#{!item.catalogoMetodoEstimacion.orden.equals(generadorDesechosPeligrososVerController.ordenMedicionDirecta)}" />
+							</p:column>
+
+						</p:dataTable>
+					</p:panelGrid>
+				</div>
+				<br />
+				<br />
+			</p:dataGrid>
+
+		</p:panelGrid>
+	</ui:remove>
+</h:panelGroup>
+
+<p:dialog id="verHistorialRealizaAutogestion"
+	widgetVar="verHistorialRealizaAutogestion" modal="true" resizable="false"
+	width="500" header="Historial Autogestión">
+	<p:dataTable id="tblVerHistorialRealizaAutogestion"
+		value="#{generadorDesechosPeligrososVerController.listaRealizaAutogestionHistorial}"
+		var="generador" emptyMessage="#{labels['common.table.empty']}">
+		<p:column headerText="Fecha modificación">
+			<h:outputText value="#{generador.fechaCreacion}" />
+		</p:column>
+		<p:column headerText="¿Realiza gestión interna (autogestión)?">
+			<h:outputText value="#{generador.realizaAutogestion ? 'SI' : 'NO'}" />
+		</p:column>
+	</p:dataTable>
+	<br />
+	<br />
+</p:dialog>
+
+<p:dialog id="verHistorialAutogestion"
+	widgetVar="verHistorialAutogestion" modal="true" resizable="false"
+	width="500" header="Historial Autogestión">
+	<p:dataTable id="tblVerHistorialAutogestion"
+		value="#{generadorDesechosPeligrososVerController.listaAutogestionHistorial}"
+		var="generador" emptyMessage="#{labels['common.table.empty']}">
+		<p:column headerText="Fecha modificación">
+			<h:outputText value="#{generador.fechaCreacion}" />
+		</p:column>
+		<p:column headerText="Número de autorización">
+			<h:outputText value="#{generador.numeroAutorizacion}" />
+		</p:column>
+	</p:dataTable>
+	<br />
+	<br />
+</p:dialog>
+
+<p:dialog id="verHistorialDesechoEliminacion"
+	widgetVar="verHistorialDesechoEliminacion" modal="true"
+	resizable="false" width="800"
+	header="Historial Desecho #{generadorDesechosPeligrososVerController.desechoEliminadoSeleccionado.desechoAutogestion.desechoPeligroso.descripcion}  #{generadorDesechosPeligrososVerController.desechoEliminadoSeleccionado.desechoAutogestion.desechoPeligroso.clave}">
+
+	<h:panelGroup id="pnlHistorialAutogestion">
+		<p:dataTable id="tblVerHistorialDesechoEliminacion"
+			value="#{generadorDesechosPeligrososVerController.desechoEliminadoSeleccionado.listaHistorial}"
+			var="desechoEliminado" emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<h:outputText value="Eliminación o disposición final" width="600px" />
+			</f:facet>
+			<p:columnGroup type="header">
+				<p:row>
+					<p:column headerText="Fecha modificación" rowspan="2"
+						styleClass="alCenter table-column-header" style="width: 80px;" />
+					<p:column headerText="Eliminación o disposición final" rowspan="2" />
+					<p:column headerText="Operación" rowspan="2" />
+					<p:column headerText="Clave" rowspan="2" />
+					<p:column headerText="Unidad" rowspan="2" />
+					<p:column headerText="Cantidad (t/año)" rowspan="2" />
+					<p:column headerText="Desechos Generados" rowspan="2" />
+				</p:row>
+			</p:columnGroup>
+			<p:column style="width: 80px;">
+				<h:outputText value="#{desechoEliminado.fechaCreacion}" />
+			</p:column>
+			<p:column>
+				<h:outputText
+					value="#{desechoEliminado.tipoEliminacion.tipoEliminacionDesecho.tipoEliminacionDesecho eq null ?
+								desechoEliminado.tipoEliminacion.tipoEliminacionDesecho.nombre :
+								desechoEliminado.tipoEliminacion.tipoEliminacionDesecho.tipoEliminacionDesecho.nombre}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{desechoEliminado.tipoEliminacion.nombre}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{desechoEliminado.tipoEliminacion.clave}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{desechoEliminado.tipoUnidad.descripcion}" />
+			</p:column>
+			<p:column styleClass="alCenter">
+				<h:outputText value="#{desechoEliminado.cantidad}" />
+			</p:column>
+			<p:column styleClass="alCenter">
+				<h:outputText
+					value="#{desechoEliminado.generaDesecho ? 'SI' : 'NO'}" />
+			</p:column>
+		</p:dataTable>
+		<br />
+		<br />
+
+		<p:dataTable id="tblVerHistorialDesechosGenerados"
+			value="#{generadorDesechosPeligrososVerController.desechoEliminadoSeleccionado.listaHistorialDesechoGenerado}"
+			var="desecho" emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<h:outputText value="Desechos Generados" width="600px" />
+			</f:facet>
+			<p:column headerText="Fecha modificación" style="width: 80px;">
+				<h:outputText value="#{desecho.fechaCreacion}" />
+			</p:column>
+			<p:column headerText="Nombre del residuo o desecho">
+				<h:outputText
+					value="#{desecho.tipoDesechoGenerado.codigo.equals(autogestionDesechosBean.tipoDesechoPeligroso) ? desecho.desechoPeligroso.descripcion : desecho.descripcion}" />
+			</p:column>
+			<p:column headerText="Código">
+				<h:outputText
+					value="#{desecho.tipoDesechoGenerado.codigo.equals(autogestionDesechosBean.tipoDesechoPeligroso) ? desecho.desechoPeligroso.clave : 'N/A'}" />
+			</p:column>
+			<p:column headerText="Unidad">
+				<h:outputText value="#{desecho.tipoUnidad.descripcion}" />
+			</p:column>
+			<p:column headerText="Cantidad">
+				<h:outputText value="#{desecho.cantidad}" />
+			</p:column>
+			<p:column style="width: 60px;">
+				<h:outputText styleClass="text-orange"
+					value="#{desecho.nuevoEnModificacion ? 'Nuevo' : 'Modificado'}" />
+			</p:column>
+		</p:dataTable>
+		<br />
+		<br />
+	</h:panelGroup>
+</p:dialog>
+
+<p:dialog id="verHistorialSustancias" widgetVar="verHistorialSustancias"
+	modal="true" resizable="false" width="700"
+	header="Historial Sustancias">
+
+	<h:panelGroup id="pnlHistorialSustancias">
+
+		<p:dataTable styleClass="headerSinBorde"
+			value="#{generadorDesechosPeligrososVerController.sustanciaRetceSeleccionada.listaHistorial}"
+			var="item" emptyMessage="#{labels['common.table.empty']}">
+			<p:column headerText="Fecha modificación" style="width: 80px;">
+				<h:outputText value="#{item.fechaCreacion}" />
+			</p:column>
+			<p:column headerText="Sustancia">
+				<h:outputText
+					value="#{item.catologSustanciasRetce.descripcionProductoQuimico}" />
+			</p:column>
+			<p:column headerText="Cantidad (t/año)" styleClass="alCenter">
+				<h:outputText value="#{item.reporteToneladaAnio}" />
+			</p:column>
+			<p:column headerText="Método de estimación">
+				<h:outputText value="#{item.catalogoMetodoEstimacion.descripcion}" />
+			</p:column>
+			<p:column headerText="Laboratorio" styleClass="w15 alCenter">
+				<p:commandButton icon="ui-icon-search" title="ver"
+					rendered="#{item.catalogoMetodoEstimacion.orden.equals(generadorDesechosPeligrososVerController.ordenMedicionDirecta)}"
+					process="@this"
+					update=":frmDialogs:verLaboratorio :frmDialogs:pnlDatosLaboratorio"
+					styleClass="primary" oncomplete="PF('verLaboratorio').show()"
+					actionListener="#{generadorDesechosPeligrososVerController.verDatosLaboratorio(item)}" />
+				<h:outputText value="N/A"
+					rendered="#{!item.catalogoMetodoEstimacion.orden.equals(generadorDesechosPeligrososVerController.ordenMedicionDirecta)}" />
+			</p:column>
+		</p:dataTable>
+		<br />
+		<br />
+	</h:panelGroup>
+</p:dialog>
+
+<p:dialog id="verHistorialDesechosEliminados"
+	widgetVar="verHistorialDesechosEliminados" modal="true"
+	resizable="false" width="1000" header="Desechos eliminados">
+
+	<h:panelGroup id="pnlHistorialDesechosEliminados">
+		<p:dataGrid styleClass="alCenter"
+			value="#{generadorDesechosPeligrososVerController.listaHistorialDesechosEliminados}"
+			var="desechoPrincipal" columns="1">
+			<div class="#{desechoPrincipal.id}">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<p:dataTable
+						value="#{desechoPrincipal.listaDesechosEliminacionAutogestion}"
+						var="desechoEliminado"
+						emptyMessage="#{labels['common.table.empty']}">
+						<f:facet name="header">
+							<h:outputText style="text-transform: uppercase"
+								value="#{desechoPrincipal.desechoPeligroso.descripcion}  #{desechoPrincipal.desechoPeligroso.clave}" />
+						</f:facet>
+
+						<p:columnGroup type="header">
+							<p:row>
+								<p:column headerText="Eliminación o disposición final"
+									rowspan="2" />
+								<p:column headerText="Operación" rowspan="2" />
+								<p:column headerText="Clave" rowspan="2" style="width: 8%" />
+								<p:column headerText="Unidad" rowspan="2" style="width: 8%" />
+								<p:column headerText="Cantidad (t/año)" rowspan="2" styleClass="w10"  />
+								<p:column headerText="Desechos Generados" colspan="4" styleClass="w40"  />
+							</p:row>
+							<p:row>
+								<p:column headerText="Nombre del residuo o desecho "
+									styleClass="w20px" />
+								<p:column headerText="Código" styleClass="w20px" />
+								<p:column headerText="Unidad" styleClass="w20px" />
+								<p:column headerText="Cantidad" styleClass="w20px" />
+							</p:row>
+						</p:columnGroup>
+						<p:column>
+							<h:outputText
+								value="#{desechoEliminado.tipoEliminacion.tipoEliminacionDesecho.tipoEliminacionDesecho eq null ?
+								desechoEliminado.tipoEliminacion.tipoEliminacionDesecho.nombre :
+								desechoEliminado.tipoEliminacion.tipoEliminacionDesecho.tipoEliminacionDesecho.nombre}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{desechoEliminado.tipoEliminacion.nombre}" />
+						</p:column>
+						<p:column style="width: 8%">
+							<h:outputText value="#{desechoEliminado.tipoEliminacion.clave}" />
+						</p:column>
+						<p:column style="width: 8%">
+							<h:outputText value="#{desechoEliminado.tipoUnidad.descripcion}" />
+						</p:column>
+						<p:column styleClass="w10 alCenter">
+							<h:outputText value="#{desechoEliminado.cantidad}" />
+						</p:column>
+						<p:column styleClass="w40 alCenter" colspan="4" style="padding:0px;">
+							<h:dataTable id="tblDesechosGeneradosVer"
+								style="height:100% !important;" styleClass="subTabla"
+								rendered="#{desechoEliminado.generaDesecho}"
+								value="#{desechoEliminado.listaDesechosGeneradosPorEliminacion}"
+								var="desecho">
+
+								<h:column styleClass="w20px">
+									<h:outputText
+										value="#{desecho.tipoDesechoGenerado.codigo.equals(autogestionDesechosBean.tipoDesechoPeligroso) ? desecho.desechoPeligroso.descripcion : desecho.descripcion}" />
+								</h:column>
+								<h:column styleClass="w20px">
+									<h:outputText
+										value="#{desecho.tipoDesechoGenerado.codigo.equals(autogestionDesechosBean.tipoDesechoPeligroso) ? desecho.desechoPeligroso.clave : 'N/A'}" />
+								</h:column>
+								<h:column styleClass="w10">
+									<h:outputText value="#{desecho.tipoUnidad.descripcion}" />
+								</h:column>
+								<h:column>
+									<h:outputText value="#{desecho.cantidad}" />
+								</h:column>
+							</h:dataTable>
+							<h:outputText value="N/A"
+								rendered="#{!desechoEliminado.generaDesecho}" />
+						</p:column>
+					</p:dataTable>
+					<br />
+					<p:dataTable styleClass="headerSinBorde"
+						rendered="#{desechoPrincipal.listaSustanciasRetce.size() > 0}"
+						value="#{desechoPrincipal.listaSustanciasRetce}" var="item"
+						emptyMessage="#{labels['common.table.empty']}">
+						<f:facet name="header">
+							<h:outputText
+								value="Sustancias RETCE (voluntario hasta la expedición de norma)" />
+						</f:facet>
+						<p:column headerText="Sustancia">
+							<h:outputText
+								value="#{item.catologSustanciasRetce.descripcionProductoQuimico}" />
+						</p:column>
+						<p:column headerText="Cantidad (t/año)" styleClass="alCenter">
+							<h:outputText value="#{item.reporteToneladaAnio}" />
+						</p:column>
+						<p:column headerText="Método de estimación">
+							<h:outputText
+								value="#{item.catalogoMetodoEstimacion.descripcion}" />
+						</p:column>
+						<p:column headerText="Laboratorio" styleClass="w15 alCenter">
+							<p:commandButton icon="ui-icon-search" title="ver"
+								rendered="#{item.catalogoMetodoEstimacion.orden.equals(generadorDesechosPeligrososVerController.ordenMedicionDirecta)}"
+								process="@this"
+								update=":frmDialogs:verLaboratorio :frmDialogs:pnlDatosLaboratorio"
+								styleClass="primary"
+								oncomplete="PF('verLaboratorio').show()"
+								actionListener="#{generadorDesechosPeligrososVerController.verDatosLaboratorio(item)}" />
+							<h:outputText value="N/A"
+								rendered="#{!item.catalogoMetodoEstimacion.orden.equals(generadorDesechosPeligrososVerController.ordenMedicionDirecta)}" />
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+			</div>
+			<br />
+			<br />
+		</p:dataGrid>
+	</h:panelGroup>
+</p:dialog>
+
+</html>

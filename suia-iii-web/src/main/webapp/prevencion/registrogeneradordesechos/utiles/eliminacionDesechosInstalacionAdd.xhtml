@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<p:panel id="adicionarPuntoEliminacion" widgetVar="adicionarPuntoEliminacion" toggleable="true" toggleOrientation="vertical" styleClass="colapsablePanel" collapsed="true">
+	<p:ajax event="toggle" listener="#{eliminacionDesechosInstalacionBean.toggleHandle}" update=":form:adicionarPuntoEliminacion" process="@this" />
+	<h:panelGroup id="datosPuntoEliminacionDesecho">
+		<h:panelGroup rendered="#{eliminacionDesechosInstalacionBean.panelAdicionarVisible}">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Punto de eliminación" />
+				</f:facet>
+
+				<h:panelGrid styleClass="w100 separatorBottom" columns="1">
+					<p:outputLabel value="Seleccionar desecho" for="efDesecho" />
+					<p:selectOneMenu id="efDesecho" value="#{eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso}" required="true" styleClass="w100" converter="selectItemConverter">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+						<f:selectItems value="#{eliminacionDesechosInstalacionBean.desechosPeligrosoDisponibles}" />
+						<p:ajax process="@this" update="efDesechoPeligrosoContainer efCantidadDesechoPeligrosoContainer permisosAmbientalesContainer permisosCantidadesContainer" listener="#{permisoAmbientalBean.resetSelection()}" />
+					</p:selectOneMenu>
+				</h:panelGrid>
+
+				<h:panelGroup id="efDesechoPeligrosoContainer">
+					<h:panelGrid styleClass="panel_data w100 separatorBottom" columns="2" columnClasses="header w25, null" rowClasses="null, alt" rendered="#{not empty eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso}">
+						<h:outputText value="Desecho" />
+						<h:outputText value="#{eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.descripcion}" />
+						<h:outputText value="Código" />
+						<h:outputText value="#{eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.clave}" />
+						<h:outputText value="CRTIB" title="#{helps['generadorDesecho.crtib']}" />
+						<h:outputText value="#{eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.nombresCRITB}" />
+					</h:panelGrid>
+				</h:panelGroup>
+
+				<h:panelGrid styleClass="#{eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.desechoES_04 or eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.desechoES_06 ? 'w50' : 'w25'} separatorBottom" columns="#{eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.desechoES_04 or eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.desechoES_06 ? '2' : '1'}" columnClasses="#{eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.desechoES_04 or eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.desechoES_06 ? 'w50, field_mrg w50' : 'w50'}" id="efCantidadDesechoPeligrosoContainer">
+					<p:outputLabel for="efCantidadToneladas" value="Capacidad de gestión anual (toneladas)" />
+					<p:outputLabel for="efCantidadUnidades" value="Capacidad de gestión anual (unidades)" rendered="#{eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.desechoES_04 or eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.desechoES_06}" />
+
+					<p:inputText id="efCantidadToneladas" styleClass="w100" value="#{eliminacionDesechosInstalacionBean.puntoEliminacion.cantidadAnualToneladas}" required="true" maxlength="8">
+						<f:validateDoubleRange minimum="0.1" maximum="9000000" />
+						<pe:keyFilter mask="num" />
+						<p:ajax event="blur" process="@this" listener="#{eliminacionDesechosInstalacionBean.cleanAllData()}" update=":form:recoleccionTransporteDesecho :form:eliminacionDesechoFI permisosCantidadesContainer" />
+					</p:inputText>
+					<p:inputText id="efCantidadUnidades" styleClass="w100" value="#{eliminacionDesechosInstalacionBean.puntoEliminacion.cantidadAnualUnidades}" required="true" rendered="#{eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.desechoES_04 or eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.desechoES_06}" maxlength="8">
+						<f:validateDoubleRange minimum="0.1" maximum="9000000" />
+						<pe:keyFilter mask="num" />
+						<p:ajax event="blur" process="@this" listener="#{eliminacionDesechosInstalacionBean.cleanAllData()}" update=":form:recoleccionTransporteDesecho :form:eliminacionDesechoFI permisosCantidadesContainer" />
+					</p:inputText>
+				</h:panelGrid>
+
+				<h:panelGroup id="#{adicionarTipoEliminacionAliasBean.tipoEliminacionDesechoContainer}">
+					<h:panelGrid columns="2" styleClass="w50 panel_data" columnClasses="header w50, null" rowClasses="null, alt" rendered="#{not empty adicionarTipoEliminacionAliasBean.tipoEliminacionDesechoSeleccionada}">
+						<h:outputText value="Eliminación o disposición final" />
+						<h:outputText value="#{adicionarTipoEliminacionAliasBean.tipoEliminacionDesechoSeleccionada}" />
+					</h:panelGrid>
+				</h:panelGroup>
+
+				<h:panelGroup id="#{adicionarTipoEliminacionAliasBean.textoAdicionalOtroSeleccionadoContainer}">
+					<p:outputLabel value="#{adicionarTipoEliminacionAliasBean.tipoEliminacionDesechoSeleccionada.nombre}" for="#{adicionarTipoEliminacionAliasBean.textoAdicionalOtroId}" rendered="#{adicionarTipoEliminacionAliasBean.otroSeleccionado}" />
+					<p:inputTextarea id="#{adicionarTipoEliminacionAliasBean.textoAdicionalOtroId}" value="#{adicionarTipoEliminacionAliasBean.textoAsociadoOpcionOtro}" rows="2" styleClass="w100" autoResize="false" maxlength="200" required="true" rendered="#{adicionarTipoEliminacionAliasBean.otroSeleccionado}" />
+				</h:panelGroup>
+
+				<h:panelGroup id="permisosAmbientalesContainer">
+					<h:panelGroup rendered="#{not empty eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso}">
+						<ui:include src="/prevencion/registrogeneradordesechos/utiles/identificarPermisosAmbientales.xhtml" />
+					</h:panelGroup>
+				</h:panelGroup>
+
+				<h:panelGroup id="permisosCantidadesContainer">
+					<p:dataList value="#{permisoAmbientalBean.puntoEliminacionPrestadorServicioLista}" type="none" rowIndexVar="index" var="permisoDatos" id="tablePermisosCantidades" emptyMessage="#{labels['common.table.empty']}" rendered="#{not empty eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso and not empty permisoAmbientalBean.puntoEliminacionPrestadorServicioLista}">
+						<p:panelGrid columns="1" layout="grid" styleClass="w100">
+							<f:facet name="header">
+								<h:outputText value="Datos asociados al permiso ambiental #{(index + 1)}" />
+							</f:facet>
+							<h:panelGrid styleClass="w50 separatorBottom" columns="#{eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.desechoES_04 or eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.desechoES_06 ? '2' : '1'}" columnClasses="#{eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.desechoES_04 or eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.desechoES_06 ? 'w50, field_mrg w50' : 'w50'}">
+								<p:outputLabel for="permisoCantidadToneladas" value="Capa (toneladas)" />
+								<p:outputLabel for="permisoCantidadUnidades" value="Cantidad (unidades)" rendered="#{eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.desechoES_04 or eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.desechoES_06}" />
+								<p:inputText id="permisoCantidadToneladas" styleClass="w100" value="#{permisoDatos.cantidadToneladas}" rendered="#{permisoAmbientalBean.getPuntoEliminacionPrestadorServicioLista().size() != 1}">
+									<p:ajax event="blur" process="@this" />
+								</p:inputText>
+								<p:inputText id="permisoCantidadToneladas2" readonly="true" styleClass="w100" value="#{eliminacionDesechosInstalacionBean.puntoEliminacion.cantidadAnualToneladas}" rendered="#{permisoAmbientalBean.getPuntoEliminacionPrestadorServicioLista().size() == 1}" />
+								<p:inputText id="permisoCantidadUnidades" styleClass="w100" value="#{permisoDatos.cantidadUnidades}" rendered="#{(eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.desechoES_04 or eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.desechoES_06) and permisoAmbientalBean.getPuntoEliminacionPrestadorServicioLista().size() != 1}">
+									<p:ajax event="blur" process="@this" />
+								</p:inputText>
+								<p:inputText id="permisoCantidadUnidades2" readonly="true" styleClass="w100" value="#{eliminacionDesechosInstalacionBean.puntoEliminacion.cantidadAnualUnidades}" rendered="#{(eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.desechoES_04 or eliminacionDesechosInstalacionBean.puntoEliminacion.desechoPeligroso.desechoES_06) and permisoAmbientalBean.getPuntoEliminacionPrestadorServicioLista().size() == 1}" />
+							</h:panelGrid>
+						</p:panelGrid>
+					</p:dataList>
+				</h:panelGroup>
+			</p:panelGrid>
+			<h:outputText id="#{adicionarTipoEliminacionAliasBean.tipoEliminacionDesechoBtn}" />
+			<h:outputText id="#{adicionarTipoEliminacionAliasBean.tipoEliminacionDesechoBtnLabel}" />
+
+			<h:inputHidden validator="#{eliminacionDesechosInstalacionBean.validateData}" />
+		</h:panelGroup>
+	</h:panelGroup>
+
+	<div class="buttons">
+		<p:commandButton value="#{eliminacionDesechosInstalacionBean.editar ? 'Actualizar' : 'Aceptar'}" oncomplete="toogleAdicionarEliminacionDesechoInstalacion(xhr, status, args)" actionListener="#{eliminacionDesechosInstalacionBean.aceptar()}" process="@this :form:datosPuntoEliminacionDesecho" update=":form:datosPuntoEliminacionDesecho :form:listadoPuntosEliminacion wizardEmision" />
+		<p:commandButton value="Cancelar" styleClass="secondary" oncomplete="PF('adicionarPuntoEliminacion').toggle()" process="@this" update="datosPuntoEliminacionDesecho" actionListener="#{eliminacionDesechosInstalacionBean.cancelar()}">
+			<p:resetInput target="@form" />
+		</p:commandButton>
+	</div>
+
+	<ui:include src="/prevencion/registrogeneradordesechos/utiles/seleccionarTipoEliminacionDesechoModal.xhtml" />
+
+	<script type="text/javascript">
+	function toogleAdicionarEliminacionDesechoInstalacion(xhr, status, args) {
+	    if(args.addPuntoEliminacion) {
+	    	PF('adicionarPuntoEliminacion').toggle();
+	    } 
+	    reloadWizard(); 
+	}
+</script>
+	<p:separator />
+</p:panel>
+
+</html>

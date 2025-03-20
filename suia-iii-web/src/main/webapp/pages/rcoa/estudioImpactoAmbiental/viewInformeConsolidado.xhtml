@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+<style type="text/css">
+.cssRadioDisabled .ui-radiobutton .ui-state-active {
+	background: #008a8a !important;
+}
+</style>
+
+
+<h:panelGroup id="informeConsolidadoData">
+	<h:panelGrid styleClass="w100" id="pnlInforme">
+		<object type="application/pdf"
+			data="#{informeTecnicoConsolidadoEIABean.urlReporte}?pfdrid_c=true"
+			width="100%" height="500px">
+			Su navegador no soporta la visualización de pdf. Puede descargar el
+			documento presionando el siguiente botón:
+			<p:commandButton value="Descargar" styleClass="primary" ajax="false"
+				icon="ui-icon-arrowthick-1-s" action="#">
+				<p:fileDownload
+					value="#{informeTecnicoConsolidadoEIABean.getStream(informeTecnicoConsolidadoEIABean.nombreReporte, informeTecnicoConsolidadoEIABean.archivoReporte)}" />
+			</p:commandButton>
+		</object>
+		<br />
+		<br />
+		<h:panelGrid columns="1" styleClass="w70">
+			<p:outputLabel value="Tipo de pronunciamiento" />
+			<p:selectOneRadio id="pronunciamiento" disabled="true" styleClass="cssRadioDisabled"
+				requiredMessage="El campo 'Tipo de pronunciamiento' es requerido"
+				value="#{informeTecnicoConsolidadoEIABean.informeTecnico.tipoPronunciamiento}"
+				required="true">
+				<f:selectItems value="#{informeTecnicoConsolidadoEIABean.listaTipoPronunciamiento}" var="tipo"
+						itemLabel="tipo.value" itemValue="tipo.value"/>
+				<p:ajax process="@this" update ="pnlActualizarCi" />
+			</p:selectOneRadio>
+		</h:panelGrid>
+		<br />
+		<p:outputLabel value="Por favor adjuntar el Oficio de ingreso del EIA por Quipux, el Estudio de Impacto Ambiental y Geodata Base del proyecto" style="text-align: right; color: #FF0000;" rendered="#{informeTecnicoConsolidadoEIABean.esTerceraObservacion}" />	
+		<p:panelGrid id="pngAdjuntosAnalisis" columns="1" layout="grid" styleClass="w100" rendered="#{informeTecnicoConsolidadoEIABean.esTerceraObservacion}" >
+			<f:facet name="header">
+				<h:outputText value="Adjuntar Documentos habilitantes " />
+			</f:facet>
+			<p:dataTable id="dtArchivosAdjuntosAnalisis" var="adjunto" value="#{informeTecnicoConsolidadoEIABean.listaDocumentosAdjuntos}" emptyMessage="#{labels['common.table.empty']}">
+				<f:facet name="header">
+					<p:commandButton icon="ui-icon-plus" 
+						actionListener="#{informeTecnicoConsolidadoEIABean.getEtiqueta('')}" update=":formDialogAdjuntoHabilitantes:adjuntosDiagGridHabilitantes"
+						value="#{msg['button.agregar']}" process="dtArchivosAdjuntosAnalisis" 
+						style="float:right"
+						oncomplete="PF('adjuntoDiagHabilitantes').show()" />
+				</f:facet>
+				<p:column headerText="Nombre del adjunto" width="85%">
+					<h:outputText value="#{adjunto.nombre}" />
+				</p:column>
+				<p:column headerText="Acción">
+					<p:commandButton id="downloadAutorizacion" icon="ui-icon-arrowthick-1-s"
+						styleClass="secondary" title="Ver" ajax="false"
+						immediate="true"
+						rendered="#{adjunto.nombre ne null}">
+						<p:fileDownload value="#{descargarDocumentosCoaController.descargarDocumentoEIA(adjunto)}" />
+					</p:commandButton>
+					<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process="dtArchivosAdjuntosAnalisis"
+						update=":form" 
+						rendered="#{informeTecnicoConsolidadoEIABean.habilitadoIngreso}"
+						actionListener="#{informeTecnicoConsolidadoEIABean.eliminarAdjunto(adjunto)}">
+						<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar el documento?" icon="ui-icon-alert" />
+					</p:commandButton>
+				</p:column>
+			</p:dataTable>
+		</p:panelGrid>
+		<p:separator rendered="#{informeTecnicoConsolidadoEIABean.informeTecnico.tipoPronunciamiento eq 2 or informeTecnicoConsolidadoEIABean.informeTecnico.tipoPronunciamiento eq 4}"/>
+			<h:panelGrid styleClass="w100" id="pnlObservacionesSustanciales" columns="3" columnClasses="w30 null, w10 null, w60 null">
+				<p:outputLabel value="¿Las observaciones son sustanciales?" styleClass="bold" rendered="#{informeTecnicoConsolidadoEIABean.informeTecnico.tipoPronunciamiento eq 2 or informeTecnicoConsolidadoEIABean.informeTecnico.tipoPronunciamiento eq 4}" style="text-align: right;" />
+				<p:selectOneRadio id="idSustanciales" styleClass="cssRadioDisabled" required="true" requiredMessage="El campo 'Tipo de observación' es requerido" rendered="#{informeTecnicoConsolidadoEIABean.informeTecnico.tipoPronunciamiento eq 2 or informeTecnicoConsolidadoEIABean.informeTecnico.tipoPronunciamiento eq 4}"
+					value="#{informeTecnicoConsolidadoEIABean.observacionesSustanciales}">
+					<f:selectItem itemLabel="No" itemValue="false"/>
+					<f:selectItem itemLabel="Si" itemValue="true"/>
+					<p:ajax process="@this" update=":form:pnlButtons pnlActualizarCi" listener="#{elaborarInformeConsolidadoController.esRequerido(false)}"/>
+				</p:selectOneRadio>
+				<h:outputText value="" />
+			</h:panelGrid>
+			<br />
+		<h:panelGroup id="pnlActualizarCi">
+			<h:panelGrid styleClass="w100" columns="1"
+				rendered="#{!informeTecnicoConsolidadoEIABean.esPlantaCentral and informeTecnicoConsolidadoEIABean.informeTecnico.tipoPronunciamiento eq 2 and informeTecnicoConsolidadoEIABean.observacionesSustanciales ne null and !informeTecnicoConsolidadoEIABean.observacionesSustanciales }">
+				<p:outputLabel
+					value="¿Requiere actualización del Certificado de Intersección?"
+					styleClass="bold" />
+				<p:selectOneRadio
+					value="#{informeTecnicoConsolidadoEIABean.proyecto.estadoActualizacionCertInterseccion}"
+					required="true"
+					requiredMessage="¿Requiere actualización del Certificado de Intersección? es requerido.">
+					<f:selectItem itemLabel="SI" itemValue="1" />
+					<f:selectItem itemLabel="NO" itemValue="0" />
+				</p:selectOneRadio>
+			</h:panelGrid>
+		</h:panelGroup>
+
+		<br />
+		
+		<p:separator rendered="#{informeTecnicoConsolidadoEIABean.mostrarFacilitadores}"/>
+			<h:panelGrid styleClass="w100" id="pnlFacilitadores" columns="3"
+				columnClasses="w20 null, w10 null, w70 null">
+
+				<p:outputLabel id="lblFacilitadores" value="Número de Facilitadores"
+					styleClass="bold"
+					rendered="#{informeTecnicoConsolidadoEIABean.mostrarFacilitadores}"
+					style="text-align: right;" />
+				<pe:inputNumber required="#{informeTecnicoConsolidadoEIABean.esRequerido}" id="numFacilitadores"
+					requiredMessage="Número de Facilitadores es requerido"
+					validatorMessage="Número de Facilitadores no puede ser cero"
+					maxValue="9999" minValue="0"
+					value="#{pronunciamientoBean.esiaProyecto.numeroFacilitadores}" 					
+					rendered="#{informeTecnicoConsolidadoEIABean.mostrarFacilitadores and informeTecnicoConsolidadoEIABean.ingresarFacilitadores}">
+					<p:ajax process="@this" />
+					<f:validateDoubleRange minimum="#{pronunciamientoBean.valorMinimo}" />
+				</pe:inputNumber>
+				
+				<p:inputText value="#{pronunciamientoBean.esiaProyecto.numeroFacilitadores}" disabled="true"
+				rendered="#{informeTecnicoConsolidadoEIABean.mostrarFacilitadores and !informeTecnicoConsolidadoEIABean.ingresarFacilitadores}" />
+
+				<h:outputText value="" />
+			</h:panelGrid>
+			
+			<p:separator/>
+		
+		<br />
+		
+
+		<p:fieldset legend="ANTECEDENTES" toggleable="true" toggleSpeed="500"
+			collapsed="true">
+			<h:panelGrid columns="1" styleClass="w100">
+				<control:imputConTextoEnriquecido
+					requiredMessage="El campo 'Antecedentes' es requerido" 
+					valor="#{informeTecnicoConsolidadoEIABean.informeTecnico.antecedentes}"
+					soloLectura="false" requerido="#{informeTecnicoConsolidadoEIABean.esRequerido}" />
+			</h:panelGrid>
+		</p:fieldset>
+
+		<br />
+
+		<p:fieldset legend="OBJETIVOS" toggleable="true" toggleSpeed="500"
+			collapsed="true">
+			<h:panelGrid columns="1" styleClass="w100">
+				<control:imputConTextoEnriquecido
+					requiredMessage="El campo 'Objetivos' es requerido"
+					valor="#{informeTecnicoConsolidadoEIABean.informeTecnico.objetivos}"
+					soloLectura="false" requerido="#{informeTecnicoConsolidadoEIABean.esRequerido}" />
+			</h:panelGrid>
+		</p:fieldset>
+
+		<br />
+
+		<p:fieldset legend="CARACTER&Iacute;STICAS IMPORTANTES" toggleable="true"
+			toggleSpeed="500" collapsed="true">
+			<control:imputConTextoEnriquecido
+				requiredMessage="El campo 'Características importantes' es requerido"
+				valor="#{informeTecnicoConsolidadoEIABean.informeTecnico.caracteristicas}"
+				soloLectura="false" requerido="#{informeTecnicoConsolidadoEIABean.esRequerido}" />
+		</p:fieldset>
+
+		<br />
+
+		<p:fieldset legend="EVALUACI&Oacute;N T&Eacute;CNICA" toggleable="true"
+			toggleSpeed="500" collapsed="true">
+			<control:imputConTextoEnriquecido
+				requiredMessage="El campo 'Evaluación técnica' es requerido"
+				valor="#{informeTecnicoConsolidadoEIABean.informeTecnico.evaluacionTecnica}"
+				soloLectura="false" requerido="#{informeTecnicoConsolidadoEIABean.esRequerido}" />
+		</p:fieldset>
+
+		<br />
+
+		<p:fieldset legend="OBSERVACIONES" toggleable="true" toggleSpeed="500"
+			collapsed="true">
+			<h:panelGrid columns="1" styleClass="w100">
+				<control:imputConTextoEnriquecido
+					requiredMessage="El campo 'Observaciones' es requerido"
+					valor="#{informeTecnicoConsolidadoEIABean.informeTecnico.observaciones}"
+					soloLectura="true" requerido="#{informeTecnicoConsolidadoEIABean.esRequerido}" />
+			</h:panelGrid>
+		</p:fieldset>
+
+		<br />
+
+		<p:fieldset legend="CONCLUSIONES Y RECOMENDACIONES" toggleable="true"
+			toggleSpeed="500" collapsed="true">
+			<h:panelGrid columns="1" styleClass="w100">
+				<control:imputConTextoEnriquecido
+					requiredMessage="El campo 'Conclusiones Y Recomendaciones' es requerido"
+					valor="#{informeTecnicoConsolidadoEIABean.informeTecnico.conclusionesRecomendaciones}"
+					soloLectura="false" requerido="#{informeTecnicoConsolidadoEIABean.esRequerido}" />
+			</h:panelGrid>
+		</p:fieldset>
+	</h:panelGrid>
+</h:panelGroup>		
+</html>

@@ -1,0 +1,46 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:controles="http://java.sun.com/jsf/composite/controles-prime">
+    <ui:define name="content">
+        <ui:include src="../contenido/menu.xhtml" />
+        <div class="content">
+            <h:form id="frmDatos">
+                <p:panel header=" Determinación del área de influencia">
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="*Adjuntar Documento:"/>
+                        <p:fileUpload fileUploadListener="#{deteminacionAreaInflueciaEIAController.handleFileUpload}" mode="advanced"
+                                      label="Seleccione" update="txtNombreAnexo"
+                                      auto="true" sizeLimit="100000" allowTypes="/(\.|\/)(pdf)$/" />                        
+                        <h:outputLabel value="Documento:" />
+                        <p:commandLink id="txtNombreAnexo"/>
+                    </h:panelGrid>
+                    <br/>
+                    <p:dataTable value="#{deteminacionAreaInflueciaEIAController.determinacionAreaInfluenciaEIABean.listaDeterminacionAreaInfluenciaEIA}" var="ana">
+                        <p:column headerText="">
+                            <h:outputText value="#{ana.gecaId.descripcion}"/>
+                        </p:column>
+                        <p:column headerText="Resultados">
+                            <controles:todoAreaTexto identificador="txtResultados" valor="#{ana.resultados}" longitud="500" tamanio="30" requerido="true"/>
+                        </p:column>
+                        <p:column headerText="Anexos">
+                            <p:fileUpload fileUploadListener="#{deteminacionAreaInflueciaEIAController.handleFileUploadDetalle}" mode="advanced"
+                                          label="Seleccione"
+                                          auto="true" sizeLimit="100000" allowTypes="/(\.|\/)(pdf)$/" update=":#{p:component('frmDatos')}">
+                                <f:attribute name="idAnalisis" value="#{ana.indice}" id="idAnalisis"/>
+                            </p:fileUpload>
+                        </p:column>
+                    </p:dataTable>
+                    <br/>
+                    <div class="buttons main">
+                        <p:commandButton value="Aceptar" icon="ui-icon-check" action="#{deteminacionAreaInflueciaEIAController.guardar()}" update=":#{p:component('frmDatos')}"/>
+                        <p:commandButton value="Cancelar" styleClass="secondary" icon="ui-icon-cancel" immediate="true" action="#{deteminacionAreaInflueciaEIAController.cancelar()}"/>
+                    </div>
+                </p:panel>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>

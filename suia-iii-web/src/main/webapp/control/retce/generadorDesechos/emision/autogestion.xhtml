@@ -1,0 +1,251 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+	
+	<script type="text/javascript">
+		$(document.getElementById('form:dtGridAutogestion_content')).addClass("sinborde")
+		$(document.getElementById('form:dtGridAutogestion_content')).addClass("sinmargen")
+
+		function deshabilitarBotonesAutogestion() {
+		$('.btnsEditarAutogestion').prop('disabled', true);
+		$('.btnsEditarAutogestion').addClass('ui-state-disabled');
+	};
+	</script>
+	
+	<style type="text/css">
+.sinborde {
+ 	border: none !important;
+}
+
+.sinmargen {
+ 	padding: none !important;
+}
+
+.headerSinBorde .ui-widget-header {
+ 	border: none !important;
+}
+
+.subTabla tr td {
+	border-right: 1px solid #aaaaaa !important;
+	border-bottom: 1px solid #aaaaaa !important;
+	border-left: none !important;
+	border-top: none !important;
+}
+
+.ui-datatable table{height: 100%;}
+</style>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="GESTIÓN INTERNA (AUTOGESTIÓN)" />
+	</f:facet>
+
+	<h:panelGrid columns="1" styleClass="w100">
+		<p:outputLabel value="¿Realiza gestión interna (autogestión)?"
+			for="realizaAutogestion" />
+		<p:selectOneRadio
+			value="#{autogestionDesechosBean.generadorDesechosRetce.realizaAutogestion}"
+			required="true" id="realizaAutogestion">
+			<f:selectItem itemLabel="Sí" itemValue="true" />
+			<f:selectItem itemLabel="No" itemValue="false" />
+			<p:ajax event="change" process="@this" update="pnlAutogestion"
+				listener="#{autogestionDesechosBean.actualizarRealizaAutogestion()}" />
+		</p:selectOneRadio>
+		<h:outputText />
+	</h:panelGrid>
+</p:panelGrid>
+
+<h:panelGroup id="pnlAutogestion">
+	<p:panelGrid columns="1" layout="grid" styleClass="w100"
+		rendered="#{autogestionDesechosBean.generadorDesechosRetce.realizaAutogestion}">
+		<f:facet name="header">
+			<h:outputText value="Información autogestión" />
+		</f:facet>
+
+		<p:panelGrid columns="2" styleClass="panel_data w100"
+			columnClasses="header w25, null">
+			<p:outputLabel for="nroAutorizacion" value="Número de autorización"
+				style="color: white" />
+			<p:inputText id="nroAutorizacion" required="true" maxlength="30" style="width: 32% !important;"
+				value="#{autogestionDesechosBean.generadorDesechosRetce.numeroAutorizacion}" />
+			<p:outputLabel for="docAutorizacion" value="Autorización"
+				style="color: white" />
+			<p:outputPanel id="pnlDocAutorizacion">
+				<p:fileUpload id="docAutorizacion"
+					fileUploadListener="#{autogestionDesechosBean.uploadFileAutorizacion}"
+					multiple="false" sizeLimit="20971520" allowTypes="/(\.|\/)(pdf)$/"
+					label="Seleccionar (pdf 20Mb)" uploadLabel="Subir"
+					invalidFileMessage="Tipo de archivo no válido"
+					invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+					cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+					auto="true" required="true" update="pnlDocAutorizacion" />
+				<p:commandButton id="downloadAutorizacion"
+					icon="ui-icon-arrowthick-1-s"
+					styleClass="button-small primary toLeft" title="Ver" ajax="false"
+					immediate="true"
+					rendered="#{autogestionDesechosBean.documentoAutorizacion.nombre ne null}">
+					<p:fileDownload
+						value="#{autogestionDesechosBean.descargar(autogestionDesechosBean.documentoAutorizacion)}" />
+				</p:commandButton>
+			</p:outputPanel>
+
+		</p:panelGrid>
+
+	</p:panelGrid>
+
+	<p:panelGrid columns="1" layout="grid" styleClass="w100" id="panelAutogestion"
+		rendered="#{autogestionDesechosBean.generadorDesechosRetce.realizaAutogestion}">
+		<f:facet name="header">
+			<p:commandButton value="Adicionar"
+				oncomplete="PF('adicionarAutogestionDesecho').toggle()"
+				onclick="deshabilitarBotonesAutogestion()"
+				styleClass="button-small-text toRight field_mrg btnsEditarAutogestion" process="@this"
+				update="datosAutogestionDesecho" icon="ui-icon-plusthick" />
+			<h:outputText value="Desechos autogestión" />
+		</f:facet>
+
+		<p:outputLabel
+			value="Estimado usuario debe completar los datos asociados para cada desecho que realice autogestión."
+			styleClass="bold" escape="false" />
+
+		<ui:include
+			src="/control/retce/generadorDesechos/emision/formAutogestionDesecho.xhtml" />
+
+		<p:dataGrid id="dtGridAutogestion" emptyMessage="Sin resultados." 
+			value="#{autogestionDesechosBean.listaDesechosAutogestion}"
+			var="desechoPrincipal" columns="1">
+			<div class="#{desechoPrincipal.id}">
+
+				<p:panelGrid id="pnlDesechosAutogestion" columns="1" layout="grid" styleClass="w100" 
+					rendered="#{autogestionDesechosBean.generadorDesechosRetce.realizaAutogestion}">
+
+					<p:dataTable
+						value="#{desechoPrincipal.listaDesechosEliminacionAutogestion}"
+						var="desechoEliminado"
+						emptyMessage="#{labels['common.table.empty']}">
+						<f:facet name="header">
+							<h:outputText style="text-transform: uppercase"
+								value="#{desechoPrincipal.desechoPeligroso.descripcion}  #{desechoPrincipal.desechoPeligroso.clave}" />
+							<p:commandButton icon="ui-icon-pencil" title="Editar"
+								value="Editar" process="@this"
+								update=":form:adicionarAutogestionDesecho"
+								styleClass="button-small-text toRight field_mrg btnsEditarAutogestion"
+								oncomplete="PF('adicionarAutogestionDesecho').toggle()"
+								onclick="deshabilitarBotonesAutogestion()"
+								actionListener="#{autogestionDesechosBean.editarDesechoAutogestion(desechoPrincipal)}" />
+							<p:commandButton icon="ui-icon-trash" title="Eliminar"
+								value="Eliminar" process="@this"
+								styleClass="button-small-text toRight field_mrg btnsEditarAutogestion"
+								actionListener="#{autogestionDesechosBean.eliminarDesechoAutogestion(desechoPrincipal)}"
+								update=":form:dtGridAutogestion" />
+						</f:facet>
+
+						<p:columnGroup type="header">
+							<p:row>
+								<p:column headerText="Eliminación o disposición final"
+									rowspan="2" />
+								<p:column headerText="Operación" rowspan="2" />
+								<p:column headerText="Clave" rowspan="2" style="width: 8%" />
+								<p:column headerText="Unidad" rowspan="2" style="width: 8%" />
+								<p:column headerText="Cantidad autogestionada/año" rowspan="2" styleClass="w10"  />
+								<p:column headerText="Desechos Generados" colspan="4" styleClass="w40"/>
+							</p:row>
+							<p:row>
+								<p:column headerText="Nombre del residuo o desecho " styleClass="w20px" />
+								<p:column headerText="Código" styleClass="w20px" />
+								<p:column headerText="Unidad" styleClass="w20px" />
+								<p:column headerText="Cantidad" styleClass="w20px" />
+							</p:row>
+						</p:columnGroup>
+						<p:column>
+							<h:outputText
+								value="#{desechoEliminado.tipoEliminacion.tipoEliminacionDesecho.tipoEliminacionDesecho eq null ?
+								desechoEliminado.tipoEliminacion.tipoEliminacionDesecho.nombre :
+								desechoEliminado.tipoEliminacion.tipoEliminacionDesecho.tipoEliminacionDesecho.nombre}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{desechoEliminado.tipoEliminacion.nombre}" />
+						</p:column>
+						<p:column style="width: 8%">
+							<h:outputText value="#{desechoEliminado.tipoEliminacion.clave}" />
+						</p:column>
+						<p:column style="width: 8%">
+							<h:outputText value="#{desechoEliminado.tipoUnidad.descripcion}" />
+						</p:column>
+						<p:column styleClass="w10 alCenter">
+							<h:outputText value="#{desechoEliminado.cantidad}" />
+						</p:column>
+						<p:column styleClass="w40 alCenter" colspan="4" style="padding:0px;">
+							<h:dataTable id="tblDesechosGeneradosVer" style="height:100% !important;" styleClass="subTabla"
+								rendered="#{desechoEliminado.generaDesecho}"
+								value="#{desechoEliminado.listaDesechosGeneradosPorEliminacion}"
+								var="desecho">
+
+								<h:column styleClass="w20px">
+									<h:outputText
+										value="#{desecho.tipoDesechoGenerado.codigo.equals(autogestionDesechosBean.tipoDesechoPeligroso) ? desecho.desechoPeligroso.descripcion : desecho.descripcion}" />
+								</h:column>
+								<h:column styleClass="w20px">
+									<h:outputText
+										value="#{desecho.tipoDesechoGenerado.codigo.equals(autogestionDesechosBean.tipoDesechoPeligroso) ? desecho.desechoPeligroso.clave : 'N/A'}" />
+								</h:column>
+								<h:column styleClass="w10">
+									<h:outputText value="#{desecho.tipoUnidad.descripcion}" />
+								</h:column>
+								<h:column >
+									<h:outputText value="#{desecho.cantidad}" />
+								</h:column>
+							</h:dataTable>
+							<h:outputText value="N/A"
+								rendered="#{!desechoEliminado.generaDesecho}" />
+						</p:column>
+					</p:dataTable>
+					<br />
+					<p:dataTable styleClass="headerSinBorde"
+						rendered="#{desechoPrincipal.listaSustanciasRetce.size() > 0}"
+						value="#{desechoPrincipal.listaSustanciasRetce}" var="item"
+						emptyMessage="#{labels['common.table.empty']}">
+						<f:facet name="header">
+							<h:outputText
+								value="Sustancias RETCE (voluntario hasta la expedición de norma)" />
+						</f:facet>
+						<p:column headerText="Sustancia">
+							<h:outputText
+								value="#{item.catologSustanciasRetce.descripcionProductoQuimico}" />
+						</p:column>
+						<p:column headerText="Cantidad (t/año)" styleClass="alCenter">
+							<h:outputText value="#{item.reporteToneladaAnio}" />
+						</p:column>
+						<p:column headerText="Método de estimación">
+							<h:outputText
+								value="#{item.catalogoMetodoEstimacion.descripcion}" />
+						</p:column>
+						<p:column headerText="Laboratorio" styleClass="w15 alCenter">
+							<p:commandButton icon="ui-icon-search" title="ver"
+								rendered="#{item.catalogoMetodoEstimacion.orden.equals(autogestionDesechosBean.ordenMedicionDirecta)}"
+								process="@this"
+								update=":frmDialogs:verLaboratorio :frmDialogs:pnlDatosLaboratorio"
+								styleClass="secondary btnsEditarAutogestion" oncomplete="PF('verLaboratorio').show()"
+								actionListener="#{autogestionDesechosBean.verDatosLaboratorio(item)}" />
+							<h:outputText value="N/A"
+								rendered="#{!item.catalogoMetodoEstimacion.orden.equals(autogestionDesechosBean.ordenMedicionDirecta)}" />
+						</p:column>
+					</p:dataTable>					
+				</p:panelGrid >
+			</div>
+			<br />
+			<br />
+		</p:dataGrid>
+
+	</p:panelGrid>
+</h:panelGroup>
+
+
+</html>

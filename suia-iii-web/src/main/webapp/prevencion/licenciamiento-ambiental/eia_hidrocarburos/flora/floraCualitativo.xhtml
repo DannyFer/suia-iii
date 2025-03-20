@@ -1,0 +1,552 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:controles-prime="http://java.sun.com/jsf/composite/controles-prime">
+
+	<h:form id="frm_tabla1" enctype="multipart/form-data">
+		<p:commandButton icon="ui-icon-plusthick" title="Agregar"
+			oncomplete="PF('dlgPuntoMuetreo').show();"
+			update=":#{p:component('tbl_flora_cualitativo')}">
+		</p:commandButton>
+		<p:separator />
+		<p:dataTable id="tbl_flora_cualitativo" var="cualitativo"
+			scrollable="true" scrollWidth="800"
+			value="#{floraBean.floraCualitativos}">
+			<f:facet name="header">
+			            Inventarios Cualitativos
+		</f:facet>
+
+			<p:columnGroup type="header">
+				<p:row>
+					<p:column headerText="" width="25" />
+					<p:column headerText="" width="25" />
+					<p:column headerText="Punto de Muestreo" width="100" />
+					<p:column headerText="X 1" width="50" />
+					<p:column headerText="Y 1" width="50" />
+					<p:column headerText="Altitud 1" width="50" />
+					<p:column headerText="X 2" width="50" />
+					<p:column headerText="Y 2" width="50" />
+					<p:column headerText="Altitud 2" width="50" />
+					<p:column headerText="X 3" width="50" />
+					<p:column headerText="Y 3" width="50" />
+					<p:column headerText="Altitud 3" width="50" />
+					<p:column headerText="X 4" width="50" />
+					<p:column headerText="Y 4" width="50" />
+					<p:column headerText="Altitud 4" width="50" />
+					<p:column headerText="Tipo Vegetación" width="100" />
+					<p:column headerText="Fecha de Muestreo" width="100" />
+				</p:row>
+			</p:columnGroup>
+			<p:column style="width:32px;text-align:center">
+				<p:commandButton title="Editar"
+					action="#{floraBean.editarPuntoMuestreoCualitativo(cualitativo)}"
+					oncomplete="PF('dlgPuntoMuetreo').show();"
+					update=":#{p:component('tbl_flora_cualitativo')}, :#{p:component('dlgPuntoMuetreo')}"
+					icon="ui-icon-pencil">
+				</p:commandButton>
+			</p:column>
+			<p:column style="width:32px;text-align:center">
+				<p:commandButton title="Eliminar"
+					actionListener="#{floraBean.eliminarPuntoMuestreoCualitativo(cualitativo)}"
+					update=":#{p:component('tbl_flora_cualitativo')}, :#{p:component('dlgPuntoMuetreo')}"
+					icon="ui-icon-closethick">
+				</p:commandButton>
+			</p:column>
+			<p:column>
+				<h:outputText value="#{cualitativo.puntoMuestreo}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{cualitativo.px1}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{cualitativo.py1}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{cualitativo.altitud1}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{cualitativo.px2 != 0.0?cualitativo.px2:null}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{cualitativo.py2 != 0.0?cualitativo.py2:null}" />
+			</p:column>
+			<p:column>
+				<h:outputText
+					value="#{cualitativo.altitud2 != 0.0?cualitativo.altitud2:null}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{cualitativo.px3 != 0.0?cualitativo.px3:null}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{cualitativo.py3 != 0.0?cualitativo.py3:null}" />
+			</p:column>
+			<p:column>
+				<h:outputText
+					value="#{cualitativo.altitud3 != 0.0?cualitativo.altitud3:null}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{cualitativo.px4 != 0.0?cualitativo.px4:null}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{cualitativo.py4 != 0.0?cualitativo.py4:null}" />
+			</p:column>
+			<p:column>
+				<h:outputText
+					value="#{cualitativo.altitud4 != 0.0?cualitativo.altitud4:null}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{cualitativo.tipoVegetacion}" />
+			</p:column>
+			<p:column>
+				<h:outputText
+					value="#{floraBean.dateToString(cualitativo.fechaMuestreo)}" />
+			</p:column>
+		</p:dataTable>
+
+		<script type="text/javascript">
+        function handlePunto1Request(xhr, status, args) {
+            if (args.validationFailed || !args.puntoIn) {
+            	PF('dlgPuntoMuetreo').show();
+            }
+            else {
+                PF('dlgPuntoMuetreo').hide();
+                $('#loginLink').fadeOut();
+            }
+        }
+    </script>
+
+	</h:form>
+
+	<p:dialog header="Punto de Muestreo" widgetVar="dlgPuntoMuetreo"
+		id="dlgPuntoMuetreo" modal="true" resizable="false" draggable="false"
+		style="overflow: auto;" width="550" height="300">
+		<h:form>
+			<p:separator />
+
+			<h:panelGrid columns="3" id="dg_inicio_flora" styleClass="w100"
+				columnClasses="w33, field_mrg w33, field_mrg w33">
+
+				<p:outputLabel for="txt_puntoMuestreo" value="Punto de Muestreo" />
+				<p:outputLabel for="cmb_tipoVegetacion" value="Tipo Vegetación" />
+				<p:outputLabel for="txt_fechaMuestreo" value="Fecha de Muestreo" />
+
+				<p:inputText value="#{floraBean.floraCualitativoBean.puntoMuestreo}"
+					styleClass="w100" required="true" id="txt_puntoMuestreo" />
+
+				<p:selectOneMenu
+					value="#{floraBean.floraCualitativoBean.tipoVegetacion}"
+					required="true" id="cmb_tipoVegetacion"
+					converter="selectItemConverter2" style="width:100%">
+					<f:selectItem itemLabel="-- Escoja un valor --" itemValue="-1" />
+					<f:selectItems value="#{floraBean.tiposVegetacion}" />
+				</p:selectOneMenu>
+
+				<p:calendar id="txt_fechaMuestreo" required="true"
+					value="#{floraBean.floraCualitativoBean.fechaMuestreo}" locale="es"
+					navigator="true" pattern="dd/mm/yyyy" />
+
+				<p:outputLabel for="txt_px1" value="X 1" />
+				<p:outputLabel for="txt_py1" value="Y 1" />
+				<p:outputLabel for="txt_altitud1" value="Altitud 1" />
+
+				<p:inputText value="#{floraBean.floraCualitativoBean.px1}"
+					styleClass="w25" onkeypress="return NumCheckDouble(event,this);"
+					required="true" requiredMessage="Campo Requerido" id="txt_px1" />
+
+				<p:inputText value="#{floraBean.floraCualitativoBean.py1}"
+					styleClass="w25" onkeypress="return NumCheckDouble(event,this);"
+					required="true" id="txt_py1" />
+
+				<p:inputText value="#{floraBean.floraCualitativoBean.altitud1}"
+					styleClass="w25" onkeypress="return NumCheckDouble(event,this);"
+					required="true" id="txt_altitud1" />
+
+				<p:outputLabel for="txt_px2" value="X 2" />
+				<p:outputLabel for="txt_py2" value="Y 2" />
+				<p:outputLabel for="txt_altitud2" value="Altitud 2" />
+
+				<p:inputText value="#{floraBean.floraCualitativoBean.px2}"
+					styleClass="w25" onkeypress="return NumCheckDouble(event,this);"
+					id="txt_px2" />
+
+				<p:inputText value="#{floraBean.floraCualitativoBean.py2}"
+					styleClass="w25" onkeypress="return NumCheckDouble(event,this);"
+					id="txt_py2" />
+
+				<p:inputText value="#{floraBean.floraCualitativoBean.altitud2}"
+					styleClass="w25" onkeypress="return NumCheckDouble(event,this);"
+					id="txt_altitud2" />
+
+				<p:outputLabel for="txt_px3" value="X 3" />
+				<p:outputLabel for="txt_py3" value="Y 3" />
+				<p:outputLabel for="txt_altitud3" value="Altitud 3" />
+
+				<p:inputText value="#{floraBean.floraCualitativoBean.px3}"
+					styleClass="w25" onkeypress="return NumCheckDouble(event,this);"
+					id="txt_px3" />
+
+				<p:inputText value="#{floraBean.floraCualitativoBean.py3}"
+					styleClass="w25" onkeypress="return NumCheckDouble(event,this);"
+					id="txt_py3" />
+
+				<p:inputText value="#{floraBean.floraCualitativoBean.altitud3}"
+					styleClass="w25" onkeypress="return NumCheckDouble(event,this);"
+					id="txt_altitud3" />
+
+				<p:outputLabel for="txt_px4" value="X 4" />
+				<p:outputLabel for="txt_py4" value="Y 4" />
+				<p:outputLabel for="txt_altitud4" value="Altitud 4" />
+
+				<p:inputText value="#{floraBean.floraCualitativoBean.px4}"
+					styleClass="w25" onkeypress="return NumCheckDouble(event,this);"
+					id="txt_px4" />
+
+				<p:inputText value="#{floraBean.floraCualitativoBean.py4}"
+					styleClass="w25" onkeypress="return NumCheckDouble(event,this);"
+					id="txt_py4" />
+
+				<p:inputText value="#{floraBean.floraCualitativoBean.altitud4}"
+					styleClass="w25" onkeypress="return NumCheckDouble(event,this);"
+					id="txt_altitud4" />
+
+			</h:panelGrid>
+
+			<p:separator />
+
+			<p:commandButton value="Agregar" icon="ui-icon-plusthick"
+				oncomplete="handlePunto1Request(xhr, status, args)"
+				action="#{floraBean.agregarPuntoMuestreoCualitativo()}"
+				update=":#{p:component('messages')}, :#{p:component('tbl_flora_cualitativo')}, :#{p:component('dlgPuntoMuetreo')}" />
+
+		</h:form>
+	</p:dialog>
+
+	<h:form id="frm_tabla2" enctype="multipart/form-data">
+		<p />
+		<p:outputLabel for="txt_esfuerzo_muestreo"
+			value="Esfuerzo de Muestreo" />
+
+		<p:inputTextarea rows="3" cols="6" required="true" autoResize="false"
+			value="#{floraBean.esfuerzoMuestreo}" id="txt_esfuerzo_muestreo"
+			styleClass="w25">
+			<p:ajax />
+		</p:inputTextarea>
+
+		<p:separator />
+		<p:separator />
+
+		<p:commandButton icon="ui-icon-plusthick" title="Agregar"
+			oncomplete="PF('dlgEspecie').show();"
+			update=":#{p:component('tbl_flora_cualitativo_2')}, :#{p:component('dlgEspecie')}">
+		</p:commandButton>
+
+		<p:dataTable id="tbl_flora_cualitativo_2" var="especie"
+			scrollable="true" scrollWidth="800" widgetVar=""
+			value="#{floraBean.floraCualitativosEspecie}">
+			<f:facet name="header">
+			            Cualitativos por Individuos
+		</f:facet>
+
+			<p:columnGroup type="header">
+				<p:row>
+					<p:column headerText="" width="25" />
+					<p:column headerText="" width="25" />
+					<p:column headerText="ID Código" width="100" />
+					<p:column headerText="Nro." width="30" />
+					<p:column headerText="Familia" width="100" />
+					<p:column headerText="Género" width="100" />
+					<p:column headerText="Especie" width="100" />
+					<p:column headerText="Nombre Científico" width="100" />
+					<p:column headerText="Nivel de Identificación" width="100" />
+					<p:column headerText="Nombre Común" width="100" />
+					<p:column headerText="Tipo Vegetación" width="100" />
+					<p:column headerText="Hábito" width="100" />
+					<p:column headerText="Estado del Individuo" width="100" />
+					<p:column headerText="Uso" width="100" />
+					<p:column headerText="Orígen" width="100" />
+					<p:column headerText="UICN Internacional" width="100" />
+					<p:column headerText="CITIES" width="100" />
+					<p:column headerText="Libro Rojo" width="100" />
+					<p:column headerText="Nro. Colección" width="100" />
+					<p:column headerText="Centro de Tenencia" width="100" />
+					<p:column headerText="Adjuntar Foto" width="100" />
+					<p:column headerText="Descripción Foto" width="100" />
+				</p:row>
+			</p:columnGroup>
+			<p:column style="width:32px;text-align:center">
+				<p:commandButton title="Editar"
+					action="#{floraBean.editarPuntoEspecieCualitativo(especie)}"
+					oncomplete="PF('dlgEspecie').show();"
+					update=":#{p:component('tbl_flora_cualitativo_2')}, :#{p:component('dlgEspecie')}"
+					icon="ui-icon-pencil">
+				</p:commandButton>
+			</p:column>
+			<p:column style="width:32px;text-align:center">
+				<p:commandButton title="Eliminar"
+					actionListener="#{floraBean.eliminarPuntoEspecieCualitativo(especie)}"
+					update=":#{p:component('tbl_flora_cualitativo_2')}, :#{p:component('dlgEspecie')}"
+					icon="ui-icon-closethick">
+				</p:commandButton>
+			</p:column>
+			<p:column>
+				<h:outputText value="#{especie.floraCualitativo.puntoMuestreo}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{especie.contador}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{especie.familia}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{especie.genero}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{especie.especie}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{especie.nombreCientifico}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{especie.nivelIdentificacion}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{especie.nombreComun}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{especie.tipoVegetacion}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{especie.habito}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{especie.estadoIndividuo}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{especie.uso}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{especie.origen}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{especie.uicnInternacional}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{especie.cities}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{especie.libroRojo}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{especie.nroColeccion}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{especie.centroTenencia}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{especie.fotoEspecieName}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{especie.descripcionFoto}" />
+			</p:column>
+		</p:dataTable>
+
+
+		<script type="text/javascript">
+        function handlePuntoRequest(xhr, status, args) {
+            if (args.validationFailed || !args.puntoIn) {
+            	PF('dlgEspecie').show();
+            }
+            else {
+                PF('dlgEspecie').hide();
+                $('#loginLink').fadeOut();
+            }
+        }
+    </script>
+
+		<p:separator />
+
+		<div class="buttons main">
+			<p:commandButton value="Aceptar" icon="ui-icon-check"
+				action="#{floraBean.guardarCualitativo()}" />
+			<p:commandButton value="Cancelar" styleClass="secondary"
+				icon="ui-icon-cancel" action="#{floraBean.cancelar()}"
+				process="@this">
+				<p:confirm header="Confirmación"
+					message="¿Está seguro de salir del registro de flora cualitativo?"
+					icon="ui-icon-alert" />
+			</p:commandButton>
+		</div>
+
+	</h:form>
+
+	<p:dialog header="Descripción por Especie" widgetVar="dlgEspecie"
+		id="dlgEspecie" modal="true" resizable="false" draggable="false"
+		style="overflow: auto;" width="600" height="450">
+		<h:form id="dlgForm_Cualitativo">
+			<p:separator />
+
+			<h:panelGrid columns="3" id="dg_inicio_flora_2" styleClass="w100"
+				columnClasses="w33, field_mrg w33, field_mrg w33">
+
+				<p:outputLabel for="cmb_id_punto_muestreo" value="ID Código" />
+				<p:outputLabel for="txt_familia" value="Familia" />
+				<p:outputLabel for="txt_genero" value="Género" />
+
+				<p:selectOneMenu required="true"
+					value="#{floraBean.floraCualitativoEspecieBean.floraCualitativo}"
+					id="cmb_id_punto_muestreo" converter="selectItemConverter2"
+					style="width:100%">
+					<f:selectItem itemLabel="-- Escoja un valor --" itemValue="-1" />
+					<f:selectItems value="#{floraBean.floraCualitativos}" />
+				</p:selectOneMenu>
+
+				<p:inputText required="true"
+					value="#{floraBean.floraCualitativoEspecieBean.familia}"
+					styleClass="w100" id="txt_familia" />
+
+				<p:inputText value="#{floraBean.floraCualitativoEspecieBean.genero}"
+					styleClass="w100" id="txt_genero" required="true" />
+
+				<p:outputLabel for="txt_especie" value="Especie" />
+				<p:outputLabel for="txt_nombreCientifico" value="Nombre Científico" />
+				<p:outputLabel for="cmb_niveIdentificacion"
+					value="Nivel de Identificación" />
+
+				<p:inputText required="true"
+					value="#{floraBean.floraCualitativoEspecieBean.especie}"
+					styleClass="w100" id="txt_especie" />
+
+				<p:inputText required="true"
+					value="#{floraBean.floraCualitativoEspecieBean.nombreCientifico}"
+					styleClass="w100" id="txt_nombreCientifico" />
+
+				<p:selectOneMenu required="true"
+					value="#{floraBean.floraCualitativoEspecieBean.nivelIdentificacion}"
+					id="cmb_niveIdentificacion" converter="selectItemConverter2"
+					style="width:100%">
+					<f:selectItem itemLabel="-- Escoja un valor --" itemValue="-1" />
+					<f:selectItems value="#{floraBean.nivelesIdentificacion}" />
+				</p:selectOneMenu>
+
+				<p:outputLabel for="txt_nombreComun" value="Nombre Común" />
+				<p:outputLabel for="cmb_tipoVegetacion2" value="Tipo Vegetación" />
+				<p:outputLabel for="cmb_habito" value="Hábito" />
+
+				<p:inputText required="true"
+					value="#{floraBean.floraCualitativoEspecieBean.nombreComun}"
+					styleClass="w100" id="txt_nombreComun" />
+
+				<p:selectOneMenu required="true"
+					value="#{floraBean.floraCualitativoEspecieBean.tipoVegetacion}"
+					id="cmb_tipoVegetacion2" converter="selectItemConverter2"
+					style="width:100%">
+					<f:selectItem itemLabel="-- Escoja un valor --" itemValue="-1" />
+					<f:selectItems value="#{floraBean.tiposVegetacion}" />
+				</p:selectOneMenu>
+
+				<p:selectOneMenu required="true"
+					value="#{floraBean.floraCualitativoEspecieBean.habito}"
+					id="cmb_habito" converter="selectItemConverter2" style="width:100%">
+					<f:selectItem itemLabel="-- Escoja un valor --" itemValue="-1" />
+					<f:selectItems value="#{floraBean.habitos}" />
+				</p:selectOneMenu>
+
+				<p:outputLabel for="cmb_estadoIndividuo"
+					value="Estado del Individuo" />
+				<p:outputLabel for="cmb_uso" value="Uso" />
+				<p:outputLabel for="cmb_origen" value="Orígen" />
+
+				<p:selectOneMenu required="true"
+					value="#{floraBean.floraCualitativoEspecieBean.estadoIndividuo}"
+					id="cmb_estadoIndividuo" converter="selectItemConverter2"
+					style="width:100%">
+					<f:selectItem itemLabel="-- Escoja un valor --" itemValue="-1" />
+					<f:selectItems value="#{floraBean.estadosIndividuo}" />
+				</p:selectOneMenu>
+
+				<p:selectOneMenu required="true"
+					value="#{floraBean.floraCualitativoEspecieBean.uso}" id="cmb_uso"
+					converter="selectItemConverter2" style="width:100%">
+					<f:selectItem itemLabel="-- Escoja un valor --" itemValue="-1" />
+					<f:selectItems value="#{floraBean.usos}" />
+				</p:selectOneMenu>
+
+				<p:selectOneMenu required="true"
+					value="#{floraBean.floraCualitativoEspecieBean.origen}"
+					id="cmb_origen" converter="selectItemConverter2" style="width:100%">
+					<f:selectItem itemLabel="-- Escoja un valor --" itemValue="-1" />
+					<f:selectItems value="#{floraBean.origenes}" />
+				</p:selectOneMenu>
+
+				<p:outputLabel for="cmb_uicnInternacional"
+					value="UICN Internacional" />
+				<p:outputLabel for="cmb_cities" value="CITIES" />
+				<p:outputLabel for="cmb_libroRojo" value="Libro Rojo" />
+
+				<p:selectOneMenu required="true"
+					value="#{floraBean.floraCualitativoEspecieBean.uicnInternacional}"
+					id="cmb_uicnInternacional" converter="selectItemConverter2"
+					style="width:100%">
+					<f:selectItem itemLabel="-- Escoja un valor --" itemValue="-1" />
+					<f:selectItems value="#{floraBean.uicnsInternacional}" />
+				</p:selectOneMenu>
+
+				<p:selectOneMenu required="true"
+					value="#{floraBean.floraCualitativoEspecieBean.cities}"
+					id="cmb_cities" converter="selectItemConverter2" style="width:100%">
+					<f:selectItem itemLabel="-- Escoja un valor --" itemValue="-1" />
+					<f:selectItems value="#{floraBean.listaCities}" />
+				</p:selectOneMenu>
+
+				<p:selectOneMenu required="true"
+					value="#{floraBean.floraCualitativoEspecieBean.libroRojo}"
+					id="cmb_libroRojo" converter="selectItemConverter2"
+					style="width:100%">
+					<f:selectItem itemLabel="-- Escoja un valor --" itemValue="-1" />
+					<f:selectItems value="#{floraBean.listaLibroRojo}" />
+				</p:selectOneMenu>
+
+				<p:outputLabel for="txt_nroColeccion" value="Nro. Colección" />
+				<p:outputLabel for="txt_centroTenencia" value="Centro de Tenencia" />
+				<p:outputLabel for="file_foto_especie" value="Adjuntar Foto" />
+
+				<p:inputText
+					value="#{floraBean.floraCualitativoEspecieBean.nroColeccion}"
+					onkeypress="return NumCheckDouble(event,this);" styleClass="w100"
+					id="txt_nroColeccion" />
+
+				<p:inputText
+					value="#{floraBean.floraCualitativoEspecieBean.centroTenencia}"
+					styleClass="w100" id="txt_centroTenencia" />
+
+				<p:row>
+					<p:fileUpload id="file_foto_especie" auto="true"
+						fileUploadListener="#{floraBean.handleFileUploadEspecie}"
+						value="#{floraBean.floraCualitativoEspecieBean.fotoEspecieName}"
+						mode="advanced" skinSimple="true" sizeLimit="10000000"
+						update=":#{p:component('lblArchivo_Cualitativo')}"
+						allowTypes="/(\.|\/)(pdf)$/" />
+
+					<p:outputLabel
+						value="#{floraBean.floraCualitativoEspecieBean.fotoEspecieName}"
+						id="lblArchivo_Cualitativo" style="color:blue" />
+				</p:row>
+				<p:outputLabel for="txt_descripcionFoto" value="Descripción Foto" />
+
+				<p:inputTextarea rows="3" cols="6" autoResize="false"
+					value="#{floraBean.floraCualitativoEspecieBean.descripcionFoto}"
+					id="txt_descripcionFoto" styleClass="w25" />
+				<p:separator />
+
+			</h:panelGrid>
+
+			<p:commandButton value="Agregar" icon="ui-icon-plusthick"
+				oncomplete="handlePuntoRequest(xhr, status, args)"
+				action="#{floraBean.agregarPuntoEspecieCualitativo()}"
+				update=":#{p:component('messages')}, :#{p:component('tbl_flora_cualitativo_2')}, :#{p:component('dlgEspecie')}" />
+		</h:form>
+	</p:dialog>
+
+</ui:composition>

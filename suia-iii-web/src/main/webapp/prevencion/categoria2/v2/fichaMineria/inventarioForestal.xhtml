@@ -1,0 +1,271 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:t="http://myfaces.apache.org/tomahawk"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{informacionGeneralController.validarTareaBpmV2()}"/>
+        <ui:include src="contenido/menuMineria.xhtml"/>
+<style>
+            ul.error {
+                padding: 0;
+            }
+
+ul.error li {
+	list-style: none;
+}
+</style>
+        <div class="content">
+            <p:panel id="parte1" header="8. INVENTARIO FORESTAL">
+                <h:panelGrid columns="1" layout="grid" styleClass="w100" cellpadding="4" cellspacing="4">
+                    <h:form id="ficha">
+                        <p:outputLabel value="¿Su proyecto tiene remoción de cobertura vegetal nativa?"
+                                       for="remocionVegetal"/>
+                        <p:selectOneRadio id="remocionVegetal" required="true"
+                                          value="#{inventarioForestalPmaMineriaBean.inventarioForestalPma.remocionVegetal}">
+                            <f:selectItem itemLabel="Sí" itemValue="true"/>
+                            <f:selectItem itemLabel="No" itemValue="false"/>
+                            <p:ajax process="@this" update=":#{p:component('pnl_remocion_vegetal')}"/>
+                        </p:selectOneRadio>
+                        
+                        <!-- MarielaG para mostrar historico INVENTARIO-->
+						<h:panelGrid styleClass="panel_data" columns="2"
+							rendered="#{inventarioForestalPmaMineriaBean.listaHistorialInventario.size() > 0}"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt">
+							<h:outputText value="Historial Inventario" />
+							<p:commandButton styleClass="button-small background-orange"
+								process="@this" icon="ui-icon-search"
+								update=":formInventarioHistorial:inventarioHistorialDlg"
+								oncomplete="PF('inventarioHistorialDlg').show()" />
+						</h:panelGrid>
+						<!-- fin historico -->
+
+                        <h:panelGroup id="pnl_remocion_vegetal">
+                            <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                         rendered="#{inventarioForestalPmaMineriaBean.inventarioForestalPma.remocionVegetal}">
+                                <f:facet name="header">
+                                    <mae:panelGridHeaderHelp render="false" value="Remoción de cobertura vegetal nativa"
+                                                             conector="generalHelp"
+                                                             image="#{request.contextPath}/resources/images/help-how.png"
+                                                             help="#{helps['no.help.yet']}"/>
+                                </f:facet>
+
+                                <h:panelGrid columns="2">
+                                    <p:outputLabel value="Descargar plantilla del inventario forestal"/>
+                                    <p:commandButton value="Descargar" ajax="false" id="btnDescargar" immediate="true"
+                                                     onclick="PrimeFaces.monitorDownload(start, stop);"
+                                                     styleClass="primary"
+                                                     icon="ui-icon-arrowthick-1-s">
+                                        <p:fileDownload
+                                                value="#{inventarioForestalPmaMineriaBean.descargarPlantillaInventarioForestal()}"/>
+                                    </p:commandButton>
+                                </h:panelGrid>
+
+                                <h:outputText value="Seleccione el archivo excel (.xls)"/>
+
+                                <h:panelGrid styleClass="w25" cellpalding="2" columns="3">
+                                    <h:outputText id="nombreArchivoInventario"
+                                                  value="#{inventarioForestalPmaMineriaBean.inventarioForestalPma.inventarioForestal.nombre}"/>
+                                    <p:commandButton ajax="false" immediate="true"
+                                                     rendered="#{!(inventarioForestalPmaMineriaBean.inventarioForestalPma.inventarioForestal.id==null)}"
+                                                     onclick="PrimeFaces.monitorDownload(start, stop);"
+                                                     styleClass="primary"
+                                                     icon="ui-icon-arrowthick-1-s">
+                                        <p:fileDownload
+                                                value="#{inventarioForestalPmaMineriaBean.descargar()}"/>
+                                    </p:commandButton>
+                                    <!-- MarielaG para historico -->
+									<p:commandButton styleClass="button-small orange"
+										process="@this" icon="ui-icon-search" title="Ver Historial"
+										rendered="#{inventarioForestalPmaMineriaBean.listaHistorialPlantilla.size() > 0}"
+										action="#{inventarioForestalPmaMineriaBean.fillHistorialInventario(1)}"
+										update=":formInventarioHistorial:inventarioHistorialDlg"
+										oncomplete="PF('inventarioHistorialDlg').show()" />
+									<!-- fin historico -->
+                                    <h:inputHidden id="nombreArchivoInventarioHidden"
+                                                   value="#{inventarioForestalPmaMineriaBean.nombreFileInventarioForestal}"/>
+                                </h:panelGrid>
+
+                                <p:fileUpload id="filePlano"
+                                              fileUploadListener="#{inventarioForestalPmaMineriaBean.fileUploadListenerInventarioForestal}"
+                                              value="#{inventarioForestalPmaMineriaBean.file}" sizeLimit="1048576"
+                                              allowTypes="/(\.|\/)(xls|xlsx)$/" label="Seleccionar"
+                                              uploadLabel="Subir" auto="true"
+                                              update=":#{p:component('nombreArchivoInventario')},:#{p:component('nombreArchivoInventarioHidden')}"
+                                              cancelLabel="Cancelar"
+                                              invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo XLS o XLSX"
+                                              invalidSizeMessage="Debe adjuntar un archivo no mayor de 1 Mb."
+                                              styleClass="w50 toLeft" mode="advanced">
+                                </p:fileUpload>
+
+                                <h:panelGrid columns="1" layout="grid" styleClass="w50" cellpadding="2"
+                                             cellspacing="2">
+                                    <p:outputLabel for="textCantidadMadera" value="Cantidad de madera en pie (m3)"/>
+									<h:panelGrid columns="2">
+										<p:inputText id="textCantidadMadera" required="true"
+											value="#{inventarioForestalPmaMineriaBean.inventarioForestalPma.maderaEnPie}">
+											<f:validateDoubleRange minimum="0.1" maximum="500000" />
+											<f:validateRequired disabled="false" />
+											<pe:keyFilter mask="num" />
+										</p:inputText>
+										<!-- MarielaG para historico -->
+										<p:commandButton styleClass="button-small orange"
+											process="@this" icon="ui-icon-search" title="Ver Historial"
+											rendered="#{inventarioForestalPmaMineriaBean.listaHistorialMaderaEnPie.size() > 0}"
+											action="#{inventarioForestalPmaMineriaBean.fillHistorialInventario(2)}"
+											update=":formInventarioHistorial:inventarioHistorialDlg"
+											oncomplete="PF('inventarioHistorialDlg').show()" />
+										<!-- fin historico -->
+									</h:panelGrid>
+								</h:panelGrid>
+
+                            </p:panelGrid>
+                        </h:panelGroup>
+                        
+                 <p:dialog header="Registro Ambiental Minería Artesanal" onShow="#{fichaMineriaEnviarControllerV2.validarPagos()}"
+                          widgetVar="dlg1" modal="true" height="400px" width="90%">
+                    <br />
+                    <div align="left">
+                        <h:outputText
+                            value="Nota: En caso de que necesite realizar cambios en su registro ambiental cierre la ventana y seleccione la sección en la cual desea modificar la información."
+                            styleClass="encabezado text-red" />
+                    </div>
+                    <h:panelGroup>                        
+                        <object data="#{fichaMineriaEnviarControllerV2.pdf}?pfdrid_c=true" height="350px" width="100%"/>
+                    </h:panelGroup>
+
+                </p:dialog>
+                <p:dialog header="Registro Ambiental Minería Artesanal" widgetVar="dlg2"
+                      modal="true" height="300">
+                <h:outputText
+                        value="Para finalizar el Registro Ambiental debe completar los siguientes puntos:" />
+                <ul class="error alLeft text-red ">
+                    <li><h:outputLink
+                            value="#{request.contextPath}/prevencion/categoria2/v2/fichaMineria/default.jsf"
+                            rendered="#{!fichaMineriaEnviarControllerV2.fichaAmbientalMineria.validarInformacionGeneral}">
+                        <h:outputText value="1 Información general" class="text-red " />
+                    </h:outputLink></li>
+                    <li><h:outputLink
+                            value="#{request.contextPath}/prevencion/categoria2/v2/fichaMineria/caracteristicas.jsf"
+                            rendered="#{!fichaMineriaEnviarControllerV2.fichaAmbientalMineria.validarCaracteristicasGenerales}">
+                        <h:outputText value="2 Características generales"
+                                      class="text-red " />
+                    </h:outputLink></li>
+                    <li><h:outputLink
+                            value="#{request.contextPath}/prevencion/categoria2/v2/fichaMineria/descripcionActividad.jsf"
+                            rendered="#{!fichaMineriaEnviarControllerV2.fichaAmbientalMineria.validarDescripcionActividad}">
+                        <h:outputText value="3 Descripción de la actividad"
+                                      class="text-red " />
+                    </h:outputLink></li>
+                    <li><h:outputLink
+                            value="#{request.contextPath}/prevencion/categoria2/v2/fichaMineria/caracteristicasAreas.jsf"
+                            rendered="#{!fichaMineriaEnviarControllerV2.fichaAmbientalMineria.validarCaracteristicasAreaInfluencia}">
+                        <h:outputText value="4 Características del área de influencia"
+                                      class="text-red " />
+                    </h:outputLink></li>
+                    <li><h:outputLink
+                            value="#{request.contextPath}/prevencion/categoria2/v2/fichaMineria/muestreoInicial.jsf"
+                            rendered="#{!fichaMineriaEnviarControllerV2.fichaAmbientalMineria.validarMuestreoInicialLineaBase}">
+                        <h:outputText value="5 Muestreo inicial o de línea base"
+                                      class="text-red " />
+                    </h:outputLink></li>
+                    <li><h:outputLink
+                            value="#{request.contextPath}/prevencion/categoria2/v2/fichaMineria/matrizImpactoAmbiental.jsf"
+                            rendered="#{!fichaMineriaEnviarControllerV2.fichaAmbientalMineria.validarMatrizIdentificacionImpactosAmbientales}">
+                        <h:outputText
+                                value="6 Matriz identificación impactos ambientales"
+                                class="text-red " />
+                    </h:outputLink></li>
+                    <li><h:outputLink
+                            value="#{request.contextPath}/prevencion/categoria2/v2/fichaMineria/planManejoAmbiental.jsf"
+                            rendered="#{!fichaMineriaEnviarControllerV2.fichaAmbientalMineria.validarPlanManejoAmbiental}">
+                        <h:outputText value="7 Plan de manejo ambiental"
+                                      class="text-red " />
+                    </h:outputLink></li>
+
+                    <li><h:outputLink
+                            value="#{request.contextPath}/prevencion/categoria2/v2/fichaMineria/inventarioForestal.jsf"
+                            rendered="#{!fichaMineriaEnviarControllerV2.fichaAmbientalMineria.validarInventarioForestal}">
+                        <h:outputText value="8 Inventario forestal"
+                                      class="text-red " />
+                    </h:outputLink></li>
+                </ul>
+
+            </p:dialog>
+
+                        <t:div styleClass="buttons main">
+                            <p:commandButton value="Atrás" immediate="true" process="@this"
+                                             action="/prevencion/categoria2/v2/fichaMineria/planManejoAmbiental.jsf?faces-redirect=true"
+                                             icon="ui-icon-arrowthick-1-w"/>
+                            <p:commandButton value="Guardar"
+                                             action="#{inventarioForestalPmaMineriaBean.guardar()}"
+                                             icon="ui-icon-disk"
+                                             update=":#{p:component('ficha')}"/>
+                            <p:commandButton value="Visualizar ficha" styleClass="extraLarge"
+                                     		 rendered="#{fichaMineriaEnviarControllerV2.validarFichaMineraCompleta() and !fichaMineriaEnviarControllerV2.ppc()}"
+                                     		 onclick="PF('dlg1').show();" icon="ui-icon-check"  immediate="true" process="@this"/>
+                            <p:commandButton value="Visualizar ficha" styleClass="extraLarge"  immediate="true"
+                                     	 	 rendered="#{!fichaMineriaEnviarControllerV2.validarFichaMineraCompleta() and !fichaMineriaEnviarControllerV2.ppc()}"
+                                     		 onclick="PF('dlg2').show();" icon="ui-icon-check" process="@this"  type="button"/>                    
+                            <p:commandButton value="Siguiente" immediate="true" rendered="#{fichaMineriaEnviarControllerV2.ppc1()}"
+                                             process="@this"
+                                             action="/prevencion/categoria2/v2/fichaMineria/participacionCiudadanaDescargar.jsf?faces-redirect=true"
+                                             icon="ui-icon-arrowthick-1-e"/>
+                                             
+                            <p:commandButton value="Siguiente" immediate="true" rendered="#{!fichaMineriaEnviarControllerV2.ppc1()}"
+                                             process="@this"
+                                             action="/prevencion/categoria2/v2/fichaMineria/enviarFicha.jsf?faces-redirect=true"
+                                             icon="ui-icon-arrowthick-1-e"/>
+                        </t:div>
+                    </h:form>
+                </h:panelGrid>
+            </p:panel>
+        </div>
+
+		<!-- MarielaG para mostrar historicos -->
+		<h:form id="formInventarioHistorial">
+			<p:dialog header="#{inventarioForestalPmaMineriaBean.nombreHistorial}"
+				id="inventarioHistorialDlg" widgetVar="inventarioHistorialDlg"
+				modal="true" resizable="false" width="600">
+				<h:panelGroup>
+					<h:panelGrid columns="1" columnClasses="w100">
+						<p:dataTable id="tableHistorial" rowIndexVar="index"
+							value="#{inventarioForestalPmaMineriaBean.listaHistorialInventario}"
+							var="item" emptyMessage="#{labels['common.table.empty']}">
+							<p:column headerText="Plantilla"
+								rendered="#{inventarioForestalPmaMineriaBean.opcionHistorial eq 0 or inventarioForestalPmaMineriaBean.opcionHistorial eq 1}">
+								<h:outputText value="#{item.inventarioForestal.nombre}" />
+							</p:column>
+							<p:column headerText="Descargar" styleClass="w15 alCenter"
+								rendered="#{inventarioForestalPmaMineriaBean.opcionHistorial eq 0 or inventarioForestalPmaMineriaBean.opcionHistorial eq 1}">
+								<p:commandButton ajax="false" immediate="true"
+									styleClass="primary" icon="ui-icon-arrowthick-1-s">
+									<p:fileDownload
+										value="#{inventarioForestalPmaMineriaBean.descargarArchivoHistorico(item.inventarioForestal)}" />
+								</p:commandButton>
+							</p:column>
+							<p:column headerText="Cantidad de madera en pie (m3)"
+								rendered="#{inventarioForestalPmaMineriaBean.opcionHistorial eq 0 or inventarioForestalPmaMineriaBean.opcionHistorial eq 2}">
+								<h:outputText value="#{item.maderaEnPie}" />
+							</p:column>
+							<p:column headerText="Fecha Modificación" styleClass="w20">
+								<h:outputText value="#{item.fechaHistorico}">
+									<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+								</h:outputText>
+							</p:column>
+						</p:dataTable>
+					</h:panelGrid>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+
+	</ui:define>
+</ui:composition>

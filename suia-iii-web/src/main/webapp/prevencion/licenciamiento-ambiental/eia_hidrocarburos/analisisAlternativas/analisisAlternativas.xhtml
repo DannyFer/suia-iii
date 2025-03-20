@@ -1,0 +1,201 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:f="http://java.sun.com/jsf/core" xmlns:controles="http://java.sun.com/jsf/composite/controles-prime"  xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+<ui:composition template="/prevencion/licenciamiento-ambiental/eia/default.xhtml">
+	<ui:define name="content-eia">
+		<h:form id="form">
+			<p:panel header="Análisis de alternativas">
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<p:commandButton value="Adicionar" oncomplete="PF('adicionarActividad').show()" styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick" actionListener="#{analisisAlternativasController.resetAdicionarActividad()}" process="@this" update=":form:adicionarActividad" />
+						<h:outputText value="Actividades o infraestructuras de implantación *" />
+					</f:facet>
+					<p:dataTable id="tableActividadesImplantacion" rowIndexVar="index" value="#{analisisAlternativasBean.actividadesImplantacion}" var="actividad" emptyMessage="#{labels['common.table.empty']}">
+						<p:column styleClass="w20px alCenter" headerText="No." >
+							<h:outputText value="#{index + 1}" />
+						</p:column>
+						<p:column headerText="Actividad o infraestructura">
+							<h:outputText value="#{actividad}" />
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton update=":form:adicionarActividad" styleClass="button-small primary" process="@this" icon="ui-icon-pencil" actionListener="#{analisisAlternativasController.seleccionarActividadImplantacion(actividad)}" oncomplete="PF('adicionarActividad').show()" />
+							<p:commandButton update=":form:tableActividadesImplantacion :form:tableActividadesAlternativas :form:pnlGridAlternativas" styleClass="button-small primary" process="@this" icon="ui-icon-circle-close" actionListener="#{analisisAlternativasController.eliminarActividadImplantacion(actividad)}">
+								<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar esta actividad o infraestructura de implantación?" icon="ui-icon-alert" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" id="pnlGridAlternativas">
+					<f:facet name="header">
+						<p:commandButton value="Adicionar" oncomplete="PF('adicionarAlternativa').show()" styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick" actionListener="#{analisisAlternativasController.resetAdicionarAlternativa()}" process="@this" update=":form:adicionarAlternativa" />
+						<h:outputText value="Análisis de alternativas *" />
+						<mae:panelGridHeaderHelp conector="criteriosComparativosHelp" help="#{helps['eia.alternativas.criterioscomparativos']}"
+												 width="500px" value=""/>
+					</f:facet>
+					<p:dataTable id="tableAlternativas" value="#{analisisAlternativasBean.alternativas}" var="alternativa" emptyMessage="#{labels['common.table.empty']}">
+						<p:columnGroup type="header">
+							<p:row>
+								<p:column rowspan="2" headerText="Actividad o infraestructura" />
+								<p:column rowspan="2" headerText="Alternativa" />
+								<p:column colspan="4" headerText="Criterios comparativos" />
+								<p:column rowspan="2" headerText="" styleClass="w40px" />
+							</p:row>
+							<p:row>
+								<p:column headerText="Técnico" />
+								<p:column headerText="Ecológico" />
+								<p:column headerText="Socioeconómico" />
+								<p:column headerText="Característica" />
+							</p:row>
+						</p:columnGroup>
+						<p:column>
+							<h:outputText value="#{alternativa.actividadImplantacion}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{alternativa}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{alternativa.tipoCriterioTecnico}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{alternativa.tipoSistemaEcologico}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{alternativa.tipoSistemaSocioeconomico}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{alternativa.caracteristica}" />
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton update=":form:adicionarAlternativa" styleClass="button-small primary" process="@this" icon="ui-icon-pencil" actionListener="#{analisisAlternativasController.seleccionarAlternativa(alternativa)}" oncomplete="PF('adicionarAlternativa').show()" />
+							<p:commandButton update=":form:tableAlternativas :form:tableActividadesAlternativas" styleClass="button-small primary" process="@this" icon="ui-icon-circle-close" actionListener="#{analisisAlternativasController.eliminarAlternativa(alternativa)}">
+								<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar esta alternativa?" icon="ui-icon-alert" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+				<br />
+				<p:separator />
+				<br />
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" id="resultadoContainer">
+					<f:facet name="header">
+						<h:outputText value="Resultado *" />
+						<mae:panelGridHeaderHelp conector="alternativaHelp" help="#{helps['eia.alternativas.mejoropcion']}" value=""/>
+					</f:facet>
+					<p:dataTable id="tableActividadesAlternativas" rowIndexVar="index" value="#{analisisAlternativasBean.actividadesImplantacion}" var="actividad" emptyMessage="#{labels['common.table.empty']}">
+						<p:column styleClass="w20px alCenter">
+							<h:outputText value="#{index + 1}" />
+						</p:column>
+						<p:column headerText="Actividad o infraestructura">
+							<h:outputText value="#{actividad}" />
+						</p:column>
+						<p:column headerText="Mejor opción">
+							<p:selectOneMenu value="#{actividad.alternativaMejorOpcion}" converter="selectItemConverter" styleClass="w100" required="true" label="Mejor opción para: #{actividad}">
+								<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+								<f:selectItems value="#{analisisAlternativasBean.getAlternativasPorActividad(actividad)}" />
+							</p:selectOneMenu>
+						</p:column>
+					</p:dataTable>
+
+					<h:inputHidden validator="#{analisisAlternativasBean.validateResultados}" />
+				</p:panelGrid>
+
+				<br />
+				<div class="buttons main">
+					<p:commandButton value="Atrás" immediate="true" process="@this"
+					action="/prevencion/licenciamiento-ambiental/eia/descripcionObraActividad/descripcionProyectoObraActividad.jsf?faces-redirect=true"
+					icon="ui-icon-arrowthick-1-w"/>
+
+					<p:commandButton value="Guardar" icon="ui-icon-check" action="#{analisisAlternativasController.guardar()}" process="@this :form:resultadoContainer" update="@form" />
+
+					<p:commandButton value="Siguiente" immediate="true" process="@this"
+									 action="/prevencion/licenciamiento-ambiental/eia/areaInfluencia/areaInfluencia.jsf?faces-redirect=true"
+									 icon="ui-icon-arrowthick-1-e"/>
+				</div>
+			</p:panel>
+
+			<p:dialog header="Actividad o infraestructura de implantación" id="adicionarActividad" widgetVar="adicionarActividad" modal="true" width="300" resizable="false" draggable="false">
+				<h:panelGrid columns="1" id="actividadImplantacionContainer" styleClass="w100">
+					<p:outputLabel value="Nombre" for="nombreActividadImplantacion" styleClass="bold" />
+					<p:inputText id="nombreActividadImplantacion" value="#{analisisAlternativasBean.actividadImplantacion.nombre}" maxlength="250" required="true" validator="#{analisisAlternativasController.validateActividades}">
+						<f:validateLength minimum="2" />
+					</p:inputText>
+				</h:panelGrid>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton actionListener="#{analisisAlternativasController.adicionarActividadImplantacion()}" process="@this :form:actividadImplantacionContainer" value="Aceptar" update=":form:tableActividadesImplantacion :form:tableActividadesAlternativas :form:actividadImplantacionContainer :form:pnlGridAlternativas" oncomplete="showModalAddActividadImplantacion(xhr, status, args)" />
+					<p:commandButton value="Cancelar" type="button" onclick="PF('adicionarActividad').hide()" styleClass="secondary" />
+				</div>
+			</p:dialog>
+
+			<p:dialog header="Alternativa" id="adicionarAlternativa" widgetVar="adicionarAlternativa" modal="true" width="600" resizable="false" draggable="false">
+				<h:panelGroup id="alternativaContainer">
+					<h:panelGrid columns="2" styleClass="w100" columnClasses="w50, field_mrg w50">
+						<p:outputLabel value="Nombre" for="nombreAlternativa" />
+						<p:outputLabel value="Característica" for="caracteristicaAlternativa" />
+						<p:inputText id="nombreAlternativa" styleClass="w50" value="#{analisisAlternativasBean.alternativa.nombre}" maxlength="250" required="true">
+							<f:validateLength minimum="2" />
+						</p:inputText>
+						<p:inputText id="caracteristicaAlternativa" styleClass="w50" value="#{analisisAlternativasBean.alternativa.caracteristica}" maxlength="250" required="true">
+							<f:validateLength minimum="2" />
+						</p:inputText>
+						<p:outputLabel value="Actividad" for="actividadAlternativa" />
+						<p:outputLabel value="Criterio técnico" for="criterioTecnicoAlternativa" />
+						<h:panelGroup>
+							<p:selectOneMenu value="#{analisisAlternativasBean.alternativa.actividadImplantacion}" converter="selectItemConverter" id="actividadAlternativa" styleClass="w100" required="true">
+								<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+								<f:selectItems value="#{analisisAlternativasBean.actividadesImplantacion}" />
+							</p:selectOneMenu>
+							<p:tooltip for="actividadAlternativa" escape="false" showDelay="1200" trackMouse="true" value="#{helps['eia.alternativas.actividad']}"/>
+						</h:panelGroup>
+						<h:panelGroup>
+							<p:selectOneMenu value="#{analisisAlternativasBean.alternativa.tipoCriterioTecnico}" converter="selectItemConverter" id="criterioTecnicoAlternativa" styleClass="w100" required="true">
+								<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+								<f:selectItems value="#{analisisAlternativasBean.tiposCriterioTecnico}" />
+							</p:selectOneMenu>
+							<p:tooltip for="criterioTecnicoAlternativa" escape="false" showDelay="1200" trackMouse="true" value="#{helps['eia.alternativas.criterios']}"/>
+						</h:panelGroup>
+					</h:panelGrid>
+					<h:panelGrid columns="1" styleClass="w100">
+						<p:outputLabel value="Sistema ecológico" for="sistemaEcologicoAlternativa" />
+						<h:panelGroup>
+							<p:selectOneMenu value="#{analisisAlternativasBean.alternativa.tipoSistemaEcologico}" converter="selectItemConverter" id="sistemaEcologicoAlternativa" styleClass="w100" required="true">
+								<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+								<f:selectItems value="#{analisisAlternativasBean.tiposSistemaEcologico}" />
+							</p:selectOneMenu>
+							<p:tooltip for="sistemaEcologicoAlternativa" escape="false" showDelay="1200" trackMouse="true" value="#{helps['eia.alternativas.criterios']}"/>
+						</h:panelGroup>
+						<p:outputLabel value="Sistema socioeconómico" for="sistemaSocioeconomicoAlternativa" />
+						<h:panelGroup>
+							<p:selectOneMenu value="#{analisisAlternativasBean.alternativa.tipoSistemaSocioeconomico}" converter="selectItemConverter" id="sistemaSocioeconomicoAlternativa" styleClass="w100" required="true">
+								<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+								<f:selectItems value="#{analisisAlternativasBean.tiposSistemaSocioeconomico}" />
+							</p:selectOneMenu>
+							<p:tooltip for="sistemaSocioeconomicoAlternativa" escape="false" showDelay="1200" trackMouse="true" value="#{helps['eia.alternativas.criterios']}"/>
+						</h:panelGroup>
+					</h:panelGrid>
+				</h:panelGroup>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton actionListener="#{analisisAlternativasController.adicionarAlternativa()}" process="@this :form:alternativaContainer" value="Aceptar" update=":form:tableAlternativas :form:tableActividadesAlternativas :form:alternativaContainer" oncomplete="showModalAddAlternativa(xhr, status, args)" />
+					<p:commandButton value="Cancelar" type="button" onclick="PF('adicionarAlternativa').hide()" styleClass="secondary" />
+				</div>
+			</p:dialog>
+
+			<script type="text/javascript">
+				function showModalAddActividadImplantacion(xhr, status, args) {
+					if (args.addActividad)
+						PF('adicionarActividad').hide();
+					else
+						PF('adicionarActividad').show();
+				}
+				function showModalAddAlternativa(xhr, status, args) {
+					if (args.addAlternativa)
+						PF('adicionarAlternativa').hide();
+					else
+						PF('adicionarAlternativa').show();
+				}
+			</script>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

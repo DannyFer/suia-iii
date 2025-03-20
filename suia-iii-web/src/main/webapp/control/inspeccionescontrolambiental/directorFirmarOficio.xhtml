@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" template="/WEB-INF/templates/default-task.xhtml" xmlns:f="http://java.sun.com/jsf/core">
+	<ui:define name="content">
+		<f:event type="preRenderView" listener="#{directorFirmarOficioController.validarTareaBpm()}" />
+		<h:form id="form-recibir-info">
+			<h:panelGrid styleClass="alCenter w100" columns="1">
+				<h:outputText value="Firmar y enviar oficio de #{directorFirmarOficioController.tipoOficio}" styleClass="encabezado1_4em" />
+				<h:panelGrid styleClass="alCenter w66" columns="1">
+					<p:panel styleClass="alCenter">
+						<h:outputText value="Inspección de control ambiental con número de solicitud:" styleClass="encabezado" />
+						<h2>
+							<h:outputText value="#{directorFirmarOficioController.solicitud.solicitud}" styleClass="bold" />
+						</h2>
+					</p:panel>
+				</h:panelGrid>
+			</h:panelGrid>
+
+			<div class="buttons main">
+				<p:commandButton value="Firmar documento" type="button" styleClass="large" icon="ui-icon-key" rendered="#{!directorFirmarOficioController.token}" onclick="PF('signDialog').show();" />
+				<p:commandButton value="Firmar documento" type="button" styleClass="large" icon="ui-icon-key" rendered="#{directorFirmarOficioController.token}" onclick="window.location.href='#{directorFirmarOficioController.firmarDocumento()}'" />
+				<p:commandButton value="Enviar" action="#{directorFirmarOficioController.aceptar}" icon="ui-icon-check">
+					<p:confirm message="#{msg['message.confirmacion.envio.tarea']}" header="#{msg['header.confirmacion.envio.tarea']}" />
+				</p:commandButton>
+				<p:commandButton value="Cancelar" immediate="true" action="/bandeja/bandejaTareas.jsf?faces-redirect=true" icon="ui-icon-cancel" styleClass="secondary">
+					<p:confirm message="#{msg['message.confirmacion.cancelacion.tarea']}" header="#{msg['header.confirmacion.cancelacion.tarea']}" />
+				</p:commandButton>
+			</div>
+
+			<p:dialog header="Firma Electrónica" id="signDlg" widgetVar="signDialog" closeOnEscape="false" modal="true" resizable="false" width="auto" height="auto" position="center top">
+				<p:panel rendered="#{directorFirmarOficioController.token}">
+					<table style="width: 100%;">
+						<tr>
+							<td><object id="embedded" data="#{directorFirmarOficioController.firmarDocumento()}" width="510" height="300" /></td>
+						</tr>
+					</table>
+				</p:panel>
+				<p:panel rendered="#{!directorFirmarOficioController.token}">
+					<h:panelGrid columns="2" cellpadding="10" style="text-align:right !important">
+						<p:outputLabel value="1. Descargue el oficio de #{directorFirmarOficioController.tipoOficio}" styleClass="bold" />
+						<p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary">
+							<p:fileDownload value="#{directorFirmarOficioController.getStream(directorFirmarOficioController.archivoOficio)}" />
+						</p:commandButton>
+						<p:outputLabel value="2. Adjunte el oficio de #{directorFirmarOficioController.tipoOficio} firmado" styleClass="bold" />
+						<p:fileUpload fileUploadListener="#{directorFirmarOficioController.uploadListener}" multiple="false" sizeLimit="209715200" allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar" uploadLabel="Subir" invalidFileMessage="Tipo de archivo no válido" invalidSizeMessage="Tamaño de archivo no válido" cancelLabel="Cancelar" mode="advanced" dragDropSupport="false" auto="true" oncomplete="PF('signDialog').hide()" />
+					</h:panelGrid>
+				</p:panel>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Cerrar" styleClass="primary" onclick="PF('signDialog').hide()" icon="ui-icon-close" />
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

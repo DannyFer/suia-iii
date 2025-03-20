@@ -1,0 +1,223 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:t="http://myfaces.apache.org/tomahawk"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{descripcionProyectoPmaBean.validarTareaBpm()}"/>
+        <ui:include src="contenido/menu.xhtml" />
+        <style>
+            .ui-treetable th{
+                background: #008a8a !important;
+                color: #ffffff !important;
+                font-weight: bold !important;
+            }
+
+            .ui-treetable .ui-widget-header{
+                border-top: 4px solid #00aac3 !important;
+            }
+        </style>
+        <div class="content">
+            <h:form id="frmImpacto">
+                <p:growl id="msgs" globalOnly="true"/>
+                <p:panel id="parte9"  header="6. PRINCIPALES IMPACTOS AMBIENTALES">
+
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="">
+
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp
+                                value="Impactos ambientales"
+                                conector="generalHelp"
+                                image="#{request.contextPath}/resources/images/help-how.png"
+                                help="#{helps['no.help.yet']}" render="false" />
+                        </f:facet>
+                        <p:treeTable id="ablImpactos" resizableColumns="true" 
+                                     value="#{impactoAmbientalPmaController.impactoAmbientalPmaBean.root}" var="actividad">
+                            <p:column headerText="Actividad">
+                                <h:outputText value="#{actividad.actividadProcesoPma.actividadComercial.nombreActividad}" 
+                                              style="width: 100px;white-space: normal"
+                                              rendered="#{!actividad.nodoFinal}"/>
+                            </p:column>
+                            <p:column headerText="Factor" >
+                                <h:outputText value="#{actividad.factor.nombre}" rendered="#{actividad.nodoFinal}"/>
+                            </p:column>
+                            <p:column headerText="Impacto" style="text-align: justify">
+                                <h:outputText value="#{actividad.impacto.nombre}" rendered="#{actividad.nodoFinal}"
+                                              style="width: 100px;white-space: normal"/>
+                            </p:column>
+                            <p:column headerText="Acciones">
+                                <center>
+                                    <p:commandButton styleClass="primary" value="Adicionar impacto" rendered="#{!actividad.nodoFinal}" 
+                                                     action="#{impactoAmbientalPmaController.seleccionarActividad(actividad)}"
+                                                     title="Adicionar impacto"
+                                                     update=":#{p:component('pnlImpacto')}"/>
+                                    <p:commandButton styleClass="primary" icon="ui-icon-pencil" rendered="#{actividad.nodoFinal}" 
+                                                     action="#{impactoAmbientalPmaController.seleccionarActividadEditar(actividad)}"
+                                                     title="Editar impacto"
+                                                     update=":#{p:component('pnlImpacto')}"/>
+                                    <p:commandButton styleClass="primary" icon="ui-icon-trash" rendered="#{actividad.nodoFinal}"
+                                                     title="Eliminar impacto" action="#{impactoAmbientalPmaController.eliminarImpacto(actividad)}"
+                                                     update=":#{p:component('ablImpactos')}"/>
+                                </center>
+                            </p:column>
+                        </p:treeTable>
+                    </p:panelGrid>
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses=""
+                                 rendered="#{not empty impactoAmbientalPmaController.impactoAmbientalPmaBean.listaActividadesOtros}">
+                        <f:facet name="header" >
+                            <h:outputText value="Otras actividades" />
+                        </f:facet>
+                        <h:panelGrid id="pnlImpactoOtros" columns="4" layout="grid" 
+                                     cellpadding="0" cellspacing="3"
+                                     styleClass="w100">
+
+                            <p:outputLabel for="cmbActividad" value="Actividad*" />
+                            <p:outputLabel for="cmbFactorOtros" value="Factor*"/>
+                            <p:outputLabel for="txtImpactoOtros" value="Impacto*"/>
+                            <h:outputText value="" />
+                            <p:selectOneMenu label="Actividad"
+                                             value="#{impactoAmbientalPmaController.impactoAmbientalPmaBean.actividadOtros.actividadProcesoPma}"
+                                             id="cmbActividad" converter="selectItemConverter"
+                                             style="width:200px">
+                                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                              itemValue="" noSelectionOption="true" />
+                                <f:selectItems value="#{impactoAmbientalPmaController.impactoAmbientalPmaBean.listaActividadesOtros}" />
+                            </p:selectOneMenu>
+                            <p:selectOneMenu label="Factor"
+                                             value="#{impactoAmbientalPmaController.impactoAmbientalPmaBean.actividadOtros.factorPma}"
+                                             id="cmbFactorOtros" converter="selectItemConverter"
+                                             style="width:200px">
+                                <f:selectItems value="#{impactoAmbientalPmaController.impactoAmbientalPmaBean.listaFactorOtros}" />
+                            </p:selectOneMenu>
+                            <p:inputText id="txtImpactoOtros" value="#{impactoAmbientalPmaController.impactoAmbientalPmaBean.actividadOtros.impactoOtros}" maxlength="250"/>
+                            <p:commandButton styleClass="primary" value="Adicionar"
+                                             action="#{impactoAmbientalPmaController.guardarImpactoActividadOtros()}"
+                                             title="Agregar impacto"
+                                             update=":#{p:component('tblImpactosOtros')},:#{p:component('pnlImpactoOtros')}"/>
+                        </h:panelGrid>
+
+                        <p:dataTable id="tblImpactosOtros" value="#{impactoAmbientalPmaController.impactoAmbientalPmaBean.listaActividadOtros}"
+                                     var="impactoOtros" paginator="true" paginatorPosition="bottom" rows="10" styleClass="w100"
+                                     emptyMessage="#{labels['common.table.empty']}">
+
+                            <p:column>
+                                <f:facet name="header" >
+                                    <h:outputText value="Actividad" />
+                                </f:facet>
+                                <h:outputText value="#{impactoOtros.actividadProcesoPma.descripcionOtros}" />
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header" >
+                                    <h:outputText value="Factor" />
+                                </f:facet>
+                                <h:outputText value="#{impactoOtros.factorPma.nombre}" />
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header" >
+                                    <h:outputText value="Impacto" />
+                                </f:facet>
+                                <h:outputText value="#{impactoOtros.impactoOtros}" />
+                            </p:column>
+                            <p:column style="width: 15%">
+                                <f:facet name="header" >
+                                    <h:outputText value="Acciones" />
+                                </f:facet>
+                                <div class="buttons-inline alCenter">
+                                    <p:commandButton icon="ui-icon-pencil" action="#{impactoAmbientalPmaController.seleccionarImpactoOtros(impactoOtros)}"
+                                                     title="Editar" styleClass="primary"
+                                                     update=":#{p:component('pnlImpactoOtros')}"/>
+                                    <p:commandButton icon="ui-icon-trash" action="#{impactoAmbientalPmaController.eliminarImpactoOtros(impactoOtros)}"
+                                                     title="Editar" styleClass="primary"
+                                                     update=":#{p:component('tblImpactosOtros')}"/>
+                                </div>
+                            </p:column>
+                        </p:dataTable>
+                    </p:panelGrid>
+
+
+
+
+
+                    <br/>
+                    <f:facet name="footer">
+                        <t:div styleClass="buttons main">
+                            <p:commandButton value="Atrás" immediate="true" process="@this" action="/prevencion/categoria2/fichaAmbiental/descripcionArea.jsf?faces-redirect=true" icon="ui-icon-arrowthick-1-w" />
+
+                            <p:commandButton value="Guardar" update="#{p:component('frmImpacto')}"
+                                             oncomplete="window.scrollTo(0,120);"
+                                             action="#{impactoAmbientalPmaController.guardar()}"
+                                             icon="ui-icon-disk" />
+                            <p:commandButton value="Siguiente" immediate="true" process="@this" action="/prevencion/categoria2/fichaAmbiental/cronogramaValorado.jsf?faces-redirect=true" icon="ui-icon-arrowthick-1-e" />
+                        </t:div>
+                    </f:facet>
+
+                    <p:dialog id="dlgInfo" header="Información" widgetVar="dlgInfo" resizable="false"  
+                              modal="true" dynamic="true" draggable="false" closable="false" width="400">
+                        <p:separator />
+                        <h:panelGrid columns="1" styleClass="w100" columnClasses="alJustify">
+                            <h:outputText value="Estimado usuario, antes de continuar con el punto actual, debe completar el punto 4 (Descripción del proyecto)." />
+                            <p:separator style="background-color: #ffffff;border-color:#ffffff;height:10px" />
+                        </h:panelGrid>
+                        <div class="buttons-inline alRight">
+                            <p:commandButton value="Aceptar" ajax="false" icon="ui-icon-check" styleClass="primary"
+                                             immediate="true" action="/prevencion/categoria2/fichaAmbiental/descripcionProceso.jsf?faces-redirect=true" />
+                        </div>
+                    </p:dialog> 
+
+                </p:panel>
+            </h:form>
+        </div>
+        <p:dialog header="Detalle impacto ambiental" widgetVar="dlgImpacto" modal="true" resizable="false" draggable="false"
+                  width="450" height="200">    
+            <h:form>
+                <p:panel>  
+                    <h:panelGrid id="pnlImpacto" columns="2" styleClass="w100">  
+                        <h:outputLabel value="Fase"/>
+                        <h:outputText value="#{impactoAmbientalPmaController.impactoAmbientalPmaBean.entityNodoActividad.actividadProcesoPma.actividadComercial.categoriaFase.fase.nombre}"/>
+                        <h:outputLabel value="Actividad"/>
+                        <h:outputText value="#{impactoAmbientalPmaController.impactoAmbientalPmaBean.entityNodoActividad.actividadProcesoPma.actividadComercial.nombreActividad}"/>
+                        <h:outputLabel value="Factor*"/>
+                        <p:selectOneMenu label="Factor"
+                                         value="#{impactoAmbientalPmaController.impactoAmbientalPmaBean.entityNodoActividad.factor}"
+                                         id="cmbFactor" converter="selectItemConverter"
+                                         style="width:200px">
+                            <f:selectItems value="#{impactoAmbientalPmaController.impactoAmbientalPmaBean.listaFactor}" />
+                            <p:ajax event="change" update="cmbImpacto, :#{p:component('msgs')}" listener="#{impactoAmbientalPmaController.cargarImpacto()}"/>
+                        </p:selectOneMenu>
+                        <h:outputLabel value="Impacto*"/>
+                        <p:selectOneMenu label="Impacto"
+                                         value="#{impactoAmbientalPmaController.impactoAmbientalPmaBean.idImpacto}"
+                                         id="cmbImpacto" 
+                                         style="width:200px">
+                            <f:selectItems value="#{impactoAmbientalPmaController.impactoAmbientalPmaBean.listaImpacto}" />
+                        </p:selectOneMenu>
+                    </h:panelGrid>  
+
+                    <br/>
+                    <center>   
+                        <p:commandButton value="Guardar" update=":#{p:component('ablImpactos')}, :#{p:component('msgs')}"  
+                                         action="#{impactoAmbientalPmaController.guardarImpacto()}" styleClass="primary" 
+                                         oncomplete="handleActividadRequest(xhr, status, args);"/>   
+                    </center>
+                </p:panel>
+            </h:form>
+        </p:dialog> 
+        <script type="text/javascript">
+            function handleActividadRequest(xhr, status, args) {
+                if (args.validationFailed || !args.impactoIn) {
+                }
+                else {
+                    PF('dlgImpacto').hide();
+                    $('#loginLink').fadeOut();
+                }
+            }
+        </script>
+
+    </ui:define>
+</ui:composition>

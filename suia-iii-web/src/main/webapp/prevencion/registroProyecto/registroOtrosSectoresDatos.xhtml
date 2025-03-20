@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<f:loadBundle var="helps" basename="ec.gob.ambiente.core.resources.helps_es" />
+
+<h:panelGroup
+	rendered="#{registroProyectoOtrosSectoresController.verPanelCamaroneras}">
+	<p:panelGrid columns="1" layout="grid" styleClass="w100"
+		columnClasses="">
+		<f:facet name="header">
+			<h:outputText value="Camaroneras" />
+		</f:facet>
+		<h:panelGrid columns="1" styleClass="w100"
+			columnClasses="w50 alTop, field_mrg w50 alTop">
+			<h:panelGroup id="viabilidadcamaroneraContainer">
+			<ui:remove><h:panelGrid columns="2" styleClass="field_mrg">
+					<p:outputLabel for="viabilidadcamaronera"
+						value="¿Posee un Acuerdo de Concesión para camaroneras emitido por Subsecretaría de Acuacultura?"
+						styleClass="bold" />
+					<h:panelGrid>
+						<p:selectOneRadio id="viabilidadcamaronera"
+							value="#{registroProyectoBean.viabilidadcamaronera}"
+							required="true">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax process="@this"
+								update="viabilidadcamaroneraContainer, datosCamaronera"
+								oncomplete="showModalNoViabilidadcamaronera(xhr, status, args)"></p:ajax>
+						</p:selectOneRadio>
+					</h:panelGrid>
+				</h:panelGrid></ui:remove>
+				
+				<h:panelGrid styleClass="field_mrg w100" rendered="#{registroProyectoBean.proyecto.proyectoPlayasBahias}" 
+				id="datosCamaronera" columns="3" columnClasses="w65,w20,w15">
+					<p:outputLabel for="oficiocamaronera" value="Número del Acuerdo de Concesión para camaroneras emitidas por la Subsecretaría de Acuacultura:" styleClass="bold" />
+					<p:inputText id="oficiocamaronera" 
+						value="#{registroProyectoBean.numeroOficioViabilidadcamaronera}"/>
+					<h:panelGroup>
+						<div class="buttons-inline">
+							<p:commandButton icon="ui-icon-check" styleClass="primary"
+								process="@this oficiocamaronera"
+								update="viabilidadcamaroneraContainer, concesionCamaronera"
+								actionListener="#{registroProyectoOtrosSectoresController.verificarOficioViavilidadcamaronera()}" title="Validar número de oficio" />
+						</div>
+					</h:panelGroup>
+				</h:panelGrid>
+				<style type="text/css">
+			.a > div{
+				border:hidden;
+					}
+				</style>
+				<p:panelGrid columns="2" layout="grid" styleClass="a" rendered="#{registroProyectoBean.proyecto.proyectoPlayasBahias or registroProyectoBean.proyecto.proyectoTierrasAltas}">
+				<p:panelGrid columns="2" layout="grid" id="ingresarCamaroneraTierrasAltas" rendered="#{registroProyectoBean.proyecto.proyectoTierrasAltas}">
+					<f:facet name="header">
+						<h:outputText value="Acuerdos de Autorización" />
+					</f:facet>
+						<p:outputLabel value="Acuerdo" />
+						<p:inputText style="width:20px;" value="#{registroProyectoOtrosSectoresController.acuerdoCamaronera}"
+									requiredMessage="El campo acuerdo es requerido"/>
+						<p:outputLabel value="Extensión" />
+						<p:inputText id="Extensión" value="#{registroProyectoOtrosSectoresController.extensionCamaronera}" required="true" validatorMessage="El campo Extensión no se encuentra entre los valores permitidos 0 y 100.">
+						<f:validateDoubleRange minimum="0.00" maximum="#{registroProyectoBean.validarValorMaximoCamaroneras()}"/>
+						</p:inputText>
+						<p:outputLabel id="nombreArchivo" value="#{registroProyectoOtrosSectoresController.nombreArchivo}"/>
+						<p:fileUpload uploadLabel="Subir" auto="true" required="true"
+							cancelLabel="Cancelar" label="Seleccionar" multiple="false"
+							allowTypes="/(\.|\/)(pdf)$/" update="nombreArchivo"
+							oncomplete="showModalTransformation()"
+							fileUploadListener="#{registroProyectoOtrosSectoresController.handleFileUpload}"
+							mode="advanced" dragDropSupport="false"
+							invalidFileMessage="El archivo es inválido."
+							invalidSizeMessage="El archivo es demasiado grande." />
+						<h:outputLabel value="" />
+						<p:commandButton value="Aceptar" 
+							update="concesionCamaronera ingresarCamaroneraTierrasAltas oficiocamaronera"
+							process="@this ingresarCamaroneraTierrasAltas"
+							styleClass="primary toRight"
+							actionListener="#{registroProyectoOtrosSectoresController.agregarConcesionCamaronera()}" />						
+					</p:panelGrid>
+					
+					<p:dataTable id="concesionCamaronera" styleClass="alCenter w100 table-column-header"
+						value="#{registroProyectoOtrosSectoresController.listaProyectosCamaroneras}"
+						var="listaCamaroneras"
+						rendered="#{registroProyectoOtrosSectoresController.mostrarCamaronera and registroProyectoOtrosSectoresController.listaProyectosCamaroneras.size()>0}">
+						<f:facet name="header">Acuerdo de Concesiones</f:facet>
+						<p:column headerText="Acuerdo">
+							<h:outputText value="#{listaCamaroneras.camaroneras.acuerdo}" rendered="#{listaCamaroneras.codigoCamaronera==null}"/>
+							<h:outputText value="#{listaCamaroneras.codigoCamaronera}" rendered="#{listaCamaroneras.codigoCamaronera!=null}"/>
+						</p:column>
+						<p:column headerText="Extensión">
+							<h:outputText value="#{listaCamaroneras.camaroneras.extension} ha" rendered="#{listaCamaroneras.codigoCamaronera==null}"/>
+							<h:outputText value="#{listaCamaroneras.extensionCamaronera} ha" rendered="#{listaCamaroneras.codigoCamaronera!=null}"/>
+						</p:column>
+						<p:column headerText="Acciones" style="text-align:center;">
+							<p:commandButton styleClass="button-small primary" process="@this" icon="ui-icon-circle-close"
+								actionListener="#{registroProyectoOtrosSectoresController.quitarCamaronera(listaCamaroneras)}"
+								update="concesionCamaronera" />
+							<p:commandButton icon="ui-icon-search" styleClass="button-small primary" rendered="#{listaCamaroneras.documento!=null}"
+							action="#{registroProyectoOtrosSectoresController.verDocumento(listaCamaroneras.documento)}" ajax="false" process="@this"/>
+						</p:column>
+					</p:dataTable>
+					<p:outputLabel value="" rendered="#{registroProyectoOtrosSectoresController.listaProyectosCamaroneras.size()==0}"/>
+					<p:outputLabel value="En caso de no contar con el permiso, subir el respaldo de encontrarse tramitando en la Subsecretaría del MAGAP." rendered="#{registroProyectoBean.proyecto.proyectoTierrasAltas}"/>
+				</p:panelGrid>
+					<h:outputText
+						value="Nota: La extensión del proyecto no debe superar la extensión registrada en el Acuerdo de Concesión para camaroneras"
+						rendered="#{registroProyectoOtrosSectoresController.mostrarCamaronera and registroProyectoOtrosSectoresController.listaProyectosCamaroneras.size()>0}"/>
+			</h:panelGroup>
+		</h:panelGrid>
+	</p:panelGrid>
+	<p:dialog header="Información" id="mostrarMensajeNoContinuarCamaronera"
+		widgetVar="mostrarMensajeNoContinuarCamaronera" modal="true"
+		resizable="false" width="400">
+		<h:panelGrid columns="1" styleClass="w100">
+			<h:outputText value="Estimado usuario:" styleClass="text-red bold" />
+			<h:outputText
+				value="Obtenga el Acuerdo de concesión para camaroneras, o si cuenta con uno y no puede validarlo en el sistema, comuníquese con Mesa de Ayuda del Ministerio del Ambiente y Agua"
+				styleClass="text-red bold" />
+			<p:separator />
+			<h:outputText
+				value="Para obtener el Permiso Ambiental debe contar con el Acuerdo de concesión para camaroneras emitido por la Subsecretaría de Acuacultura."
+				styleClass="bold" />
+		</h:panelGrid>
+		<p:separator />
+		<div class="buttons">
+			<p:commandButton type="button" value="Cerrar"
+				onclick="PF('mostrarMensajeNoContinuarCamaronera').hide()" />
+		</div>
+	</p:dialog>
+</h:panelGroup>
+
+<script type="text/javascript">
+	function showModalNoViabilidadcamaronera(xhr, status, args) {
+		if (args.showNoViabilidadcamaronera) {
+        	PF('mostrarMensajeNoContinuarCamaronera').show();
+    	}                    
+	}
+</script>
+
+<h:panelGroup rendered="#{registroProyectoOtrosSectoresController.mostrarPescaPlantados}">
+	<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="">
+		<f:facet name="header">
+			<h:outputText value="Pesca" />
+		</f:facet>
+		<h:panelGrid columns="2">
+			<p:selectBooleanCheckbox id="utilizaPlantados" value="#{registroProyectoBean.proyecto.utilizaPlantados}">
+				<p:ajax process="@this utilizaPlantados" update=":form:containerCoordenadas" listener="#{registroProyectoOtrosSectoresController.mostrarCoordenadas}" />
+			</p:selectBooleanCheckbox>
+			<p:outputLabel for="utilizaPlantados" value="¿Utiliza plantados en la actividad pesquera?" />
+		</h:panelGrid>
+	</p:panelGrid>
+</h:panelGroup>
+
+<h:panelGroup rendered="#{registroProyectoOtrosSectoresController.mostrarAlcance}">
+	<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="">
+		<f:facet name="header">
+			<p:commandButton value="Adicionar" actionListener="#{adicionarUbicaciones1Bean.resetSelections()}" process="@this" update="#{adicionarUbicaciones1Bean.dialogWidgetVar}" oncomplete="PF('#{adicionarUbicaciones1Bean.dialogWidgetVar}').show()" styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick" />
+			<mae:panelGridHeaderHelp value="Ubicación geográfica del patio de maniobras / oficina principal / almacenamiento *" conector="ubicacion2Help" image="#{request.contextPath}/resources/images/proyecto-mapa.png" help="#{helps['registro.ubicaciones']}" />
+		</f:facet>
+		<t:aliasBeansScope>
+			<t:aliasBean alias="#{adicionarUbicacionesAliasBean}" value="#{adicionarUbicaciones1Bean}" />
+			<ui:include src="/comun/adicionarUbicaciones.xhtml" />
+		</t:aliasBeansScope>
+		<h:panelGroup>
+			<p:outputLabel value="Dirección" for="direccion2" styleClass="bold" />
+			<p:inputTextarea id="direccion2" value="#{registroProyectoBean.proyecto.direccionProyecto}" required="true" rows="2" styleClass="w100" autoResize="false" maxlength="200" />
+			<p:tooltip for="direccion2" escape="false" showDelay="1200" trackMouse="true">
+				<h:outputText value="#{helps['registro.ubicaciones.direccionPatioManiobras']}" escape="false" />
+			</p:tooltip>
+		</h:panelGroup>
+	</p:panelGrid>
+	<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="">
+		<f:facet name="header">
+			<p:commandButton value="Adicionar" actionListener="#{adicionarUbicaciones2Bean.resetSelections()}" process="@this" update="#{adicionarUbicaciones2Bean.dialogWidgetVar}" oncomplete="PF('#{adicionarUbicaciones2Bean.dialogWidgetVar}').show()" styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick" />
+			<mae:panelGridHeaderHelp value="Alcance / Ubicación geográfica *" conector="ubicacion3Help" image="#{request.contextPath}/resources/images/proyecto-mapa.png" help="#{helps['registro.ubicaciones']}" />
+		</f:facet>
+		<h:panelGroup>
+			<p:outputLabel value="Descripción de rutas" for="rutas" styleClass="bold" />
+			<p:inputTextarea id="rutas" value="#{registroProyectoBean.proyecto.rutas}" required="true" rows="2" styleClass="w100" autoResize="false" maxlength="500" />
+			<p:tooltip for="rutas" escape="false" showDelay="1200" trackMouse="true">
+				<h:outputText value="#{helps['registro.rutas']}" escape="false" />
+			</p:tooltip>
+		</h:panelGroup>
+		<t:aliasBeansScope>
+			<t:aliasBean alias="#{adicionarUbicacionesAliasBean}" value="#{adicionarUbicaciones2Bean}" />
+			<ui:include src="/comun/adicionarUbicaciones.xhtml" />
+		</t:aliasBeansScope>
+	</p:panelGrid>
+</h:panelGroup>
+
+</html>

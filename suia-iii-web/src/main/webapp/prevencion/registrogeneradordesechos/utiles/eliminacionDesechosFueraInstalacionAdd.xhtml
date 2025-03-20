@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<p:panel id="adicionarEliminacionFI" widgetVar="adicionarEliminacionFI" toggleable="true" toggleOrientation="vertical" styleClass="colapsablePanel" collapsed="true">
+	<p:ajax event="toggle" listener="#{eliminacionDesechosFueraInstalacionBean.toggleHandle}" update=":form:adicionarEliminacionFI" process="@this" />
+	<h:panelGroup id="datosEliminacionFI">
+		<h:panelGroup rendered="#{eliminacionDesechosFueraInstalacionBean.panelAdicionarVisible}">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Datos generales" />
+				</f:facet>
+
+				<h:panelGrid styleClass="w100" columns="1">
+					<p:outputLabel value="Seleccionar desecho" for="desechoFI" />
+					<p:selectOneMenu id="desechoFI" value="#{eliminacionDesechosFueraInstalacionBean.generadorDesechosEliminador.desechoPeligroso}" required="true" styleClass="w100" converter="selectItemConverter">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+						<f:selectItems value="#{eliminacionDesechosFueraInstalacionBean.desechosPeligrosoDisponibles}" />
+						<p:ajax process="@this" update="desechoPeligrosoContainerFI identificarEmpresasContainer1" listener="#{eliminacionDesechosFueraInstalacionBean.modificarDesecho()}" />
+					</p:selectOneMenu>
+				</h:panelGrid>
+
+				<h:panelGroup id="desechoPeligrosoContainerFI">
+					<h:panelGrid styleClass="panel_data w100 separatorBottom" columns="2" columnClasses="header w25, null" rowClasses="null, alt" rendered="#{not empty eliminacionDesechosFueraInstalacionBean.generadorDesechosEliminador.desechoPeligroso}">
+						<h:outputText value="Desecho" />
+						<h:outputText value="#{eliminacionDesechosFueraInstalacionBean.generadorDesechosEliminador.desechoPeligroso.descripcion}" />
+						<h:outputText value="Código" />
+						<h:outputText value="#{eliminacionDesechosFueraInstalacionBean.generadorDesechosEliminador.desechoPeligroso.clave}" />
+						<h:outputText value="CRTIB" title="#{helps['generadorDesecho.crtib']}" />
+						<h:outputText value="#{eliminacionDesechosFueraInstalacionBean.generadorDesechosEliminador.desechoPeligroso.nombresCRITB}" />
+					</h:panelGrid>
+				</h:panelGroup>
+
+				<h:panelGrid styleClass="w50" columns="1">
+					<h:panelGroup id="#{adicionarTipoEliminacionAliasBean.tipoEliminacionDesechoBtnLabel}">
+						<p:outputLabel value="Eliminación o disposición final" rendered="#{empty adicionarTipoEliminacionAliasBean.tipoEliminacionDesechoSeleccionada}" />
+					</h:panelGroup>
+					<h:panelGroup id="#{adicionarTipoEliminacionAliasBean.tipoEliminacionDesechoBtn}">
+						<p:commandButton styleClass="primary extraLarge" value="Seleccionar" oncomplete="PF('#{adicionarTipoEliminacionAliasBean.dialogSeleccionarTipoEliminacionDesecho}').show()" actionListener="#{adicionarTipoEliminacionAliasBean.reset()}" process="@this" update=":form:#{adicionarTipoEliminacionAliasBean.dialogSeleccionarTipoEliminacionDesecho}" rendered="#{empty adicionarTipoEliminacionAliasBean.tipoEliminacionDesechoSeleccionada}" />
+					</h:panelGroup>
+				</h:panelGrid>
+
+				<h:panelGroup id="#{adicionarTipoEliminacionAliasBean.tipoEliminacionDesechoContainer}">
+					<h:panelGrid columns="2" styleClass="panel_data w50" columnClasses="header w50, null" rowClasses="null, alt" rendered="#{not empty adicionarTipoEliminacionAliasBean.tipoEliminacionDesechoSeleccionada}">
+						<h:outputText value="Tipo de eliminación o disposición final" />
+						<h:outputText value="#{adicionarTipoEliminacionAliasBean.tipoEliminacionDesechoSeleccionada}" />
+						<h:outputText value="Modificar" />
+						<p:commandButton styleClass="button-small primary" icon="ui-icon-pencil" oncomplete="PF('#{adicionarTipoEliminacionAliasBean.dialogSeleccionarTipoEliminacionDesecho}').show()" actionListener="#{adicionarTipoEliminacionAliasBean.reset()}" process="@this" update=":form:#{adicionarTipoEliminacionAliasBean.dialogSeleccionarTipoEliminacionDesecho}" />
+					</h:panelGrid>
+				</h:panelGroup>
+
+				<h:panelGroup id="#{adicionarTipoEliminacionAliasBean.textoAdicionalOtroSeleccionadoContainer}">
+					<p:outputLabel value="#{adicionarTipoEliminacionAliasBean.tipoEliminacionDesechoSeleccionada.nombre}" for="#{adicionarTipoEliminacionAliasBean.textoAdicionalOtroId}" rendered="#{adicionarTipoEliminacionAliasBean.otroSeleccionado}" />
+					<p:inputTextarea id="#{adicionarTipoEliminacionAliasBean.textoAdicionalOtroId}" value="#{adicionarTipoEliminacionAliasBean.textoAsociadoOpcionOtro}" rows="2" styleClass="w100" autoResize="false" maxlength="200" required="true" rendered="#{adicionarTipoEliminacionAliasBean.otroSeleccionado}" />
+				</h:panelGroup>
+			</p:panelGrid>
+
+			<h:panelGroup id="identificarEmpresasContainer1">
+				<h:panelGroup rendered="#{not empty eliminacionDesechosFueraInstalacionBean.generadorDesechosEliminador.desechoPeligroso and not empty adicionarTipoEliminacionAliasBean.tipoEliminacionDesechoSeleccionada}">
+					<ui:include src="/prevencion/registrogeneradordesechos/utiles/identificarEmpresas.xhtml" />
+				</h:panelGroup>
+			</h:panelGroup>
+
+
+			<h:inputHidden validator="#{eliminacionDesechosFueraInstalacionBean.validateData}" />
+		</h:panelGroup>
+	</h:panelGroup>
+
+	<ui:include src="/prevencion/registrogeneradordesechos/utiles/seleccionarEmpresaModal.xhtml" />
+	<ui:include src="/prevencion/registrogeneradordesechos/utiles/seleccionarTipoEliminacionDesechoModal.xhtml" />
+
+	<div class="buttons">
+		<p:commandButton value="#{eliminacionDesechosFueraInstalacionBean.editar ? 'Actualizar' : 'Aceptar'}" oncomplete="toogleAdicionarEliminacionDesechoFueraInstalacion(xhr, status, args)" actionListener="#{eliminacionDesechosFueraInstalacionBean.aceptar()}" process="@this :form:datosEliminacionFI" update=":form:datosEliminacionFI :form:listadoEliminacionFI" />
+		<p:commandButton value="Cancelar" styleClass="secondary" onclick="PF('adicionarEliminacionFI').toggle()" process="@this" actionListener="#{eliminacionDesechosFueraInstalacionBean.cancelar()}" update="datosEliminacionFI">
+			<p:resetInput target="@form" />
+		</p:commandButton>
+	</div>
+
+	<script type="text/javascript">
+	function toogleAdicionarEliminacionDesechoFueraInstalacion(xhr, status, args) {
+	    if(args.addEliminacionFueraInstalacion) {
+	    	PF('adicionarEliminacionFI').toggle();
+	    }            
+	}
+</script>
+	<p:separator />
+</p:panel>
+
+</html>

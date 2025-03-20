@@ -1,0 +1,431 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+	<ui:composition template="/WEB-INF/templates/default.xhtml" 
+		xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:p="http://primefaces.org/ui"	
+		xmlns:pe="http://primefaces.org/ui/extensions"
+		xmlns:t="http://myfaces.apache.org/tomahawk"
+		xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+		xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+		xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+		<ui:define name="content">
+			
+			<h:form id="form" onkeypress="if (event.keyCode == 13) {return false; }">
+				<p:panel style="text-align:center;">
+					<f:facet name="header">
+						<h:outputText value="Inventario Forestal Registro Ambiental" styleClass="uppercase"/>
+					</f:facet>
+				</p:panel>
+
+				<p:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w50, field_mrg w50">
+					<f:facet name="header">
+						<h:outputText value="Superficie del proyecto y Superficie del desbroce de cobertura vetetal nativa"/>
+					</f:facet>
+						<p:outputLabel value="Superficie del proyecto, obra o actividad (ha):"/>
+						<p:outputLabel value="Superficie total de desbroce de cobertura vegetal nativa (ha):"/>
+						
+						<p:inputText disabled="true" value="#{inventarioForestalRegistroVisualizarController.inventarioForestalAmbiental.superficieProyecto}" />
+						<pe:inputNumber id="superficieDesbroce" thousandSeparator="" maxValue="#{inventarioForestalRegistroVisualizarController.inventarioForestalAmbiental.superficieProyecto}" minValue="0" 
+						value="#{inventarioForestalRegistroVisualizarController.inventarioForestalAmbiental.superficieDesbroce}" disabled="true">
+							<f:validateDoubleRange minimum="0.1" />
+						</pe:inputNumber>						
+				</p:panelGrid>
+				
+				<p:panelGrid columns="2" layout="grid" styleClass="panel_data w50" columnClasses="w50 header, field_mrg w50">
+					
+					<p:outputLabel value="Método de recolección de datos"/>
+					<p:selectOneRadio value="#{inventarioForestalRegistroVisualizarController.inventarioForestalAmbiental.metodoRecoleccionDatos}"
+					converter="selectItemConverter" disabled="true">
+						<f:selectItems value="#{inventarioForestalRegistroVisualizarController.listMetodoRecoleccionDatos}" var="item" 
+						itemLabel="#{item.descripcion}" itemValue="#{item}"/>						
+					</p:selectOneRadio>
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w100">
+					<f:facet name="header">
+						<p:commandButton styleClass="button-small toRight field_mrg" ajax="false" immediate="true" icon="ui-icon-help">
+							<p:fileDownload value="" />
+						</p:commandButton>
+						<h:outputText value="Sistema de referencia UTM WGS84 zona 17sur"/>
+					</f:facet>
+					<p:outputLabel value="El archivo de coordenadas debe marcar el sitio en el que se realiza el Muestreo o Censo del Inventario Forestal"/>
+					
+					<p:dataTable id="tblCoordenadas" rowIndexVar="index" value="#{inventarioForestalRegistroVisualizarController.coordinatesWrappers}" var="item" emptyMessage="#{labels['common.table.empty']}">
+						<p:subTable value="#{item.coordenadas}" var="coordenada">
+							<p:columnGroup type="header">
+								<p:row>
+									<p:column headerText="Grupo de coordenadas #{index + 1} (#{item.tipoForma}})" styleClass="alCenter w100 table-column-header" colspan="3" />
+								</p:row>
+								<p:row>
+									<p:column headerText="Shape" styleClass="alCenter table-column-header" />
+									<p:column headerText="X" styleClass="alCenter table-column-header" />
+									<p:column headerText="Y" styleClass="alCenter table-column-header" />
+								</p:row>
+							</p:columnGroup>
+							<p:column headerText="Shape" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.ordenCoordenada}" />
+							</p:column>
+							<p:column headerText="X" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.x.intValue()}" />
+							</p:column>
+							<p:column headerText="Y" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.y.intValue()}" />
+							</p:column>
+						</p:subTable>
+					</p:dataTable>
+					
+					<p:panelGrid columns="3" layout="grid" styleClass="w100" columnClasses="w25, w5, field_mrg w70"
+					rendered="#{inventarioForestalRegistroVisualizarController.metodoRecoleccionDatos eq 'MUESTREO'}">
+						<p:outputLabel value="Ecosistema del área del proyecto"/>
+						<p:inputTextarea label="Justificacion" value="#{inventarioForestalRegistroVisualizarController.inventarioForestalDetalle.ecosistemaAreaProyecto}" disabled="true" styleClass="w100">
+						</p:inputTextarea>
+						<br/>
+						<p:outputLabel value="Cobertura vegetal y uso del suelo"/>
+						<p:inputText value="#{inventarioForestalRegistroVisualizarController.inventarioForestalDetalle.coberturaVegetalSuelo}" disabled="true" />
+						<br/>
+						<p:outputLabel value="Fecha de elaboración del Muestreo o el Censo Forestal"/>
+						<p:calendar styleClass="calendarClass"  value="#{inventarioForestalRegistroVisualizarController.inventarioForestalAmbiental.fechaElaboracion}" 
+							pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" >
+						</p:calendar>
+						<br/>
+					</p:panelGrid>
+					
+					<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w40,null w60"
+					rendered="#{inventarioForestalRegistroVisualizarController.metodoRecoleccionDatos eq 'MUESTREO'}">
+						<h:outputText value="Justificar técnicamente si se realiza el inventario forestal mediante el uso de transectos, parcelas o censo, lo cual deberá estar en concordancia del área 
+						de cobertura vegetal nativa o bosque nativo a ser desbrozado (en caso de muestreo se recomienda que la representatividad de la muestra sea entre el 1 y el 10 por ciento 
+						del área de desbroce)" for="justificacion" />
+						<p:inputTextarea label="Justificacion" value="#{inventarioForestalRegistroVisualizarController.inventarioForestalDetalle.justificacionTecnica}" 
+						rows="5" styleClass="w100" autoResize="false" maxlength="3000" disabled="true"/>						
+					</p:panelGrid>
+					
+					<p:panelGrid columns="3" layout="grid" styleClass="w100" columnClasses="w25, w5, field_mrg w70"
+					rendered="#{inventarioForestalRegistroVisualizarController.metodoRecoleccionDatos eq 'CENSO'}">
+						<p:outputLabel value="Fecha de elaboración del Censo Forestal"/>
+						<p:calendar id="fechaElaboracion" styleClass="calendarClass" value="#{inventarioForestalRegistroVisualizarController.inventarioForestalAmbiental.fechaElaboracion}"
+							maxdate="#{inventarioForestalCertificadoController.currentDate}" immediate="true"
+							pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" disabled="true">							
+						</p:calendar>
+						<br/>
+					</p:panelGrid>
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w100">
+					<f:facet name="header">
+						<h:outputText value="Registro de especies forestales"/>
+					</f:facet>
+					<p:outputLabel value="Para registrar la información de las especies, el sistema ofrece dos opciones de registro: Mediante un archivo Excel y/o mediante un formulario, 
+					usted puede registrar las especies con cualquiera de las dos opciones."/>					
+					<p:dataTable id="tblEspecies" rowIndexVar="index" value="#{inventarioForestalRegistroVisualizarController.listRegistroEspeciesForestales}" var="especie" emptyMessage="#{labels['common.table.empty']}"
+					rows="10" paginatorAlwaysVisible="false" paginator="true" paginatorPosition="bottom" >
+						<f:facet name="header"></f:facet>
+						<p:columnGroup type="header">
+				            <p:row>
+				                <p:column rowspan="2" headerText="Código de la muestra" rendered="#{inventarioForestalRegistroVisualizarController.metodoRecoleccionDatos eq 'MUESTREO'}"/>
+				                <p:column rowspan="2" headerText="Número del individuo" />
+				                <p:column colspan="3" headerText="Taxonomía" />
+				                <p:column rowspan="2" headerText="DAP (Diámetro a la altura del pecho (m))" />
+				                <p:column rowspan="2" headerText="Altura total (m)" />
+				                <p:column rowspan="2" headerText="AB (Área basa (m2))" />
+				                <p:column rowspan="2" headerText="Volumen total (m3)" />
+				            </p:row>
+				            <p:row>
+				                <p:column headerText="Familia" />
+				                <p:column headerText="Género" />
+				                <p:column headerText="Especie" />
+				            </p:row>
+				        </p:columnGroup>
+				        <p:column styleClass="alCenter w5" rendered="#{inventarioForestalRegistroVisualizarController.metodoRecoleccionDatos eq 'MUESTREO'}">
+				        	<h:outputText value="#{especie.codigoMuestra}"/>
+				        </p:column>
+				        <p:column styleClass="alCenter w5">
+				        	<h:outputText value="#{especie.numeroIndividuo}" />
+				        </p:column>
+				        <p:column>
+				        	<h:outputText value="#{especie.familiaEspecie.hiclScientificName}" />
+				        </p:column>
+				        <p:column>
+				        	<h:outputText value="#{especie.generoEspecie.hiclScientificName}" />
+				        </p:column>
+				        <p:column>
+				        	<h:outputText value="#{especie.especieEspecie.sptaScientificName}" />
+				        	<h:outputText value=" - #{especie.especieEspecie.sptaOtherScientificName}" rendered="#{especie.especieEspecie.id == 0}" />
+				        </p:column>
+				        <p:column styleClass="alCenter">
+				        	<h:outputText value="#{especie.diametroEspecie}">
+				        		<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+				        </p:column>
+				        <p:column styleClass="alCenter">
+				        	<h:outputText value="#{especie.alturaEspecie}" >
+				        		<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+				        </p:column>
+				        <p:column styleClass="alCenter">
+				        	<h:outputText value="#{especie.areaBasalEspecie}" >
+				        		<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+				        </p:column>
+				        <p:column styleClass="alCenter">
+				        	<h:outputText value="#{especie.volumenTotalEspecie}" >
+				        		<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+				        </p:column>
+					</p:dataTable>
+
+					<p:dataTable id="tblSumatoria" rowIndexVar="index" value="#{inventarioForestalRegistroVisualizarController.listRegistroAmbientalSumatoria}" var="suma" emptyMessage="#{labels['common.table.empty']}"
+					rendered="#{inventarioForestalRegistroController.metodoRecoleccionDatos eq 'MUESTREO'}"
+					rows="10" paginatorAlwaysVisible="false" paginator="true" paginatorPosition="bottom" >
+						<f:facet name="header">
+							<p:outputLabel value="Sumatoria de los datos de cada muestra (las superficies de los sitios de muestreo deberán tener las mismas dimensiones)"/>
+						</f:facet>
+						<p:column headerText="Códigos de muestra" styleClass="alCenter">
+							<h:outputText value="#{suma.codigoMuestra}" >
+				        		<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+						</p:column>
+						<p:column headerText="Sumatoria del área basal de cada sitio de muestreo" styleClass="alCenter">
+							<h:outputText value="#{suma.sumatoriaAreaBasal}" >
+				        		<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+						</p:column>
+						<p:column headerText="Sumatoria del volumen de cada sitio de muestreo" styleClass="alCenter">
+							<h:outputText value="#{suma.sumatoriaVolumen}" >
+				        		<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+						</p:column>
+						<p:column headerText="Superficie del sitio de muestreo (ha)" styleClass="alCenter">
+							<pe:inputNumber thousandSeparator="" maxValue="9999999999.9999" minValue="0" 
+							value="#{suma.superficieSitio}" disabled="true">
+								<f:validateDoubleRange minimum="0.1" />
+							</pe:inputNumber>
+						</p:column>
+					</p:dataTable>
+					<p:dataTable id="tblSumatoriaCenso" rowIndexVar="index" value="#{inventarioForestalRegistroController.listRegistroAmbientalSumatoria}" var="inventario" emptyMessage="#{labels['common.table.empty']}"
+					rendered="#{inventarioForestalRegistroVisualizarController.metodoRecoleccionDatos eq 'CENSO'}">
+						<f:facet name="header">
+							<p:outputLabel value="Sumatoria de datos"/>
+						</f:facet>
+						<p:column headerText="Supericie total de desbroce">
+							<h:outputText value="#{inventario.superficieDesbroce}" >
+								<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+						</p:column>
+						<p:column headerText="Sumatoria del área basal">
+							<h:outputText value="#{inventario.sumatoriaAreaBasal}" >
+								<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+						</p:column>
+						<p:column headerText="Sumatoria del volumen total">
+							<h:outputText value="#{inventario.sumatoriaVolumenTotal}" >
+								<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+						</p:column>
+						<p:column headerText="Valor del m3 de Madera en pie">
+							<h:outputText value="#{inventario.valorMaderaPie}" >
+								<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+						</p:column>
+						<p:column headerText="Pago por desbroce de cobertura vegetal nativa">
+							<h:outputText value="#{inventario.pagoDesbroceCobertura}" >
+								<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+						</p:column>
+					</p:dataTable>
+					
+					<p:dataTable id="tblPromedio" rowIndexVar="index" value="#{inventarioForestalRegistroVisualizarController.listPromedioInventarioForestal}" var="promedio" emptyMessage="#{labels['common.table.empty']}"
+					rendered="#{inventarioForestalRegistroVisualizarController.metodoRecoleccionDatos eq 'MUESTREO'}"
+					rows="10" paginatorAlwaysVisible="false" paginator="true" paginatorPosition="bottom" >
+						<f:facet name="header">
+							<p:outputLabel value="Resultados"/>
+						</f:facet>
+						<p:column headerText="Promedio del área basal m2" styleClass="alCenter">
+							<h:outputText value="#{promedio.promedioAreaBasal}" >
+				        		<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+						</p:column>
+						<p:column headerText="Promedio del Volumen m3" styleClass="alCenter">
+							<h:outputText value="#{promedio.promedioVolumen}" >
+				        		<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+						</p:column>
+						<p:column headerText="Valor de área basal por hectárea m2" styleClass="alCenter">
+							<h:outputText value="#{promedio.valorAreaBasalPromedio}" >
+				        		<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+						</p:column>
+						<p:column headerText="Valor del volumen total por hectárea" styleClass="alCenter">
+							<h:outputText value="#{promedio.valorVolumenTotalPromedio}" >
+				        		<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+						</p:column>
+						<p:column headerText="Valor del m3 de Madera en pie" styleClass="alCenter">
+							<h:outputText value="#{promedio.valorMaderaPie}" >
+				        		<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+						</p:column>
+						<p:column headerText="Pago por desbroce de covertura vegetal nativa" styleClass="alCenter">
+							<h:outputText value="#{promedio.pagoDesbroceCobertura}" >
+				        		<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+				
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w100">
+					<f:facet name="header">
+						<h:outputText value="Cálculo de índice de valor de importancia IVI"/>
+					</f:facet>
+					<p:dataTable id="tblImportancia" rowIndexVar="index" value="#{inventarioForestalRegistroVisualizarController.listIndiceValorImportanciaInventarioForestal}" var="importancia" emptyMessage="#{labels['common.table.empty']}"
+					rows="10" paginatorAlwaysVisible="false" paginator="true" paginatorPosition="bottom" >
+						<f:facet name="header"></f:facet>
+						<p:column headerText="Familia">
+							<h:outputText value="#{importancia.familiaEspecie.hiclScientificName}" />
+						</p:column>
+						<p:column headerText="Genero">
+							<h:outputText value="#{importancia.generoEspecie.hiclScientificName}" />
+						</p:column>
+						<p:column headerText="Especie">
+							<h:outputText value="#{importancia.especieEspecie.sptaScientificName}" />
+				        	<h:outputText value=" - #{importancia.especieEspecie.sptaOtherScientificName}" rendered="#{importancia.especieEspecie.id == 0}" />
+						</p:column>
+						<p:column headerText="Frecuencia (FR)" styleClass="alCenter">
+							<h:outputText value="#{importancia.frecuenciaEspecies}" />
+						</p:column>
+						<p:column headerText="AB Área basal en (m2)" styleClass="alCenter">
+							<h:outputText value="#{importancia.areaBasal}" >
+				        		<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+						</p:column>
+						<p:column headerText="DnR" styleClass="alCenter">
+							<h:outputText value="#{importancia.dnr}" >
+				        		<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+						</p:column>
+						<p:column headerText="DmR" styleClass="alCenter">
+							<h:outputText value="#{importancia.dmr}" >
+				        		<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+						</p:column>
+						<p:column headerText="IVI (DnR + DmR)" styleClass="alCenter">
+							<h:outputText value="#{importancia.ivi}" >
+				        		<f:convertNumber pattern="#0.00" />
+			        		</h:outputText>
+						</p:column>
+						<p:columnGroup type="footer">
+							<p:row>
+								<p:column footerText="Sumatoria total" colspan="3" style="text-align: right;"/>
+								<p:column styleClass="alCenter" footerText="#{inventarioForestalRegistroVisualizarController.sumatoria('fr')}"/>
+								<p:column styleClass="alCenter" footerText="#{inventarioForestalRegistroVisualizarController.sumatoria('m2')}"/>
+								<p:column styleClass="alCenter" footerText="#{inventarioForestalRegistroVisualizarController.sumatoria('dnr')}"/>
+								<p:column styleClass="alCenter" footerText="#{inventarioForestalRegistroVisualizarController.sumatoria('dmr')}"/>
+								<p:column styleClass="alCenter" footerText="#{inventarioForestalRegistroVisualizarController.sumatoria('ivi')}"/>
+							</p:row>						
+						</p:columnGroup>
+					</p:dataTable>
+				</p:panelGrid>
+				
+				<p:panelGrid id="valoracionEconomicaGrid" columns="2" layout="grid" styleClass="w100" columnClasses="w50, w50"
+				rendered="#{inventarioForestalRegistroVisualizarController.mostrarValoracion}">
+					<f:facet name="header">
+						<h:outputText value="Valoración económica de bienes y servicios"/>
+					</f:facet>
+
+					<p:panelGrid columns="2" layout="grid" styleClass="w100 noBorder" columnClasses="w50, field_mrg w50">
+						<p:outputLabel value="Productos maderables y no maderables"/>
+						<pe:inputNumber disabled="true" value="#{inventarioForestalRegistroVisualizarController.bienesServiciosInventarioForestal.maderableNoMaderable}" >
+							<f:validateDoubleRange minimum="0.0" />
+						</pe:inputNumber>
+						<p:outputLabel value="Almacenamiento de carbono"/>
+						<pe:inputNumber thousandSeparator="" maxValue="9999999999.99" minValue="0" 
+						value="#{inventarioForestalRegistroVisualizarController.bienesServiciosInventarioForestal.almacenamientoCarbono}" >
+							<f:validateDoubleRange minimum="0.0" />
+						</pe:inputNumber>
+						<p:outputLabel value="Belleza escénica"/>
+						<pe:inputNumber thousandSeparator="" maxValue="9999999999.99" minValue="0"
+						value="#{inventarioForestalRegistroVisualizarController.bienesServiciosInventarioForestal.bellezaEscenica}" >
+							<f:validateDoubleRange minimum="0.0" />
+						</pe:inputNumber>
+						<p:outputLabel value="Agua"/>
+						<pe:inputNumber thousandSeparator="" maxValue="9999999999.99" minValue="0"
+						value="#{inventarioForestalRegistroVisualizarController.bienesServiciosInventarioForestal.agua}" >
+							<f:validateDoubleRange minimum="0.0" />
+						</pe:inputNumber>
+						<p:outputLabel value="Productos medicinales"/>
+						<pe:inputNumber thousandSeparator="" maxValue="9999999999.99" minValue="0"
+						value="#{inventarioForestalRegistroVisualizarController.bienesServiciosInventarioForestal.productosMedicinales}" >
+							<f:validateDoubleRange minimum="0.0" />
+						</pe:inputNumber>
+						<p:outputLabel value="Productos ornamentales"/>
+						<pe:inputNumber thousandSeparator="" maxValue="9999999999.99" minValue="0"
+						value="#{inventarioForestalRegistroVisualizarController.bienesServiciosInventarioForestal.productosOrnamentales}" >
+							<f:validateDoubleRange minimum="0.0" />
+						</pe:inputNumber>
+						<p:outputLabel value="Productos artesanales"/>
+						<pe:inputNumber thousandSeparator="" maxValue="9999999999.99" minValue="0"
+						value="#{inventarioForestalRegistroVisualizarController.bienesServiciosInventarioForestal.productosArtesanales}" >
+							<f:validateDoubleRange minimum="0.0" />
+						</pe:inputNumber>
+						<p:outputLabel id="totalValoracionEconomica" value="Pago total con valoración económica de bienes y servicios ambientales"/>
+						<pe:inputNumber disabled="true" value="#{inventarioForestalRegistroVisualizarController.bienesServiciosInventarioForestal.pagoTotal}" >
+							<f:validateDoubleRange minimum="0.0" />
+						</pe:inputNumber>
+					</p:panelGrid>
+					<p:panel>
+						<p:outputLabel value="Descargar el archivo de valoración económica de bienes y servicios ambientales por remoción de cobertura vegetal nativa"/>
+						<br/><br/>
+						<p:commandButton value="Download" ajax="false" icon="ui-icon-arrowthickstop-1-s" styleClass="primary">
+							<p:fileDownload value="#{inventarioForestalRegistroVisualizarController.getStreamValoracion()}"/>
+    					</p:commandButton>
+					</p:panel>
+				</p:panelGrid>
+
+				<p:panelGrid id="tecnicoGrid" columns="1" layout="grid" styleClass="w100" columnClasses="w100">
+					<f:facet name="header">
+						<p:outputLabel value="Datos del profesional responsable del Inventario Forestal"/>
+					</f:facet>
+					<p:panelGrid columns="3" layout="grid" styleClass="w100" columnClasses="w25, w5, field_mrg w70">
+						<p:outputLabel value="Cédula / Pasaporte *" for="documentoResponsable" />
+						<p:inputMask id="documentoResponsable" mask="9999999999" maxlength="10"
+						value="#{inventarioForestalRegistroVisualizarController.especialistaAmbiental.identificacion}" disabled="true"/>
+						<br/>
+	
+						<p:outputLabel value="Nombres y Apellidos *" for="nombreResponsable" />
+						<p:inputText id="nombreResponsable"
+						value="#{inventarioForestalRegistroVisualizarController.especialistaAmbiental.nombre}"
+						maxlength="200" disabled="true" />
+						<br/>
+	
+						<p:outputLabel value="Título Académico *" for="tituloResponsable" />
+						<p:inputText id="tituloResponsable"
+						value="#{inventarioForestalRegistroVisualizarController.especialistaAmbiental.titulo}"
+						maxlength="30" disabled="true"/>
+						<br/>
+	
+						<p:outputLabel value="Registro Senecyt *" for="senecytRegistro" />
+						<p:inputText id="senecytRegistro"
+						value="#{inventarioForestalRegistroVisualizarController.especialistaAmbiental.numeroRegistro}"
+						disabled="true"/>
+						<br/>
+					</p:panelGrid>
+				<p:outputLabel value="Para el pago por desbroce en la ejecución de proyectos, obras o actividades, debe calcular el volumen total de productos maderables 
+				y no maderables determinados con el censo forestal multiplicado por la tasa establecida por la Autoridad Ambiental Nacional (Madera en pie)"/>
+				</p:panelGrid>
+				
+				<p:panelGrid id="observacionesInventarioRegistro" columns="1" layout="grid" styleClass="w100">
+					<observaciones:tablaObservacionesInventarioForestal idComponent="observacionesInventarioRegistro"
+						componenteActualizarEliminar="observacionesInventarioRegistro"
+						seccion="InventarioForestalAmbiental"
+						nombreClase="InventarioForestalAmbiental"
+						idClase="#{inventarioForestalRegistroVisualizarController.inventarioForestalAmbiental.id}"		
+						aparace="true"
+						mostrarSiVacio="true"
+						soloLectura="#{!inventarioForestalRegistroVisualizarController.esRevisarInformacion}"/>
+				</p:panelGrid>
+			</h:form>
+		</ui:define>
+	</ui:composition>
+</html>

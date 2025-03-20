@@ -1,0 +1,217 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:f="http://java.sun.com/jsf/core" xmlns:t="http://myfaces.apache.org/tomahawk" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones" xmlns:control="http://java.sun.com/jsf/composite/controles-prime" template="/control/aprobacionRequisitosTecnicos/templates/defaultTemplate.xhtml" xmlns:pe="http://primefaces.org/ui/extensions">
+	<ui:define name="content-art">
+		<h:form id="form">
+
+			<p:panel header="#{labels['label.requisitos.vehiculo']}">
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Requisitos" />
+					</f:facet>
+					<f:facet name="header">
+						<p:commandButton value="Adicionar" oncomplete="handleMaxVehiculosRequest(xhr, status, args)" process="@this" styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg" icon="ui-icon-plusthick" update=":#{p:component('datosGenerales')}" actionListener="#{requisitosVehiculoController.prepararNuevo}" />
+					</f:facet>
+
+
+					<p:dataTable value="#{requisitosVehiculoController.requisitosVehiculoBean.listaRequisitosVehiculo}" var="reqVehiculo" id="tablarequisitosVehiculo" emptyMessage="#{labels['common.table.empty']}">
+						<f:facet name="header">
+							<h:outputText value="Total de vehículos: #{requisitosVehiculoController.requisitosVehiculoBean.listaRequisitosVehiculo.size()}" />
+						</f:facet>
+						<p:column headerText="#{labels['label.numero.placa']}">
+							<h:outputText value="#{reqVehiculo.numeroPlaca}" >
+							</h:outputText>
+
+						</p:column>
+						<p:column headerText="#{labels['label.numero.motor']}">
+							<h:outputText value="#{reqVehiculo.numeroMotor}" />
+						</p:column>
+						<p:column headerText="#{labels['label.numero.chasis']}">
+							<h:outputText value="#{reqVehiculo.numeroChasis}" />
+						</p:column>
+						<p:column headerText="#{labels['label.clase.vehiculo']}">
+							<h:outputText value="#{reqVehiculo.clase}" />
+						</p:column>
+						<p:column headerText="#{labels['label.tipo.vehiculo']}">
+							<h:outputText value="#{reqVehiculo.tipo}" />
+						</p:column>
+						<p:column headerText="#{labels['label.anio.fabricacion']}">
+							<h:outputText value="#{reqVehiculo.anioFabriacacion}" />
+						</p:column>
+						<p:column headerText="#{labels['label.cilindraje']}">
+							<h:outputText value="#{reqVehiculo.cilindraje}" />
+						</p:column>
+						<p:column headerText="#{labels['label.capacidad.transporte']}">
+							<h:outputText value="#{reqVehiculo.capacidadTransporte}" />
+						</p:column>
+						<p:column headerText="#{labels['label.peso.bruto.vehicular']}">
+							<h:outputText value="#{reqVehiculo.pesoBrutoVehicular}" />
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton icon="ui-icon-pencil" action="#{requisitosVehiculoController.seleccionarRequisito(reqVehiculo)}" title="Editar" styleClass="button-small primary" oncomplete="PF('agregarRequerimiento').show();" update=":#{p:component('datosGenerales')}" process="@this" />
+							<p:commandButton icon="ui-icon-trash" action="#{requisitosVehiculoController.remover(reqVehiculo)}" title="Remover" styleClass="button-small primary" process="@this" update="tablarequisitosVehiculo">
+								<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar este registro?" icon="ui-icon-alert" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+			</p:panel>
+			<h:panelGroup id="pnl2" rendered="#{requisitosVehiculoController.aprobacionRequisitosTecnicosBean.revisar}">
+				<p:fragment>
+					<!--<h2 class="bold">Observaciones de requisitos del vehiculo.</h2>-->
+					<observaciones:tablaObservaciones aparace="true" soloLectura="#{requisitosVehiculoController.aprobacionRequisitosTecnicosBean.revisar}" mostrarSiVacio="#{!requisitosVehiculoController.aprobacionRequisitosTecnicosBean.revisar}" idClase="#{requisitosVehiculoController.aprobacionRequisitosTecnicosBean.aprobacionRequisitosTecnicos.id}" nombreClase="AprobacionRequisitosTecnicos" seccion="#{requisitosVehiculoController.aprobacionRequisitosTecnicosBean.seccion}" rol="sjsj" componenteActualizarEliminar="pnl2" />
+				</p:fragment>
+			</h:panelGroup>
+			<div class="buttons main">
+				<p:commandButton value="Atrás" immediate="true" process="@this" action="/control/aprobacionRequisitosTecnicos/informacionPatioManiobra.jsf?faces-redirect=true" icon="ui-icon-arrowthick-1-w" />
+				<p:commandButton value="#{labels['label.guardar']}" update=":#{p:component('tablarequisitosVehiculo')}" oncomplete="handleNumVehiculosRequest(xhr, status, args);window.scrollTo(0,120);" action="#{requisitosVehiculoController.guardarPagina()}" icon="ui-icon-disk" process="@this" />
+				<p:commandButton value="Siguiente" immediate="true" process="@this" action="/control/aprobacionRequisitosTecnicos/requisitosConductor.jsf?faces-redirect=true" icon="ui-icon-arrowthick-1-e" />
+			</div>
+			<p:dialog header="#{labels['label.requisitos.vehiculo']}" id="agregarRequerimiento" widgetVar="agregarRequerimiento" modal="true" resizable="false" width="600" closable="false">
+				<h:panelGroup id="datosGenerales">
+					<h:panelGrid styleClass="w50" columns="3" columnClasses="w20, field_mrg w20, field_mrg w20">
+						<p:outputLabel for="numPlaca" value="#{labels['label.numero.placa']}" />
+						<h:outputText />
+						<h:outputText />
+						<p:inputText id="numPlaca" value="#{requisitosVehiculoController.requisitosVehiculoBean.numPlaca}" required="true" maxlength="10" minlenght="7"
+									 styleClass="uppercase" validatorMessage="La placa debe tener 3 letras y 4 dígitos. Por favor agregue un cero después de la última letra para que se valide la información con el sistema del ANT.">
+							<pe:keyFilter regEx="/[a-z0-9]/i"  />
+							<f:validateLength minimum="7"/>
+						</p:inputText>
+
+						<div class="buttons main">
+							<p:commandButton styleClass="primary" value="Buscar" update="datosGenerales" process="@this numPlaca" action="#{requisitosVehiculoController.buscar()}" disabled="#{requisitosVehiculoController.requisitosVehiculoBean.editar}" />
+						</div>
+					</h:panelGrid>
+					<h:panelGrid styleClass="w100" columns="2" columnClasses="w50,field_mrg w50">
+						<p:outputLabel for="numMotor" value="#{labels['label.numero.motor']}" />
+						<p:outputLabel for="numChasis" value="#{labels['label.numero.chasis']}" />
+						<p:inputText id="numMotor" value="#{requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.numeroMotor}" styleClass="w100" readonly="true" />
+						<p:inputText id="numChasis" value="#{requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.numeroChasis}" styleClass="w100" readonly="true" />
+						<p:outputLabel for="clase" value="#{labels['label.clase.vehiculo']}" />
+						<p:outputLabel for="tipo" value="#{labels['label.tipo.vehiculo']}" />
+						<p:inputText id="clase" value="#{requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.clase}" styleClass="w100" readonly="true" />
+						<p:inputText id="tipo" value="#{requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.tipo}" styleClass="w100" readonly="true" />
+						<p:outputLabel for="anioFabricacion" value="#{labels['label.anio.fabricacion']}" />
+						<p:outputLabel for="cilindraje" value="#{labels['label.cilindraje']}" />
+						<p:inputText id="anioFabricacion" value="#{requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.anioFabriacacion}" styleClass="w100" readonly="true" />
+
+						<pe:inputNumber id="cilindraje" decimalPlaces="" maxValue="99999"  styleClass="w100"
+										thousandSeparator="" required="#{requisitosVehiculoController.requisitosVehiculoBean.requistosVehiculoRequerido}"
+										value="#{requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.cilindraje}">
+						</pe:inputNumber>
+						<!--<p:inputText id="cilindraje" value="#{requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.cilindraje}"
+									 styleClass="w100" maxlength="10" required="#{requisitosVehiculoController.requisitosVehiculoBean.requistosVehiculoRequerido}" />-->
+						<p:outputLabel for="capacidadTransporte" value="#{labels['label.capacidad.transporte']}" />
+						<p:outputLabel for="pesoBruto" value="#{labels['label.peso.bruto.vehicular']}" />
+						<p:inputText id="capacidadTransporte" value="#{requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.capacidadTransporte}" styleClass="w100" maxlength="10" required="#{requisitosVehiculoController.requisitosVehiculoBean.requistosVehiculoRequerido}">
+							<pe:keyFilter mask="num" />
+						</p:inputText>
+
+						<pe:inputNumber id="pesoBruto" decimalPlaces="2" maxValue="9999999.99"  styleClass="w100"
+										thousandSeparator="" required="#{requisitosVehiculoController.requisitosVehiculoBean.requistosVehiculoRequerido}"
+										value="#{requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.pesoBrutoVehicular}">
+						</pe:inputNumber>
+						<!--<p:inputText id="pesoBruto" value="#{requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.pesoBrutoVehicular}"
+									 styleClass="w100" maxlength="10" required="#{requisitosVehiculoController.requisitosVehiculoBean.requistosVehiculoRequerido}" />-->
+					</h:panelGrid>
+					<h:panelGroup>
+						<h:panelGrid columns="2" columnClasses="w50, field_mrg w50" styleClass="w100">
+							<h:panelGroup>
+								<p:outputLabel for="nombreArchivoHidden" value="#{labels['label.foto']} (.pdf)" />
+								<mae:btnHelp help="#{formatearAyudaController.obtenerAyuda(helps['art.requisitos.vehiculo.foto'])}" conector="alturaAyuda" />
+								<h:outputText id="nombreArchivo" value="#{requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.documentoFoto.nombre}" />
+								<p:commandButton icon="ui-icon-arrowthick-1-s" styleClass="button-small primary" title="Ver" action="#{requisitosVehiculoController.descargar(0)}" ajax="false" id="btn_descargaFoto" rendered="#{!(requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.documentoFoto.id==null)}" />
+								<h:inputHidden id="nombreArchivoHidden" required="#{requisitosVehiculoController.requisitosVehiculoBean.requistosVehiculoRequerido}" value="#{requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.documentoFoto.nombre}" />
+							</h:panelGroup>
+							<h:panelGroup>
+								<p:outputLabel for="nombreArchivoCertificadoInspeccionHidden" value="#{labels['label.certificado.inspeccion.vehicular']}(.pdf)" />
+								<h:outputText id="nombreArchivoCertificadoInspeccion" value="#{requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.documentoCertificadoInspeccionTecnicaVehicular.nombre}" />
+								<p:commandButton icon="ui-icon-arrowthick-1-s" styleClass="button-small primary" title="Ver" action="#{requisitosVehiculoController.descargar(2)}" ajax="false" id="btn_descargaCertificadoInspeccion" rendered="#{!(requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.documentoCertificadoInspeccionTecnicaVehicular.id==null)}" />
+								<h:inputHidden id="nombreArchivoCertificadoInspeccionHidden" required="#{requisitosVehiculoController.requisitosVehiculoBean.requistosVehiculoRequerido}" value="#{requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.documentoCertificadoInspeccionTecnicaVehicular.nombre}" />
+							</h:panelGroup>
+							<p:fileUpload id="foto" fileUploadListener="#{requisitosVehiculoController.handleFileUpload}" value="#{requisitosVehiculoController.file}" sizeLimit="1048576" allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar" uploadLabel="Subir" auto="true" update="nombreArchivo,nombreArchivoHidden,btn_descargaFoto" cancelLabel="Cancelar" invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF" invalidSizeMessage="Debe adjuntar un archivo no mayor de 1 Mb." required="true" mode="advanced" styleClass="w100">
+								<f:attribute name="indice" id="indice" value="0" />
+							</p:fileUpload>
+							<p:fileUpload id="certificadoInsperccionVehicular" fileUploadListener="#{requisitosVehiculoController.handleFileUpload}" value="#{requisitosVehiculoController.file}" sizeLimit="1048576" allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar" uploadLabel="Subir" auto="true" update="nombreArchivoCertificadoInspeccion,nombreArchivoCertificadoInspeccionHidden,btn_descargaCertificadoInspeccion" cancelLabel="Cancelar" invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF" invalidSizeMessage="Debe adjuntar un archivo no mayor de 1 Mb." required="true" mode="advanced" styleClass="w100 ">
+								<f:attribute name="indice" id="indice" value="1" />
+							</p:fileUpload>
+							<h:panelGroup>
+								<p:outputLabel for="nombreArchivoMatriculaHidden" value="#{labels['label.matricula']} (.pdf)" />
+								<h:outputText id="nombreArchivoMatricula" value="#{requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.documentoMatricula.nombre}" />
+								<p:commandButton icon="ui-icon-arrowthick-1-s" styleClass="button-small primary" title="Ver" action="#{requisitosVehiculoController.descargar(1)}" ajax="false" id="btn_descargaMatricula" rendered="#{!(requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.documentoMatricula.id==null)}" />
+								<h:inputHidden id="nombreArchivoMatriculaHidden" required="#{requisitosVehiculoController.requisitosVehiculoBean.requistosVehiculoRequerido}" value="#{requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.documentoMatricula.nombre}" />
+							</h:panelGroup>
+							<h:panelGroup rendered="#{requisitosVehiculoController.requisitosVehiculoBean.habilitarCertificadoCalibracion}">
+								<p:outputLabel for="nombreArchivoCertificadoCalibracionHidden" value="#{labels['label.certificado.calibracion.tanque.cisterna']} (.pdf)" />
+								<h:outputText id="nombreArchivoCertificadoCalibracion" value="#{requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.documentoCertificadoCalibracionTanque.nombre}" />
+								<p:commandButton icon="ui-icon-arrowthick-1-s" styleClass="button-small primary" title="Ver" action="#{requisitosVehiculoController.descargar(3)}" ajax="false" id="btn_descargaCertificadoCalibracion" rendered="#{!(requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.documentoCertificadoCalibracionTanque.id==null)}" />
+								<h:inputHidden id="nombreArchivoCertificadoCalibracionHidden" required="#{requisitosVehiculoController.requisitosVehiculoBean.requistosVehiculoRequerido}" value="#{requisitosVehiculoController.requisitosVehiculoBean.requisitoVehiculo.documentoCertificadoCalibracionTanque.nombre}" />
+							</h:panelGroup>
+							<h:outputText rendered="#{!requisitosVehiculoController.requisitosVehiculoBean.habilitarCertificadoCalibracion}" />
+							<p:fileUpload id="matricula" fileUploadListener="#{requisitosVehiculoController.handleFileUpload}" value="#{requisitosVehiculoController.file}" sizeLimit="1048576" allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar" uploadLabel="Subir" auto="true" update="nombreArchivoMatricula,nombreArchivoMatriculaHidden,btn_descargaMatricula" cancelLabel="Cancelar" invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF" invalidSizeMessage="Debe adjuntar un archivo no mayor de 1 Mb." required="true" mode="advanced">
+								<f:attribute name="indice" id="indice" value="3" />
+							</p:fileUpload>
+							<p:fileUpload id="certificadoInsperccionCalibracion" rendered="#{requisitosVehiculoController.requisitosVehiculoBean.habilitarCertificadoCalibracion}" fileUploadListener="#{requisitosVehiculoController.handleFileUpload}" value="#{requisitosVehiculoController.file}" sizeLimit="1048576" allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar" uploadLabel="Subir" auto="true" update="nombreArchivoCertificadoCalibracion,nombreArchivoCertificadoCalibracionHidden,btn_descargaCertificadoCalibracion" cancelLabel="Cancelar" invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF" invalidSizeMessage="Debe adjuntar un archivo no mayor de 1 Mb." required="true" mode="advanced">
+								<f:attribute name="indice" id="indice" value="2" />
+							</p:fileUpload>
+						</h:panelGrid>
+					</h:panelGroup>
+				</h:panelGroup>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton styleClass="buttonAceptar" value="Aceptar" update=":form:tablarequisitosVehiculo,datosGenerales" process="@this :form:datosGenerales" action="#{requisitosVehiculoController.agregarRequisito()}" oncomplete=" if (args.validationFailed) { }else { PF('agregarRequerimiento').hide(); }" />
+					<p:commandButton value="Cancelar" styleClass="secondary" immediate="true" onclick="PF('agregarRequerimiento').hide();" />
+				</div>
+			</p:dialog>
+
+			<p:dialog id="AgregarMaxVehiculoDlg" header="Información" widgetVar="agregarMaxVehiculoWdgt" modal="true" dynamic="true">
+				<h:panelGroup id="agregarMaxVehiculo" layout="block" style="margin:10px;">
+					<h:outputText value="El número de vehículos que usted definió es #{informacionPatioManiobrasBean
+				.getInformacionPatioManiobra().getNumeroVehiculos()}, por lo tanto no puede agregar mas vehículos." />
+				</h:panelGroup>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton type="button" value="Aceptar" styleClass="buttonAceptar" onclick="PF('agregarMaxVehiculoWdgt').hide()" />
+				</div>
+			</p:dialog>
+			<p:dialog header="Importante" id="importanteDlg" widgetVar="importanteWdgt" modal="true" resizable="false" width="300" closable="false">
+				<h:outputText value="Usted debe llenar antes la sección:" />
+				<ul class="error alLeft text-red ">
+					<li><h:outputLink class="text-red " value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/informacionPatioManiobra#{mode}.jsf">
+							<h:outputText value="Información general de la ubicación del patio de maniobra , almacenamiento temporal u oficina matriz" />
+						</h:outputLink></li>
+				</ul>
+			</p:dialog>
+			<p:dialog id="numVehiculoDlg" header="Información" widgetVar="numVehiculoWdgt" modal="true" width="400" resizable="false">
+				<h:panelGroup id="numVehiculo" layout="block">
+					<h:outputText value="El número de vehículos que usted definió es #{informacionPatioManiobrasBean
+				.getInformacionPatioManiobra().getNumeroVehiculos()}, por lo tanto debe agregar el resto de vehículos, caso contrario no podra completar la tarea." />
+				</h:panelGroup>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton type="button" value="Aceptar" styleClass="buttonAceptar" onclick="PF('numVehiculoWdgt').hide()" />
+				</div>
+			</p:dialog>
+		</h:form>
+
+		<script type="text/javascript">
+        function handleMaxVehiculosRequest(xhr, status, args) {
+                if (args.maxNumVehiculos) {
+                	
+                	 PF('agregarMaxVehiculoWdgt').show();
+                }  
+                else{
+                	 PF('agregarRequerimiento').show();
+                    }              
+            }
+        function handleNumVehiculosRequest(xhr, status, args) {
+            if (args.numVehiculos) {
+            	
+            	 PF('numVehiculoWdgt').show();
+            }  
+                   
+        }
+		</script>
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,298 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+<script type="text/javascript">
+function valida(e)
+{
+    key = e.keyCode || e.which;
+    tecla = String.fromCharCode(key).toLowerCase();
+    letras = " áéíóúabcdefghijklmnñopqrstuvwxyz0123456789-";
+    especiales = "8-37-39-46";
+
+    tecla_especial = false
+    for(var i in especiales){
+         if(key == especiales[i]){
+             tecla_especial = true;
+             break;
+         }
+     }
+     if(letras.indexOf(tecla)==-1){
+         if(!tecla_especial){
+             return false;
+         }
+     }
+}
+</script>
+
+<f:loadBundle var="helps" basename="ec.gob.ambiente.core.resources.helps_es" />
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{!(catalogoActividadesBean.actividadSistemaSeleccionada.codigo eq '21.02.03.05'
+							or catalogoActividadesBean.actividadSistemaSeleccionada.codigo eq '21.02.04.03'
+							or catalogoActividadesBean.actividadSistemaSeleccionada.codigo eq '21.02.05.03'
+							or catalogoActividadesBean.actividadSistemaSeleccionada.codigo eq '21.02.02.03')}">
+	<f:facet name="header">
+		<h:outputText value="Tipo de material" />
+	</f:facet>
+	<h:panelGrid columns="1" styleClass="w100" columnClasses="w50, field_mrg w50">
+		<p:outputLabel value="#{registroProyectoMineriaController.labelMateriales}" for="tipoMatrial" />
+		<p:selectOneMenu id="tipoMatrial" value="#{registroProyectoBean.proyecto.tipoMaterial}" styleClass="w66" required="true" converter="selectItemConverter">
+			<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+			<f:selectItems value="#{registroProyectoMineriaController.tiposMateriales}" />
+			<p:ajax process="@this" />
+		</p:selectOneMenu>
+	</h:panelGrid>
+</p:panelGrid>
+
+<h:panelGroup rendered="#{registroProyectoBean.validarSectorMineria()}">
+    <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w50 alTop, field_mrg w50 alTop">
+        <f:facet name="header">
+            <h:outputText value="Sistemas Integrados" />
+        </f:facet>
+        <h:panelGrid columns="1">
+            <p:outputLabel value="¿Su proyecto tiene sistemas integrados?" for="sistemasIntegrados" />
+            <p:selectOneRadio id="sistemasIntegrados" value="#{registroProyectoMineriaController.sistIntegrados}">
+                <f:selectItem itemLabel="Sí" itemValue="true" />
+                <f:selectItem itemLabel="No" itemValue="false" />
+                <p:ajax process="@this,panelSistIntegrados" update=":#{p:component('panelSistIntegrados')}"/>
+            </p:selectOneRadio>
+            
+            <h:panelGroup id="panelSistIntegrados" >
+            <h:panelGroup id="panelDescripcion" styleClass="w100" rendered="#{registroProyectoMineriaController.sistIntegrados}">
+                <p:outputLabel value="Descripción de la actividad" for="descripcionActividad" />
+					<p:inputTextarea id="descripcionActividad" 
+						rows="5" autoResize="false" maxlength="7550"
+						value="#{registroProyectoMineriaController.descripcionSistIntegrados}">						
+					</p:inputTextarea>
+				</h:panelGroup>    
+            <p:commandButton value="agregar" styleClass="primary" icon="ui-icon-plusthick" actionListener="#{registroProyectoMineriaController.cargarLista()}"
+            update="tablaActividad,descripcionActividad" process="@this,descripcionActividad,tablaActividad"
+            rendered="#{registroProyectoMineriaController.sistIntegrados}" style="margin-top:5px; margin-bottom:5px;"/>
+            
+            <p:dataTable id="tablaActividad" var="valorSist" value="#{registroProyectoMineriaController.listSistemasIntegrales}"
+            rendered="#{registroProyectoMineriaController.sistIntegrados}">
+                        <p:column headerText="Actividad">
+                            <h:outputText value="#{valorSist.descripcion}" />
+                        </p:column>
+                        <p:column styleClass="w20px">
+                            <p:commandButton update="tablaActividad" styleClass="button-small primary" process="@this" icon="ui-icon-circle-close" actionListener="#{registroProyectoMineriaController.quitarActividadLista(valorSist)}"/>
+                        </p:column>
+            </p:dataTable>
+            </h:panelGroup>
+                
+        </h:panelGrid>
+    </p:panelGrid>
+</h:panelGroup>
+<h:panelGroup rendered="#{!registroProyectoMineriaController.mineriaArtesanalOLibreAprovechamiento}">
+    <p:panelGrid columns="2" styleClass="w100" columnClasses="w50 alTop, field_mrg w50 alTop">
+        <f:facet name="header">
+            <h:panelGrid columns="3" styleClass="w100" columnClasses="w50, null, field_mrg w50">
+                <h:outputText value="Operadores Mineros" />
+                <t:div styleClass="header-separator" />
+                <h:outputText value="Concesiones mineras" />
+            </h:panelGrid>
+        </f:facet>
+        <h:panelGrid columns="1">
+            <p:outputLabel value="¿Su proyecto tiene Operadores Mineros?" for="minerosArtesanales" />
+            <p:selectOneRadio value="#{registroProyectoBean.proyecto.minerosArtesanales}" required="true" id="minerosArtesanales">
+                <f:selectItem itemLabel="Sí" itemValue="true" />
+                <f:selectItem itemLabel="No" itemValue="false" />
+                <p:ajax process="@this" update="minerosArtesanalesGeneralContainer" />
+            </p:selectOneRadio>
+            <h:outputText />
+        </h:panelGrid>
+        <h:panelGrid columns="1">
+            <p:outputLabel value="¿Su proyecto tiene varias concesiones mineras?" for="concesionesMineras" />
+            <p:selectOneRadio value="#{registroProyectoBean.proyecto.concesionesMinerasMultiples}" required="true" id="concesionesMineras">
+                <f:selectItem itemLabel="Sí" itemValue="true" />
+                <f:selectItem itemLabel="No" itemValue="false" />
+                <p:ajax process="@this" listener="#{registroProyectoMineriaController.procesarMultiplesConcesiones()}" update="ubicacionGeograficaContainer concesionesMinerasGeneralContainer areaAltitudContainer codigoMineroContainer" />
+            </p:selectOneRadio>
+            <h:panelGroup id="codigoMineroContainer">
+			<h:panelGrid columns="1" styleClass="w50" columnClasses="w100">                    
+			<p:outputLabel value="Código minero" for="codigoMinero" rendered="#{!registroProyectoBean.proyecto.concesionesMinerasMultiples}"/>
+                    <p:inputText value="#{registroProyectoBean.proyecto.codigoMinero}"
+                                 id="codigoMinero"
+                                 styleClass="w100" 
+                                 maxlength="25"
+                                 rendered="#{!registroProyectoBean.proyecto.concesionesMinerasMultiples}"
+                                 onkeypress="return valida(event)"
+                                 >
+                    </p:inputText>
+                    
+                    
+					<p:commandButton value="Validar" styleClass="primary"
+						action="#{registroProyectoBean.validarConcesion()}"
+						process="@this codigoMinero" update="@form"
+						rendered="#{(catalogoActividadesBean.actividadSistemaSeleccionada.codigo eq '21.02.03.05'
+							or catalogoActividadesBean.actividadSistemaSeleccionada.codigo eq '21.02.04.03'
+							or catalogoActividadesBean.actividadSistemaSeleccionada.codigo eq '21.02.05.03'
+							or catalogoActividadesBean.actividadSistemaSeleccionada.codigo eq '21.02.02.03') and !registroProyectoBean.proyecto.concesionesMinerasMultiples}" />
+				</h:panelGrid>
+            </h:panelGroup>
+        </h:panelGrid>
+    </p:panelGrid>
+</h:panelGroup>
+
+<h:panelGroup id="minerosArtesanalesGeneralContainer">
+	<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{registroProyectoBean.proyecto.minerosArtesanales}">
+		<f:facet name="header">
+			<p:commandButton value="Adicionar" oncomplete="PF('adicionarMineroArtesanal').show()" styleClass="button-small-text toRight field_mrg" process="@this" update=":formMinerosArtesanales:adicionarMineroArtesanal" actionListener="#{minerosArtesanalesBean.clear()}" icon="ui-icon-plusthick">
+				<p:resetInput target=":formMinerosArtesanales:adicionarMineroArtesanal" />
+			</p:commandButton>
+			<h:outputText value="Listado de Operadores Mineros *" />
+		</f:facet>
+		<p:panel id="listadoMineros">
+			<p:dataList type="none" value="#{minerosArtesanalesBean.minerosArtesanales}" var="mineroArtesanal" rowIndexVar="index" emptyMessage="#{labels['common.table.empty']}">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<p:commandButton styleClass="button-small toRight field_mrg" process="@this" update=":form:listadoMineros" actionListener="#{minerosArtesanalesBean.eliminar(mineroArtesanal)}" icon="ui-icon-trash">
+							<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar este Operador Minero?" icon="ui-icon-alert" />
+						</p:commandButton>
+						<p:commandButton styleClass="button-small toRight field_mrg" icon="ui-icon-pencil" process="@this" update=":formMinerosArtesanales:adicionarMineroArtesanal" actionListener="#{minerosArtesanalesBean.editar(mineroArtesanal)}" oncomplete="PF('adicionarMineroArtesanal').show()" />
+						<h:outputText value="Operador Minero #{index + 1}" />
+					</f:facet>
+					<h:panelGrid styleClass="w100" columns="2" columnClasses="w50 alTop, field_mrg w50 alTop">
+						<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header, null" rowClasses="null, alt">
+							<h:outputText value="Nombre" />
+							<h:outputText value="#{mineroArtesanal.nombre}" />
+							<h:outputText value="Código" />
+							<h:outputText value="#{mineroArtesanal.codigo}" />
+						</h:panelGrid>
+						<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header, null" rowClasses="null, alt">
+							<h:outputText value="Contrato de operación" />
+							<p:commandButton icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true">
+								<p:fileDownload value="#{registroProyectoMineriaController.getStream(mineroArtesanal.contratoOperacion)}" />
+							</p:commandButton>
+						</h:panelGrid>
+					</h:panelGrid>
+				</p:panelGrid>
+			</p:dataList>
+		</p:panel>
+	</p:panelGrid>
+</h:panelGroup>
+
+<h:panelGroup id="concesionesMinerasGeneralContainer">
+	<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{registroProyectoBean.proyecto.concesionesMinerasMultiples}">
+		<f:facet name="header">
+            <p:commandButton id="contenedor" disabled="#{!concesionesBean.habilitarConcesion}" value="Adicionar" oncomplete="PF('adicionarConcesion').show()" styleClass="button-small-text toRight field_mrg" process="@this" update=":formConcesiones" actionListener="#{concesionesBean.clear()}" icon="ui-icon-plusthick">
+                <p:resetInput target=":formConcesiones" />
+            </p:commandButton>
+            <h:outputText value="Listado de concesiones mineras *" />
+        </f:facet>
+		<p:panel id="listadoConcesiones">
+			<p:dataList type="none" value="#{concesionesBean.concesionesMineras}" var="concesion" rowIndexVar="index" emptyMessage="#{labels['common.table.empty']}">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<p:commandButton styleClass="button-small toRight field_mrg" process="@this" update=":form:listadoConcesiones :form:contenedor :form:containerCoordenadas" actionListener="#{concesionesBean.eliminar(concesion)}" icon="ui-icon-trash">
+                            <p:confirm header="Confirmación" message="¿Está seguro que desea eliminar esta concesión minera?" icon="ui-icon-alert" />
+                        </p:commandButton>
+						<p:commandButton styleClass="button-small toRight field_mrg" icon="ui-icon-pencil" process="@this" update=":formConcesiones:adicionarConcesion" actionListener="#{concesionesBean.editar(concesion)}" oncomplete="PF('adicionarConcesion').show()" />
+						<h:outputText value="Concesión minera #{index + 1}" />
+					</f:facet>
+					<h:panelGrid styleClass="w100" columns="2" columnClasses="w50 alTop, field_mrg w50 alTop">
+						<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header, null" rowClasses="null, alt">
+							<h:outputText value="Nombre" />
+							<h:outputText value="#{concesion.nombre}" />
+							<h:outputText value="Código" />
+							<h:outputText value="#{concesion.codigo}" />
+						</h:panelGrid>
+						<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header, null" rowClasses="null, alt">
+							<h:outputText value="Área" />
+							<h:outputText value="#{concesion.area} #{concesion.unidad}" />
+							<h:outputText value="Altitud" />
+							<h:outputText value="#{concesion.altitud} msnm" />
+						</h:panelGrid>
+					</h:panelGrid>
+					<p:dataTable value="#{concesion.concesionesUbicacionesGeograficas}" var="ubicacion">
+						<p:column headerText="Provincia">
+							<h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+						</p:column>
+						<p:column headerText="Cant&oacute;n">
+							<h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+						</p:column>
+						<p:column headerText="Parroquia">
+							<h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}" />
+						</p:column>
+					</p:dataTable>
+					<h:panelGroup>
+						<h:outputText value="Dirección" styleClass="bold" />
+						<p:inputTextarea value="#{concesion.direccion}" rows="2" styleClass="w100" readonly="true" />
+					</h:panelGroup>
+				</p:panelGrid>
+			</p:dataList>
+		</p:panel>
+	</p:panelGrid>
+</h:panelGroup>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{registroProyectoMineriaController.mineriaArtesanalOLibreAprovechamiento}">
+	<f:facet name="header">
+		<h:outputText value="Minería dentro de áreas concesionadas" />
+	</f:facet>
+	<h:panelGrid columns="1" styleClass="w100" columnClasses="w50, field_mrg w50">
+		<p:outputLabel value="¿Su proyecto se encuentra dentro de una concesión minera?" for="mineriaAreasConcesionadas" />
+		<p:selectOneRadio value="#{registroProyectoBean.proyecto.mineriaAreasConcesionadas}" required="true" id="mineriaAreasConcesionadas">
+			<f:selectItem itemLabel="Sí" itemValue="true" />
+			<f:selectItem itemLabel="No" itemValue="false" />
+			<p:ajax process="@this" update="mineriaAreasLibres artesanalOLibreAprovechDentroConcesionMineraContainer" />
+		</p:selectOneRadio>
+	</h:panelGrid>
+</p:panelGrid>
+
+<h:panelGroup id="mineriaAreasLibres">
+	<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{!registroProyectoBean.proyecto.mineriaAreasConcesionadas and registroProyectoMineriaController.mineriaArtesanalOLibreAprovechamiento}">
+		<f:facet name="header">
+			<p:commandButton value="#{areaLibreBean.valid ? 'Editar' : 'Adicionar'}" oncomplete="PF('adicionarDatosAreaLibre').show()" styleClass="button-small-text toRight field_mrg" process="@this" update=":formDatosAreaLibre:adicionarDatosAreaLibre" icon="#{areaLibreBean.valid ? 'ui-icon-pencil' : 'ui-icon-plusthick'}">
+				<p:resetInput target=":formDatosAreaLibre:adicionarDatosAreaLibre" />
+			</p:commandButton>
+			<h:outputText value="Minería en áreas libres *" />
+		</f:facet>
+		<h:outputText value="#{labels['common.table.empty']}" rendered="#{!areaLibreBean.valid}" />
+		<h:panelGrid styleClass="w100" columns="2" columnClasses="w50 alTop, field_mrg w50 alTop" rendered="#{areaLibreBean.valid}">
+			<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header, null" rowClasses="null, alt">
+				<h:outputText value="#{registroProyectoMineriaController.labelCodigoMineroMineriaAreaLibre}" />
+				<h:outputText value="#{areaLibreBean.mineroArtesanal.codigo}" />
+			</h:panelGrid>
+			<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header, null" rowClasses="null, alt">
+				<h:outputText value="#{registroProyectoMineriaController.labelRegistroMineroArtesanalMRNNRMineriaAreaLibre}" />
+				<p:commandButton disabled="#{empty areaLibreBean.mineroArtesanal.registroMineroArtesanal}" icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true">
+					<p:fileDownload value="#{registroProyectoMineriaController.getStream(areaLibreBean.mineroArtesanal.registroMineroArtesanal)}" />
+				</p:commandButton>
+			</h:panelGrid>
+		</h:panelGrid>
+	</p:panelGrid>
+</h:panelGroup>
+
+<h:panelGroup id="artesanalOLibreAprovechDentroConcesionMineraContainer">
+	<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{registroProyectoBean.proyecto.mineriaAreasConcesionadas}">
+		<f:facet name="header">
+			<p:commandButton value="#{!areaConcesionadaBean.datosValidos ? 'Adicionar' : 'Editar'}" oncomplete="PF('adicionarDatosAreaConcesionada').show()" styleClass="button-small-text toRight field_mrg" process="@this" update=":formDatosAreaConcesionada:adicionarDatosAreaConcesionada" icon="#{!areaConcesionadaBean.datosValidos ? 'ui-icon-plusthick' : 'ui-icon-pencil'}">
+				<p:resetInput target=":formDatosAreaConcesionada:adicionarDatosAreaConcesionada" />
+			</p:commandButton>
+			<h:outputText value="Datos del área concesionada *" />
+		</f:facet>
+		<h:outputText value="#{labels['common.table.empty']}" rendered="#{!areaConcesionadaBean.datosValidos}" />
+		<h:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{areaConcesionadaBean.datosValidos}">
+			<h:panelGrid styleClass="w100" columns="2" columnClasses="w50 alTop, field_mrg w50 alTop">
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header, null" rowClasses="null, alt">
+					<h:outputText value="Nombre de la concesión" />
+					<h:outputText value="#{areaConcesionadaBean.concesionMinera.nombre}" />
+					<h:outputText value="Código de la concesión" />
+					<h:outputText value="#{areaConcesionadaBean.concesionMinera.codigo}" />
+				</h:panelGrid>
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header, null" rowClasses="null, alt">
+					<h:outputText value="#{registroProyectoMineriaController.labelCodigoMineroMineriaAreaConcesionada}" />
+					<h:outputText value="#{areaConcesionadaBean.mineroArtesanal.codigo}" />
+					<h:outputText value="#{registroProyectoMineriaController.labelRegistroMineroArtesanalMRNNRMineriaAreaConcesionada}" />
+					<p:commandButton disabled="#{empty areaConcesionadaBean.mineroArtesanal.registroMineroArtesanal}" icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true">
+						<p:fileDownload value="#{registroProyectoMineriaController.getStream(areaConcesionadaBean.mineroArtesanal.registroMineroArtesanal)}" />
+					</p:commandButton>
+					<h:outputText value="Contrato de operación" rendered="#{!registroProyectoMineriaController.mineriaLibreAprovechamientoProyectoExPost}" />
+					<p:commandButton disabled="#{empty areaConcesionadaBean.mineroArtesanal.contratoOperacion}" icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true" rendered="#{!registroProyectoMineriaController.mineriaLibreAprovechamientoProyectoExPost}">
+						<p:fileDownload value="#{registroProyectoMineriaController.getStream(areaConcesionadaBean.mineroArtesanal.contratoOperacion)}" />
+					</p:commandButton>
+				</h:panelGrid>
+			</h:panelGrid>
+		</h:panelGrid>
+	</p:panelGrid>
+</h:panelGroup>
+
+</html>

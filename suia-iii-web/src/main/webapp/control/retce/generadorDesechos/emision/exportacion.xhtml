@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+	<script type="text/javascript">
+	function deshabilitarBotonesExportacion() {
+		$('.btnsEditarExportacion').prop('disabled', true);
+		$('.btnsEditarExportacion').addClass('ui-state-disabled');
+	};
+	</script>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="EXPORTACION" />
+	</f:facet>
+
+	<h:panelGrid columns="1" styleClass="w100">
+		<p:outputLabel value="¿Realiza exportación?" for="realizaExportacion" />
+		<p:selectOneRadio
+			value="#{exportacionDesechosBean.generadorDesechosRetce.realizaExportacion}"
+			required="true" id="realizaExportacion">
+			<f:selectItem itemLabel="Sí" itemValue="true" />
+			<f:selectItem itemLabel="No" itemValue="false" />
+			<p:ajax process="@this" update="pnlExportacion" />
+			<p:ajax event="change" process="@this" update="pnlExportacion"
+				listener="#{exportacionDesechosBean.actualizarRealizaExportacion()}" />
+		</p:selectOneRadio>
+		<h:outputText />
+	</h:panelGrid>
+</p:panelGrid>
+
+
+<h:panelGroup id="pnlExportacion">
+	<p:panelGrid columns="1" layout="grid" styleClass="w100"
+		rendered="#{exportacionDesechosBean.generadorDesechosRetce.realizaExportacion}">
+		<f:facet name="header">
+			<h:outputText value="Desechos exportación" width="600px" />
+		</f:facet>
+
+		<ui:include
+			src="/control/retce/generadorDesechos/emision/formExportacionDesecho.xhtml" />
+
+		<p:dataTable id="tblExportacion"
+			value="#{exportacionDesechosBean.listaExportacionDesechos}"
+			var="item" emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<p:commandButton value="Adicionar"
+					oncomplete="PF('adicionarExportacionDesecho').toggle()"
+					onclick="deshabilitarBotonesExportacion()"
+					styleClass="button-small-text toRight field_mrg btnsEditarExportacion" process="@this"
+					update=":form:datosExportacionDesecho" icon="ui-icon-plusthick" />
+			</f:facet>
+			<p:column headerText="Desecho peligroso o especial" styleClass="w40">
+				<h:outputText value="#{item.desechoPeligroso.descripcion}" />
+			</p:column>
+			<p:column headerText="Código" style="width: 8%">
+				<h:outputText value="#{item.desechoPeligroso.clave}" />
+			</p:column>
+			<p:column headerText="Cantidad (t)" styleClass="w10 alCenter">
+				<h:outputText value="#{item.cantidad}" />
+			</p:column>
+			<p:column headerText="País de destino">
+				<h:outputText value="#{item.paisDestino.nombre}" />
+			</p:column>
+			<p:column headerText="Documentos" styleClass="w70px alCenter">
+				<p:commandButton icon="ui-icon-search" title="ver" process="@this"
+					update=":form:tblDocumentosDesechoExp" styleClass="secondary"
+					oncomplete="PF('verDocumentosDesechoExp').show()"
+					actionListener="#{exportacionDesechosBean.verDocumentosDesecho(item)}" />
+			</p:column>
+
+			<p:column styleClass="w70px alCenter">
+				<p:commandButton icon="ui-icon-pencil" title="Editar"
+					process="@this" update=":form:datosExportacionDesecho"
+					styleClass="primary btnsEditarExportacion"
+					oncomplete="PF('adicionarExportacionDesecho').toggle()"
+					onclick="deshabilitarBotonesExportacion()"
+					actionListener="#{exportacionDesechosBean.editarDesecho(item)}" />
+				<p:commandButton icon="ui-icon-trash" title="Eliminar"
+					process="@this" styleClass="primary"
+					actionListener="#{exportacionDesechosBean.eliminarDesecho(item)}"
+					update="tblExportacion" />
+			</p:column>
+		</p:dataTable>
+		<br />
+		<br />
+	</p:panelGrid>
+</h:panelGroup>
+
+<p:dialog id="verDocumentosDesechoExp"
+	widgetVar="verDocumentosDesechoExp" modal="true" resizable="false"
+	width="800" header="Documentos por desecho">
+	<p:dataTable id="tblDocumentosDesechoExp"
+		value="#{exportacionDesechosBean.listaDocumentosExportacion}"
+		var="item" emptyMessage="#{labels['common.table.empty']}"
+		sortBy="#{item.tipoDocumento}">
+		<p:column headerText="Fase">
+			<h:outputText value="#{item.tipoDocumento}" />
+		</p:column>
+		<p:column headerText="Documento" styleClass="w20 alCenter">
+			<h:outputText value="#{item.documento.nombre}" />
+		</p:column>
+		<p:column headerText="Descargar" styleClass="w20 alCenter">
+			<p:commandButton icon="ui-icon-arrowthick-1-s"
+				styleClass="button-small primary" title="Ver" ajax="false"
+				immediate="true">
+				<p:fileDownload
+					value="#{exportacionDesechosBean.descargar(item.documento)}" />
+			</p:commandButton>
+		</p:column>
+	</p:dataTable>
+	<br />
+	<br />
+</p:dialog>
+
+</html>

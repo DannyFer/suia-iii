@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" template="/WEB-INF/templates/default-task.xhtml" xmlns:f="http://java.sun.com/jsf/core">
+	<ui:define name="content">
+		<f:event type="preRenderView" listener="#{recibirRegistroRGController.validarTareaBpm()}" />
+		<h:form id="form-recibir-info">
+			<br />
+			<h:panelGrid styleClass="alCenter w100" columns="1">
+				<h:outputText value="Estimado usuario, atendiendo a su solicitud #{recibirRegistroRGController.documentoRGBean.generador.solicitud}, se #{recibirRegistroRGController.documentoRGBean.emision ? 'emite' : 'actualiza'} el registro de generador de desechos especiales y/o peligrosos" styleClass="encabezado" />
+				<h:panelGrid styleClass="alCenter w66" columns="1">
+					<p:panel styleClass="alCenter">
+						<h2>
+							<h:outputText value="#{recibirRegistroRGController.documentoRGBean.generador.codigo}" styleClass="bold" />
+						</h2>
+					</p:panel>
+				</h:panelGrid>
+				<br />
+				<h:outputText value="Para completar la obtención de su registro, descargue el Oficio de Pronunciamiento Favorable y el Registro de Generador, y haga clic en el botón Aceptar." styleClass="encabezado text-red" />
+				<p:separator />
+				<h:panelGrid columns="2" cellpadding="10" style="text-align:right !important" rendered="#{!recibirRegistroRGController.showSurvey()}">
+					<p:outputLabel value="Descargue su Oficio de Pronunciamiento Favorable" styleClass="bold" />
+					<p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s" onclick="$('.oculto').removeAttr('style');"
+									 styleClass="primary" disabled="#{empty recibirRegistroRGController.documentoRGBean.oficio.documento.contenidoDocumento}"
+									 action="#{recibirRegistroRGController.descargarOficio}">
+
+
+						<p:fileDownload value="#{recibirRegistroRGController.documentoRGBean.getStream(recibirRegistroRGController.documentoRGBean.oficio.documento.nombre, recibirRegistroRGController.documentoRGBean.oficio.documento.contenidoDocumento)}" />
+					</p:commandButton>
+					<p:outputLabel value="Descargue su Registro de Generador" styleClass="bold oculto" style="display:none;" />
+					<p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s" id="certificado" styleClass="oculto primary" style="display:none;" disabled="#{empty recibirRegistroRGController.documentoRGBean.generador.documentoBorrador.contenidoDocumento}"
+									 action="#{recibirRegistroRGController.descargarRgd}">
+
+						<p:fileDownload value="#{recibirRegistroRGController.documentoRGBean.getStream(recibirRegistroRGController.documentoRGBean.generador.documentoBorrador.nombre, recibirRegistroRGController.documentoRGBean.generador.documentoBorrador.contenidoDocumento)}" />
+					</p:commandButton>
+				</h:panelGrid>
+				
+				<h:panelGrid columns="2" text-align="left" columnClasses="header, w20px alCenter" rowClasses="null, alt" 
+				rendered="#{recibirRegistroRGController.showSurvey()}" width="500" >
+				<h:outputText  value="Estimado Proponente se solicita completar la siguiente encuesta, una vez realizado dicha tareas podrá obtener la documentación de su proyecto" />
+				<p:commandButton value="Encuesta" styleClass="primary" update="surveyDialog"
+                    	actionListener="#{recibirRegistroRGController.showDialogSurvey()}" />
+			</h:panelGrid>
+			
+			</h:panelGrid>
+
+			<div class="buttons main">
+				<p:commandButton value="Aceptar" action="#{recibirRegistroRGController.aceptar}" oncomplete="PF('continuarDialog').show();" icon="ui-icon-check"  disabled="#{recibirRegistroRGController.showSurvey()}" />
+			</div>
+
+
+		<p:dialog id="surveyDialog" header="Encuesta de Satisfacción de Servicios" modal="true" closable="true" resizable="false"
+				visible="#{recibirRegistroRGController.showSurveyD}" onHide="location.reload();">
+				<iframe frameborder="0" align="left" src="#{recibirRegistroRGController.urlLinkSurvey()}"
+					scrolling="auto" width="925" height="450" marginheight="5" marginwidth="10"></iframe>
+		    </p:dialog>
+    
+			<p:dialog id="continuarDialog" widgetVar="continuarDialog" header="Información" width="800" modal="true" closable="false" resizable="false">
+				<p:panel>
+					<h:panelGrid columns="1" styleClass="w100">
+						<p:outputLabel value="#{recibirRegistroRGController.mensaje}"  escape="false"></p:outputLabel>
+						<p:spacer></p:spacer>
+						<p:commandButton value="Aceptar" action="/bandeja/bandejaTareas.jsf?faces-redirect=true" style="float:right;" styleClass="primary" process="@this" />
+					</h:panelGrid>
+				</p:panel>
+			</p:dialog>
+
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

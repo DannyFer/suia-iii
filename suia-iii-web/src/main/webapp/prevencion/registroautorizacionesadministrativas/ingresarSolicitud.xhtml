@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components">
+	<ui:define name="context-extra">
+
+
+		<p:outputLabel rendered="#{ingresarSolicitudBean.solicitud != null}">Observación</p:outputLabel>
+
+		<p:outputLabel rendered="#{ingresarSolicitudBean.solicitud != null}">Datos de la observación</p:outputLabel>
+
+
+		<p:commandButton rendered="#{ingresarSolicitudBean.solicitud != null}"
+			icon="ui-icon-search" onclick="PF('dlg3').show();" />
+
+
+		<p:dialog header="Observaciones" widgetVar="dlg3" modal="true"
+			height="400">
+			<mae-components:readOnly>
+				Oficio.....
+			</mae-components:readOnly>
+		</p:dialog>
+	</ui:define>
+	<ui:define name="content">
+		<center>
+			<h:form id="form" enctype="multipart/form-data">
+				<p:messages id="msgss" />
+
+				<h3>Ingresar solicitud de autorizaciones administrativas
+					ambientales y licencia ambiental</h3>
+
+				<p:panelGrid columns="2" styleClass="w100" columnClasses="w10, w90">
+					<h:outputLabel for="cmb_listaUsuarios" value="Promotor" />
+					<p:selectOneMenu id="cmb_listaUsuarios" required="true"
+						value="#{ingresarSolicitudBean.usuarioActivo}" filter="true"
+						filterMatchMode="contains">
+						<p:ajax listener="#{ingresarSolicitudBean.cambiarUsuarioActivo}"
+							update="cmb_listaUsuarios" />
+						<f:selectItems value="#{ingresarSolicitudBean.usuarios}"
+							var="usuario" itemValue="#{usuario}"
+							itemLabel="#{usuario.nombre}" />
+
+						<f:converter converterId="selectItemConverter" />
+
+					</p:selectOneMenu>
+					<h:outputLabel for="cmb_registro" value="Registro" />
+					<p:selectOneMenu id="cmb_registro" required="true"
+						value="#{ingresarSolicitudBean.registro}">
+						<p:ajax listener="#{ingresarSolicitudBean.cambiarUsuarioActivo}"
+							update="form" />
+						<f:selectItem itemLabel="Licencia Ambiental" itemValue="l" />
+						<f:selectItem itemLabel="Ficha ambiental" itemValue="f" />
+					</p:selectOneMenu>
+
+
+					<h:outputLabel for="cmb_categoria" value="Categoria"
+						rendered='#{ingresarSolicitudBean.registro.equals("l")==true}' />
+					<p:selectOneMenu id="cmb_categoria" required="true"
+						rendered='#{ingresarSolicitudBean.registro.equals("l")==true}'
+						value="#{ingresarSolicitudBean.categoria}">
+						<p:ajax listener="#{ingresarSolicitudBean.cambiarUsuarioActivo}" />
+						<f:selectItem itemLabel="CATEGORÍA II" itemValue="2" />
+						<f:selectItem itemLabel="CATEGORÍA III" itemValue="3" />
+						<f:selectItem itemLabel="CATEGORÍA IV" itemValue="4" />
+					</p:selectOneMenu>
+
+
+					<h:outputLabel for="cmb_listaProyectos" value="Lista Proyectos" />
+					<p:selectOneMenu id="cmb_listaProyectos" required="true"
+						value="#{ingresarSolicitudBean.proyectoActivo}" filter="true"
+						filterMatchMode="contains">
+						<p:ajax listener="#{ingresarSolicitudBean.cambiarUsuarioActivo}"
+							update="form" />
+						<f:selectItems value="#{ingresarSolicitudBean.proyectos}"
+							var="proyecto" itemValue="#{proyecto}"
+							itemLabel="#{proyecto.nombre}" />
+
+						<f:converter converterId="selectItemConverter" />
+
+					</p:selectOneMenu>
+
+
+
+
+					<h:outputLabel for="cmb_listaProvincias" value="Provincia" />
+					<p:selectOneMenu id="cmb_listaProvincias" required="true"
+						value="#{ingresarSolicitudBean.provinciaActiva}" filter="true"
+						filterMatchMode="contains">
+						<p:ajax
+							listener="#{ingresarSolicitudBean.actualizarProvinciaActiva}"
+							update="form" />
+						<f:selectItems value="#{ingresarSolicitudBean.provincias}"
+							var="provincia" itemValue="#{provincia}"
+							itemLabel="#{provincia.nombre}" />
+						<f:converter converterId="selectItemConverter" />
+
+					</p:selectOneMenu>
+					<h:outputLabel for="cmb_listaCantones" value="Cantones" />
+					<p:selectCheckboxMenu id="cmb_listaCantones" required="true"
+						value="#{ingresarSolicitudBean.cantonesActivos}" label="Cantones"
+						filter="true" filterMatchMode="startsWith"
+						panelStyle="width:250px">
+						<p:ajax listener="#{ingresarSolicitudBean.cambiarUsuarioActivo}" />
+						<f:selectItems value="#{ingresarSolicitudBean.cantones}" />
+						<f:converter converterId="selectItemConverter" />
+					</p:selectCheckboxMenu>
+
+
+					<h:outputLabel for="cmb_NumeroResolucion"
+						value="Número de resolución" />
+					<p:inputText id="cmb_NumeroResolucion"
+						value="#{ingresarSolicitudBean.numeroResolucion}">
+						<p:ajax />
+					</p:inputText>
+
+					<h:outputLabel for="cmb_fechaEmision"
+						value="Fecha de emisión de resolución de licencia" />
+					<p:calendar id="cmb_fechaEmision"
+						value="#{ingresarSolicitudBean.fechaEmision}">
+						<p:ajax event="dateSelect" />
+					</p:calendar>
+
+					<h:outputLabel for="adjuntarLicencia" value="Licencia" />
+					<p:outputPanel id="adjuntarLicencia">
+						<h:outputText
+							rendered="#{not empty ingresarSolicitudBean.licencia}"
+							value="#{ingresarSolicitudBean.licencia.getFileName()}" />
+						<p:fileUpload mode="advanced" auto="true" skinSimple="true"
+							fileUploadListener="#{ingresarSolicitudBean.handleFileUpload}"
+							update="adjuntarLicencia" />
+					</p:outputPanel>
+
+				</p:panelGrid>
+
+				<p:commandButton value="Enviar" id="send-solicitud"
+					action="#{ingresarSolicitudController.ingresarSolicitud()}"
+					title="Asignar a técnico" icon="ui-icon-search">
+
+				</p:commandButton>
+
+
+
+			</h:form>
+
+
+
+		</center>
+	</ui:define>
+</ui:composition>
+</html>

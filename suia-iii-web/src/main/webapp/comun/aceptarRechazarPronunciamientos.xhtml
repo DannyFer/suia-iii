@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<h:form>
+			<p:dataTable var="pronunciamiento" value="#{aceptarRechazarPronunciamientosComunBean.pronunciamientos}" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" rows="7" sortBy="#{pronunciamiento.estadoPronunciamiento}" sortOrder="ascending" id="pronunciamientosTableId">
+				<p:column headerText="Técnico" styleClass="w15">
+					<h:outputText value="#{pronunciamiento.usuario.nombre}" />
+				</p:column>
+				<!-- 	<p:column headerText="Visualizar" styleClass="w10">
+					<p:commandLink title="Ver Detalle" onclick="PF('detalle').show()">
+						<p:graphicImage name="/images/excel.png" width="24" />
+					</p:commandLink>
+				</p:column> -->
+				<p:column style="text-align: center" headerText="Visualizar" styleClass="w10">
+					<p:commandButton update="@form #{p.component('pronDetail')}" oncomplete="PF('detalle').show()" icon="ui-icon-search" title="View">
+						<f:setPropertyActionListener value="#{pronunciamiento}" target="#{aceptarRechazarPronunciamientosComunBean.pronunciamiento}" />
+					</p:commandButton>
+				</p:column>
+				<p:column headerText="Estado" styleClass="w15">
+					<h:outputText value="#{pronunciamiento.estadoPronunciamiento}" />
+				</p:column>
+
+				<p:column headerText="¿Aceptar Criterio?" styleClass="w20">
+					<p:selectOneRadio value="#{pronunciamiento.aprobado}">
+						<f:selectItem itemLabel="Sí" itemValue="true" />
+						<f:selectItem itemLabel="No" itemValue="false" />
+						<p:ajax update="pronunciamientosTableId" />
+					</p:selectOneRadio>
+				</p:column>
+
+				<p:column headerText="Observaciones/Correcciones" styleClass="w50">
+					<p:inputTextarea autoResize="false" value="#{pronunciamiento.observaciones}" rows="2" rendered="#{pronunciamiento.aprobado==true ? 'false' : 'true'}" styleClass="w100" />
+				</p:column>
+			</p:dataTable>
+
+			<p:separator />
+
+			<div class="buttons">
+				<p:commandButton value="Siguiente" action="#{aceptarRechazarPronunciamientosComunController.completarTareaAceptarPronunciamientos()}" />
+				<p:commandButton value="Rechazar" action="#{aceptarRechazarPronunciamientosComunController.completarTareaRechazarPronunciamientos()}" />
+			</div>
+
+			<p:dialog header="Detalle del Pronunciamiento" widgetVar="detalle" modal="true" resizable="false">
+				<p:outputPanel id="pronDetail">
+					<p:panelGrid columns="2" columnClasses="label, value">
+						<h:outputText value="Contenido" />
+						<p:inputText value="#{aceptarRechazarPronunciamientosComunBean.pronunciamiento.contenido}" />
+					</p:panelGrid>
+				</p:outputPanel>
+				<div class="buttons">
+					<p:commandButton type="button" value="Cerrar" onclick="PF('detalle').hide()" />
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

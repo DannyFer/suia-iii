@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="Finalizar" />
+	</f:facet>
+
+	<p:panelGrid columns="2" styleClass="panel_data w100"
+		columnClasses="header w25,null w75">
+		<h:outputText value="Operador" />
+		<h:outputText
+			value="#{verInformacionPlaguicidasController.productoReporte.nombreOperador}" />
+
+		<h:outputText value="Nombre Comercial del producto" />
+		<h:outputText
+			value="#{verInformacionPlaguicidasController.productoReporte.nombreComercialProducto}" />
+
+		<h:outputText value="Composición del Producto (Ingrediente activo)" />
+		<h:outputText escape="false"
+			value="#{verInformacionPlaguicidasController.productoReporte.tablaComposicionProducto}" />
+
+		<h:outputText value="Formulación" />
+		<h:outputText
+			value="#{verInformacionPlaguicidasController.productoReporte.formulacion}" />
+
+		<h:outputText value="Tipo de producto" />
+		<h:outputText
+			value="#{verInformacionPlaguicidasController.proyectoPlaguicidas.productoPqua.tipoProducto.nombre}" />
+
+		<h:outputText value="Categoría toxicológica (nueva etiqueta)" />
+		<h:outputText
+			value="#{verInformacionPlaguicidasController.proyectoPlaguicidas.productoPqua.categoriaFinal.nombre}" />
+
+		<h:outputText value="Color de franja (nueva etiqueta)" />
+		<h:outputText styleClass="bold"
+			value="#{verInformacionPlaguicidasController.proyectoPlaguicidas.productoPqua.colorFranjaFinal.nombre}"
+			style="color:#{verInformacionPlaguicidasController.proyectoPlaguicidas.productoPqua.colorFranjaFinal.valor}" />
+	</p:panelGrid>
+
+	<p:dataTable id="dtProductoResumen" var="producto"
+		styleClass="table table-hover"
+		value="#{verInformacionPlaguicidasController.listaDetalleProyectoPlaguicidas}"
+		paginator="true" paginatorAlwaysVisible="false"
+		paginatorPosition="bottom" rowIndexVar="index"
+		emptyMessage="#{labels['common.table.empty']}"
+		currentPageReportTemplate="{currentPage} de {totalPages}" rows="5"
+		rowsPerPageTemplate="5,10,15">
+
+		<p:column headerText="Nombre del cultivo">
+			<h:outputText value="#{producto.cultivo.nombreComun}" />
+			<h:outputText value=" (#{producto.nombreCientificoCultivo})"
+				styleClass="italic" />
+		</p:column>
+		<p:column headerText="Plaga">
+			<h:outputText value="#{producto.getDetallePlagas()}" escape="false" />
+		</p:column>
+		<p:column headerText="Dosis aprobada en la etiqueta" styleClass="w20">
+			<h:outputText value="#{producto.getDetalleDosis()}" escape="false" />
+		</p:column>
+	</p:dataTable>
+
+
+</p:panelGrid>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText
+			value="Información que debe tener la etiqueta con base a la Resolución Nro 2075" />
+	</f:facet>
+
+	<p:dataGrid emptyMessage="Sin resultados."
+		value="#{verInformacionPlaguicidasController.listaComponentesResumen}"
+		var="item" columns="1" styleClass="cssPnlData">
+		<p:outputLabel value="#{item.ingredienteActivo}" styleClass="bold" />
+		<h:panelGrid columns="2" styleClass="w100"
+			columnClasses="w80,w20 alCenter">
+			<p:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25,null w75">
+				<h:outputText value="Categoría:" />
+				<h:outputText value="#{item.categoria.nombre}" />
+
+				<h:outputText value="Pictograma:" />
+				<h:outputText value="#{(item.pictograma) ? 'SI' : 'NO'}" />
+
+				<h:outputText value="Palabra de advertencia:" />
+				<h:outputText escape="false" value="#{item.palabraAdvertencia}" />
+
+				<h:outputText value="Indicaciones de peligro:" />
+				<h:outputText value="#{item.indicacionesPeligro}" />
+			</p:panelGrid>
+
+			<h:panelGrid columns="1" styleClass="w100 alCenter"
+				columnClasses="alCenter">
+				<h:panelGroup rendered="#{item.pictograma}">
+					<img
+						src="#{request.contextPath}/resources/images/pictograma_plaguicidas.png"
+						style="width: 100px;" />
+				</h:panelGroup>
+			</h:panelGrid>
+		</h:panelGrid>
+		<br />
+	</p:dataGrid>
+</p:panelGrid>
+
+<p:panelGrid id="pnlAdjuntos" columns="1" layout="grid"
+	styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="Adjuntar documentos" />
+	</f:facet>
+
+	<h:panelGrid columns="2" styleClass="w100" columnClasses="w66,null">
+
+		<h:outputText
+			value="Adjuntar documento de respaldo (Solicitud, certificado de registro y etiqueta antigua):" />
+		<p:commandButton icon="ui-icon-arrowthick-1-s" styleClass="secondary"
+			title="Descargar" ajax="false" immediate="true">
+			<p:fileDownload
+				value="#{verInformacionPlaguicidasController.descargar(verInformacionPlaguicidasController.documentoRespaldo)}" />
+		</p:commandButton>
+
+		<h:outputText
+			value="Adjuntar documento de la etiqueta y hoja de seguridad SGA:" />
+		<p:commandButton icon="ui-icon-arrowthick-1-s" styleClass="secondary"
+			title="Descargar" ajax="false" immediate="true">
+			<p:fileDownload
+				value="#{verInformacionPlaguicidasController.descargar(verInformacionPlaguicidasController.documentoEtiqueta)}" />
+		</p:commandButton>
+	</h:panelGrid>
+
+</p:panelGrid>
+
+<p:panelGrid id="pnlClausula" columns="1" layout="grid"
+	styleClass="w100">
+
+	<h:outputText
+		value="Declaración de responsabilidad sobre la información ingresada"
+		style="font-weight:bold;" />
+	<h:panelGrid columns="3" columnClasses="w10,w80,w10">
+		<h:outputText value="" />
+		<div align="justify">Yo,
+			#{verInformacionPlaguicidasController.nombreOperador} portador(a) del
+			documento de identificación No
+			#{verInformacionPlaguicidasController.cedula} por mis propios
+			derechos (o en legal representación de la persona jurídica
+			identificada en líneas arriba) declaro que la información consignada
+			es veraz, auténtica y corresponde a la realidad, conforme a lo
+			dispuesto en el numeral 10, del artículo 17 del Código Orgánico
+			Administrativo, que cumplo con los lineamientos en la Resolución
+			Nro.2075 de la Comunidad Andina publicada en la Gaceta Oficial del
+			Acuerdo de Cartagena 3709 de 02 de agosto de 2019. Adicionalmente
+			acepto recibir notificaciones administrativas al correo electrónico
+			registrado.</div>
+		<h:outputText value="" />
+	</h:panelGrid>
+	<h:panelGrid columns="2" columnClasses="w50,w50">
+		<h:outputText value="" />
+		<h:panelGroup>
+			<p:selectBooleanCheckbox disabled="true"
+				value="#{verInformacionPlaguicidasController.aceptarCondiciones}"
+				id="aceptarCondiciones" label="Acepto toda la responsabilidad"
+				requiredMessage="Debe aceptar la declaración de responsabilidad">
+				<p:ajax process="@this" />
+			</p:selectBooleanCheckbox>
+			<p:outputLabel value="Acepto toda la responsabilidad"
+				for="aceptarCondiciones" />
+		</h:panelGroup>
+	</h:panelGrid>
+	<h:panelGrid columns="2" columnClasses="w30,w70">
+		<h:outputText value="" />
+		<p:outputLabel
+			value="Para finalizar la solicitud, haga clic en el botón Enviar"
+			style="color: red" />
+	</h:panelGrid>
+
+</p:panelGrid>
+
+<observaciones:tablaObservacionesPqua
+	idComponent="observacionesFinalizar"
+	componenteActualizarEliminar="observacionesFinalizar"
+	seccion="FinalizarEtiquetado" nombreClase="ActualizacionEtiquetaPqua"
+	idClase="#{verInformacionPlaguicidasController.idProyecto}"
+	aparace="#{verInformacionPlaguicidasController.mostrarObservaciones}"
+	mostrarSiVacio="#{verInformacionPlaguicidasController.mostrarObservaciones}"
+	soloLectura="#{!verInformacionPlaguicidasController.editarObservaciones}" />
+
+</html>

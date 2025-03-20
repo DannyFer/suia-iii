@@ -1,0 +1,127 @@
+<ui:composition template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+	<ui:define name="content">
+
+		<style type="text/css">
+.noHeader tr td {
+	padding-left: 0px;
+	padding-right: 0px;
+}
+</style>
+
+		<h:form id="form">
+			<h:panelGroup>
+				<h:panelGrid styleClass="alCenter w100" columns="1">
+					<h:outputText value="Firmar y enviar Certificado"
+						styleClass="encabezado1_4em" />
+					<h:panelGrid styleClass="alCenter w66" columns="1">
+						<p:panel styleClass="alCenter">
+							<h:outputText
+								value="Certificado del proyecto #{firmaElectronicaController.tramite}"
+								styleClass="encabezado" />
+						</p:panel>
+					</h:panelGrid>
+					<h:panelGrid styleClass="alCenter w66" columns="1">
+						<p:panel styleClass="alCenter">
+							<h:panelGrid styleClass="alCenter w50" columns="2">
+								<h:outputText value="¿Cuenta con token?" styleClass="encabezado"
+									style="text-align:right" />
+								<p:selectOneRadio id="verificaToken"
+									value="#{firmaElectronicaController.token}">
+									<f:selectItem itemLabel="Sí" itemValue="true" />
+									<f:selectItem itemLabel="No" itemValue="false" />
+									<p:ajax event="change" update=":form :formDialogs"
+										listener="#{firmaElectronicaController.guardarToken}" />
+								</p:selectOneRadio>
+							</h:panelGrid>
+						</p:panel>
+					</h:panelGrid>
+				</h:panelGrid>
+			</h:panelGroup>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Firmar documento " type="button"
+						styleClass="large" icon="ui-icon-key" style="width: 170px;"
+						rendered="#{!firmaElectronicaController.token}"
+						update=":formDialogs:pnlFirmaManualOficio"
+						onclick="PF('signDialogOficio').show();" />
+					<p:commandButton value="Firmar documento" type="button"
+						styleClass="large" icon="ui-icon-key"
+						rendered="#{firmaElectronicaController.token}"
+						onclick="window.location.href='#{firmaElectronicaController.firmarDocumento()}'" />
+
+					<p:commandButton value="Enviar"
+						action="#{firmaElectronicaController.completarTarea()}"
+						title="Enviar" icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+					<p:commandButton value="Cancelar" immediate="true"
+						action="#{firmaElectronicaController.cancelar()}"
+						icon="ui-icon-cancel" styleClass="secondary" >
+						<p:confirm
+							message="#{msg['message.confirmacion.cancelacion.tarea']}"
+							header="#{msg['header.confirmacion.cancelacion.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+		</h:form>
+
+		<h:form id="formDialogs">
+			<p:dialog header="Firma Electrónica" id="signDialogOficio"
+				widgetVar="signDialogOficio" closeOnEscape="false" modal="true"
+				resizable="false" width="auto" height="auto" position="center top">
+				<p:panel id="pnlFirmaManualOficio">
+					<h:panelGrid columns="2" cellpadding="10"
+						style="text-align:right !important">
+						<h:outputLabel value="1. Descargar mapa" styleClass="bold" />
+						<p:commandButton value="Descargar" ajax="false"
+							icon="ui-icon-arrowthick-1-s" styleClass="primary"
+							immediate="true">
+							<p:fileDownload value="#{firmaElectronicaController.streamMapa}" />
+						</p:commandButton>
+
+						<p:outputLabel value="2. Descargar el #{labels['roca.cc.certificado.categorizacion']}"
+							styleClass="bold" />
+						<p:commandButton value="Descargar" ajax="false"
+							icon="ui-icon-arrowthick-1-s" styleClass="primary"
+							immediate="true"
+							actionListener="#{firmaElectronicaController.descargarOficio}">
+							<p:fileDownload value="#{firmaElectronicaController.stream}" />
+						</p:commandButton>
+
+						<p:outputLabel for="uploadRequired"
+							value="3. Adjuntar el #{labels['roca.cc.certificado.categorizacion']} firmado" styleClass="bold" />
+						<p:fileUpload
+							fileUploadListener="#{firmaElectronicaController.uploadListenerDocumentos}"
+							multiple="false" sizeLimit="5242880"
+							allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Tamaño de archivo no válido"
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update="lblNombreOficioFirmado"
+							rendered="#{!firmaElectronicaController.token}">
+							<f:attribute name="clave" value=":form" />
+						</p:fileUpload>
+						<p:outputLabel value="" />
+						<h:outputText id="lblNombreOficioFirmado"
+							value="#{firmaElectronicaController.documentoManual.nombreDocumento}" />
+					</h:panelGrid>
+				</p:panel>
+				<h:inputHidden id="uploadRequired"
+					required="#{!firmaElectronicaController.token and !firmaElectronicaController.subido}" />
+				<p:separator />
+				<div style="display: block; width: 100%; text-align: right;">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialogOficio').hide()" icon="ui-icon-close" />
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

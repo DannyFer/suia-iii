@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+	<ui:define name="content">
+		<ui:remove>
+			<f:event type="preRenderView"
+				listener="#{elaborarOficioObsNoSubsanablesController.validarTareaBpm()}" />
+		</ui:remove>
+		<h:form id="form">
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				columnClasses="w100">
+				<f:facet name="header">
+					<h:outputText value="Oficio de pronunciamiento" />
+				</f:facet>
+
+
+				<h:panelGrid styleClass="w100" id="pnlDocumentos">
+					<object type="application/pdf"
+						data="#{elaborarOficioObsNoSubsanablesController.urlReporte}?pfdrid_c=true"
+						width="100%" height="500px">
+						Su navegador no soporta la visualización de pdf. Puede descargar
+						el documento presionando el siguiente botón:
+						<p:commandButton value="Descargar" styleClass="primary"
+							ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+							<p:fileDownload
+								value="#{elaborarOficioObsNoSubsanablesController.getStream(elaborarOficioObsNoSubsanablesController.nombreReporte, elaborarOficioObsNoSubsanablesController.archivoReporte)}" />
+						</p:commandButton>
+					</object>
+					<br />
+				</h:panelGrid>
+
+
+				<h:panelGrid styleClass="w100">
+
+					<p:outputLabel styleClass="bold" value="Pronunciamiento *"
+						for="pronunciamieno"></p:outputLabel>
+					<control:imputConTextoEnriquecido id="pronunciamieno"
+						requiredMessage="#{msg['label.prevencion.tdr.campo']} 'Pronunciamiento' #{msg['label.prevencion.tdr.requerido']}."
+						valor="#{elaborarOficioObsNoSubsanablesController.oficioPronunciamientoBean.oficioPronunciamiento.pronunciamiento}"
+						requerido="true" />
+				</h:panelGrid>
+
+			</p:panelGrid>
+
+			<br />
+			<h:panelGrid styleClass="w100" columns="1" id="pnlObsOficio">
+				<observaciones:tablaObservacionesPreliminar idComponent="obsOficio"
+					seccion="Pronunciamiento observaciones no subsanables"
+					componenteActualizarEliminar="pnlObsOficio" aparace="true"
+					mostrarSiVacio="false"
+					idClase="#{elaborarOficioObsNoSubsanablesController.oficioPronunciamientoBean.oficioPronunciamiento.id}"
+					nombreClase="oficioObservacionesNoSubsanables" soloLectura="true" />
+			</h:panelGrid>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Guardar" process="form"
+						styleClass="secondary"
+						actionListener="#{elaborarOficioObsNoSubsanablesController.guardarOficio()}"
+						update="pnlDocumentos pnlButtons" icon="ui-icon-disk" />
+
+					<p:commandButton value="Siguiente" process="form"
+						disabled="#{!elaborarOficioObsNoSubsanablesController.oficioGuardado}"
+						action="#{elaborarOficioObsNoSubsanablesController.enviar()}"
+						icon="ui-icon-arrowthick-1-e">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

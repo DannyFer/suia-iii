@@ -1,0 +1,298 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+
+	<ui:composition template="/WEB-INF/templates/default.xhtml">
+		<ui:define name="content">
+			<style type="text/css">
+				.noHeader tr td {
+					padding-left: 0px;
+					padding-right: 0px;
+				}
+			</style>
+
+			<h:form id="formDatos">
+				<p:panel styleClass="separatorTop colapsablePanelStandard" collapsed="#{!controlesBean.contextoActividadToggleVisible}"
+					toggleable="true" widgetVar="panelContextoActividad">
+					<f:facet name="header">
+						<h:outputText value="Contexto de la Actividad" />
+						<p:commandButton id="buttonPanelContextoActividad" styleClass="button-small-text toRight field_mrg" type="button" 
+							value="#{controlesBean.contextoActividadToggleVisible ? 'Cerrar' : 'Ver detalles'}"
+							onclick="PF('panelContextoActividad').toggle()"
+							icon="#{controlesBean.contextoActividadToggleVisible ? 'ui-icon-carat-1-n' : 'ui-icon-carat-1-s'}"/>
+					</f:facet>
+					
+					<p:ajax global="false" event="toggle" update="buttonPanelContextoActividad" 
+						listener="#{controlesBean.contextoActividadToggleListener}"/>
+	
+					<h:panelGrid id="pnlContextoMainDefaulTask" columns="3" styleClass="mw50 panel_data"
+						columnClasses="header w25, null, alCenter w20px" rowClasses="null, alt">
+						<h:outputText value="Actividad" />
+						<h:outputText value="Ingreso de Información de Importación" styleClass="bold"/>
+						<h:outputText />
+						
+						<h:outputText value="Flujo" />
+						<h:outputText value="Registro Sustancias Quimicas VUE (Importacion Exportacion)"/>
+						<p:commandButton icon="ui-icon-search" onclick="PF('modalShowFlow').show()" styleClass="primary button-small" />	
+							
+						<h:outputText value="Técnico"/>
+						<h:outputText value="#{ingresoInformacionImportacionController.loginBean.usuario.persona.nombre}"/>
+						<p:commandButton type="button" icon="ui-icon-search" onclick="PF('modalShowProponente').show()" styleClass="primary button-small"/>
+					
+						<h:outputText value="Código RSQ" />
+						<h:outputText value="#{ingresoInformacionImportacionController.tramiteRSQ}"/>
+						<p:commandButton ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="button-small primary" immediate="true">
+							<p:fileDownload value="#{ingresoInformacionImportacionController.descargarDocumento()}" />
+						</p:commandButton>				
+					</h:panelGrid>
+	
+					<p:dialog width="500" id="modalShowProponente" header="Operador" widgetVar="modalShowProponente" modal="true" resizable="false">
+						<h:panelGrid styleClass="w100" columns="1">
+							<h:panelGrid styleClass="panel_data mw50" columns="2" columnClasses="header, null" rowClasses="null, alt">
+								<h:outputText value="Nombre"/>
+								<h:outputText value="#{ingresoInformacionImportacionController.nombre}"/>
+								
+								<h:outputText value="Representante legal" rendered="#{!empty ingresoInformacionImportacionController.representanteLegal}"/>
+								<h:outputText value="#{ingresoInformacionImportacionController.representanteLegal}"
+									rendered="#{!empty ingresoInformacionImportacionController.representanteLegal}"/>
+								
+								<h:outputText value="Correo"/>
+								<h:outputText value="#{ingresoInformacionImportacionController.correo}" />
+								
+								<h:outputText value="Teléfono" rendered="#{!empty ingresoInformacionImportacionController.telefono}"/>
+								<h:outputText value="#{ingresoInformacionImportacionController.telefono}"
+									rendered="#{!empty ingresoInformacionImportacionController.telefono}"/>
+								
+								<h:outputText value="Celular" rendered="#{!empty ingresoInformacionImportacionController.celular}" />
+								<h:outputText value="#{ingresoInformacionImportacionController.celular}"
+									rendered="#{!empty ingresoInformacionImportacionController.celular}" />
+							</h:panelGrid>
+							
+							<br/>
+							<h:outputText value="Ubicación geográfica" styleClass="bold"/>
+							<p:dataTable value="#{ingresoInformacionImportacionController.ubicacionesGeografica}" var="ubicacion">
+								<p:column headerText="Provincia">
+									<h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}"/>
+								</p:column>
+								
+								<p:column headerText="Cant&oacute;n">
+									<h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}"/>
+								</p:column>
+								
+								<p:column headerText="Parroquia">
+									<h:outputText value="#{ubicacion.nombre}"/>
+								</p:column>
+							</p:dataTable>
+						</h:panelGrid>
+						
+						<p:separator />
+						<div class="buttons">
+							<p:commandButton value="Cerrar" styleClass="primary" type="button" onclick="PF('modalShowProponente').hide()" />
+						</div>
+					</p:dialog>
+					
+					<p:dialog width="800" height="500" position="top" id="modalShowFlow" styleClass="modalShowFlow" 
+						header="Detalles del flujo" widgetVar="modalShowFlow" modal="true" resizable="true">
+						<p:panel header="Diagrama" collapsed="false" toggleable="false" styleClass="alCenter">
+							<img src="#{request.contextPath}/resources/images/RegistroSustanciasQuimicasImportacion.png"/>
+						</p:panel>
+					</p:dialog>
+				</p:panel>
+			</h:form>
+							
+			<h:form id="formPagoInformacion">
+				<p:panel styleClass="separatorTop colapsablePanelStandard">
+					<f:facet name="header">
+						<h:outputText value="Datos de la Actividad" />
+					</f:facet>
+				
+					<h:panelGrid>
+						<p:selectOneRadio id="tipo" value="#{ingresoInformacionImportacionController.tipo}" unselectable="true">
+				            <f:selectItem itemLabel="Solicitud de Autorización de Importación" itemValue="#{true}" />
+				            <f:selectItem itemLabel="Anulación de Autorización de Importación" itemValue="#{false}" />     
+		                   <p:ajax update="pnlAutorizacion pnlAnulacion @form" listener="#{ingresoInformacionImportacionController.tipoTramite()}"/>
+						</p:selectOneRadio>
+					</h:panelGrid>
+		
+					<p:panelGrid columns="1" id="pnlAutorizacion" rendered="#{ingresoInformacionImportacionController.tipo}">
+						<f:facet name="header">
+							<h:outputText value="Solicitud de Autorización de Importación" />
+						</f:facet>
+				
+						<h:panelGrid columns="4" layout="grid" styleClass="w100 noBorders" columnClasses="w25, field_mrg w25, w25, w25">				
+							<p:outputLabel value="Sustancias Químicas (*)" />
+							<p:selectOneMenu value="#{ingresoInformacionImportacionController.idActividadSustanciaSeleccionada}" 
+								required="true" requiredMessage="Sustancias químicas es requerido">
+								<f:selectItem itemLabel="Seleccione" itemValue="0"/>
+								<f:selectItems var="item" itemValue="#{item.id}" 
+									value="#{ingresoInformacionImportacionController.actividadSustanciaProyectoList}"
+									itemLabel="#{item.gestionarProductosQuimicosProyectoAmbiental.sustanciaquimica.descripcion}"/>
+			
+								<p:ajax update="cupo partida" process="@this" listener="#{ingresoInformacionImportacionController.sustanciaListener}"/>
+							</p:selectOneMenu>
+			
+							<p:outputLabel value="Cupo Cantidad (*)" />
+							<p:inputText id="cupo" value="#{ingresoInformacionImportacionController.cupoCantidad}" disabled="true"/>
+			
+							<p:outputLabel value="Sub-partidad Arancelaria: (*)"/>
+							<p:inputText id="partida" disabled="true"
+								value="#{ingresoInformacionImportacionController.actividadSustanciaSeleccionada.gestionarProductosQuimicosProyectoAmbiental.sustanciaquimica.partidaArancelaria}"/>
+			
+							<p:outputLabel value=""/>
+							<p:outputLabel value=""/>
+							
+							<p:outputLabel value="País de origen: (*)" />
+							<p:selectOneMenu value="#{ingresoInformacionImportacionController.idPais}"
+								required="true" requiredMessage="País de origen requerido">
+								<f:selectItem itemLabel="Seleccione" />
+								<f:selectItems value="#{ingresoInformacionImportacionController.listaUbicaciones}"
+									var="item" itemLabel="#{item.nombre}" itemValue="#{item.id}"/>
+								<p:ajax listener="#{ingresoInformacionImportacionController.paisListener}" process="@this"/>	
+							</p:selectOneMenu>
+							
+							<p:outputLabel value="" />
+							<p:outputLabel value="" />
+			
+							<mae:panelGridHeaderHelpLabel value="Peso Neto: (*)" conector="pesoNetoHelp"
+								help="#{ingresoInformacionImportacionController.mensajeAyudaPesoNeto}" width="600px"/>	
+							
+							<h:panelGrid columns="3" styleClass="noBorders w100" columnClasses="w50, w25, w25" id="panelPesoNeto">
+								<pe:inputNumber required="true" id="pesoNeto" requiredMessage="Peso Neto es Requerido" maxValue="9999999.99"
+									validatorMessage="Peso Neto no debe ser Cero" decimalPlaces="2" thousandSeparator=""
+									value="#{ingresoInformacionImportacionController.detalle.pesoNeto}">
+									<f:validateDoubleRange minimum="0.01"/>
+									<p:tooltip id="kilogramosTip" for="pesoNeto" value="Puede ingresar 7 enteros y 2 decimales" trackMouse="true"/>
+								</pe:inputNumber>
+								
+								<p:outputLabel value="Unidad: "/>
+								<p:inputText value="#{ingresoInformacionImportacionController.detalle.unidadPesoNeto}" disabled="true"/>
+							</h:panelGrid>
+							
+							<p:outputLabel value="" />
+							<p:outputLabel value="" />
+			
+							<mae:panelGridHeaderHelpLabel value="Peso Bruto: (*)" conector="pesoBrutoHelp"
+								help="#{ingresoInformacionImportacionController.mensajeAyudaPesoBruto}" width="600px"/>
+								
+							<h:panelGrid columns="3" styleClass="noBorders w100" columnClasses="w50, w25, w25" id="panelPesoBruto">
+								<pe:inputNumber required="true" id="pesoBruto"
+									requiredMessage="Peso Bruto es Requerido" maxValue="9999999.99"
+									validatorMessage="Peso Bruto no debe ser Cero" decimalPlaces="2" thousandSeparator=""
+									value="#{ingresoInformacionImportacionController.detalle.pesoBruto}">
+									<f:validateDoubleRange minimum="0.01"/>
+									<p:tooltip id="kilogramoTip" for="pesoBruto" value="Puede ingresar 7 enteros y 2 decimales" trackMouse="true" />
+								</pe:inputNumber>
+								
+								<p:outputLabel value="Unidad: " />
+								<p:inputText value="#{ingresoInformacionImportacionController.detalle.unidadPesoBruto}" disabled="true"/>
+							</h:panelGrid>						
+						</h:panelGrid>
+			
+						<p:outputLabel value="Me comprometo con el cumplimiento de las disposiciones expresadas en la Normativa Ambiental vigente, particularmente en la transferencia de sustancias químicas, que se realizará exclusivamente con personas que cuenten con el Registro de Sustancias Químicas vigente."/>
+					</p:panelGrid>
+				</p:panel>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" id="pnlAnulacion"
+					rendered="#{!ingresoInformacionImportacionController.tipo}">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="Listado de Autorizaciones de Importación" />
+						</f:facet>
+	
+						<p:panel styleClass="separatorTop colapsablePanelStandard">
+							<f:facet name="header">
+								<h:outputText value="Listado de trámites" />
+							</f:facet>
+							
+							<p:dataTable value="#{ingresoInformacionImportacionController.listaSolicitudes}"
+								id="registroTable" var="registro" rows="10" paginator="true"
+								paginatorAlwaysVisible="false" paginatorPosition="bottom" emptyMessage="#{labels['common.table.empty']}">
+								<p:column headerText="Trámite" filterMatchMode="contains" filterBy="#{registro.tramite}">
+									<h:outputText value="#{registro.tramite}" />
+								</p:column>
+								
+								<p:column headerText="Inicio" sortBy="#{registro.fechaInicioAutorizacion}">
+									<h:outputText value="#{registro.fechaInicioAutorizacion}" />
+								</p:column>
+								
+								<p:column headerText="Fin">
+									<h:outputText value="#{registro.fechaFinAutorizacion}" />
+								</p:column>
+								
+								<p:column headerText="Seleccionar" style="text-align:center;">
+									<p:selectOneRadio id="seleccionar" value="#{registro.seleccionado}">
+										<f:selectItem itemValue="#{true}"/>	
+										<p:ajax listener="#{ingresoInformacionImportacionController.seleccionarListener(registro.id)}" update=":formPagoInformacion:pnlDatosAnulacion"/>					
+									</p:selectOneRadio>
+								</p:column>
+							</p:dataTable>
+						</p:panel>
+					</p:panelGrid>
+	
+					<h:panelGrid id="pnlDatosAnulacion" layout="grid" styleClass="w100">
+						<p:panelGrid id="pnlDatosAnulacion_" columns="1" layout="grid" styleClass="w100" rendered="#{ingresoInformacionImportacionController.solicitudSeleccionada}">
+							<f:facet name="header">
+								<h:outputText value="Justificación de Anulación*" />
+							</f:facet>
+		
+							<p:outputLabel value="Detallar la justificación por la cual usted esta solicitando anular esta autorización de importación y adjuntar la evidencia respectiva" />
+							<p:inputTextarea value="#{ingresoInformacionImportacionController.solicitud.justificacionAnulacion}" maxlength="500" 
+								required="true" requiredMessage="El campo Justificación de Anulación es requerido]"/>
+		
+							<p:panelGrid columns="1" layout="grid" styleClass="w100">
+								<f:facet name="header">
+									<h:outputText value="Evidencia" />
+								</f:facet>
+								
+								<p:outputLabel id="documento" value="#{ingresoInformacionImportacionController.documentoEvidencia eq null ? 'Documento (.pdf)' : ingresoInformacionImportacionController.documentoEvidencia.nombre}"/>
+								<p:fileUpload id="file" fileUploadListener="#{ingresoInformacionImportacionController.uploadDocumento}"
+									mode="advanced" auto="true" sizeLimit="136314880" label="Seleccione"
+									invalidFileMessage="El tipo de archivo no es pdf." invalidSizeMessage="Tamaño de archivo incorrecto"
+									allowTypes="/(\.|\/)(pdf)$/" update="documento" process="@this" immediate="true">
+								</p:fileUpload>
+							</p:panelGrid>
+						</p:panelGrid>
+					</h:panelGrid>
+				</p:panelGrid>
+
+				<div class="buttons main">				
+					<p:commandButton id="btnGuardar" value="Guardar" title="Guardar" icon="ui-icon-disk"
+						actionListener="#{ingresoInformacionImportacionController.guardar()}" update="btnEnviar"/>				
+					
+					<p:commandButton value="Enviar" id="btnEnviar" process="@this" icon="ui-icon-check"
+						actionListener="#{ingresoInformacionImportacionController.abrirDialog()}" update="finalizeDlg"
+						disabled="#{ingresoInformacionImportacionController.guardado}">
+						<p:confirm header="Confirmación" icon="ui-icon-alert" 
+							message="¿Está seguro que desea enviar la información? Si desea verificar la información de clic en Cancelar."/>
+					</p:commandButton>
+									
+					<p:commandButton id="btnCancelar" value="Cancelar" icon="ui-icon-cancel" styleClass="primary" 
+						actionListener="#{ingresoInformacionImportacionController.cerrar()}"/>
+				</div>
+		
+				<p:dialog modal="true" id="finalizeDlg" widgetVar="finalizeDlg"
+					header="Ingreso de información de importación" resizable="false" width="650px">
+					<h:panelGrid id="pnlMensaje">
+						<p align="justify">N° trámite #{ingresoInformacionImportacionController.numeroTramite}, en la pestaña Procesos, Listado de procesos podrá dar seguimiento a su trámite.
+							</p>
+						<br />
+					</h:panelGrid>
+					
+					<div class="buttons main">
+						<p:commandButton icon="ui-icon-check" id="btnEnviarDlg" value="Enviar" process="@this" styleClass="large"
+							actionListener="#{ingresoInformacionImportacionController.enviar()}"/>
+						
+						<p:commandButton icon="ui-icon-cancel" value="Cerrar" onclick="PF('finalizeDlg').hide();"
+							process="@this" styleClass="secondary" />
+					</div>
+				</p:dialog>
+			</h:form>
+		</ui:define>
+	</ui:composition>
+</html>

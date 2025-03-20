@@ -1,0 +1,98 @@
+<ui:composition template="/WEB-INF/templates/default.xhtml" 
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+	<ui:define name="content">
+		<style type="text/css">
+		.valigntop{
+			vertical-align: top;
+		}
+		
+		.ui-datatable-pink table {
+			width: 100%;
+			table-layout: auto;
+			font-size: 12px;
+		}
+		.tree-table-no-header thead {
+			/*display: none*/
+			text-align: center !important;
+		}
+		
+		.ui-datatable-header{
+			height: 30px;
+			text-shadow: none;
+		}
+		
+		.textoCenterColumnContent{
+		    text-align: center !important;
+		}
+		
+		.textoTitulo{
+			-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+			filter: Alpha(Opacity=100) !important;	
+			opacity: 100 !important;
+			box-shadow:none !important;
+			color: red !important;
+			font-weight: bold !important;
+		}
+
+		.textoTitulo td{
+			-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+			filter: Alpha(Opacity=100) !important;
+			opacity: 100 !important;
+			box-shadow:none !important;
+			color: red !important;
+			font-weight: bold !important;
+		}
+		
+		.qutarBordeGrid.ui-panelgrid>*>tr,.qutarBordeGrid.ui-panelgrid .ui-panelgrid-cell {
+    			border: none;
+		}
+		</style>
+		<h:form id="form" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }">
+			
+			<p:panelGrid id="opcionesGrid" columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Emisión de Registro Generador o Desechos Especiales y/o Peligrosos"/>
+				</f:facet>
+				<p:panel>
+				<f:facet name="header">
+					<h:outputText value="Motivo de la emisión *"/>
+				</f:facet>
+				<p:separator></p:separator>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<ui:remove>
+					<h:outputLabel value="Aplicable a toda actividad que genere desechos peligrosos y/o especiales, la misma que debe contar con el proceso de regularización ambiental." for="emiteSuia"/>
+					</ui:remove>
+
+					<p:selectOneRadio id="emiteSuia" layout="grid" columns="1" value="#{motivoEmisionController.tipoEmision}" required="true" requiredMessage="El motivo de la emisión es requerido">
+						<f:selectItem itemLabel="Emisión de Registro de Generador cuando ya cuenta con una Autorización Administrativa Ambiental" itemValue="#{1}"/>
+						<f:selectItem itemLabel="Emisión de Registro de Generador por aplicación de Responsabilidad Extendida del Productor (REP) únicamente para productores definidos en el Código Orgánico del Ambiente." itemValue="#{2}"/>
+						<f:selectItem itemLabel="Emisión de un Registro de Generador al cual se vinculan varias actividades regularizadas de un mismo operador" itemValue="#{3}" itemDisabled="true"/>
+						<f:selectItem itemLabel="Emisión de Registro de Generador cuando la Autorización Administrativa Ambiental (Licencia Ambiental) se encuentra en trámite a partir de la entrada en vigencia del Reglamento Orgánico de Ambiente" itemValue="#{4}" itemDisabled="true"/>
+						<p:ajax event="change" process="@this" update=":form:pnlButons"/>
+					</p:selectOneRadio>	
+				</p:panelGrid>
+			</p:panel>
+			</p:panelGrid>
+
+			<div class="buttons main" >
+				<p:outputPanel id="pnlButons">
+					<p:commandButton value="Siguiente" icon="ui-icon-check" actionListener="#{motivoEmisionController.redirigir()}" rendered="#{motivoEmisionController.tipoEmision ne 2}"
+						onclick="PF('statusDialog').show();" ajax="false"/>
+					<p:commandButton value="Aceptar" actionListener="#{procesoRegistroGeneradorController.iniciarProceso()}" icon="ui-icon-check" styleClass="large" rendered="#{motivoEmisionController.tipoEmision eq 2}">
+						<p:confirm header="Confirmación" message="Esta acción dará inicio al proceso Registro de generador por aplicación de Responsabilidad Extendida del Productor (REP). ¿Está seguro que desea continuar?" icon="ui-icon-alert" />
+					</p:commandButton>
+				</p:outputPanel>
+			</div>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

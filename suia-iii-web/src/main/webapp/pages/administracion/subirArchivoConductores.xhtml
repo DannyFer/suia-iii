@@ -1,0 +1,114 @@
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																								<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	template="/WEB-INF/templates/default.xhtml"
+	
+	
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<style type="text/css">
+.myTable {  
+     text-align: justify;
+ } 
+</style>
+	<ui:define name="content">
+		<div class="arrow-indicator arrow-indicator3"
+			data-forStyleClass="buttonadjuntarDatos"></div>
+			<p:growl autoUpdate="true" id="msgs" showSummary="true" rendered="true" />
+		<h:form id="forml">
+		<p:panelGrid id="panelDatosConductores" columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<p:commandButton value="Adjuntar"
+					onclick="PF('adjuntarDatos').show()"
+					styleClass="buttonadjuntarDatos button-small-text toRight field_mrg"
+					type="button" icon="ui-icon-document" />
+				<p:commandButton  value="Descargar plantilla" styleClass="button-small-text toRight field_mrg" icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true">
+							<p:fileDownload value="#{cargarConductoresBean.plantillaConsultores}"/>
+						</p:commandButton>
+				<h:outputText value="Listado de conductores *" />
+			</f:facet>	
+			
+			<p:dataTable  rendered="#{cargarConductoresBean.mostrargeneral}" rows="10" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" tableStyle="width:auto" id="tbl_datosdb" value="#{cargarConductoresBean.listConsultantsdb}" var="item" emptyMessage="No se encontraron resultados.">
+
+				<p:column headerText="FECHA DE EMISIÓN" styleClass="alCenter w15" filterBy="#{item.emision}" filterMatchMode="contains">
+					<h:outputText value="#{item.emision}" >
+					<f:convertDateTime pattern="yyyy-MM-dd" timeZone="GMT+1"/>
+					</h:outputText>
+				</p:column>
+				<p:column headerText="FECHA DE VALIDEZ" styleClass="alCenter w15" filterBy="#{item.vigencia}" filterMatchMode="contains">
+					<h:outputText value="#{item.vigencia}" >
+					<f:convertDateTime pattern="yyyy-MM-dd" timeZone="GMT+1"/>
+					</h:outputText>
+				</p:column>
+				<p:column headerText="NOMBRE Y APELLIDOS" styleClass="alCenter w15" filterBy="#{item.nombre}" filterMatchMode="contains">
+					<h:outputText value="#{item.nombre}" />
+				</p:column>
+				<p:column headerText="CEDULA DE IDENTIDAD" styleClass="alCenter w15" filterBy="#{item.documento}" filterMatchMode="contains">
+					<h:outputText value="#{item.documento}" />
+				</p:column>
+				<p:column headerText="No. de CERTIFICADO" styleClass="alCenter w15" filterBy="#{item.codigoCurso}" filterMatchMode="contains">
+					<h:outputText value="#{item.codigoCurso}" />
+				</p:column>
+			</p:dataTable>
+					
+			<p:dataTable rendered="#{cargarConductoresBean.mostrarprevisualizar}" tableStyle="width:auto" id="tbl_datos" value="#{cargarConductoresBean.listConsultants}" var="item" emptyMessage="No se encontraron resultados.">
+
+				<p:column headerText="FECHA DE EMISIÓN" styleClass="alCenter w15">
+					<h:outputText value="#{item.emision}" />
+				</p:column>
+				<p:column headerText="FECHA DE VALIDEZ" styleClass="alCenter w15">
+					<h:outputText value="#{item.vigencia}" />
+				</p:column>
+				<p:column headerText="NOMBRE Y APELLIDOS" styleClass="alCenter w15">
+					<h:outputText value="#{item.nombre}" />
+				</p:column>
+				<p:column headerText="CEDULA DE IDENTIDAD" styleClass="alCenter w15">
+					<h:outputText value="#{item.documento}" />
+				</p:column>
+				<p:column headerText="No. de CERTIFICADO" styleClass="alCenter w15">
+					<h:outputText value="#{item.codigoCurso}" />
+				</p:column>
+			</p:dataTable>
+			<h:outputLabel value="Observaciones: *" rendered="#{cargarConductoresBean.mostrarprevisualizar}"/>
+			<p:inputTextarea value="#{cargarConductoresBean.observaciones}" required="true" requiredMessage="La observación es requerida" rendered="#{cargarConductoresBean.mostrarprevisualizar}"/>
+			
+			<div style="display: block; text-align: right; padding-top: 3px;" class="buttons main" rendered="#{cargarConductoresBean.mostrarprevisualizar}">
+						<p:commandButton icon="ui-icon-disk" value="Guardar" actionListener="#{cargarConductoresBean.saveConsultores()}" rendered="#{cargarConductoresBean.mostrarprevisualizar}"
+						update="@form" process="@form">
+						<p:confirm header="Confirmación" message="¿Está seguro de guardar la información?" icon="ui-icon-alert" />
+					</p:commandButton>
+					<p:commandButton icon="ui-icon-disk" value="Cancelar" actionListener="#{cargarConductoresBean.limpiardatos()}" rendered="#{cargarConductoresBean.mostrarprevisualizar}"
+						update="@form" process="@form">
+					</p:commandButton>
+					
+				</div>
+			
+			<p:dialog header="Adjuntar listado de conductores"
+				widgetVar="adjuntarDatos"
+				modal="#{cargarConductoresBean.modalLoadFile}" resizable="false">
+				<p:panelGrid columns="1" columnClasses="label, value">
+					<h:outputText value="Seleccione el archivo excel (.xls)" />
+					<p:fileUpload uploadLabel="Subir" auto="true" cancelLabel="Cancelar" 
+					label="Seleccionar" fileUploadListener="#{cargarConductoresBean.handleFileUpload}" 
+					mode="advanced" dragDropSupport="false" update=":forml,:msgs" 
+					multiple="false" allowTypes="/(\.|\/)(xls)$/" oncomplete="showModalTransformation()" 
+					invalidFileMessage="El archivo es inválido." 
+					invalidSizeMessage="El archivo es demasiado grande." 
+					process="@this"/>					
+					
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton type="button" value="Cerrar"
+						onclick="PF('adjuntarDatos').hide()" />
+				
+						
+				</div>
+			</p:dialog>
+		</p:panelGrid>
+		</h:form>
+	</ui:define>
+<!-- 	<script type="text/javascript"> -->
+</ui:composition>

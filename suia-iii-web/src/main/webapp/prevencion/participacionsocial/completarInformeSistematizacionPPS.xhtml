@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+        >
+<ui:composition template="/WEB-INF/templates/default-task.xhtml"
+        >
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}" target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+
+    </ui:define>
+    <ui:define name="content">
+
+        <f:event type="preRenderView" listener="#{completarInformeSistematizacionPSBean.validarTareaBpm()}"/>
+        <h:form id="form">
+            <p:panelGrid columns="1" layout="grid" styleClass="w100" id="informeSistematizacionPPS"
+                         columnClasses=" " rendered="true">
+                <f:facet name="header">
+                    <h:outputText value="Informe de sistematización: *"/>
+                    <p:outputLabel
+                        value="Informe de sistematización" for="validarIVPS" style="display:none"/>
+                </f:facet>
+                <h:panelGrid columns="2" columnClasses="null, field_mrg"
+                        >
+                    <p:outputLabel
+                            value="#{empty completarInformeSistematizacionPSBean.documentos.get('informeSistematizacionPPS') ? 'Documento(.pdf)' :
+                                completarInformeSistematizacionPSBean.documentos.get('informeSistematizacionPPS').nombre}"/>
+                    <p:commandButton id="downloadInformeSistematizacionPPS" icon="ui-icon-arrowthick-1-s"
+                                     ajax="false" styleClass="button-small primary" title="Ver"
+                                     immediate="true"
+                                     rendered="#{not empty completarInformeSistematizacionPSBean.documentos.get('informeSistematizacionPPS')}">
+                        <p:fileDownload
+                                value="#{completarInformeSistematizacionPSBean.getStreamContent('informeSistematizacionPPS')}"/>
+                    </p:commandButton>
+                </h:panelGrid>
+                <p:fileUpload
+                        fileUploadListener="#{completarInformeSistematizacionPSBean.uploadListenerDocumentos}"
+                        multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                        label="Seleccionar" uploadLabel="Subir"
+                        invalidFileMessage="Tipo de archivo no válido"
+                        invalidSizeMessage="Tamaño de archivo no válido"
+                        cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                        auto="true" update="informeSistematizacionPPS"
+                        rendered="#{!completarInformeSistematizacionPSBean.revisar}"
+                        >
+                    <f:attribute name="clave" value="informeSistematizacionPPS"/>
+                </p:fileUpload>
+            </p:panelGrid>
+            <h:inputHidden id="validarIVPS"
+                           required="#{empty completarInformeSistematizacionPSBean.documentos.get('informeSistematizacionPPS')}"/>
+            <p:fragment>
+                <h:panelGroup id="pnl2">
+
+                    <observaciones:tablaObservaciones aparace="true"
+                                                      soloLectura="#{!completarInformeSistematizacionPSBean.revisar}"
+                                                      mostrarSiVacio="#{completarInformeSistematizacionPSBean.revisar}"
+                                                      idClase="#{completarInformeSistematizacionPSBean.proyectosBean.proyecto.id}"
+                                                      nombreClase="ParticipacionSocial"
+                                                      seccion="informeSistematizacionPPS"
+                                                      rol="admin"
+                                                      componenteActualizarEliminar="pnl2"/>
+                </h:panelGroup>
+            </p:fragment>
+
+            <div class="buttons main">
+                <p:commandButton value="Enviar" title="Completar tarea" styleClass="primary" update=":form"
+
+                                 action="#{completarInformeSistematizacionPSController.enviarDatos}"
+                                 icon="ui-icon-check">
+                </p:commandButton>
+            </div>
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

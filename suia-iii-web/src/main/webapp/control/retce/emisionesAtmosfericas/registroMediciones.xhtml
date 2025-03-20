@@ -1,0 +1,228 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+<h:panelGroup id="registroMediciones">
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="REGISTRO DE MEDICIONES" />
+				</f:facet>
+
+				<p:panelGrid columns="1" styleClass="panel_data w100">
+					<p:panelGrid columns="3" styleClass="panel_data w100"
+						columnClasses="w10, header w14, null w12,header w14, null w12, header w10, null w16, null w5">
+						<h:outputText value="Nombre del lugar del punto de muestreo:*" />
+						<h:panelGroup>
+						<p:inputText id="nombreLugar"
+							value="#{emisionesAtmosfericasController.detalleEmision.lugarPuntoMuestreo}"
+							maxlength="50" required="true"
+							requiredMessage="El campo Nombre del lugar del punto de muestreo es requerido." 
+							autocomplete="off"/>
+							<p:tooltip id="nombreLugarTip" for="nombreLugar" 
+								value="El operador deberá ingresar el nombre del sitio donde se encuentra la fuente" trackMouse="true" />						
+							</h:panelGroup>
+
+					</p:panelGrid>
+					
+					<p:panelGrid columns="4" styleClass="panel_data w100" columnClasses="header w25,w25,header w25,w25" id="periodo">
+						
+						<h:outputText value="Periodo de medición (Desde)*" />
+						<h:panelGroup>		
+						<p:selectOneMenu id="anio"
+							value="#{emisionesAtmosfericasController.anioInicio}"
+							required="true" requiredMessage="Periodo de medición (Desde Año) es requerido">
+							<f:selectItem itemLabel="Año..." noSelectionOption="true" />
+							<f:selectItems
+								value="#{emisionesAtmosfericasController.listaAnios}"
+								var="item" itemLabel="#{item}" itemValue="#{item}" />
+							<p:ajax event="change" listener="#{emisionesAtmosfericasController.validarPeriodoMedicionListener()}" 
+								process="@this" update="anio mes anioHasta mesHasta"/>
+						</p:selectOneMenu>				
+						<p:selectOneMenu id="mes"
+							value="#{emisionesAtmosfericasController.mesInicio}"
+							required="true" requiredMessage="Periodo de medición (Desde Mes) es requerido">
+							<f:selectItem itemLabel="Mes..." noSelectionOption="true" />
+							<f:selectItems
+								value="#{emisionesAtmosfericasController.listaMeses}"
+								var="item" itemLabel="#{item}" itemValue="#{item}" />
+								<p:ajax event="change" listener="#{emisionesAtmosfericasController.validarPeriodoMedicionListener()}" 
+								process="@this" update="anio mes anioHasta mesHasta" />
+						</p:selectOneMenu>						
+						</h:panelGroup>	
+						<h:outputText value="Periodo de medición (Hasta)*" />
+						<h:panelGroup>			
+						<p:selectOneMenu id="anioHasta"
+							value="#{emisionesAtmosfericasController.anioFin}"
+							required="true" requiredMessage="Periodo de medición (Hasta Año) es requerido">
+							<f:selectItem itemLabel="Año..." noSelectionOption="true" />
+							<f:selectItems
+								value="#{emisionesAtmosfericasController.listaAnios}"
+								var="item" itemLabel="#{item}" itemValue="#{item}" />
+							<p:ajax event="change" listener="#{emisionesAtmosfericasController.validarPeriodoMedicionListener()}" 
+							process="@this" update="anio mes anioHasta mesHasta" />
+						</p:selectOneMenu>			
+						<p:selectOneMenu id="mesHasta"
+							value="#{emisionesAtmosfericasController.mesFin}"
+							required="true" requiredMessage="Periodo de medición (Hasta Mes) es requerido">
+							<f:selectItem itemLabel="Mes..." noSelectionOption="true" />
+							<f:selectItems
+								value="#{emisionesAtmosfericasController.listaMeses}"
+								var="item" itemLabel="#{item}" itemValue="#{item}" />
+								<p:ajax event="change" listener="#{emisionesAtmosfericasController.validarPeriodoMedicionListener()}" 
+								process="@this" update="anio mes anioHasta mesHasta"/>
+						</p:selectOneMenu>						
+						</h:panelGroup>
+					</p:panelGrid>	
+					
+					<p:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25, null w75">
+
+						<h:outputText value="Fases:*" rendered="#{emisionesAtmosfericasController.mostrarHME}" />
+						<p:selectOneMenu id="fasesMonitoreo" disabled="#{emisionesAtmosfericasController.editarFuente}"
+							value="#{emisionesAtmosfericasController.idFase}"
+							required="true" style="width:100%" requiredMessage="El campo Fases"
+							rendered="#{emisionesAtmosfericasController.mostrarHME}">
+							<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+							<f:selectItems
+								value="#{emisionesAtmosfericasController.listaFaseRetce}"
+								var="item" itemLabel="#{item.descripcion}" itemValue="#{item.id}" />
+							<p:ajax event="change" listener="#{emisionesAtmosfericasController.unidadFaseListener()}" 
+									process="@this" />
+						</p:selectOneMenu>
+
+						<h:outputText value="Frecuencia de monitoreo:" />
+						<p:selectOneMenu id="frecuenciaMonitoreo" disabled="#{emisionesAtmosfericasController.editarFuente}"
+							value="#{emisionesAtmosfericasController.idFrecuenciaMonitoreo}"
+							required="true" style="width:100%" requiredMessage="El campo Frecuencia de monitoreo es requerido">
+							<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+							<f:selectItems
+								value="#{emisionesAtmosfericasController.listaCatalogoFrecuenciaMonitoreo}"
+								var="item" itemLabel="#{item.descripcion}" itemValue="#{item.id}" />
+
+								<p:ajax event="change" listener="#{emisionesAtmosfericasController.frecuenciaMonitoreoListener()}" 
+									process="@this" />
+						</p:selectOneMenu>
+
+					
+						<h:outputText value="Estado de la fuente:*" />
+						<p:selectOneMenu id="estadoFuente"
+							value="#{emisionesAtmosfericasController.idEstadoFuenteDetalleCatalogo}"
+							required="true" style="width:100%" requiredMessage="El campo Estado de la fuente es requerido">
+							<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+							<f:selectItems
+								value="#{emisionesAtmosfericasController.listaCatalogoEstadoFuente}"
+								var="item" itemLabel="#{item.descripcion}" itemValue="#{item.id}" />
+
+							<p:ajax event="change" listener="#{emisionesAtmosfericasController.estadoFuente()}"
+								update=":form:pnlMediciones" process="@this"/>
+						</p:selectOneMenu>
+					</p:panelGrid>
+
+				</p:panelGrid>
+				
+				<h:inputHidden validator="#{emisionesAtmosfericasController.validateRegistroMedicionesCoordenadas}" />
+	</p:panelGrid>
+	
+	<p:panelGrid id="pnlMediciones" columns="1" layout="grid" styleClass="w100">
+	
+				<p:panelGrid id="pnlPrimerIngresoRegistro" columns="1"
+					styleClass="panel_data w100" rendered="#{emisionesAtmosfericasController.mostrarEstadoFuente}">
+					<p:panelGrid styleClass="panel_data w100" columns="2"
+						columnClasses="header w25, null w70, null w5">
+						<c:if test="#{emisionesAtmosfericasController.detalleEmision.fuenteFijaCombustion.fuente.equals('Motores de combustión interna')}">
+							<h:outputText value="Horas de funcionamiento:*" />
+							<h:panelGroup>
+							<pe:inputNumber required="true" id="horasFun"
+								requiredMessage="Horas de funcionamiento es Requerido"
+								validatorMessage="Horas de funcionamiento no debe ser Cero"
+								maxValue="99999999999999999999.99"
+								value="#{emisionesAtmosfericasController.detalleEmision.horasFuncionamiento}"
+								decimalPlaces="2">
+								<f:validateDoubleRange minimum="0.1" />
+							</pe:inputNumber>
+							<p:tooltip id="horasTip" for="horasFun" 
+							value="El operador debe ingresar las horas de funcionamiento marcadas por el horómetro al momento de la medición" 
+							trackMouse="true" />						
+							</h:panelGroup>
+						</c:if>
+						<h:outputText value="Tipo de funcionamiento:*" />
+						<h:panelGroup>
+						<p:selectOneMenu id="tipofuncionamiento"
+							value="#{emisionesAtmosfericasController.idTipoFuncionamiento}"
+							required="true" style="width:100%" requiredMessage="El campo Tipo de funcionamiento es requerido.">
+							<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+							<f:selectItems
+								value="#{emisionesAtmosfericasController.listaCatalogoTipoFuncionamiento}"
+								var="item" itemLabel="#{item.descripcion}" itemValue="#{item.id}" />
+
+							<p:ajax event="change" listener="#{emisionesAtmosfericasController.tipoFuncionamientoListener()}" process="@this" />
+						</p:selectOneMenu>
+						
+						<p:tooltip id="tipofuncionamientoTip" for="tipofuncionamiento" 
+							value="Continuo: Funcionamiento 24/7 -- Discontinuo: Funcionamiento menos de 24/7" trackMouse="true" />						
+						</h:panelGroup>
+
+						<h:outputText value="Velocidad de salida(m/s):*" />
+						<h:panelGroup>
+						<pe:inputNumber required="true" id="velocidadSal"
+							requiredMessage="Velocidad de salida es Requerido"
+							validatorMessage="Velocidad de salida no debe ser Cero"
+							maxValue="9999.99"
+							value="#{emisionesAtmosfericasController.detalleEmision.velocidadSalida}"
+							decimalPlaces="2">
+							<f:validateDoubleRange minimum="0.1" />
+						</pe:inputNumber>
+						<p:tooltip id="velocidadSalTip" for="velocidadSal" 
+							value="Indicar la velocidad promedio de salida del flujo de gases bajo operación normal." 
+							trackMouse="true" />						
+							</h:panelGroup>				
+					</p:panelGrid>
+
+				</p:panelGrid>
+
+				<p:panelGrid id="pnlJustificacion" columns="1" styleClass="panel_data w100"
+					rendered ="#{!emisionesAtmosfericasController.mostrarEstadoFuente}">
+					<p:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25, null w75">
+						<h:outputText value="Justifique *" />
+						<p:inputTextarea
+							value="#{emisionesAtmosfericasController.detalleEmision.justificacion}"
+							maxlength="500" requiredMessage="El campo Justifique es requerido." 
+							rows="5" autoResize="false" required="true"/>
+
+						<h:outputText value="Adjunte un documento de justificación*" />
+						
+						<p:outputPanel>
+							<p:fileUpload
+								fileUploadListener="#{emisionesAtmosfericasController.uploadListenerDocumentoEstadoFuente}"
+								multiple="false" sizeLimit="20971520"
+								allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar (pdf 20Mb)"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" required="true" update="nombreDoc1ustificacion"/>
+	                    <h:inputHidden validator="#{emisionesAtmosfericasController.validarDocumentoJustificacionEstadoFuente}"/>   
+						<p:outputLabel id="nombreDoc1ustificacion" value="#{emisionesAtmosfericasController.documentoJustificacionEstadoFuente.nombre}" styleClass="toLeft"/>						
+						<p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar"
+							rendered="#{emisionesAtmosfericasController.documentoJustificacionEstadoFuente.id!=null or emisionesAtmosfericasController.documentoJustificacionEstadoFuente.contenidoDocumento!=null}">
+							<p:fileDownload value="#{emisionesAtmosfericasController.documentoJustificacionDownload}"/>
+						</p:commandButton>																
+					</p:outputPanel>
+					</p:panelGrid>
+				</p:panelGrid>
+		</p:panelGrid>
+
+</h:panelGroup>
+
+
+</html>

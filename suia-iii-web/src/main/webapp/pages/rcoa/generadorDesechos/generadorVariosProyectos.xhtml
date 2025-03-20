@@ -1,0 +1,740 @@
+<ui:composition template="/WEB-INF/templates/default.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+	<ui:define name="content">
+	<style type="text/css">
+		.ui-fileupload-content{
+			border:none !important;
+			padding: 0px;
+		}
+		</style> 
+	
+	
+	
+		<h:form id="form" prependId="false"
+			onkeypress="if (event.keyCode == 13) {return false; }">
+
+			<p:panelGrid id="opcionesGrid" columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Emisión de Registro Generador o Desechos Especiales y/o Peligrosos" />
+				</f:facet>
+
+				<h:panelGrid columns="6">
+					<p:outputLabel value="Cédula / RUC"/>
+					<p:inputText/>
+					<p:outputLabel value="Actividad del RUC"/>
+					<p:inputText />
+					<p:outputLabel value="Adjuntar RUC"/>
+					<h:panelGroup>
+								<p:fileUpload
+									fileUploadListener="#{emisionGeneradorVariasActividadesController.fileUploadRuc}"
+									value="#{emisionGeneradorVariasActividadesController.documentoRuc}"
+									sizeLimit="20971520" allowTypes="/(\.|\/)(pdf)$/"
+									label="Seleccionar" update="nombreFile" uploadLabel="Subir"
+									auto="true" cancelLabel="Cancelar" required="true"
+									requiredMessage="El adjunto de la resolución es requerido."
+									invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+									invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+									styleClass="w100 toLeft" mode="advanced">
+								</p:fileUpload>
+								<br />
+								<p:outputPanel id="nombreFile">
+									<h:outputText value="nombre Documento" />
+									<br />
+									<p:commandButton icon="ui-icon-arrowthickstop-1-s"
+										styleClass="secondary" ajax="false" immediate="true"
+										process="@this" title="Descargar">
+										<p:fileDownload
+											value="#{emisionGeneradorVariasActividadesController.getDocumentoRuc()}" />
+									</p:commandButton>
+								</p:outputPanel>
+							</h:panelGroup>				
+				</h:panelGrid>
+				
+				<p:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="header w75, null w25">
+				
+					<h:outputText value="Del Estado del CIIU, escoja la actividad económica en importancia que desarrollará en su proyecto" />
+					<p:inputText value=""/>
+					<h:outputText value="Del Estado del CIIU, escoja la segunda actividad económica en importancia que desarrollará en su proyecto"/>
+					<p:inputText value=""/>
+					<h:outputText value="Del Estado del CIIU, escoja la tercera actividad económica en importancia que desarrollará en su proyecto"/>				
+				
+				</p:panelGrid>
+				
+				<p:panelGrid id="proyectosVariosGrid" columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+					<h:outputText value="Datos Generales" />
+					</f:facet>
+					
+					<p:dataTable
+					value="#{emisionesAtmosfericasController.listaLaboratorios}"
+					var="lab" emptyMessage="#{labels['common.table.empty']}">
+						
+					
+					
+					<p:dataTable id="dtbVariosProyectos" value="#{emisionGeneradorVariasActividadesController.listaProyectosSeleccionados}" 
+					var="proyectoSeleccionado" emptyMessage="#{labels['common.table.empty']}">
+					
+					<f:facet name="header">
+					<p:commandButton value="#{msg['button.agregar']}" icon="ui-icon-plus" 
+					style="float:right" onclick="PF('tipoProyecto').show();">					 
+					 </p:commandButton>
+				</f:facet>	
+										
+					<p:column headerText="Actividad">
+						<h:outputText value="" />
+					</p:column>
+					<p:column headerText="Código Proyecto">
+						<h:outputText value="" />
+					</p:column>
+					<p:column headerText="Nombre">
+						<h:outputText value="" />
+					</p:column>
+					<p:column headerText="Número Resolución">
+						<h:outputText value="" />
+					</p:column>
+					<p:column headerText="Tipo permiso ambiental">
+						<h:outputText value="" />
+					</p:column>
+					<p:column headerText="Acción">
+						<p:commandButton title="Modificar" icon="ui-icon-pencil"/>
+						<p:commandButton title="Eliminar" icon="ui-icon-trash"/>
+					</p:column>
+										
+					</p:dataTable>					
+				
+				</p:panelGrid>
+
+				<p:panelGrid id="proyectosGrid" columns="1" layout="grid" styleClass="w100">
+
+					<p:panelGrid id="informacionProyectoGrid" columns="1" layout="grid" styleClass="w100"
+						rendered="#{emisionGeneradorVariasActividadesController.tipoProyecto eq 1 ? true :false}">
+							<f:facet name="header">
+								<h:outputText value="Datos Generales" />
+							</f:facet>
+						
+						<p:dataTable id="proyectosTable"
+							value="#{emisionGeneradorConAAA.listaProyectos}" var="proyecto"
+							selection="#{emisionGeneradorConAAA.proyectoCustomSeleccionado}" rowKey="#{proyecto.id}"
+							sortOrder="descending" paginator="true"
+							paginatorAlwaysVisible="true" paginatorPosition="bottom"
+							currentPageReportTemplate="{currentPage} de {totalPages}"
+							rows="5" rowsPerPageTemplate="5,10,15"
+							emptyMessage="No existen registros">
+							
+							<p:ajax event="rowToggle" listener="#{emisionGeneradorConAAA.datosProyecto(proyecto)}"/>
+
+							<p:column style="width:16px">
+								<p:rowToggler/>
+							</p:column>
+							<p:column headerText="Actividad">
+								<h:outputText value="#{proyecto.codigo}" />
+							</p:column>
+							
+							<p:column headerText="Código Proyecto">
+								<h:outputText value="#{proyecto.codigo}" />
+							</p:column>
+							<p:column headerText="Código Proyecto">
+								<h:outputText value="#{proyecto.codigo}" />
+							</p:column>
+							<p:column headerText="Número de Resolución">
+								<h:outputText value="#{emisionGeneradorConAAA.numeroResolucion(proyecto)}" />
+							</p:column>
+							<p:column headerText="Nombre del proyecto">
+								<h:outputText value="#{proyecto.nombre}" />
+							</p:column>
+							<p:column headerText="Sector">
+								<h:outputText value="#{proyecto.catalogoCategoria.catalogoCategoriaPublico.tipoSector.nombre}" />
+							</p:column>
+							<p:column headerText="Tipo de permiso ambiental">
+								<h:outputText value="#{proyecto.catalogoCategoria.categoria.nombrePublico}" />
+							</p:column>
+							<p:column headerText="Accion" selectionMode="single"
+								style="width:30px;text-align:center" />
+
+
+							<p:rowExpansion>
+							<p:panelGrid rendered="false">
+								<p:panelGrid columns="2" styleClass="panel_data w100"
+									columnClasses="header w25,null w75">
+									<h:outputText value="Número de resolución" />
+									<h:outputText value="#{emisionGeneradorConAAA.numeroResolucion}" />
+									<h:outputText value="Nombre proyecto" />
+									<h:outputText value="#{proyecto.nombre}" />
+									<h:outputText value="Fecha que otorgo su Autorización Administrativa Ambiental" />
+									<h:outputText value="#{emisionGeneradorConAAA.fechaProyecto}" />
+									<h:outputText value="Actividad Económica Principal" />
+									<h:outputText value="#{emisionGeneradorConAAA.actividadProyecto}" />
+									<h:outputText value="Segunda actividad en importancia" />
+									<h:outputText value="" />
+									<h:outputText value="Tercera actividad en importancia" />
+									<h:outputText value="" />
+									<h:outputText value="Su trámite corresponde a un(a)" />
+									<h:outputText value="#{proyecto.catalogoCategoria.categoria.nombrePublico}" />
+
+								</p:panelGrid>
+								<br />
+								<br />
+								<p:panelGrid columns="1" layout="grid">
+
+									<p:panelGrid columns="1" layout="grid" styleClass="w100">						
+
+										<f:facet name="header">
+											<h:outputText
+												value="Sistema de referencias (Formato: sistema WGS84, zona 17S)" />
+										</f:facet>
+										<p:dataTable id="tbl_coordenadasRcoa" rowIndexVar="index"
+											value="#{proyecto.formasProyectos}"
+											var="item" emptyMessage="#{labels['common.table.empty']}">
+											<p:subTable value="#{item.coordenadas}" var="coordenada">
+												<p:columnGroup type="header">
+													<p:row>
+														<p:column
+															headerText="Grupo de coordenadas #{index + 1} (#{item.tipoForma})"
+															styleClass="alCenter w100 table-column-header"
+															colspan="5" />
+													</p:row>
+													<p:row>
+														<p:column headerText="Shape"
+															styleClass="alCenter table-column-header" />
+														<p:column headerText="X"
+															styleClass="alCenter table-column-header" />
+														<p:column headerText="Y"
+															styleClass="alCenter table-column-header" />
+														<p:column headerText="Tipo"
+															styleClass="alCenter table-column-header" />
+														<p:column headerText="Descripción"
+															styleClass="alCenter table-column-header" />
+													</p:row>
+												</p:columnGroup>
+												<p:column headerText="Shape" styleClass="alCenter w15">
+													<h:outputText value="#{coordenada.orden}" />
+												</p:column>
+												<p:column headerText="X" styleClass="alCenter w15">
+													<h:outputText value="#{coordenada.x}" />
+												</p:column>
+												<p:column headerText="Y" styleClass="alCenter w15">
+													<h:outputText value="#{coordenada.y}" />
+												</p:column>
+												<p:column headerText="Tipo" styleClass="alCenter w15">
+													<h:outputText value="#{item.tipoForma}" />
+												</p:column>
+												<p:column headerText="Descripción"
+													styleClass="alCenter">
+													<h:outputText value="#{coordenada.descripcion}" />
+												</p:column>
+											</p:subTable>
+										</p:dataTable>
+									</p:panelGrid>
+
+									<br />
+									<br />
+
+									<p:panelGrid columns="1" layout="grid" styleClass="w100">
+										<f:facet name="header">
+											<h:outputText value="Ubicación geográfica" />
+										</f:facet>
+										
+										<p:dataTable
+											value="#{proyecto.proyectoUbicacionesGeograficas}"
+											var="ubicacion">
+											<p:column headerText="Provincia">
+												<h:outputText
+													value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+											</p:column>
+											<p:column headerText="Cantón">
+												<h:outputText
+													value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+											</p:column>
+											<p:column headerText="Parroquia">
+												<h:outputText
+													value="#{ubicacion.ubicacionesGeografica.nombre}" />
+											</p:column>
+										</p:dataTable>
+									</p:panelGrid>
+
+								</p:panelGrid>
+							</p:panelGrid>
+							
+							<p:panelGrid rendered="true">
+								<p:panelGrid columns="2" styleClass="panel_data w100"
+									columnClasses="header w25,null w75">
+									<h:outputText value="Código del proyecto" />
+									<h:outputText value="#{proyecto.codigo}" />
+									<h:outputText value="Nombre proyecto" />
+									<h:outputText value="#{proyecto.nombre}" />
+									<h:outputText value="Sector" />
+									<h:outputText value="#{proyecto.catalogoCategoria.catalogoCategoriaPublico.tipoSector.nombre}" />
+									<h:outputText value="Actividad" />
+									<h:outputText value="#{emisionGeneradorConAAA.actividadProyecto}" />									
+									<h:outputText value="Su trámite corresponde a un(a)" />
+									<h:outputText value="#{proyecto.catalogoCategoria.categoria.nombrePublico}" />
+
+								</p:panelGrid>
+								<br />
+								<br />
+								<p:panelGrid columns="1" layout="grid">
+
+									<p:panelGrid columns="1" layout="grid" styleClass="w100">						
+
+										<f:facet name="header">
+											<h:outputText
+												value="Sistema de referencias (Formato: sistema WGS84, zona 17S)" />
+										</f:facet>
+										<p:dataTable id="tbl_coordenadasSuia" rowIndexVar="index"
+											value="#{proyecto.formasProyectos}"
+											var="item" emptyMessage="#{labels['common.table.empty']}">
+											<p:subTable value="#{item.coordenadas}" var="coordenada">
+												<p:columnGroup type="header">
+													<p:row>
+														<p:column
+															headerText="Grupo de coordenadas #{index + 1} (#{item.tipoForma})"
+															styleClass="alCenter w100 table-column-header"
+															colspan="5" />
+													</p:row>
+													<p:row>
+														<p:column headerText="Shape"
+															styleClass="alCenter table-column-header" />
+														<p:column headerText="X"
+															styleClass="alCenter table-column-header" />
+														<p:column headerText="Y"
+															styleClass="alCenter table-column-header" />
+														<p:column headerText="Tipo"
+															styleClass="alCenter table-column-header" />
+														<p:column headerText="Descripción"
+															styleClass="alCenter table-column-header" />
+													</p:row>
+												</p:columnGroup>
+												<p:column headerText="Shape" styleClass="alCenter w15">
+													<h:outputText value="#{coordenada.orden}" />
+												</p:column>
+												<p:column headerText="X" styleClass="alCenter w15">
+													<h:outputText value="#{coordenada.x}" />
+												</p:column>
+												<p:column headerText="Y" styleClass="alCenter w15">
+													<h:outputText value="#{coordenada.y}" />
+												</p:column>
+												<p:column headerText="Tipo" styleClass="alCenter w15">
+													<h:outputText value="#{item.tipoForma}" />
+												</p:column>
+												<p:column headerText="Descripción"
+													styleClass="alCenter">
+													<h:outputText value="#{coordenada.descripcion}" />
+												</p:column>
+											</p:subTable>
+										</p:dataTable>
+									</p:panelGrid>
+
+									<br />
+									<br />
+
+									<p:panelGrid columns="1" layout="grid" styleClass="w100">
+										<f:facet name="header">
+											<h:outputText value="Ubicación geográfica" />
+										</f:facet>
+										
+										<p:dataTable
+											value="#{proyecto.proyectoUbicacionesGeograficas}"
+											var="ubicacion">
+											<p:column headerText="Provincia">
+												<h:outputText
+													value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+											</p:column>
+											<p:column headerText="Cantón">
+												<h:outputText
+													value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+											</p:column>
+											<p:column headerText="Parroquia">
+												<h:outputText
+													value="#{ubicacion.ubicacionesGeografica.nombre}" />
+											</p:column>
+										</p:dataTable>
+									</p:panelGrid>									
+								</p:panelGrid>
+							</p:panelGrid>
+							
+							
+							</p:rowExpansion>
+
+
+						</p:dataTable>
+
+
+					</p:panelGrid>
+
+					<p:panelGrid id="informacionProyectoFisicoGrid" columns="1"
+						layout="grid" styleClass="w100"
+						rendered="#{emisionGeneradorConAAA.emitidoPor eq 2 ? true :false}">
+
+						<p:panel>
+							<f:facet name="header">
+								<h:outputText value="Datos proyecto" />
+							</f:facet>
+							<p:outputLabel value="Si su autorización Administrativa se obtuvo de manera física ingrese el número de la resolución del documento"
+								style="color:#FF0000;" />
+							<p:separator />
+						</p:panel>
+
+						<p:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="null w30,null w70">
+
+							<p:outputLabel value="Número de la Autorización administrativa ambiental *" />
+							<p:inputText value="#{emisionGeneradorConAAA.numeroAutorizacionAmbiental}" />
+
+							<p:outputLabel value="Fecha de otorgamiento de Autorización administrativa ambiental *" />
+							<p:calendar id="fechaOtorgamiento" styleClass="calendarClass"
+								value="#{emisionGeneradorConAAA.fechaOtorgamiento}"
+								pattern="dd/MM/yyyy" readonlyInput="true" navigator="true"
+								required="true"
+								requiredMessage="echa de otorgamiento de Autorización administrativa ambiental es requerido"
+								maxdate="#{emisionGeneradorConAAA.fechaActual()}" />
+
+							<p:outputLabel value="Dirección del proyecto *" />
+							<p:inputTextarea value="#{emisionGeneradorConAAA.direccion}"
+								rows="3" maxlength="250" autoResize="false"  style="width: 100% !important; resize: none;"/>
+						</p:panelGrid>
+
+						<p:panelGrid id="coordenadasFisGrid" columns="1" layout="grid" styleClass="w100">
+							<f:facet name="header">
+								<p:commandButton value="Adjuntar"
+									onclick="PF('adjuntarCoordenadas').show()"
+									styleClass="buttonAdjuntarCoordenadas button-small-text toRight field_mrg"
+									type="button" icon="ui-icon-document" />
+								<p:commandButton value="Descargar plantilla"
+									styleClass="button-small-text toRight field_mrg"
+									icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true">
+									<p:fileDownload
+										value="#{cargarCoordenadasBean.plantillaCoordenadas}" />
+								</p:commandButton>
+								<p:commandButton styleClass="button-small toRight field_mrg"
+									ajax="false" immediate="true" icon="ui-icon-help">
+									<p:fileDownload
+										value="#{cargarCoordenadasBean.ayudaCoordenadas}" />
+								</p:commandButton>
+
+
+								<h:outputText
+									value="Sistema de referencias [Formato: sistema WGS84, zona 17S]" />
+							</f:facet>
+
+							<p:dataTable id="tbl_coordenadas" rowIndexVar="index"
+								value="#{cargarCoordenadasBean.coordinatesWrappers}" var="item"
+								emptyMessage="#{labels['common.table.empty']}">
+								<p:subTable value="#{item.coordenadas}" var="coordenada">
+									<p:columnGroup type="header">
+										<p:row>
+											<p:column
+												headerText="Grupo de coordenadas #{index + 1} (#{item.tipoForma})"
+												styleClass="alCenter w100 table-column-header" colspan="6" />
+										</p:row>
+										<p:row>
+											<p:column headerText="Shape"
+												styleClass="alCenter table-column-header" />
+											<p:column headerText="X"
+												styleClass="alCenter table-column-header" />
+											<p:column headerText="Y"
+												styleClass="alCenter table-column-header" />
+											<p:column headerText="Tipo"
+												styleClass="alCenter table-column-header" />
+											<p:column headerText="Descripción"
+												styleClass="alCenter table-column-header" />
+											<p:column headerText="Zona"
+												styleClass="alCenter table-column-header" />
+										</p:row>
+									</p:columnGroup>
+									<p:column headerText="Shape" styleClass="alCenter w15">
+										<h:outputText value="#{coordenada.orden}" />
+									</p:column>
+									<p:column headerText="X" styleClass="alCenter w15">
+										<h:outputText value="#{coordenada.x.intValue()}" />
+									</p:column>
+									<p:column headerText="Y" styleClass="alCenter w15">
+										<h:outputText value="#{coordenada.y.intValue()}" />
+									</p:column>
+									<p:column headerText="Tipo" styleClass="alCenter w15">
+										<h:outputText value="#{item.tipoForma}" />
+									</p:column>
+									<p:column headerText="Descripción" styleClass="alCenter">
+										<h:outputText value="#{coordenada.descripcion}" />
+									</p:column>
+									<p:column headerText="Zona" styleClass="alCenter">
+										<h:outputText value="#{coordenada.zona}" />
+									</p:column>
+								</p:subTable>
+							</p:dataTable>
+
+
+							<p:dataTable id="ubicacionFisTable" value="#{emisionGeneradorConAAA.listaUbicaciones}" var="ubicacion">
+
+								<p:column headerText="Provincia">
+									<h:outputText value="ubicacion" />
+								</p:column>
+								<p:column headerText="Cantón">
+									<h:outputText value="ubicacion" />
+								</p:column>
+								<p:column headerText="Parroquia">
+									<h:outputText value="ubicacion" />
+								</p:column>
+
+							</p:dataTable>
+
+						</p:panelGrid>
+
+						<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="null w30,null w70">
+
+							<p:outputLabel value="Adjuntar Autorización Administrativa Ambiental otorgado (.pdf) *" />
+
+							<h:panelGroup>
+								<p:fileUpload
+									fileUploadListener="#{emisionGeneradorConAAA.fileUploadResolucion}"
+									value="#{emisionGeneradorConAAA.documentoResolucion}"
+									sizeLimit="20971520" allowTypes="/(\.|\/)(pdf)$/"
+									label="Seleccionar" update="nombreFile" uploadLabel="Subir"
+									auto="true" cancelLabel="Cancelar" required="true"
+									requiredMessage="El adjunto de la resolución es requerido."
+									invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+									invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+									styleClass="w100 toLeft" mode="advanced">
+								</p:fileUpload>
+								<br />
+								<p:outputPanel id="nombreFile">
+									<h:outputText value="nombre Documento" />
+									<br />
+									<p:commandButton icon="ui-icon-arrowthickstop-1-s"
+										styleClass="secondary" ajax="false" immediate="true"
+										process="@this" title="Descargar">
+										<p:fileDownload
+											value="#{emisionGeneradorConAAA.getDocumentoResolucion()}" />
+									</p:commandButton>
+								</p:outputPanel>
+							</h:panelGroup>
+						</p:panelGrid>
+					</p:panelGrid>
+
+					<p:panelGrid id="informacionProyectoSistemaFisicoGrid" columns="1" layout="grid" styleClass="w100" rendered="#{emisionGeneradorConAAA.emitidoPor eq 3 ? true :false}">
+
+						<p:panel>
+							<f:facet name="header">
+								<h:outputText value="Buscar proyecto" />
+							</f:facet>
+
+							<p:separator />
+							<p:outputLabel value="Estimado usuario, si su Autorización Administrativa Ambiental inicio en el SUIA y se obtuvo de manera física seleccione el código del proyecto"
+								style="color:#FF0000;" />
+
+							<p:separator />
+						</p:panel>
+
+						<p:dataTable id="proyectosSuiaFisTable"
+							value="#{emisionGeneradorConAAA.listaProyectos}" var="proyecto"
+							selection="#{emisionGeneradorConAAA.proyectoSelecionado}" rowKey="#{proyecto.id}"
+							sortOrder="descending" paginator="true"
+							paginatorAlwaysVisible="true" paginatorPosition="bottom"
+							currentPageReportTemplate="{currentPage} de {totalPages}"
+							rows="5" rowsPerPageTemplate="5,10,15"
+							emptyMessage="No existen registros">
+
+							<p:column style="width:16px">
+								<p:rowToggler />
+							</p:column>
+							<p:column headerText="Código Proyecto">
+								<h:outputText value="#{proyecto.codigo}" />
+							</p:column>
+							<p:column headerText="Nombre del proyecto">
+								<h:outputText value="#{proyecto.nombre}" />
+							</p:column>
+							<p:column headerText="Tipo de permiso ambiental">
+								<h:outputText value="#{proyecto.catalogoCategoria.categoria.nombrePublico}" />
+							</p:column>
+							<p:column headerText="Accion" selectionMode="single"
+								style="width:35px;text-align:center" />
+
+
+							<p:rowExpansion>
+								
+									<p:outputLabel value="Actividad"/>Aceptar
+									<p:inputTextarea value="#{proyecto.catalogoCategoria.descripcion}" disabled="true" rows="4"/>
+									<p:outputLabel value="Resumen del Proyecto, obra o actividad"/>
+									<p:inputTextarea value="#{proyecto.resumen}" disabled="true" rows="4"/>
+									
+
+								<br />
+								<br />
+								<p:panelGrid columns="1" layout="grid">
+
+									<p:panelGrid columns="1" layout="grid" styleClass="w100">						
+
+										<f:facet name="header">
+											<h:outputText
+												value="Sistema de referencias (Formato: sistema WGS84, zona 17S)" />
+										</f:facet>
+										<p:dataTable id="tbl_coordenadas" rowIndexVar="index"
+											value="#{proyecto.formasProyectos}"
+											var="item" emptyMessage="#{labels['common.table.empty']}">
+											<p:subTable value="#{item.coordenadas}" var="coordenada">
+												<p:columnGroup type="header">
+													<p:row>
+														<p:column
+															headerText="Grupo de coordenadas #{index + 1} (#{item.tipoForma})"
+															styleClass="alCenter w100 table-column-header"
+															colspan="5" />
+													</p:row>
+													<p:row>
+														<p:column headerText="Shape"
+															styleClass="alCenter table-column-header" />
+														<p:column headerText="X"
+															styleClass="alCenter table-column-header" />
+														<p:column headerText="Y"
+															styleClass="alCenter table-column-header" />
+														<p:column headerText="Tipo"
+															styleClass="alCenter table-column-header" />
+														<p:column headerText="Descripción"
+															styleClass="alCenter table-column-header" />
+													</p:row>
+												</p:columnGroup>
+												<p:column headerText="Shape" styleClass="alCenter w15">
+													<h:outputText value="#{coordenada.orden}" />
+												</p:column>
+												<p:column headerText="X" styleClass="alCenter w15">
+													<h:outputText value="#{coordenada.x}" />
+												</p:column>
+												<p:column headerText="Y" styleClass="alCenter w15">
+													<h:outputText value="#{coordenada.y}" />
+												</p:column>
+												<p:column headerText="Tipo" styleClass="alCenter w15">
+													<h:outputText value="#{item.tipoForma}" />
+												</p:column>
+												<p:column headerText="Descripción"
+													styleClass="alCenter">
+													<h:outputText value="#{coordenada.descripcion}" />
+												</p:column>
+											</p:subTable>
+										</p:dataTable>
+									</p:panelGrid>
+
+									<br />
+									<br />
+
+									<p:panelGrid columns="1" layout="grid" styleClass="w100">
+										<f:facet name="header">
+											<h:outputText value="Ubicación geográfica" />
+										</f:facet>
+										
+										<p:dataTable
+											value="#{proyecto.proyectoUbicacionesGeograficas}"
+											var="ubicacion">
+											<p:column headerText="Provincia">
+												<h:outputText
+													value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+											</p:column>
+											<p:column headerText="Cantón">
+												<h:outputText
+													value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+											</p:column>
+											<p:column headerText="Parroquia">
+												<h:outputText
+													value="#{ubicacion.ubicacionesGeografica.nombre}" />
+											</p:column>
+										</p:dataTable>
+									</p:panelGrid>
+
+
+									<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="null w30,null w70">
+
+							<p:outputLabel value="Adjuntar Autorización Administrativa Ambiental otorgado (.pdf) *" />
+
+							<h:panelGroup>
+								<p:fileUpload
+									fileUploadListener="#{emisionGeneradorConAAA.fileUploadResolucion}"
+									value="#{emisionGeneradorConAAA.documentoResolucion}"
+									sizeLimit="20971520" allowTypes="/(\.|\/)(pdf)$/"
+									label="Seleccionar" update="nombreFile" uploadLabel="Subir"
+									auto="true" cancelLabel="Cancelar" required="true"
+									requiredMessage="El adjunto de la resolución es requerido."
+									invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+									invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+									styleClass="w100 toLeft" mode="advanced">
+								</p:fileUpload>
+								<br />
+								<p:outputPanel id="nombreFile">
+									<h:outputText value="nombre Documento" />
+									<br />
+									<p:commandButton icon="ui-icon-arrowthickstop-1-s"
+										styleClass="secondary" ajax="false" immediate="true"
+										process="@this" title="Descargar">
+										<p:fileDownload
+											value="#{emisionGeneradorConAAA.getDocumentoResolucion()}" />
+									</p:commandButton>
+								</p:outputPanel>
+							</h:panelGroup>
+						</p:panelGrid>
+								</p:panelGrid>
+
+							</p:rowExpansion>
+
+
+						</p:dataTable>
+
+					</p:panelGrid>
+
+				</p:panelGrid>
+			</p:panelGrid>
+
+			<div class="buttons main">
+				<p:commandButton value="Guardar" icon="ui-icon-check" />
+				<p:commandButton value="Enviar" icon="ui-icon-check" />
+				<p:commandButton value="Cancelar" icon="ui-icon-check" immediate="true"
+					styleClass="secondary" action="/pages/rcoa/generadorDesechos/motivoEmision.jsf"/>
+			</div>
+
+			<p:dialog header="Adjuntar coordenadas"
+				widgetVar="adjuntarCoordenadas"
+				modal="#{cargarCoordenadasBean.modalLoadFile}" resizable="false">
+				<p:panelGrid columns="1" columnClasses="label, value">
+					<h:outputText value="Seleccione el archivo excel (.xls)" />
+					<p:fileUpload uploadLabel="Subir" auto="true"
+						cancelLabel="Cancelar" label="Seleccionar"
+						fileUploadListener="#{cargarCoordenadasBean.handleFileUpload}"
+						mode="advanced" dragDropSupport="false" multiple="false"
+						allowTypes="/(\.|\/)(xls)$/"
+						oncomplete="showModalTransformation()"
+						invalidFileMessage="El archivo es inválido."
+						invalidSizeMessage="El archivo es demasiado grande." />
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton type="button" value="Cerrar"
+						onclick="PF('adjuntarCoordenadas').hide()" />
+				</div>
+			</p:dialog>
+			
+			
+			<p:dialog header="Selección"
+				widgetVar="tipoProyecto" resizable="false">
+				<p:panelGrid columns="2" columnClasses="label, value">
+				
+				<p:selectOneRadio id="seleccionarProyecto" layout="grid" columns="1" value="#{emisionGeneradorVariasActividadesController.tipoProyecto}">
+							<f:selectItem itemLabel="Emitido en físico" itemValue="#{1}" />
+							<f:selectItem itemLabel="Iniciado en SUIA emitido en Físico" itemValue="#{2}" />
+							<f:selectItem itemLabel="Emitido en SUIA" itemValue="#{3}" />
+							<p:ajax event="change" process="@this"/>
+						</p:selectOneRadio>					
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton type="button" value="Aceptar"
+						onclick="PF('tipoProyecto').hide()" />
+						<p:commandButton type="button" value="Cancelar"
+						onclick="PF('tipoProyecto').hide()" styleClass="secondary"/>
+				</div>
+			</p:dialog>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

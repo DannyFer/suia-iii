@@ -1,0 +1,91 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+<p:panelGrid id="justificativoGrid" columns="1" layout="grid" styleClass="w60">
+	<f:facet name="header">
+		<h:outputText value="Corrección de las observaciones encontradas en la inspección de campo"/>										
+	</f:facet>
+	
+	<p:dataTable id="justificativoTable" value="#{registrarSustanciasQuimicasController.ubicacionSustanciaProyectoLista}" var="item"
+	 emptyMessage="#{labels['common.table.empty']}" lazy="true">
+		
+		<p:column headerText="Sustancia Quimica"
+			styleClass="alCenter singleLine">
+			<h:outputText value="#{item.gestionarProductosQuimicosProyectoAmbiental.sustanciaquimica.descripcion}" />
+		</p:column>
+		
+		<p:column headerText="Lugar">
+			<h:outputText value="#{item.lugares}"/>
+		</p:column>
+		
+		<p:column headerText="Provincia">
+			<h:outputText value="#{item.ubicacionesGeografica.ubicacionesGeografica.nombre}"/>
+		</p:column>
+		
+		<p:column headerText="Cantón">
+			<h:outputText value="#{item.ubicacionesGeografica.nombre}"/>
+		</p:column>
+		
+		<p:column headerText="Obsevaciones">
+			<h:outputText value="#{item.observaciones}"/>
+		</p:column>
+		
+		<p:column headerText="Informe Apoyo">
+			<center>
+			<p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary" immediate="true"
+				rendered="#{item.necesitaInspeccion and not empty registrarSustanciasQuimicasController.buscarInforme(item)}">
+                	<p:fileDownload value="#{registrarSustanciasQuimicasController.descargarDocumento(item)}"/>
+                </p:commandButton> 
+                <h:outputText value="Sin Informe de Inspección de Apoyo" 
+                rendered="#{empty registrarSustanciasQuimicasController.buscarInforme(item)}"/> 
+			</center>
+		</p:column>
+				
+		<p:column headerText="Justificativo">
+			<center>
+			<p:commandButton icon="ui-icon-plus" value="Adjuntar" styleClass="secondary"  process="@this" 
+				actionListener="#{registrarSustanciasQuimicasController.editarJustificativo(item)}" oncomplete="PF('justificativoDiag').show()" update=":formDialogs:justificativoDiag"
+				rendered="#{registrarSustanciasQuimicasController.habilitarIngreso and item.necesitaInspeccion}"/>
+			<br/>
+			<p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary" immediate="true"
+				rendered="#{not empty item.documentoJustificativo}">
+                	<p:fileDownload value="#{documentosRSQController.streamedContentRsq(item.documentoJustificativo)}"/>
+            </p:commandButton>			
+			</center>
+		</p:column>
+		
+	</p:dataTable>
+</p:panelGrid>
+	
+<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{not empty registrarSustanciasQuimicasController.documentoInformeInspeccion}">
+	<f:facet name="header">
+		<h:outputText value="Informe de Inspección General"/>		
+	</f:facet>
+	<p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary" immediate="true">
+        <p:fileDownload value="#{documentosRSQController.streamedContentRsq(registrarSustanciasQuimicasController.documentoInformeInspeccion)}"/>
+    </p:commandButton> 		
+</p:panelGrid>
+
+<p:panelGrid columns="1" styleClass="w100 alCenter" rendered="#{!registrarSustanciasQuimicasController.habilitarIngreso}">
+		<h:outputText value="Respuestas Aclaratorias Adicionales"/>
+		<p:inputTextarea value="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.respuestasAdicionales}"
+			maxlength="300" readonly="true"/>
+			
+		<h:outputText value="Justificaciones Adicionales"/>
+		<p:inputTextarea value="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.justificacionAdicional}"
+			maxlength="300" readonly="true"/>
+			
+		<p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary" immediate="true"
+			rendered="#{not empty registrarSustanciasQuimicasController.documentoJustificaciones}">
+        <p:fileDownload value="#{documentosRSQController.streamedContentRsq(registrarSustanciasQuimicasController.documentoJustificaciones)}"/>
+    </p:commandButton> 
+	
+	</p:panelGrid> 
+	
+</html>

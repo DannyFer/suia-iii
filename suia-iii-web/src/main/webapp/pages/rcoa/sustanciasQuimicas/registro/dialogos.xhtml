@@ -1,0 +1,542 @@
+<html 
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"	
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+<style type="text/css">
+.displayfalse {
+	dislay: none !important;
+}
+#lugar_panel .ui-widget-header {    
+    display: none;
+}
+</style>	
+<p:dialog id="ubicacionSustanciaDiag" widgetVar="ubicacionSustanciaDiag" header="Ingresar Ubicación Sustancia" width="900px" closable="false">								
+	<p:panelGrid id="ubicacionSustanciaDiagGrid" columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+		<h:outputText value="Sustancia Quimica *" for="sustancia"/>		
+		<p:selectOneMenu id="sustancia" layout="grid" columns="1" value="#{registrarSustanciasQuimicasController.ubicacionSustanciaProyecto.gestionarProductosQuimicosProyectoAmbiental}"
+		converter="selectItemConverter" required="true" requiredMessage="Sustancia Quimica es requerido">
+			<f:selectItem noSelectionOption="true" itemLabel="Seleccione..."/>
+        	<f:selectItems value="#{registrarSustanciasQuimicasController.sustanciasParaUbicacionLista}" var="item" itemLabel="#{item.sustanciaquimica.descripcion}" itemValue="#{item}"/>
+        	<p:ajax event="change" update="@this lugar"/>
+    	</p:selectOneMenu>	
+		
+		<h:outputText value="Lugar *" for="lugar"/>
+		<p:selectManyCheckbox id="lugar" value="#{registrarSustanciasQuimicasController.ubicacionSustanciaProyecto.lugaresArray}"
+			label="#{registrarSustanciasQuimicasController.labelLugares}" filter="false"
+			styleClass="w100" required="true" requiredMessage="Lugar es requerido">
+			<f:selectItems value="#{registrarSustanciasQuimicasController.lugaresLista}" var="item" itemLabel="#{item.nombre}" itemValue="#{item.nombre}"/>
+			<p:ajax event="change" update="@this"/>			
+		</p:selectManyCheckbox>
+		</p:panelGrid>
+		
+		<p:panelGrid columns="1" layout="grid" styleClass="buttonAddPuntosRecuperacionContainer w100">
+	
+		<f:facet name="header">	
+		<h:outputText value="Ingrese las coordenadas del punto geográfico en DATUM WGS 84 zona 17 sur" />
+		<mae:panelGridHeaderHelp					
+					conector="puntosHelp"
+					help="Debe ingresar una coordenada de ubicación de su planta, bodega, sucursal o proyecto. La coordenada debe encontrarse en el área que se está regularizando."
+					width="600px"/>
+				
+		</f:facet>
+		
+	<p:panelGrid columns="4"
+		styleClass="panel_data w100"
+		columnClasses="header w25,null w25,header w25,null w25">
+
+		<h:outputText value="Coordenada en x" for="coorx" />
+		<pe:inputNumber id="coorx"
+			value="#{registrarSustanciasQuimicasController.ubicacionSustanciaProyecto.coordenadaX}"
+			required="true" requiredMessage="Coordenada X es requerida"
+			thousandSeparator="" decimalSeparator="." maxValue="999999.9999"
+			minValue="0" validatorMessage="mensaje" decimalPlaces="4">
+			<f:validateDoubleRange minimum="0.1" />
+			<p:ajax event="blur"
+				listener="#{registrarSustanciasQuimicasController.validarCoordenada()}"
+				process="@this" update="canton, provincia, parroquia" />
+		</pe:inputNumber>
+
+
+		<h:outputText value="Coordenada en y" for="coory" />
+		<pe:inputNumber
+			value="#{registrarSustanciasQuimicasController.ubicacionSustanciaProyecto.coordenadaY}"
+			required="true" requiredMessage="Coordenada Y es requerida"
+			decimalPlaces="4" thousandSeparator="" maxValue="9999999.9999">
+			<p:ajax event="blur"
+				listener="#{registrarSustanciasQuimicasController.validarCoordenada()}"
+				update="canton, provincia, parroquia" />
+		</pe:inputNumber>
+
+	</p:panelGrid>
+	</p:panelGrid>
+
+	<p:panelGrid id="ubicacionSustanciaDiagGrid3" columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+
+		<h:outputText value="Provincia *" for="provincia" />
+		<h:outputText id="provincia" 
+		value="#{registrarSustanciasQuimicasController.ubicacionSustanciaProyecto.ubicacionesGeografica.ubicacionesGeografica.ubicacionesGeografica.nombre}"/>
+			
+			<h:outputText value="Cantón *" for="canton" />
+			<h:outputText id="canton"
+			value="#{registrarSustanciasQuimicasController.ubicacionSustanciaProyecto.ubicacionesGeografica.ubicacionesGeografica.nombre}"/>
+			
+			<h:outputText value="Parroquia *" for="parroquia" />
+			<h:outputText id="parroquia" value="#{registrarSustanciasQuimicasController.ubicacionSustanciaProyecto.ubicacionesGeografica.nombre}"/>
+
+			<h:outputText value="Teléfono *" for="telefono" />
+			<p:inputText id="telefono"
+				value="#{registrarSustanciasQuimicasController.ubicacionSustanciaProyecto.telefono}"
+				required="true" maxlength="13"
+				onkeypress="return numbersonly(event);"
+				requiredMessage="Teléfono es requerido">
+				<f:validateLength minimum="7" />
+				<p:ajax process="@this" />
+			</p:inputText>
+
+			<h:outputText value="Correo *" for="correo" />
+			<p:inputText id="correo"
+				value="#{registrarSustanciasQuimicasController.ubicacionSustanciaProyecto.correo}"
+				required="true" requiredMessage="Correo es requerido"
+				maxlength="100">
+				<p:ajax process="@this" />
+			</p:inputText>
+
+			<h:outputText value="Dirección *" for="direccion" />
+			<p:inputText id="direccion"
+				value="#{registrarSustanciasQuimicasController.ubicacionSustanciaProyecto.direccion}"
+				required="true" requiredMessage="Dirección es requerido"
+				maxlength="200" />
+
+			<h:inputHidden validator="#{registrarSustanciasQuimicasController.validarCorreoUbicacion}" />
+			<h:inputHidden validator="#{registrarSustanciasQuimicasController.validarUbicacionRepetida}"/>
+	</p:panelGrid>
+	
+	<t:div styleClass="buttons">
+		<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" 
+		oncomplete="PF('ubicacionSustanciaDiag').hide()" styleClass="secondary" resetValues="true" 
+		actionListener="#{registrarSustanciasQuimicasController.crearUbicacionSustancia}"
+		update="ubicacionSustanciaDiag"/>
+		<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}" styleClass="primary" process="ubicacionSustanciaDiag" oncomplete="if(!args.validationFailed) PF('ubicacionSustanciaDiag').hide();"
+			actionListener="#{registrarSustanciasQuimicasController.agregarUbicacionSustancia}" update="ubicacionSustanciaDiagGrid :form:ubicacionSustanciaGrid"/>
+	</t:div>
+</p:dialog>
+
+<p:dialog id="respTecnicoDiag" widgetVar="respTecnicoDiag" header="Ingresar Responsable Técnico" width="900px" closable="false">
+<p:panelGrid id="respTecnicoIdent" columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+		<h:outputText value="Tipo de Identificacion *"/>
+		<p:selectOneRadio value="#{registrarSustanciasQuimicasController.responsable.tipoIdentificacion}" converter="selectItemConverter"
+		required="true" requiredMessage="Tipo de Identificacion es requerido">
+			<f:selectItems value="#{registrarSustanciasQuimicasController.tipoIdentificacionResponsableLista}" var="item" itemLabel="#{item.nombre}" itemValue="#{item}"/>				
+			<p:ajax process="@this" update="respTecnicoDiagGrid" 
+			listener="#{registrarSustanciasQuimicasController.tipoIdentificaionListener}"
+			resetValues="true"/>
+		</p:selectOneRadio>
+	</p:panelGrid>
+	
+<p:panel id="respTecnicoDiagGrid">
+	<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75"
+	rendered="#{!registrarSustanciasQuimicasController.responsable.tipoIdentificacion.nombre.toUpperCase().contains('ARTESANAL')}">
+			
+		<h:outputText value="Número de Cédula o Pasaporte *"/>
+		<h:panelGroup id="cedulaGroupResp">
+		<p:inputText value="#{registrarSustanciasQuimicasController.cedulaResponsable}" style="width:200px!important" 
+		maxlength="#{registrarSustanciasQuimicasController.responsable.tipoIdentificacion.nombre.toUpperCase().contains('CEDULA')?'10':'20'}"
+		required="true" requiredMessage="Número de Cédula o Pasaporte es requerido"
+		disabled="#{empty registrarSustanciasQuimicasController.responsable.tipoIdentificacion}"/>
+		<p:commandButton value="Validar" styleClass="primary" rendered="#{registrarSustanciasQuimicasController.responsable.tipoIdentificacion.nombre.toUpperCase().contains('CEDULA')}"
+		actionListener="#{registrarSustanciasQuimicasController.validarCedulaResponsable}" process="cedulaGroupResp" 
+		update="nombreResp tablaNumTitulo tituloProfesional"/>
+		<p:commandButton value="Buscar Títulos" styleClass="primary" rendered="#{registrarSustanciasQuimicasController.responsable.tipoIdentificacion.nombre.toUpperCase().contains('PASAPORTE')}"
+		actionListener="#{registrarSustanciasQuimicasController.validarTituloResponsable()}" process="cedulaGroupResp" 
+		update="nombreResp tablaNumTitulo tituloProfesional"/>
+		</h:panelGroup>			
+		
+		<h:outputText value="Nombre *"/>
+		<p:inputText id="nombreResp" value="#{registrarSustanciasQuimicasController.nombreResponsable}" 
+		required="true" requiredMessage="Nombre es requerido"
+		maxlength="100" readonly="#{registrarSustanciasQuimicasController.responsable.tipoIdentificacion.nombre.toUpperCase().contains('CEDULA')}"
+		disabled="#{empty registrarSustanciasQuimicasController.responsable.tipoIdentificacion}">
+			<p:ajax process="@this"/>
+		</p:inputText>
+		
+		<h:outputText value="Dirección *"/>
+		<p:inputText value="#{registrarSustanciasQuimicasController.responsable.direccion}" maxlength="200"
+		required="true" requiredMessage="Dirección es requerido">
+		</p:inputText>
+			
+		<h:outputText value="Teléfono *"/>
+			<p:inputText id="telefonoTec"
+				value="#{registrarSustanciasQuimicasController.responsable.telefono}"
+				required="true" maxlength="10"
+				onkeypress="return numbersonly(event);"
+				requiredMessage="Teléfono es requerido">
+				<f:validateLength minimum="7" />
+			</p:inputText>
+
+			<h:outputText value="Correo *"/>
+		<p:inputText value="#{registrarSustanciasQuimicasController.responsable.correo}" maxlength="100"
+		required="true" requiredMessage="Correo es requerido">
+			<p:ajax process="@this"/>
+		</p:inputText>
+				
+		<h:outputText value="Número(s) Registro(s) Título(s) SENESCYT *"/>
+		<p:dataTable id="tablaNumTitulo" value="#{registrarSustanciasQuimicasController.responsable.numerosTitulos}" var="item"
+		emptyMessage="#{labels['common.table.empty']}">
+			<p:column>
+				<h:outputText value="#{item}"/>
+			</p:column>
+		</p:dataTable>
+		
+		<h:outputText value="Título(s) Profesional(es) *"/>
+		<h:panelGroup id="tituloProfesional">
+			<p:dataTable value="#{registrarSustanciasQuimicasController.responsable.nombresTitulos}" var="item"
+				emptyMessage="#{labels['common.table.empty']}" rendered="#{not empty registrarSustanciasQuimicasController.responsable.numerosTitulos}">
+				<p:column>
+					<h:outputText value="#{item}"/>
+				</p:column>
+			</p:dataTable>
+			<p:fileUpload 
+				fileUploadListener="#{registrarSustanciasQuimicasController.fileUploadTitProfesionalListener}"
+				sizeLimit="20971520" allowTypes="/(\.|\/)(pdf|rar|zip)$/"
+				label="Admite .pdf .rar .zip de 20Mb" update="@this labelDocTitProfesional"
+				uploadLabel="Subir" auto="true" cancelLabel="Cancelar"
+				invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+				invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+				styleClass="w100 toLeft primary" mode="advanced"
+				rendered="#{empty registrarSustanciasQuimicasController.responsable.numerosTitulos}" />
+			<h:inputHidden validator="#{registrarSustanciasQuimicasController.validarDocumentoTitProfesional}" />
+			<h:outputText id="labelDocTitProfesional" value="#{registrarSustanciasQuimicasController.responsable.documentoTitProfesional.nombre}"/>
+		</h:panelGroup>	
+		
+		<h:outputText value="Responsabilidad Técnico *"/>
+		<h:panelGroup id="responsabilidadTec">		
+			<p:commandButton icon="ui-icon-arrowthickstop-1-s" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar Formato" styleClass="secondary">
+				<p:fileDownload value="#{documentosRSQController.streamedContentRsqPorNombre('FormularioResponsableTecnicoRSQ.pdf')}"/>
+			</p:commandButton>
+			<p:fileUpload 
+				fileUploadListener="#{registrarSustanciasQuimicasController.fileUploadResponsabilidadTeclListener}"
+				sizeLimit="20971520" allowTypes="/(\.|\/)(pdf)$/"
+				label="Adjuntar archivo .pdf (20Mb)" update="@this labelDocResponsabilidadTec"
+				uploadLabel="Subir" auto="true" cancelLabel="Cancelar"
+				invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+				invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+				styleClass="w100 toLeft primary" mode="advanced"/>
+			<h:inputHidden validator="#{registrarSustanciasQuimicasController.validarDocumentoResponsabilidadTec}" />
+			<h:outputText id="labelDocResponsabilidadTec" value="#{registrarSustanciasQuimicasController.responsable.documentoResponsabilidadTec.nombre}"/>
+		</h:panelGroup>	
+				
+		<h:outputText value="Sustancia Quimica" for="sustanciaResp"/>
+		<p:selectManyCheckbox id="sustanciaResp" value="#{registrarSustanciasQuimicasController.listaSustanciasTecnico}"
+		converter="selectItemConverter" required="true" requiredMessage="Sustancia Química es requerido">
+        	<f:selectItems value="#{registrarSustanciasQuimicasController.sustanciasParaUbicacionLista}" var="item" itemLabel="#{item.sustanciaquimica.descripcion}" itemValue="#{item}"/>
+        	<p:ajax event="change" process="@this" update="@this lugarResp" listener="#{registrarSustanciasQuimicasController.obtenerLugares(false)}"/>
+		</p:selectManyCheckbox>
+		
+		<h:outputText value="Lugar *" for="lugarResp"/>		
+		<p:selectManyCheckbox id="lugarResp" value="#{registrarSustanciasQuimicasController.lugaresSeleccionados}"
+		converter="selectItemConverter" required="true" requiredMessage="Lugar es requerido">
+        	<f:selectItems value="#{registrarSustanciasQuimicasController.lugaresArray}" var="item" itemLabel="#{item}" itemValue="#{item}"/>
+        	<p:ajax event="change" process="@this" update="@this lugarResp"/>
+		</p:selectManyCheckbox>
+	
+		<h:inputHidden validator="#{registrarSustanciasQuimicasController.validarCorreoResponsable}" />	
+		<h:inputHidden validator="#{registrarSustanciasQuimicasController.validarNombreResponsable}" />	
+	</p:panelGrid>
+	<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75"
+	rendered="#{registrarSustanciasQuimicasController.responsable.tipoIdentificacion.nombre.toUpperCase().contains('ARTESANAL')}">	
+	
+	<h:outputText value="Sustancia Quimica" for="sustanciaRespArt"/>
+		<p:selectManyCheckbox id="sustanciaRespArt" value="#{registrarSustanciasQuimicasController.listaSustanciasTecnico}"
+		converter="selectItemConverter" required="true" requiredMessage="Sustancia Química es requerido">
+        	<f:selectItems value="#{registrarSustanciasQuimicasController.sustanciasParaUbicacionLista}" var="item" itemLabel="#{item.sustanciaquimica.descripcion}" itemValue="#{item}"/>
+        	<p:ajax event="change" process="@this" update="@this"/>
+		</p:selectManyCheckbox>
+	
+	<h:outputText value="Título Artesanal"/>
+		<h:panelGroup id="operadorArtesanal">	
+			<p:fileUpload 
+				fileUploadListener="#{registrarSustanciasQuimicasController.fileUploadTitArtesanalListener}"
+				sizeLimit="20971520" allowTypes="/(\.|\/)(pdf)$/"
+				label="Adjuntar archivo .pdf (20Mb)" update="@this labelDocTitArtesanal"
+				uploadLabel="Subir" auto="true" cancelLabel="Cancelar"
+				invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+				invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+				styleClass="w100 toLeft primary" mode="advanced"/>
+			<h:inputHidden validator="#{registrarSustanciasQuimicasController.validarDocumentoTitArtesanal}" />
+			<h:outputText id="labelDocTitArtesanal" value="#{registrarSustanciasQuimicasController.responsable.documentoTitArtesanal.nombre}"/>		
+		</h:panelGroup>			
+	</p:panelGrid>		
+	<t:div styleClass="buttons">
+			<p:commandButton icon="ui-icon-cancel"
+				value="#{msg['button.cerrar']}" process="@this"
+				oncomplete="PF('respTecnicoDiag').hide()" styleClass="secondary" resetValues="true"/>
+			<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}"
+				styleClass="primary" process="respTecnicoDiag"
+				oncomplete="if(!args.validationFailed) PF('respTecnicoDiag').hide();"
+				actionListener="#{registrarSustanciasQuimicasController.agregarResponsable(false)}"
+				update="respTecnicoIdent respTecnicoDiagGrid :form:respTecnicoGrid" resetValues="true"/>
+		</t:div>
+</p:panel>
+</p:dialog>
+
+<p:dialog id="respBodegaDiag" widgetVar="respBodegaDiag" header="Ingresar Responsable Bodega" width="900px" closable="false">								
+	<p:panelGrid id="respBodegaDiagGrid" columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+		<h:outputText value="Tipo de Identificacion"/>
+		<p:selectOneRadio value="#{registrarSustanciasQuimicasController.responsable.tipoIdentificacion}" converter="selectItemConverter"
+		required="true" requiredMessage="Tipo de Identificacion es requerido">
+			<f:selectItems value="#{registrarSustanciasQuimicasController.tipoIdentificacionLista}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>				
+			<p:ajax process="@this" update="@this cedulaGroupRespB nombreRespB" 
+			listener="#{registrarSustanciasQuimicasController.tipoIdentificaionListener}"
+			resetValues="true"/>
+		</p:selectOneRadio>
+			
+		<h:outputText value="Número de Cédula o Pasaporte *"/>
+		<h:panelGroup id="cedulaGroupRespB">
+		<p:inputText value="#{registrarSustanciasQuimicasController.cedulaResponsable}" style="width:200px!important" 
+		maxlength="#{registrarSustanciasQuimicasController.responsable.tipoIdentificacion.nombre.toUpperCase().contains('CEDULA')?'10':'20'}"
+		required="true" requiredMessage="Número de Cédula o Pasaporte es requerido"
+		disabled="#{empty registrarSustanciasQuimicasController.responsable.tipoIdentificacion}"/>
+		<p:commandButton value="Validar" styleClass="primary" rendered="#{registrarSustanciasQuimicasController.responsable.tipoIdentificacion.nombre.toUpperCase().contains('CEDULA')}"
+		actionListener="#{registrarSustanciasQuimicasController.validarCedulaResponsable}" process="cedulaGroupRespB" update="nombreRespB"/>
+		</h:panelGroup>			
+		
+		<h:outputText value="Nombre *"/>
+		<p:inputText id="nombreRespB" value="#{registrarSustanciasQuimicasController.nombreResponsable}" 
+		maxlength="100" readonly="#{registrarSustanciasQuimicasController.responsable.tipoIdentificacion.nombre.toUpperCase().contains('CEDULA')}"
+		required="true" requiredMessage="Nombre es requerido"
+		disabled="#{empty registrarSustanciasQuimicasController.responsable.tipoIdentificacion}">
+			<p:ajax process="@this"/>
+		</p:inputText>
+		
+		<h:outputText value="Dirección *"/>
+		<p:inputText value="#{registrarSustanciasQuimicasController.responsable.direccion}" maxlength="200"
+		required="true" requiredMessage="Dirección es requerido"/>
+		
+		<h:outputText value="Teléfono *"/>
+		<p:inputText id="telefonoTecB"
+				value="#{registrarSustanciasQuimicasController.responsable.telefono}"
+				required="true" maxlength="10"
+				onkeypress="return numbersonly(event);"
+				requiredMessage="Teléfono es requerido">
+				<f:validateLength minimum="7" />
+			</p:inputText>
+						
+		<h:outputText value="Correo electrónico *"/>
+		<p:inputText value="#{registrarSustanciasQuimicasController.responsable.correo}" maxlength="100"
+		required="true" requiredMessage="Correo es requerido">
+			<p:ajax process="@this"/>
+		</p:inputText>		
+				
+		<h:outputText value="Sustancia Quimica" for="sustanciaRespB"/>    	
+    	<p:selectManyCheckbox id="sustanciaRespB" value="#{registrarSustanciasQuimicasController.listaSustanciasTecnico}"
+		converter="selectItemConverter" required="true" requiredMessage="Sustancia Química es requerido">
+        	<f:selectItems value="#{registrarSustanciasQuimicasController.sustanciasParaUbicacionLista}" var="item" itemLabel="#{item.sustanciaquimica.descripcion}" itemValue="#{item}"/>
+        	<p:ajax event="change" process="@this" update="@this lugarRespB" listener="#{registrarSustanciasQuimicasController.obtenerLugares(true)}"/>
+		</p:selectManyCheckbox>
+    	
+		
+		<h:outputText value="Bodega *" for="lugarRespB"/>		
+		<p:selectManyCheckbox id="lugarRespB" value="#{registrarSustanciasQuimicasController.lugaresSeleccionados}"
+		converter="selectItemConverter" required="true" requiredMessage="Lugar es requerido">
+        	<f:selectItems value="#{registrarSustanciasQuimicasController.lugaresArray}" var="item" itemLabel="#{item}" itemValue="#{item}"/>
+        	<p:ajax event="change" process="@this" update="@this"/>
+		</p:selectManyCheckbox>		
+						
+		<h:inputHidden validator="#{registrarSustanciasQuimicasController.validarCorreoResponsable}" />
+		<h:inputHidden validator="#{registrarSustanciasQuimicasController.validarNombreResponsable}" />						
+	</p:panelGrid>	
+	<t:div styleClass="buttons">
+		<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('respBodegaDiag').hide()" styleClass="secondary"/>
+		<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}" styleClass="primary" process="respBodegaDiag" oncomplete="if(!args.validationFailed) PF('respBodegaDiag').hide();"
+			actionListener="#{registrarSustanciasQuimicasController.agregarResponsable(true)}" update="respBodegaDiagGrid :form:respBodegaGrid"/>
+	</t:div>
+</p:dialog>
+
+<p:dialog id="justificativoDiag" widgetVar="justificativoDiag" header="Adjuntar Justificativo" width="900px" closable="false">								
+<p:panel id="justificativoDiagGrid">
+	<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">	
+	<h:outputText value="Justificativo"/>
+		<h:panelGroup>	
+			<p:fileUpload 
+				fileUploadListener="#{registrarSustanciasQuimicasController.fileUploadJustificativoListener}"
+				sizeLimit="20971520" allowTypes="/(\.|\/)(pdf)$/"
+				label="Adjuntar archivo .pdf (20Mb)" update="@this labelDocJustificativo"
+				uploadLabel="Subir" auto="true" cancelLabel="Cancelar"
+				invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+				invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+				styleClass="w100 toLeft primary" mode="advanced"/>
+			<h:outputText id="labelDocJustificativo" value="#{registrarSustanciasQuimicasController.ubicacionSustanciaProyecto.documentoJustificativo.nombre}"/>		
+		</h:panelGroup>			
+	</p:panelGrid>		
+	<t:div styleClass="buttons">
+		<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('justificativoDiag').hide()" styleClass="secondary"/>
+		<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}" styleClass="primary" process="justificativoDiag" oncomplete="if(!args.validationFailed) PF('justificativoDiag').hide();"
+			actionListener="#{registrarSustanciasQuimicasController.guardarJustificativo}" update="justificativoDiagGrid :form:justificativoGrid"/>
+	</t:div>
+</p:panel>
+</p:dialog>
+<p:dialog id="prorrogaDiag" widgetVar="prorrogaDiag" header="Prórroga" width="900px" closable="false" 
+visible="#{registrarSustanciasQuimicasController.verProrroga}" modal="true">								
+<p:panel>
+	<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">	
+	<h:outputText value="¿Requiere Prórroga?"/>
+	<p:selectOneRadio value="#{registrarSustanciasQuimicasController.requiereProrroga}"
+	required="true" requiredMessage="Requiere Prórroga es obligatorio">
+		<f:selectItem itemLabel="Si" itemValue="#{true}"/>
+		<f:selectItem itemLabel="No" itemValue="#{false}"/>				
+		<p:ajax update="@this docProrroga"/>
+	</p:selectOneRadio>
+	
+	<h:outputText value=""/>
+	<h:outputText value="Nota: Su prórroga tiene vigencia 10 días, si no cumple con el tiempo establecido su proyecto se archivará"
+	style="color:red"/>
+	</p:panelGrid>
+</p:panel>
+	
+<p:panel id="docProrroga">
+	<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">	
+	<h:outputText value="Adjuntar Justificativo Prórroga" rendered="#{registrarSustanciasQuimicasController.requiereProrroga}"/>
+		<h:panelGroup rendered="#{registrarSustanciasQuimicasController.requiereProrroga}">	
+			<p:fileUpload 
+				fileUploadListener="#{registrarSustanciasQuimicasController.fileUploadProrrogaListener}"
+				sizeLimit="20971520" allowTypes="/(\.|\/)(pdf)$/"
+				label="Adjuntar archivo .pdf (20Mb)" update="@this labelDocJustificativoProrroga"
+				uploadLabel="Subir" auto="true" cancelLabel="Cancelar"
+				invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+				invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+				styleClass="w100 toLeft primary" mode="advanced"/>
+			<h:outputText id="labelDocJustificativoProrroga" value="#{registrarSustanciasQuimicasController.documentoProrroga.nombre}"/>
+			<h:inputHidden validator="#{registrarSustanciasQuimicasController.validarDocumentoProrroga}" />			
+		</h:panelGroup>			
+	</p:panelGrid>
+</p:panel>		
+	<t:div styleClass="buttons">
+		<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('prorrogaDiag').hide()" styleClass="secondary"/>
+		<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}" styleClass="primary" process="prorrogaDiag" oncomplete="if(!args.validationFailed) PF('prorrogaDiag').hide();"
+			actionListener="#{registrarSustanciasQuimicasController.guardarProrroga()}" update="prorrogaDiag"/>
+	</t:div>
+</p:dialog>
+
+<p:dialog width="600" id="actividadesRealizar" height="1000"
+			widgetVar="actividadesRealizar"
+			header="Actividades a Realizar"
+			modal="true" closable="true" resizable="false"
+			style="position: absolute;">
+			
+			<p:panel id="pnlActividades">
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	
+	<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,w75">	
+		<h:outputText value="Sustancia Química"/>	
+		<h:outputText value="#{registrarSustanciasQuimicasController.gestionarProductosQuimicosProyectoAmbientalSeleccionado.sustanciaquimica.descripcion}"/>			
+	</p:panelGrid>
+
+		<p:panelGrid id="panelActividades1" columns="1" layout="grid">
+			<f:facet name="header">
+				<h:outputText value="Nivel 1" styleClass="primary" />
+			</f:facet>
+			<ui:repeat value="#{registrarSustanciasQuimicasController.actividadesNivel1}" var="act">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					rendered="#{not empty registrarSustanciasQuimicasController.gestionarProductosQuimicosProyectoAmbientalSeleccionado}">
+					<f:facet name="header">
+						<h:outputText value="#{act.nombreActividad}" />
+					</f:facet>
+					<ui:repeat
+						value="#{registrarSustanciasQuimicasController.getCaracteristicaActividad(act)}"
+						var="actPro">
+						<p:panelGrid columns="2" styleClass="w66" columnClasses="w75, w25">
+							<h:outputText value="#{actPro.caracteristicaActividad.nombre}" />
+							<p:selectBooleanCheckbox value="#{actPro.actividadSeleccionada}"
+								disabled="#{!registrarSustanciasQuimicasController.habilitarActividad(actPro)}">
+								<p:ajax update="@this" />
+							</p:selectBooleanCheckbox>
+						</p:panelGrid>
+					</ui:repeat>
+				</p:panelGrid>
+			</ui:repeat>
+		</p:panelGrid>
+
+		<p:panelGrid id="panelActividades2" columns="1" layout="grid">
+		<f:facet name="header">
+			<h:outputText value="Nivel 2"/>		
+		</f:facet>
+		<ui:repeat value="#{registrarSustanciasQuimicasController.actividadesNivel2}" var="act">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{not empty registrarSustanciasQuimicasController.gestionarProductosQuimicosProyectoAmbientalSeleccionado}">
+				<f:facet name="header">
+					<h:outputText value="#{act.nombreActividad}"/>		
+				</f:facet>
+				<ui:repeat value="#{registrarSustanciasQuimicasController.getCaracteristicaActividad(act)}" var="actPro">
+					<p:panelGrid columns="#{actPro.caracteristicaActividad.habilitarDescripcion?'4':'2'}" styleClass="#{actPro.caracteristicaActividad.habilitarDescripcion?'w100':'w66'}" columnClasses="#{actPro.caracteristicaActividad.habilitarDescripcion?'w25,w10,w25,w40':'w75, w25'}">			
+						<h:outputText value="#{actPro.caracteristicaActividad.nombre}"/>
+						<p:selectBooleanCheckbox value="#{actPro.actividadSeleccionada}"  disabled="#{!registrarSustanciasQuimicasController.habilitarActividad(actPro)}"
+						styleClass="display#{actPro.caracteristicaActividad.tipo}">
+							<p:ajax process="@this" update="@this descripcionActividad :formDialogs:panelActividades2" listener="#{registrarSustanciasQuimicasController.actividadListener(actPro)}"/>
+						</p:selectBooleanCheckbox>
+						
+						<h:outputText value="#{actPro.caracteristicaActividad.etiquetaDescripcion}" rendered="#{actPro.caracteristicaActividad.habilitarDescripcion}"/>
+						<p:inputText id="descripcionActividad" value="#{actPro.descripcion}" maxlength="50" required="true" requiredMessage="El campo '#{actPro.caracteristicaActividad.etiquetaDescripcion}' es requerido"
+						rendered="#{actPro.caracteristicaActividad.habilitarDescripcion}" disabled="#{!actPro.actividadSeleccionada}">
+							<p:ajax update="@this" />
+						</p:inputText>
+						
+					</p:panelGrid>
+				</ui:repeat>
+			</p:panelGrid> 
+		</ui:repeat>		
+	</p:panelGrid>
+	<p:panelGrid id="panelActividades3" columns="1" layout="grid">
+		<f:facet name="header">
+			<h:outputText value="Contratará servicio de (Opcional):"/>		
+		</f:facet>
+		<ui:repeat value="#{registrarSustanciasQuimicasController.actividadesNivel3}" var="act">
+
+				<ui:repeat value="#{registrarSustanciasQuimicasController.getCaracteristicaActividad(act)}" var="actPro">
+					<p:panelGrid columns="#{actPro.caracteristicaActividad.habilitarDescripcion?'4':'2'}"
+						styleClass="#{actPro.caracteristicaActividad.habilitarDescripcion?'w100':'w66'}"
+						columnClasses="#{actPro.caracteristicaActividad.habilitarDescripcion?'w25,w10,w25,w40':'w75, w25'}">
+						<h:outputText value="#{actPro.caracteristicaActividad.nombre}" />
+						<p:selectBooleanCheckbox value="#{actPro.actividadSeleccionada}"
+							disabled="#{!registrarSustanciasQuimicasController.habilitarActividad(actPro)}"
+							styleClass="display#{actPro.caracteristicaActividad.tipo}">
+							<p:ajax process="@this"
+								update="@this descripcionActividad :formDialogs:panelActividades3"
+								resetValues="true" />
+						</p:selectBooleanCheckbox>
+
+						<h:outputText
+							value="#{actPro.caracteristicaActividad.etiquetaDescripcion}"
+							rendered="#{actPro.caracteristicaActividad.habilitarDescripcion}" />
+						<p:inputText id="descripcionActividad"
+							value="#{actPro.descripcion}" maxlength="50" required="true"
+							requiredMessage="El campo '#{actPro.caracteristicaActividad.etiquetaDescripcion}' es requerido"
+							rendered="#{actPro.caracteristicaActividad.habilitarDescripcion}"
+							disabled="#{!actPro.actividadSeleccionada}">
+							<p:ajax update="@this" />
+						</p:inputText>
+
+					</p:panelGrid>
+				</ui:repeat>
+		</ui:repeat>		
+	</p:panelGrid>
+	<h:inputHidden validator="#{registrarSustanciasQuimicasController.validarActividades}"/>	
+</p:panelGrid>
+</p:panel>
+
+	<div class="buttons main">
+		<p:commandButton icon="ui-icon-cancel" value="Cancelar"
+			styleClass="Primary" oncomplete="PF('actividadesRealizar').hide()"
+			immediate="true"/>
+			
+		<p:commandButton icon="ui-icon-disk" value="Guardar"
+			styleClass="Primary" action="#{registrarSustanciasQuimicasController.validarSustanciaQuimica(registrarSustanciasQuimicasController.gestionarProductosQuimicosProyectoAmbientalSeleccionado)}"
+			update=":form:pnlActividadSustancia" rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}" process="pnlActividades" oncomplete="if(!args.validationFailed) PF('actividadesRealizar').hide();"/>
+	</div>
+
+</p:dialog>
+</html>

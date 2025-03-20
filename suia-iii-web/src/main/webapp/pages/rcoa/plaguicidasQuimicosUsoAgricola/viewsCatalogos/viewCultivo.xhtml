@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+<div style="padding-bottom: 12px; padding-left: 4px;">
+	<h:outputText value="Registro de cultivos" styleClass="bold" />
+</div>
+
+<h:panelGrid styleClass="w100">
+	<p:dataTable id="dtCultivos" var="cultivo"
+		styleClass="table table-hover"
+		value="#{administracionCatalogosPquaController.listaCultivos}"
+		paginator="true" paginatorAlwaysVisible="false"
+		paginatorPosition="bottom"
+		emptyMessage="#{labels['common.table.empty']}"
+		currentPageReportTemplate="{currentPage} de {totalPages}" rows="20"
+		rowsPerPageTemplate="20,40,60">
+
+		<p:column headerText="Nombre común del cultivo"
+			filterBy="#{cultivo.nombreComun}" filterMatchMode="contains">
+			<h:outputText value="#{cultivo.nombreComun}" />
+		</p:column>
+		<p:column headerText="Nombre científico del cultivo">
+			<h:outputText value="#{cultivo.nombreCientificoSplit}"
+				style="font-style: italic;" escape="false" />
+		</p:column>
+		<p:column headerText="Cultivo menor / Cultivo mayor" styleClass="w12">
+			<h:outputText value="#{cultivo.tipoCultivo.valor}" />
+		</p:column>
+		<p:column headerText="Familia de cultivo">
+			<h:outputText value="#{cultivo.familiaCultivo.nombre}" />
+		</p:column>
+		<p:column headerText="Agregar" styleClass="alCenter w10">
+			<f:facet name="header">
+				<p:commandButton value="Agregar" title="Agregar"
+					styleClass="secondary" process="@this" icon="ui-icon-plus"
+					actionListener="#{administracionCatalogosPquaController.agregarCultivo()}"
+					update=":form:tab:dlgAgregarCultivo"
+					oncomplete="PF('dlgAgregarCultivo').show();" />
+			</f:facet>
+
+			<p:commandButton styleClass="button-small primary" process="@this"
+				icon="ui-icon-pencil"
+				actionListener="#{administracionCatalogosPquaController.editarCultivo(cultivo)}"
+				update=":form:tab:dlgAgregarCultivo"
+				oncomplete="PF('dlgAgregarCultivo').show();" immediate="true" />
+
+			<p:commandButton update="dtCultivos"
+				styleClass="button-small primary" process="@this"
+				icon="ui-icon-trash"
+				actionListener="#{administracionCatalogosPquaController.eliminarCultivo(cultivo)}"
+				immediate="true">
+				<p:confirm icon="ui-icon-alert" header="Confirmación"
+					message="¿Está seguro de eliminar el registro?" />
+			</p:commandButton>
+		</p:column>
+
+	</p:dataTable>
+
+
+</h:panelGrid>
+
+<p:dialog header="#{administracionCatalogosPquaController.headerCultivo}"
+	id="dlgAgregarCultivo" widgetVar="dlgAgregarCultivo" modal="true"
+	resizable="false" width="600" closable="false">
+
+	<h:outputText
+		value="Debe ingresar solo un nombre común de cultivo y sus nombres científicos separados por punto y coma." />
+	<br />
+	<br />
+	<p:panelGrid id="pnlCultivoAdd" columns="2"
+		styleClass="panel_data w100" columnClasses="header w40, w60">
+
+		<p:outputLabel value="Nombre común de cultivo:" style="color: white"
+			for="txtNomCultivo" />
+		<p:inputText id="txtNomCultivo"
+			value="#{administracionCatalogosPquaController.cultivo.nombreComun}"
+			maxlength="100" required="true"
+			requiredMessage="Nombre común de cultivo es requerido"
+			placeholder="CESPED/PASTO" />
+		<p:outputLabel value="Nombre científico de cultivo:"
+			style="color: white" for="txtNomCientifico" />
+		<p:inputText id="txtNomCientifico"
+			value="#{administracionCatalogosPquaController.cultivo.nombreCientifico}"
+			maxlength="200" required="true"
+			requiredMessage="Nombre científico de cultivo es requerido"
+			placeholder="Cynodon dactylon;Brachiaria brizantha"
+			style="font-style: italic;" />
+		<p:outputLabel value="Tipo de cultivo:" style="color: white"
+			for="cmbTipoCultivo" />
+		<p:selectOneRadio id="cmbTipoCultivo" required="true" layout="grid"
+			columns="2" converter="selectItemConverter"
+			value="#{administracionCatalogosPquaController.cultivo.tipoCultivo}">
+			<f:selectItems
+				value="#{administracionCatalogosPquaController.listaTipoCultivo}"
+				var="item" itemLabel="#{item.nombre}" itemValue="#{item}" />
+		</p:selectOneRadio>
+		<p:outputLabel value="Familia de cultivo:" style="color: white"
+			for="cmbFamilia" />
+		<p:selectOneMenu id="cmbFamilia" required="true"
+			value="#{administracionCatalogosPquaController.cultivo.familiaCultivo}"
+			converter="selectItemConverter" filter="true"
+			filterMatchMode="startsWith">
+			<f:selectItem itemLabel="#{labels['common.item.choose']}"
+				itemValue="#{null}" noSelectionOption="true" />
+			<f:selectItems
+				value="#{administracionCatalogosPquaController.listaFamiliaCultivo}"
+				var="item" itemLabel="#{item.nombre}" itemValue="#{item}" />
+		</p:selectOneMenu>
+
+	</p:panelGrid>
+	<br />
+	<p:outputPanel>
+		<div class="buttons">
+			<p:commandButton value="Cancelar" styleClass="wizard-custom-btn-back"
+				immediate="true" oncomplete="PF('dlgAgregarCultivo').hide();"
+				resetValues="true"
+				actionListener="#{administracionCatalogosPquaController.limpiarCultivo()}" />
+			<p:commandButton value="Aceptar"
+				actionListener="#{administracionCatalogosPquaController.aceptarCultivo()}"
+				oncomplete="if(!args.validationFailed) PF('dlgAgregarCultivo').hide();"
+				update="dtCultivos" process="dlgAgregarCultivo" />
+		</div>
+	</p:outputPanel>
+</p:dialog>
+
+
+</html>

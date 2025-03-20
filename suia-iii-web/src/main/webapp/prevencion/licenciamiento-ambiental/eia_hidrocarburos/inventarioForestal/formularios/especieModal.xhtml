@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui"
+      xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<p:dialog header="Especie" id="adicionarEspecie" widgetVar="adicionarEspecie" modal="true" resizable="false"
+          width="700">
+    <h:panelGroup id="panelEspecie">
+        <h:panelGrid styleClass="w100 separatorBottom" columns="2" columnClasses="w50, field_mrg w50">
+            <p:outputLabel for="nombreCientificoEspecie" value="Nombre científico"/>
+            <p:outputLabel for="nombreComunEspecie" value="Nombre común"/>
+
+            <p:selectOneMenu id="nombreCientificoEspecie" required="true" styleClass="w100"
+                             value="#{inventarioForestalController.inventarioForestalBean.especieCategoriaAmenaza.catalogoLibroRojo}"
+                             converter="selectItemConverter" filter="true">
+                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                              itemValue="" noSelectionOption="true"/>
+                <f:selectItems
+                        value="#{inventarioForestalController.listaCatalogoLibroRojo}"
+                        var="clr" itemLabel="#{clr.nombre}"
+                        itemValue="#{clr}"/>
+                <p:ajax update="panelOtroNombreCientificoEspecie"></p:ajax>
+            </p:selectOneMenu>
+            <p:inputText id="nombreComunEspecie" maxlength="250"
+                         value="#{inventarioForestalController.inventarioForestalBean.especieCategoriaAmenaza.nombreComun}"
+                         required="true"/>
+        </h:panelGrid>
+
+        <h:panelGrid id="panelOtroNombreCientificoEspecie" columns="2" columnClasses="w50, field_mrg w50"
+                     class="#{inventarioForestalController.inventarioForestalBean.especieCategoriaAmenaza.catalogoLibroRojo.id eq -1 ? '' : 'noShow'} w100 separatorBottom">
+            <p:outputLabel for="otroNombreCientificoEspecie" value="Otro nombre científico "/>
+            <p:spacer></p:spacer>
+            <p:inputText id="otroNombreCientificoEspecie" maxlength="250" required="#{inventarioForestalController.inventarioForestalBean.especieCategoriaAmenaza.catalogoLibroRojo.id eq -1}"
+                         value="#{inventarioForestalController.inventarioForestalBean.especieCategoriaAmenaza.otroNombreCientifico}"/>
+            <p:spacer></p:spacer>
+        </h:panelGrid>
+
+        <h:panelGrid styleClass="w100 separatorBottom" columns="2" columnClasses="w50, field_mrg w50">
+            <p:outputLabel for="frecuenciaEspecie" value="Frecuencia"/>
+            <p:outputLabel for="usosEspecie" value="Usos"/>
+            <p:inputText id="frecuenciaEspecie" maxlength="5"
+                         value="#{inventarioForestalController.inventarioForestalBean.especieCategoriaAmenaza.frecuencia}"
+                         required="true">
+                <pe:keyFilter mask="num"/>
+            </p:inputText>
+            <p:inputText id="usosEspecie" maxlength="250"
+                         value="#{inventarioForestalController.inventarioForestalBean.especieCategoriaAmenaza.usos}"
+                         required="true"/>
+        </h:panelGrid>
+
+    </h:panelGroup>
+
+    <p:separator/>
+
+    <div class="buttons">
+        <p:commandButton value="Aceptar" process="@this panelEspecie" update="tableEspecies panelEspecie"
+                         oncomplete="handleEspecie(xhr, status, args)"
+                         actionListener="#{inventarioForestalController.guardarEspecie}"/>
+    </div>
+
+    <script type="text/javascript">
+        function handleEspecie(xhr, status, args) {
+            if (!args.addEspecie) {
+                PF('adicionarEspecie').show();
+            }
+            else {
+                PF('adicionarEspecie').hide();
+            }
+        }
+    </script>
+</p:dialog>
+</html>

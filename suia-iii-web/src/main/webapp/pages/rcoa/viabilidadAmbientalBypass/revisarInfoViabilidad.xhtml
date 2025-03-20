@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+	<ui:define name="content">
+		<style type="text/css">
+.ui-datepicker-unselectable span {
+	background: #b9b5b5 !important;
+}
+
+.ui-fileupload-content {
+	border: none !important;
+	padding: 0px;
+}
+
+.ui-panelgrid-header .ui-widget-header td {
+	background: #008A8A !important;
+}
+
+</style>
+		<f:event type="preRenderView"
+			listener="#{adjuntarPronunciamientoViabilidadController.validarTareaBpm()}" />
+
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Obtención de la viabilidad ambiental" />
+				</f:facet>
+
+				<p:panelGrid columns="2" styleClass="panel_data w50"
+					columnClasses="header w85, null">
+					<f:facet name="header">
+						<h:outputText value="Documentos del Proyecto" />
+					</f:facet>
+					<h:outputText value="#{proyectosBean.proyecto.codigo}"
+						rendered="#{!empty proyectosbean.proyecto.codigo}" />
+
+					<p:outputLabel
+						value="Oficio del #{labels['roca.lc.certificado.categorizacion']}"
+						style="color: white" />
+					<p:commandButton icon="ui-icon-arrowthick-1-s"
+						styleClass="button-small primary toLeft" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{adjuntarPronunciamientoViabilidadController.descargar(1)}" />
+					</p:commandButton>
+					<p:outputLabel
+						value="Mapa del #{labels['roca.lc.certificado.categorizacion']}"
+						style="color: white" />
+					<p:commandButton icon="ui-icon-arrowthick-1-s"
+						styleClass="button-small primary toLeft" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{adjuntarPronunciamientoViabilidadController.descargar(2)}" />
+					</p:commandButton>
+					<p:outputLabel value="Coordenadas del proyecto"
+						style="color: white" />
+					<p:commandButton icon="ui-icon-arrowthick-1-s"
+						styleClass="button-small primary toLeft" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{adjuntarPronunciamientoViabilidadController.descargar(3)}" />
+					</p:commandButton>
+					<p:outputLabel for="docRespuestas" value="Respuestas del operador"
+						style="color: white" />
+					<p:commandButton id="docRespuestas" icon="ui-icon-arrowthick-1-s"
+						styleClass="button-small primary toLeft" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{adjuntarPronunciamientoViabilidadController.descargar(4)}" />
+					</p:commandButton>
+				</p:panelGrid>
+
+				<h:panelGrid columns="2" styleClass="w100" id="pnlInforme"
+					columnClasses="w25, fieldPadding">
+
+					<h:outputText value="Su pronunciamiento es de tipo *" />
+					<p:selectOneRadio id="pronunciamiento" required="true"
+						requiredMessage="El campo 'Tipo de pronunciamiento' es requerido"
+						value="#{adjuntarPronunciamientoViabilidadController.viabilidadProyecto.esPronunciamientoFavorable}">
+						<f:selectItem itemLabel="Favorable" itemValue="true" />
+						<f:selectItem itemLabel="No favorable" itemValue="false" />
+						<p:ajax event="change" process="@this" />
+					</p:selectOneRadio>
+				</h:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Pronunciamiento de la Viabilidad Ambiental" />
+					</f:facet>
+
+					<h:panelGrid columns="2" layout="grid" styleClass="w100"
+						columnClasses="w33, null">
+						<p:outputLabel
+							value="Código y fecha del oficio de pronunciamiento *" />
+						<h:panelGrid columns="2" layout="grid" styleClass="w66"
+							columnClasses="w66, null">
+							<p:inputText required="true" autocomplete="off"
+								value="#{adjuntarPronunciamientoViabilidadController.numeroOficioArchivo}"
+								id="txtOficio" maxlength="200"
+								requiredMessage="El campo 'Código de oficio' es requerido">
+								<p:ajax process="@this" />
+							</p:inputText>
+							<p:calendar
+								requiredMessage="El campo 'Fecha de oficio' es requerido"
+								value="#{adjuntarPronunciamientoViabilidadController.fechaOficioArchivo}"
+								timeZone="America/Guayaquil" readonlyInput="true"
+								required="true" pattern="dd/MM/yyyy" maxdate="today">
+								<p:ajax event="dateSelect" process="@this" />
+							</p:calendar>
+						</h:panelGrid>
+
+						<p:outputLabel
+							value="Recomendaciones *" />
+						<p:inputTextarea id="txtComentario" maxlength="2000" rows="5"
+								required="true" style="resize: none;" autoResize="false"
+								requiredMessage="El campo 'Recomendaciones' es requerido"
+								value="#{adjuntarPronunciamientoViabilidadController.recomendaciones}" />
+					</h:panelGrid>
+
+					<h:panelGrid columns="2" layout="grid" styleClass="w100"
+						columnClasses="w33, null">
+						<p:outputLabel value="Adjuntar oficio de pronunciamiento *" />
+						<p:outputPanel id="pnlDocOficio">
+							<p:fileUpload
+								fileUploadListener="#{adjuntarPronunciamientoViabilidadController.uploadOficio}"
+								multiple="false" sizeLimit="52428800"
+								allowTypes="/(\.|\/)(pdf)$/" label="Admite .pdf de 50MB"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Debe adjuntar un archivo no mayor de 50MB."
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" required="true" update="pnlDocOficio" />
+							<p:commandButton icon="ui-icon-arrowthick-1-s"
+								styleClass="button-small primary toLeft" title="Ver"
+								ajax="false" immediate="true"
+								rendered="#{adjuntarPronunciamientoViabilidadController.documentoOficio.nombre ne null}">
+								<p:fileDownload
+									value="#{adjuntarPronunciamientoViabilidadController.descargarArchivo(adjuntarPronunciamientoViabilidadController.documentoOficio)}" />
+							</p:commandButton>
+							<h:outputText
+								value="#{adjuntarPronunciamientoViabilidadController.documentoOficio.nombre}"
+								rendered="#{adjuntarPronunciamientoViabilidadController.documentoOficio.nombre ne null}" />
+						</p:outputPanel>
+					</h:panelGrid>
+
+					<h:panelGrid columns="2" layout="grid" styleClass="w100"
+						columnClasses="w33, null">
+						<p:outputLabel value="Adjuntar Informe de Viabilidad Ambiental *" />
+						<p:outputPanel id="pnlDocInforme">
+							<p:fileUpload
+								fileUploadListener="#{adjuntarPronunciamientoViabilidadController.uploadInforme}"
+								multiple="false" sizeLimit="52428800"
+								allowTypes="/(\.|\/)(pdf)$/" label="Admite .pdf de 50MB"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Debe adjuntar un archivo no mayor de 50MB."
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" required="true" update="pnlDocInforme" />
+							<p:commandButton icon="ui-icon-arrowthick-1-s"
+								styleClass="button-small primary toLeft" title="Ver"
+								ajax="false" immediate="true"
+								rendered="#{adjuntarPronunciamientoViabilidadController.documentoInforme.nombre ne null}">
+								<p:fileDownload
+									value="#{adjuntarPronunciamientoViabilidadController.descargarArchivo(adjuntarPronunciamientoViabilidadController.documentoInforme)}" />
+							</p:commandButton>
+							<h:outputText
+								value="#{adjuntarPronunciamientoViabilidadController.documentoInforme.nombre}"
+								rendered="#{adjuntarPronunciamientoViabilidadController.documentoInforme.nombre ne null}" />
+						</p:outputPanel>
+					</h:panelGrid>
+
+				</p:panelGrid>
+
+			</p:panelGrid>
+
+			<h:inputHidden
+				validator="#{adjuntarPronunciamientoViabilidadController.validateDatosIngreso}" />
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Finalizar"
+						action="#{adjuntarPronunciamientoViabilidadController.enviar()}"
+						icon="ui-icon-check" process="@this form">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+</ui:composition>

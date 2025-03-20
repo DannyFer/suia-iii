@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+
+<div style="padding-bottom: 12px; padding-left: 4px;">
+	<h:outputText value="Temas de capacitación" styleClass="bold" />
+</div>
+
+<h:panelGrid styleClass="w100">
+
+	<p:accordionPanel id="pnlTemasContent" var="temaP" dynamic="false"
+		value="#{administracionCatalogosPquaController.listaTemasCapacitacion}"
+		activeIndex="#{administracionCatalogosPquaController.indexTab}">
+		<p:tab>
+			<f:facet name="title">
+				<h:outputText value="#{temaP.descripcion}" />
+			</f:facet>
+
+			<h:panelGrid>
+
+				<p:accordionPanel var="temaS" dynamic="false" value="#{temaP.temas}"
+					activeIndex="#{administracionCatalogosPquaController.indexTabSec}"
+					rendered="#{temaP.codigo eq 'cap_accion'}">
+					<p:tab>
+						<f:facet name="title">
+							<h:outputText value="#{temaS.descripcion}" />
+						</f:facet>
+
+						<h:panelGrid>
+							<p:dataTable id="dtbTemas" var="item"
+								styleClass="table table-hover" value="#{temaS.temas}"
+								paginator="true" paginatorAlwaysVisible="false"
+								paginatorPosition="bottom"
+								emptyMessage="#{labels['common.table.empty']}"
+								currentPageReportTemplate="{currentPage} de {totalPages}"
+								rows="10" rowsPerPageTemplate="5,10,15" rowIndexVar="index">
+								<p:column headerText="Nro." styleClass="w70px alCenter">
+									<h:outputText value="#{index + 1}" />
+								</p:column>
+								<p:column headerText="Tema">
+									<h:outputText value="#{item.descripcion}" />
+								</p:column>
+								<p:column headerText="Acción" styleClass="w10 alCenter">
+									<f:facet name="header">
+										<p:commandButton value="Agregar" title="Agregar"
+											styleClass="secondary" process="@this" icon="ui-icon-plus"
+											actionListener="#{administracionCatalogosPquaController.agregarTema(temaS, 2)}"
+											update=":form:tab:dlgTemasCapacitacion"
+											oncomplete="PF('dlgTemasCapacitacion').show();"
+											resetValues="true" />
+									</f:facet>
+
+									<p:commandButton styleClass="button-small primary"
+										process="@this" icon="ui-icon-pencil" resetValues="true"
+										actionListener="#{administracionCatalogosPquaController.editarTema(item, 2)}"
+										oncomplete="PF('dlgTemasCapacitacion').show();"
+										immediate="true" update=":form:tab:dlgTemasCapacitacion" />
+									<p:commandButton styleClass="button-small primary"
+										process="@this" icon="ui-icon-trash"
+										actionListener="#{administracionCatalogosPquaController.eliminarTema(item)}"
+										update=":form:tab:pnlTemasContent">
+										<p:confirm icon="ui-icon-alert" header="Confirmación"
+											message="¿Está seguro de eliminar el registro?" />
+									</p:commandButton>
+								</p:column>
+							</p:dataTable>
+						</h:panelGrid>
+					</p:tab>
+				</p:accordionPanel>
+
+				<p:dataTable id="dtbTemas" var="item" styleClass="table table-hover"
+					value="#{temaP.temas}" paginator="true"
+					paginatorAlwaysVisible="false" paginatorPosition="bottom"
+					emptyMessage="#{labels['common.table.empty']}"
+					currentPageReportTemplate="{currentPage} de {totalPages}" rows="10"
+					rowsPerPageTemplate="5,10,15" rowIndexVar="index"
+					rendered="#{temaP.codigo ne 'cap_accion'}">
+					<p:column headerText="Nro." styleClass="w70px alCenter">
+						<h:outputText value="#{index + 1}" />
+					</p:column>
+					<p:column headerText="Tema">
+						<h:outputText value="#{item.descripcion}" />
+					</p:column>
+					<p:column headerText="Acción" styleClass="w10 alCenter">
+						<f:facet name="header">
+							<p:commandButton value="Agregar" title="Agregar"
+								styleClass="secondary" process="@this" icon="ui-icon-plus"
+								actionListener="#{administracionCatalogosPquaController.agregarTema(temaP, 1)}"
+								update=":form:tab:dlgTemasCapacitacion"
+								oncomplete="PF('dlgTemasCapacitacion').show();"
+								resetValues="true" />
+						</f:facet>
+
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-pencil" resetValues="true"
+							actionListener="#{administracionCatalogosPquaController.editarTema(item, 1)}"
+							oncomplete="PF('dlgTemasCapacitacion').show();" immediate="true"
+							update=":form:tab:dlgTemasCapacitacion" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-trash"
+							actionListener="#{administracionCatalogosPquaController.eliminarTema(item)}"
+							update=":form:tab:pnlTemasContent">
+							<p:confirm icon="ui-icon-alert" header="Confirmación"
+								message="¿Está seguro de eliminar el registro?" />
+						</p:commandButton>
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+		</p:tab>
+	</p:accordionPanel>
+</h:panelGrid>
+
+<p:dialog header="Temas de capacitación" id="dlgTemasCapacitacion"
+	widgetVar="dlgTemasCapacitacion" modal="true" resizable="false"
+	width="600" closable="false">
+
+	<p:panelGrid columns="2" styleClass="panel_data w100"
+		columnClasses="header w25, null">
+		<p:outputLabel value="Tema de capacitación:" style="color: white"
+			for="txtTemaCap" />
+		<p:inputText id="txtTemaCap" autocomplete="off"
+			value="#{administracionCatalogosPquaController.temaSeleccionado.descripcion}"
+			maxlength="200" required="true" />
+	</p:panelGrid>
+
+	<br />
+	<p:outputPanel>
+		<div class="buttons main">
+			<p:commandButton value="Cancelar" resetValues="true"
+				actionListener="#{administracionCatalogosPquaController.limpiarTema()}"
+				oncomplete="PF('dlgTemasCapacitacion').hide();" process="@this" />
+			<p:commandButton value="Aceptar"
+				actionListener="#{administracionCatalogosPquaController.aceptarTema()}"
+				oncomplete="handledlgTemaCap(xhr, status, args)"
+				update="dlgTemasCapacitacion :form:tab:pnlTemasContent"
+				process="dlgTemasCapacitacion" />
+		</div>
+	</p:outputPanel>
+</p:dialog>
+
+<script type="text/javascript">
+	function handledlgTemaCap(xhr, status, args) {
+		if (args.validationFailed || !args.addTema) {
+			PF('dlgTemasCapacitacion').show();
+		}
+		else {
+			PF('dlgTemasCapacitacion').hide();
+		}
+	}
+	</script>
+
+</html>

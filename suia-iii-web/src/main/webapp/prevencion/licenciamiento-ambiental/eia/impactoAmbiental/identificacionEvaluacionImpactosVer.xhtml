@@ -1,0 +1,276 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:f="http://java.sun.com/jsf/core" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:controles="http://java.sun.com/jsf/composite/controles-prime">
+<ui:composition template="/prevencion/licenciamiento-ambiental/eia/verEIA.xhtml">
+	<ui:define name="content-eia">
+		<h:form id="frmDatos">
+			<p:panel header="Identificación, evaluación de impactos ambientales">
+				<p:panelGrid columns="1" layout="grid">
+					<f:facet name="header">
+						<h:outputText value="Datos generales" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data" columns="2" columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="#{identificacionEvaluacionImpactosBean.identificacionEvaluacionImpactoAmbiental.documento.nombre}" />
+						<p:commandButton icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true">
+							<p:fileDownload value="#{impactoAmbientalBaseBean.getStreamContent(identificacionEvaluacionImpactosBean.identificacionEvaluacionImpactoAmbiental.documento)}" />
+						</p:commandButton>
+					</h:panelGrid>
+
+					<!-- MarielaG para mostrar historico DOCUMENTOS HISTORICO-->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{identificacionEvaluacionImpactosBean.listaDocumentoGeneralHistorico.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText value="Historial de documentos" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-search"
+							action="#{identificacionEvaluacionImpactosBean.fillHistorialDocumentos(0)}"
+							update=":formDocumentosOriginal:documentosOriginalesDlg"
+							oncomplete="PF('documentosOriginalesDlg').show()" />
+					</h:panelGrid>
+					<!-- fin historico -->
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" rendered="#{!identificacionEvaluacionImpactosBean.esMineriaNoMetalicos}">
+					<f:facet name="header">
+						<h:outputText value="Identificación y Descripción de impactos ambientales" />
+					</f:facet>
+					<p:dataTable id="tbl_evaluaciones" rowIndexVar="index" emptyMessage="#{labels['common.table.empty']}" value="#{evaluacionAspectoAmbientalBean.evaluacionAspectoAmbientalLista}" var="evaluacion">
+						<p:column headerText="No." styleClass="w20px alCenter">
+							<h:outputText value="#{index + 1}"/>
+						</p:column>
+						<p:column headerText="Etapa/Fase" styleClass="singleLine">
+							<h:outputText
+									value="#{evaluacion.actividadLicenciamiento.catalogoCategoriaFase.fase.nombre}"/>
+						</p:column>
+						<p:column headerText="Actividad" styleClass="singleLine">
+							<h:outputText value="#{evaluacion.actividadLicenciamiento.nombreActividad}"/>
+						</p:column>
+						<p:column headerText="No. Impactos" styleClass="w10 alCenter">
+							<h:outputText value="#{evaluacion.detalleEvaluacionLista.size()}"/>
+						</p:column>
+						<!-- MarielaG para mostrar historico MODIFICADOS-->
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{evaluacion.registroModificado or evaluacion.nuevoEnModificacion}"
+								styleClass="button-small orange"
+								action="#{identificacionEvaluacionImpactosBean.mostrarDetalles(evaluacion)}"
+								update=":frmDlgOrig:dlgOrig" process="@this"
+								oncomplete="PF('dlgOrig').show()" />
+ 							<!-- REGISTROS NUEVO  -->
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{!evaluacion.registroModificado and !evaluacion.nuevoEnModificacion}"
+								styleClass="button-small primary"
+								action="#{identificacionEvaluacionImpactosBean.mostrarDetalles(evaluacion)}"
+								update=":frmDlgOrig:dlgOrig" process="@this"
+								oncomplete="PF('dlgOrig').show()" />
+						</p:column>
+						<!-- fin historico -->
+					</p:dataTable>
+
+					<!--MarielaG para mostrar historico ELIMINADOS-->
+					<h:panelGrid columns="1" styleClass="w100 uppercase"
+						columnClasses="w100"
+						rendered="#{identificacionEvaluacionImpactosBean.evaluacionesEliminadasEnBdd.size() > 0}">
+						<p:outputLabel
+							value="Descripción de impactos ambientales eliminados"
+							styleClass="bold text-orange" />
+					</h:panelGrid>
+
+					<p:dataTable id="tblImpactosEliminados" rowIndexVar="index"
+						rendered="#{identificacionEvaluacionImpactosBean.evaluacionesEliminadasEnBdd.size() > 0}"
+						value="#{identificacionEvaluacionImpactosBean.evaluacionesEliminadasEnBdd}"
+						var="evaluacion" emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="No." styleClass="w20px alCenter">
+							<h:outputText value="#{index + 1}" />
+						</p:column>
+						<p:column headerText="Etapa/Fase" styleClass="singleLine">
+							<h:outputText
+								value="#{evaluacion.actividadLicenciamiento.catalogoCategoriaFase.fase.nombre}" />
+						</p:column>
+						<p:column headerText="Actividad" styleClass="singleLine">
+							<h:outputText
+								value="#{evaluacion.actividadLicenciamiento.nombreActividad}" />
+						</p:column>
+						<p:column headerText="No. Impactos" styleClass="w10 alCenter">
+							<h:outputText value="#{evaluacion.detalleEvaluacionLista.size()}" />
+						</p:column>
+
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton icon="ui-icon-search"
+								styleClass="button-small primary"
+								update=":frmDlgOrig:dlgOrig" process="@this"
+								oncomplete="PF('dlgOrig').show()" 
+								actionListener="#{identificacionEvaluacionImpactosBean.mostrarDetalles(evaluacion)}" />
+						</p:column>
+					</p:dataTable>
+					<!--fin historico -->
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" rendered="#{!identificacionEvaluacionImpactosBean.esMineriaNoMetalicos}">
+					<f:facet name="header">
+						<h:outputText value="Resultado de protocolo de prueba" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data" columns="2" columnClasses="header, null" rowClasses="null, alt">
+						<c:if test="#{identificacionEvaluacionImpactosBean.identificacionEvaluacionImpactoAmbiental.tratamiento != null}">
+							<h:outputText value="#{identificacionEvaluacionImpactosBean.identificacionEvaluacionImpactoAmbiental.tratamiento.nombre}" />
+							<p:commandButton icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true">
+								<p:fileDownload value="#{impactoAmbientalBaseBean.getStreamContent(identificacionEvaluacionImpactosBean.identificacionEvaluacionImpactoAmbiental.tratamiento)}" />
+							</p:commandButton>
+						</c:if>
+						<c:if test="#{identificacionEvaluacionImpactosBean.identificacionEvaluacionImpactoAmbiental.tratamiento == null}">
+							<h:outputText value="No se adjunto el documento" />
+						</c:if>
+					</h:panelGrid>
+					
+					<!-- MarielaG para mostrar historico DOCUMENTOS HISTORICO-->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{identificacionEvaluacionImpactosBean.listaDocumentoResultadoHistorico.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText value="Historial de documentos" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-search"
+							action="#{identificacionEvaluacionImpactosBean.fillHistorialDocumentos(1)}"
+							update=":formDocumentosOriginal:documentosOriginalesDlg"
+							oncomplete="PF('documentosOriginalesDlg').show()" />
+					</h:panelGrid>
+					<!-- fin historico -->
+				</p:panelGrid>
+			</p:panel>
+			<ui:include src="/prevencion/licenciamiento-ambiental/eia/impactoAmbiental/utiles/adicionarEvaluacionAspectoAmbientalModalVer.xhtml" />
+		</h:form>
+
+		<!-- MarielaG para mostrar historico DOCUMENTOS-->
+		<h:form id="formDocumentosOriginal">
+			<p:dialog header="Historial de documentos"
+				id="documentosOriginalesDlg" widgetVar="documentosOriginalesDlg"
+				modal="true" resizable="false" width="600">
+				<h:panelGroup id="datosDocumentosOriginal">
+					<p:dataTable
+						value="#{identificacionEvaluacionImpactosBean.listaDocumentosHistorico}"
+						var="doc" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText
+								value="#{doc.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Documento">
+							<h:outputText value="#{doc.nombre}" />
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton id="download_historico" rendered="true"
+								icon="ui-icon-search" ajax="false"
+								styleClass="button-small background-orange" title="Ver"
+								immediate="true">
+								<p:fileDownload
+									value="#{identificacionEvaluacionImpactosBean.descargarOriginal(doc)}" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+		<!-- MarielaG para mostrar DETALLES DE EVALUACION--> 
+		<h:form id="frmDlgOrig">
+			<p:dialog id="dlgOrig" header="Identificación y Descripción de impactos ambientales"
+				widgetVar="dlgOrig" modal="true" width="600" resizable="false">
+				<h:panelGrid id="panelDatosOrig" columns="1"
+					styleClass="w100 separatorBottom"
+					columnClasses="w50, field_mrg w50">
+					<!--MarielaG para mostrar historico -->
+					<!-- cuando es un registro que se ingreso en la modificacion -->
+					<h:panelGrid columns="1" styleClass="w100 uppercase"
+						columnClasses="w100"
+						rendered="#{identificacionEvaluacionImpactosBean.evaluacionSeleccionada.nuevoEnModificacion}">
+						<p:outputLabel value="Registro Nuevo" styleClass="bold text-orange" />
+					</h:panelGrid>
+					<!--fin historico -->
+					
+					<p:dataTable id="tbl_detalles_evaluacion" rowIndexVar="index"
+						emptyMessage="#{labels['common.table.empty']}"
+						value="#{identificacionEvaluacionImpactosBean.evaluacionSeleccionada.detalleEvaluacionLista}"
+						var="detalle">
+						<p:column headerText="No." styleClass="w20px alCenter">
+							<h:outputText value="#{index + 1}" />
+						</p:column>
+						<p:column headerText="Componente">
+							<h:outputText value="#{detalle.componente}" />
+						</p:column>
+						<p:column headerText="Aspecto ambiental">
+							<h:outputText value="#{detalle.aspectoAmbiental}" />
+						</p:column>
+						<p:column headerText="Impactos identificados">
+							<h:outputText value="#{detalle.impactosIdentificados}" />
+						</p:column>
+						<p:column headerText="Resultados">
+							<h:outputText value="#{detalle.resultados}" />
+						</p:column>
+						<!-- MarielaG para mostrar historico DETALLE-->
+						<p:column styleClass="w40px alCenter"
+							rendered="#{identificacionEvaluacionImpactosBean.totalDetallesModificados > 0}">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{detalle.registroModificado}"
+								styleClass="button-small orange"
+								action="#{identificacionEvaluacionImpactosBean.mostrarDetallesOriginales(detalle)}"
+								update=":formDetalleOriginal:detalleOriginalDlg"
+								process="@this" oncomplete="PF('detalleOriginalDlg').show()" />
+							<!-- REGISTRO NUEVO -->
+							<h:outputText value="Nuevo" styleClass="bold text-orange"
+								rendered="#{detalle.nuevoEnModificacion}" />
+						</p:column>
+						<!-- fin historico -->
+					</p:dataTable>
+
+					<!-- MarielaG para mostrar historico -->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{identificacionEvaluacionImpactosBean.detallesEliminadosBdd.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText value="Impactos ambientales eliminados" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-search"
+							action="#{identificacionEvaluacionImpactosBean.fillDetallesEliminados()}"
+							update=":formDetalleOriginal:detalleOriginalDlg"
+							oncomplete="PF('detalleOriginalDlg').show()" />
+					</h:panelGrid>
+					<!-- fin historico -->
+				</h:panelGrid>
+			</p:dialog>
+		</h:form>
+		
+		<!-- MarielaG para mostrar historico DETALLES--> 
+		<h:form id="formDetalleOriginal">
+			<p:dialog header="Historial de impactos ambientales"
+				id="detalleOriginalDlg" widgetVar="detalleOriginalDlg" modal="true"
+				resizable="false"
+				width="600">
+				<h:panelGroup id="datosInfo">
+					<p:dataTable id="tblInfo" rowIndexVar="index"
+						value="#{identificacionEvaluacionImpactosBean.listaDetalleHistorico}"
+						var="detalle" emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText
+								value="#{detalle.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Componente">
+							<h:outputText value="#{detalle.componente}" />
+						</p:column>
+						<p:column headerText="Aspecto ambiental">
+							<h:outputText value="#{detalle.aspectoAmbiental}" />
+						</p:column>
+						<p:column headerText="Impactos identificados">
+							<h:outputText value="#{detalle.impactosIdentificados}" />
+						</p:column>
+						<p:column headerText="Resultados">
+							<h:outputText value="#{detalle.resultados}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+	</ui:define>
+</ui:composition>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="content">
+        <t:aliasBeansScope>
+            <t:aliasBean alias="#{mode}" value=""/>
+            <ui:include src="contenido/menu.xhtml"/>
+        </t:aliasBeansScope>
+
+        <div class="content">
+            <ui:insert name="content-eia">
+                <h1 style="color: red">#{eia.mensaje}</h1>
+
+                <div class="alCenter">
+                    <h2 class="verde">Estudio de Impacto Ambiental</h2>
+                </div>
+            </ui:insert>
+        </div>
+        <div class="clear"></div>
+    </ui:define>
+    <ui:define name="context-extra">
+        <h:outputText value="Oficio de observación" rendered="#{eia.revision}"/>
+        <h:outputText value="Datos del Oficio de observación" rendered="#{eia.revision}"/>
+
+        <p:commandButton styleClass="primary button-small" rendered="#{eia.revision}"
+                         actionListener="#{eia.mostrarDocumentoObeservaciones}"
+                         icon="ui-icon-search" oncomplete="PF('dlg2').show();"
+                         update="modal"/>
+
+        <p:dialog header="Oficio de observación" widgetVar="dlg2" modal="true" id="modal" rendered="#{eia.revision}"
+                  height="500" width="100%">
+            <p:outputPanel rendered="#{eia.mostrarInforme}">
+                <object id="pdf_informe" type="application/pdf"
+                        data="#{eia.informePath}"
+                        width="100%" height="400px">
+                    Su navegador no soporta la visualización de pdf. Puede descargar el
+                    documento presionando el siguiente botón:
+                    <p:commandButton value="Descargar" ajax="false"
+                                     icon="ui-icon-arrowthick-1-s" id="observacion"
+                                     styleClass="oculto primary">
+                        <p:fileDownload value="#{eia.stream}"/>
+                    </p:commandButton>
+                </object>
+
+
+            </p:outputPanel>
+        </p:dialog>
+
+    </ui:define>
+</ui:composition>
+</html>

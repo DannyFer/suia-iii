@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+	<ui:define name="content">
+		<ui:include src="../contenido/menu.xhtml" />
+		<div class="content">
+
+			<h:form id="frm_inicio_flora" enctype="multipart/form-data">
+				<p:growl id="messages" showDetail="true" />
+
+				<p:separator />
+
+				<h:panelGrid columns="1" id="dg_inicio_flora" styleClass="w100"
+					columnClasses="w33, field_mrg w33, field_mrg w33">
+
+					<p:selectBooleanCheckbox required="true" itemLabel="Aplica Flora"
+						value="#{floraBean.aplicaFlora}">
+						<p:ajax listener="#{floraBean.mostrarFormPrincipal()}"
+							update=":frm_inicio_flora:pg_form_principal" />
+					</p:selectBooleanCheckbox>
+
+					<p:separator />
+
+					<h:panelGrid columns="3" styleClass="w100" style="display: none"
+						id="pg_form_principal"
+						columnClasses="w33, field_mrg w33, field_mrg w33">
+						<p:outputLabel for="cmb_tipo_muestreo" value="Tipo Muestreo" />
+						<p:outputLabel for="cmb_metodologia" value="Metodología" />
+						<p:outputLabel for="file_anexo_metodologia"
+							value="Anexo Metodologia" />
+
+						<p:selectOneMenu value="#{floraBean.tipoMuestreo}"
+							id="cmb_tipo_muestreo" required="true"
+							converter="selectItemConverter2" style="width:100%">
+							<f:selectItem itemLabel="-- Escoja un valor --" itemValue="-1" />
+							<f:selectItems value="#{floraBean.tiposMuestreo}" />
+							<p:ajax listener="#{floraBean.mostrarTabPrincipal()}"
+								update=":#{p:component('tab_tipo_muestreo')}" />
+						</p:selectOneMenu>
+
+						<p:selectOneMenu value="#{floraBean.metodologia}"
+							id="cmb_metodologia" required="true"
+							converter="selectItemConverter2" style="width:100%">
+							<f:selectItem itemLabel="-- Escoja un valor --" itemValue="-1" />
+							<f:selectItems value="#{floraBean.metodologias}" />
+							<p:ajax />
+						</p:selectOneMenu>
+						<p:row>
+							<p:fileUpload id="file_anexo_metodologia" auto="true"
+								fileUploadListener="#{floraBean.handleFileUpload}"
+								mode="advanced" value="#{floraBean.anexoMetodologiaName}"
+								skinSimple="true" required="true" sizeLimit="10000000"
+								allowTypes="/(\.|\/)(pdf)$/" update=":#{p:component('lblArchivo')}" />
+								
+								<p:outputLabel value="#{floraBean.anexoMetodologiaName}" id="lblArchivo" style="color:blue"/>
+						</p:row>
+					</h:panelGrid>
+				</h:panelGrid>
+			</h:form>
+			<p:tabView dynamic="true" cache="true" orientation="top"
+				widgetVar="tab_tipo_muestreo" style="display: none"
+				id="tab_tipo_muestreo">
+				<p:tab title="CUALITATIVO" disabled="true" id="tab_h_cualitativo"
+					titleStyle="font-size:10px">
+					<p:separator />
+					<ui:include src="/pages/eia/flora/floraCualitativo.xhtml" />
+				</p:tab>
+				<p:tab title="CUANTITATIVO" disabled="true" id="tab_h_cuantitativo"
+					titleStyle="font-size:10px">
+					<p:separator />
+					<ui:include src="/pages/eia/flora/floraCuantitativo.xhtml" />
+				</p:tab>
+			</p:tabView>
+
+		</div>
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,506 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<script type="text/javascript">
+	function deshabilitarBotones() {
+		$('.btnsEditar').prop('disabled', true);
+		$('.btnsEditar').addClass('ui-state-disabled');
+	};
+	</script>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="CONSUMO DE ENERGÍA ELÉCTRICA" />
+	</f:facet>
+
+	<p:panel id="adicionarEnergia" widgetVar="adicionarEnergia"
+		toggleable="true" toggleOrientation="vertical"
+		styleClass="colapsablePanel" collapsed="true">
+		<p:ajax event="toggle"
+			listener="#{consumoRecursosController.toggleHandleEnergia}"
+			update=":form:adicionarEnergia" process="@this" />
+		<h:panelGroup id="datosEnergia">
+			<h:panelGroup
+				rendered="#{consumoRecursosController.panelEnergiaVisible}">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					id="pnlEnergia">
+					<f:facet name="header">
+						<h:outputText value="Información energía" />
+					</f:facet>
+					<h:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25, null" rowClasses="null, alt">
+
+						<p:outputLabel value="Tipo de suministro" for="cmbTipoSuministro"
+							styleClass="ui-label-form" />
+						<p:selectOneMenu id="cmbTipoSuministro"
+							disabled="#{consumoRecursosController.editarEnergia}"
+							value="#{consumoRecursosController.consumoEnergia.tipoSuministro}"
+							styleClass="w25" required="true" converter="selectItemConverter">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}"
+								itemValue="" noSelectionOption="true" />
+							<f:selectItems itemLabel="#{tipo.descripcion}"
+								itemValue="#{tipo}" var="tipo"
+								value="#{consumoRecursosController.listaTipoSuministro}" />
+							<p:ajax event="change"
+								listener="#{consumoRecursosController.cambiarSuministro}"
+								process="@this" update="pnlEnergia pnlSustanciasRetce" />
+						</p:selectOneMenu>
+
+
+						<p:outputLabel for="cantidadSuministro" styleClass="ui-label-form"
+							value="Número de suministros (cantidad)"
+							rendered="#{consumoRecursosController.consumoEnergia.tipoSuministro ne null and !consumoRecursosController.consumoEnergia.tipoSuministro.codigo.equals('tiposuministro.biomasa')}" />
+						<p:inputText required="true" id="cantidadSuministro"
+							autocomplete="off" thousandSeparator="" maxlength="2"
+							style="width: 10% !important;"
+							value="#{consumoRecursosController.consumoEnergia.numeroSuministro}"
+							rendered="#{consumoRecursosController.consumoEnergia.tipoSuministro ne null and !consumoRecursosController.consumoEnergia.tipoSuministro.codigo.equals('tiposuministro.biomasa')}">
+							<pe:keyFilter mask="num" />
+						</p:inputText>
+
+						<p:outputLabel value="Especifique" for="otroSuministro"
+							styleClass="ui-label-form"
+							rendered="#{consumoRecursosController.consumoEnergia.tipoSuministro ne null and consumoRecursosController.consumoEnergia.tipoSuministro.codigo.equals(consumoRecursosController.codOtroTipoSuministro)}" />
+						<p:inputText id="otroSuministro" maxlength="50" required="true"
+							rendered="#{consumoRecursosController.consumoEnergia.tipoSuministro ne null and consumoRecursosController.consumoEnergia.tipoSuministro.codigo.equals(consumoRecursosController.codOtroTipoSuministro)}"
+							value="#{consumoRecursosController.consumoEnergia.otroTipoSuministro}" />
+
+						<p:outputLabel value="Consumo anual (kwh)"
+							for="consumoAnualEnergia" styleClass="ui-label-form" />
+						<pe:inputNumber id="consumoAnualEnergia" thousandSeparator=""
+							autocomplete="off" maxValue="999999999999999.99" minValue="0"
+							required="true"
+							value="#{consumoRecursosController.consumoEnergia.valorAnual}">
+							<f:validateDoubleRange minimum="0.1" />
+							<p:ajax process="@this" />
+						</pe:inputNumber>
+
+						<p:outputLabel value="Proceso en el que usa energía"
+							styleClass="ui-label-form" for="procesosEnergia" />
+						<p:selectManyCheckbox id="procesosEnergia"
+							value="#{consumoRecursosController.consumoEnergia.listaProcesos}"
+							converter="selectItemConverter" required="true"
+							requiredMessage="Debe seleccionar al menos 1 proceso">
+							<f:selectItems
+								value="#{consumoRecursosController.listaTipoProceso}" var="item"
+								itemLabel="#{item.descripcion}" itemValue="#{item}" />
+						</p:selectManyCheckbox>
+
+						<p:outputLabel value="Medio de verificación"
+							styleClass="ui-label-form" />
+						<p:dataTable id="tblDocumentosEnergia"
+							value="#{consumoRecursosController.listaDocumentosMediosVerificacion}"
+							var="item" emptyMessage="#{labels['common.table.empty']}">
+							<f:facet name="header">
+								<p:commandButton value="Añadir" icon="ui-icon-plus"
+									title="Añadir" oncomplete="PF('adicionarDocumento').show()"
+									process="@this" style="float:right;" />
+							</f:facet>
+							<p:column headerText="Nombre">
+								<h:outputText value="#{item.nombre}" />
+							</p:column>
+							<p:column headerText="Descargar" styleClass="w70px alCenter">
+								<p:commandButton icon="ui-icon-arrowthick-1-s"
+									styleClass="button-small primary" title="Ver" ajax="false"
+									immediate="true">
+									<p:fileDownload
+										value="#{consumoRecursosController.descargar(item)}" />
+								</p:commandButton>
+							</p:column>
+						</p:dataTable>
+
+
+					</h:panelGrid>
+
+
+					<h:panelGrid columns="2" styleClass="panel_data w100"
+						id="pnlSustanciasRetce" columnClasses="header w25, null"
+						rowClasses="null, alt"
+						rendered="#{consumoRecursosController.consumoEnergia.tipoSuministro ne null and consumoRecursosController.consumoEnergia.tipoSuministro.codigo.equals('tiposuministro.biomasa')}">
+						<p:outputLabel
+							value="Sustancias RETCE (voluntario hasta la expedición de la norma)"
+							styleClass="ui-label-form" />
+						<p:dataTable id="tblSustanciasRetce"
+							value="#{consumoRecursosController.listaSustanciasEnergia}"
+							var="item" emptyMessage="#{labels['common.table.empty']}">
+							<f:facet name="header">
+								<p:commandButton value="Adicionar sustancia"
+									oncomplete="PF('adicionarSustancia').show()"
+									actionListener="#{consumoRecursosController.nuevaSustancia()}"
+									styleClass="button-small-text toRight field_mrg"
+									process="@this" update=":form:frmSustancia:datosSustancias"
+									icon="ui-icon-plusthick" />
+							</f:facet>
+
+							<p:column headerText="Sustancia">
+								<h:outputText
+									value="#{item.catologSustanciasRetce.descripcionProductoQuimico}" />
+							</p:column>
+							<p:column headerText="Cantidad (t/año)" styleClass="alCenter">
+								<h:outputText value="#{item.reporteToneladaAnio}" />
+							</p:column>
+							<p:column headerText="Método de estimación">
+								<h:outputText
+									value="#{item.catalogoMetodoEstimacion.descripcion}" />
+							</p:column>
+							<p:column styleClass="w70px alCenter">
+								<p:commandButton icon="ui-icon-pencil" title="Editar"
+									process="@this" styleClass="primary"
+									oncomplete="PF('adicionarSustancia').show()"
+									actionListener="#{consumoRecursosController.editarSustancia(item)}"
+									update=":form:frmSustancia:datosSustancias" />
+								<p:commandButton icon="ui-icon-trash" title="Eliminar"
+									process="@this" styleClass="primary"
+									actionListener="#{consumoRecursosController.eliminarSustancia(item)}"
+									update="tblSustanciasRetce" />
+							</p:column>
+						</p:dataTable>
+					</h:panelGrid>
+
+				</p:panelGrid>
+			</h:panelGroup>
+
+			<h:panelGroup id="pnlBtnsConsumo">
+				<div class="buttons">
+					<p:commandButton styleClass="primary"
+						value="#{consumoRecursosController.editarEnergia ? 'Actualizar' : 'Aceptar'}"
+						actionListener="#{consumoRecursosController.agregarEnergia()}"
+						oncomplete="toggleEnergia(xhr, status, args)"
+						process="@this datosEnergia"
+						update=":form:datosEnergia :form:tblEnergia :form:pnlSustancias :form:tblSustanciasEnergia" />
+					<p:commandButton value="Cancelar" styleClass="secondary"
+						actionListener="#{consumoRecursosController.cancelarEnergia()}"
+						oncomplete="PF('adicionarEnergia').toggle()" process="@this"
+						update="datosEnergia :form:tblEnergia :form:pnlSustancias :form:tblSustanciasEnergia">
+						<p:resetInput target="@form" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+		</h:panelGroup>
+
+
+		<p:separator />
+	</p:panel>
+
+	<br />
+
+	<p:dataTable id="tblEnergia"
+		value="#{consumoRecursosController.listaConsumoEnergia}" var="item"
+		emptyMessage="#{labels['common.table.empty']}">
+		<f:facet name="header">
+			<p:commandButton value="Añadir" update=":form:datosEnergia"
+				oncomplete="PF('adicionarEnergia').toggle()"
+				onclick="deshabilitarBotones()"
+				styleClass="button-small-text toRight field_mrg btnsEditar"
+				icon="ui-icon-plusthick" process="@this" style="float:right;" />
+		</f:facet>
+
+		<p:column headerText="Tipo de suministro">
+			<h:outputText
+				value="#{item.tipoSuministro.codigo.equals(consumoRecursosController.codOtroTipoSuministro) ? item.otroTipoSuministro : item.tipoSuministro.descripcion}" />
+		</p:column>
+		<p:column headerText="Número de suministros (cantidad)"
+			styleClass="alCenter">
+			<h:outputText value="#{item.numeroSuministro}" />
+		</p:column>
+		<p:column headerText="Consumo anual (kwh)" styleClass="alCenter">
+			<h:outputText value="#{item.valorAnual}">
+				<f:convertNumber pattern="#0.00" locale="en-US" />
+			</h:outputText>
+		</p:column>
+		<p:column headerText="Proceso en el que usa energía">
+			<p:dataTable styleClass="borderless"
+				rendered="#{item.listaProcesos.size() > 0}"
+				value="#{item.listaProcesos}" var="proceso">
+				<p:column style="text-align: left; background-color: #f5f5f5;">
+					<h:outputText value="#{proceso.descripcion}" />
+				</p:column>
+			</p:dataTable>
+		</p:column>
+		<p:column headerText="Medio de verificación" styleClass="alCenter">
+			<p:dataTable styleClass="borderless"
+				rendered="#{item.listaMediosVerificacion ne null and item.listaMediosVerificacion.size() > 0}"
+				value="#{item.listaMediosVerificacion}" var="documento">
+				<p:column style="text-align: left; background-color: #f5f5f5;">
+					<p:commandLink value="#{documento.nombre}" ajax="false">
+						<p:fileDownload
+							value="#{consumoRecursosController.descargar(documento)}" />
+					</p:commandLink>
+				</p:column>
+			</p:dataTable>
+			<h:outputText value="N/A"
+				rendered="#{item.listaMediosVerificacion eq null or item.listaMediosVerificacion.size() == 0}" />
+		</p:column>
+		<p:column styleClass="w70px alCenter">
+			<p:commandButton icon="ui-icon-pencil" title="Editar" process="@this"
+				update=":form:datosEnergia" styleClass="primary btnsEditar"
+				onclick="deshabilitarBotones()"
+				oncomplete="PF('adicionarEnergia').toggle()"
+				actionListener="#{consumoRecursosController.editarEnergia(item)}" />
+			<p:commandButton icon="ui-icon-trash" title="Eliminar"
+				process="@this" styleClass="primary btnsEditar"
+				actionListener="#{consumoRecursosController.eliminarEnergia(item)}"
+				update="tblEnergia :form:pnlSustancias :form:tblSustanciasEnergia" />
+		</p:column>
+
+		<p:columnGroup type="footer">
+			<p:row>
+				<p:column colspan="2"
+					style="text-align:right; font-weight: bold; padding: 10px;"
+					footerText="Consumo anual (kwh)" />
+				<p:column>
+					<f:facet name="footer">
+						<h:outputText
+							value="#{consumoRecursosController.totalConsumoEnergia}">
+							<f:convertNumber pattern="#0.00" locale="en-US" />
+						</h:outputText>
+					</f:facet>
+				</p:column>
+				<p:column colspan="3" footerText="" />
+			</p:row>
+		</p:columnGroup>
+	</p:dataTable>
+	<br />
+	<br />
+
+	<h:panelGroup id="pnlSustancias">
+		<p:dataTable style="margin: auto;" id="tblSustanciasEnergia"
+			rendered="#{consumoRecursosController.listaSustanciasRetceEnergia.size() > 0}"
+			value="#{consumoRecursosController.listaSustanciasRetceEnergia}"
+			var="item" emptyMessage="#{labels['common.table.empty']}">
+			<p:columnGroup type="header">
+				<p:row>
+					<p:column
+						colspan="#{consumoRecursosController.totalColsSustancias}"
+						headerText="Sustancias RETCE (voluntario hasta la expedición de la norma)"
+						styleClass="w100" />
+				</p:row>
+				<p:row>
+					<p:column headerText="Sustancia" />
+					<p:column headerText="Cantidad (t/año)" />
+					<p:column headerText="Método de estimación" />
+					<p:column headerText="Laboratorio"
+						rendered="#{consumoRecursosController.showLaboratorio}" />
+					<p:column headerText="Cálculo"
+						rendered="#{consumoRecursosController.showCalculo}" />
+				</p:row>
+			</p:columnGroup>
+
+			<p:column>
+				<h:outputText
+					value="#{item.catologSustanciasRetce.descripcionProductoQuimico}" />
+			</p:column>
+			<p:column styleClass="w15 alCenter">
+				<h:outputText value="#{item.reporteToneladaAnio}" />
+			</p:column>
+			<p:column styleClass="w30">
+				<h:outputText value="#{item.catalogoMetodoEstimacion.descripcion}" />
+			</p:column>
+			<p:column styleClass="w15 alCenter"
+				rendered="#{consumoRecursosController.showLaboratorio}">
+				<p:commandButton icon="ui-icon-search" title="ver"
+					rendered="#{item.catalogoMetodoEstimacion.descripcion.equals('Medición Directa')}"
+					process="@this"
+					update=":frmDialogs:verLaboratorio :frmDialogs:pnlDatosLaboratorio"
+					styleClass="primary" oncomplete="PF('verLaboratorio').show()"
+					actionListener="#{consumoRecursosController.verDatosLaboratorio(item)}" />
+				<h:outputText value="N/A"
+					rendered="#{!item.catalogoMetodoEstimacion.descripcion.equals('Medición Directa')}" />
+			</p:column>
+			<p:column styleClass="w15 alCenter"
+				rendered="#{consumoRecursosController.showCalculo}">
+				<p:commandButton icon="ui-icon-arrowthick-1-s"
+					styleClass="button-small primary" title="Ver" ajax="false"
+					immediate="true"
+					rendered="#{!item.catalogoMetodoEstimacion.descripcion.equals('Medición Directa')}">
+					<p:fileDownload
+						value="#{consumoRecursosController.descargar(item.documento)}" />
+				</p:commandButton>
+				<h:outputText value="N/A"
+					rendered="#{item.catalogoMetodoEstimacion.descripcion.equals('Medición Directa')}" />
+			</p:column>
+		</p:dataTable>
+	</h:panelGroup>
+	<br />
+
+</p:panelGrid>
+
+
+<h:form id="frmSustancia">
+	<p:dialog id="adicionarSustancia" widgetVar="adicionarSustancia"
+		width="800"
+		header="Sustancias RETCE (voluntario hasta la expedición de norma)">
+		<h:panelGroup id="datosSustancias">
+			<h:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25, null" rowClasses="null, alt">
+
+				<p:outputLabel value="Sustancia RETCE" for="sustanciaR"
+					styleClass="ui-label-form" />
+				<p:selectOneMenu
+					value="#{consumoRecursosController.sustanciaRetce.catologSustanciasRetce}"
+					id="sustanciaR" styleClass="w100" required="true"
+					converter="selectItemConverter">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="" noSelectionOption="true" />
+					<f:selectItems itemLabel="#{tipo.descripcionProductoQuimico}"
+						itemValue="#{tipo}" var="tipo"
+						value="#{consumoRecursosController.getSustanciasPendientes()}" />
+				</p:selectOneMenu>
+
+				<p:outputLabel value="Reporte (t/año)"
+					for="cantidadEliminacionSustancia" styleClass="ui-label-form" />
+				<pe:inputNumber required="true" id="cantidadEliminacionSustancia"
+					thousandSeparator="" maxValue="9999999999.9999999999" minValue="0"
+					value="#{consumoRecursosController.sustanciaRetce.reporteToneladaAnio}">
+					<f:validateDoubleRange minimum="0" />
+				</pe:inputNumber>
+
+				<p:outputLabel for="metodoSustancia" styleClass="ui-label-form"
+					value="Método de estimación" />
+				<p:selectOneMenu
+					value="#{consumoRecursosController.sustanciaRetce.catalogoMetodoEstimacion}"
+					id="metodoSustancia" styleClass="w100" required="true"
+					converter="selectItemConverter">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="" noSelectionOption="true" />
+					<f:selectItems itemLabel="#{tipo.descripcion}" itemValue="#{tipo}"
+						var="tipo"
+						value="#{consumoRecursosController.listaMetodoEstimacion}" />
+					<p:ajax event="change"
+						listener="#{consumoRecursosController.cambiarEstimacion}"
+						process="@this" update="pnlLaboratorio pnlDocCalculo" />
+				</p:selectOneMenu>
+			</h:panelGrid>
+			<h:panelGroup id="pnlLaboratorio">
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null" rowClasses="null, alt"
+					rendered="#{consumoRecursosController.sustanciaRetce.catalogoMetodoEstimacion.descripcion.equals('Medición Directa')}">
+					<f:facet name="header">
+						<h:outputText value="DATOS  DEL LABORATORIO"
+							style="text-align: left; color:#222222;" />
+					</f:facet>
+					<p:outputLabel for="rucLaboratorio" styleClass="ui-label-form"
+						value="RUC" />
+					<p:inputText required="true" id="rucLaboratorio"
+						value="#{consumoRecursosController.sustanciaRetce.datosLaboratorio.ruc}"
+						maxlength="20">
+						<pe:keyFilter regEx="/[a-z0-9]/i " />
+						<p:ajax event="change"
+							listener="#{consumoRecursosController.validarCedula}"
+							update="razonSocial" />
+					</p:inputText>
+
+					<p:outputLabel value="Nombre o Razón Social" for="razonSocial"
+						styleClass="ui-label-form" />
+					<p:inputText id="razonSocial"
+						value="#{consumoRecursosController.sustanciaRetce.datosLaboratorio.nombre}"
+						readonly="true" />
+
+					<p:outputLabel value="N° de Registro de SAE" for="numeroSae"
+						styleClass="ui-label-form" />
+					<p:inputText id="numeroSae"
+						value="#{consumoRecursosController.sustanciaRetce.datosLaboratorio.numeroRegistroSAE}"
+						maxlength="30" />
+
+					<p:outputLabel value="Vigencia del registro" for="fechaVigencia"
+						styleClass="ui-label-form" />
+					<p:calendar id="fechaVigencia" required="true" readonlyInput="true"
+						value="#{consumoRecursosController.sustanciaRetce.datosLaboratorio.fechaVigenciaRegistro}"
+						locale="es" navigator="true" pattern="dd-MM-yyyy">
+					</p:calendar>
+
+					<p:outputLabel for="docLaboratorio" styleClass="ui-label-form"
+						value="Informe de monitoreo emitido por el laboratorio" />
+					<h:panelGroup id="panelDocLab">
+						<p:fileUpload required="true" id="docLaboratorio"
+							fileUploadListener="#{consumoRecursosController.uploadInformeMonitoreo}"
+							multiple="false" sizeLimit="20971520"
+							allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar (pdf 20Mb)"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update="panelDocLab" />
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="button-small primary toLeft" title="Ver" ajax="false"
+							immediate="true"
+							rendered="#{consumoRecursosController.informeMonitoreo.nombre ne null}">
+							<p:fileDownload
+								value="#{consumoRecursosController.descargar(consumoRecursosController.informeMonitoreo)}" />
+						</p:commandButton>
+					</h:panelGroup>
+				</p:panelGrid>
+				<h:inputHidden
+					validator="#{consumoRecursosController.validateLaboratorio}" />
+			</h:panelGroup>
+
+			<h:panelGroup id="pnlDocCalculo">
+				<h:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null "
+					rendered="#{!consumoRecursosController.sustanciaRetce.catalogoMetodoEstimacion.descripcion.equals('Medición Directa')}">
+					<p:outputLabel for="docCalculo" value="Cálculo"
+						style="color: white" />
+					<p:outputPanel>
+						<p:fileUpload id="docCalculo"
+							fileUploadListener="#{consumoRecursosController.uploadFileDocumentoCalculo}"
+							multiple="false" sizeLimit="20971520"
+							allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar (pdf 20Mb)"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" required="true" update="pnlDocCalculo" />
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="button-small primary toLeft" title="Ver" ajax="false"
+							immediate="true"
+							rendered="#{consumoRecursosController.documentoCalculo.nombre ne null}">
+							<p:fileDownload
+								value="#{consumoRecursosController.descargar(consumoRecursosController.documentoCalculo)}" />
+						</p:commandButton>
+					</p:outputPanel>
+				</h:panelGrid>
+				<h:inputHidden
+					validator="#{consumoRecursosController.validateDocumentoCalculo}" />
+			</h:panelGroup>
+		</h:panelGroup>
+		<p:separator />
+		<br />
+		<div class="buttons">
+			<p:commandButton styleClass="primary"
+				value="#{consumoRecursosController.editarSustancia ? 'Actualizar' : 'Aceptar'}"
+				actionListener="#{consumoRecursosController.agregarSustancia()}"
+				oncomplete="handleSustancia(xhr, status, args)"
+				process="@this datosSustancias"
+				update="datosSustancias :form:tblSustanciasRetce " />
+		</div>
+
+	</p:dialog>
+</h:form>
+
+<script type="text/javascript">
+	function toggleEnergia(xhr, status, args) {
+		if(args.addEnergia) {
+			PF('adicionarEnergia').toggle();
+		}
+	}
+
+	function handleSustancia(xhr, status, args) {
+		if (args.validationFailed || !args.addSustancia) {
+            	PF('adicionarSustancia').show();
+            }
+            else {
+                PF('adicionarSustancia').hide();
+            }
+	}
+	
+</script>
+
+</html>

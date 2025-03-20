@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<h:panelGroup id="eliminacionDesechoFI">
+	<p:outputLabel value="Estimado usuario, según los datos ingresados hasta el momento, esta pantalla no aplica para usted." styleClass="bold text-red" escape="false" rendered="#{(recoleccionTransporteDesechosBean.getGeneradoresDesechosRecolectores().isEmpty() and recoleccionTransporteDesechosBean.getDesechosDisponiblesTransporte().size() > 0 )}" />
+	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<p:commandButton value="Adicionar" onclick="PF('adicionarEliminacionFI').toggle()" styleClass="button-small-text toRight field_mrg" process="@this" icon="ui-icon-plusthick">
+				<p:resetInput target=":form:adicionarEliminacionFI" />
+			</p:commandButton>
+			<mae:panelGridHeaderHelp value="Eliminación o disposición final fuera del establecimiento *" conector="eliminacionDesechoFIHelp" help="#{helps['generadorDesecho.eliminacionDesechoFI']}" width="600px" />
+		</f:facet>
+
+		<p:outputLabel value="Estimado Usuario: Recuerde que como generador de desechos peligrosos y/o especiales, Usted es responsable de la gestión de sus desechos peligrosos o especiales “desde la cuna a la tumba”, por lo que, se recomienda que para ingresar la información en esta pantalla, debe previamente consultar con gestores ambientales que cuenten con el permiso ambiental correspondiente, de esta manera no tendrá inconvenientes en seleccionar el tipo de eliminación o disposición final y luego los prestadores autorizados para ese fin." styleClass="bold text-red alJustify" escape="false" />
+
+		<p:outputLabel value="Estimado usuario, según los datos ingresados hasta el momento, esta pantalla no es requerida." styleClass="bold text-red" escape="false" rendered="#{(eliminacionDesechosFueraInstalacionBean.getGeneradoresDesechosEliminadores().isEmpty() and recoleccionTransporteDesechosBean.getDesechosDisponiblesTransporte().size() == 0 )}" />
+
+		<ui:include src="/prevencion/registrogeneradordesechos/utiles/eliminacionDesechosFueraInstalacionAdd.xhtml" />
+
+		<p:dataList id="listadoEliminacionFI" value="#{eliminacionDesechosFueraInstalacionBean.generadoresDesechosEliminadores}" type="none" var="eliminador" rowIndexVar="index" emptyMessage="#{labels['common.table.empty']}">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<p:commandButton styleClass="button-small toRight field_mrg" process="@this" update=":form:listadoEliminacionFI :form:adicionarEliminacionFI" actionListener="#{eliminacionDesechosFueraInstalacionBean.eliminar(eliminador)}" icon="ui-icon-trash">
+						<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar los datos asociados a la eliminación de desechos fuera del establecimiento?" icon="ui-icon-alert" />
+					</p:commandButton>
+					<p:commandButton styleClass="button-small toRight field_mrg" process="@this" update=":form:adicionarEliminacionFI" actionListener="#{eliminacionDesechosFueraInstalacionBean.editar(eliminador)}" icon="ui-icon-pencil" oncomplete="PF('adicionarEliminacionFI').toggle()" />
+					<h:outputText value="Dato #{(index + 1)}" />
+				</f:facet>
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w25, null" rowClasses="null, alt">
+					<h:outputText value="Desecho" />
+					<h:outputText value="#{eliminador.desechoPeligroso.descripcion}" />
+					<h:outputText value="Código" />
+					<h:outputText value="#{eliminador.desechoPeligroso.clave}" />
+					<h:outputText value="CRTIB" title="#{helps['generadorDesecho.crtib']}" />
+					<h:outputText value="#{eliminador.desechoPeligroso.nombresCRITB}" />
+				</h:panelGrid>
+				<h:panelGrid styleClass="panel_data w50" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+					<h:outputText value="Eliminación o disposición final" />
+					<h:outputText value="#{eliminador.tipoEliminacionDesecho}" />
+				</h:panelGrid>
+				<p:dataTable value="#{eliminador.generadoresDesechosEliminadoresSedes}" var="eliminadorSede" emptyMessage="#{labels['common.table.empty']}" >
+					<p:column headerText="Empresa prestadora de servicios">
+						<h:outputText value="#{eliminadorSede.sedePrestadorServiciosDesechos.prestadorServiciosDesechos}" />
+						<h:outputText value="#{eliminadorSede.otraEmpresa}" rendered="#{recolectorSede.sedePrestadorServiciosDesechos eq null}"/>
+					</p:column>
+					<p:column headerText="Gestión anual (T)" styleClass="w15 alCenter">
+						<h:outputText value="#{eliminadorSede.sedePrestadorServiciosDesechos.capacidadGestionAnualToneladas}" />
+					</p:column>
+					<p:column headerText="Gestión anual (U)" styleClass="w15 alCenter" rendered="#{(empresaPrestadoraServiciosAliasBean.desechoSeleccionado.desechoES_04 or empresaPrestadoraServiciosAliasBean.desechoSeleccionado.desechoES_06) }">
+						<h:outputText value="#{eliminadorSede.sedePrestadorServiciosDesechos.capacidadGestionAnualUnidades}" />
+					</p:column>
+					<p:column headerText="Permiso Ambiental" width="20%" styleClass="not-show-at-start" rendered="#{eliminacionDesechosFueraInstalacionBean.tieneArchvoPermiso}">
+						<p:commandButton icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true" rendered="#{eliminadorSede.permisoAmbiental ne null}"> 
+							<p:fileDownload value="#{eliminacionDesechosFueraInstalacionBean.getFilePermiso(eliminadorSede)}" />
+						</p:commandButton>
+					</p:column>
+				</p:dataTable>
+				<p:inputTextarea value="#{eliminador.textoAsociadoOpcionOtro}" readonly="true" rows="2" rendered="#{not empty eliminador.textoAsociadoOpcionOtro}" />
+			</p:panelGrid>
+		</p:dataList>
+	</p:panelGrid>
+</h:panelGroup>
+</html>

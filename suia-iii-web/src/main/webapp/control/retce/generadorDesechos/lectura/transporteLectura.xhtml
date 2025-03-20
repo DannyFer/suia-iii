@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100"
+	style="margin-top: 15px !important;">
+	<f:facet name="header">
+		<h:outputText value="TRANSPORTE FUERA DE LA INSTALACIÓN" />
+	</f:facet>
+</p:panelGrid>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="MEDIOS PROPIOS" width="600px" />
+	</f:facet>
+
+	<h:panelGroup
+		rendered="#{transporteDesechosBean.panelMedioPropioVisible}">
+		<h:panelGrid columns="2" styleClass="panel_data w100"
+			columnClasses="header w33, null" rowClasses="null, alt">
+			<h:outputText
+				value="#{transporteDesechosBean.transporteMediosPropios.tipoResolucion.descripcion}" />
+			<h:outputText
+				value="#{transporteDesechosBean.transporteMediosPropios.nroResolucion}" />
+
+			<h:outputText value="Anexo" />
+			<p:commandButton icon="ui-icon-arrowthick-1-s"
+				styleClass="button-small primary toLeft" title="Ver" ajax="false"
+				immediate="true"
+				rendered="#{transporteDesechosBean.documentoAutorizacion.id ne null}">
+				<p:fileDownload
+					value="#{transporteDesechosBean.descargar(transporteDesechosBean.documentoAutorizacion)}" />
+			</p:commandButton>
+		</h:panelGrid>
+
+		<p:dataTable value="#{transporteDesechosBean.listaManifiestos}"
+			var="item" emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<h:outputText value="Detalle Manifiestos" />
+			</f:facet>
+
+			<p:column headerText="N° de manifiesto">
+				<h:outputText value="#{item.numeroManifiesto}" />
+			</p:column>
+			<p:column headerText="Fecha de embarque">
+				<h:outputText value="#{item.fechaEmbarque}" />
+			</p:column>
+			<p:column headerText="Manifiesto único" styleClass="w15 alCenter">
+				<p:commandButton icon="ui-icon-arrowthick-1-s"
+					styleClass="button-small primary" title="Ver" ajax="false"
+					immediate="true" rendered="#{item.manifiestoUnico.id ne null}">
+					<p:fileDownload
+						value="#{transporteDesechosBean.descargar(item.manifiestoUnico)}" />
+				</p:commandButton>
+			</p:column>
+			<p:column headerText="Desechos" styleClass="w10 alCenter">
+				<p:commandButton icon="ui-icon-search" title="ver" process="@this"
+					update=":frmDialogs:verDesechosManifiesto"
+					styleClass="button-small secondary"
+					oncomplete="PF('verDesechosManifiesto').show()"
+					actionListener="#{transporteDesechosBean.verDesechosManifiesto(item)}" />
+			</p:column>
+		</p:dataTable>
+		<br />
+		<br />
+		<p:dataTable
+			value="#{transporteDesechosBean.resumenManifiestoMedioPropio}"
+			var="item" emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<h:outputText value="Sumatoria" />
+			</f:facet>
+
+			<p:column
+				headerText="Nombre del residuo o desecho peligroso o especial"
+				styleClass="w50">
+				<h:outputText value="#{item.desechoPeligroso.descripcion}" />
+			</p:column>
+			<p:column headerText="Código">
+				<h:outputText value="#{item.desechoPeligroso.clave}" />
+			</p:column>
+			<p:column headerText="Total (t)" styleClass="alCenter">
+				<h:outputText value="#{item.totalDesecho}">
+					<f:convertNumber pattern="#0.00" />
+				</h:outputText>
+			</p:column>
+		</p:dataTable>
+	</h:panelGroup>
+</p:panelGrid>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="GESTOR AMBIENTAL" />
+	</f:facet>
+
+	<h:panelGroup rendered="#{transporteDesechosBean.panelGestorVisible}">
+		<p:dataTable value="#{transporteDesechosBean.listaEmpresasGestoras}"
+			var="item" emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<h:outputText value="Empresas Gestoras" />
+			</f:facet>
+
+			<p:column headerText="Empresa gestora" styleClass="w50">
+				<h:outputText
+					value="#{item.empresaGestora.prestadorServiciosDesechos}" />
+			</p:column>
+			<p:column headerText="Número de autorización">
+				<h:outputText value="#{item.empresaGestora.codigoPermisoAmbiental}" />
+			</p:column>
+			<p:column headerText="Fecha de autorización">
+				<h:outputText value="#{item.empresaGestora.fechaPermisoAmbiental}" />
+			</p:column>
+		</p:dataTable>
+
+		<p:dataTable
+			value="#{transporteDesechosBean.listaManifiestosGestores}" var="item"
+			emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<h:outputText value="Detalle Manifiestos" />
+			</f:facet>
+
+			<p:column headerText="N° de manifiesto">
+				<h:outputText value="#{item.numeroManifiesto}" />
+			</p:column>
+			<p:column headerText="Fecha de embarque">
+				<h:outputText value="#{item.fechaEmbarque}" />
+			</p:column>
+			<p:column headerText="Manifiestos únicos" styleClass="w15 alCenter">
+				<p:commandButton icon="ui-icon-arrowthick-1-s"
+					styleClass="button-small primary" title="Ver" ajax="false"
+					immediate="true" rendered="#{item.manifiestoUnico.id ne null}">
+					<p:fileDownload
+						value="#{transporteDesechosBean.descargar(item.manifiestoUnico)}" />
+				</p:commandButton>
+			</p:column>
+			<p:column headerText="Desechos" styleClass="w10 alCenter">
+				<p:commandButton icon="ui-icon-search" title="ver" process="@this"
+					update=":frmDialogs:verDesechosManifiesto"
+					styleClass="button-small secondary"
+					oncomplete="PF('verDesechosManifiesto').show()"
+					actionListener="#{transporteDesechosBean.verDesechosManifiesto(item)}" />
+			</p:column>
+		</p:dataTable>
+
+		<br />
+		<br />
+		<p:dataTable
+			value="#{transporteDesechosBean.resumenManifiestoGestores}"
+			var="item" emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<h:outputText value="Sumatoria" />
+			</f:facet>
+
+			<p:column
+				headerText="Nombre del residuo o desecho peligroso o especial"
+				styleClass="w50">
+				<h:outputText value="#{item.desechoPeligroso.descripcion}" />
+			</p:column>
+			<p:column headerText="Código">
+				<h:outputText value="#{item.desechoPeligroso.clave}" />
+			</p:column>
+			<p:column headerText="Total (t)" styleClass="alCenter">
+				<h:outputText value="#{item.totalDesecho}">
+					<f:convertNumber pattern="#0.00" />
+				</h:outputText>
+			</p:column>
+		</p:dataTable>
+	</h:panelGroup>
+</p:panelGrid>
+
+
+
+</html>

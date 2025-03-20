@@ -1,0 +1,462 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="content">
+        <h:form id="form"> 
+            <p:panel header="2. Diseños definitivos">
+
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                    <f:facet name="header">
+                        <h:outputText value="Fases"/>
+                    </f:facet>
+										
+					<p:selectManyCheckbox id="smcfases" value="#{gestionIntegralBean.fasesSeleccionadas}" converter="selectItemConverter" layout="grid" columns="1">
+						<f:selectItems value="#{gestionIntegralBean.listFaseViabilidadTecnica}"/>
+					</p:selectManyCheckbox>
+								
+                </p:panelGrid>
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                    <f:facet name="header">
+                        <center><h:outputText value="Emisión Viabilidad Técnica"/></center>
+                    </f:facet>
+                </p:panelGrid>
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                    <f:facet name="header">
+                        <center><h:outputText value="Etapa 1"/></center>
+                    </f:facet>
+                </p:panelGrid>
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                    <f:facet name="header">
+                        <h:outputText value="1. Diagnóstico y Factibilidad"/>
+                    </f:facet>
+                    <p:inputTextarea
+                            value="#{gestionIntegralBean.proyectoAmbientalNoRegulado.diagnosticoFactibilidad}"
+                            maxlength="500" autoResize="false">
+                        <f:validateLength maximum="500"/>
+                    </p:inputTextarea>
+                </p:panelGrid>
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                    <f:facet name="header">
+                        <h:outputText
+                                value="1.1 Información básica sobre el área del Proyecto						"/>
+                    </f:facet>
+                    <p:inputTextarea
+                            value="#{gestionIntegralBean.proyectoAmbientalNoRegulado.informacionBasicaAreaProyecto}"
+                            maxlength="500" autoResize="false">
+                        <f:validateLength maximum="500"/>
+                    </p:inputTextarea>
+                </p:panelGrid>
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                    <f:facet name="header">
+                        <h:outputText value="1.1.1 Descripción del proyecto"/>
+                    </f:facet>
+                    <p:inputTextarea
+                            value="#{gestionIntegralBean.proyectoAmbientalNoRegulado.descripcion}"
+                            maxlength="500" autoResize="false">
+                        <f:validateLength maximum="500"/>
+                    </p:inputTextarea>
+                </p:panelGrid>
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                    <f:facet name="header">
+                        <h:outputText value="1.1.2 Datos Generales"/>
+                    </f:facet>
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                        <f:facet name="header">
+                            <h:outputText value="Ubicación geográfica"/>
+                        </f:facet>
+                        <f:facet name="header">
+
+                            <p:commandButton
+                                    styleClass="button-small-text toRight field_mrg"
+                                    icon="ui-icon-plusthick" value="Adicionar"
+                                    process="@none" 
+                                    actionListener="#{gestionIntegralBean.iniciarObjetosUbicacion()}"
+                                    oncomplete="PF('adicionarUbicacion').show()" 
+                                    update=":#{p:component('pgUbicacionesGeograficas')}"/>
+
+                        </f:facet>
+
+
+                        <p:dataTable id="dtUbicacionesGeo"
+                                paginator="true" rows="10" paginatorPosition="bottom"
+                                emptyMessage="#{labels['common.table.empty']}" value="#{gestionIntegralBean.listaProyectoNoRegularizadoUbicacionGeografica}"
+                                paginatorAlwaysVisible="false" var="u">
+                            <p:column headerText="Región">
+                                <h:outputText value="#{u.ubicacionesGeografica.ubicacionesGeografica.region.nombre}"/>
+                            </p:column>
+                            <p:column headerText="Provincia">
+                                <h:outputText value="#{u.ubicacionesGeografica.ubicacionesGeografica.nombre}"/>
+                            </p:column>
+                            <p:column headerText="Cantón">
+                                <h:outputText
+                                        value="#{u.ubicacionesGeografica.nombre}"/>
+                            </p:column>
+                            
+                            <p:column headerText="Acciones" styleClass="w40px alCenter">
+                                <p:commandButton icon="ui-icon-circle-close"
+                                                 styleClass="button-small primary"
+                                                 actionListener="#{gestionIntegralBean.eliminarProyectoNoRegularizadoUbicacionGeografica(u)}"
+                                                 update=":#{p:component('dtUbicacionesGeo')}" process="@this">
+                                    <p:confirm header="Confirmación"
+                                               message="¿Está seguro que desea eliminar esta Ubicacion geografica?"
+                                               icon="ui-icon-alert"/>
+                                </p:commandButton>
+                            </p:column>
+                        </p:dataTable>
+                    </p:panelGrid>
+                </p:panelGrid>
+
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                    <f:facet name="header">
+                        <h:outputText value="Sistema de referencias [Formato: sistema WGS84, zona 17S] *"/>
+                    </f:facet>
+                    <div class="alCenter">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+                      <h:panelGroup id="containerCoordenadas">
+							<p:panelGrid columns="1" layout="grid"
+								styleClass="buttonAdjuntarCoordenadasContainer w100">
+								<f:facet name="header">
+									<p:commandButton value="Adjuntar"
+										onclick="PF('adjuntarCoordenadas').show()"
+										styleClass="buttonAdjuntarCoordenadas button-small-text toRight field_mrg"
+										type="button" icon="ui-icon-document" />
+									<p:commandButton
+										rendered="#{!empty cargarCoordenadasBean.plantillaCoordenadas}"
+										value="Descargar plantilla"
+										styleClass="button-small-text toRight field_mrg"
+										icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true">
+										<p:fileDownload
+											value="#{cargarCoordenadasBean.plantillaCoordenadas}" />
+									</p:commandButton>
+									<p:commandButton styleClass="button-small toRight field_mrg"
+										ajax="false" immediate="true" icon="ui-icon-help">
+										<p:fileDownload
+											value="#{cargarCoordenadasBean.ayudaCoordenadas}" />
+									</p:commandButton>
+									<h:outputText
+										value="Sistema de referencias [Formato: sistema WGS84, zona 17S] *" />
+								</f:facet>
+								<ui:include src="/comun/cargarCoordenadas.xhtml" />
+							</p:panelGrid>
+						</h:panelGroup>
+                    </p:panelGrid>
+					</div>
+				</p:panelGrid>
+
+                <p:panelGrid columns="1" layout="grid" id="pnlTotalPoblacion" styleClass="w100">
+                    <f:facet name="header">
+                        <h:outputText value="Población"/>
+                    </f:facet>
+                    
+                    <p:panelGrid columns="3" layout="grid" styleClass="w100" columnClasses="w30, w30 , w30 ">
+						<p:panelGrid columns="1" layout="grid" styleClass="w100">
+							<f:facet name="header"><h:outputText value="Urbana" id="urbana" /></f:facet>
+							<h:inputText value="#{gestionIntegralBean.urbana}" />
+						</p:panelGrid>
+							
+						<p:panelGrid columns="1" layout="grid" styleClass="w100">
+							<f:facet name="header"><h:outputText value="Rural" id="rural"/></f:facet>
+							<h:inputText value="#{gestionIntegralBean.rural}" />
+						</p:panelGrid>
+							
+						<p:panelGrid columns="1" layout="grid" styleClass="w100">
+							<f:facet name="header"><h:outputText value="Índice de crecimiento" id="indiceCrecimiento" /></f:facet>
+						    <h:inputText value="#{gestionIntegralBean.indiceCrecimiento}" />
+						</p:panelGrid>
+							
+						<p:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w50, w50">
+							<p:commandButton value="Total Poblacion" 
+											 process="@this, :#{p:component('pnlTotalPoblacion')}"
+											 actionListener="#{gestionIntegralBean.calcularTotalPoblacion()}" 
+											 update=":#{p:component('lblTotalPoblacion')}"></p:commandButton>
+
+							<p:outputLabel value="#{gestionIntegralBean.totalPoblacion}" id="lblTotalPoblacion"></p:outputLabel>
+						</p:panelGrid>
+                	</p:panelGrid>
+                </p:panelGrid>
+
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                    <f:facet name="header">
+                        <h:outputText
+                                value="1.1.3 Características físicas, geográficas y ambientales de la región"/>
+                    </f:facet>
+                    <p:inputTextarea
+                            value="#{gestionIntegralBean.proyectoAmbientalNoRegulado.descripcionRegion}"
+                            maxlength="500" autoResize="false">
+                        <f:validateLength maximum="500"/>
+                    </p:inputTextarea>
+                </p:panelGrid>
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w10,w10">
+                    <f:facet name="header">
+                        <h:outputText value="1.1.4 Salud pública en la zona del proyecto:"/>
+                    </f:facet>
+
+					<h:panelGrid columns="3" layout="grid" styleClass="w75" columnClasses="w25 field_mrg,w25 field_mrg,w25 field_mrg">
+						<p:outputLabel value="Tasa de mortalidad" for="mortalidad"/>
+						<p:outputLabel value="Tasa de morbilidad" for="morbilidad"/>
+						<h:outputText />
+					
+						<p:inputText id="mortalidad"
+                                     value="#{gestionIntegralBean.proyectoAmbientalNoRegulado.mortalidad}">
+						</p:inputText>
+                    
+						<p:inputText id="morbilidad"
+									 value="#{gestionIntegralBean.proyectoAmbientalNoRegulado.mobilidad}">
+						</p:inputText>
+						<h:outputText />
+					</h:panelGrid>
+                </p:panelGrid>
+
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w50">
+                    <f:facet name="header">
+                        <h:outputText value="1.1.4 Salud pública en la zona del proyecto:"/>
+                    </f:facet>
+                    <h:panelGrid columns="3" layout="grid" styleClass="w75" columnClasses="w25 field_mrg,w25 field_mrg,w25 field_mrg">
+						<p:outputLabel value="PEA" for="pea"/>
+						<h:outputText />
+						<h:outputText />
+						<p:inputText id="pea"
+                                     value="#{gestionIntegralBean.proyectoAmbientalNoRegulado.pea}">
+                        </p:inputText>
+					</h:panelGrid>
+                </p:panelGrid>
+
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                    <f:facet name="header">
+                        <h:outputText value="Servicios públicos"/>
+                    </f:facet>
+
+               <p:dataTable id="idDtServiciosPublicosNoRegulados" 
+                            paginator="true" rows="10" paginatorPosition="bottom"
+                            emptyMessage="#{labels['common.table.empty']}" value="#{gestionIntegralBean.listaServiciosPublicosNoRegulados}"
+                            paginatorAlwaysVisible="false" var="spnr">
+                            
+                        <f:facet name="header">
+                            <p:commandButton
+                                    styleClass="button-small-text toRight field_mrg"
+                                    icon="ui-icon-plusthick" value="Adicionar"
+                                    process="@none"
+                                    oncomplete="PF('adicionarServiciosPublicos').show()"/>
+
+                        </f:facet>
+                        <p:column headerText="# Establecimiento Educacionales">
+                            <h:outputText value="#{spnr.establecimientosEducacionales}"/>
+                        </p:column>
+                        <p:column headerText="#Hospitales y Centros de salud">
+                            <h:outputText value="#{spnr.centroSalud}"/>
+                        </p:column>
+                        <p:column headerText="# Medios de Comunicación">
+                            <h:outputText
+                                    value="#{spnr.mediosComunicacionTransporte}"/>
+                        </p:column>
+
+                        <p:column headerText="# Mercados, establecimientos Comerciales e Institucionales">
+                            <h:outputText
+                                    value="#{spnr.establecimientosComercialesIntitucionales}"/>
+                        </p:column>
+                        
+                        <p:column headerText="Acciones" styleClass="w40px alCenter">
+                        	 <p:commandButton icon="ui-icon-circle-close"
+                                              styleClass="button-small primary"
+                                              actionListener="#{gestionIntegralBean.eliminarServiciosProyectosNoRegularizado(spnr)}"
+                                              process="@this"
+                                              update=":#{p:component('idDtServiciosPublicosNoRegulados')}" >
+                                    <p:confirm header="Confirmación"
+                                               message="¿Está seguro que desea eliminar este Servicios públicos?"
+                                               icon="ui-icon-alert"/>
+                            </p:commandButton>
+                        </p:column>
+                        
+                    </p:dataTable>
+                </p:panelGrid>
+               
+                <p:panelGrid id="pnlGrdServiciosBasicos" columns="1" layout="grid" styleClass="w100">
+                 <f:facet name="header">
+                        <h:outputText value="Servicios basicos"/>
+                    </f:facet>
+					
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	                    <f:facet name="header">
+	                        <h:outputText value="Luz"/>
+	                    </f:facet>
+						<h:panelGrid columns="3" layout="grid" styleClass="w66" columnClasses="w10 field_mrg, w20 field_mrg, w20 field_mrg">
+	                    	<p:column></p:column>
+							<p:outputLabel value="COBERTURA"></p:outputLabel>
+							<p:outputLabel value="TARIFAS"></p:outputLabel>
+							
+							<p:column><p:outputLabel value="RURAL"></p:outputLabel></p:column>
+							<p:inputText value="#{gestionIntegralBean.serviciosBasicosProyectosNoRegulados.luzCoberturaRural}"></p:inputText>
+							<p:inputText value="#{gestionIntegralBean.serviciosBasicosProyectosNoRegulados.luzTarifaRural}"></p:inputText>
+							
+							<p:column><p:outputLabel value="URBANA"></p:outputLabel></p:column>
+							<p:inputText value="#{gestionIntegralBean.serviciosBasicosProyectosNoRegulados.luzCoberturaUrbana}"></p:inputText>
+							<p:inputText value="#{gestionIntegralBean.serviciosBasicosProyectosNoRegulados.luzTarifaUrbana}"></p:inputText>
+						</h:panelGrid>				
+                	</p:panelGrid>	
+                	
+                	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	                    <f:facet name="header">
+	                        <h:outputText value="Agua"/>
+	                    </f:facet>
+						<h:panelGrid columns="3" layout="grid" styleClass="w66" columnClasses="w10 field_mrg, w20 field_mrg, w20 field_mrg">
+	                    	<p:column></p:column>
+							<p:outputLabel value="COBERTURA"></p:outputLabel>
+							<p:outputLabel value="TARIFAS"></p:outputLabel>
+							
+							<p:column><p:outputLabel value="RURAL"></p:outputLabel></p:column>
+							<p:inputText value="#{gestionIntegralBean.serviciosBasicosProyectosNoRegulados.aguaCoberturaRural}"></p:inputText>
+							<p:inputText value="#{gestionIntegralBean.serviciosBasicosProyectosNoRegulados.aguaTarifaRural}"></p:inputText>
+							
+							<p:column><p:outputLabel value="URBANA"></p:outputLabel></p:column>
+							<p:inputText value="#{gestionIntegralBean.serviciosBasicosProyectosNoRegulados.aguaCoberturaUrbana}"></p:inputText>
+							<p:inputText value="#{gestionIntegralBean.serviciosBasicosProyectosNoRegulados.aguaTarifaUrbana}"></p:inputText> 
+						</h:panelGrid>
+					</p:panelGrid>	
+                	
+                	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	                    <f:facet name="header">
+	                        <h:outputText value="Alcantarillado"/>
+	                    </f:facet>
+						<h:panelGrid columns="3" layout="grid" styleClass="w66" columnClasses="w10 field_mrg, w20 field_mrg, w20 field_mrg">
+	                    	<p:column></p:column>
+							<p:outputLabel value="COBERTURA"></p:outputLabel>
+							<p:outputLabel value="TARIFAS"></p:outputLabel>
+							
+							<p:column><p:outputLabel value="RURAL"></p:outputLabel></p:column>
+							<p:inputText value="#{gestionIntegralBean.serviciosBasicosProyectosNoRegulados.alcantarilladoCoberturaRural}"></p:inputText>
+							<p:inputText value="#{gestionIntegralBean.serviciosBasicosProyectosNoRegulados.alcantarilladoTarifaRural}"></p:inputText>
+							
+							<p:column><p:outputLabel value="URBANA"></p:outputLabel></p:column>
+							<p:inputText value="#{gestionIntegralBean.serviciosBasicosProyectosNoRegulados.alcantarilladoCoberturaUrbana}"></p:inputText>
+							<p:inputText value="#{gestionIntegralBean.serviciosBasicosProyectosNoRegulados.alcantarilladoTarifaUrbana}"></p:inputText> 
+						</h:panelGrid>
+					</p:panelGrid>	
+                	
+                	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	                    <f:facet name="header">
+	                        <h:outputText value="Teléfono"/>
+	                    </f:facet>
+						<h:panelGrid columns="3" layout="grid" styleClass="w66" columnClasses="w10 field_mrg, w20 field_mrg, w20 field_mrg">	
+	                    	<p:column></p:column>
+							<p:outputLabel value="COBERTURA"></p:outputLabel>
+							<p:outputLabel value="TARIFAS"></p:outputLabel>
+							
+							<p:column><p:outputLabel value="RURAL"></p:outputLabel></p:column>
+							<p:inputText value="#{gestionIntegralBean.serviciosBasicosProyectosNoRegulados.telefonoCoberturaRural}"></p:inputText>
+							<p:inputText value="#{gestionIntegralBean.serviciosBasicosProyectosNoRegulados.telefonoTarifaRural}"></p:inputText>
+							
+							<p:column><p:outputLabel value="URBANA"></p:outputLabel></p:column>
+							<p:inputText value="#{gestionIntegralBean.serviciosBasicosProyectosNoRegulados.telefonoCoberturaUrbana}"></p:inputText>
+							<p:inputText value="#{gestionIntegralBean.serviciosBasicosProyectosNoRegulados.telefonoTarifaUrbana}"></p:inputText> 
+						</h:panelGrid>
+					</p:panelGrid>				
+                </p:panelGrid>
+
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                    <f:facet name="header">
+                        <h:outputText value="1.1.8 Sistema de vías urbanas"/>
+                    </f:facet>
+
+
+                    <p:inputTextarea
+                            value="#{gestionIntegralBean.viasUrbanas}"
+                            maxlength="500" autoResize="false">
+                        <f:validateLength maximum="500"/>
+                    </p:inputTextarea>
+
+                </p:panelGrid>
+
+
+            </p:panel>
+            
+            <div class="buttons">
+                    <p:commandButton  value="Guardar" 
+                    				  icon="ui-icon-disk" 
+                    				  process="@this, :#{p:component('form')}"
+                    				  partialSubmit="true"  
+                    				  actionListener="#{gestionIntegralBean.guardarDatos()}" />
+            </div>
+			
+			<p:dialog header="Ubicación" widgetVar="adicionarUbicacion" modal="false" width="350" resizable="false">
+                <h:panelGrid id="pgUbicacionesGeograficas" columns="2" styleClass="w100 alCenter" columnClasses="alRight, field_mrg w66 alLeft">
+                    
+                    <p:outputLabel value="Región" for="region"/>
+                    <p:selectOneMenu value="#{gestionIntegralBean.regionSeleccionada}" converter="selectItemConverter" id="region" styleClass="w100">
+                        <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true"/>
+						<f:selectItems value="#{gestionIntegralBean.listaRegiones}" var="region" itemLabel="#{region.nombre}" />
+						<p:ajax listener="#{gestionIntegralBean.cargarProvincias()}"
+						 update=":form:pgUbicacionesGeograficas" process=":form:pgUbicacionesGeograficas" />
+                    </p:selectOneMenu>
+													
+                    <p:outputLabel value="Provincia" for="provincia"/>
+                    <p:selectOneMenu value="#{gestionIntegralBean.provinciaSeleccionada}" converter="selectItemConverter" id="provincia" styleClass="w100">
+                        <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true"/>
+						<f:selectItems value="#{gestionIntegralBean.listaProvincias}" />
+						<p:ajax listener="#{gestionIntegralBean.cargarCantones()}"
+						update=":form:pgUbicacionesGeograficas" process=":form:pgUbicacionesGeograficas" />
+
+                    </p:selectOneMenu>
+					
+					
+                    <p:outputLabel value="Cantón" for="canton"/>  
+                    <p:selectOneMenu value="#{gestionIntegralBean.cantonSeleccionado}" converter="selectItemConverter" id="canton" styleClass="w100">
+                        <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true"/>
+						<f:selectItems value="#{gestionIntegralBean.listaCantones}" />
+						<p:ajax update=":form:pgUbicacionesGeograficas" process=":form:pgUbicacionesGeograficas" />
+					</p:selectOneMenu>
+									
+
+                </h:panelGrid>
+                <p:separator/>
+
+                <div class="buttons">
+                    <p:commandButton  value="Agregar" actionListener="#{gestionIntegralBean.cargarListaUbicacionesGeo()}" oncomplete="PF('adicionarUbicacion').hide()" process="@this" partialSubmit="true" update="#{p:component('dtUbicacionesGeo')}" />
+                </div>
+            </p:dialog>
+            
+            <p:dialog header="Servicios básicos" widgetVar="adicionarServiciosPublicos" width="700" modal="false">
+            		<p:separator/>
+            		<h:panelGrid columns="2" id="idPnlGrdNuevosServiciosPublicos" layout="grid" styleClass="w100" columnClasses="w50" >
+												
+            			<p:outputLabel value="Establecimiento Educacionales"></p:outputLabel>
+            			<p:inputText value="#{gestionIntegralBean.serviciosPublicosProyectosNoRegulados.establecimientosEducacionales}"/>
+            				
+            			<p:outputLabel value="Hospitales y Centros de salud"></p:outputLabel>
+            			<p:inputText value="#{gestionIntegralBean.serviciosPublicosProyectosNoRegulados.centroSalud}"/>
+            				
+            			<p:outputLabel value="Medios de Comunicación y Transporte"></p:outputLabel>
+            			<p:inputText value="#{gestionIntegralBean.serviciosPublicosProyectosNoRegulados.mediosComunicacionTransporte}"/>
+            				
+            			<p:outputLabel value="Mercados, establecimientos Comerciales e Institucionales"></p:outputLabel>
+            			<p:inputText value="#{gestionIntegralBean.serviciosPublicosProyectosNoRegulados.establecimientosComercialesIntitucionales}"/>		
+            		</h:panelGrid>
+            		<p:separator/>
+            	    
+            	    <div class="buttons">
+                    	<p:commandButton  value="Agregar" actionListener="#{gestionIntegralBean.cargarListaServiciosPublicos()}" 
+										  oncomplete="PF('adicionarServiciosPublicos').hide()" 
+										  process="@this :#{p:component('idPnlGrdNuevosServiciosPublicos')}" partialSubmit="true" 
+										  update=":#{p:component('idDtServiciosPublicosNoRegulados')} :#{p:component('idPnlGrdNuevosServiciosPublicos')}"/>
+                	</div>
+            </p:dialog>
+            
+       </h:form>	
+    </ui:define>
+</ui:composition>
+</html>

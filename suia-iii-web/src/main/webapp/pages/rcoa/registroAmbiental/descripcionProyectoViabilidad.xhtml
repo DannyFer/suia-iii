@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="content">
+
+		<ui:include src="contenido/menu.xhtml" />
+		<div class="content">
+			<f:facet name="header">
+				<h:outputText value="&nbsp;&nbsp;&nbsp; Datos de la Actividad" />
+			</f:facet>
+		</div>
+		<p:panel styleClass="content" header="2. DESCRIPCIÓN DEL PROYECTO FASES: CONSTRUCCIÓN, REHABILITACIÓN Y/O AMPLIACIÓN, OPERACIÓN Y MANTENIMIENTO, CIERRE Y ABANDONO" >
+			<h:form id="frmRigistroFases">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Actividades del proceso *" />
+					</f:facet>
+						<p:outputPanel id="pnlIngresoFase">
+							<h:panelGrid styleClass="w100 " columns="2" columnClasses="w33, field_mrg w33">
+								<p:outputLabel value="¿Su proyecto, obra o actividad cuenta con el manejo de desechos sanitarios?" />
+							<p:selectOneRadio id="verificaEncuentraActividadCIIU"
+								value="#{faseRegistroAmbientalController.manejaDesechos}"
+								required="true"
+								requiredMessage="El campo ¿Su proyecto, obra o actividad cuenta con el manejo de desechos sanitarios? es requerido">
+								<f:selectItem itemValue="true" itemLabel="Si" />
+								<f:selectItem itemValue="false" itemLabel="No" />
+								<p:ajax process="@this" />
+							</p:selectOneRadio>
+
+							<p:outputLabel value="" />
+								<p:outputLabel value="" />
+							
+								<p:outputLabel value="Fase *" />
+								<p:outputLabel value="" />
+								
+								<p:selectOneMenu required="true" requiredMessage="El campo remitente es requerido"
+								disabled="#{faseRegistroAmbientalController.registroAmbientalFasesViabilidad.nuevoRegistro}"
+									value="#{faseRegistroAmbientalController.registroAmbientalFasesViabilidad.fasesCoa}" id="cmbFase" converter="selectItemConverter">
+									<f:selectItem itemLabel="Seleccione" itemValue="" />
+									<f:selectItems value="#{faseRegistroAmbientalController.listaFases}" 
+									var="fase" itemLabel="#{fase.descripcion}" itemValue="#{fase}" />
+									<p:ajax  update=":#{p:component('pnlIngresoFase')} :#{p:component('idfechaFin')}" listener="#{faseRegistroAmbientalController.inicializarFechasViabilidad}" ></p:ajax>
+								</p:selectOneMenu>
+								<p:outputLabel value="" />
+										
+								<p:outputLabel value="Fecha inicio " rendered="#{faseRegistroAmbientalController.registroAmbientalFasesViabilidad.fasesCoa.id eq faseRegistroAmbientalController.faseConstruccionId}"/>
+								<p:outputLabel value="Fecha Fin " rendered="#{faseRegistroAmbientalController.registroAmbientalFasesViabilidad.fasesCoa.id eq faseRegistroAmbientalController.faseConstruccionId}"/>
+								
+								<p:calendar id="idFechaInicio" styleClass="calendarClass" value="#{faseRegistroAmbientalController.registroAmbientalFasesViabilidad.fechaInicio}" pattern="dd/MM/yyyy" readonlyInput="true" navigator="true"
+										rendered="#{faseRegistroAmbientalController.registroAmbientalFasesViabilidad.fasesCoa.id eq faseRegistroAmbientalController.faseConstruccionId}" requiredMessage="El campo fecha de inicio es requerido"  >
+										<p:ajax event="dateSelect" update=":#{p:component('idfechaFin')}" />
+								</p:calendar>
+		
+								<p:calendar id="idfechaFin" styleClass="calendarClass" value="#{faseRegistroAmbientalController.registroAmbientalFasesViabilidad.fechaFin}" pattern="dd/MM/yyyy" readonlyInput="true" navigator="true"
+											mindate="#{faseRegistroAmbientalController.registroAmbientalFasesViabilidad.fechaInicio}"
+										rendered="#{faseRegistroAmbientalController.registroAmbientalFasesViabilidad.fasesCoa.id eq faseRegistroAmbientalController.faseConstruccionId}" requiredMessage="El campo fecha de fin es requerido"  >
+								</p:calendar>
+							</h:panelGrid>
+							<p:outputLabel value="Descripción *" />
+							<p:outputLabel value="" />
+							<p:inputTextarea id="txtDescripcion" value="#{faseRegistroAmbientalController.registroAmbientalFasesViabilidad.descripcion}" rows="4" styleClass="w100"  
+									required="true" requiredMessage="El campo observaciones es requerido" autoResize="false" maxlength="256" />
+							
+						</p:outputPanel>
+			                <p:commandButton icon="ui-icon-disk" value="Adicionar"
+			                                 styleClass="primary" disabled="#{marcoLegalReferencialController.habilitarIngreso}"
+			                                 action="#{faseRegistroAmbientalController.agregarFaseViabilidad()}"
+			                                 update=":#{p:component('pnlFases')} :#{p:component('pnlIngresoFase')}" />
+						<p:outputPanel id="pnlFases">
+			            	<p:dataTable id="dtRegistroFases" rendered="#{faseRegistroAmbientalController.listaFasesRegistroAmbientalViabilidad.size() gt 0 }"
+			                         value="#{faseRegistroAmbientalController.listaFasesRegistroAmbientalViabilidad}" emptyMessage="#{labels['common.table.empty']}"
+			                         var="faseRegistro" paginator="true" rows="10"  >
+			                <p:column headerText="Fase" width="20%" >
+			                    <h:outputText value="#{faseRegistro.fasesCoa.descripcion}">
+			                    </h:outputText>
+			                </p:column>
+			                <p:column headerText="Descripción"  >
+			                    <h:outputText value="#{faseRegistro.descripcion}">
+			                    </h:outputText>
+			                </p:column>
+			                <p:column headerText="Fecha de inicio" width="10%" rendered="#{faseRegistroAmbientalController.existeConstruccion}">
+			                    <h:outputText value="#{faseRegistro.fechaInicio}">
+			                    	<f:convertDateTime pattern="dd-MM-yyyy"/>
+			                    </h:outputText>
+			                </p:column>
+			                <p:column headerText="Fecha de Fin" width="10%" rendered="#{faseRegistroAmbientalController.existeConstruccion}">
+			                    <h:outputText value="#{faseRegistro.fechaFin}">
+			                    	<f:convertDateTime pattern="dd-MM-yyyy"/>
+			                    </h:outputText>
+			                </p:column>
+			                <p:column headerText="Acciones" width="12%" >
+								<center>
+									<p:commandButton icon="ui-icon-pencil" title="#{msg['button.editar']}" styleClass="secondary"  process="dtRegistroFases" update=":#{p:component('pnlFases')} :#{p:component('pnlIngresoFase')}"
+										disabled="#{marcoLegalReferencialController.habilitarIngreso}"
+										actionListener="#{faseRegistroAmbientalController.editarFaseViabilidad(faseRegistro)}" rendered="#{faseRegistroAmbientalController.registroAmbientalFasesViabilidad.id eq null}"/>
+									<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process="dtRegistroFases" update=":#{p:component('pnlFases')}"
+										disabled="#{marcoLegalReferencialController.habilitarIngreso}"
+										actionListener="#{faseRegistroAmbientalController.eliminarFaseViabilidad(faseRegistro)}" rendered="#{faseRegistroAmbientalController.registroAmbientalFasesViabilidad.id eq null}">
+										<p:confirm header="Estimado Usuario" icon="ui-icon-alert" message="¿Está seguro de eliminar la fase del registro ambiental?"/>
+									</p:commandButton>
+								</center>	                    
+			                </p:column>
+			                </p:dataTable>
+						</p:outputPanel>
+					</p:panelGrid>
+					<p:outputPanel id="pnlFasesBtn">
+						<div class="buttons main">
+							<p:commandButton value="Atrás" icon="ui-icon-arrowthick-1-w"
+								action="#{registroAmbientalController.atras()}" styleClass="wizard-custom-btn-back" process="@this" />
+							<p:commandButton value="Guardar" id="btnGuardar"	icon="ui-icon-disk"	immediate="true" update=":#{p:component('pnlFasesBtn')} :#{p:component('menu-principal')}"		
+								action="#{faseRegistroAmbientalController.guardarViabilidad()}" disabled="#{marcoLegalReferencialController.habilitarIngreso}" />
+							<p:commandButton value="Siguiente" id="btnSiguiente" immediate="true" disabled="#{!faseRegistroAmbientalController.validarDatos and !marcoLegalReferencialController.habilitarIngreso}"
+								process="@this" action="#{registroAmbientalController.siguiente()}" icon="ui-icon-arrowthick-1-e" />
+						</div>
+					</p:outputPanel>
+			</h:form>
+			<ui:include src="/pages/rcoa/registroAmbiental/popupFases.xhtml" />
+		</p:panel>
+		<div class="clear"></div>
+	</ui:define>
+</ui:composition>

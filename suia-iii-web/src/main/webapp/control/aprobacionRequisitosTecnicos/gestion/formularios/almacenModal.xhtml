@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+ <p:dialog header="Datos almacén" id="adicionarAlmacen" widgetVar="adicionarAlmacen"
+          modal="true" resizable="false" width="900" draggable="false" height="500">
+    <h:panelGroup id="panelAlmacen">
+        <h:panelGrid id="panelDatosHDialogo" columns="2" styleClass="w100"
+                     columnClasses="w30,null">
+
+            <p:outputLabel value="Identificación de Almacén:" for="identificacion" />
+            <p:inputText required="true" id="identificacion"
+                         value="#{almacenamientoTemporalController.almacenTemporalBean.almacen.identificacion}"
+                         styleClass="w100" maxlength="150" />
+
+            <h:outputLabel value="Desecho*:"/>
+            <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                         columnClasses="w50, field_mrg w50">
+                <f:facet name="header">
+                    <p:commandButton value="Adicionar" id="btnAdicionarDesecho"
+                                     styleClass="button-small-text toRight field_mrg"
+                                     icon="ui-icon-plusthick" immediate="true"
+                                     update="panelDesechos" process="@this"
+                                     oncomplete="PF('adicionarDesecho').show()"
+                                     actionListener="#{almacenamientoTemporalController.agregarDesecho}"/>
+                    <mae:panelGridHeaderHelp value="Recepción Desechos"
+                                             conector="almacenRecepcionHelp"
+                                             help="#{helps['almace.recepcion']}" />
+                </f:facet>
+
+                <p:dataTable id="tblDesechos"
+                             value="#{almacenamientoTemporalController.almacenTemporalBean.almacen.almacenRecepciones}"
+                             var="almacenRecepcion"
+                             emptyMessage="#{labels['common.table.empty']}">
+                    <p:column headerText="Nombre">
+                        <h:outputLabel
+                                value="#{almacenRecepcion.entityRecepcionDesecho.descripcionDesecho}" />
+                    </p:column>
+                    <p:column headerText="Código">
+                        <h:outputLabel
+                                value="#{almacenRecepcion.entityRecepcionDesecho.codigo}" />
+                    </p:column>
+                    <p:column headerText="Estado">
+                        <h:outputLabel
+                                value="#{almacenRecepcion.entityRecepcionDesecho.tipoEstado}" />
+                    </p:column>
+                    <p:column headerText="Envase">
+                        <h:outputLabel value="#{almacenRecepcion.tipoEnvase.nombre}" />
+                        <h:outputLabel value=" (#{almacenRecepcion.otroTipoEnvase})"
+                                       rendered="#{almacenRecepcion.tipoEnvase.nombre=='Otro'}" />
+                    </p:column>
+                    <p:column styleClass="w40px alCenter">
+                        <p:commandButton icon="ui-icon-pencil"
+                                         actionListener="#{almacenamientoTemporalController.seleccionarAlmacenRecepcion(almacenRecepcion)}"
+                                         title="Editar" styleClass="button-small primary"
+                                         update=":#{p:component('panelDesechos')}" process="@this"
+                                         oncomplete="PF('adicionarDesecho').show()" />
+                        <p:commandButton icon="ui-icon-trash"
+                                         actionListener="#{almacenamientoTemporalController.eliminarAlmacenRecepcion(almacenRecepcion)}"
+                                         title="Eliminar" styleClass="button-small primary" process="@this"
+                                         update=":#{p:component('tblDesechos')} :#{p:component('pngDescripcion')} ">
+                            <p:confirm header="Confirmación" message="¿Está seguro que desea eliminar?"
+                                       icon="ui-icon-alert"/>
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+            </p:panelGrid>
+
+            <p:outputLabel value="Características:" for="cmbLocal"/>
+            <p:panelGrid columns="2" layout="grid" styleClass="w100"
+                         columnClasses="alRight, field_mrg w25 alLeft">
+                <p:outputLabel value="Local:" for="cmbLocal" />
+                <p:selectOneMenu id="cmbLocal" styleClass="w100" required="true"
+                                 value="#{almacenamientoTemporalController.almacenTemporalBean.almacen.tipoLocal}"
+                                 converter="selectItemConverter">
+                    <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                  itemValue="" noSelectionOption="true" />
+                    <f:selectItems
+                            value="#{almacenamientoTemporalController.locales}">
+                    </f:selectItems>
+                </p:selectOneMenu>
+                <p:outputLabel value="Material:" for="cmbMaterial"/>
+                <p:selectOneMenu id="cmbMaterial" styleClass="w100" required="true"
+                                 value="#{almacenamientoTemporalController.almacenTemporalBean.almacen.tipoMaterialConstruccion}"
+                                 converter="selectItemConverter">
+                    <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                  itemValue="" noSelectionOption="true" />
+                    <f:selectItems
+                            value="#{almacenamientoTemporalController.materiales}">
+                    </f:selectItems>
+                </p:selectOneMenu>
+                <p:outputLabel value="Ventilación:" for="cmbVentilacion" />
+                <p:selectOneMenu id="cmbVentilacion" styleClass="w100" required="true"
+                                 value="#{almacenamientoTemporalController.almacenTemporalBean.almacen.tipoVentilacion}"
+                                 converter="selectItemConverter">
+                    <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                  itemValue="" noSelectionOption="true" />
+                    <f:selectItems
+                            value="#{almacenamientoTemporalController.ventilaciones}">
+                    </f:selectItems>
+                </p:selectOneMenu>
+                <p:outputLabel value="Iluminación:" for="cmbIluminacion" />
+                <p:selectOneMenu id="cmbIluminacion" styleClass="w100" required="true"
+                                 value="#{almacenamientoTemporalController.almacenTemporalBean.almacen.tipoIluminacion}"
+                                 converter="selectItemConverter">
+                    <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                  itemValue="" noSelectionOption="true" />
+                    <f:selectItems
+                            value="#{almacenamientoTemporalController.iluminaciones}">
+                    </f:selectItems>
+                </p:selectOneMenu>
+            </p:panelGrid>
+            <p:outputLabel value=""  />
+            <p:separator/>
+            <p:outputLabel value=""  />
+
+            <h:outputText   value="En caso de seleccionar almacenamiento a la intemperie, tomar en consideración la altura del apilamiento." style="color:#008890 "> </h:outputText>
+            <p:outputLabel value="Medidas del almacén:" for="txtAltura" />
+            <p:panelGrid columns="2" layout="grid" styleClass="w100"
+                         columnClasses="alRight, field_mrg w25 alLeft">
+
+                <p:outputLabel value="Largo (m):" for="txtLargo" />
+                <pe:inputNumber id="txtLargo" decimalPlaces="2"
+                                thousandSeparator="" widgetVar="txtLargo"
+                                value="#{almacenamientoTemporalController.almacenTemporalBean.almacen.largo}"
+                                required="true"
+                                validatorMessage="El campo 'Largo(m)' debe tener máximo 5 digitos y 2 decimales."
+                                maxValue="99999.9999" minValue="0" maxlength="5" />
+
+                <p:outputLabel value="Ancho (m):" for="txtAncho" />
+                <pe:inputNumber id="txtAncho" decimalPlaces="2"
+                                thousandSeparator="" widgetVar="txtAncho"
+                                value="#{almacenamientoTemporalController.almacenTemporalBean.almacen.ancho}"
+                                required="true"
+                                validatorMessage="El campo 'Largo(m)' debe tener máximo 5 digitos y 2 decimales."
+                                maxValue="99999.9999" minValue="0" maxlength="5" />
+
+                <p:outputLabel value="Altura (m):" for="txtAltura" />
+                <pe:inputNumber id="txtAltura" decimalPlaces="2"
+                                thousandSeparator="" widgetVar="txtAltura"
+                                value="#{almacenamientoTemporalController.almacenTemporalBean.almacen.altura}"
+                                required="true"
+                                validatorMessage="El campo 'Largo(m)' debe tener máximo 5 digitos y 2 decimales."
+                                maxValue="99999.9999" minValue="0" maxlength="5" />
+            </p:panelGrid>
+
+            <p:outputLabel value="Descripción:" for="extincionIncendio"/>
+            <p:panelGrid id="pngDescripcion" columns="2" layout="grid"
+                         styleClass="w100" columnClasses="w25, field_mrg w25">
+                <p:outputLabel
+                        rendered="#{almacenamientoTemporalController.almacenTemporalBean.mostrarFosasRetencion}"
+                        value="Capacidad de fosas de retención o muros de contención (metros cúbicos):"
+                        for="txtCapacidadFosas" />
+                <pe:inputNumber id="txtCapacidadFosas" decimalPlaces="2" thousandSeparator=""
+                                rendered="#{almacenamientoTemporalController.almacenTemporalBean.mostrarFosasRetencion}"
+                                required="#{almacenamientoTemporalController.almacenTemporalBean.mostrarFosasRetencion}"
+                                value="#{almacenamientoTemporalController.almacenTemporalBean.almacen.capacidadFosas}"
+                                styleClass="w100"   maxValue="9999999.99" minValue="0">
+                </pe:inputNumber>
+                <p:outputLabel value="Breve descripción de sistema de extinción de incendios:" for="extincionIncendio" />
+                <p:inputTextarea autoResize="false" maxlength="200" rows="2"
+                                 value="#{almacenamientoTemporalController.almacenTemporalBean.almacen.extincionIncendio}" required="true"  id="extincionIncendio" />
+            </p:panelGrid>
+
+            <p:outputLabel value="Medidas de seguridad o indicaciones adicionales:" />
+            <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                         columnClasses="w25, field_mrg w25">
+                <f:facet name="header">
+                    <mae:panelGridHeaderHelp value=""
+                                             conector="generalHelp"
+                                             help="#{msg['message.help.almacen']}"/>
+                </f:facet>
+                <p:inputText maxlength="200"
+                             value="#{almacenamientoTemporalController.almacenTemporalBean.almacen.medidadSeguridad}"
+                             styleClass="w100" />
+            </p:panelGrid>
+        </h:panelGrid>
+    </h:panelGroup>
+    <p:separator/>
+
+    <div class="buttons">
+        <p:commandButton value="Guardar" actionListener="#{almacenamientoTemporalController.guardarAlmacen}"
+                         process="@this panelAlmacen" update="tblAlmacen panelAlmacen"
+                         oncomplete="handleAlmacen(xhr, status, args)"/>
+        <p:commandButton value="Cancelar" onclick="PF('adicionarAlmacen').hide();" type="button" styleClass=""/>
+    </div>
+
+    <script type="text/javascript">
+        function handleAlmacen(xhr, status, args) {
+            if (!args.addAlmacen) {
+                PF('adicionarAlmacen').show();
+            }
+            else {
+                PF('adicionarAlmacen').hide();
+            }
+        }
+    </script>
+</p:dialog>
+
+<ui:include
+        src="/control/aprobacionRequisitosTecnicos/gestion/formularios/desechoModal.xhtml"/>
+
+</html>

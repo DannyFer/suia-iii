@@ -1,0 +1,127 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<h:outputText value="Datos de la Autorizaciones Administrativas Ambientales (AAA)" />
+		</f:facet>
+		<h:panelGrid layout="grid" styleClass="panel_data w100" columnClasses="header w25,null w25, header w25,null w25" columns="4">
+			<h:outputText value="N° Resolución Administrativa Ambiental*" />
+			<p:inputText id="txtResolucion" value="#{ingresoDigitalizacionProyectosController.autorizacionAdministrativa.resolucion}" style="text-transform: uppercase;" readonly="true">
+				<p:ajax event="blur" process="@this" update="txtCodigoProyecto"/>
+			</p:inputText>
+			<h:outputText value="Fecha emisión de la Autorización Administrativa Ambiental (AAA): *" />
+			<p:calendar id="txtFechaemision" value="#{ingresoDigitalizacionProyectosController.autorizacionAdministrativa.fechaResolucion}"
+						timeZone="America/Guayaquil" readonlyInput="true" navigator="true" disabled="true"
+						pattern="dd/MM/yyyy" maxdate="today">
+				<p:ajax event="dateSelect" process="@this" update="txtCodigoProyecto txtFechaEmisionInicio"/>
+			</p:calendar>
+			<h:outputText value="Fecha de inicio del proceso de Regularización Ambiental: *" rendered="#{ingresoDigitalizacionProyectosController.autorizacionAdministrativa.sistema eq 0 or ingresoDigitalizacionProyectosController.autorizacionAdministrativa.sistema eq 1}"/>
+			<p:calendar id="txtFechaEmisionInicio" disabled="true"
+							rendered="#{ingresoDigitalizacionProyectosController.autorizacionAdministrativa.sistema eq 0 or ingresoDigitalizacionProyectosController.autorizacionAdministrativa.sistema eq 1}"
+							value="#{ingresoDigitalizacionProyectosController.autorizacionAdministrativa.fechaInicioResolucion}"
+							timeZone="America/Guayaquil" readonlyInput="false" navigator="true" maxdate="#{ingresoDigitalizacionProyectosController.autorizacionAdministrativa.fechaResolucion}"
+							pattern="dd/MM/yyyy" >
+				<p:ajax event="dateSelect" process="@this" update="txtFechaEmisionInicio"/>
+			</p:calendar>
+			<h:outputText value="" rendered="#{ingresoDigitalizacionProyectosController.autorizacionAdministrativa.sistema eq 0 or ingresoDigitalizacionProyectosController.autorizacionAdministrativa.sistema eq 1}"/>
+			<h:outputText value="" rendered="#{ingresoDigitalizacionProyectosController.autorizacionAdministrativa.sistema eq 0 or ingresoDigitalizacionProyectosController.autorizacionAdministrativa.sistema eq 1}"/>
+			<h:outputText value="Cédula / RUC operador: *" />
+			<p:inputText value="#{ingresoDigitalizacionProyectosController.autorizacionAdministrativa.identificacionUsuario}"
+				disabled="#{!ingresoDigitalizacionProyectosController.esTecnico or ingresoDigitalizacionProyectosController.habilitarEditar}" maxlength="50">
+				<p:ajax process="@this"/>
+			</p:inputText>
+			<h:outputText value="Nombre del operador: *" />
+			<p:inputText id="txtNombre" value="#{ingresoDigitalizacionProyectosController.autorizacionAdministrativa.nombreUsuario}" 
+				disabled="true" maxlength="200" required="true" requiredMessage="El campo Nombre del operador es requerido">
+				<p:ajax process="@this"/>
+			</p:inputText>
+			<h:outputText value="Código del proyecto *" />
+			<p:inputText id="txtCodigoProyecto" value="#{ingresoDigitalizacionProyectosController.autorizacionAdministrativa.codigoProyecto}" disabled="true"/>
+		</h:panelGrid>
+		<h:panelGrid id="pngFases" layout="grid" styleClass="panel_data w100" columnClasses="header w25,null w25, header w25,null w25" columns="4">
+			<h:outputText value="Sector: *" rendered="#{ingresoDigitalizacionProyectosController.autorizacionPrincipal eq null ? true : false}"/>
+			<h:outputText value="Sector (Inclusión, Reforma, Actualización): *" rendered="#{ingresoDigitalizacionProyectosController.autorizacionPrincipal eq null ? false : true}"/>
+			<p:selectOneMenu id="cmbSector" value="#{ingresoDigitalizacionProyectosController.idSector}" disabled="true">
+				<f:selectItem itemLabel="Seleccione" itemValue=""/>
+				<f:selectItems value="#{ingresoDigitalizacionProyectosController.listaSectores}" var="sector" itemLabel="#{sector.nombre}" itemValue="#{sector.id}"/>	
+				<p:ajax event="change" listener="#{ingresoDigitalizacionProyectosController.cargarFases(false)}" update="pngFases"></p:ajax>				
+			</p:selectOneMenu>
+			<h:outputText value="#{ingresoDigitalizacionProyectosController.autorizacionPrincipal eq null ? 'Fase / Etapa: *' : 'Fase / Etapa (Inclusión, Reforma, Actualización): *'}" rendered="#{ingresoDigitalizacionProyectosController.idSector ne 3}"/>
+			<p:selectOneMenu id="cmbFase" value="#{ingresoDigitalizacionProyectosController.idFase}" disabled="true" rendered="#{ingresoDigitalizacionProyectosController.idSector ne 3}">
+				<f:selectItem itemLabel="Seleccione" itemValue=""/>
+				<f:selectItems value="#{ingresoDigitalizacionProyectosController.listaFases}" var="fase" itemLabel="#{fase.nombre}" itemValue="#{fase.id}"/>
+				<p:ajax listener="#{ingresoDigitalizacionProyectosController.buscarFase()}"></p:ajax>				
+			</p:selectOneMenu>
+		</h:panelGrid>
+		<h:panelGrid styleClass="panel_data w100" columnClasses="header w25,null w75" columns="2">
+			<h:outputText value="Autoridad Ambiental emisora de la AAA: *" rendered="#{ingresoDigitalizacionProyectosController.autorizacionPrincipal eq null ? true : false}"/>
+			<h:outputText value="Autoridad Ambiental emisora de la AAA (Inclusión, Reforma, Actualización): *" rendered="#{ingresoDigitalizacionProyectosController.autorizacionPrincipal eq null ? false : true}"/>
+			<p:selectOneMenu id="cmbAreaEmisora" value="#{ingresoDigitalizacionProyectosController.idAreaEmisora}" filter="true" filterMatchMode="contains" style="width: 100%" disabled="true">
+				<f:selectItem itemLabel="Seleccione" itemValue=""/>
+				<f:selectItems value="#{ingresoDigitalizacionProyectosController.listaAreasEmisoras}" var="area" itemLabel="#{area.areaName}" itemValue="#{area.id}"/>
+				<p:ajax listener="#{ingresoDigitalizacionProyectosController.buscarArea()}"></p:ajax>				
+			</p:selectOneMenu>
+			<h:outputText value="Tipo de permiso Ambiental: *" />
+			<h:panelGrid columns="2" >
+				<p:selectOneMenu id="cmbPermisoAmbiental" value="#{ingresoDigitalizacionProyectosController.autorizacionAdministrativa.autorizacionAdministrativaAmbiental}" disabled="true">
+					<f:selectItem itemLabel="Seleccione" itemValue=""/>
+					<f:selectItems value="#{ingresoDigitalizacionProyectosController.listaTipoPermisoAmbiental}" var="permiso" itemLabel="#{permiso}" itemValue="#{permiso}"/>
+				</p:selectOneMenu>
+				<mae:panelGridHeaderHelp conector="TipoLicenciaHelp" help="#{helps['digitalizacion.tipo.permiso.ambiental']}" width="600px" styleClass="button-small primary"/>
+			</h:panelGrid>
+			<h:outputText value="Ente responsable de control y seguimiento de la AAA: *" rendered="#{ingresoDigitalizacionProyectosController.autorizacionPrincipal eq null ? true : false}"/>
+			<h:outputText value="Ente responsable de control y seguimiento (Inclusión, Reforma, Actualización): *" rendered="#{ingresoDigitalizacionProyectosController.autorizacionPrincipal eq null ? false : true}"/>
+			<p:selectOneMenu id="cmbAreaControlSeguimiento" value="#{ingresoDigitalizacionProyectosController.idEnteControl}" filter="true" filterMatchMode="contains" style="width: 100%" disabled="true">
+				<f:selectItem itemLabel="Seleccione" itemValue=""/>
+				<f:selectItems value="#{ingresoDigitalizacionProyectosController.listaAreasControl}" var="area" itemLabel="#{area.areaName}" itemValue="#{area.id}"/>	
+				<p:ajax listener="#{ingresoDigitalizacionProyectosController.buscarAreaEnteControl()}"></p:ajax>				
+			</p:selectOneMenu>
+		</h:panelGrid>
+		<h:panelGrid styleClass="panel_data w100" columns="2">
+			<h:panelGroup styleClass="btnsHelp">
+				<p:outputLabel id="nombrelbl" value="Nombre del proyecto, obra o actividad" for="nombre" />
+			</h:panelGroup>
+			<h:panelGroup styleClass="btnsHelp">
+				<p:outputLabel value="Resumen del proyecto, obra o actividad" for="resumen" />
+			</h:panelGroup>
+			<h:panelGroup id="nombreProyectoPnl" styleClass="w100" columns="1">
+				<p:inputTextarea placeholder="Entre como mínimo 1 y como máximo 500 caracteres." id="nombre" rows="2" styleClass="w100" disabled="true"
+						autoResize="false" maxlength="500" value="#{ingresoDigitalizacionProyectosController.autorizacionAdministrativa.nombreProyecto}">
+					<f:validateLength minimum="1" />
+					<p:ajax process="nombre" immediate="true" />
+				</p:inputTextarea>
+			</h:panelGroup>
+			<h:panelGroup>
+				<p:inputTextarea placeholder="Entre como mínimo 25 y como máximo 2500 caracteres." id="resumen" rows="2" styleClass="w100" disabled="true"
+						autoResize="false" maxlength="500" value="#{ingresoDigitalizacionProyectosController.autorizacionAdministrativa.resumenProyecto}">
+					<f:validateLength minimum="25" maximum="2500" />
+					<p:ajax process="resumen" immediate="true" />
+				</p:inputTextarea>
+			</h:panelGroup>
+		</h:panelGrid>
+	</p:panelGrid>
+	<p:panelGrid id="idPanelSiiu" columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<h:outputText value="Seleccione el código CIIU de su actividad"/>
+		</f:facet>
+		<h:panelGrid styleClass="panel_data " columns="2" columnClasses="header w25, null w75" rendered="#{ingresoDigitalizacionProyectosController.tieneActividad}">
+			<h:outputText value="Actividad económica del CIIU *"/>
+			<p:inputText value="#{ingresoDigitalizacionProyectosController.autorizacionAdministrativa.catalogoCIUU.nombre}" disabled="true"/>
+		</h:panelGrid>
+		<h:panelGrid styleClass="panel_data " columns="2" columnClasses="header, null, cssJustificado"
+					rowClasses="null, alt" rendered="#{!ingresoDigitalizacionProyectosController.tieneActividad}">
+			<h:outputText value="Actividad económica:" />
+			<h:outputText id="txtCiiuPrincipal" value="#{ingresoDigitalizacionProyectosController.ciiuPrincipal.nombre}" />
+		</h:panelGrid>
+	</p:panelGrid>
+	
+</ui:composition>

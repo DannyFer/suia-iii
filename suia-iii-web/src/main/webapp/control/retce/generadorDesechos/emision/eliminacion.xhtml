@@ -1,0 +1,298 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<script type="text/javascript">
+	function deshabilitarBotonesDesechoEliminacion() {
+		$('.btnsEditarDesechoEliminacion').prop('disabled', true);
+		$('.btnsEditarDesechoEliminacion').addClass('ui-state-disabled');
+	};
+
+	function deshabilitarBotonesGestorEliminacion() {
+		$('.btnsEditarGestorEliminacion').prop('disabled', true);
+		$('.btnsEditarGestorEliminacion').addClass('ui-state-disabled');
+	};
+	</script>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText
+			value="ELIMINACIÓN FUERA DE LA INSTALACIÓN (TRATAMIENTO CON O SIN APROVECHAMIENTO)" />
+	</f:facet>
+
+
+	<p:panel id="adicionarDesechoEliminacion"
+		widgetVar="adicionarDesechoEliminacion" toggleable="true"
+		toggleOrientation="vertical" styleClass="colapsablePanel"
+		collapsed="true">
+		<p:ajax event="toggle"
+			listener="#{eliminacionDesechosRetceBean.toggleHandleDesechoEliminacion}"
+			update=":form:adicionarDesechoEliminacion" process="@this" />
+		<h:panelGroup id="datosDesechoEliminacion">
+			<h:panelGroup
+				rendered="#{eliminacionDesechosRetceBean.panelDesechoEliminacionVisible}">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Desecho" />
+					</f:facet>
+
+					<h:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25, null" rowClasses="null, alt">
+						<p:outputLabel value="Desecho" for="desechoEliminacion"
+							styleClass="ui-label-form" />
+						<p:selectOneMenu id="desechoEliminacion" 
+							value="#{eliminacionDesechosRetceBean.desechoSeleccionado}"
+							styleClass="w100" converter="selectItemConverter" required="true">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}"
+								itemValue="" noSelectionOption="true" />
+							<f:selectItems
+								value="#{eliminacionDesechosRetceBean.getDesechosPendientes()}" />
+							<p:ajax process="@this" listener="#{eliminacionDesechosRetceBean.getInfoDesecho()}" update="unidadEliminacion cantidadEliminacionFinal"/>
+						</p:selectOneMenu>
+
+						<p:outputLabel value="Unidad" for="unidadEliminacion"
+							styleClass="ui-label-form" />
+						<p:selectOneMenu
+							value="#{eliminacionDesechosRetceBean.eliminacionFueraInstalacion.tipoUnidad}"
+							id="unidadEliminacion" styleClass="w100" required="true" disabled="true"
+							converter="selectItemConverter">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}"
+								itemValue="" noSelectionOption="true" />
+							<f:selectItems itemLabel="#{tipo.descripcion}"
+								itemValue="#{tipo}" var="tipo" 
+								value="#{eliminacionDesechosRetceBean.listaTipoUnidad}" />
+							<p:ajax process="@this" event="change" listener="#{eliminacionDesechosRetceBean.validarCantidadEliminada()}" update="cantidadEliminacionFinal"/>
+						</p:selectOneMenu>
+
+						<p:outputLabel value="Cantidad" for="cantidadEliminacionFinal"
+							styleClass="ui-label-form" />
+						<pe:inputNumber id="cantidadEliminacionFinal" thousandSeparator=""
+							maxValue="9999999999.99" minValue="0" required="true" disabled="true"
+							value="#{eliminacionDesechosRetceBean.eliminacionFueraInstalacion.cantidad}">
+							<f:validateDoubleRange minimum="0.1" />
+							<p:ajax event="blur" process="@this"
+											listener="#{eliminacionDesechosRetceBean.validarCantidadEliminada()}"
+											update="cantidadEliminacionFinal" />
+						</pe:inputNumber>
+
+					</h:panelGrid>
+
+				</p:panelGrid>
+			</h:panelGroup>
+		</h:panelGroup>
+
+		<div class="buttons">
+			<p:commandButton
+				value="#{eliminacionDesechosRetceBean.editarDesechoEliminacion ? 'Actualizar' : 'Aceptar'}"
+				actionListener="#{eliminacionDesechosRetceBean.aceptarDesechoEliminacion()}"
+				oncomplete="toogleDesechoEliminacion(xhr, status, args)"
+				process="@this datosDesechoEliminacion"
+				update="datosDesechoEliminacion tblEliminacionDesechos" />
+			<p:commandButton value="Cancelar" styleClass="secondary"
+				actionListener="#{eliminacionDesechosRetceBean.cancelar()}"
+				oncomplete="PF('adicionarDesechoEliminacion').toggle()"
+				process="@this" update="datosDesechoEliminacion tblEliminacionDesechos">
+				<p:resetInput target="@form" />
+			</p:commandButton>
+		</div>
+
+		<p:separator />
+	</p:panel>
+
+	<p:dataTable id="tblEliminacionDesechos"
+		value="#{eliminacionDesechosRetceBean.listaEliminacionFueraInstalacion}"
+		var="desecho" emptyMessage="#{labels['common.table.empty']}">
+		<f:facet name="header">
+			<p:commandButton value="Adicionar"
+				update=":form:datosDesechoEliminacion"
+				oncomplete="PF('adicionarDesechoEliminacion').toggle()"
+				onclick="deshabilitarBotonesDesechoEliminacion()"
+				styleClass="button-small-text toRight field_mrg btnsEditarDesechoEliminacion"
+				icon="ui-icon-plusthick" process="@this" style="float:right;" />
+			<h:outputText value="Desechos eliminación" />
+		</f:facet>
+
+		<p:column styleClass="w50"
+			headerText="Nombre del residuo o desecho peligroso o especial">
+			<h:outputText value="#{desecho.desechoPeligroso.descripcion}" />
+		</p:column>
+		<p:column headerText="Código">
+			<h:outputText value="#{desecho.desechoPeligroso.clave}" />
+		</p:column>
+		<p:column headerText="Unidad">
+			<h:outputText value="#{desecho.tipoUnidad.descripcion}" />
+		</p:column>
+		<p:column headerText="Cantidad" styleClass="alCenter">
+			<h:outputText value="#{desecho.cantidad}" />
+		</p:column>
+		<p:column styleClass="w70px alCenter">
+			<p:commandButton rendered="false" icon="ui-icon-pencil" title="Editar" process="@this"
+				update=":form:datosDesechoEliminacion" styleClass="primary btnsEditarDesechoEliminacion"
+				oncomplete="PF('adicionarDesechoEliminacion').toggle()"
+				onclick="deshabilitarBotonesDesechoEliminacion()"
+				actionListener="#{eliminacionDesechosRetceBean.editarDesecho(desecho)}" />
+			<p:commandButton icon="ui-icon-trash" title="Eliminar"
+				process="@this" styleClass="primary"
+				actionListener="#{eliminacionDesechosRetceBean.eliminarDesecho(desecho)}"
+				update="tblEliminacionDesechos" />
+		</p:column>
+	</p:dataTable>
+	<br />
+
+	<p:panel id="adicionarEmpresaGestoraEliminacion"
+		widgetVar="adicionarEmpresaGestoraEliminacion" toggleable="true"
+		toggleOrientation="vertical" styleClass="colapsablePanel"
+		collapsed="true">
+		<p:ajax event="toggle"
+			listener="#{eliminacionDesechosRetceBean.toggleHandleEmpresaGestora}"
+			update=":form:adicionarEmpresaGestoraEliminacion" process="@this" />
+		<h:panelGroup id="datosEmpresaGestoraEliminacion">
+			<h:panelGroup
+				rendered="#{eliminacionDesechosRetceBean.panelEmpresaVisible}"
+				id="datosEmpresaEliminacionContainer">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Empresa gestora" />
+					</f:facet>
+					<h:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25, null" rowClasses="null, alt">
+						<p:outputLabel value="Empresa gestora"
+							for="empresaGestoraEliminacion" styleClass="ui-label-form" />
+						<p:selectOneMenu
+							value="#{eliminacionDesechosRetceBean.prestadorServicioSeleccionado}"
+							id="empresaGestoraEliminacion" styleClass="w100" required="true"
+							converter="selectItemConverter">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}"
+								itemValue="" noSelectionOption="true" />
+							<f:selectItems
+								itemLabel="#{tipo.prestadorServiciosDesechos} #{tipo.codigoPermisoAmbiental}"
+								itemValue="#{tipo}" var="tipo"
+								value="#{eliminacionDesechosRetceBean.getPrestadoresDisponibles()}" />
+							<p:ajax process="@this" update="datosEmpresaEliminacionContainer" />
+						</p:selectOneMenu>
+
+						<p:outputLabel value="Número de autorización"
+							styleClass="ui-label-form"
+							rendered="#{eliminacionDesechosRetceBean.prestadorServicioSeleccionado ne null and eliminacionDesechosRetceBean.prestadorServicioSeleccionado.prestadorServiciosDesechos ne 'OTRA'}" />
+						<h:outputText required="true"
+							value="#{eliminacionDesechosRetceBean.prestadorServicioSeleccionado.codigoPermisoAmbiental}"
+							rendered="#{eliminacionDesechosRetceBean.prestadorServicioSeleccionado ne null and eliminacionDesechosRetceBean.prestadorServicioSeleccionado.prestadorServiciosDesechos ne 'OTRA'}" />
+
+						<p:outputLabel value="Especifique" styleClass="ui-label-form"
+							for="otraEmpresaEliminacion"
+							rendered="#{eliminacionDesechosRetceBean.prestadorServicioSeleccionado ne null and eliminacionDesechosRetceBean.prestadorServicioSeleccionado.prestadorServiciosDesechos eq 'OTRA'}" />
+						<p:inputText required="true" id="otraEmpresaEliminacion" maxlength="100"
+							value="#{eliminacionDesechosRetceBean.transporteEmpresaGestora.otraEmpresa}"
+							rendered="#{eliminacionDesechosRetceBean.prestadorServicioSeleccionado ne null and eliminacionDesechosRetceBean.prestadorServicioSeleccionado.prestadorServiciosDesechos eq 'OTRA'}" />
+
+						<p:outputLabel value="Certificado de destrucción"
+							for="fileEmpresaEliminacion" styleClass="ui-label-form" />
+						<p:outputPanel id="pnlCertificadoDestruccion">
+							<p:fileUpload id="fileEmpresaEliminacion"
+								fileUploadListener="#{eliminacionDesechosRetceBean.uploadFileCertificado}"
+								multiple="false" sizeLimit="20971520"
+								allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar (pdf 20Mb)"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" required="true" update="pnlCertificadoDestruccion" />
+							<p:commandButton icon="ui-icon-arrowthick-1-s"
+								styleClass="button-small primary toLeft" title="Ver"
+								ajax="false" immediate="true"
+								rendered="#{eliminacionDesechosRetceBean.documentoCertificadoDestruccion.nombre ne null}">
+								<p:fileDownload
+									value="#{exportacionDesechosBean.descargar(eliminacionDesechosRetceBean.documentoCertificadoDestruccion)}" />
+							</p:commandButton>
+						</p:outputPanel>
+					</h:panelGrid>
+					<h:inputHidden
+						validator="#{eliminacionDesechosRetceBean.validateEmpresaGestora}" />
+				</p:panelGrid>
+			</h:panelGroup>
+		</h:panelGroup>
+
+		<div class="buttons">
+			<p:commandButton
+				value="#{eliminacionDesechosRetceBean.editarEmpresa ? 'Actualizar' : 'Aceptar'}"
+				actionListener="#{eliminacionDesechosRetceBean.aceptarEmpresaGestora()}"
+				oncomplete="toggleEmpresasGestorasEliminacion(xhr, status, args)"
+				process="@this datosEmpresaGestoraEliminacion"
+				update="datosEmpresaGestoraEliminacion tblEmpresasGestorasEliminacion" />
+			<p:commandButton value="Cancelar" styleClass="secondary"
+				actionListener="#{eliminacionDesechosRetceBean.cancelarEmpresaGestora()}"
+				oncomplete="PF('adicionarEmpresaGestoraEliminacion').toggle()"
+				process="@this" update="datosEmpresaGestoraEliminacion tblEmpresasGestorasEliminacion">
+				<p:resetInput target="@form" />
+			</p:commandButton>
+		</div>
+
+		<p:separator />
+	</p:panel>
+
+	<p:dataTable id="tblEmpresasGestorasEliminacion"
+		value="#{eliminacionDesechosRetceBean.listaEmpresasGestoras}"
+		var="item" emptyMessage="#{labels['common.table.empty']}">
+		<f:facet name="header">
+			<p:commandButton value="Adicionar"
+				update=":form:datosEmpresaGestoraEliminacion"
+				oncomplete="PF('adicionarEmpresaGestoraEliminacion').toggle()"
+				onclick="deshabilitarBotonesGestorEliminacion()"
+				styleClass="button-small-text toRight field_mrg btnsEditarGestorEliminacion"
+				icon="ui-icon-plusthick" process="@this" style="float:right;" />
+			<h:outputText value="Empresas Gestoras" />
+		</f:facet>
+
+		<p:column headerText="Empresa gestora" styleClass="w50">
+			<h:outputText
+						value="#{(item.empresaGestora.prestadorServiciosDesechos.nombre eq 'OTRA') ? item.otraEmpresa : item.empresaGestora.prestadorServiciosDesechos}" />
+		</p:column>
+		<p:column headerText="Número de autorización">
+			<h:outputText value="#{item.empresaGestora.prestadorServiciosDesechos.nombre ne 'OTRA' ? item.empresaGestora.codigoPermisoAmbiental : 'N/A'}" />
+		</p:column>
+		<p:column headerText="Certificado de destrucción" styleClass="alCenter">
+			<p:commandButton icon="ui-icon-arrowthick-1-s"
+				styleClass="button-small primary" title="Ver" ajax="false"
+				immediate="true">
+				<p:fileDownload
+					value="#{eliminacionDesechosRetceBean.descargar(item.certificadoDestruccion)}" />
+			</p:commandButton>
+		</p:column>
+		<p:column styleClass="w70px alCenter">
+			<p:commandButton icon="ui-icon-pencil" title="Editar" process="@this"
+				update=":form:datosEmpresaGestoraEliminacion" styleClass="primary btnsEditarGestorEliminacion"
+				oncomplete="PF('adicionarEmpresaGestoraEliminacion').toggle()"
+				onclick="deshabilitarBotonesGestorEliminacion()"
+				actionListener="#{eliminacionDesechosRetceBean.editarEmpresaGestora(item)}" />
+			<p:commandButton icon="ui-icon-trash" title="Eliminar"
+				process="@this" styleClass="primary"
+				actionListener="#{eliminacionDesechosRetceBean.eliminarEmpresaGestora(item)}"
+				update="tblEmpresasGestorasEliminacion" />
+		</p:column>
+	</p:dataTable>
+
+</p:panelGrid>
+
+
+<script type="text/javascript">
+	function toogleDesechoEliminacion(xhr, status, args) {
+		if(args.addDesechoEliminacion) {
+			PF('adicionarDesechoEliminacion').toggle();
+		}
+	}
+
+	function toggleEmpresasGestorasEliminacion(xhr, status, args) {
+		if(args.addEmpresaEliminacion) {
+			PF('adicionarEmpresaGestoraEliminacion').toggle();
+		}
+	}
+</script>
+
+</html>

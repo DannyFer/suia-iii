@@ -1,0 +1,150 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:controles="http://java.sun.com/jsf/composite/controles-prime">
+<ui:composition
+        template="/prevencion/licenciamiento-ambiental/eia/default.xhtml">
+    <ui:define name="content-eia">
+        <h:form id="frmDatos">
+            <p:panel header="Resumen ejecutivo">
+                <h:panelGrid columns="1" styleClass="w100"
+                             columnClasses="w33, field_mrg w33, field_mrg w33">
+                    <p:outputLabel value="Ingresar resumen ejecutivo" for="resumen" styleClass="bold" rendered="#{!resumenEjecutivoBean.esMineriaNoMetalicos}"/>
+                    <p:inputTextarea
+                            placeholder="#{resumenEjecutivoBean.proyectoHidrocarburos ?'Entre como mínimo 1 y como máximo 1500 caracteres.':'Entre como mínimo 1 y como máximo 1000 caracteres.'}"
+                            value="#{resumenEjecutivoBean.estudio.resumenEjecutivo}"
+                            id="resumen" required="true" maxlength="#{resumenEjecutivoBean.proyectoHidrocarburos ? 15000 : 1000}" autoResize="false"
+                            rows="4" rendered="#{!resumenEjecutivoBean.esMineriaNoMetalicos}">
+                        <f:validateLength minimum="1"/>
+                    </p:inputTextarea>
+                    
+                    <p:panelGrid columns="2" layout="grid" styleClass="w100"
+                             columnClasses="w50, w50" rendered="#{resumenEjecutivoBean.esMineriaNoMetalicos}">
+                    <f:facet name="header">
+                        <h:outputText value="Adjuntar resumen ejecutivo *" />                        
+                    </f:facet>
+                    <h:panelGrid columns="2" columnClasses="null, field_mrg"
+                                 id="etiqueta">
+                        <p:outputLabel
+                                value="#{empty resumenEjecutivoBean.documentoGeneral.nombre ? 'Documento(.pdf)' : resumenEjecutivoBean.documentoGeneral.nombre}" />
+                        <p:commandButton id="download" icon="ui-icon-arrowthick-1-s"
+                                         ajax="false" styleClass="button-small primary" title="Ver"
+                                         immediate="true"
+                                         rendered="#{not empty resumenEjecutivoBean.documentoGeneral.nombre}">
+                            <p:fileDownload
+                                    value="#{resumenEjecutivoBean.getStreamContent()}" />
+                        </p:commandButton>
+                    </h:panelGrid>
+                    <h:outputText />
+                    <p:fileUpload
+                            fileUploadListener="#{resumenEjecutivoBean.uploadListenerDocumentoGeneral}"
+                            multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/"
+                            label="Seleccionar" uploadLabel="Subir"
+                            invalidFileMessage="Tipo de archivo no válido"
+                            invalidSizeMessage="Tamaño de archivo no válido"
+                            cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                            auto="true" update="etiqueta download" />
+                    <h:outputText />
+                </p:panelGrid>
+                
+                <!-- para mostrar historico -->
+				<!-- Cris F: cambio para tener una tabla -->
+				
+				<br />
+				<h:panelGrid columns="1" styleClass="w100"
+					columnClasses="w33, field_mrg w33, field_mrg w33"
+					rendered="#{resumenEjecutivoBean.mostrarTabla}">
+					<f:facet name="header">
+						<h3 align="left"><h:outputText value="Historial de cambios" styleClass="text-orange"/></h3>
+					</f:facet>
+
+					<p:dataTable id="tblResumenEjecutivo" rowIndexVar="index"
+						value="#{resumenEjecutivoBean.listaEstudioOriginales}"
+						var="resumen" emptyMessage="#{labels['common.table.empty']}"
+						rendered="#{resumenEjecutivoBean.mostrarTabla}"
+						style="height: 200px; overflow: auto; display:block;">
+						<p:column styleClass="w15 alCenter" headerText="Fecha Modificación">
+							<h:outputText value="#{resumen.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Resumen Ejecutivo">
+							<h:outputText styleClass="alJustify" value="#{resumen.resumenEjecutivo}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+				<!-- fin historico -->
+				
+				 <!-- para mostrar historico -->
+				<!-- Cris F: cambio para tener una tabla -->
+				
+				<h:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{resumenEjecutivoBean.esMineriaNoMetalicos and resumenEjecutivoBean.listaDocumentosHistorico.size() > 0}">
+					<f:facet name="header">
+						<h3 align="left"><h:outputText value="Historial de cambios" styleClass="text-orange"/></h3>
+					</f:facet>
+
+					<p:dataTable id="tblResumenEjecutivoDocs" rowIndexVar="index"
+						value="#{resumenEjecutivoBean.listaDocumentosHistorico}"
+						var="documento" emptyMessage="#{labels['common.table.empty']}">
+						<p:column styleClass="w15 alCenter" headerText="Fecha Modificación">
+							<h:outputText
+								value="#{documento.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Documento">
+							<h:outputText value="#{documento.nombre}" />
+						</p:column>
+						<p:column styleClass="w5 alCenter">
+							<p:commandButton id="downloadOriginal" rendered="true"
+							icon="ui-icon-search" ajax="false"
+							styleClass="button-small orange" title="Ver" immediate="true">
+							<p:fileDownload
+								value="#{resumenEjecutivoBean.getStreamContentOriginal(documento)}" />
+						</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+				<!-- fin historico -->
+                    
+                                
+                </h:panelGrid>
+
+                <br/>
+
+                <div class="buttons main">
+                    <p:commandButton value="Guardar" icon="ui-icon-check"
+                                     action="#{resumenEjecutivoBean.guardar()}" update="@form"/>
+                    <p:commandButton value="Siguiente" immediate="true" process="@this"
+                                     action="/prevencion/licenciamiento-ambiental/eia/ficha/fichaTecnicaEIA.jsf?faces-redirect=true"
+                                     icon="ui-icon-arrowthick-1-e"/>
+                </div>
+
+                <br/>
+                <br/>
+            </p:panel>
+            <p:dialog header="Estimado Proponente" widgetVar="dlgPPS" visible="#{resumenEjecutivoBean.verDiag}" modal="true" resizable="false" width="500" closable="false">
+				<h:panelGroup rendered="#{resumenEjecutivoBean.verDiagActividades}">
+					<h:outputText styleClass="alJustify"
+						value="Usted no puede subir el Estudio de Impacto Ambiental o ingresar información en el Sistema Único de Información Ambiental, sin contar con el oficio de aprobación de los Términos de Referencia para su Estudio de Impacto Ambiental, en cumplimiento del Art.21 del Reglamento Ambiental de Actividades Mineras. En tal razón, Usted debe elaborar los Términos de Referencia en función de su proyecto en particular, los mismos, que deben ser presentados ante la Autoridad Ambiental Competente en forma física a través de un oficio, para ser sometidos a evaluación y aprobación ya sea del Ministerio del Ambiente y Agua o de la Autoridad Ambiental de Aplicación Responsable." />						
+						<br/>
+						<h:outputText styleClass="alJustify"
+						value="Se le recuerda a Usted,  que la documentación requerida debe ser presentada en un término no mayor a 90 días  desde el presente requerimiento, en cumplimiento a  la Disposición Transitoria Quinta del Acuerdo Ministerial No. 061, publicado en el Registro Oficial No. 316 de 4 de mayo de 2015." />
+					<div class="buttons">
+						<p:commandButton value="Aceptar" immediate="true" process="@this"
+                                    action="#{resumenEjecutivoBean.cancelarActividadesMineria()}"/>
+					</div>
+				</h:panelGroup>
+				<h:panelGroup rendered="#{!resumenEjecutivoBean.verDiagActividades}">
+				<h:panelGrid columns="1" style="text-align: justify;" rendered="#{!resumenEjecutivoBean.verDiagActividades}">
+					<h:outputText style="text-align: justify;" value="Para la ejecución del proceso de Participación Social de su proyecto, usted deberá coordinar de manera obligatoria las actividades del mismo, con la Autoridad Ambiental Competente a través de la unidad técnica correspondiente." />
+					<h:outputText style="text-align: justify;" value="Los proyectos que se regulan en el Ministerio del Ambiente y Agua deberán coordinar su proceso con la Unidad de Participación Social en Planta Central o en la Dirección Provincial respectiva." />				
+				<div class="buttons main">                    
+                    <p:commandButton value="Aceptar" immediate="true" process="@this"
+                                     onclick="PF('dlgPPS').hide();"/>
+                </div>
+				</h:panelGrid>		
+				</h:panelGroup>		
+			</p:dialog>   
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>

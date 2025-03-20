@@ -1,0 +1,114 @@
+<ui:composition template="/WEB-INF/templates/default.xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+	<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+
+		<ui:define name="context-extra">
+			<h:outputText value="Datos" />
+			<h:outputText value="Estudio de Impacto Ambiental" />
+			<h:outputLink target="_blank"
+				value="#{request.contextPath}/pages/rcoa/estudioImpactoAmbiental/verProyectoEIAResumen.jsf">
+				<p:commandButton type="button" styleClass="primary button-small"
+					icon="ui-icon-search" />
+			</h:outputLink>
+
+
+			<h:panelGroup>
+				<h:outputText value="Oficio" />
+			</h:panelGroup>
+			<h:outputText
+				value="Aprobación Técnica del Estudio de Impacto Ambiental" />
+			<p:commandButton ajax="false" icon="ui-icon-arrowthick-1-s"
+				styleClass="primary button-small" immediate="true">
+				<p:fileDownload
+					value="#{pagosFacilitadoresBypassController.descargarOficoEia()}" />
+			</p:commandButton>
+		</ui:define>
+
+		<ui:define name="content">
+
+			<f:event type="preRenderView"
+				listener="#{pagosFacilitadoresBypassController.validarTareaBpm()}" />
+
+			<h:form id="formPagoInformacion"
+				onkeypress="if (event.keyCode == 13) {return false; }">
+				<h:outputText
+					rendered="#{!pagosFacilitadoresBypassController.facilitadorAdicional}"
+					value="#{pagosFacilitadoresBypassController.mensajeAddFacilitador}"
+					styleClass="bold" />
+				<br />
+				<br />
+
+				<h:panelGrid styleClass="panel_data w100" columns="2"
+					columnClasses="header w25, bold w75">
+					<h:outputText value="N° de facilitadores ambientales" />
+					<h:outputText
+						value="#{pagosFacilitadoresBypassController.numeroFacilitadores}" />
+
+					<h:outputText value="Valor total" />
+					<h:panelGroup>
+						<h:outputText
+							value="#{pagosFacilitadoresBypassController.valorTotalFacilitador}">
+							<f:convertNumber pattern="#0.00" />
+						</h:outputText>
+						<h:outputText value=" USD" />
+					</h:panelGroup>
+				</h:panelGrid>
+
+				<ui:include src="/pages/rcoa/pagos/formPagos.xhtml" />
+			</h:form>
+
+			<br />
+			<h:form id="idfrmfactura" rendered="false">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<p:outputLabel value="Adjuntar factura de pago" />
+					</f:facet>
+					<h:panelGrid layout="grid" styleClass="w100">
+						<h:panelGroup>
+							<h:panelGrid columns="1" columnClasses="null, field_mrg">
+								<p:outputLabel value="Documento (.pdf) 20MB" />
+							</h:panelGrid>
+							<p:fileUpload multiple="false" sizeLimit="20480000"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true"
+								fileUploadListener="#{pagosFacilitadoresBypassController.uploadDocumentoPago}"
+								update="idnombrefactura">
+							</p:fileUpload>
+						</h:panelGroup>
+						<h:panelGroup id="idnombrefactura">
+							<p:outputLabel
+								value="#{pagosFacilitadoresBypassController.nombreArchivo}" />
+						</h:panelGroup>
+					</h:panelGrid>
+				</p:panelGrid>
+			</h:form>
+
+			<h:form id="formSubmit">
+				<div class="buttons main">
+					<p:commandButton value="Enviar" id="btnEnviar" icon="ui-icon-check" rendered="false"
+						actionListener="#{pagosFacilitadoresBypassController.completarTarea()}"
+						widgetVar="btnEnviar" onstart="PF('btnEnviar').disable()"
+						update="@form">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+					<p:commandButton value="Cancelar" immediate="true" action="/bandeja/bandejaTareas.jsf?faces-redirect=true" 
+							title="regresar a la bandeja de tareas"  icon="ui-icon-cancel" styleClass="secondary" />
+				</div>
+			</h:form>
+
+		</ui:define>
+	</ui:composition>
+</ui:composition>

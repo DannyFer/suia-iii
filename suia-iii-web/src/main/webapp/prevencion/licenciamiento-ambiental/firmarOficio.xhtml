@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones" >
+
+	<ui:define name="context-extra">
+		<h:outputText value="Datos" />
+		<h:outputText value="Estudio de Impacto Ambiental" />
+
+		<h:outputLink value="#{request.contextPath}#{eia.verEIA()}"
+			target="_blank">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+	</ui:define>
+	<ui:define name="content">
+		<f:event type="preRenderView"
+			listener="#{firmarOficioBean.validarTareaBpm()}" />
+		<h:form id="signOfficeForm">
+			<p:panel>
+				<div class="buttons main">
+					<p:commandButton value="Firmar documento" type="button" styleClass="large"
+									 update=":signOfficeForm:signDlg" icon="ui-icon-key"
+									 onclick="PF('signDialog').show();"/>
+
+					<p:commandButton value="Enviar"
+									 action="#{firmarOficioBean.completarTarea()}"
+									 title="Enviar" icon="ui-icon-check">
+					</p:commandButton>
+				</div>
+			</p:panel>
+
+			<p:dialog header="Firma Electronica" id="signDlg"
+					  widgetVar="signDialog" closeOnEscape="false" modal="true"
+					  resizable="false" width="auto" height="auto" position="center top">
+
+				<p:panel>
+					<table style="width: 100%;">
+						<tr>
+							<td>
+								<object id="embedded"
+										data="#{firmarOficioBean.firmarDocumento()}"
+										width="510" height="300"/>
+							</td>
+						</tr>
+					</table>
+					<f:facet name="footer">
+						<div style="display: block; width: 100%; text-align: right;">
+							<p:commandButton value="Cerrar" styleClass="primary" onclick="signDialog.hide()"
+											 icon="ui-icon-close"/>
+						</div>
+					</f:facet>
+				</p:panel>
+			</p:dialog>
+
+		</h:form>
+
+
+	</ui:define>
+</ui:composition>

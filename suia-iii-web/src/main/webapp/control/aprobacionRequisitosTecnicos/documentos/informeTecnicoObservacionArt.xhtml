@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" template="/WEB-INF/templates/default-task.xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones" xmlns:control="http://java.sun.com/jsf/composite/controles-prime" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+	<ui:define name="content">
+		<f:event type="preRenderView" listener="#{informeTecnicoObservacionesArtController.validarTareaBpm()}" />
+		<h:form id="form">
+			<p:panel>
+				<h:panelGrid columns="1" styleClass="alCenter w100">
+					<p:outputLabel for="informeCumple" value="¿Es necesario realizar correcciones sobre el informe técnico o el oficio?" styleClass="bold" />
+					<p:selectOneRadio id="informeCumple" value="#{informeTecnicoObservacionesArtController.existeCorreciones}" required="true">
+						<f:selectItem itemLabel="Si" itemValue="true" />
+						<f:selectItem itemLabel="No" itemValue="false" />
+						<p:ajax listener="#{informeTecnicoObservacionesArtController.enviarCorregir()}" event="change" update="@form" />
+					</p:selectOneRadio>
+					<h:outputText value="Si es necesario realizar correcciones, el trámite regresará al técnico asignado." styleClass="text-red bold" />
+				</h:panelGrid>
+			</p:panel>
+			<br />
+
+			<p:tabView id="tab">
+				<p:tab title="Informe técnico">
+					<object id="pdf_informe" type="application/pdf" data="#{informeTecnicoObservacionesArtController.informePath}?pfdrid_c=true" width="100%" height="500px">
+						Su navegador no soporta la visualización de pdf. Puede descargar el documento presionando el siguiente botón:
+						<p:commandButton value="Descargar" styleClass="primary" ajax="false" icon="ui-icon-arrowthick-1-s" action="#" />
+					</object>
+					<h:panelGroup id="pnl1" rendered="#{informeTecnicoObservacionesArtController.revisar or !informeTecnicoObservacionesArtController.observacionesController.getObservacionesBB().getMapaSecciones().get('informeAprobacionRequisitos').isEmpty()}">
+						<p:fragment>
+							<observaciones:tablaObservaciones idComponent="tit" aparace="true" soloLectura="#{!informeTecnicoObservacionesArtController.revisar}" mostrarSiVacio="#{informeTecnicoObservacionesArtController.revisar}" idClase="#{informeTecnicoObservacionesArtController.informeTecnicoArt.id}" nombreClase="InformeTecnicoAproReqTec" seccion="informeAprobacionRequisitos" rol="sjsj" componenteActualizarEliminar="pnl1" />
+						</p:fragment>
+					</h:panelGroup>
+				</p:tab>
+				<p:tab title="Oficio de pronunciamiento">
+					<mae:sendFileCopy autoSave="false" entityId="#{informeTecnicoObservacionesArtController.oficioArt.id}" className="OficioAproReqTec" discriminator="#{informeTecnicoObservacionesArtController.userName}" onlySystemEmail="false" />
+				
+					<ui:include src="/control/aprobacionRequisitosTecnicos/documentos/util/oficioAprobacionObservacionArt.xhtml" />
+				</p:tab>
+			</p:tabView>
+
+			<div class="buttons main">
+				<p:commandButton value="Guardar" action="#{informeTecnicoObservacionesArtController.guardarAutoridad()}" update="@form" icon="ui-icon-disk" />
+				
+				<p:commandButton id="btnEnviar" value="Enviar" title="Enviar datos" icon="ui-icon-check" rendered="#{informeTecnicoObservacionesArtController.soloEnviar}"
+					action="#{informeTecnicoObservacionesArtController.completarTarea()}" disabled="#{!informeTecnicoObservacionesArtController.guardado}">
+					<p:confirm message="¿Estás seguro que desea enviar la información?" header="Confirmación de envío" />
+				</p:commandButton>
+				<p:commandButton id="btnEnviarFirma" value="Enviar" oncomplete="PF('signDialog').show();" title="Enviar datos" icon="ui-icon-check"
+					rendered="#{!informeTecnicoObservacionesArtController.soloEnviar}" disabled="#{!informeTecnicoObservacionesArtController.guardado}">
+					<p:confirm message="¿Estás seguro que desea enviar la información?" header="Confirmación de envío" />
+				</p:commandButton>
+				
+				<p:commandButton value="Cancelar" immediate="true" action="/bandeja/bandejaTareas.jsf?faces-redirect=true" icon="ui-icon-cancel" styleClass="secondary">
+					<p:confirm message="#{msg['message.confirmacion.cancelacion.tarea']}" header="#{msg['header.confirmacion.cancelacion.tarea']}" />
+				</p:commandButton>
+			</div>
+
+		</h:form>
+		
+		<h:form id="formDialogs">
+
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600px" height="auto">
+				<p:panel id="pnlFimaE">
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel value="Firmar informe Técnico" styleClass="bold" />
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold"
+							rendered="#{!informeTecnicoObservacionesArtController.ambienteProduccion}" />
+						<p:selectOneRadio id="verificaToken"
+							value="#{informeTecnicoObservacionesArtController.token}"
+							rendered="#{!informeTecnicoObservacionesArtController.ambienteProduccion}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax 
+								update=":formDialogs:pnlFimaE"
+								listener="#{informeTecnicoObservacionesArtController.firmarOficio}" />
+						</p:selectOneRadio>
+
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{informeTecnicoObservacionesArtController.ambienteProduccion}" />
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{informeTecnicoObservacionesArtController.ambienteProduccion}" />
+
+						<h:panelGroup id="pnlFirmaToken" rendered="#{informeTecnicoObservacionesArtController.token}">
+							<p:commandButton value="Firmar documento" type="button"
+								styleClass="primary" icon="ui-icon-key"
+								rendered="#{informeTecnicoObservacionesArtController.token}"
+								onclick="window.location.href='#{informeTecnicoObservacionesArtController.firmarOficio()}'" />
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual" rendered="#{!informeTecnicoObservacionesArtController.token}">
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!informeTecnicoObservacionesArtController.token}">
+							<p:outputLabel value="1. Descargar el Informe" styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload
+									value="#{informeTecnicoObservacionesArtController.descargarInformacion()}" />
+							</p:commandButton>
+							<p:outputLabel for="uploadRequired"
+								value="2. Adjuntar el Informe Técnico firmado"
+								styleClass="bold" />
+							<p:fileUpload id="Idfirmada"
+								fileUploadListener="#{informeTecnicoObservacionesArtController.cargarArchivo}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreDocFirmado"
+								rendered="#{!informeTecnicoArtBean.token}">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreDocFirmado"
+								value="#{informeTecnicoObservacionesArtController.documentoInformacionManual.nombre}" />
+						</h:panelGrid>
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!informeTecnicoObservacionesArtController.token and !informeTecnicoObservacionesArtController.informacionSubida}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialog').hide()" icon="ui-icon-close" 
+						immediate="true"/>
+					<p:commandButton value="Enviar" styleClass="secondary"
+						action="#{informeTecnicoObservacionesArtController.completarTarea()}" icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+
+			<p:separator />
+
+		</h:form>
+
+	</ui:define>
+</ui:composition>

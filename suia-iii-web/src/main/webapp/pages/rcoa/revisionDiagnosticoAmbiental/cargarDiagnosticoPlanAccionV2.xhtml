@@ -1,0 +1,684 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+
+	<ui:define name="content">
+
+		<style type="text/css">
+.ui-fileupload-content {
+	border: none !important;
+	padding: 0px;
+}
+
+.ui-fileupload-buttonbar {
+	text-align: right !important;
+}
+
+.lblPanel .header label {
+	color: white !important;
+}
+
+.ui-datepicker-unselectable span {
+	background: #b9b5b5 !important;
+}
+</style>
+
+		<f:event type="preRenderView"
+			listener="#{cargarDiagnosticoPlanAccionV2Controller.validarTareaBpm()}" />
+
+		<h:form id="form">
+
+			<h:panelGrid columns="1" layout="grid" styleClass="w100"
+				style="text-align: justify !important">
+				<h:outputText
+					value="#{cargarDiagnosticoPlanAccionV2Controller.mensaje}"
+					escape="false" styleClass="alJustify" />
+				<br />
+			</h:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Diagnóstico Ambiental *" />
+				</f:facet>
+
+				<h:panelGrid columns="1" layout="grid" styleClass="w100"
+					style="text-align: justify !important">
+					<h:outputText
+						value="#{cargarDiagnosticoPlanAccionV2Controller.mensajeDiagnostico}"
+						escape="false" styleClass="alJustify" />
+				</h:panelGrid>
+
+				<h:outputText
+					value="Adjuntar el (los) documento(s) de Diagnóstico Ambiental (Archivos formato .pdf, de hasta 20MB)" />
+
+				<p:fileUpload id="fileDiagnosticoObservado" multiple="false"
+					fileUploadListener="#{cargarDiagnosticoPlanAccionV2Controller.uploadDiagnostico}"
+					sizeLimit="20971520" allowTypes="/(\.|\/)(pdf)$/" label="Adicionar"
+					uploadLabel="Subir" invalidFileMessage="Tipo de archivo no válido"
+					invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+					cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+					auto="true" required="true" styleClass="w75 toCenter"
+					update="tblDiagnosticos" />
+				<p:dataTable id="tblDiagnosticos" styleClass="w75"
+					value="#{cargarDiagnosticoPlanAccionV2Controller.listaDocumentosDiagnostico}"
+					var="documento" emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Documento">
+						<h:outputText value="#{documento.nombreDocumento}" />
+					</p:column>
+					<p:column headerText="Acciones" styleClass="w70px alCenter">
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="primary" title="Descargar" ajax="false"
+							immediate="true">
+							<p:fileDownload
+								value="#{cargarDiagnosticoPlanAccionV2Controller.descargarDocumento(documento)}" />
+						</p:commandButton>
+						<p:commandButton icon="ui-icon-trash" title="Eliminar"
+							process="@this" styleClass="primary"
+							actionListener="#{cargarDiagnosticoPlanAccionV2Controller.eliminarDocumento(1, documento)}"
+							update="tblDiagnosticos" />
+					</p:column>
+				</p:dataTable>
+
+				<br />
+			</p:panelGrid>
+
+			<br />
+			<h:panelGrid columns="2" styleClass="w100" columnClasses="w66, null">
+				<p:outputLabel styleClass="bold"
+					value="Su proyecto, obra o actividad ¿Cumple o no con la normativa ambiental vigente?"
+					for="rdbCumple" />
+				<p:selectOneRadio id="rdbCumple" styleClass="w100"
+					value="#{cargarDiagnosticoPlanAccionV2Controller.proyecto.diagnosticoCumpleNormativa}"
+					required="true">
+					<f:selectItem itemLabel="SI cumple" itemValue="true" />
+					<f:selectItem itemLabel="NO cumple" itemValue="false" />
+					<p:ajax process="@this"
+						listener="#{cargarDiagnosticoPlanAccionV2Controller.seleccionarCumpleNormativa()}" />
+				</p:selectOneRadio>
+			</h:panelGrid>
+			<br />
+
+			<h:panelGroup id="pnlPlanAccion">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					rendered="#{cargarDiagnosticoPlanAccionV2Controller.visualizarCargarPlan}">
+					<f:facet name="header">
+						<h:outputText value="Ingresar Plan de acción *" />
+					</f:facet>
+
+					<h:outputText
+						value="#{cargarDiagnosticoPlanAccionV2Controller.mensajePlan}"
+						escape="false" styleClass="alJustify" />
+					<br />
+
+					<h:panelGrid styleClass="w100" id="pnlPlanDocumento">
+						<object id="pdf_resolucion" type="application/pdf"
+							data="#{cargarDiagnosticoPlanAccionV2Controller.documentoPath}?pfdrid_c=true"
+							width="100%" height="500px">
+							Su navegador no soporta la visualización de pdf. Puede descargar
+							el documento presionando el siguiente botón:
+							<p:commandButton value="Descargar" styleClass="primary"
+								ajax="false" icon="ui-icon-arrowthick-1-s" immediate="true">
+								<p:fileDownload
+									value="#{cargarDiagnosticoPlanAccionV2Controller.getStream(cargarDiagnosticoPlanAccionV2Controller.nombreDocumento, cargarDiagnosticoPlanAccionV2Controller.archivoDocumento)}" />
+							</p:commandButton>
+						</object>
+						<br />
+						<br />
+					</h:panelGrid>
+
+				</p:panelGrid>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					rendered="#{cargarDiagnosticoPlanAccionV2Controller.visualizarCargarPlan}">
+					<f:facet name="header">
+						<h:outputText value="Plan de acción *" />
+					</f:facet>
+
+					<h:panelGrid styleClass="panel_data w100 lblPanel" columns="2"
+						columnClasses="header w20, bold">
+						<p:outputLabel for="txtObjetivo" value="Objetivo" />
+						<p:inputTextarea rows="2" styleClass="w100" style="overflow:auto;"
+							required="true" id="txtObjetivo" maxlength="400"
+							autoResize="false"
+							value="#{cargarDiagnosticoPlanAccionV2Controller.planAccion.objetivo}" />
+
+						<p:outputLabel for="txtResponsable" value="Responsable" />
+						<p:inputTextarea rows="2" styleClass="w100" style="overflow:auto;"
+							maxlength="200" required="true" id="txtResponsable"
+							autoResize="false"
+							value="#{cargarDiagnosticoPlanAccionV2Controller.planAccion.responsable}" />
+					</h:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100 lblPanel"
+						id="pnlHallazgos">
+						<f:facet name="header">
+							<p:commandButton value="Adicionar" icon="ui-icon-plusthick"
+								styleClass="button-small-text toRight field_mrg" process="@this"
+								update=":formMedioVerificacion:dlgMedioVerificacion"
+								actionListener="#{cargarDiagnosticoPlanAccionV2Controller.abrirNuevoHallazgo}" />
+							<h:outputText value="Hallazgos" />
+						</f:facet>
+
+						<h:panelGroup id="pnlDatosHallazgos"
+							rendered="#{cargarDiagnosticoPlanAccionV2Controller.verNuevoHallazgo}">
+							<h:panelGrid styleClass="panel_data w100" columns="2"
+								columnClasses="header w20, bold">
+
+								<p:outputLabel for="txtDescripcion"
+									value="Descripción del hallazgo" />
+								<p:inputTextarea id="txtDescripcion" rows="2" styleClass="w100"
+									style="overflow:auto;" required="true" maxlength="1000"
+									autoResize="false"
+									value="#{cargarDiagnosticoPlanAccionV2Controller.hallazgoPlanAccion.descripcion}" />
+
+								<p:outputLabel for="rdbDescripcion" value="Calificación" />
+								<p:selectOneRadio id="rdbDescripcion" styleClass="w100"
+									value="#{cargarDiagnosticoPlanAccionV2Controller.hallazgoPlanAccion.calificacion}"
+									required="true">
+									<f:selectItem itemLabel="No conformidad Mayor: NC+"
+										itemValue="1" />
+									<f:selectItem itemLabel="No conformidad Menor: NC-"
+										itemValue="2" />
+									<f:selectItem itemLabel="Observación: O" itemValue="3" />
+									<p:ajax process="@this" />
+								</p:selectOneRadio>
+
+								<p:outputLabel for="txtMedidasCorrectivas"
+									value="Medidas correctivas" />
+								<p:inputTextarea id="txtMedidasCorrectivas" rows="2"
+									styleClass="w100" style="overflow:auto;" required="true"
+									maxlength="2000" autoResize="false"
+									value="#{cargarDiagnosticoPlanAccionV2Controller.hallazgoPlanAccion.medidasCorrectivas}" />
+							</h:panelGrid>
+							<h:panelGrid styleClass="panel_data w100" columns="5"
+								columnClasses="header w20, header w15, null, header w15">
+								<p:outputLabel value="Cronograma *" />
+								<p:outputLabel for="txtFechaInicio" value="Inicio" />
+								<p:calendar id="txtFechaInicio" styleClass="calendarClass"
+									value="#{cargarDiagnosticoPlanAccionV2Controller.hallazgoPlanAccion.fechaInicio}"
+									pattern="dd/MM/yyyy" readonlyInput="true" navigator="true"
+									required="true">
+									<p:ajax event="dateSelect" update="txtFechaFin" process="@this" />
+								</p:calendar>
+								<p:outputLabel for="txtFechaFin" value="Fin" />
+								<p:calendar styleClass="calendarClass" id="txtFechaFin"
+									value="#{cargarDiagnosticoPlanAccionV2Controller.hallazgoPlanAccion.fechaFin}"
+									pattern="dd/MM/yyyy" readonlyInput="true" navigator="true"
+									mindate="#{cargarDiagnosticoPlanAccionV2Controller.hallazgoPlanAccion.fechaInicio}"
+									required="true">
+								</p:calendar>
+							</h:panelGrid>
+							<h:panelGrid styleClass="panel_data w100" columns="3"
+								columnClasses="header w20, w20, null">
+								<p:outputLabel for="txtCosto" value="Costos (USD $)" />
+								<pe:inputNumber id="txtCosto" thousandSeparator=""
+									decimalSeparator="," maxValue="9999999.99" required="true"
+									autocomplete="off" style="width: 20% !important;"
+									value="#{cargarDiagnosticoPlanAccionV2Controller.hallazgoPlanAccion.costo}">
+									<f:validateDoubleRange minimum="0.01" />
+								</pe:inputNumber>
+								<p:outputLabel value="" />
+							</h:panelGrid>
+							<h:panelGrid styleClass="panel_data w100" columns="2"
+								columnClasses="header w20, null">
+								<p:outputLabel for="txtIndicadores" value="Indicadores" />
+								<p:inputTextarea rows="2" styleClass="w100" required="true"
+									style="overflow:auto;" id="txtIndicadores" maxlength="200"
+									autoResize="false"
+									value="#{cargarDiagnosticoPlanAccionV2Controller.hallazgoPlanAccion.indicadores}" />
+							</h:panelGrid>
+
+							<p:panelGrid columns="1" layout="grid" styleClass="w100 alCenter">
+								<f:facet name="header">
+									<p:commandButton value="Adicionar" icon="ui-icon-plusthick"
+										styleClass="button-small-text toRight field_mrg"
+										process="@this"
+										actionListener="#{cargarDiagnosticoPlanAccionV2Controller.abrirNuevoMedio}" />
+									<h:outputText value="Medio de verificación *" />
+								</f:facet>
+
+								<p:dataTable id="tblMediosVerificacion"
+									styleClass="w100 alCenter"
+									value="#{cargarDiagnosticoPlanAccionV2Controller.listaMedios}"
+									var="item" emptyMessage="#{labels['common.table.empty']}"
+									rows="5" paginator="true" paginatorAlwaysVisible="false"
+									paginatorPosition="bottom" rowsPerPageTemplate="5,10,15">
+									<p:column headerText="Descripción medio de verificación">
+										<h:outputText value="#{item.descripcion}" />
+									</p:column>
+									<p:column headerText="Documento" style="width: 20%;">
+										<h:outputText value="#{item.documentoAdjunto.nombreDocumento}" />
+									</p:column>
+									<p:column headerText="Acciones" styleClass="w70px alCenter">
+
+										<p:commandButton icon="ui-icon-pencil" title="Editar"
+											process="@this"
+											update=":formMedioVerificacion:dlgMedioVerificacion"
+											styleClass="primary"
+											actionListener="#{cargarDiagnosticoPlanAccionV2Controller.editarMedioVerificacion(item)}" />
+										<p:commandButton icon="ui-icon-trash" title="Eliminar"
+											process="@this" styleClass="primary"
+											actionListener="#{cargarDiagnosticoPlanAccionV2Controller.eliminarMedioVerificacion(item)}"
+											update=":form:tblMediosVerificacion" />
+									</p:column>
+								</p:dataTable>
+							</p:panelGrid>
+
+							<p:panelGrid columns="1" layout="grid" styleClass="w100">
+								<f:facet name="header">
+									<h:outputText
+										value="Instrumentos de avance o cumplimiento del Plan de Acción (opcional)" />
+								</f:facet>
+
+								<h:outputText
+									value="Adjuntar el (los) Instrumento(s) de avance o cumplimiento del Plan de Acción (Archivos formato .pdf de hasta 20MB)" />
+								<p:fileUpload multiple="false"
+									fileUploadListener="#{cargarDiagnosticoPlanAccionV2Controller.uploadInstrumentos}"
+									sizeLimit="20971520" allowTypes="/(\.|\/)(pdf)$/"
+									label="Adicionar" uploadLabel="Subir"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+									cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+									auto="true" required="true" styleClass="w75"
+									update="tblInstrumentos" />
+								<p:dataTable id="tblInstrumentos" styleClass="w75"
+									value="#{cargarDiagnosticoPlanAccionV2Controller.listaInstrumentos}"
+									var="documento" emptyMessage="#{labels['common.table.empty']}"
+									rows="5" paginator="true" paginatorAlwaysVisible="false"
+									paginatorPosition="bottom" rowsPerPageTemplate="5,10,15">
+									<p:column headerText="Documento">
+										<h:outputText value="#{documento.nombreDocumento}" />
+									</p:column>
+									<p:column headerText="Acciones" styleClass="w70px alCenter">
+										<p:commandButton icon="ui-icon-arrowthick-1-s"
+											styleClass="primary" title="Descargar" ajax="false"
+											immediate="true">
+											<p:fileDownload
+												value="#{cargarDiagnosticoPlanAccionV2Controller.descargarDocumento(documento)}" />
+										</p:commandButton>
+										<p:commandButton icon="ui-icon-trash" title="Eliminar"
+											process="@this" styleClass="primary"
+											actionListener="#{cargarDiagnosticoPlanAccionV2Controller.eliminarDocumento(4, documento)}"
+											update="tblInstrumentos" />
+									</p:column>
+								</p:dataTable>
+							</p:panelGrid>
+
+							<h:inputHidden
+								validator="#{cargarDiagnosticoPlanAccionV2Controller.validateDatosHallazgos}" />
+
+							<h:panelGroup id="pnlButtonsHallazgo">
+								<div class="buttons main">
+									<p:commandButton value="Aceptar" styleClass="primary"
+										action="#{cargarDiagnosticoPlanAccionV2Controller.guardarNuevoHallazgo()}"
+										icon="ui-icon-check" process="form:pnlDatosHallazgos" />
+
+									<p:commandButton value="Cancelar" immediate="true"
+										action="#{cargarDiagnosticoPlanAccionV2Controller.limpiarNuevoHallazgo(true)}"
+										icon="ui-icon-cancel" styleClass="secondary">
+									</p:commandButton>
+								</div>
+							</h:panelGroup>
+
+							<br />
+						</h:panelGroup>
+
+						<p:dataTable id="tblHallazgos"
+							value="#{cargarDiagnosticoPlanAccionV2Controller.listaHallazgos}"
+							var="item" emptyMessage="#{labels['common.table.empty']}"
+							rows="10" paginator="true" paginatorAlwaysVisible="false"
+							paginatorPosition="bottom" rowsPerPageTemplate="5,10,15">
+							<p:columnGroup type="header">
+								<p:row>
+									<p:column headerText="Descripción del hallazgo" rowspan="2" />
+									<p:column headerText="Calificación" colspan="3" />
+									<p:column headerText="Medidas correctivas" rowspan="2" />
+									<p:column headerText="Cronograma" colspan="2" />
+									<p:column headerText="Costos (USD $)" rowspan="2" />
+									<p:column headerText="Indicadores" rowspan="2" />
+									<p:column headerText="Medios de verificación" rowspan="2" />
+									<p:column
+										headerText="Instrumentos de avance o cumplimiento del Plan de Acción"
+										rowspan="2" />
+									<p:column headerText="Acciones" rowspan="2" />
+								</p:row>
+								<p:row>
+									<p:column headerText="NC+" />
+									<p:column headerText="NC-" />
+									<p:column headerText="O" />
+									<p:column headerText="Inicio (DD/MM/AA)" />
+									<p:column headerText="Fin (DD/MM/AA)" />
+								</p:row>
+							</p:columnGroup>
+
+							<p:column styleClass="w50">
+								<h:outputText styleClass="cssColumnDescription" escape="false"
+									value="#{item.descripcion}" />
+							</p:column>
+							<p:column>
+								<h:outputText value="#{item.calificacion eq 1 ? 'X' : ''}" />
+							</p:column>
+							<p:column>
+								<h:outputText value="#{item.calificacion eq 2 ? 'X' : ''}" />
+							</p:column>
+							<p:column>
+								<h:outputText value="#{item.calificacion eq 3 ? 'X' : ''}" />
+							</p:column>
+							<p:column>
+								<h:outputText styleClass="cssColumnDescription" escape="false"
+									value="#{item.medidasCorrectivas}" />
+							</p:column>
+							<p:column>
+								<h:outputText value="#{item.fechaInicio}">
+									<f:convertDateTime pattern="dd/MM/YYY" />
+								</h:outputText>
+							</p:column>
+							<p:column>
+								<h:outputText value="#{item.fechaFin}">
+									<f:convertDateTime pattern="dd/MM/YYY" />
+								</h:outputText>
+							</p:column>
+							<p:column>
+								<h:outputText value="#{item.costo}" />
+							</p:column>
+							<p:column>
+								<h:outputText styleClass="cssColumnDescription" escape="false"
+									value="#{item.indicadores}" />
+							</p:column>
+							<p:column styleClass="w70px alCenter">
+								<h:outputText value="Total #{item.listaMedios.size()}" />
+								<br />
+								<br />
+								<p:commandButton icon="ui-icon-search" title="ver"
+									process="@this"
+									update=":formMedioVerificacion:dlgVerMedioVerificacion :formMedioVerificacion:pnlVerMedio"
+									styleClass="primary"
+									actionListener="#{cargarDiagnosticoPlanAccionV2Controller.verMedioVerificacion(item)}" />
+							</p:column>
+							<p:column>
+								<h:outputText value="#{item.docsInstrumentos}" escape="false" />
+							</p:column>
+							<p:column styleClass="w70px alCenter">
+								<p:commandButton icon="ui-icon-pencil" title="Editar"
+									process="@this" update=":form:pnlHallazgos"
+									styleClass="primary"
+									actionListener="#{cargarDiagnosticoPlanAccionV2Controller.editarHallazgo(item)}" />
+								<p:commandButton icon="ui-icon-trash" title="Eliminar"
+									process="@this" styleClass="primary"
+									actionListener="#{cargarDiagnosticoPlanAccionV2Controller.eliminarHallazgo(item)}"
+									update="tblHallazgos" />
+							</p:column>
+						</p:dataTable>
+						<h:outputText
+							value="No Conformidad Mayor (NC+), No Conformidad Menor (NC-) y Observación (O" />
+
+						<h:inputHidden
+							validator="#{cargarDiagnosticoPlanAccionV2Controller.validateDatosPlanAccion}" />
+
+					</p:panelGrid>
+
+				</p:panelGrid>
+			</h:panelGroup>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Guardar"
+						disabled="#{!cargarDiagnosticoPlanAccionV2Controller.habilitarGuardar}"
+						action="#{cargarDiagnosticoPlanAccionV2Controller.guardarDatos()}"
+						icon="ui-icon-disk" process="form">
+					</p:commandButton>
+
+					<h:panelGroup
+						rendered="#{cargarDiagnosticoPlanAccionV2Controller.proyecto.diagnosticoCumpleNormativa ne null and !cargarDiagnosticoPlanAccionV2Controller.proyecto.diagnosticoCumpleNormativa}">
+						<ui:remove>
+							<p:commandButton value="Firmar" type="button" styleClass="large"
+								icon="ui-icon-key"
+								rendered="#{cargarDiagnosticoPlanAccionV2Controller.firmaSoloToken}"
+								disabled="#{!cargarDiagnosticoPlanAccionV2Controller.habilitarFirmar}"
+								onclick="window.location.href='#{cargarDiagnosticoPlanAccionV2Controller.firmarPlanToken()}'" />
+						</ui:remove>
+
+						<p:commandButton value="Firmar" styleClass="large"
+							icon="ui-icon-key"
+							disabled="#{!cargarDiagnosticoPlanAccionV2Controller.habilitarFirmar}"
+							update="pnlButtons :formDialogs:pnlFirmaManual :formDialogs:pnlFirmaToken"
+							actionListener="#{cargarDiagnosticoPlanAccionV2Controller.firmarPlan()}" />
+					</h:panelGroup>
+
+
+					<p:commandButton value="Enviar" styleClass="primary"
+						disabled="#{!cargarDiagnosticoPlanAccionV2Controller.habilitarEnviar}"
+						action="#{cargarDiagnosticoPlanAccionV2Controller.enviar()}"
+						update="@form" icon="ui-icon-check" />
+				</div>
+			</h:panelGroup>
+
+			<p:dialog
+				header="Verificación de cumplimiento de normativa ambiental vigente"
+				id="dlgInfoCumple" widgetVar="dlgInfoCumple" modal="true"
+				width="400" resizable="false" closable="false" draggable="false">
+				<h:panelGroup>
+					<h:panelGrid columns="1" styleClass="alJustify w100">
+						<h:outputText
+							value="¿Está seguro que su proyecto, obra o actividad cumple con la normativa ambiental vigente, por lo tanto, no requiere la presentación de un Plan de Acción?"
+							escape="false" />
+					</h:panelGrid>
+					<br />
+					<div class="buttons" style="border-top: 1px solid #aaa">
+						<p:commandButton value="SI, estoy seguro" styleClass="primary"
+							oncomplete="PF('dlgInfoCumple').hide()"
+							actionListener="#{cargarDiagnosticoPlanAccionV2Controller.finalizarCumpleNormativa()}" />
+
+						<p:commandButton value="NO" styleClass="primary w20"
+							actionListener="#{cargarDiagnosticoPlanAccionV2Controller.finalizarNoCumpleNormativa()}"
+							oncomplete="PF('dlgInfoCumple').hide()" />
+					</div>
+					<br />
+				</h:panelGroup>
+			</p:dialog>
+
+			<p:dialog id="dlgInfoPlanAccion" widgetVar="dlgInfoPlanAccion"
+				modal="true" width="400" resizable="false" closable="false"
+				draggable="false">
+				<h:panelGroup>
+					<h:panelGrid columns="1" styleClass="alJustify w100">
+						<h:outputText
+							value="El plan de acción del diagnóstico ambiental en línea será con apego a la normativa ambiental aplicable y tendrá responsabilidad legal al entregar datos fidedignos y contrastables. El operador deberá adoptar las medidas propuestas de manera inmediata para corregir los incumplimientos normativos identificados y será de cumplimiento obligatorio."
+							escape="false" />
+					</h:panelGrid>
+					<br />
+					<div class="buttons" style="border-top: 1px solid #aaa">
+						<p:commandButton value="Cancelar" styleClass="secondary w20"
+							actionListener="#{cargarDiagnosticoPlanAccionV2Controller.finalizarNoCumpleNormativa()}"
+							oncomplete="PF('dlgInfoPlanAccion').hide()" />
+
+						<p:commandButton value="Aceptar" styleClass="primary"
+							actionListener="#{cargarDiagnosticoPlanAccionV2Controller.habilitarIngresoPlanAccion()}"
+							oncomplete="PF('dlgInfoPlanAccion').hide()"
+							update="pnlPlanAccion" />
+					</div>
+					<br />
+				</h:panelGroup>
+			</p:dialog>
+
+
+		</h:form>
+
+		<h:form id="formDialogs">
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600" height="auto" position="center top">
+				<p:panel>
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel value="Plan de Acción" styleClass="bold" />
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold"
+							rendered="#{!cargarDiagnosticoPlanAccionV2Controller.firmaSoloToken}" />
+						<p:selectOneRadio id="verificaToken"
+							value="#{cargarDiagnosticoPlanAccionV2Controller.token}"
+							rendered="#{!cargarDiagnosticoPlanAccionV2Controller.firmaSoloToken}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change" update="pnlFirmaManual pnlFirmaToken"
+								listener="#{cargarDiagnosticoPlanAccionV2Controller.guardarToken}" />
+						</p:selectOneRadio>
+
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{cargarDiagnosticoPlanAccionV2Controller.firmaSoloToken}" />
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{cargarDiagnosticoPlanAccionV2Controller.firmaSoloToken}" />
+
+						<h:panelGroup id="pnlFirmaToken">
+							<p:commandButton value="Firmar documento" type="button"
+								styleClass="primary" icon="ui-icon-key"
+								rendered="#{cargarDiagnosticoPlanAccionV2Controller.token}"
+								onclick="window.location.href='#{cargarDiagnosticoPlanAccionV2Controller.urlAlfresco}'" />
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!cargarDiagnosticoPlanAccionV2Controller.token}">
+							<p:outputLabel value="1. Descargar el Plan de Acción"
+								styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload
+									value="#{cargarDiagnosticoPlanAccionV2Controller.descargarDocumento(cargarDiagnosticoPlanAccionV2Controller.documentoPlan)}" />
+							</p:commandButton>
+							<p:outputLabel for="uploadRequired"
+								value="2. Adjuntar el Plan de Acción firmado" styleClass="bold" />
+							<p:fileUpload
+								fileUploadListener="#{cargarDiagnosticoPlanAccionV2Controller.uploadListenerPlanFirmado}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreDocFirmado"
+								rendered="#{!cargarDiagnosticoPlanAccionV2Controller.token}">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreDocFirmado"
+								value="#{cargarDiagnosticoPlanAccionV2Controller.nombreDocumentoFirmado}" />
+						</h:panelGrid>
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!cargarDiagnosticoPlanAccionV2Controller.token and !cargarDiagnosticoPlanAccionV2Controller.documentoSubido}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialog').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						action="#{cargarDiagnosticoPlanAccionV2Controller.enviar()}"
+						icon="ui-icon-check">
+						<p:confirm
+							message="El diagnóstico ambiental (y plan de acción) de su proyecto se va a enviar, ¿Está seguro de enviar la información?"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+		</h:form>
+
+		<h:form id="formMedioVerificacion">
+			<p:dialog width="750" id="dlgMedioVerificacion"
+				widgetVar="dlgMedioVerificacion"
+				header="Ingresar información de Medio de Verificación" modal="true"
+				resizable="false">
+				<p:panel>
+					<h:panelGrid styleClass="w100" columns="1">
+
+						<p:outputLabel for="txtMedioVerificacion"
+							value="Descripción de medio de verificación" />
+						<p:inputTextarea rows="2" styleClass="w100" required="true"
+							style="overflow:auto;" id="txtMedioVerificacion" maxlength="1000"
+							autoResize="false"
+							value="#{cargarDiagnosticoPlanAccionV2Controller.nuevoMedioVerificacion.descripcion}" />
+						<br />
+						<br />
+						<p:outputLabel
+							value="Adjuntar los medios de verificación (Archivos formatos .doc, .docx, .xls, .xlsx, .pdf, .png, .jpeg, .zip, .rar, .shp de hasta 20MB)" />
+						<p:fileUpload multiple="false"
+							fileUploadListener="#{cargarDiagnosticoPlanAccionV2Controller.uploadMedioVerificacion}"
+							sizeLimit="20971520"
+							allowTypes="/(\.|\/)(doc|docx|xls|xlsx|pdf|png|jpeg|zip|rar|shp)$/"
+							label="Adjuntar" uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" required="true" update="lblNombreDocMedio" />
+
+						<h:outputText id="lblNombreDocMedio"
+							value="#{cargarDiagnosticoPlanAccionV2Controller.nuevoDocumentoVerificacion.nombreDocumento}" />
+
+					</h:panelGrid>
+				</p:panel>
+				<br />
+				<br />
+
+				<div class="buttons">
+					<p:commandButton icon="ui-icon-cancel" value="Cancelar"
+						process="@this" oncomplete="PF('dlgMedioVerificacion').hide()"
+						styleClass="secondary" />
+
+					<p:commandButton value="Aceptar" styleClass="primary"
+						process="@this :formMedioVerificacion:txtMedioVerificacion"
+						actionListener="#{cargarDiagnosticoPlanAccionV2Controller.agregarNuevoMedio()}"
+						icon="ui-icon-check" />
+				</div>
+
+			</p:dialog>
+
+			<p:dialog width="750" id="dlgVerMedioVerificacion"
+				widgetVar="dlgVerMedioVerificacion" header="Medios de Verificación"
+				modal="true" resizable="false">
+				<p:panel id="pnlVerMedio" style="max-height: 500px; overflow: auto">
+					<h:panelGrid styleClass="w100" columns="1">
+						<p:dataTable id="tblVerMediosVerificacion"
+							styleClass="w100 alCenter"
+							value="#{cargarDiagnosticoPlanAccionV2Controller.listaMedios}"
+							var="item" emptyMessage="#{labels['common.table.empty']}"
+							rows="5" paginator="true" paginatorAlwaysVisible="false"
+							paginatorPosition="bottom" rowsPerPageTemplate="5,10,15">
+							<p:column headerText="Descripción medio de verificación">
+								<h:outputText value="#{item.descripcion}" />
+							</p:column>
+							<p:column headerText="Documento" style="width: 20%;">
+								<h:outputText value="#{item.documentoAdjunto.nombreDocumento}" />
+							</p:column>
+						</p:dataTable>
+					</h:panelGrid>
+				</p:panel>
+				<br />
+				<div class="buttons">
+					<p:commandButton icon="ui-icon-cancel" value="Cerrar"
+						process="@this" oncomplete="PF('dlgVerMedioVerificacion').hide()"
+						styleClass="secondary" />
+				</div>
+
+			</p:dialog>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

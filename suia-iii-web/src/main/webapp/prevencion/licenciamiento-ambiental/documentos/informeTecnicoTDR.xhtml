@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+    <ui:define name="context-extra">
+
+        <h:outputText value="TDR"/>
+        <h:outputText value="Documento de TDR"/>
+
+
+        <p:commandButton id="downloadadjuntoTDR" icon="ui-icon-arrowthick-1-s"
+                         ajax="false" styleClass="button-small primary" title="Ver"
+                         immediate="true">
+            <p:fileDownload
+                    value="#{elaborarPronunciamientoAreaLABean.stream}"/>
+        </p:commandButton>
+
+
+        <h:outputText value="Pronunciamiento" rendered="#{!informeTecnicoTDRBean.documentOffice.isEmpty()}"/>
+        <h:outputText value="Ministerio de Justicia" rendered="#{!informeTecnicoTDRBean.documentOffice.isEmpty()}"/>
+
+        <h:outputLink value="#{informeTecnicoTDRBean.documentOffice}" target="_blank"
+                      rendered="#{!informeTecnicoTDRBean.documentOffice.isEmpty()}">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+
+        <c:forEach items="#{informeTecnicoTDRBean.listaPronunciamiento}" var="pronunciamiento">
+
+            <h:outputText value="Pronunciamiento"/>
+            <h:outputText value='#{msg["label.prevencion.".concat(pronunciamiento.tipo)]}'/>
+            <p:commandButton styleClass="primary button-small"
+                             actionListener="#{informeTecnicoTDRBean.setPronunciamientoActivo(pronunciamiento)}"
+                             icon="ui-icon-search" oncomplete="PF('dlg').show();"
+                             update="@(.modal)"/>
+
+
+        </c:forEach>
+
+        <p:dialog
+                header='Pronunciamiento - #{msg["label.prevencion.".concat(informeTecnicoTDRBean.pronunciamientoActivo.tipo)]}'
+                widgetVar="dlg" modal="true" styleClass="modal" id="modal"
+                height="400">
+            <control:imputConTextoEnriquecido valor="#{informeTecnicoTDRBean.pronunciamientoActivo.contenido}"
+                                              soloLectura="true"
+                                              requerido="false"/>
+        </p:dialog>
+
+
+    </ui:define>
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{informeTecnicoTDRBean.validarTareaBpm()}"/>
+
+        <h:form id="form">
+            <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                         columnClasses="w100"
+                    >
+                <f:facet name="header">
+                    <mae:panelGridHeaderHelp value="Informe técnico"
+                                             conector="generalHelp"
+                                             help="Para completar el informe, por favor ingrese la información requerida en las secciones correspondientes. Para previsualizar el documento presione Guardar."/>
+
+
+                </f:facet>
+                <object id="pdf_informe" type="application/pdf"
+                        data="#{informeTecnicoTDRBean.informePath}?pfdrid_c=true"
+                        width="100%" height="400px">
+                    Su navegador no soporta la visualización de pdf. Puede descargar el
+                    documento presionando el siguiente botón:
+                    <p:commandButton value="Descargar" styleClass="primary"
+                                     ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+                        <p:fileDownload value="#{informeTecnicoTDRBean.stream}"/>
+                    </p:commandButton>
+                </object>
+
+
+                <br/>
+                <br/>
+                <h:panelGrid columns="1" styleClass="w100" id="pronunciamiento-wrapper"
+                             columnClasses="w50, field_mrg w50">
+                    <p:outputLabel for="requiere-modificaciones"
+                                   value="¿Requiere modificaciones el informe?"
+                                   rendered="#{informeTecnicoTDRBean.revisar}"/>
+                    <p:selectOneRadio id="requiere-modificaciones"
+                                      value="#{informeTecnicoTDRBean.requiereModificaciones}"
+                                      required="#{informeTecnicoTDRBean.revisar}"
+                                      rendered="#{informeTecnicoTDRBean.revisar}">
+                        <f:selectItem itemLabel="Si"
+                                      itemValue="true"/>
+                        <f:selectItem itemLabel="No"
+                                      itemValue="false"/>
+                    </p:selectOneRadio>
+
+
+                    <p:outputLabel for="pronunciamiento" value="Tipo de pronunciamiento"/>
+                    <p:selectOneRadio id="pronunciamiento" value="#{informeTecnicoTDRBean.pronunciamiento}"
+                                      required="true" disabled="#{informeTecnicoTDRBean.revisar}">
+                        <f:selectItem itemLabel="Pronunciamiento Aprobación"
+                                      itemValue="true"/>
+                        <f:selectItem itemLabel="Pronunciamiento Observación"
+                                      itemValue="false"/>
+                    </p:selectOneRadio>
+
+                </h:panelGrid>
+                <br/>
+                <h:panelGrid styleClass="w100" rendered="#{!informeTecnicoTDRBean.revisar}">
+                    <p:fieldset legend="2. ANTECEDENTES" toggleable="true" rendered="#{informeTecnicoTDRBean.intersecta}"
+                                toggleSpeed="500" collapsed="true">
+                        <p:panelGrid columns="2" layout="grid" styleClass="w100" id="antecedentesGrid"
+                                     columnClasses="w50, field_mrg w50">
+
+                            <p:outputLabel for="numeroOficioSolicitud"
+                                           value="Número de solicitud del oficio al Ministerio de Justicia Derechos Humanos y Cultos"/>
+                            <p:outputLabel for="fechaOficioSolicitud"
+                                           value="Fecha del oficio al Ministerio de Justicia Derechos Humanos y Cultos"/>
+
+                            <p:inputText id="numeroOficioSolicitud"
+                                         value="#{informeTecnicoTDRBean.informeTecnicoTDRLA.numeroOficioSolicitud}"><p:ajax/></p:inputText>
+                            <p:calendar id="fechaOficioSolicitud"
+                                        value="#{informeTecnicoTDRBean.informeTecnicoTDRLA.fechaOficioSolicitud}"
+                                        maxdate="#{informeTecnicoTDRBean.obtenerFechaAcual()}"> <p:ajax event="dateSelect" listener="#{informeTecnicoTDRBean.actualizarFechas()}" update="antecedentesGrid"/></p:calendar>
+
+                            <p:outputLabel for="numeroOficioMJ"
+                                           value="Número del oficio al Ministerio de Justicia Derechos Humanos y Cultos"/>
+                            <p:outputLabel for="fechaOficioMJ"
+                                           value="Fecha del oficio al Ministerio de Justicia Derechos Humanos y Cultos"/>
+                            <p:inputText id="numeroOficioMJ"
+                                         value="#{informeTecnicoTDRBean.informeTecnicoTDRLA.numeroOficioMJ}"><p:ajax/></p:inputText>
+
+                            <p:calendar id="fechaOficioMJ"
+                                        value="#{informeTecnicoTDRBean.informeTecnicoTDRLA.fechaOficioMJ}"
+                                        maxdate="#{informeTecnicoTDRBean.obtenerFechaAcual()}"
+                                        mindate="#{informeTecnicoTDRBean.informeTecnicoTDRLA.fechaOficioSolicitud}"><p:ajax immediate="true" event="dateSelect"/></p:calendar>
+                        </p:panelGrid>
+                    </p:fieldset>
+                    <p:fieldset legend="3. CARACTERÍSTICAS IMPORTANTES DEL PROYECTO *" toggleable="true" id="caracteristicasIP"
+                                toggleSpeed="500" collapsed="true">
+                        <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                     columnClasses="w50, field_mrg w50">
+                            <control:imputConTextoEnriquecido requiredMessage="El campo '3. CARACTERÍSTICAS IMPORTANTES DEL PROYECTO' es requerido."
+                                    valor="#{informeTecnicoTDRBean.informeTecnicoTDRLA.caracteristicasImportantes}"
+                                    soloLectura="#{informeTecnicoTDRBean.soloLectura}"
+                                    requerido="false"/>
+                        </p:panelGrid>
+                    </p:fieldset>
+                    <p:fieldset legend="4. COMENTARIOS U OBSERVACIONES *" toggleable="true" id="comentariosObservaciones"
+                                toggleSpeed="500" collapsed="true">
+                        <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                     columnClasses="w50, field_mrg w50">
+                            <control:imputConTextoEnriquecido requiredMessage="El campo '4. COMENTARIOS U OBSERVACIONES' es requerido."
+                                    valor="#{informeTecnicoTDRBean.informeTecnicoTDRLA.comentarioObservaciones}"
+                                    soloLectura="#{informeTecnicoTDRBean.soloLectura}"
+                                    requerido="false"/>
+                        </p:panelGrid>
+                    </p:fieldset>
+                    <p:fieldset legend="5. CONCLUSIONES Y RECOMENDACIONES *" id="conclisionesRecomen"
+                                toggleable="true" toggleSpeed="500" collapsed="true">
+                        <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                     columnClasses="w50, field_mrg w50">
+                            <control:imputConTextoEnriquecido  requiredMessage="El campo '5. CONCLUSIONES Y RECOMENDACIONES' es requerido."
+                                    valor="#{informeTecnicoTDRBean.informeTecnicoTDRLA.conclusionesRecomendaciones}"
+                                    soloLectura="#{informeTecnicoTDRBean.soloLectura}"
+                                    requerido="false"/>
+                        </p:panelGrid>
+                    </p:fieldset>
+
+                    <h:panelGroup id="pnl1" rendered="false">
+                        <observaciones:tablaObservaciones soloLectura="true" aparace="true" mostrarSiVacio="true"
+                                                          idComponent="sololectura"
+                                                          idClase="#{informeTecnicoTDRBean.proyectosBean.proyecto.id}"
+                                                          nombreClase="PronunciamientoTDR"
+                                                          seccion="*"
+                                                          rol="sjsj"
+                                                          componenteActualizarEliminar="pnl1"/>
+
+
+                    </h:panelGroup>
+
+                </h:panelGrid>
+            </p:panelGrid>
+            <h:panelGroup id="pnl2"
+                          rendered="#{informeTecnicoTDRBean.revisar or !informeTecnicoTDRBean.observacionesController.getObservacionesBB().getMapaSecciones().get('informe').isEmpty()}"><p:fragment>
+                <h2 class="bold"> Observaciones del pronunciamiento.</h2>
+
+                <observaciones:tablaObservaciones aparace="true"
+                                                  soloLectura="#{!informeTecnicoTDRBean.revisar}"
+                                                  mostrarSiVacio="#{informeTecnicoTDRBean.revisar}"
+                                                  idClase="#{informeTecnicoTDRBean.proyectosBean.proyecto.id}"
+                                                  nombreClase="informeTecnicoTDRLA"
+                                                  seccion="informe"
+                                                  rol="sjsj"
+                                                  componenteActualizarEliminar="pnl2"/>
+
+            </p:fragment>
+            </h:panelGroup>
+
+            <div class="buttons main">
+                <p:commandButton value="Guardar" update="pronunciamiento-wrapper"
+                                 action="#{informeTecnicoTDRBean.guardar()}"
+                                 styleClass="ui-confirmdialog-yes secondary" icon="ui-icon-disk"/>
+                <p:commandButton value="Siguiente" update="pronunciamiento-wrapper"
+                                 action="#{informeTecnicoTDRBean.guardarContinuar()}"
+                                 styleClass="primary" icon="ui-icon-arrowthick-1-e"/>
+
+
+            </div>
+
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>

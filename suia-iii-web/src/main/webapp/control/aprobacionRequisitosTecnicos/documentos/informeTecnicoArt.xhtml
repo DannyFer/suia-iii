@@ -1,0 +1,204 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" template="/WEB-INF/templates/default-task.xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones" xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+	<ui:define name="content">
+		<f:event type="preRenderView" listener="#{informeTecnicoArtBean.validarTareaBpm()}" />
+
+		<h:form>
+			<h:panelGrid columns="2" columnClasses="null, field_mrg">
+				<p:outputLabel for="pronunciamiento" value="¿Los requisitos, en base a normativa 026 y sus anexos c y b, cumplen con las normas técnicas y legales?" styleClass="bold" />
+				<p:selectOneRadio id="pronunciamiento" value="#{informeTecnicoArtBean.pronunciamiento}" required="true">
+					<f:selectItem itemLabel="Si" itemValue="true" />
+					<f:selectItem itemLabel="No" itemValue="false" />
+				</p:selectOneRadio>
+			</h:panelGrid>
+
+			<p:separator />
+			<br />
+
+			<object id="pdf_informe" type="application/pdf" data="#{informeTecnicoArtBean.informePath}?pfdrid_c=true" width="100%" height="500px">
+				Su navegador no soporta la visualización de pdf. Puede descargar el documento presionando el siguiente botón:
+				<p:commandButton value="Descargar" styleClass="primary" ajax="false" icon="ui-icon-arrowthick-1-s" action="#" />
+			</object>
+
+			<br />
+			<br />
+
+			<p:fieldset legend="1. FASE" toggleable="true" toggleSpeed="500" collapsed="true">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<p:outputLabel value="Fase" styleClass="bold" />
+					<p:inputTextarea value="#{informeTecnicoArtBean.informeTecnicoArt.fase}" maxlength="1000" rows="4" styleClass="w100" addLine="false" autoResize="false" />
+				</p:panelGrid>
+			</p:fieldset>
+
+			<br />
+
+			<p:fieldset legend="2. DATOS GENERALES" toggleable="true" toggleSpeed="500" collapsed="true">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<p:outputLabel value="Alcance" styleClass="bold" />
+					<p:inputTextarea value="#{informeTecnicoArtBean.informeTecnicoArt.alcance}" maxlength="1000" rows="4" styleClass="w100" addLine="false" autoResize="false" />
+				</p:panelGrid>
+			</p:fieldset>
+
+			<br />
+
+			<p:fieldset legend="3. ANTECEDENTES *" toggleable="true" toggleSpeed="500" collapsed="true">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<p:outputLabel value="Normativa *" styleClass="bold" />
+					<p:inputTextarea value="#{informeTecnicoArtBean.informeTecnicoArt.normaVigente}" maxlength="1000" rows="4" styleClass="w100" addLine="false" autoResize="false" />
+				</p:panelGrid>
+				<br />
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w50, field_mrg w50">
+					<p:outputLabel value="Antecedentes" styleClass="bold" />
+					<p:inputTextarea id="antecedentes" value="#{informeTecnicoArtBean.informeTecnicoArt.antecedentes}" maxlength="1000" rows="4" styleClass="w100" addLine="false" autoResize="false" />
+				</p:panelGrid>
+			</p:fieldset>
+
+			<br />
+
+			<p:fieldset legend="4. OBJETIVOS" toggleable="true" toggleSpeed="500" collapsed="true">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<control:imputConTextoEnriquecido id="objetivos" soloLectura="false" requerido="false" valor="#{informeTecnicoArtBean.informeTecnicoArt.objetivos}" />
+				</p:panelGrid>
+			</p:fieldset>
+
+			<br />
+
+			<p:fieldset legend="5. ANALISIS TÉCNICO" toggleable="true" toggleSpeed="500" collapsed="true">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<control:imputConTextoEnriquecido id="analisisTecnico" soloLectura="false" requerido="false" valor="#{informeTecnicoArtBean.informeTecnicoArt.analisisTecnico}" />
+				</p:panelGrid>
+			</p:fieldset>
+
+			<br />
+
+			<p:fieldset legend="6. CONCLUSIONES Y RECOMENDACIONES *" toggleable="true" toggleSpeed="500" collapsed="true">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<p:outputLabel value="Conclusiones principales *" styleClass="bold" />
+					<p:inputTextarea value="#{informeTecnicoArtBean.informeTecnicoArt.conclusiones}" maxlength="1000" rows="4" styleClass="w100" addLine="false" autoResize="false" />
+				</p:panelGrid>
+				<br />
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<p:outputLabel value="Conclusiones adicionales" styleClass="bold" />
+					<control:imputConTextoEnriquecido valor="#{informeTecnicoArtBean.informeTecnicoArt.conclusionesAdicional}" longitudmáxima="1000" soloLectura="false" requerido="false" />
+				</p:panelGrid>
+				<br />
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<p:outputLabel value="Recomendaciones" styleClass="bold" />
+					<control:imputConTextoEnriquecido valor="#{informeTecnicoArtBean.informeTecnicoArt.recomendaciones }" longitudmáxima="1000" soloLectura="false" requerido="false" />
+				</p:panelGrid>
+			</p:fieldset>
+
+			<h:panelGroup id="pnl2" rendered="#{informeTecnicoArtBean.revisar or !informeTecnicoArtBean.observacionesController.getObservacionesBB().getMapaSecciones().get('informeAprobacionRequisitos').isEmpty()}">
+				<p:fragment>					
+					<observaciones:tablaObservaciones idComponent="tit" aparace="true" soloLectura="#{!informeTecnicoArtBean.revisar}" mostrarSiVacio="#{informeTecnicoArtBean.revisar}" idClase="#{informeTecnicoArtBean.informeTecnicoArt.id}" nombreClase="InformeTecnicoAproReqTec" seccion="informeAprobacionRequisitos" rol="sjsj" componenteActualizarEliminar="pnl2" />
+				</p:fragment>
+			</h:panelGroup>
+
+			<div class="buttons main">
+				 
+				<p:commandButton value="Guardar" update="@form" action="#{informeTecnicoArtBean.guardar()}" icon="ui-icon-disk"/>
+				 
+				<p:commandButton value="Siguiente" icon="ui-icon-arrowthick-1-e" onclick="PF('signDialog').show();" disabled="#{!informeTecnicoArtBean.guardado}"/>
+				<p:commandButton value="Cancelar" immediate="true" action="/bandeja/bandejaTareas.jsf?faces-redirect=true" icon="ui-icon-cancel" styleClass="secondary">
+					<p:confirm message="#{msg['message.confirmacion.cancelacion.tarea']}" header="#{msg['header.confirmacion.cancelacion.tarea']}" />
+				</p:commandButton>
+			</div>
+		</h:form>
+		
+		<h:form id="formDialogs">
+
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600px" height="auto">
+				<p:panel>
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel value="Firmar informe Técnico"
+							styleClass="bold" />
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold"
+							rendered="#{!informeTecnicoArtBean.ambienteProduccion}" />
+						<p:selectOneRadio id="verificaToken"
+							value="#{informeTecnicoArtBean.token}"
+							rendered="#{!informeTecnicoArtBean.ambienteProduccion}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change" update=":formDialogs:pnlFirmaManual :formDialogs:pnlFirmaToken" 
+								listener="#{informeTecnicoArtBean.firmarOficio}" />
+						</p:selectOneRadio>
+
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{informeTecnicoArtBean.ambienteProduccion}" />
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{informeTecnicoArtBean.ambienteProduccion}" />
+
+						<h:panelGroup id="pnlFirmaToken">
+							<p:commandButton value="Firmar documento" type="button" 
+								styleClass="primary" icon="ui-icon-key"
+								rendered="#{informeTecnicoArtBean.token}"
+								onclick="window.location.href='#{informeTecnicoArtBean.firmarOficio()}'"  />
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!informeTecnicoArtBean.token}">
+							<p:outputLabel value="1. Descargar el Informe" styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload
+									value="#{informeTecnicoArtBean.descargarInformacion()}" />
+							</p:commandButton>
+							<p:outputLabel for="uploadRequired"
+								value="2. Adjuntar el Informe Técnico firmado"
+								styleClass="bold" />
+							<p:fileUpload
+								id="Idfirmada"
+								fileUploadListener="#{informeTecnicoArtBean.cargarArchivo}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreDocFirmado"
+								rendered="#{!informeTecnicoArtBean.token}">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreDocFirmado"
+								value="#{informeTecnicoArtBean.nombreDocumentoFirmado}" />
+						</h:panelGrid>
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!informeTecnicoArtBean.token and !informeTecnicoArtBean.informacionSubida}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialog').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						action="#{informeTecnicoArtBean.continuar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+
+			<p:separator />
+
+		</h:form>
+
+	</ui:define>
+</ui:composition>

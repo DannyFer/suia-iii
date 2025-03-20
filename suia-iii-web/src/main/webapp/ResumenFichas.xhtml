@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:controles-prime="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<h:head>
+	<h:outputStylesheet name="suia-layout.css" library="css" />
+	<h:outputStylesheet name="suia-styles.css" library="css" />
+	<h:outputStylesheet name="suia-pf-custom.css" library="css" />
+	<h:outputScript name="util.js" library="js" />
+	<link rel="shortcut icon"
+		href="#{request.contextPath}/resources/images/favicon.ico" />
+	<title>#{labels['label.siglas.institucion']}</title>
+</h:head>
+
+<style>
+.col1 {
+	width: 30%;
+}
+
+.col2 {
+	width: 70%;
+}
+
+.colAlign {
+	vertical-align: top;
+	width: 30%;
+}
+
+.wizard-steps li.suspend:before, .wizard-steps li.suspend .step {
+	border-color: #f28787;
+}
+
+.ui-widget-content a{
+color: #116fbf;
+}
+</style>
+
+<h:body>
+	<div>
+		<div class="header-left-part"></div>
+		<div id="header" class="containerHeader">
+			<div class="header-right-part"></div>
+			<div class="clear"></div>
+			<div class="header-right-part-bar"></div>
+			<div class="clear"></div>
+		</div>
+		<div class="container bordercontainer">
+			<div id="page">
+				<div id="content">
+					<ui:include src="/WEB-INF/templates/status.xhtml" />
+					<p:growl globalOnly="true" id="msgs" />
+					<link rel="stylesheet" type="text/css"
+						href="#{request.contextPath}/resources/css/plugin/wizard.css" />
+					<h:form id="form"
+						onkeypress="if (event.keyCode == 13) { return false; }">
+						<p:panel id="parte2">
+							<f:facet name="header">
+								<h:outputText id='txtTitulo' style="font-size: large; "
+									value="CONSULTA DE PERMISOS AMBIENTALES" />
+							</f:facet>
+							<p:panelGrid columns="1" layout="grid" styleClass="w100"
+								columnClasses="w25, field_mrg w25">
+
+								<h:panelGrid columns="3" layout="grid" styleClass="w100"
+									columnClasses="w25, w10, field_mrg w50">
+									<p:outputLabel for="codigoProyecto" value="Código:"
+										styleClass="labelMain" />
+									<h:outputText value="" />
+									<p:outputLabel for="nombreProyecto" value="Nombre proyecto:"
+										styleClass="labelMain" />
+
+									<p:inputText
+										value="#{resumenFichaAmbientalPmaBean.codigoProyecto}"
+										id="codigoProyecto" maxlength="25" autocomplete="off"
+										onchange="javascript:this.value = this.value.toUpperCase();"
+										style="text-transform: uppercase" />
+									<h:outputText value="" />
+									<p:inputText
+										value="#{resumenFichaAmbientalPmaBean.nombreProyecto}"
+										id="nombreProyecto" autocomplete="off"
+										onchange="javascript:this.value = this.value.toUpperCase();"
+										style="text-transform: uppercase" />
+
+									<p:outputLabel for="cedulaProponente" value="RUC/Cédula:"
+										styleClass="labelMain" />
+									<h:outputText value="" />
+									<p:outputLabel for="nombreProponente"
+										value="Nombre proponente:" styleClass="labelMain" />
+
+									<p:inputText
+										value="#{resumenFichaAmbientalPmaBean.rucProponente}"
+										id="cedulaProponente" autocomplete="off" maxlength="13">
+										<pe:keyFilter regEx="/[\d]/" />
+									</p:inputText>
+									<h:outputText value="" />
+									<p:inputText
+										value="#{resumenFichaAmbientalPmaBean.nombreProponente}"
+										id="nombreProponente" autocomplete="off"
+										onchange="javascript:this.value = this.value.toUpperCase();"
+										style="text-transform: uppercase" />
+
+									<f:facet name="footer">
+										<h:panelGroup style="display:block; text-align:center">
+											<p:commandButton value="Limpiar" styleClass="secondary"
+												ajax="true" process="@this" update="@form"
+												onclick="location.reload();" icon="ui-icon-close"
+												style="float:right;" />
+											<p:commandButton value="Buscar" styleClass="primary"
+												action="#{resumenFichaAmbientalPmaBean.getPermisosAmbientales()}"
+												title="Buscar" icon="ui-icon-search" update=":form"
+												style="float:right;" />
+										</h:panelGroup>
+									</f:facet>
+
+
+								</h:panelGrid>
+							</p:panelGrid>
+							<br></br>
+							<br></br>
+							<p:dataTable
+								value="#{resumenFichaAmbientalPmaBean.listaPermisosAmbientales}"
+								var="proyect" sortBy="#{proyect.codigo}" sortOrder="descending"
+								rows="10" paginator="true" paginatorAlwaysVisible="false"
+								paginatorPosition="bottom"
+								currentPageReportTemplate="{currentPage} de {totalPages}">
+								<p:column headerText="Proyecto">
+									<h:outputText value="#{proyect.codigo}" />
+								</p:column>
+								<p:column headerText="Nombre Proyecto">
+									<h:outputText value="#{proyect.nombre}" />
+								</p:column>
+								<p:column headerText="Nombre Proponente">
+									<h:outputText value="#{proyect.nombreProponente}" />
+								</p:column>
+
+								<p:column headerText="Visualizaci&oacute;n"
+									style="text-align: center">
+									<p:commandButton update=":form:dlResumen" styleClass="primary"
+										action="#{resumenFichaAmbientalPmaBean.cargarResumenProyecto}"
+										oncomplete="PF('resumenDialog').show()" icon="ui-icon-search"
+										title="View">
+										<f:setPropertyActionListener value="#{proyect}"
+											target="#{resumenFichaAmbientalPmaBean.permisoAmbientalSeleccionado}" />
+									</p:commandButton>
+								</p:column>
+							</p:dataTable>
+
+							<p:dialog id="dlResumen" widgetVar="resumenDialog" modal="true"
+								width="600" showEffect="fade" hideEffect="fade"
+								resizable="false" onShow="createWizard()">
+								<f:facet name="header">Permiso ambiental</f:facet>
+								<p:outputPanel id="resumen" style="text-align:left;">
+									<h:panelGrid columns="2" styleClass="mw50 panel_data"
+										rendered="#{not empty resumenFichaAmbientalPmaBean.permisoAmbientalSeleccionado}"
+										rowClasses="null, alt"
+										columnClasses="header w25, null, alCenter w20px">
+										<h:outputText value="Código" />
+										<h:outputText
+											value="#{resumenFichaAmbientalPmaBean.permisoAmbientalSeleccionado.codigo}" />
+
+										<h:outputText value="Nombre Proyecto" />
+										<h:outputText
+											value="#{resumenFichaAmbientalPmaBean.permisoAmbientalSeleccionado.nombre}" />
+
+										<h:outputText value="Identificación del Proponente (NUI/RUC)" />
+										<h:outputText
+											value="#{resumenFichaAmbientalPmaBean.permisoAmbientalSeleccionado.cedulaProponente}" />
+
+										<h:outputText value="Nombre del Proponente - Razón social" />
+										<h:outputText
+											value="#{resumenFichaAmbientalPmaBean.permisoAmbientalSeleccionado.nombreProponente}" />
+
+										<h:outputText value="Tipo de permiso" />
+										<h:outputText
+											value="#{resumenFichaAmbientalPmaBean.tipoTramite}" />
+
+										<h:outputText value="Fecha registro"
+											rendered="#{resumenFichaAmbientalPmaBean.enTramite}" />
+										<h:outputText
+											rendered="#{resumenFichaAmbientalPmaBean.enTramite}"
+											value="#{resumenFichaAmbientalPmaBean.permisoAmbientalSeleccionado.fechaRegistro}" />
+
+										<h:outputText value="Ente responsable"
+											rendered="#{resumenFichaAmbientalPmaBean.enTramite}" />
+										<h:outputText
+											rendered="#{resumenFichaAmbientalPmaBean.enTramite}"
+											value="#{resumenFichaAmbientalPmaBean.permisoAmbientalSeleccionado.enteResponsable}" />
+
+										<h:outputText value="Estado del proyecto "
+											rendered="#{resumenFichaAmbientalPmaBean.enTramite or resumenFichaAmbientalPmaBean.archivado}" />
+										<h:outputText value="En Trámite"
+											rendered="#{resumenFichaAmbientalPmaBean.enTramite}" />
+										<h:outputText value="Archivado"
+											rendered="#{resumenFichaAmbientalPmaBean.archivado}"
+											styleClass="cssTxtArchivado" />
+
+										<h:outputText value="Fecha archivación"
+											rendered="#{resumenFichaAmbientalPmaBean.archivado}" />
+										<h:outputText
+											value="#{resumenFichaAmbientalPmaBean.permisoAmbientalSeleccionado.fechaArchivacion}"
+											rendered="#{resumenFichaAmbientalPmaBean.archivado}" />
+
+										<h:outputText value="Motivo archivación"
+											rendered="#{resumenFichaAmbientalPmaBean.archivado}" />
+										<h:outputText
+											value="#{resumenFichaAmbientalPmaBean.permisoAmbientalSeleccionado.motivoEliminar}"
+											rendered="#{resumenFichaAmbientalPmaBean.archivado}" />
+
+										<h:outputText value="Procesos Asociados"
+											rendered="#{resumenFichaAmbientalPmaBean.procesosAsociados.size() > 0}" />
+										<p:dataTable styleClass="borderless"
+											rendered="#{resumenFichaAmbientalPmaBean.procesosAsociados.size() > 0}"
+											value="#{resumenFichaAmbientalPmaBean.procesosAsociados}"
+											var="proceso">
+											<p:column style="text-align: left">
+												<h:outputText value="#{proceso}" />
+											</p:column>
+										</p:dataTable>
+										<h:outputText value="Tareas"
+											rendered="#{resumenFichaAmbientalPmaBean.estadoFlujos4Categorias.size() > 0}" />
+										<p:dataTable styleClass="borderless"
+											rendered="#{resumenFichaAmbientalPmaBean.estadoFlujos4Categorias.size() > 0}"
+											value="#{resumenFichaAmbientalPmaBean.estadoFlujos4Categorias}"
+											var="proceso">
+											<p:column style="text-align: left">
+												<h:outputText value="#{proceso}" />
+											</p:column>
+										</p:dataTable>
+
+										<h:outputText value="Documentos"
+											rendered="#{!resumenFichaAmbientalPmaBean.archivado and !resumenFichaAmbientalPmaBean.enTramite}" />
+										<p:dataTable id="tbl_Documento" styleClass="borderless"
+											rendered="#{!resumenFichaAmbientalPmaBean.archivado and !resumenFichaAmbientalPmaBean.enTramite}"
+											value="#{resumenFichaAmbientalPmaBean.documentosProyecto}"
+											var="documento"
+											emptyMessage="No se han encontrado Documentos.">
+											<p:column style="text-align: left">
+												<p:commandLink id="nombreDoc" ajax="false"
+													value="#{documento.nombre}" style="color: #0000FF"
+													action="#{resumenFichaAmbientalPmaBean.descargarDocumento}">
+													<f:setPropertyActionListener value="#{documento}"
+														target="#{resumenFichaAmbientalPmaBean.documentoDescargar}" />
+												</p:commandLink>
+											</p:column>
+										</p:dataTable>
+
+										<h:outputText value="Documento estado"
+											rendered="#{resumenFichaAmbientalPmaBean.generarDocumentoEstado}" />
+										<p:commandButton id="download"
+											rendered="#{resumenFichaAmbientalPmaBean.generarDocumentoEstado}"
+											icon="ui-icon-arrowthick-1-s" ajax="false"
+											styleClass="button-small primary" title="Descargar"
+											immediate="true">
+											<p:fileDownload
+												value="#{resumenFichaAmbientalPmaBean.getStreamDocumentoEstado()}" />
+										</p:commandButton>
+									</h:panelGrid>
+
+									<h:panelGrid columns="1" styleClass="w100"
+										rendered="#{resumenFichaAmbientalPmaBean.mostrarFlujo}">
+										<p:inputText
+											value="#{resumenFichaAmbientalPmaBean.flujosActivos}"
+											id="txtStep" type="hidden" styleClass="cssTxtStep" />
+										<p:inputText
+											value="#{resumenFichaAmbientalPmaBean.tareaActiva}"
+											id="txtTarea" type="hidden" styleClass="cssTxtTarea" />
+
+										<p:wizard showNavBar="false">
+											<p:tab id="paso1" title="Registro Proyecto" disabled="true">
+											</p:tab>
+											<p:tab id="paso2" title="Términos de Referencia" disabled="true">
+											</p:tab>
+											<p:tab id="paso3" title="Estudio de Impacto Ambiental" disabled="true">
+											</p:tab>
+											<p:tab id="paso4" title="Proceso de Participación Social" disabled="true">
+											</p:tab>
+											<p:tab id="paso5" title="Licenciamiento" disabled="true">
+											</p:tab>
+										</p:wizard>
+									</h:panelGrid>
+
+									<br />
+									<h:panelGrid columns="1" styleClass="w100">
+									<h:outputText 
+											value="Si usted tiene alguna duda en el proceso ingresar a: " />
+										<p:link target="_blank"
+											value="http://regularizacion-control.ambiente.gob.ec/suia-iii/start.jsf"
+											href="http://regularizacion-control.ambiente.gob.ec/suia-iii/start.jsf">
+										</p:link>
+									</h:panelGrid>
+								</p:outputPanel>
+							</p:dialog>
+						</p:panel>
+					</h:form>
+				</div>
+
+			</div>
+		</div>
+		<ui:insert name="footer">
+			<ui:include src="/WEB-INF/templates/footer.xhtml" />
+		</ui:insert>
+	</div>
+</h:body>
+<script type="text/javascript">
+
+		var arrowIndicator1 = ".arrow-indicator1";
+
+		function createWizard() {
+			var stepActive = $('.cssTxtStep').val();
+			if (stepActive !== undefined){
+				var wizard = $('ul.ui-wizard-step-titles');
+				$(wizard).removeClass('ui-wizard-step-titles ui-helper-clearfix ui-helper-reset');			
+				$(wizard).addClass('wizard-steps');		
+	
+				var pos = 1;
+				var stepActiveArray = JSON.parse("[" + stepActive + "]");
+				var txtArchivado = $('.cssTxtArchivado').val();
+				var claseTareaActiva = 'active';
+				if (txtArchivado !== undefined){
+					claseTareaActiva = 'suspend';
+				}
+
+				var taskActiveArray = JSON.parse("{" + $('.cssTxtTarea').val() + "}");
+				
+				$(wizard).children('li').each(function() {
+					$(this).removeClass('ui-wizard-step-title ui-state-default ui-state-highlight ui-corner-all');
+					var existpos = stepActiveArray.indexOf(pos);
+					if(existpos >= 0)
+						$(this).addClass('ui-state-highlight ' + claseTareaActiva);				
+					var title = $(this).html();
+					$(this).empty();
+					var indice = pos++;
+					var tooltip = (taskActiveArray[indice] !== undefined) ? taskActiveArray[indice] : "";
+					$(this).append('<span class="step" title="'+tooltip+'">' + (indice) + '</span>');
+					$(this).append('<span class="title" title="'+tooltip+'">' + title + '</span>');	
+				});
+			}
+		}
+		
+</script>
+</html>

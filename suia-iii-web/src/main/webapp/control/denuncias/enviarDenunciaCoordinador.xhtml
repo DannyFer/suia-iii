@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<h:form>
+			<p:panelGrid columns="2" layout="grid">
+				<h:outputLabel value="Remitir a *:" for="opcionEnte" />
+				<p:selectOneRadio id="opcionEnte"
+					value="#{remitirDenunciaController.remitirDenunciaBean.opcion}"
+					required="true"
+					requiredMessage="Debe escoger una opci&oacute;n para remitir la denuncia">
+					<f:selectItem itemLabel="Direccion Provincial" itemValue="dp" />
+					<f:selectItem itemLabel="Planta central" itemValue="pc" />
+					<f:selectItem itemLabel="Gad´s (Entes Acreditados)" itemValue="gad" />
+					<p:ajax listener="#{remitirDenunciaController.actualizarSeleccion}"
+						update="@this panelEnvio gad" />
+				</p:selectOneRadio>
+			</p:panelGrid>
+			<p:panelGrid id="panelEnvio" columns="2" layout="grid">
+				<h:outputLabel value="Direcci&oacute;n Provincial:"
+					for="comboDirecciones"
+					rendered="#{remitirDenunciaController.remitirDenunciaBean.enviarDP}" />
+				<p:selectOneMenu id="comboDirecciones"
+					value="#{remitirDenunciaController.remitirDenunciaBean.remitirDenuncia.direccionProvincial}"
+					rendered="#{remitirDenunciaController.remitirDenunciaBean.enviarDP}">
+					<f:selectItems
+						value="#{remitirDenunciaController.remitirDenunciaBean.listaDireccionesProvinciales}"
+						var="direccion" itemValue="#{direccion}"
+						itemLabel="#{direccion.nombre}" />
+					<f:converter converterId="selectItemConverter" />
+				</p:selectOneMenu>
+				<h:outputLabel value="Gad´s (Entes Acreditados):" for="comboEntes"
+					rendered="#{remitirDenunciaController.remitirDenunciaBean.enviarGads}" />
+				<p:selectOneMenu id="comboEntes"
+					value="#{remitirDenunciaController.remitirDenunciaBean.remitirDenuncia.enteAcreditado}"
+					rendered="#{remitirDenunciaController.remitirDenunciaBean.enviarGads}">
+					<f:selectItems
+						value="#{remitirDenunciaController.remitirDenunciaBean.listaEntesAcreditados}"
+						var="ente" itemValue="#{ente}" itemLabel="#{ente.nombre}" />
+					<f:converter converterId="selectItemConverter" />
+				</p:selectOneMenu>
+			</p:panelGrid>
+			<p:panelGrid id="gad" columns="2" layout="grid"
+				rendered="#{remitirDenunciaController.remitirDenunciaBean.enviarGads}">
+				<h:outputLabel value="Sector:" for="comboSector" />
+				<p:selectOneMenu id="comboSector"
+					rendered="#{remitirDenunciaController.remitirDenunciaBean.enviarGads}"
+					value="#{remitirDenunciaController.remitirDenunciaBean.remitirDenuncia.sector}">
+					<f:selectItem itemLabel="Sector 1" itemValue="sector 1" />
+					<f:selectItem itemLabel="Sector 2" itemValue="Xbox One" />
+				</p:selectOneMenu>
+
+				<h:outputLabel value="Direcci&oacute;n o Unidad:"
+					for="comboDireccionUnidad" />
+				<p:selectOneMenu id="comboDireccionUnidad"
+					value="#{remitirDenunciaController.remitirDenunciaBean.remitirDenuncia.sector}">
+					<f:selectItem itemLabel="Unidad 1" itemValue="aaaaa" />
+					<f:selectItem itemLabel="Unidad 2" itemValue="Xbox One" />
+				</p:selectOneMenu>
+			</p:panelGrid>
+			<br />
+			<br />
+			<p:commandButton value="Ver denuncia" type="button"
+				onclick="PF('dlg').show();" />
+			<p:dialog header="Denuncia" widgetVar="dlg" modal="true" height="500"
+				width="800">
+				<ui:include src="denunciaInclude.xhtml" />
+			</p:dialog>
+			<br />
+			<br />
+			<p:commandButton value="Enviar"
+				action="#{remitirDenunciaController.enviar()}" process="@all" />
+
+
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

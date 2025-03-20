@@ -1,0 +1,332 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:f="http://java.sun.com/jsf/core" xmlns:controles="http://java.sun.com/jsf/composite/controles-prime">
+<ui:composition template="/prevencion/licenciamiento-ambiental/eia/verEIA.xhtml">
+	<ui:define name="content-eia">
+		<h:form id="form">
+			<p:panel header="Análisis de alternativas" rendered="#{!analisisAlternativasBean.esMineriaNoMetalicos}">
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Actividades o infraestructuras de implantación" />
+					</f:facet>
+					<p:dataTable id="tableActividadesImplantacion" rowIndexVar="index" 
+					value="#{analisisAlternativasBean.actividadesImplantacion}" 
+					var="actividad" emptyMessage="#{labels['common.table.empty']}">
+						<p:column styleClass="w20px alCenter">
+							<h:outputText value="#{index + 1}" />
+						</p:column>
+						<p:column headerText="Actividad o infraestructura">
+							<h:outputText value="#{actividad}" />
+						</p:column>
+						<!-- MarielaG para mostrar historico-->
+						<p:column styleClass="w40px alCenter"
+							rendered="#{analisisAlternativasBean.actividadesImplantacionOriginales.size() > 0}">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{actividad.registroModificado}"
+								styleClass="button-small orange"
+								action="#{analisisAlternativasBean.mostrarActividadOriginal(actividad)}"
+								update=":formActividadesOriginales:actividadesOriginalesDlg" process="@this"
+								oncomplete="PF('actividadesOriginalesDlg').show()" />
+							<!-- registro NUEVO -->
+							<h:outputText value="Nuevo" styleClass="bold text-orange"
+								rendered="#{actividad.nuevoEnModificacion}" />
+						</p:column>
+						<!-- fin historico -->
+					</p:dataTable>
+					
+					<!-- MarielaG para mostrar historico REGISTROS ELIMINADOS-->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{!analisisAlternativasBean.actividadesEliminadasBdd.isEmpty() and 
+							analisisAlternativasBean.actividadesEliminadasBdd != null}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText  value="Actividades o infraestructuras de implantación eliminadas" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-search"
+							action="#{analisisAlternativasBean.fillActividadesEliminados()}"
+							update=":formActividadesOriginales:actividadesOriginalesDlg" 
+							oncomplete="PF('actividadesOriginalesDlg').show()" />
+					</h:panelGrid>
+					<!-- fin historico -->
+					
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Análisis de alternativas" />
+					</f:facet>
+					<p:dataTable id="tableAlternativas" value="#{analisisAlternativasBean.alternativas}" var="alternativa" emptyMessage="#{labels['common.table.empty']}">
+						<p:columnGroup type="header">
+							<p:row>
+								<p:column rowspan="2" headerText="Actividad o infraestructura" />
+								<p:column rowspan="2" headerText="Alternativa" />
+								<p:column colspan="4" headerText="Criterios comparativos" />
+								<p:column rowspan="2" headerText="" rendered="#{analisisAlternativasBean.alternativasOriginales.size() > 0}"/>
+							</p:row>
+							<p:row>
+								<p:column headerText="Técnico" />
+								<p:column headerText="Ecológico" />
+								<p:column headerText="Socioeconómico" />
+								<p:column headerText="Característica" />
+							</p:row>
+						</p:columnGroup>
+						<p:column>
+							<h:outputText value="#{alternativa.actividadImplantacion}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{alternativa}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{alternativa.tipoCriterioTecnico}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{alternativa.tipoSistemaEcologico}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{alternativa.tipoSistemaSocioeconomico}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{alternativa.caracteristica}" />
+						</p:column>
+						<!-- MarielaG para mostrar historico-->
+						<p:column styleClass="w40px alCenter"
+							rendered="#{analisisAlternativasBean.alternativasOriginales.size() > 0}">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{alternativa.registroModificado}"
+								styleClass="button-small orange"
+								action="#{analisisAlternativasBean.mostrarAlternativaOriginal(alternativa)}"
+								update=":formAlternativasOriginales:alternativasOriginalesDlg" process="@this"
+								oncomplete="PF('alternativasOriginalesDlg').show()" />
+							<!-- registro NUEVO -->
+							<h:outputText value="Nuevo" styleClass="bold text-orange"
+								rendered="#{alternativa.nuevoEnModificacion}" />
+						</p:column>
+						<!-- fin historico -->
+					</p:dataTable>
+					
+					<!-- MarielaG para mostrar historico REGISTROS ELIMINADOS-->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{!analisisAlternativasBean.alternativasEliminadasBdd.isEmpty() and 
+							analisisAlternativasBean.alternativasEliminadasBdd != null}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText  value="Alternativas eliminadas" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-search"
+							action="#{analisisAlternativasBean.fillAlternativasEliminadas()}"
+							update=":formAlternativasOriginales:alternativasOriginalesDlg" 
+							oncomplete="PF('alternativasOriginalesDlg').show()" />
+					</h:panelGrid>
+					<!-- fin historico -->
+				</p:panelGrid>
+				<br />
+				<p:separator />
+				<br />
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" id="resultadoContainer">
+					<f:facet name="header">
+						<h:outputText value="Resultado" />
+					</f:facet>
+					<p:dataTable id="tableActividadesAlternativas" rowIndexVar="index" value="#{analisisAlternativasBean.actividadesImplantacion}" var="actividad" emptyMessage="#{labels['common.table.empty']}">
+						<p:column styleClass="w20px alCenter" headerText="No." >
+							<h:outputText value="#{index + 1}" />
+						</p:column>
+						<p:column headerText="Actividad o infraestructura">
+							<h:outputText value="#{actividad}" />
+						</p:column>
+						<p:column headerText="Mejor opción">
+							<h:outputText value="#{actividad.alternativaMejorOpcion}" />
+						</p:column>
+						<!-- MarielaG para mostrar historico-->
+						<p:column styleClass="w40px alCenter"
+							rendered="#{analisisAlternativasBean.actividadesMejorOpcionOriginales.size() > 0}">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{actividad.mejorOpcionModificado and !actividad.nuevoEnModificacion}"
+								styleClass="button-small orange"
+								action="#{analisisAlternativasBean.mostrarMejorOpcionOriginal(actividad)}"
+								update=":formResultadosOriginales:resultadosOriginalesDlg" process="@this"
+								oncomplete="PF('resultadosOriginalesDlg').show()" />
+							<!-- registro NUEVO -->
+							<h:outputText value="Nuevo" styleClass="bold text-orange"
+								rendered="#{actividad.nuevoEnModificacion}" />
+						</p:column>
+						<!-- fin historico -->
+					</p:dataTable>
+				</p:panelGrid>
+			</p:panel>
+			<p:panel header="Análisis de alternativas" rendered="#{analisisAlternativasBean.esMineriaNoMetalicos}">
+				<p:panelGrid columns="1" layout="grid">
+					<f:facet name="header">
+						<h:outputText value="Ver Análisis de alternativas*" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data" columns="2" columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText id="etiqueta4" value="#{analisisAlternativasBean.documentoGeneral.getNombre()}" />
+						<p:commandButton id="download4" rendered="true" icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true">
+							<p:fileDownload value="#{analisisAlternativasController.getStreamContent()}" />
+						</p:commandButton>
+					</h:panelGrid>
+
+					<!-- MarielaG para mostrar historico DOCUMENTOS HISTORICO-->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{analisisAlternativasBean.listaDocumentoGeneralHistorico.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText value="Historial de documentos" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-search"
+							oncomplete="PF('documentosOriginalesDlg').show()" />
+					</h:panelGrid>
+					<!-- fin historico -->
+
+					<!-- MarielaG para mostrar historico DOCUMENTO-->
+					<h:panelGrid
+						rendered="#{analisisAlternativasBean.documentoGeneralOriginal.id != null}"
+						styleClass="panel_data" columns="2"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText id="historicoDocumento" value="Documento original" />
+						<p:commandButton id="downloadDocumento" rendered="true"
+							icon="ui-icon-search" ajax="false"
+							styleClass="button-small primary" title="Ver" immediate="true">
+							<p:fileDownload
+								value="#{analisisAlternativasController.getStreamContentOriginal()}" />
+						</p:commandButton>
+					</h:panelGrid>
+					<!-- fin historico -->
+				</p:panelGrid>
+			</p:panel>
+		</h:form>
+		
+		<!-- MarielaG para mostrar historico ACTIVIDADES-->
+		<h:form id="formActividadesOriginales">
+			<p:dialog
+				header="Actividades o infraestructuras de implantación historial"
+				id="actividadesOriginalesDlg" widgetVar="actividadesOriginalesDlg"
+				modal="true" resizable="false" width="600">
+				<h:panelGroup id="datosActividadesOriginales">
+					<h:panelGrid columns="1" columnClasses="w100">
+						<p:dataTable id="tableActividadesImplantacion" rowIndexVar="index"
+							value="#{analisisAlternativasBean.actividadesHistorico}"
+							var="actividad" emptyMessage="#{labels['common.table.empty']}">
+							<p:column headerText="Fecha Modificación" styleClass="w20 alCenter">
+								<h:outputText value="#{actividad.fechaCreacion}" />
+							</p:column>
+							<p:column headerText="Actividad o infraestructura">
+								<h:outputText value="#{actividad}" />
+							</p:column>
+						</p:dataTable>
+					</h:panelGrid>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+		<!-- MarielaG para mostrar historico ALTERNATIVAS-->
+		<h:form id="formAlternativasOriginales">
+			<p:dialog
+				header="Análisis de alternativas originales"
+				id="alternativasOriginalesDlg" widgetVar="alternativasOriginalesDlg"
+				modal="true" resizable="false" width="700">
+				<h:panelGroup id="datosAlternativasOriginales">
+					<h:panelGrid columns="1" columnClasses="w100">
+						<p:dataTable id="tableAlternativas"
+							value="#{analisisAlternativasBean.alternativasHistorico}"
+							var="alternativa" emptyMessage="#{labels['common.table.empty']}">
+							<p:columnGroup type="header">
+								<p:row>
+									<p:column rowspan="2" headerText="Fecha Modificación" />
+									<p:column rowspan="2" headerText="Actividad o infraestructura" />
+									<p:column rowspan="2" headerText="Alternativa" />
+									<p:column colspan="4" headerText="Criterios comparativos" />
+								</p:row>
+								<p:row>
+									<p:column headerText="Técnico" />
+									<p:column headerText="Ecológico" />
+									<p:column headerText="Socioeconómico" />
+									<p:column headerText="Característica" />
+								</p:row>
+							</p:columnGroup>
+							<p:column styleClass="w20 alCenter">
+								<h:outputText value="#{alternativa.fechaCreacion}" />
+							</p:column>
+							<p:column>
+								<h:outputText value="#{alternativa.actividadImplantacion}" />
+							</p:column>
+							<p:column>
+								<h:outputText value="#{alternativa}" />
+							</p:column>
+							<p:column>
+								<h:outputText value="#{alternativa.tipoCriterioTecnico}" />
+							</p:column>
+							<p:column>
+								<h:outputText value="#{alternativa.tipoSistemaEcologico}" />
+							</p:column>
+							<p:column>
+								<h:outputText value="#{alternativa.tipoSistemaSocioeconomico}" />
+							</p:column>
+							<p:column>
+								<h:outputText value="#{alternativa.caracteristica}" />
+							</p:column>
+						</p:dataTable>
+					</h:panelGrid>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+		<!-- MarielaG para mostrar historico RESULTADOS-->
+		<h:form id="formResultadosOriginales">
+			<p:dialog
+				header="Resultados originales"
+				id="resultadosOriginalesDlg" widgetVar="resultadosOriginalesDlg"
+				modal="true" resizable="false" width="600">
+				<h:panelGroup id="datosAlternativasOriginales">
+					<h:panelGrid columns="1" columnClasses="w100">
+						<p:dataTable id="tableActividadesAlternativas" rowIndexVar="index"
+							value="#{analisisAlternativasBean.alternativasHistorico}"
+							var="actividadOrginal" emptyMessage="#{labels['common.table.empty']}">
+							<p:column styleClass="w20px alCenter" headerText="No.">
+								<h:outputText value="#{index + 1}" />
+							</p:column>
+							<p:column headerText="Mejor opción">
+								<h:outputText value="#{actividadOrginal}" />
+							</p:column>
+						</p:dataTable>
+					</h:panelGrid>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+		<!-- MarielaG para mostrar historico DOCUMENTOS-->
+		<h:form id="formDocumentosOriginal">
+			<p:dialog header="Historial de documentos"
+				id="documentosOriginalesDlg" widgetVar="documentosOriginalesDlg"
+				modal="true" resizable="false" width="600">
+				<h:panelGroup id="datosDocumentosOriginal">
+					<p:dataTable value="#{analisisAlternativasBean.listaDocumentoGeneralHistorico}"
+						var="doc" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText
+								value="#{doc.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Documento">
+							<h:outputText value="#{doc.nombre}" />
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton id="download_historico" rendered="true"
+								icon="ui-icon-search" ajax="false"
+								styleClass="button-small background-orange" title="Ver"
+								immediate="true">
+								<p:fileDownload
+									value="#{analisisAlternativasController.getStreamContentOriginal(doc)}" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+	</ui:define>
+</ui:composition>
+</html>

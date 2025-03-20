@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:t="http://myfaces.apache.org/tomahawk"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+    <ui:define name="context-extra">
+		<h:outputText value="Datos" />
+		<h:outputText value="Estudio de Impacto Ambiental" />		
+		<p:commandButton action="#{elaborarInformeTecnicoIndividualController.abrirEstudio()}" icon="ui-icon-search" styleClass="primary button-small" 
+								 />	
+	</ui:define>
+	
+	<style type="text/css">
+.cssRadioDisabled .ui-radiobutton .ui-state-active {
+	background: #008a8a !important;
+}
+</style>
+    <ui:define name="content">   
+   
+    <f:event type="preRenderView" listener="#{elaborarInformeTecnicoIndividualController.validarTareaBpm()}" />
+   
+        <h:form id="form">
+        	<h:panelGrid styleClass="w100" id="informeGrid">        	
+        	
+        		<h:outputText value="Informe Técnico" styleClass="bold" />        		
+						
+				<p:separator />
+				<object type="application/pdf"
+					data="#{informeTecnicoEsIABean.urlReporte}?pfdrid_c=true"
+					width="100%" height="500px" >
+					Su navegador no soporta la visualización de pdf. Puede descargar el
+					documento presionando el siguiente botón:
+					<p:commandButton value="Descargar" styleClass="primary"
+						ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+						<p:fileDownload
+							value="#{informeTecnicoEsIABean.getStream(informeTecnicoEsIABean.nombreReporte, informeTecnicoEsIABean.archivoReporte)}" />
+					</p:commandButton>
+				</object>
+				
+				<br />
+				<br />
+				
+				<p:panel id="panelInforme">
+            	
+					<h:panelGrid columns="1" layout="grid" styleClass="w100" >
+                		<p:outputLabel value="Tipo de pronunciamiento" styleClass="bold"/>
+                		<p:selectOneRadio id="tipoPronunciamiento" value="#{elaborarInformeTecnicoIndividualController.esReporteAprobacion}" 
+							required="true" requiredMessage="Tipo de pronunciamiento es requerido." styleClass="w50 cssRadioDisabled" disabled="true">						
+							<f:selectItem itemLabel="Pronunciamiento Aprobación" itemValue="#{true}"/>
+							<f:selectItem itemLabel="Pronunciamiento Observación" itemValue="#{false}"/>
+							<p:ajax update="pnlFacilitadores lblFacilitadores numFacilitadores pnlActualizarCi"/>												
+						</p:selectOneRadio>
+
+						<h:panelGroup id="pnlActualizarCi">
+							<h:panelGrid styleClass="w100" columns="1"
+								rendered="#{!elaborarInformeTecnicoIndividualController.esReporteAprobacion and elaborarInformeTecnicoIndividualController.informeTecnicoEsIABean.tipoInforme eq 5}">
+								<p:outputLabel
+									value="¿Requiere actualización del Certificado de Intersección?"
+									styleClass="bold" />
+								<p:selectOneRadio
+									value="#{elaborarInformeTecnicoIndividualController.informeTecnicoEsIABean.proyecto.estadoActualizacionCertInterseccion}"
+									required="true"
+									requiredMessage="¿Requiere actualización del Certificado de Intersección? es requerido.">
+									<f:selectItem itemLabel="SI" itemValue="1" />
+									<f:selectItem itemLabel="NO" itemValue="0" />
+								</p:selectOneRadio>
+							</h:panelGrid>
+						</h:panelGroup>
+						
+						<h:panelGrid styleClass="w100" id="pnlFacilitadores" columns="3" columnClasses="w20 null, w10 null, w70 null">
+
+							<p:outputLabel id="lblFacilitadores" value="Número de Facilitadores" styleClass="bold"
+								rendered="#{elaborarInformeTecnicoIndividualController.esSocial and elaborarInformeTecnicoIndividualController.esReporteAprobacion}" 
+								style="text-align: right;"/>
+							<pe:inputNumber required="true" id="numFacilitadores"
+								requiredMessage="Número de Facilitadores es requerido"
+								validatorMessage="Número de Facilitadores no puede ser cero"
+								maxValue="9999" minValue="1"
+								value="#{elaborarInformeTecnicoIndividualController.informacionEstudio.numeroFacilitadores}"
+								decimalPlaces="0" style="width:30px"
+								rendered="#{elaborarInformeTecnicoIndividualController.esSocial and elaborarInformeTecnicoIndividualController.esReporteAprobacion}">
+								<p:ajax process="@this" />
+							</pe:inputNumber>
+
+							<h:outputText value="" />
+						</h:panelGrid>
+						
+ 					<p:fieldset widgetVar="fdsAntecedentes" legend="ANTECEDENTES" toggleable="true" toggleSpeed="500" collapsed="true">														
+							<control:imputConTextoEnriquecido id="antecedentes"
+								requiredMessage="Antecedentes es requerido"
+								valor="#{informeTecnicoEsIABean.informeTecnico.antecedentes}"
+								requerido="false" soloLectura="false"/>						
+					</p:fieldset>
+					
+					<p:fieldset legend="OBJETIVOS" toggleable="true" toggleSpeed="500" collapsed="true">
+							<control:imputConTextoEnriquecido id="objetivos"
+								requiredMessage="Objetivos es requerido"
+								valor="#{informeTecnicoEsIABean.informeTecnico.objetivos}"
+								requerido="false"/>						
+					</p:fieldset>
+					
+					<p:fieldset legend="CARACTERÍSTICAS IMPORTANTES" toggleable="true" toggleSpeed="500" collapsed="true">
+							<control:imputConTextoEnriquecido id="caracteristicas"
+								requiredMessage="Características Importantes es requerido"
+								valor="#{informeTecnicoEsIABean.informeTecnico.caracteristicas}" 
+								requerido="false"/>						
+					</p:fieldset>
+					
+					<p:fieldset legend="EVALUACIÓN TÉCNICA" toggleable="true" toggleSpeed="500" collapsed="true">							
+						<control:imputConTextoEnriquecido id="evaluacion"
+								requiredMessage="Evaluación Técnica es requerida"
+								valor="#{informeTecnicoEsIABean.informeTecnico.evaluacionTecnica}"
+								requerido="false" />							
+					</p:fieldset>
+						
+					<p:fieldset legend="OBSERVACIONES" toggleable="true" toggleSpeed="500" collapsed="true">
+						<control:imputConTextoEnriquecido id="observacion"
+								requiredMessage="Observaciones es requerido"
+								valor="#{informeTecnicoEsIABean.informeTecnico.observaciones}"
+								requerido="false" 
+								soloLectura="true"/>						
+					</p:fieldset>	
+					
+					<p:fieldset legend="CONCLUSIONES Y RECOMENDACIONES" toggleable="true" toggleSpeed="500" collapsed="true">						
+						<control:imputConTextoEnriquecido id="conclusion"
+								requiredMessage="Conclusiones y Recomendaciones es requerido"
+								valor="#{informeTecnicoEsIABean.informeTecnico.conclusionesRecomendaciones}"
+								requerido="false" />							
+					</p:fieldset>						
+
+                    </h:panelGrid>                                    
+					
+            	</p:panel>  
+            	         	
+        	</h:panelGrid>
+        	
+        	
+        	<div class="buttons main">
+				<p:commandButton value="Guardar" update="@form"
+					actionListener="#{elaborarInformeTecnicoIndividualController.guardarInforme()}"
+					icon="ui-icon-disk"
+					process="@this @form" disabled="#{!elaborarInformeTecnicoIndividualController.habilitarGuardar()}"/>
+				<p:commandButton value="Firmar documento" styleClass="large buttonLarge"
+					icon="ui-icon-key"
+					disabled="#{!elaborarInformeTecnicoIndividualController.habilitarFirma}"
+					update=":formDialogFirma:pnlFirmaManual :formDialogFirma:pnlFirmaToken"
+					actionListener="#{elaborarInformeTecnicoIndividualController.guardarDocumentos()}" />
+			</div>       	
+        	
+        	
+    	</h:form>    	
+    	
+    	<h:form id="formDialogFirma">
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600" height="auto" position="center top">
+
+				<p:panel>
+
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel
+							value="Informe técnico  Nro: #{informeTecnicoEsIABean.informeTecnico.codigoInforme}"
+							styleClass="bold" />						
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<h:outputText value="¿Cuenta con token?" styleClass="encabezado" rendered="#{!elaborarInformeTecnicoIndividualController.firmaSoloToken}"/>
+						<p:selectOneRadio id="verificaToken"
+							value="#{elaborarInformeTecnicoIndividualController.token}" rendered="#{!elaborarInformeTecnicoIndividualController.firmaSoloToken}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change" update="pnlFirmaManual pnlFirmaToken"
+								listener="#{elaborarInformeTecnicoIndividualController.guardarToken}" />
+						</p:selectOneRadio>
+						<h:panelGroup id="pnlFirmaToken">
+							<p:commandButton value="Firmar documento" type="button"
+								styleClass="primary buttonLarge" icon="ui-icon-key"
+								rendered="#{elaborarInformeTecnicoIndividualController.token}"
+								onclick="window.location.href='#{elaborarInformeTecnicoIndividualController.urlAlfresco}'" />
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!elaborarInformeTecnicoIndividualController.token}">
+							<h:outputLabel value="1. Descargue el Informe Técnico"
+								styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload value="#{elaborarInformeTecnicoIndividualController.descargar()}" />
+							</p:commandButton>
+
+							<p:outputLabel for="uploadRequired" value="2. Adjunte el Informe Técnico firmado"
+								styleClass="bold" />
+							<p:fileUpload
+								fileUploadListener="#{elaborarInformeTecnicoIndividualController.uploadListenerDocumentos}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblInformeFirmado"
+								rendered="#{!elaborarInformeTecnicoIndividualController.token}">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+							<p:outputLabel value="" />
+							<h:outputText id="lblInformeFirmado"
+								value="#{elaborarInformeTecnicoIndividualController.documentoManual.nombre}" />
+						</h:panelGrid>
+
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!elaborarInformeTecnicoIndividualController.token and !elaborarInformeTecnicoIndividualController.subido}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialog').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						action="#{elaborarInformeTecnicoIndividualController.finalizar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+		</h:form>
+		
+    </ui:define>
+</ui:composition>

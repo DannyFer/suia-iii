@@ -1,0 +1,1560 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<style type="text/css">
+.ui-spinner-button {
+	margin-right: -22px;
+	background: #008A8A !important;
+}
+
+.spinner .ui-state-default .ui-icon {
+	background-image:
+		url("/suia-iii/javax.faces.resource/images/ui-icons_222222_256x240.png.jsf?ln=primefaces-suia")
+		!important;
+}
+</style>
+
+
+<h:form id="formDialog">
+	<p:dialog header="Identificación de unidades hidrográficas"
+		id="dlgIdentificacionUniHidrograficas"
+		widgetVar="dlgIdentificacionUniHidrograficas" modal="true"
+		resizable="false" width="600" closable="false">
+
+		<p:panelGrid id="pnlIdentificacionUniHidrograficas" columns="2"
+			styleClass="panel_data w100"
+			columnClasses="header w25, w25, header w25, w25">
+			<p:outputLabel value="Nombre de la Unidad hidrográfica"
+				style="color: white" for="nombreUnidad" />
+			<p:inputText id="nombreUnidad" maxlength="1000"
+				value="#{ingresarInformacionViabilidadPfnController.unidadHidrografica.nombre}"
+				required="true" autocomplete="false">
+				<p:ajax process="@this" />
+			</p:inputText>
+
+			<p:outputLabel value="Coordenada X" style="color: white"
+				for="coordenadaX" />
+			<pe:inputNumber id="coordenadaX"
+				value="#{ingresarInformacionViabilidadPfnController.unidadHidrografica.coordenadaX}"
+				thousandSeparator="" maxValue="9999999999.99" required="true"
+				requiredMessage="Coordenada X es requerido" autocomplete="off">
+				<p:ajax process="@this" />
+			</pe:inputNumber>
+
+			<p:outputLabel value="Coordenada Y" style="color: white"
+				for="coordenadaY" />
+			<pe:inputNumber id="coordenadaY"
+				value="#{ingresarInformacionViabilidadPfnController.unidadHidrografica.coordenadaY}"
+				thousandSeparator="" maxValue="9999999999.99" required="true"
+				requiredMessage="Coordenada Y es requerido" autocomplete="off">
+				<p:ajax process="@this" />
+			</pe:inputNumber>
+
+			<p:outputLabel value="Elevación (m.s.n.m.)" style="color: white"
+				for="elevacion" />
+			<h:panelGrid columns="2">
+				<pe:inputNumber id="elevacion"
+					value="#{ingresarInformacionViabilidadPfnController.unidadHidrografica.elevacion}"
+					maxValue="9999999" required="true"
+					requiredMessage="Elevacion (m.s.n.m.) es requerido"
+					autocomplete="off" decimalPlaces="0"
+					onkeypress="return numbersonly(this, event);">
+				</pe:inputNumber>
+				<p:outputLabel value="m" />
+			</h:panelGrid>
+		</p:panelGrid>
+		<h:inputHidden
+			validator="#{ingresarInformacionViabilidadPfnController.validateUnidadHidrografica}" />
+		<br />
+		<p:outputPanel>
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+					styleClass="wizard-custom-btn-back" immediate="true"
+					oncomplete="PF('dlgIdentificacionUniHidrograficas').hide();"
+					actionListener="#{ingresarInformacionViabilidadPfnController.limpiarUnidadHidrografica}"
+					update="dlgIdentificacionUniHidrograficas">
+					<p:resetInput target="dlgIdentificacionUniHidrograficas" />
+				</p:commandButton>
+				<p:commandButton value="Aceptar"
+					actionListener="#{ingresarInformacionViabilidadPfnController.aceptarUnidadHidrografica}"
+					update=":form:dtInterUHidrograficas"
+					process="dlgIdentificacionUniHidrograficas"
+					oncomplete="if(!args.validationFailed) PF('dlgIdentificacionUniHidrograficas').hide()" />
+			</div>
+		</p:outputPanel>
+	</p:dialog>
+
+	<p:dialog header="Equipo consultor" id="dlgEquipoConsultor"
+		widgetVar="dlgEquipoConsultor" modal="true" resizable="false"
+		width="600" closable="false">
+
+		<p:panelGrid id="pnlEquipoCon" columns="2"
+			styleClass="panel_data w100"
+			columnClasses="header w25, w25, header w25, w25">
+			<p:outputLabel value="Cédula" style="color: white" for="idCedula" />
+			<p:inputText id="idCedula" autocomplete="false"
+				value="#{ingresarInformacionViabilidadPfnController.equipoConsultor.consultor.cedula}"
+				required="true" maxlength="50">
+				<p:ajax event="blur"
+					listener="#{ingresarInformacionViabilidadPfnController.validarEquipoConsultor()}"
+					update="pnlEquipoCon" />
+			</p:inputText>
+
+			<p:outputLabel value="Nombres y Apellidos" style="color: white"
+				for="idNombres" />
+			<p:inputText id="idNombres"
+				value="#{ingresarInformacionViabilidadPfnController.equipoConsultor.consultor.nombres}"
+				required="true" disabled="true" />
+
+			<p:outputLabel value="Título académico" style="color: white"
+				for="idTituloA" />
+			<p:inputText id="idTituloA"
+				value="#{ingresarInformacionViabilidadPfnController.equipoConsultor.consultor.tituloAcademico}"
+				required="true" disabled="true" />
+
+			<p:outputLabel value="Registro de título SENESCYT"
+				style="color: white" for="idRegistroTitulo" />
+			<p:inputText id="idRegistroTitulo"
+				value="#{ingresarInformacionViabilidadPfnController.equipoConsultor.consultor.registroSenecyt}"
+				required="true" disabled="true" />
+
+			<p:outputLabel value="Correo electrónico" style="color: white"
+				for="idCorreoConsultor" />
+			<p:inputText id="idCorreoConsultor" autocomplete="false"
+				value="#{ingresarInformacionViabilidadPfnController.equipoConsultor.correo}"
+				required="true" maxlength="200">
+				<t:validateEmail />
+			</p:inputText>
+
+			<p:outputLabel value="Teléfono" style="color: white"
+				for="idTelefonoConsultor" />
+			<p:inputText id="idTelefonoConsultor" autocomplete="false"
+				value="#{ingresarInformacionViabilidadPfnController.equipoConsultor.telefono}"
+				required="true" maxlength="200" />
+
+		</p:panelGrid>
+
+		<br />
+		<p:outputPanel>
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+					styleClass="wizard-custom-btn-back" immediate="true"
+					oncomplete="PF('dlgEquipoConsultor').hide();" />
+				<p:commandButton value="Aceptar"
+					actionListener="#{ingresarInformacionViabilidadPfnController.aceptarEquipoConsultor()}"
+					oncomplete="if(!args.validationFailed) PF('dlgEquipoConsultor').hide()"
+					process="dlgEquipoConsultor"
+					update=":form:dtEquipoConsultor :form:pnlEquipoConsultor" />
+			</div>
+		</p:outputPanel>
+	</p:dialog>
+
+	<p:dialog header="Datos fotografía" id="dlgfotoArchivo"
+		widgetVar="dlgfotoArchivo" modal="true" resizable="false" width="600"
+		closable="false">
+
+		<p:panelGrid columns="2" styleClass="panel_data w100"
+			columnClasses="header w25, w25, header w25, w25">
+			<p:outputLabel value="Fotografía:" style="color: white"
+				for="uploadRequiredFotoArchivo" />
+			<h:panelGroup>
+				<p:fileUpload
+					fileUploadListener="#{ingresarInformacionViabilidadPfnController.uploadListenerFotografia}"
+					required="true" requiredMessage="Debe ingresar el adjunto"
+					multiple="false" sizeLimit="20971520"
+					allowTypes="/(\.|\/)(jpeg|jpg)$/" label="Admite .jpg de 20 Mb"
+					uploadLabel="Subir" auto="true" cancelLabel="Cancelar"
+					invalidFileMessage="Tipo de archivo no válido"
+					invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+					mode="advanced" styleClass="w100"
+					update="idTxtFotoArchivo uploadRequiredFotoArchivo">
+				</p:fileUpload>
+				<h:inputHidden id="uploadRequiredFotoArchivo" required="true"
+					value="#{ingresarInformacionViabilidadPfnController.fotoArchivo.nombre}" />
+				<h:outputText id="idTxtFotoArchivo"
+					value="#{ingresarInformacionViabilidadPfnController.fotoArchivo.nombre}" />
+
+			</h:panelGroup>
+
+			<p:outputLabel value="Descripción fotografía" style="color: white"
+				for="txtDesFotografia" />
+			<p:inputText id="txtDesFotografia" maxlength="200"
+				value="#{ingresarInformacionViabilidadPfnController.fotoArchivo.descripcionAnexo}"
+				required="true" autocomplete="false"
+				requiredMessage="El campo 'Descripción fotografía es requerido'" />
+
+		</p:panelGrid>
+
+		<br />
+		<p:outputPanel>
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+					styleClass="wizard-custom-btn-back" immediate="true"
+					oncomplete="PF('dlgfotoArchivo').hide();"
+					actionListener="#{ingresarInformacionViabilidadPfnController.limpiarFotoArchivo}"
+					update="dlgfotoArchivo" />
+				<p:commandButton value="Aceptar"
+					actionListener="#{ingresarInformacionViabilidadPfnController.aceptarFotoArchivo}"
+					update=":form:dtFotoArchivo :form:btnAgregarFotoProyecto"
+					process="dlgfotoArchivo"
+					oncomplete="if(!args.validationFailed) PF('dlgfotoArchivo').hide()" />
+			</div>
+		</p:outputPanel>
+	</p:dialog>
+
+	<p:dialog header="Datos adjunto" id="dlgArchivoAdjunto"
+		widgetVar="dlgArchivoAdjunto" modal="true" resizable="false"
+		width="600" closable="false">
+
+		<p:panelGrid columns="2" styleClass="panel_data w100"
+			columnClasses="header w25, w25, header w25, w25">
+			<p:outputLabel value="Archivo adjunto:" style="color: white"
+				for="uploadRequiredDocumentoAdjunto" />
+			<h:panelGroup>
+				<p:fileUpload
+					fileUploadListener="#{ingresarInformacionViabilidadPfnController.uploadListenerAdjunto}"
+					multiple="false" sizeLimit="52428800" allowTypes="/(\.|\/)(pdf)$/i"
+					label="Admite .pdf de 50 Mb" uploadLabel="Subir"
+					cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+					auto="true" invalidFileMessage="Tipo de archivo no válido"
+					invalidSizeMessage="Debe adjuntar un archivo no mayor de 50 Mb"
+					update="uploadRequiredDocumentoAdjunto idTxtDocumentoAdjunto">
+				</p:fileUpload>
+				<h:inputHidden id="uploadRequiredDocumentoAdjunto" required="true"
+					value="#{ingresarInformacionViabilidadPfnController.documentoAdjunto.nombre}" />
+				<h:outputText id="idTxtDocumentoAdjunto"
+					value="#{ingresarInformacionViabilidadPfnController.documentoAdjunto.nombre}" />
+			</h:panelGroup>
+			<p:outputLabel value="Descripción archivo adjunto"
+				style="color: white" for="txtDescripcion" />
+			<p:inputText id="txtDescripcion" maxlength="200" autocomplete="false"
+				value="#{ingresarInformacionViabilidadPfnController.documentoAdjunto.descripcionAnexo}"
+				required="true" />
+
+		</p:panelGrid>
+		<br />
+		<p:outputPanel>
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+					styleClass="wizard-custom-btn-back" immediate="true"
+					oncomplete="PF('dlgArchivoAdjunto').hide();"
+					actionListener="#{ingresarInformacionViabilidadPfnController.limpiarDocumentoAdjunto}"
+					update="dlgArchivoAdjunto" />
+				<p:commandButton value="Aceptar"
+					actionListener="#{ingresarInformacionViabilidadPfnController.aceptarDocumentoAdjunto}"
+					update=":form:dtAdjuntos" process="dlgArchivoAdjunto"
+					oncomplete="if(!args.validationFailed) PF('dlgArchivoAdjunto').hide()" />
+			</div>
+		</p:outputPanel>
+	</p:dialog>
+
+	<p:dialog header="Datos imagen" id="dlgImagenSatelital"
+		widgetVar="dlgImagenSatelital" modal="true" resizable="false"
+		width="600" closable="false">
+
+		<p:panelGrid columns="2" styleClass="panel_data w100"
+			columnClasses="header w25, w25, header w25, w25">
+			<p:outputLabel value="Imagen:" style="color: white"
+				for="uploadRequiredImagenSatelital" />
+			<h:panelGroup>
+				<p:fileUpload
+					fileUploadListener="#{ingresarInformacionViabilidadPfnController.uploadListenerImagenSatelital}"
+					required="true" requiredMessage="Debe ingresar el adjunto"
+					multiple="false" sizeLimit="20971520"
+					allowTypes="/(\.|\/)(jpeg|jpg)$/" label="Admite .jpg de 20 Mb"
+					uploadLabel="Subir" auto="true" cancelLabel="Cancelar"
+					invalidFileMessage="Tipo de archivo no válido"
+					invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+					mode="advanced" styleClass="w100"
+					update="idTxtImagenSatelital uploadRequiredImagenSatelital">
+				</p:fileUpload>
+				<h:inputHidden id="uploadRequiredImagenSatelital" required="true"
+					value="#{ingresarInformacionViabilidadPfnController.imagenSatelital.nombre}" />
+				<h:outputText id="idTxtImagenSatelital"
+					value="#{ingresarInformacionViabilidadPfnController.imagenSatelital.nombre}" />
+
+			</h:panelGroup>
+
+			<p:outputLabel value="Descripción imagen" style="color: white"
+				for="txtDesImagenS" />
+			<p:inputText id="txtDesImagenS" autocomplete="false"
+				value="#{ingresarInformacionViabilidadPfnController.imagenSatelital.descripcionAnexo}"
+				required="true" maxlength="200"
+				requiredMessage="El campo 'Descripción imagen' es requerido" />
+
+		</p:panelGrid>
+		<br />
+		<p:outputPanel>
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+					styleClass="wizard-custom-btn-back" immediate="true"
+					oncomplete="PF('dlgImagenSatelital').hide();"
+					actionListener="#{ingresarInformacionViabilidadPfnController.limpiarImagenSatelital()}"
+					update="dlgImagenSatelital" />
+				<p:commandButton value="Aceptar"
+					actionListener="#{ingresarInformacionViabilidadPfnController.aceptarImagenSatelital}"
+					update=":form:dtImagenSatelital" process="dlgImagenSatelital"
+					oncomplete="if(!args.validationFailed) PF('dlgImagenSatelital').hide()" />
+			</div>
+		</p:outputPanel>
+	</p:dialog>
+
+	<p:dialog header="Ubicación caracterización cualitativa"
+		id="dlgCaracterizacionCualitativa"
+		widgetVar="dlgCaracterizacionCualitativa" modal="true"
+		resizable="false" width="600" closable="false">
+
+		<p:panelGrid columns="2" styleClass="panel_data w100"
+			columnClasses="header w25, w25, header w25, w25">
+			<p:outputLabel value="Código o nombre del sitio" style="color: white"
+				for="idCodigoSitio" />
+			<p:inputText id="idCodigoSitio" autocomplete="false"
+				value="#{ingresarInformacionViabilidadPfnController.sitioMuestral.nombreSitio}"
+				required="true" maxlength="200">
+				<p:ajax process="@this" />
+			</p:inputText>
+
+			<p:outputLabel value="Coordenada X" style="color: white"
+				for="idCoorX" />
+			<pe:inputNumber id="idCoorX"
+				value="#{ingresarInformacionViabilidadPfnController.sitioMuestral.coordenadaSitioMuestral.coordenadaX}"
+				thousandSeparator="" maxValue="9999999999.99" required="true"
+				requiredMessage="Coordenada X es requerido" autocomplete="off">
+				<p:ajax process="@this" />
+			</pe:inputNumber>
+
+			<p:outputLabel value="Coordenada Y" style="color: white"
+				for="idCoorY" />
+			<pe:inputNumber id="idCoorY"
+				value="#{ingresarInformacionViabilidadPfnController.sitioMuestral.coordenadaSitioMuestral.coordenadaY}"
+				thousandSeparator="" maxValue="9999999999.99" required="true"
+				requiredMessage="Coordenada Y es requerido" autocomplete="off">
+				<p:ajax process="@this" />
+			</pe:inputNumber>
+
+			<p:outputLabel value="Elevación (m.s.n.m.)" style="color: white"
+				for="idElevacion" />
+			<h:panelGrid columns="2">
+				<pe:inputNumber id="idElevacion"
+					value="#{ingresarInformacionViabilidadPfnController.sitioMuestral.elevacion}"
+					thousandSeparator="" maxValue="9999999" required="true"
+					requiredMessage="Elevacion (m.s.n.m.) es requerido"
+					autocomplete="off" decimalPlaces="0"
+					onkeypress="return numbersonly(this, event);">
+				</pe:inputNumber>
+
+				<p:outputLabel value="m" />
+			</h:panelGrid>
+		</p:panelGrid>
+		<h:inputHidden
+			validator="#{ingresarInformacionViabilidadPfnController.validateCoordenadaSitioCualitativa}" />
+		<h:inputHidden
+			validator="#{ingresarInformacionViabilidadPfnController.validateNombreSitio}" />
+		<br />
+		<p:outputPanel>
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+					styleClass="wizard-custom-btn-back" immediate="true"
+					oncomplete="PF('dlgCaracterizacionCualitativa').hide();"
+					actionListener="#{ingresarInformacionViabilidadPfnController.borrarCaracterizacionCualitativa()}"
+					update="dlgCaracterizacionCualitativa">
+					<p:resetInput target="dlgCaracterizacionCualitativa" />
+				</p:commandButton>
+				<p:commandButton value="Aceptar"
+					process="@this dlgCaracterizacionCualitativa"
+					actionListener="#{ingresarInformacionViabilidadPfnController.aceptarCaracterizacionCualitativa()}"
+					update=":form:pnlCoordenadasCualitativa :form:dtCaracterizacionCualitativa" />
+			</div>
+		</p:outputPanel>
+	</p:dialog>
+
+	<p:dialog header="Registro cualitativo de especies"
+		id="dlgCaracterizacionEspeciesCualitativa"
+		widgetVar="dlgCaracterizacionEspeciesCualitativa" modal="true"
+		resizable="false" width="600" closable="false">
+
+		<p:panelGrid id="pnlCaracterizacionEspecie" columns="2"
+			styleClass="panel_data w100"
+			columnClasses="header w25, w25, header w25, w25">
+			<p:outputLabel value="Código o nombre del sitio" style="color: white"
+				for="cmbCodigoSitio" />
+
+			<p:selectOneMenu id="cmbCodigoSitio"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestal.sitioMuestral}"
+				style="width: 100%" required="true"
+				requiredMessage="Código sitio requerido"
+				converter="selectItemConverter" filter="true"
+				filterMatchMode="startsWith">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listaSitioMuestral}"
+					var="sitio" itemLabel="#{sitio.nombreSitio}" itemValue="#{sitio}" />
+				<p:ajax process="@this"/>
+			</p:selectOneMenu>
+
+			<p:outputLabel value="Nivel de taxonomía: *" style="color: white"
+				for="idNivelTax" />
+			<p:selectOneRadio id="idNivelTax" required="true"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestal.nivelTaxonomia}">
+				<f:selectItem itemValue="1" itemLabel="Género" />
+				<f:selectItem itemValue="2" itemLabel="Especie" />
+				<p:ajax update="cmbFamilia cmbGenero cmbEspecie" process="@this"
+					listener="#{ingresarInformacionViabilidadPfnController.desbloquearTaxonomia(ingresarInformacionViabilidadPfnController.especiesInformeForestal)}" />
+			</p:selectOneRadio>
+
+			<p:outputLabel value="Familia:" style="color: white" for="cmbFamilia" />
+			<p:selectOneMenu id="cmbFamilia"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestal.familiaEspecie}"
+				style="width: 100%" required="true"
+				requiredMessage="Familia requerido" converter="selectItemConverter"
+				filter="true" filterMatchMode="startsWith"
+				disabled="#{ingresarInformacionViabilidadPfnController.blockFamilia}">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listFamilia}"
+					var="familia" itemLabel="#{familia.hiclScientificName}"
+					itemValue="#{familia}" />
+				<p:ajax update="cmbGenero"
+					listener="#{ingresarInformacionViabilidadPfnController.obtenerListaGeneroPorFamilia(ingresarInformacionViabilidadPfnController.especiesInformeForestal.familiaEspecie)}" />
+			</p:selectOneMenu>
+
+			<p:outputLabel value="Género:" style="color: white" for="cmbGenero" />
+			<p:selectOneMenu id="cmbGenero"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestal.generoEspecie}"
+				styleClass="w100" required="true" requiredMessage="Genero requerido"
+				converter="selectItemConverter" filter="true"
+				filterMatchMode="startsWith"
+				disabled="#{ingresarInformacionViabilidadPfnController.blockGenero}">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listGenero}"
+					var="genero" itemLabel="#{genero.hiclScientificName}"
+					itemValue="#{genero}" />
+				<p:ajax update="cmbEspecie cmbGenero"
+					listener="#{ingresarInformacionViabilidadPfnController.obtenerListaEspecies(ingresarInformacionViabilidadPfnController.especiesInformeForestal.generoEspecie)}" />
+			</p:selectOneMenu>
+
+			<p:outputLabel value="Especie:" style="color: white" for="cmbEspecie" />
+			<p:selectOneMenu id="cmbEspecie"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestal.especie}"
+				styleClass="w100" required="true"
+				requiredMessage="Especie requerida" converter="selectItemConverter"
+				disabled="#{ingresarInformacionViabilidadPfnController.blockEspecie}">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listEspecie}"
+					var="especie" itemLabel="#{especie.sptaScientificName}"
+					itemValue="#{especie}" />
+				<p:ajax update="cmbEspecie"
+					listener="#{ingresarInformacionViabilidadPfnController.validarEspecieCualitativa()}" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Frecuencia:" style="color: white"
+				for="minMaxFrecuencia" />
+			<p:spinner id="minMaxFrecuencia" required="true"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestal.frecuencia}"
+				min="0" max="999" styleClass="sppiner"
+				onkeypress="return numbersonly(this, event);" maxlength="3">
+
+			</p:spinner>
+			<p:outputLabel value="Estado de conservación UICN"
+				style="color: white" for="cmbConservacion" />
+			<p:selectOneMenu id="cmbConservacion"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestal.estadoConservacion}"
+				styleClass="w100" required="true"
+				requiredMessage="Estado de conservación UICN es requerido"
+				converter="selectItemConverter">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listaEstadoConservacion}"
+					var="estado" itemLabel="#{estado.nombre}" itemValue="#{estado}" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Apéndice CITES" style="color: white"
+				for="cmbCites" />
+			<p:selectOneMenu id="cmbCites"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestal.estadoCites}"
+				styleClass="w100" required="true"
+				requiredMessage="Apéndice CITES es requerida"
+				converter="selectItemConverter">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listaApendiceCITES}"
+					var="apendice" itemLabel="#{apendice.nombre}"
+					itemValue="#{apendice}" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Aprovechamiento condicionado:"
+				style="color: white" for="rbtAprovechamientocon" />
+			<p:selectOneRadio id="rbtAprovechamientocon" required="true"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestal.aprovechamientoCondicionado}">
+				<f:selectItem itemValue="true" itemLabel="Si" />
+				<f:selectItem itemValue="false" itemLabel="No" />
+			</p:selectOneRadio>
+			<p:outputLabel value="Especies endémicas:" style="color: white"
+				for="rbtEspeciesEndemicas" />
+			<p:selectOneRadio id="rbtEspeciesEndemicas" required="true"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestal.especieEndemica}">
+				<f:selectItem itemValue="true" itemLabel="Si" />
+				<f:selectItem itemValue="false" itemLabel="No" />
+			</p:selectOneRadio>
+
+		</p:panelGrid>
+		<br />
+		<p:outputPanel>
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+					styleClass="wizard-custom-btn-back" immediate="true" resetValues="true"
+					oncomplete="PF('dlgCaracterizacionEspeciesCualitativa').hide();"
+					actionListener="#{ingresarInformacionViabilidadPfnController.borrarCaracterizacionCualitativaEspecies()}"
+					update="dlgCaracterizacionEspeciesCualitativa" />
+				<p:commandButton value="Aceptar"
+					actionListener="#{ingresarInformacionViabilidadPfnController.aceptarCaracterizacionCualitativaEspecies()}"
+					oncomplete="if(!args.validationFailed) PF('dlgCaracterizacionEspeciesCualitativa').hide();"
+					update=":form:dtCaracterizacionEspeciesCualitativa"
+					process="dlgCaracterizacionEspeciesCualitativa" />
+			</div>
+		</p:outputPanel>
+	</p:dialog>
+
+	<p:dialog header="Datos fotografía" id="dlgFotografiaCuantitativa"
+		widgetVar="dlgFotografiaCuantitativa" modal="true" resizable="false"
+		width="600" closable="false">
+
+		<p:panelGrid columns="2" styleClass="panel_data w100"
+			columnClasses="header w25, w25, header w25, w25">
+			<p:outputLabel value="Fotografía:" style="color: white" />
+			<h:panelGroup>
+				<p:fileUpload
+					fileUploadListener="#{ingresarInformacionViabilidadPfnController.uploadListenerFotografiaCuantitativa}"
+					required="true" requiredMessage="Admite .jpg de 20 Mb"
+					multiple="false" sizeLimit="20971520"
+					allowTypes="/(\.|\/)(jpeg|jpg)$/" label="Admite .jpg de 20 Mb"
+					uploadLabel="Subir" auto="true" cancelLabel="Cancelar"
+					invalidFileMessage="Tipo de archivo no válido"
+					invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+					mode="advanced" styleClass="w100" update="IdTxtDesFotoCuantitativa">
+				</p:fileUpload>
+				<p:outputLabel value="" />
+				<h:outputText id="IdTxtDesFotoCuantitativa"
+					value="#{ingresarInformacionViabilidadPfnController.fotografiaCuantitativa.nombre}" />
+			</h:panelGroup>
+			<p:outputLabel value="Descripción fotografía" style="color: white"
+				for="txtDesFotoCuantitativa" />
+			<p:inputText id="txtDesFotoCuantitativa" maxlength="200"
+				autocomplete="false"
+				value="#{ingresarInformacionViabilidadPfnController.fotografiaCuantitativa.descripcionAnexo}"
+				required="true" />
+
+		</p:panelGrid>
+		<br />
+		<p:outputPanel>
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+					styleClass="wizard-custom-btn-back" immediate="true"
+					oncomplete="PF('dlgFotografiaCuantitativa').hide();"
+					actionListener="#{ingresarInformacionViabilidadPfnController.limpiarFotografiaCuantitativa()}"
+					update="dlgFotografiaCuantitativa" />
+				<p:commandButton value="Aceptar"
+					actionListener="#{ingresarInformacionViabilidadPfnController.aceptarFotografiaCuantitativa}"
+					oncomplete="if(!args.validationFailed) PF('dlgFotografiaCuantitativa').hide()"
+					update=":form:dtFotografiaCuantitativa"
+					process="dlgFotografiaCuantitativa" />
+			</div>
+		</p:outputPanel>
+	</p:dialog>
+
+	<p:dialog header="Datos fotografía" id="dlgFotografiaOficina"
+		widgetVar="dlgFotografiaOficina" modal="true" resizable="false"
+		width="600" closable="false">
+
+		<p:panelGrid columns="2" styleClass="panel_data w100"
+			columnClasses="header w25, w25, header w25, w25">
+			<p:outputLabel value="Fotografía:" style="color: white" />
+			<h:panelGroup>
+				<p:fileUpload
+					fileUploadListener="#{ingresarInformacionViabilidadPfnController.uploadListenerFotografiaOficina}"
+					required="true" requiredMessage="Admite .jpg de 20 Mb"
+					multiple="false" sizeLimit="20971520"
+					allowTypes="/(\.|\/)(jpeg|jpg)$/" label="Admite .jpg de 20 Mb"
+					uploadLabel="Subir" auto="true" cancelLabel="Cancelar"
+					invalidFileMessage="Tipo de archivo no válido"
+					invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+					mode="advanced" styleClass="w100" update="idTxtDesFotoOficina">
+				</p:fileUpload>
+				<p:outputLabel value="" />
+				<h:outputText id="idTxtDesFotoOficina"
+					value="#{ingresarInformacionViabilidadPfnController.fotografiaOficina.nombre}" />
+			</h:panelGroup>
+			<p:outputLabel value="Descripción fotografía" style="color: white"
+				for="txtDesFotoOficina" />
+			<p:inputText id="txtDesFotoOficina" maxlength="200"
+				autocomplete="false"
+				value="#{ingresarInformacionViabilidadPfnController.fotografiaOficina.descripcionAnexo}"
+				required="true" />
+
+		</p:panelGrid>
+		<br />
+		<p:outputPanel>
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+					styleClass="wizard-custom-btn-back" immediate="true"
+					oncomplete="PF('dlgFotografiaOficina').hide();"
+					actionListener="#{ingresarInformacionViabilidadPfnController.limpiarFotografiaOficina()}"
+					update="dlgFotografiaOficina" />
+				<p:commandButton value="Aceptar"
+					actionListener="#{ingresarInformacionViabilidadPfnController.aceptarFotografiaOficina}"
+					update=":form:dtFotografiaOficina" process="dlgFotografiaOficina"
+					oncomplete="if(!args.validationFailed) PF('dlgFotografiaOficina').hide()" />
+			</div>
+		</p:outputPanel>
+	</p:dialog>
+
+	<p:dialog header="Área basal y volumen" id="dlgAreaBasal"
+		widgetVar="dlgAreaBasal" modal="true" resizable="false" width="600"
+		closable="false">
+
+		<p:panelGrid id="pnlAreaBasalVolumen" columns="2"
+			styleClass="panel_data w100"
+			columnClasses="header w25, w25, header w25, w25">
+
+			<p:outputLabel value="Nivel de taxonomía:" style="color: white"
+				for="idNivelTaxAB" />
+			<p:selectOneRadio id="idNivelTaxAB" required="true"
+				requiredMessage="Nivel de taxonomía requerido" 
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalCenso.nivelTaxonomia}">
+				<f:selectItem itemValue="1" itemLabel="Género" />
+				<f:selectItem itemValue="2" itemLabel="Especie" />
+				<p:ajax update="pnlAreaBasalVolumen" process="@this"
+					listener="#{ingresarInformacionViabilidadPfnController.desbloquearTaxonomiaAB(ingresarInformacionViabilidadPfnController.especiesInformeForestalCenso)}" />
+			</p:selectOneRadio>
+
+			<p:outputLabel value="Familia:" style="color: white"
+				for="cmbFamiliaAB" />
+			<p:selectOneMenu id="cmbFamiliaAB"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalCenso.familiaEspecie}"
+				style="width: 100%" required="true"
+				requiredMessage="Familia requerido" converter="selectItemConverter"
+				filter="true" filterMatchMode="startsWith"
+				disabled="#{ingresarInformacionViabilidadPfnController.blockFamilia}">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listFamilia}"
+					var="familia" itemLabel="#{familia.hiclScientificName}"
+					itemValue="#{familia}" />
+				<p:ajax update="cmbGeneroAB cmbEspecieAB"
+					listener="#{ingresarInformacionViabilidadPfnController.obtenerListaGeneroPorFamilia(ingresarInformacionViabilidadPfnController.especiesInformeForestalCenso.familiaEspecie)}" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Género:" style="color: white" for="cmbGeneroAB" />
+			<p:selectOneMenu id="cmbGeneroAB"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalCenso.generoEspecie}"
+				styleClass="w100" required="true" requiredMessage="Genero requerido"
+				converter="selectItemConverter" filter="true"
+				filterMatchMode="startsWith"
+				disabled="#{ingresarInformacionViabilidadPfnController.blockGenero}">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listGenero}"
+					var="genero" itemLabel="#{genero.hiclScientificName}"
+					itemValue="#{genero}" />
+				<p:ajax update="cmbEspecieAB"
+					listener="#{ingresarInformacionViabilidadPfnController.obtenerListaEspecies(ingresarInformacionViabilidadPfnController.especiesInformeForestalCenso.generoEspecie)}" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Especie:" style="color: white"
+				for="cmbEspecieAB" />
+			<p:selectOneMenu id="cmbEspecieAB"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalCenso.especie}"
+				styleClass="w100" required="true"
+				requiredMessage="Especie requerida" converter="selectItemConverter"
+				disabled="#{ingresarInformacionViabilidadPfnController.blockEspecie}">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listEspecie}"
+					var="especie" itemLabel="#{especie.sptaScientificName}"
+					itemValue="#{especie}" />
+			</p:selectOneMenu>
+
+			<p:outputLabel value="Nombre común" style="color: white"
+				for="cmbNombreCom" />
+			<p:inputText id="cmbNombreCom" autocomplete="false"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalCenso.nombreComun}"
+				required="true" maxlength="200" />
+
+			<p:outputLabel value="Diámetro a la altura del pecho DAP (m)"
+				style="color: white" for="txtDiametroDAP" />
+			<pe:inputNumber id="txtDiametroDAP"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalCenso.alturaDap}"
+				thousandSeparator="" maxValue="9999999.99" required="true"
+				requiredMessage="Diámetro a la altura del pecho DAP es requerido"
+				autocomplete="off">
+				<p:ajax event="change" process="@this"
+					listener="#{ingresarInformacionViabilidadPfnController.calculoAreaBasal()}"
+					update="txtAreaBasal txtVolumenT txtVolumenC" />
+			</pe:inputNumber>
+
+			<p:outputLabel value="Altura Total HT (m)" style="color: white"
+				for="txtAlturaHT" />
+			<pe:inputNumber id="txtAlturaHT"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalCenso.alturaTotal}"
+				thousandSeparator="" maxValue="9999999.99" required="true"
+				requiredMessage="Altura Total es requerido" autocomplete="off">
+				<p:ajax event="change" process="@this" update="txtVolumenT"
+					listener="#{ingresarInformacionViabilidadPfnController.calcularVolumenTotal()}" />
+			</pe:inputNumber>
+
+			<p:outputLabel value="Altura comercial HC (m)" style="color: white"
+				for="txtAlturaHC" />
+			<pe:inputNumber id="txtAlturaHC"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalCenso.alturaComercial}"
+				thousandSeparator="" maxValue="9999999.99" required="true"
+				requiredMessage="Altura comercial es requerido" autocomplete="off">
+				<p:ajax event="change" process="@this" update="txtVolumenC"
+					listener="#{ingresarInformacionViabilidadPfnController.calcularVolumenComercial()}" />
+			</pe:inputNumber>
+
+			<p:outputLabel value="Área basal AB (m2)" style="color: white"
+				for="txtAreaBasal" />
+			<p:inputText id="txtAreaBasal"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalCenso.areaBasal}"
+				required="true" disabled="true" />
+
+			<p:outputLabel value="Volumen total Vt (m3)" style="color: white"
+				for="txtVolumenT" />
+			<p:inputText id="txtVolumenT"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalCenso.volumenTotal}"
+				required="true" disabled="true" />
+
+			<p:outputLabel value="Volumen comercial Vc (m3)" style="color: white"
+				for="txtVolumenC" />
+			<p:inputText id="txtVolumenC"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalCenso.volumenComercial}"
+				required="true" disabled="true" />
+
+		</p:panelGrid>
+		<br />
+		<p:outputPanel>
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+					styleClass="wizard-custom-btn-back" immediate="true"
+					oncomplete="PF('dlgAreaBasal').hide();" resetValues="true"
+					actionListener="#{ingresarInformacionViabilidadPfnController.limpiarCalculoBasal()}" />
+				<p:commandButton value="Aceptar"
+					actionListener="#{ingresarInformacionViabilidadPfnController.aceptarAreaBasal()}"
+					oncomplete="if(!args.validationFailed) PF('dlgAreaBasal').hide();"
+					update=":form:dtCalculaBasal :form:dtValorImportancia :form:dtSumatoriaBasalCenso"
+					process="dlgAreaBasal" />
+			</div>
+		</p:outputPanel>
+	</p:dialog>
+
+	<p:dialog header="Especies de importancia"
+		id="dlgEspeciesImportanciaCenso"
+		widgetVar="dlgEspeciesImportanciaCenso" modal="true" resizable="false"
+		width="600" closable="false">
+
+		<p:panelGrid id="pnlEspecieImportancia" columns="2"
+			styleClass="panel_data w100"
+			columnClasses="header w25, w25, header w25, w25">
+
+			<p:outputLabel value="Nivel de taxonomía:" style="color: white"
+				for="idNivelEI" />
+			<p:selectOneRadio id="idNivelEI" required="true"
+				requiredMessage="Nivel de taxonomía requerido" 
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia.nivelTaxonomia}">
+				<f:selectItem itemValue="1" itemLabel="Género" />
+				<f:selectItem itemValue="2" itemLabel="Especie" />
+				<p:ajax update="pnlEspecieImportancia" process="@this"
+					listener="#{ingresarInformacionViabilidadPfnController.desbloquearTaxonomiaEI(ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia)}" />
+			</p:selectOneRadio>
+
+			<p:outputLabel value="Familia:" style="color: white"
+				for="cmbFamiliaEI" />
+			<p:selectOneMenu id="cmbFamiliaEI"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia.familiaEspecie}"
+				style="width: 100%" required="true"
+				requiredMessage="Familia requerido" converter="selectItemConverter"
+				filter="true" filterMatchMode="startsWith"
+				disabled="#{ingresarInformacionViabilidadPfnController.blockFamilia}">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listFamiliaSelect}"
+					var="familia" itemLabel="#{familia.hiclScientificName}"
+					itemValue="#{familia}" />
+				<p:ajax update="cmbGeneroEI"
+					listener="#{ingresarInformacionViabilidadPfnController.obtenerListaGeneroPorFamilia(ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia.familiaEspecie)}" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Género:" style="color: white" for="cmbGeneroEI" />
+			<p:selectOneMenu id="cmbGeneroEI"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia.generoEspecie}"
+				styleClass="w100" required="true" requiredMessage="Genero requerido"
+				converter="selectItemConverter" filter="true"
+				filterMatchMode="startsWith"
+				disabled="#{ingresarInformacionViabilidadPfnController.blockGenero}">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listGenero}"
+					var="genero" itemLabel="#{genero.hiclScientificName}"
+					itemValue="#{genero}" />
+				<p:ajax update="cmbEspecieEI"
+					listener="#{ingresarInformacionViabilidadPfnController.obtenerListaEspecies(ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia.generoEspecie)}" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Especie:" style="color: white"
+				for="cmbEspecieEI" />
+			<p:selectOneMenu id="cmbEspecieEI"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia.especie}"
+				styleClass="w100" required="true"
+				requiredMessage="Especie requerida" converter="selectItemConverter"
+				disabled="#{ingresarInformacionViabilidadPfnController.blockEspecie}">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listEspecie}"
+					var="especie" itemLabel="#{especie.sptaScientificName}"
+					itemValue="#{especie}" />
+				<p:ajax process="@this" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Estado de conservación UICN:"
+				style="color: white" for="cmbConservacionEI" />
+			<p:selectOneMenu id="cmbConservacionEI"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia.estadoConservacion}"
+				styleClass="w100" required="true"
+				requiredMessage="Estado de conservación UICN es requerido"
+				converter="selectItemConverter">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listaEstadoConservacion}"
+					var="estado" itemLabel="#{estado.nombre}" itemValue="#{estado}" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Apéndice CITES:" style="color: white"
+				for="cmbCitesEI" />
+			<p:selectOneMenu id="cmbCitesEI"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia.estadoCites}"
+				styleClass="w100" required="true"
+				requiredMessage="Apéndice CITES es requerida"
+				converter="selectItemConverter">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listaApendiceCITES}"
+					var="apendice" itemLabel="#{apendice.nombre}"
+					itemValue="#{apendice}" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Aprovechamiento condicionado:"
+				style="color: white" for="rbtAprovechamientoConEI" />
+			<p:selectOneRadio id="rbtAprovechamientoConEI" required="true"
+			requiredMessage="Aprovechamiento condicionado es requerido"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia.aprovechamientoCondicionado}">
+				<f:selectItem itemValue="true" itemLabel="Si" />
+				<f:selectItem itemValue="false" itemLabel="No" />
+			</p:selectOneRadio>
+			<p:outputLabel value="Especies endémicas:" style="color: white"
+				for="rbtEspeciesEndemicasEI" />
+			<p:selectOneRadio id="rbtEspeciesEndemicasEI" required="true"
+			requiredMessage="Especies endémicas es requerido"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia.especieEndemica}">
+				<f:selectItem itemValue="true" itemLabel="Si" />
+				<f:selectItem itemValue="false" itemLabel="No" />
+			</p:selectOneRadio>
+
+		</p:panelGrid>
+		<br />
+		<p:outputPanel>
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+					styleClass="wizard-custom-btn-back" immediate="true"
+					oncomplete="PF('dlgEspeciesImportanciaCenso').hide();" resetValues="true"
+					actionListener="#{ingresarInformacionViabilidadPfnController.borrarEspecieImportancia()}" />
+				<p:commandButton value="Aceptar"
+					actionListener="#{ingresarInformacionViabilidadPfnController.agregarEspecieImportancia()}"
+					oncomplete="if(!args.validationFailed) PF('dlgEspeciesImportanciaCenso').hide();"
+					update=":form:dtEspeciesImportanciaCenso"
+					process="dlgEspeciesImportanciaCenso" />
+			</div>
+		</p:outputPanel>
+	</p:dialog>
+
+	<p:dialog header="Ubicación unidades muestrales"
+		id="dlgUbicacionUnidadesMuestra"
+		widgetVar="dlgUbicacionUnidadesMuestra" modal="true" resizable="false"
+		width="600" closable="false">
+
+		<p:panelGrid id="pnlUbicacionUnidadesMuestra" columns="2"
+			styleClass="panel_data w100"
+			columnClasses="header w25, w25, header w25, w25">
+
+			<p:outputLabel value="Código de la Unidad Muestral"
+				style="color: white" for="txtCodUnidadMuestral" />
+			<p:inputText id="txtCodUnidadMuestral" autocomplete="false"
+				value="#{ingresarInformacionViabilidadPfnController.sitioMuestral.nombreSitio}"
+				required="true" maxlength="200">
+				<p:ajax process="@this" />
+			</p:inputText>
+
+			<p:outputLabel value="Archivo de coordenadas:*" style="color: white" />
+			<h:panelGroup>
+				<p:commandButton value="Descargar" styleClass="field_mrg"
+					ajax="false" immediate="true">
+					<p:fileDownload
+						value="#{ingresarInformacionViabilidadPfnController.plantillaCoordenadas}" />
+				</p:commandButton>
+
+				<p:commandButton value="Adjuntar" title="Adjuntar"
+					styleClass="field_mrg" oncomplete="PF('dlgAdjuntarCoord').show();"
+					immediate="true">
+				</p:commandButton>
+			</h:panelGroup>
+
+		</p:panelGrid>
+
+		<h:panelGrid>
+			<p:dataTable id="tblUbicacionesUnidadMuestra"
+				value="#{ingresarInformacionViabilidadPfnController.sitioMuestral.ubicacionesGeograficas}"
+				var="ubicacion" emptyMessage="#{labels['common.table.empty']}"
+				paginator="true" paginatorAlwaysVisible="false"
+				paginatorPosition="bottom"
+				currentPageReportTemplate="{currentPage} de {totalPages}" rows="10"
+				rowsPerPageTemplate="5,10,15">
+				<p:column headerText="Provincia">
+					<h:outputText
+						value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+				</p:column>
+				<p:column headerText="Cantón">
+					<h:outputText
+						value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+				</p:column>
+				<p:column headerText="Parroquia">
+					<h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}" />
+				</p:column>
+			</p:dataTable>
+
+		</h:panelGrid>
+
+		<p:panelGrid id="pnlUbicacionMuestra" columns="3"
+			styleClass="panel_data w100" columnClasses="header w35, w50, w15">
+
+			<p:outputLabel value="Elevación (m.s.n.m.)" style="color: white"
+				for="txtElevacionM" />
+			<pe:inputNumber id="txtElevacionM"
+				value="#{ingresarInformacionViabilidadPfnController.sitioMuestral.elevacion}"
+				thousandSeparator="" maxValue="9999999.99" required="true"
+				requiredMessage="Elevación (m.s.n.m.) es requerido"
+				autocomplete="off">
+				<p:ajax process="@this" />
+			</pe:inputNumber>
+			<p:outputLabel value="m" />
+
+			<p:outputLabel value="Largo de la unidad muestral:"
+				style="color: white" for="txtLargoUM" />
+			<pe:inputNumber id="txtLargoUM"
+				value="#{ingresarInformacionViabilidadPfnController.sitioMuestral.largo}"
+				thousandSeparator="" maxValue="9999999.99" required="true"
+				requiredMessage="Largo de la unidad muestral es requerido"
+				autocomplete="off">
+				<p:ajax process="@this" />
+			</pe:inputNumber>
+			<p:outputLabel value="m" />
+
+			<p:outputLabel value="Ancho de la unidad muestral:"
+				style="color: white" for="txtAnchoUM" />
+			<pe:inputNumber id="txtAnchoUM"
+				value="#{ingresarInformacionViabilidadPfnController.sitioMuestral.ancho}"
+				thousandSeparator="" maxValue="9999999.99" required="true"
+				requiredMessage="Ancho de la unidad muestral es requerido"
+				autocomplete="off">
+				<p:ajax process="@this" />
+			</pe:inputNumber>
+			<p:outputLabel value="m" />
+
+		</p:panelGrid>
+		<h:inputHidden
+			validator="#{ingresarInformacionViabilidadPfnController.validateNombreSitioMuestra}" />
+
+		<br />
+		<p:outputPanel>
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+					styleClass="wizard-custom-btn-back" immediate="true"
+					oncomplete="PF('dlgUbicacionUnidadesMuestra').hide();"
+					actionListener="#{ingresarInformacionViabilidadPfnController.abriUbicacionMuestral()}"
+					update="dlgUbicacionUnidadesMuestra">
+					<p:resetInput target="dlgUbicacionUnidadesMuestra" />
+				</p:commandButton>
+				<p:commandButton value="Aceptar"
+					actionListener="#{ingresarInformacionViabilidadPfnController.aceptarSitiosMuestrales()}"
+					oncomplete="if(!args.validationFailed) PF('dlgUbicacionUnidadesMuestra').hide();"
+					update=":form:dtUbicacionMuestras :form:pnlTotalSuperficieMuestral :formDialog:pnlAreaBasalVolumenMuestreo :formDialog:cmbCodigoM"
+					process="dlgUbicacionUnidadesMuestra" />
+			</div>
+		</p:outputPanel>
+
+	</p:dialog>
+
+	<p:dialog header="Adjuntar Coordenadas" id="dlgAdjuntarCoord"
+		widgetVar="dlgAdjuntarCoord" modal="true" resizable="false"
+		width="400" closable="false">
+
+		<p:panelGrid columns="1" styleClass="w100"
+			columnClasses="label, value">
+			<p:fileUpload uploadLabel="Subir" auto="true" cancelLabel="Cancelar"
+				label="Seleccionar"
+				fileUploadListener="#{ingresarInformacionViabilidadPfnController.handleFileUpload}"
+				mode="advanced" dragDropSupport="false" multiple="false"
+				allowTypes="/(\.|\/)(xls)$/"
+				invalidFileMessage="El archivo es inválido."
+				invalidSizeMessage="El archivo es demasiado grande."
+				oncomplete="PF('dlgAdjuntarCoord').hide();"
+				update=":formDialog:tblUbicacionesUnidadMuestra" />
+		</p:panelGrid>
+		<div class="buttons">
+			<p:commandButton type="button" value="Cerrar"
+				onclick="PF('dlgAdjuntarCoord').hide()" />
+		</div>
+
+	</p:dialog>
+
+	<p:dialog header="Área basal y volumen" id="dlgAreaBasalMuestreo"
+		widgetVar="dlgAreaBasalMuestreo" modal="true" resizable="false"
+		width="600" closable="false">
+
+		<p:panelGrid id="pnlAreaBasalVolumenMuestreo" columns="2"
+			styleClass="panel_data w100"
+			columnClasses="header w25, w25, header w25, w25">
+
+			<p:outputLabel value="Código de la Unidad Muestral:"
+				style="color: white" for="cmbCodigoM" />
+			<p:selectOneMenu id="cmbCodigoM"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalMuestreo.sitioMuestral}"
+				style="width: 100%" required="true"
+				requiredMessage="Código de la Unidad Muestral es requerido"
+				converter="selectItemConverter" filter="true"
+				filterMatchMode="startsWith">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listaSitioMuestreo}"
+					var="sitio" itemLabel="#{sitio.nombreSitio}" itemValue="#{sitio}" />
+				<p:ajax process="@this" />
+			</p:selectOneMenu>
+
+			<p:outputLabel value="Nivel de taxonomía:" style="color: white"
+				for="idNivelTaxABM" />
+			<p:selectOneRadio id="idNivelTaxABM" required="true"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalMuestreo.nivelTaxonomia}">
+				<f:selectItem itemValue="1" itemLabel="Género" />
+				<f:selectItem itemValue="2" itemLabel="Especie" />
+				<p:ajax update="pnlAreaBasalVolumenMuestreo" process="@this"
+					listener="#{ingresarInformacionViabilidadPfnController.desbloquearTaxonomiaAB(ingresarInformacionViabilidadPfnController.especiesInformeForestalMuestreo)}" />
+			</p:selectOneRadio>
+
+			<p:outputLabel value="Familia:" style="color: white"
+				for="cmbFamiliaABM" />
+			<p:selectOneMenu id="cmbFamiliaABM"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalMuestreo.familiaEspecie}"
+				style="width: 100%" required="true"
+				requiredMessage="Familia requerido" converter="selectItemConverter"
+				filter="true" filterMatchMode="startsWith"
+				disabled="#{ingresarInformacionViabilidadPfnController.blockFamilia}">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listFamilia}"
+					var="familia" itemLabel="#{familia.hiclScientificName}"
+					itemValue="#{familia}" />
+				<p:ajax update="cmbGeneroABM"
+					listener="#{ingresarInformacionViabilidadPfnController.obtenerListaGeneroPorFamilia(ingresarInformacionViabilidadPfnController.especiesInformeForestalMuestreo.familiaEspecie)}" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Género:" style="color: white"
+				for="cmbGeneroABM" />
+			<p:selectOneMenu id="cmbGeneroABM"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalMuestreo.generoEspecie}"
+				styleClass="w100" required="true" requiredMessage="Genero requerido"
+				converter="selectItemConverter" filter="true"
+				filterMatchMode="startsWith"
+				disabled="#{ingresarInformacionViabilidadPfnController.blockGenero}">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listGenero}"
+					var="genero" itemLabel="#{genero.hiclScientificName}"
+					itemValue="#{genero}" />
+				<p:ajax update="cmbEspecieABM"
+					listener="#{ingresarInformacionViabilidadPfnController.obtenerListaEspecies(ingresarInformacionViabilidadPfnController.especiesInformeForestalMuestreo.generoEspecie)}" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Especie:" style="color: white"
+				for="cmbEspecieABM" />
+			<p:selectOneMenu id="cmbEspecieABM"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalMuestreo.especie}"
+				styleClass="w100" required="true"
+				requiredMessage="Especie requerida" converter="selectItemConverter"
+				disabled="#{ingresarInformacionViabilidadPfnController.blockEspecie}">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listEspecie}"
+					var="especie" itemLabel="#{especie.sptaScientificName}"
+					itemValue="#{especie}" />
+			</p:selectOneMenu>
+
+			<p:outputLabel value="Nombre común" style="color: white"
+				for="cmbNombreComM" />
+			<p:inputText id="cmbNombreComM" autocomplete="false"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalMuestreo.nombreComun}"
+				required="true" maxlength="200" />
+
+			<p:outputLabel value="Diámetro a la altura del pecho DAP (m)"
+				style="color: white" for="txtDiametroDAPM" />
+			<pe:inputNumber id="txtDiametroDAPM"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalMuestreo.alturaDap}"
+				thousandSeparator="" maxValue="9999999.99" required="true"
+				requiredMessage="Diámetro a la altura del pecho DAP es requerido"
+				autocomplete="off">
+				<p:ajax event="change" process="@this"
+					listener="#{ingresarInformacionViabilidadPfnController.calculoAreaBasalM()}"
+					update="txtAreaBasalM txtVolumenCM txtVolumenTM" />
+			</pe:inputNumber>
+
+			<p:outputLabel value="Altura Total HT (m)" style="color: white"
+				for="txtAlturaHTM" />
+			<pe:inputNumber id="txtAlturaHTM"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalMuestreo.alturaTotal}"
+				thousandSeparator="" maxValue="9999999.99" required="true"
+				requiredMessage="Altura Total es requerido" autocomplete="off">
+				<p:ajax event="change" process="@this"
+					update="txtVolumenCM txtVolumenTM"
+					listener="#{ingresarInformacionViabilidadPfnController.calcularVolumenTotalM()}" />
+			</pe:inputNumber>
+
+			<p:outputLabel value="Altura comercial HC (m)" style="color: white"
+				for="txtAlturaHCM" />
+			<pe:inputNumber id="txtAlturaHCM"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalMuestreo.alturaComercial}"
+				thousandSeparator="" maxValue="9999999.99" required="true"
+				requiredMessage="Altura comercial es requerido" autocomplete="off">
+				<p:ajax event="change" process="@this"
+					update="txtVolumenCM txtVolumenTM"
+					listener="#{ingresarInformacionViabilidadPfnController.calcularVolumenComercialM()}" />
+			</pe:inputNumber>
+
+			<p:outputLabel value="Área basal AB (m2)" style="color: white"
+				for="txtAreaBasalM" />
+			<p:inputText id="txtAreaBasalM"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalMuestreo.areaBasal}"
+				required="true" disabled="true" />
+
+			<p:outputLabel value="Volumen total Vt (m3)" style="color: white"
+				for="txtVolumenTM" />
+			<p:inputText id="txtVolumenTM"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalMuestreo.volumenTotal}"
+				required="true" disabled="true" />
+
+			<p:outputLabel value="Volumen comercial Vc (m3)" style="color: white"
+				for="txtVolumenCM" />
+			<p:inputText id="txtVolumenCM"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalMuestreo.volumenComercial}"
+				required="true" disabled="true" />
+
+		</p:panelGrid>
+		<br />
+		<p:outputPanel>
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+					styleClass="wizard-custom-btn-back" immediate="true"
+					oncomplete="PF('dlgAreaBasalMuestreo').hide();"
+					actionListener="#{ingresarInformacionViabilidadPfnController.abrirEspeciesCalculoMuestreo()}" />
+				<p:commandButton value="Aceptar"
+					actionListener="#{ingresarInformacionViabilidadPfnController.aceptarEspeciesCalculoMuestreo()}"
+					oncomplete="if(!args.validationFailed) PF('dlgAreaBasalMuestreo').hide();"
+					update=":form:dtCalculaBasalMuestreo :form:dtSumatoriaBasalMuestreo :form:idSitioMuestreo :form:dtEspeciesImportanciaMuestreo"
+					process="dlgAreaBasalMuestreo" />
+			</div>
+		</p:outputPanel>
+	</p:dialog>
+
+	<p:dialog header="Especies de importancia"
+		id="dlgEspeciesImportanciaMuestreo"
+		widgetVar="dlgEspeciesImportanciaMuestreo" modal="true"
+		resizable="false" width="600" closable="false">
+
+		<p:panelGrid id="pnlEspecieImportanciaMuestreo" columns="2"
+			styleClass="panel_data w100"
+			columnClasses="header w25, w25, header w25, w25">
+
+			<p:outputLabel value="Nivel de taxonomía:" style="color: white"
+				for="idNivelEIM" />
+			<p:selectOneRadio id="idNivelEIM" required="true"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia.nivelTaxonomia}">
+				<f:selectItem itemValue="1" itemLabel="Género" />
+				<f:selectItem itemValue="2" itemLabel="Especie" />
+				<p:ajax update="pnlEspecieImportanciaMuestreo" process="@this"
+					listener="#{ingresarInformacionViabilidadPfnController.desbloquearTaxonomiaEI(ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia)}" />
+			</p:selectOneRadio>
+
+			<p:outputLabel value="Familia:" style="color: white"
+				for="cmbFamiliaEIM" />
+			<p:selectOneMenu id="cmbFamiliaEIM"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia.familiaEspecie}"
+				style="width: 100%" required="true"
+				requiredMessage="Familia requerido" converter="selectItemConverter"
+				filter="true" filterMatchMode="startsWith"
+				disabled="#{ingresarInformacionViabilidadPfnController.blockFamilia}">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listFamiliaSelect}"
+					var="familia" itemLabel="#{familia.hiclScientificName}"
+					itemValue="#{familia}" />
+				<p:ajax update="cmbGeneroEIM"
+					listener="#{ingresarInformacionViabilidadPfnController.obtenerListaGeneroPorFamilia(ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia.familiaEspecie)}" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Género:" style="color: white"
+				for="cmbGeneroEIM" />
+			<p:selectOneMenu id="cmbGeneroEIM"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia.generoEspecie}"
+				styleClass="w100" required="true" requiredMessage="Genero requerido"
+				converter="selectItemConverter" filter="true"
+				filterMatchMode="startsWith"
+				disabled="#{ingresarInformacionViabilidadPfnController.blockGenero}">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listGenero}"
+					var="genero" itemLabel="#{genero.hiclScientificName}"
+					itemValue="#{genero}" />
+				<p:ajax update="cmbEspecieEIM"
+					listener="#{ingresarInformacionViabilidadPfnController.obtenerListaEspecies(ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia.generoEspecie)}" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Especie:" style="color: white"
+				for="cmbEspecieEIM" />
+			<p:selectOneMenu id="cmbEspecieEIM"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia.especie}"
+				styleClass="w100" required="true"
+				requiredMessage="Especie requerida" converter="selectItemConverter"
+				disabled="#{ingresarInformacionViabilidadPfnController.blockEspecie}">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listEspecie}"
+					var="especie" itemLabel="#{especie.sptaScientificName}"
+					itemValue="#{especie}" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Estado de conservación UICN"
+				style="color: white" for="cmbConservacionEIM" />
+			<p:selectOneMenu id="cmbConservacionEIM"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia.estadoConservacion}"
+				styleClass="w100" required="true" converter="selectItemConverter">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listaEstadoConservacion}"
+					var="estado" itemLabel="#{estado.nombre}" itemValue="#{estado}" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Apéndice CITES" style="color: white"
+				for="cmbCitesEIM" />
+			<p:selectOneMenu id="cmbCitesEIM"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia.estadoCites}"
+				styleClass="w100" required="true" converter="selectItemConverter">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{ingresarInformacionViabilidadPfnController.listaApendiceCITES}"
+					var="apendice" itemLabel="#{apendice.nombre}"
+					itemValue="#{apendice}" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Aprovechamiento condicionado:"
+				style="color: white" for="rbtAprovechamientoConEIM" />
+			<p:selectOneRadio id="rbtAprovechamientoConEIM" required="true"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia.aprovechamientoCondicionado}">
+				<f:selectItem itemValue="true" itemLabel="Si" />
+				<f:selectItem itemValue="false" itemLabel="No" />
+				<p:ajax process="@this" />
+			</p:selectOneRadio>
+			<p:outputLabel value="Especies endémicas:" style="color: white"
+				for="rbtEspeciesEndemicasEIM" />
+			<p:selectOneRadio id="rbtEspeciesEndemicasEIM" required="true"
+				value="#{ingresarInformacionViabilidadPfnController.especiesInformeForestalImportancia.especieEndemica}">
+				<f:selectItem itemValue="true" itemLabel="Si" />
+				<f:selectItem itemValue="false" itemLabel="No" />
+				<p:ajax process="@this" />
+			</p:selectOneRadio>
+
+		</p:panelGrid>
+		<br />
+		<p:outputPanel>
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+					styleClass="wizard-custom-btn-back" immediate="true"
+					oncomplete="PF('dlgEspeciesImportanciaMuestreo').hide();"
+					actionListener="#{ingresarInformacionViabilidadPfnController.borrarEspecieImportancia()}" />
+				<p:commandButton value="Aceptar"
+					actionListener="#{ingresarInformacionViabilidadPfnController.agregarEspecieImportancia()}"
+					oncomplete="if(!args.validationFailed) PF('dlgEspeciesImportanciaMuestreo').hide();"
+					update=":form:dtEspeciesImportanciaMuestreo :form:dtSumatoriaBasalMuestreo"
+					process="dlgEspeciesImportanciaMuestreo" />
+			</div>
+		</p:outputPanel>
+	</p:dialog>
+
+	<p:dialog header="Actividades del proyecto" id="dlgActividadesProyecto"
+		widgetVar="dlgActividadesProyecto" modal="true" resizable="true"
+		width="600" closable="false" style="position: absolute;">
+		<p:panel id="pnlVerMedio" style="max-height: 500px; overflow: auto">
+
+			<p:panelGrid id="pnlActividadProyecto" columns="2"
+				styleClass="panel_data w100" columnClasses="header w25, w75">
+
+				<p:outputLabel value="Actividad:" style="color: white"
+					for="idActividadP" />
+				<p:inputText id="idActividadP" maxlength="200" autocomplete="false"
+					value="#{ingresarInformacionViabilidadPfnController.afectacionForestal.actividad}"
+					required="true" placeholder="Apertura de trochas" />
+
+				<p:outputLabel value="ZPP:" style="color: white" for="idZpp" />
+				<p:selectBooleanCheckbox
+					value="#{ingresarInformacionViabilidadPfnController.afectacionForestal.zppZonaProteccion}"
+					id="idZpp" required="true" />
+
+				<p:outputLabel value="ZMBN:" style="color: white" for="idZmbn" />
+				<p:selectBooleanCheckbox
+					value="#{ingresarInformacionViabilidadPfnController.afectacionForestal.zmbnZonaManejoBosque}"
+					id="idZmbn" required="true" />
+
+				<p:outputLabel value="ZR:" style="color: white" for="idZr" />
+				<p:selectBooleanCheckbox
+					value="#{ingresarInformacionViabilidadPfnController.afectacionForestal.zrZonaRecuperacion}"
+					id="idZr" required="true" />
+
+				<p:outputLabel value="ZOU:" style="color: white" for="idZou" />
+				<p:selectBooleanCheckbox
+					value="#{ingresarInformacionViabilidadPfnController.afectacionForestal.zouZonaOtrosUsos}"
+					id="idZou" required="true" />
+
+				<h:panelGroup>
+					<p:outputLabel value="Tipo de ecosistemas" style="color: white"
+						for="idTipoEcosistemaP" />
+					<br />
+					<br />
+					<p:outputLabel
+						value="Seleccione solo los ecosistemas a los cuales va a afectar su proyecto, obra o actividad"
+						style="color: white" />
+				</h:panelGroup>
+				<p:selectManyCheckbox id="idTipoEcosistemaP"
+					value="#{ingresarInformacionViabilidadPfnController.afectacionForestal.listaIdEcosistemas}"
+					layout="pageDirection" columns="1" styleClass="grid-checkbox">
+					<f:selectItems
+						value="#{ingresarInformacionViabilidadPfnController.listaInterseccionesEcosistema}"
+						var="ecosistema" itemLabel="#{ecosistema.nombreGeometria}"
+						itemValue="#{ecosistema.id}" />
+				</p:selectManyCheckbox>
+
+				<h:panelGroup>
+					<p:outputLabel value="Tipo de cobertura vegetal:"
+						style="color: white" for="idCoberturaP" />
+					<br />
+					<br />
+					<p:outputLabel
+						value="Seleccione solo el tipo de cobertura vegetal o uso de suelo a los cuales va a afectar su proyecto, obra o actividad"
+						style="color: white" />
+				</h:panelGroup>
+				<p:selectManyCheckbox id="idCoberturaP"
+					value="#{ingresarInformacionViabilidadPfnController.afectacionForestal.listaIdCoberturaVegetal}"
+					layout="pageDirection" columns="1" styleClass="grid-checkbox">
+					<f:selectItems
+						value="#{ingresarInformacionViabilidadPfnController.listaInterseccionesCobertura}"
+						var="cobertura" itemLabel="#{cobertura.nombreGeometria}"
+						itemValue="#{cobertura.id}" />
+				</p:selectManyCheckbox>
+
+				<h:panelGroup>
+					<p:outputLabel value="Nombre del convenio:" style="color: white"
+						for="idConvenioP" />
+					<br />
+					<br />
+					<p:outputLabel
+						value="Seleccionar solo las unidades hidrográficas a los cuales va a afectar su proyecto, obra o actividad"
+						style="color: white" />
+				</h:panelGroup>
+				<p:selectManyCheckbox id="idConvenioP"
+					value="#{ingresarInformacionViabilidadPfnController.afectacionForestal.listaIdConvenio}"
+					layout="pageDirection" columns="1" styleClass="grid-checkbox">
+					<f:selectItems
+						value="#{ingresarInformacionViabilidadPfnController.listaInterseccionesConvenios}"
+						var="convenio" itemLabel="#{convenio.tipoConvenio eq 'Restauración' ? convenio.codigoConvenio : convenio.nombreGeometria}"
+						itemValue="#{convenio.id}" />
+				</p:selectManyCheckbox>
+
+				<h:panelGroup>
+					<p:outputLabel value="Nombre de la unidad hidrográfica:"
+						style="color: white" for="idUnidadHidrograficaP" />
+					<br />
+					<br />
+					<p:outputLabel
+						value="Seleccione solo las unidades hidrográficas a los cuales va afectar su proyecto, obra o actividad"
+						style="color: white" />
+				</h:panelGroup>
+				<p:selectManyCheckbox id="idUnidadHidrograficaP"
+					value="#{ingresarInformacionViabilidadPfnController.afectacionForestal.listaIdUnidadHidrograficas}"
+					layout="pageDirection" columns="1" styleClass="grid-checkbox">
+					<f:selectItems
+						value="#{ingresarInformacionViabilidadPfnController.listaInterseccionUHidrograficas}"
+						var="unidad" itemLabel="#{unidad.nombre}"
+						itemValue="#{unidad.nombre}" />
+				</p:selectManyCheckbox>
+
+				<p:outputLabel value="Apéndices CITES:" style="color: white"
+					for="rbtApendiceCites" />
+				<p:selectOneRadio id="rbtApendiceCites" required="true"
+					value="#{ingresarInformacionViabilidadPfnController.afectacionForestal.esCites}">
+					<f:selectItem itemLabel="Si" itemValue="true" />
+					<f:selectItem itemLabel="No" itemValue="false" />
+					<p:ajax process="@this" />
+				</p:selectOneRadio>
+
+				<p:outputLabel value="Estado de conservación UICN:"
+					style="color: white" for="rbtConservacionUICN" />
+				<p:selectOneRadio id="rbtConservacionUICN" required="true"
+					value="#{ingresarInformacionViabilidadPfnController.afectacionForestal.esUicn}">
+					<f:selectItem itemLabel="Si" itemValue="true" />
+					<f:selectItem itemLabel="No" itemValue="false" />
+					<p:ajax process="@this" />
+				</p:selectOneRadio>
+
+				<p:outputLabel value="Endémicas" style="color: white"
+					for="rbtEndemicas" />
+				<p:selectOneRadio id="rbtEndemicas" required="true"
+					value="#{ingresarInformacionViabilidadPfnController.afectacionForestal.esEndemica}">
+					<f:selectItem itemLabel="Si" itemValue="true" />
+					<f:selectItem itemLabel="No" itemValue="false" />
+					<p:ajax process="@this" />
+				</p:selectOneRadio>
+
+				<p:outputLabel value="Aprovechamiento condicionado"
+					style="color: white" for="rbtAprovechamientoConP" />
+				<p:selectOneRadio id="rbtAprovechamientoConP" required="true"
+					value="#{ingresarInformacionViabilidadPfnController.afectacionForestal.esAprovechamientoCondicionado}">
+					<f:selectItem itemLabel="Si" itemValue="true" />
+					<f:selectItem itemLabel="No" itemValue="false" />
+					<p:ajax process="@this" />
+				</p:selectOneRadio>
+
+			</p:panelGrid>
+
+		</p:panel>
+		<br />
+		<p:outputPanel>
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+					styleClass="wizard-custom-btn-back" immediate="true"
+					oncomplete="PF('dlgActividadesProyecto').hide();"
+					actionListener="#{ingresarInformacionViabilidadPfnController.abrirAfectacionForestal()}"
+					update="dlgActividadesProyecto" />
+				<p:commandButton value="Aceptar"
+					actionListener="#{ingresarInformacionViabilidadPfnController.aceptarAfectacionForestal()}"
+					oncomplete="if(!args.validationFailed) PF('dlgActividadesProyecto').hide();"
+					update=":form:dtActividadesProyecto :form:dtAnalisisPosiblesAfectaciones"
+					process="dlgActividadesProyecto" />
+			</div>
+		</p:outputPanel>
+
+	</p:dialog>
+
+	<p:dialog header="Datos adjunto" id="dlgArchivoAdjuntoAnexo"
+		widgetVar="dlgArchivoAdjuntoAnexo" modal="true" resizable="false"
+		width="600" closable="false">
+
+		<p:panelGrid columns="2" styleClass="panel_data w100"
+			columnClasses="header w25, w25, header w25, w25">
+			<p:outputLabel value="Archivo adjunto:*" style="color: white"
+				for="uploadRequiredDocumentoAdjuntoAnexo" />
+			<h:panelGroup>
+				<p:fileUpload
+					fileUploadListener="#{ingresarInformacionViabilidadPfnController.uploadListenerAdjunto}"
+					multiple="false" sizeLimit="52428800"
+					allowTypes="/(\.|\/)(pdf|jpg|jpeg)$/i"
+					label="Admite .jpg o .pdf de 50 Mb" uploadLabel="Subir"
+					cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+					auto="true" invalidFileMessage="Tipo de archivo no válido"
+					invalidSizeMessage="Debe adjuntar un archivo no mayor de 50 Mb"
+					update="uploadRequiredDocumentoAdjuntoAnexo idTxtDocumentoAdjuntoAdjunto">
+				</p:fileUpload>
+				<h:inputHidden id="uploadRequiredDocumentoAdjuntoAnexo"
+					required="true"
+					value="#{ingresarInformacionViabilidadPfnController.documentoAdjunto.nombre}" />
+				<h:outputText id="idTxtDocumentoAdjuntoAdjunto"
+					value="#{ingresarInformacionViabilidadPfnController.documentoAdjunto.nombre}" />
+			</h:panelGroup>
+			<p:outputLabel value="Descripción archivo adjunto"
+				style="color: white" for="txtDescripcionAnexo" />
+			<p:inputText id="txtDescripcionAnexo" maxlength="200"
+				autocomplete="false"
+				value="#{ingresarInformacionViabilidadPfnController.documentoAdjunto.descripcionAnexo}"
+				required="true" />
+
+		</p:panelGrid>
+		<br />
+		<p:outputPanel>
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+					styleClass="wizard-custom-btn-back" immediate="true"
+					oncomplete="PF('dlgArchivoAdjuntoAnexo').hide();"
+					actionListener="#{ingresarInformacionViabilidadPfnController.limpiarDocumentoAdjunto}"
+					update="dlgArchivoAdjuntoAnexo" />
+				<p:commandButton value="Aceptar"
+					actionListener="#{ingresarInformacionViabilidadPfnController.aceptarDocumentoAdjuntoAnexo}"
+					update=":form:dtAdjuntosAnexo" process="dlgArchivoAdjuntoAnexo"
+					oncomplete="if(!args.validationFailed) PF('dlgArchivoAdjuntoAnexo').hide()" />
+			</div>
+		</p:outputPanel>
+	</p:dialog>
+
+	<p:dialog header="Informe de Factibilidad" id="dlgInformeFact"
+		widgetVar="dlgInformeFact" modal="true" height="700px" width="70%"
+		closable="false">
+
+		<h:panelGrid columns="1" styleClass="panel_data w100"
+			columnClasses=" null" rowClasses="null, alt">
+
+			<h:panelGrid styleClass="w100" id="pnlInforme">
+				<object type="application/pdf"
+					data="#{ingresarInformacionViabilidadPfnController.informeFactivilidadForestal.informePath}?pfdrid_c=true"
+					width="100%" height="500px">
+					Su navegador no soporta la visualización de pdf. Puede descargar el
+					documento presionando el siguiente botón:
+					<p:commandButton value="Descargar" styleClass="primary"
+						ajax="false" immediate="true" icon="ui-icon-arrowthick-1-s">
+						<p:fileDownload
+							value="#{ingresarInformacionViabilidadPfnController.getStreamInforme()}" />
+					</p:commandButton>
+				</object>
+			</h:panelGrid>
+		</h:panelGrid>
+
+		<div class="buttons main">
+			<p:commandButton value="Cancelar" styleClass="secondary"
+				update=":form:pnlButtons" oncomplete="PF('dlgInformeFact').hide()"
+				process="@this" />
+			<p:commandButton value="Aceptar"
+				actionListener="#{ingresarInformacionViabilidadPfnController.finalizar()}"
+				oncomplete="PF('dlgInformeFact').hide()" process="@this">
+				<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+					header="#{msg['header.confirmacion.envio.tarea']}" />
+			</p:commandButton>
+		</div>
+	</p:dialog>
+
+</h:form>
+</html>

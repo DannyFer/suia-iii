@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+xmlns:t="http://myfaces.apache.org/tomahawk">
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<f:loadBundle var="labels" basename="ec.gob.ambiente.core.resources.labels_es" />
+
+		<p:tabView id="tabView">
+			<p:tab title="Listado de proyectos" id="tabProyectos">
+				<h:form id="form">
+						<p:dataTable id="tableProyectos" widgetVar="tableProyectos"
+							value="#{proyectosAdminController.proyectosBean.proyectosLazy}"
+							lazy="true" filterDelay="600" sortBy="#{proyecto.codigo}"
+							sortOrder="descending" var="proyecto" rows="10" paginator="true"
+							paginatorAlwaysVisible="false" paginatorPosition="bottom"
+							currentPageReportTemplate="{currentPage} de {totalPages}"
+							rowsPerPageTemplate="5,10,15"
+							emptyMessage="#{labels['common.table.empty']}">
+							<p:column headerText="Código" filterBy="#{proyecto.codigo}"
+								filterMatchMode="contains" styleClass="alCenter w15"
+								sortBy="#{proyecto.codigo}">
+								<p:commandLink
+									action="#{proyectosAdminController.seleccionar(proyecto)}">
+									<h:outputText value="#{proyecto.codigo}" />
+								</p:commandLink>
+							</p:column>
+							<p:column headerText="Nombre" filterBy="#{proyecto.nombre}"
+								filterMatchMode="contains" styleClass="w25">
+								<h:outputText value="#{proyecto.nombre}"
+									title="#{proyecto.nombre}" />
+							</p:column>
+							<p:column headerText="Registro" styleClass="alCenter w15">
+								<h:outputText value="#{proyecto.registro}" />
+							</p:column>
+							<p:column headerText="Sector" filterBy="#{proyecto.sector}"
+								filterMatchMode="contains" styleClass="alCenter w15">
+								<h:outputText value="#{proyecto.sector}" />
+							</p:column>
+							<p:column headerText="Responsable"
+								filterBy="#{proyecto.responsableSiglas}"
+								filterMatchMode="contains" styleClass="alCenter w15">
+								<h:outputText value="#{proyecto.responsableSiglas}"
+									title="#{proyecto.responsable}" />
+							</p:column>
+							<p:column headerText="Permiso ambiental"
+								filterBy="#{proyecto.categoriaNombrePublico}"
+								filterMatchMode="contains" styleClass="alCenter w20">
+								<f:facet name="filter">
+									<p:selectOneMenu onchange="PF('tableProyectos').filter()"
+										converter="selectItemConverter2" >
+										<f:selectItem itemLabel="" itemValue="-1" />
+										<f:selectItems value="#{proyectosBean.categoriasItems}" />
+									</p:selectOneMenu>
+								</f:facet>
+								<h:outputText value="#{proyecto.categoriaNombrePublico}" />
+							</p:column>
+							<ui:remove>
+								<p:column headerText="Registro" styleClass="alCenter w20">
+									<h:outputText value="#{proyecto.sourceType}" />
+								</p:column>
+							</ui:remove>
+							<p:column headerText="Archivar" styleClass="alCenter w40px"
+								rendered="#{proyectosAdminController.deletionActive or proyectosController.updateSuiaActive}">
+								<p:commandButton
+									rendered="#{!proyecto.internal and proyectosController.deletionActive and !contenidoExterno.verificaEsHidrocarburos(proyecto.codigo) and proyecto.sourceType ne 'source_type_rcoa'}"
+									actionListener="#{proyectosAdminController.marcar(proyecto)}"
+									process="@this" update=":formDelete:eliminarProyecto"
+									icon="ui-icon-trash" styleClass="button-small primary" />
+								<p:commandButton
+									rendered="#{(proyecto.internal or contenidoExterno.verificaEsHidrocarburos(proyecto.codigo)) and proyectosController.deletionActive and proyecto.sourceType ne 'source_type_rcoa'}"
+									disabled="#{proyecto.requestDeletion}"
+									actionListener="#{proyectosAdminController.marcarH(proyecto)}"
+									process="@this" update=":formDelete:eliminarProyecto"
+									icon="ui-icon-trash" styleClass="button-small primary"
+									oncomplete="PF('eliminarProyecto').show()" title="Archivar" />
+								<p:commandButton
+									rendered="#{proyectosAdminController.updateSuiaActive and proyectosController.isProyectoSuia(proyecto) and proyecto.sourceType ne 'source_type_rcoa' }"
+									actionListener="#{proyectosAdminController.eliminarProyectoIntegracion(proyecto)}"
+									process="@this" update=":formDelete:eliminarProyecto"
+									icon="ui-icon-arrow-4-diag" styleClass="button-small primary" />
+								<p:commandButton
+									rendered="#{proyecto.sourceType eq 'source_type_rcoa' and proyecto.categoriaNombrePublico ne 'Licencia Ambiental'}"
+									disabled="#{proyecto.requestDeletion}"
+									actionListener="#{proyectosAdminController.marcarH(proyecto)}"
+									process="@this" update=":formDeleteRcoa:eliminarProyectoRcoa"
+									icon="ui-icon-trash" styleClass="button-small primary"
+									oncomplete="PF('eliminarProyectoRcoa').show()" title="Archivar" />
+							</p:column>
+							<p:column styleClass="alCenter w10" headerText="Digitalización">
+								<p:button icon="ui-icon-zoomin" target="_blank"  href="#{proyectosAdminController.mostrarDigitalizacion(proyecto)}"
+									styleClass="button-small primary" rendered="#{proyecto.categoria eq 'Digitalizacion'}"></p:button>
+							</p:column>
+						</p:dataTable>
+				</h:form>
+			</p:tab>
+			<p:tab title="Proyectos archivados" id="tabArchivados">
+				<ui:include src="/proyectos/listaProyectosArchivados.xhtml" />
+			</p:tab>
+		</p:tabView>
+
+		<h:form id="formDelete">
+			<p:dialog header="Archivar proyecto" id="eliminarProyecto" widgetVar="eliminarProyecto" modal="true" width="500" resizable="false" closable="true" draggable="false">
+				<h:panelGrid columns="1" styleClass="w100">
+					<p:outputLabel value="Recuerde la responsabilidad de la acción que esta ejecutando."/>
+					<p:outputLabel value="Ingrese el motivo por el cual desea archivar el proyecto" for="motivo" />
+					<p:inputTextarea id="motivo" value="#{proyectosAdminController.proyectosBean.proyectoCustom.motivoEliminar}" required="true" autoResize="false" rows="3" maxlength="1000">
+						<f:validateLength minimum="20" />
+					</p:inputTextarea>
+					<p:outputLabel value="Es necesario que adjunte la solicitud del pedido de Proponente que sustente el archivo del proyecto en formato pdf."/>
+				</h:panelGrid>
+				 <p:outputLabel id="adjunto" value="Adjuntar Archivo: #{proyectosAdminController.documentoAdjunto.nombre}" for="fileAdjunto"/>
+            			<p:fileUpload id="fileAdjunto" required="true" requiredMessage="Adjunto obligatorio"
+                                fileUploadListener="#{proyectosAdminController.uploadFile}"
+                                multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                                label="Seleccionar" uploadLabel="Subir"
+                                invalidFileMessage="Tipo de archivo no válido"
+                                invalidSizeMessage="Tamaño de archivo no válido"
+                                cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                auto="true" update="adjunto">                            
+                        </p:fileUpload>
+                  <p:outputLabel value="Si el proyecto cuenta con Resolución Ambiental proceder con la desactivación conforme al proceso establecido."/>      
+				<div class="buttons">
+					<p:commandButton value="Eliminar" icon="ui-icon-check" actionListener="#{proyectosAdminController.eliminar()}" update=":formDelete:eliminarProyecto :tabView:form:tableProyectos" oncomplete="showModalEliminarProyecto(xhr, status, args)" rendered="false"/>
+					<p:commandButton process="@this motivo fileAdjunto" value="Archivar" icon="ui-icon-check" actionListener="#{proyectosAdminController.suspenderProyecto(null)}" update=":formDelete:eliminarProyecto :tabView:form:tableProyectos" oncomplete="showModalEliminarProyecto(xhr, status, args)" />
+					<p:commandButton value="Cancelar" styleClass="secondary" icon="ui-icon-cancel" type="button" onclick="PF('eliminarProyecto').hide()" />
+				</div>
+			</p:dialog>
+		</h:form>	
+		
+		<h:form id="formDeleteRcoa">
+			<p:dialog header="Archivar proyecto" id="eliminarProyectoRcoa" widgetVar="eliminarProyectoRcoa" modal="true" width="500" resizable="false" closable="true" draggable="false">
+				<h:panelGrid columns="1" styleClass="w100">
+					<p:outputLabel value="Recuerde la responsabilidad de la acción que esta ejecutando."/>
+					<p:outputLabel value="Ingrese el motivo por el cual desea archivar el proyecto" for="motivo" />
+					<p:inputTextarea id="motivo" value="#{proyectosAdminController.proyectosBean.proyectoCustom.motivoEliminar}" required="true" autoResize="false" rows="3" maxlength="1000">
+						<f:validateLength minimum="20" />
+					</p:inputTextarea>
+					<p:outputLabel value="Es necesario que adjunte la solicitud del pedido de Proponente que sustente el archivo del proyecto en formato pdf."/>
+				</h:panelGrid>
+				 <p:outputLabel id="adjunto" value="Adjuntar Archivo: #{proyectosAdminController.documentoRCoa.nombreDocumento}" for="fileAdjunto"/>
+            			<p:fileUpload id="fileAdjunto" required="true" requiredMessage="Adjunto obligatorio"
+                                fileUploadListener="#{proyectosAdminController.uploadFileRcoa}"
+                                multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                                label="Seleccionar" uploadLabel="Subir"
+                                invalidFileMessage="Tipo de archivo no válido"
+                                invalidSizeMessage="Tamaño de archivo no válido"
+                                cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                auto="true" update="adjunto">                            
+                        </p:fileUpload>
+                  <p:outputLabel value="Si el proyecto cuenta con Resolución Ambiental proceder con la desactivación conforme al proceso establecido."/>      
+				<div class="buttons">
+					
+					<p:commandButton process="@this motivo fileAdjunto" value="Archivar" icon="ui-icon-check" actionListener="#{proyectosAdminController.suspenderProyectoRcoa(null)}" update=":formDelete:eliminarProyecto :tabView:form:tableProyectos" oncomplete="showModalEliminarProyectoRcoa(xhr, status, args)" />
+					<p:commandButton value="Cancelar" styleClass="secondary" icon="ui-icon-cancel" type="button" onclick="PF('eliminarProyectoRcoa').hide()" />
+				</div>
+			</p:dialog>
+		</h:form>	
+
+		<h:form>
+			<p:remoteCommand autoRun="true" oncomplete="cleanComponentsValues()" />
+		</h:form>
+
+		<script type="text/javascript">
+	        function showModalEliminarProyecto(xhr, status, args) {
+	        	PF('eliminarProyecto').show();
+	            if (args.eliminarProyecto) {
+	            	PF('eliminarProyecto').hide();
+	            }
+	        }
+
+	        function showModalEliminarProyectoRcoa(xhr, status, args) {
+	        	PF('eliminarProyectoRcoa').show();
+	            if (args.eliminarProyecto) {
+	            	PF('eliminarProyectoRcoa').hide();
+	            }
+	        }
+
+	        function cleanComponentsValues() {
+	        }
+
+    	</script>
+
+	</ui:define>
+</ui:composition>
+</html>

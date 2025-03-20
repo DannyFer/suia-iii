@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+    <ui:composition xmlns="http://www.w3.org/1999/xhtml" 
+                    xmlns:ui="http://java.sun.com/jsf/facelets" 
+                    xmlns:h="http://java.sun.com/jsf/html" 
+                    xmlns:p="http://primefaces.org/ui" 
+                    xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+                    template="/WEB-INF/templates/default-task.xhtml">
+
+        <ui:define name="context-extra">
+			<h:outputText value="Datos" />
+			<h:outputText value="Remoción de cobertura vegetal nativa" />
+			<h:outputLink target="_blank" 
+			value="#{request.contextPath}/pages/rcoa/inventarioForestal/previewInventarioForestalVisualizar.jsf">
+				<p:commandButton type="button" styleClass="primary button-small"
+					icon="ui-icon-search" />
+			</h:outputLink>
+		</ui:define>
+
+		<ui:define name="content">
+			<h:form id="form">
+				<p:tabView id="contTab" dynamic="true">
+	                 <p:tab title="Informe técnico" >
+	                     <ui:include id="includeRevisionInforme" src="inventarioForestalRevisionInforme.xhtml"/>
+	                 </p:tab>
+	                 <p:tab title="Oficio de pronunciamiento">
+	                     <ui:include id="includeRevisionOficio" src="inventarioForestalRevisionOficio.xhtml"/>
+	                 </p:tab>
+               	</p:tabView>
+               	<h:panelGroup id="DecicionOficio">
+					<h:panelGrid styleClass="panel_data w100" columns="2" 
+								columnClasses="header w50, null" rowClasses="null, null">
+		             	<h:outputText value="¿Es necesario realizar correcciones sobre el informe o el oficio de pronunciamiento?" />
+		             	<p:selectOneRadio value="#{inventarioForestalInformeTecnicoPronunciamientoController.correccionInformeOficio}" 
+		             	required="true" requiredMessage="Seleccione si requiere o no correcciones">
+				            <f:selectItem itemValue="true" itemLabel="SI" />
+				            <f:selectItem itemValue="false" itemLabel="NO" />
+				            <p:ajax update="@form"></p:ajax>
+				        </p:selectOneRadio>				        
+		             </h:panelGrid>
+		             <h:panelGrid styleClass="panel_data w100" columns="1">
+		             <h:outputText value="Si es necesario realizar correcciones, el trámite regresará al técnico responsable" styleClass="text-red"/>
+		             </h:panelGrid>
+				</h:panelGroup>
+				
+				<h:panelGroup id="ObservacionInforme">
+					<p:panelGrid id="observacionesInventarioRegistro" columns="1" layout="grid" styleClass="w100">
+						<observaciones:tablaObservacionesInventarioForestal idComponent="observacionesInventarioRegistro"
+							componenteActualizarEliminar="observacionesInventarioRegistro"
+							seccion="ReporteInventarioForestal"
+							nombreClase="ReporteInventarioForestal"
+							idClase="#{inventarioForestalInformeTecnicoPronunciamientoController.informeTecnico.id}"		
+							aparace="true"
+							mostrarSiVacio="true"
+							soloLectura="false"/>
+					</p:panelGrid>
+				</h:panelGroup>
+				
+				
+				<div class="buttons main">
+					<p:commandButton value="Guardar" update="@form"
+                    process="@this" icon="ui-icon-disk" 
+					actionListener="#{inventarioForestalInformeTecnicoPronunciamientoController.guardarRevision()}" />
+					<p:commandButton id="btnFirmar" value="Firmar Documento" icon="ui-icon-check" process="@this"
+					actionListener="#{inventarioForestalInformeTecnicoPronunciamientoController.firmar()}" 
+					rendered="#{!inventarioForestalInformeTecnicoPronunciamientoController.correccionInformeOficio}"/>
+					<p:commandButton id="btnEnviar" value="Enviar" action="#{inventarioForestalInformeTecnicoPronunciamientoController.enviarRevision()}" 
+					icon="ui-icon-check" rendered="#{inventarioForestalInformeTecnicoPronunciamientoController.correccionInformeOficio}">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}" header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+			</div>			
+				
+			</h:form>
+			
+			<h:form id="formDialog">
+			<p:dialog id="signDialog" widgetVar="signDialog" header="Firmar Informe" modal="true" resizable="false" width="500px" closable="false">
+					<h:panelGrid styleClass="alCenter w100" columns="1" id="pnlFirmar">
+						<h:outputText value="Firmar Informe Técnico" styleClass="encabezado1_4em" />
+						<h:outputText value="Informe Técnico: #{inventarioForestalInformeTecnicoPronunciamientoController.informeTecnico.codigoReporte}" styleClass="encabezado1_4em" />
+						<h:panelGrid styleClass="alCenter w66" columns="1">
+							<p:panel styleClass="alCenter" rendered="#{!inventarioForestalInformeTecnicoPronunciamientoController.firmaSoloToken}">
+								<h:form>
+									<h:panelGrid styleClass="alCenter w100" columns="2">
+										<h:outputText value="Cuenta con token?" styleClass="encabezado" style="text-align:right" />
+										<p:selectOneRadio id="verificaToken" value="#{inventarioForestalInformeTecnicoPronunciamientoController.token}">
+											<f:selectItem itemLabel="Sí" itemValue="true" />
+											<f:selectItem itemLabel="No" itemValue="false" />
+											<p:ajax event="change" update="@form :formDialog:pnlFirmar"
+												process="@this"
+												listener="#{inventarioForestalInformeTecnicoPronunciamientoController.guardarToken}" />
+										</p:selectOneRadio>
+									</h:panelGrid>
+								</h:form>
+							</p:panel>
+						</h:panelGrid>
+						
+							<h:panelGrid id="digital">
+								<p:commandButton value="Firmar documento" type="button"
+									styleClass="primary" icon="ui-icon-key"
+									rendered="#{inventarioForestalInformeTecnicoPronunciamientoController.token}"
+									onclick="window.location.href='#{inventarioForestalInformeTecnicoPronunciamientoController.firmarDocumentoRevision()}'"/>
+							</h:panelGrid>
+
+							<h:panelGrid id="fisico" columns="2" cellpadding="10" style="text-align:right !important"
+								rendered="#{!inventarioForestalInformeTecnicoPronunciamientoController.token}">
+								<p:outputLabel value="1. Descargue el informe" styleClass="bold" />
+								<p:commandButton value="Descargar" ajax="false"
+									icon="ui-icon-arrowthick-1-s" styleClass="primary"
+									immediate="true">
+									<p:fileDownload value="#{inventarioForestalInformeTecnicoPronunciamientoController.descargarRevision()}" />
+								</p:commandButton>
+								<p:outputLabel for="uploadRequired" value="2. Adjunte el informe firmado" styleClass="bold" />
+								<p:fileUpload
+									fileUploadListener="#{inventarioForestalInformeTecnicoPronunciamientoController.uploadListenerDocumentos}"
+									multiple="false" sizeLimit="5242880"
+									allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+									uploadLabel="Subir"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Tamaño de archivo no válido"
+									cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+									auto="true" update=":formDialog:nombreDocumento">
+									<f:attribute name="clave" value=":form" />
+								</p:fileUpload>
+								<p:outputLabel value="Recuerde que es obligatorio mantener un archivo de los documentos originales en el caso de firma manual" />
+								<h:outputText id="nombreDocumento"
+									value="#{inventarioForestalInformeTecnicoPronunciamientoController.documentoFirmado.nombreDocumento}" />
+							</h:panelGrid>
+							<h:inputHidden id="uploadRequired"
+								required="#{!inventarioForestalInformeTecnicoPronunciamientoController.token and !inventarioForestalInformeTecnicoPronunciamientoController.subido}" />
+							<p:separator />
+						
+						</h:panelGrid>
+
+						<div class="buttons">
+							<p:commandButton value="Enviar"
+								action="#{inventarioForestalInformeTecnicoPronunciamientoController.finalizarRevision()}"
+								icon="ui-icon-check" process="@this">
+								<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+									header="#{msg['header.confirmacion.envio.tarea']}" />
+							</p:commandButton>
+
+							<p:commandButton type="button" value="Cerrar"
+								onclick="PF('signDialog').hide()" />
+						</div>
+					
+				</p:dialog>
+				
+				
+				<p:dialog id="signDialogOficio" widgetVar="signDialogOficio" header="Firmar Oficio" modal="true" resizable="false" width="500px" closable="false">
+					<h:panelGrid styleClass="alCenter w100" columns="1" id="pnlFirmarOficio">
+						<h:outputText value="Firmar Oficio de Pronunciamiento" styleClass="encabezado1_4em" />
+						<h:outputText value="Oficio de Pronunciamiento: #{inventarioForestalInformeTecnicoPronunciamientoController.oficioPronunciamiento.codigoReporte}" 
+							styleClass="encabezado1_4em" />
+						<h:panelGrid styleClass="alCenter w66" columns="1">
+							<p:panel styleClass="alCenter" rendered="#{!inventarioForestalInformeTecnicoPronunciamientoController.firmaSoloToken}">
+								<h:form>
+									<h:panelGrid styleClass="alCenter w100" columns="2">
+										<h:outputText value="Cuenta con token?" styleClass="encabezado" style="text-align:right" />
+										<p:selectOneRadio id="verificaTokenOficio" value="#{inventarioForestalInformeTecnicoPronunciamientoController.token}">
+											<f:selectItem itemLabel="Sí" itemValue="true" />
+											<f:selectItem itemLabel="No" itemValue="false" />
+											<p:ajax event="change" update="@form :formDialog:pnlFirmarOficio"
+												process="@this"
+												listener="#{inventarioForestalInformeTecnicoPronunciamientoController.guardarToken}" />
+										</p:selectOneRadio>
+									</h:panelGrid>
+								</h:form>
+							</p:panel>
+						</h:panelGrid>
+						
+											
+							<h:panelGrid id="digitalOficio">
+								<p:commandButton value="Firmar documento" type="button"
+									styleClass="primary" icon="ui-icon-key"
+									rendered="#{inventarioForestalInformeTecnicoPronunciamientoController.token}"
+									onclick="window.location.href='#{inventarioForestalInformeTecnicoPronunciamientoController.firmarDocumentoOficio()}'"/>
+							</h:panelGrid>
+
+							<h:panelGrid id="fisicoOficio" columns="2" cellpadding="10" style="text-align:right !important"
+								rendered="#{!inventarioForestalInformeTecnicoPronunciamientoController.token}">
+								<p:outputLabel value="1. Descargue el oficio de pronunciamiento" styleClass="bold" />
+								<p:commandButton value="Descargar" ajax="false"
+									icon="ui-icon-arrowthick-1-s" styleClass="primary"
+									immediate="true">
+									<p:fileDownload value="#{inventarioForestalInformeTecnicoPronunciamientoController.descargarOficio()}" />
+								</p:commandButton>
+								<p:outputLabel for="uploadRequiredOficio" value="2. Adjunte el oficio firmado" styleClass="bold" />
+								<p:fileUpload
+									fileUploadListener="#{inventarioForestalInformeTecnicoPronunciamientoController.uploadListenerDocumentos}"
+									multiple="false" sizeLimit="5242880"
+									allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+									uploadLabel="Subir"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Tamaño de archivo no válido"
+									cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+									auto="true" update=":formDialog:nombreDocumentoOficio">
+									<f:attribute name="clave" value=":form" />
+								</p:fileUpload>
+								<p:outputLabel value="Recuerde que es obligatorio mantener un archivo de los documentos originales en el caso de firma manual" />
+								<h:outputText id="nombreDocumentoOficio"
+									value="#{inventarioForestalInformeTecnicoPronunciamientoController.documentoFirmado.nombreDocumento}" />
+							</h:panelGrid>
+							<h:inputHidden id="uploadRequiredOficio"
+								required="#{!inventarioForestalInformeTecnicoPronunciamientoController.token and !inventarioForestalInformeTecnicoPronunciamientoController.subido}" />
+							
+						</h:panelGrid>
+					
+					<div class="buttons">
+							<p:commandButton value="Enviar"
+								action="#{inventarioForestalInformeTecnicoPronunciamientoController.finalizarRevisionOficio()}"
+								icon="ui-icon-check" process="@this">
+								<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+									header="#{msg['header.confirmacion.envio.tarea']}" />
+							</p:commandButton>
+
+							<p:commandButton type="button" value="Cerrar"
+								onclick="PF('signDialogOficio').hide()" />
+						</div>
+				</p:dialog>
+			
+			
+			</h:form>
+		</ui:define>
+	</ui:composition>
+</html>

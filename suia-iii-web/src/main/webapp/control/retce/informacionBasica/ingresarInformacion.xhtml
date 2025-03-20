@@ -1,0 +1,759 @@
+<ui:composition template="/WEB-INF/templates/default.xhtml" 
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"	
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+	<ui:define name="content">
+		<style type="text/css">
+		.valigntop{
+			vertical-align: top;
+		}
+		
+		.ui-datatable-pink table {
+			width: 100%;
+			table-layout: auto;
+			font-size: 12px;
+		}
+		.tree-table-no-header thead {
+			/*display: none*/
+			text-align: center !important;
+		}
+		
+		.ui-datatable-header{
+			height: 30px;
+			text-shadow: none;
+		}
+		
+		.textoCenterColumnContent{
+		    text-align: center !important;
+		}
+		
+		.textoTitulo{
+			-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+			filter: Alpha(Opacity=100) !important;	
+			opacity: 100 !important;
+			box-shadow:none !important;
+			color: red !important;
+			font-weight: bold !important;
+		}
+
+		.textoTitulo td{
+			-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+			filter: Alpha(Opacity=100) !important;	
+			opacity: 100 !important;
+			box-shadow:none !important;
+			color: red !important;
+			font-weight: bold !important;
+		}
+		
+		.quitarBordeGrid.ui-panelgrid>*>tr,.quitarBordeGrid.ui-panelgrid .ui-panelgrid-cell {
+    			border: none;
+		}
+		</style>
+		<h:form id="formTable" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }" rendered="#{!informacionBasicaController.verFormulario}">
+			<p:panel style="text-align:center;">
+				<f:facet name="header">
+					<h:outputText value="REGISTRO DE EMISIONES Y TRANSFERENCIA DE CONTAMINANTES EN EL ECUADOR" styleClass="uppercase"/><br/>
+					<h:outputText value="INFORMACIÓN BASICA" styleClass="uppercase"/>
+				</f:facet>
+			</p:panel>			
+			<p:dataTable id="informacionBasicaTable" value="#{informacionBasicaController.informacionProyectoList}" var="item"
+			paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rows="15">											
+				<p:column headerText="Código">
+					<h:outputText value="#{item.codigo}"/>
+				</p:column>
+				<p:column headerText="Proyecto">
+					<h:outputText value="#{item.nombreProyecto}"/>
+				</p:column>
+				<p:column headerText="Tipo">
+					<h:outputText value="#{item.nombreProceso}"/>
+				</p:column>
+				<p:column styleClass="w15" headerText="Acciones" width="10%">
+					<center>
+						<p:commandButton icon="ui-icon-#{informacionBasicaController.mostrarEditar(item)?'search':'pencil'}" title="#{informacionBasicaController.mostrarEditar(item)?'Ver':'Editar'}" styleClass="#{informacionBasicaController.habilitarIngreso?'secondary':'primary'}"  process="informacionBasicaTable" update="@all" 
+							actionListener="#{informacionBasicaController.editarInfBasica(item)}"/>						
+						<p:commandButton icon="ui-icon-trash" title="Eliminar" styleClass="#{informacionBasicaController.habilitarIngreso?'secondary':'primary'}"  process="informacionBasicaTable" update="@all" 							
+							actionListener="#{informacionBasicaController.eliminarInfBasica(item)}" 
+							rendered="#{item.informacionValidada eq null and !item.informacionEnviada and informacionBasicaController.habilitarIngreso and false}">
+							<p:confirm header="Estimado Usuario" icon="ui-icon-alert" message="¿Está seguro de eliminar el registro del proyecto?"/>
+						</p:commandButton>						
+					</center>
+				</p:column>
+				<p:column styleClass="w15" headerText="Reporte RETCE" width="10%">
+					<center>
+						<p:commandButton icon="ui-icon-plus" title="Agregar Reporte" styleClass="primary" process="@this" actionListener="#{informacionBasicaController.irReporteListener(item.id)}" onclick="PF('reporteDiag').show()" 
+						rendered="#{item.informacionValidada and informacionBasicaController.habilitarIngreso}"/>
+					</center>												
+				</p:column>
+			</p:dataTable>
+			<div class="buttons main">
+				<p:commandButton value="#{msg['button.agregar']}" icon="ui-icon-plus" action="#{informacionBasicaController.agregarInfBasica()}" update="@all"
+				rendered="#{informacionBasicaController.habilitarIngreso}"/>
+			</div>
+		</h:form>
+		<h:form id="form" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }" rendered="#{informacionBasicaController.verFormulario}">
+			<p:panel style="text-align:center;">
+				<f:facet name="header">
+					<h:outputText value="REGISTRO DE EMISIONES Y TRANSFERENCIA DE CONTAMINANTES EN EL ECUADOR" styleClass="uppercase"/><br/>
+					<h:outputText value="Información general de establecimiento" styleClass="uppercase"/>
+				</f:facet>
+			</p:panel>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText
+						value="1.1. Información del operador"/>
+				</f:facet>
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25,null w75">
+					<h:outputText value="RUC / Cédula"/>
+					<h:outputText value="#{loginBean.usuario.nombre}"/>					
+					<h:outputText value="Nombre"/>
+					<h:outputText value="#{informacionBasicaController.nombreUsuario}"/>					
+					<h:outputText value="Representante legal" rendered="#{not empty informacionBasicaController.representanteLegal}"/>
+					<h:outputText value="#{informacionBasicaController.representanteLegal}" rendered="#{not empty informacionBasicaController.representanteLegal}"/>						
+				</p:panelGrid>
+				<h:outputLabel value="Información de contacto"/>
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+					<h:outputText value="Correo electrónico"/>
+					<h:outputText value="#{informacionBasicaController.correo}"/>					
+					<h:outputText value="Teléfono"/>
+					<h:outputText value="#{informacionBasicaController.telefono}"/>
+					<h:outputText value="Dirección"/>
+					<h:outputText value="#{informacionBasicaController.direccion}"/>
+				</p:panelGrid>
+			</p:panelGrid>
+			
+			<p:panelGrid id="proyectoGrid" columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="1.2. Información del proyecto"/>
+				</f:facet>
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+					<h:outputText value="Tipo de emisión *" for="emiteSuia"/>
+					<h:outputText value="Permiso ambiental emitido #{informacionBasicaController.emiteSuia?'a través del Sistema de Regularización y Control Ambiental':'en físico'}"
+					rendered="#{!informacionBasicaController.habilitarIngreso}"/>
+					<p:selectOneRadio id="emiteSuia" layout="grid" columns="1"  styleClass="textoTitulo" 
+						value="#{informacionBasicaController.emiteSuia}" 
+						required="true" disabled="#{informacionBasicaController.informacionProyecto.informacionEnviada or informacionBasicaController.informacionProyecto.informacionValidada ne null }"
+						requiredMessage="El tipo de emisión del permiso ambiental es requerido"
+						rendered="#{informacionBasicaController.habilitarIngreso}">
+						<f:selectItem itemLabel="Permiso ambiental emitido a través del Sistema de Regularización y Control Ambiental" itemValue="#{true}"/>
+						<f:selectItem itemLabel="Permiso ambiental emitido en físico" itemValue="#{false}"/>
+						<p:ajax update="proyectoGrid" listener="#{informacionBasicaController.emiteListener}"/>
+					</p:selectOneRadio>	
+				</p:panelGrid>
+				<p:panelGrid rendered="#{informacionBasicaController.emiteSuia and informacionBasicaController.habilitarIngreso and !informacionBasicaController.informacionProyecto.informacionEnviada and !informacionBasicaController.informacionProyecto.informacionValidada}" columns="1">					
+					<p:dataTable id="buscarTable"  value="#{informacionBasicaController.proyectosBuscarList}" var="item"
+						sortBy="#{item.codigo}" sortOrder="descending" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rows="5" rowsPerPageTemplate="5,10,15">
+						<p:column headerText="Código" filterBy="#{item.codigo}" filterMatchMode="contains" styleClass="alCenter w15">
+							<h:outputText value="#{item.codigo}" />
+						</p:column>
+						<p:column headerText="Nombre proyecto" filterBy="#{item.nombre}" filterMatchMode="contains">
+							<h:outputText value="#{item.nombre}" />
+						</p:column>
+						<p:column headerText="Tipo de trámite" filterBy="#{item.categoriaNombrePublico}" filterMatchMode="contains" styleClass="alCenter w15">
+							<h:outputText value="#{item.categoriaNombrePublico}" />
+						</p:column>
+						<p:column headerText="Seleccionar" styleClass="alCenter w10">
+                        	<p:commandButton actionListener="#{informacionBasicaController.seleccionarProyecto(item.codigo)}" 
+                        	process="@this" update=":form:proyectoGrid" icon="ui-icon-play" styleClass="button-small primary"  />
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+				
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75" rendered="#{informacionBasicaController.emiteSuia or informacionBasicaController.emiteFisico}">
+					
+					<h:outputText value="Código" for="codigoProyecto" rendered="#{not empty informacionBasicaController.informacionProyecto.codigo or informacionBasicaController.emiteSuia}" />
+					<h:outputText id="codigoProyecto" value="#{informacionBasicaController.informacionProyecto.codigo}" rendered="#{not empty informacionBasicaController.informacionProyecto.codigo or informacionBasicaController.emiteSuia}"/>
+														
+					<h:outputText value="Nombre de Proyecto *" for="nombreProyecto"/>
+					<h:outputText value="#{informacionBasicaController.informacionProyecto.nombreProyecto}" 
+					rendered="#{informacionBasicaController.emiteSuia or !informacionBasicaController.habilitarIngreso}"/>
+					<p:inputText id="nombreProyecto" value="#{informacionBasicaController.informacionProyecto.nombreProyecto}"
+					required="true" requiredMessage="Nombre Proyecto es requerido" 
+					rendered="#{!informacionBasicaController.emiteSuia and informacionBasicaController.habilitarIngreso}" maxlength="200"/>
+					
+					<h:outputText value="#{informacionBasicaController.emiteFisico?'Tipo de Permiso *':'Tipo de Permiso *'}" for="tipoTramite"/>
+					<h:outputText value="#{informacionBasicaController.informacionProyecto.nombreProceso}" rendered="#{!informacionBasicaController.habilitarIngreso}"/>
+					<p:panelGrid id="pnlNombreProceso" columns="2" styleClass="quitarBordeGrid" columnClasses="w50" rendered="#{informacionBasicaController.habilitarIngreso}">
+						<p:selectOneRadio id="tipoTramite" value="#{informacionBasicaController.informacionProyecto.nombreProceso}" 
+						required="true" requiredMessage="#{informacionBasicaController.emiteFisico?'Nombre Proceso':'Tipo de Trámite'} es requerido" styleClass="textoTitulo #{(informacionBasicaController.emiteFisico and informacionBasicaController.informacionProyecto.nombreProceso eq 'Licencia Ambiental')?'w100':'w50'}" filter="true" filterMatchMode="contains"
+						disabled="#{informacionBasicaController.emiteSuia}"
+						rendered="#{informacionBasicaController.habilitarIngreso}">						
+							<f:selectItem itemLabel="#{informacionBasicaController.emiteFisico?'Ficha':'Registro'} Ambiental" itemValue="Registro Ambiental"/>
+							<f:selectItem itemLabel="Licencia Ambiental" itemValue="Licencia Ambiental"/>
+							<p:ajax listener="#{informacionBasicaController.ingresarInclusion}" update="pnlNombreProceso"/>						
+						</p:selectOneRadio>
+						<h:outputText value="#{informacionBasicaController.msjLicenciaFisica}" 
+										rendered="#{informacionBasicaController.emiteFisico and informacionBasicaController.informacionProyecto.nombreProceso eq 'Licencia Ambiental' }"/>
+					</p:panelGrid>
+					
+					<h:outputText value="Sector *" for="sectorProyecto"/>
+					<h:outputText value="#{informacionBasicaController.informacionProyecto.tipoSector.nombre}" 
+					rendered="#{!informacionBasicaController.habilitarIngreso}"/>
+					<p:selectOneMenu id="sectorProyecto" required="true" requiredMessage="Sector es requerido" styleClass="w100"
+					value="#{informacionBasicaController.informacionProyecto.tipoSector}" disabled="#{informacionBasicaController.emiteSuia}" converter="selectItemConverter"
+					rendered="#{informacionBasicaController.habilitarIngreso}">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{informacionBasicaController.tipoSectorList}" var="item" itemLabel="#{item.nombre}" itemValue="#{item}"/>
+						<p:ajax event="change" listener="#{informacionBasicaController.sectorListener}" update="faseProyecto"/>
+					</p:selectOneMenu>
+					
+					<h:outputText value="Fase *" for="faseProyecto"/>
+					<h:outputText value="#{informacionBasicaController.disabledFase?'N/A':informacionBasicaController.informacionProyecto.faseRetce.descripcion}" 
+					rendered="#{!informacionBasicaController.habilitarIngreso}"/>										
+					<p:selectOneMenu id="faseProyecto" required="true" requiredMessage="Fase es requerido" styleClass="w100"
+					value="#{informacionBasicaController.informacionProyecto.faseRetce}" disabled="#{informacionBasicaController.disabledFase}" converter="selectItemConverter"
+					rendered="#{informacionBasicaController.habilitarIngreso}">
+						<f:selectItem itemLabel="#{informacionBasicaController.disabledFase?'N/A':'Seleccione...'}" noSelectionOption="true"/>
+						<f:selectItems value="#{informacionBasicaController.faseRetceList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+					</p:selectOneMenu>
+					
+					<h:outputText value="Inicio de Operaciones " for="inicioOperaciones"/>
+					<h:outputText value="#{informacionBasicaController.informacionProyecto.fechaInicioOperaciones}" 
+					rendered="#{!informacionBasicaController.habilitarIngreso}">
+					<f:convertDateTime pattern="dd/MM/yyyy"/>
+					</h:outputText>					
+					<p:calendar id="inicioOperaciones" styleClass="calendarClass" value="#{informacionBasicaController.informacionProyecto.fechaInicioOperaciones}" 
+					pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" disabled="#{informacionBasicaController.emiteSuia}"
+					required="false" requiredMessage="Inicio de Operaciones es requerido" maxdate="#{informacionBasicaController.fechaActual}"
+					rendered="#{informacionBasicaController.habilitarIngreso}"/>					
+					
+					<h:outputText value="Número de Autorización Ambiental Administrativa Principal (Número de Resolución) *" for="numeroResolucion"/>
+					<h:outputText value="#{informacionBasicaController.informacionProyecto.numeroResolucion}" 
+					rendered="#{!informacionBasicaController.habilitarIngreso}"/>					
+					<p:inputText id="numeroResolucion" value="#{informacionBasicaController.informacionProyecto.numeroResolucion}"
+					required="true" requiredMessage="Numero Resolución es requerido" disabled="#{informacionBasicaController.emiteSuia and not empty informacionBasicaController.informacionProyecto.numeroResolucion}" maxlength="30"
+					rendered="#{informacionBasicaController.habilitarIngreso}">
+					<p:ajax event="change" listener="#{informacionBasicaController.cambioNumeroResolucion}" />
+					</p:inputText>
+					<h:outputText value="Resolución Ambiental *" for="adjuntoResolucion" />	
+					<h:panelGroup >
+                    <p:fileUpload id="fileResolucion" 
+                                              fileUploadListener="#{informacionBasicaController.fileUploadResolucion}"
+                                              value="#{informacionBasicaController.fileAdjuntoResolucion}" sizeLimit="20971520"
+                                              allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar  (pdf 20Mb)"
+                                              update="#{p:component('nombreAdjuntoResolucion')}"
+                                              uploadLabel="Subir" auto="true"                                              
+                                              cancelLabel="Cancelar"
+                                              invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+                                              invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+                                              styleClass="w100 toLeft" mode="advanced"
+                                              rendered="#{informacionBasicaController.habilitarIngreso and informacionBasicaController.emiteFisico}"/>
+                    <br/>                  
+                    <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar"
+					rendered="#{informacionBasicaController.adjuntoResolucion.id!=null or informacionBasicaController.adjuntoResolucion.contenidoDocumento!=null}">
+								<p:fileDownload value="#{informacionBasicaController.documentoAdjuntoResolucion}"/>
+					</p:commandButton>
+                    <h:outputText id="nombreAdjuntoResolucion" value="#{informacionBasicaController.adjuntoResolucion.nombre}"/>
+                    </h:panelGroup>
+                    <h:outputText value="Fecha de emisión del permiso ambiental *" for="fechaEmision"/>
+                    <h:outputText value="#{informacionBasicaController.informacionProyecto.fechaEmision}" 
+					rendered="#{!informacionBasicaController.habilitarIngreso}">
+					<f:convertDateTime pattern="dd/MM/yyyy"/>
+					</h:outputText>						
+					<p:calendar id="fechaEmision" styleClass="calendarClass" value="#{informacionBasicaController.informacionProyecto.fechaEmision}" 
+					pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" disabled="#{informacionBasicaController.emiteSuia}"
+					required="true" requiredMessage="Fecha de emisión del permiso ambiental es requerido" maxdate="#{informacionBasicaController.fechaActual}"
+					rendered="#{informacionBasicaController.habilitarIngreso}"/>
+
+					<h:outputText value="Número de Oficio de Certificado de Intersección *" rendered="#{informacionBasicaController.emiteFisico}"/>
+					<p:inputText value="#{informacionBasicaController.informacionProyecto.certificadoInterseccion}"
+					required="true" requiredMessage="El Certificado de Intersección es requerido" maxlength="30" rendered="#{informacionBasicaController.emiteFisico and informacionBasicaController.habilitarIngreso}" />
+					<h:outputText value="#{informacionBasicaController.informacionProyecto.certificadoInterseccion}" rendered="#{informacionBasicaController.emiteFisico and !informacionBasicaController.habilitarIngreso}"/>
+
+                    <h:outputText value="Fecha de Certificado de Intersección *" for="fechaCertificado" rendered="#{informacionBasicaController.emiteFisico}"/>
+                    <h:outputText value="#{informacionBasicaController.informacionProyecto.fechaCertificadoInterseccion}" 
+					rendered="#{informacionBasicaController.emiteFisico and !informacionBasicaController.habilitarIngreso}">
+					<f:convertDateTime pattern="dd/MM/yyyy"/>
+					</h:outputText>						
+					<p:calendar id="fechaCertificado" styleClass="calendarClass" value="#{informacionBasicaController.informacionProyecto.fechaCertificadoInterseccion}" 
+					pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" disabled="#{informacionBasicaController.emiteSuia}"
+					required="true" requiredMessage="Fecha de Certificado de Intersección es requerido" maxdate="#{informacionBasicaController.fechaActual}"
+					rendered="#{informacionBasicaController.emiteFisico and informacionBasicaController.habilitarIngreso}"/>
+					
+					<h:outputText value="Mapa de interseccion " for="adjuntoMapa" rendered="#{informacionBasicaController.emiteFisico}"/>	
+					<h:panelGroup rendered="#{informacionBasicaController.emiteFisico}">
+                    <p:fileUpload id="fileMapa" 
+                                              fileUploadListener="#{informacionBasicaController.fileUploadMapa}"
+                                              value="#{informacionBasicaController.fileAdjuntoMapa}" sizeLimit="20971520"
+                                              allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar"
+                                              update="#{p:component('nombreAdjuntoMapa')}"
+                                              uploadLabel="Subir" auto="true"                                              
+                                              cancelLabel="Cancelar"
+                                              invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+                                              invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+                                              styleClass="w100 toLeft" mode="advanced"
+                                              rendered="#{informacionBasicaController.habilitarIngreso}"/>
+                    <br/>
+                    <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar"
+					rendered="#{informacionBasicaController.adjuntoMapa.id!=null or informacionBasicaController.adjuntoMapa.contenidoDocumento!=null}">
+								<p:fileDownload value="#{informacionBasicaController.documentoMapa}"/>
+					</p:commandButton>
+                    <h:outputText id="nombreAdjuntoMapa" value="#{informacionBasicaController.adjuntoMapa.nombre}"/>            
+                    </h:panelGroup>
+				</p:panelGrid>
+
+				<h:outputLabel value="Coordenadas del proyecto" rendered="#{informacionBasicaController.emiteFisico}"/>
+				<p:panelGrid columns="3" styleClass="panel_data w100" columnClasses="header w25,w5,null" rendered="#{informacionBasicaController.emiteSuia}">
+					<h:outputText value="Coordenadas" rendered="#{informacionBasicaController.adjuntoCoordenadas.contenidoDocumento != null}"/>					
+					<p:commandButton id="fileCoordDownload" icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar"
+					rendered="#{informacionBasicaController.adjuntoCoordenadas.contenidoDocumento != null}">
+								<p:fileDownload value="#{informacionBasicaController.documentoCoordenadas}"/>
+					</p:commandButton>
+					<h:outputText value="#{informacionBasicaController.adjuntoCoordenadas.nombre}" rendered="#{informacionBasicaController.adjuntoCoordenadas.contenidoDocumento != null}"/>
+
+					<h:outputText value="Mapa" rendered="#{informacionBasicaController.adjuntoMapa != null}"/>
+					<p:commandButton id="fileMapaDownload" icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar"
+					rendered="#{informacionBasicaController.adjuntoMapa.id != null}">
+								<p:fileDownload value="#{informacionBasicaController.documentoMapa}"/>
+					</p:commandButton>			
+					<h:outputText value="#{informacionBasicaController.adjuntoMapa.nombre}" rendered="#{informacionBasicaController.adjuntoMapa.contenidoDocumento != null}"/>							
+					<h:outputText value="" rendered="#{informacionBasicaController.adjuntoMapa.contenidoDocumento == null}"/>
+					<h:outputText value="" rendered="#{informacionBasicaController.adjuntoMapa.id == null}"/>
+				</p:panelGrid>
+
+				<h:panelGrid columns="4" styleClass="panel_data w100" columnClasses="header w25,null w25, header w25,null w25" rendered="#{informacionBasicaController.emiteFisico}">
+					<p:outputLabel value="Datum" style="color: white"/>
+				        <p:selectOneRadio id="formato" value="#{informacionBasicaController.informacionProyecto.formatoCoordenadas}" required="true" requiredMessage="Datum es requerido" rendered="#{informacionBasicaController.habilitarIngreso}">
+				            <f:selectItem itemLabel="PSAD56" itemValue="PSAD56"/>
+				            <f:selectItem itemLabel="WGS84" itemValue="WGS84"/>
+				            <f:selectItem itemLabel="UTM" itemValue="UTM"/>
+				            <p:ajax process="formato" immediate="true" update="pnlUpload"/>
+				        </p:selectOneRadio>
+				        <p:outputLabel value="#{informacionBasicaController.informacionProyecto.formatoCoordenadas}" style="color: black" rendered="#{!informacionBasicaController.habilitarIngreso}"/>
+				        <p:outputLabel value="Zona" style="color: white" />
+				        <p:selectOneRadio id="zona" value="#{informacionBasicaController.informacionProyecto.zona}" required="true" requiredMessage="Zona es requerido" rendered="#{informacionBasicaController.habilitarIngreso}">
+				            <f:selectItem itemLabel="16S" itemValue="16S"/>
+				            <f:selectItem itemLabel="17S" itemValue="17S"/>
+				            <f:selectItem itemLabel="18S" itemValue="18S"/>
+				            <p:ajax update="pnlUpload"></p:ajax>
+				        </p:selectOneRadio>
+				        <p:outputLabel value="#{informacionBasicaController.informacionProyecto.zona}" style="color: black" rendered="#{!informacionBasicaController.habilitarIngreso}"/>
+				</h:panelGrid>
+				
+				<h:panelGroup id="containerCoordenadas" rendered="#{informacionBasicaController.emiteFisico and informacionBasicaController.habilitarIngreso}">
+				</h:panelGroup>
+				    <p:outputPanel id="pnlUpload">
+					<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75" rendered="#{informacionBasicaController.getMostrarUpload()}">
+					<h:outputText value="Descargar Plantilla" rendered="#{informacionBasicaController.habilitarIngreso}" />
+					<p:commandButton rendered="#{not empty cargarCoordenadasBean.plantillaCoordenadas and informacionBasicaController.habilitarIngreso}" value="Descargar plantilla" icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true">
+						<p:fileDownload value="#{cargarCoordenadasBean.plantillaCoordenadas}" />
+					</p:commandButton>
+							
+				    <h:outputText value="Archivo de Coordenadas *" /> 
+      				<h:panelGroup >
+                    <p:fileUpload id="fileCoordenadas" 
+                                              fileUploadListener="#{informacionBasicaController.fileUploadCoordenadas}"
+                                              value="#{informacionBasicaController.fileAdjuntoCoordenadas}" sizeLimit="20971520"
+                                              allowTypes="/(\.|\/)(xls)$/" label="Seleccionar"
+                                              update="#{p:component('nombreAdjuntoCoordenadas')}"
+                                              uploadLabel="Subir" auto="true"                                              
+                                              cancelLabel="Cancelar"
+                                              invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo xls"
+                                              invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+                                              styleClass="w100 toLeft" mode="advanced"
+                                              rendered="#{informacionBasicaController.habilitarIngreso}"/>
+                    <br/>
+                    <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar"
+					rendered="#{informacionBasicaController.adjuntoCoordenadas.id!=null or informacionBasicaController.adjuntoCoordenadas.contenidoDocumento!=null}">
+								<p:fileDownload value="#{informacionBasicaController.documentoCoordenadas}"/>
+					</p:commandButton>
+                    <h:outputText id="nombreAdjuntoCoordenadas" value="#{informacionBasicaController.adjuntoCoordenadas.nombre}"/>            
+                    </h:panelGroup>
+				</p:panelGrid>
+				</p:outputPanel>
+				<ui:remove>
+				<h:panelGroup id="containerCoordenadas1" rendered="#{informacionBasicaController.emiteFisico and informacionBasicaController.habilitarIngreso}">
+					<p:panelGrid columns="1" layout="grid" styleClass="buttonAdjuntarCoordenadasContainer w100">
+						<f:facet name="header">
+							<p:commandButton value="Adjuntar" actionListener="#{informacionBasicaController.cargarCoordenadasListener}" process="@this" styleClass="buttonAdjuntarCoordenadas button-small-text toRight field_mrg" icon="ui-icon-document" />
+							<p:commandButton rendered="#{not empty cargarCoordenadasBean.plantillaCoordenadas}" value="Descargar plantilla" styleClass="button-small-text toRight field_mrg" icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true">
+								<p:fileDownload value="#{cargarCoordenadasBean.plantillaCoordenadas}" />
+							</p:commandButton>
+							<p:commandButton styleClass="button-small toRight field_mrg" ajax="false" immediate="true" icon="ui-icon-help">
+								<p:fileDownload value="#{cargarCoordenadasBean.ayudaCoordenadas}" />
+							</p:commandButton>
+						</f:facet>
+						<ui:include src="/comun/cargarCoordenadasRetce.xhtml" />
+					</p:panelGrid>
+				</h:panelGroup>
+				</ui:remove>
+				
+
+				<h:outputLabel value="Ubicacción Geográfica del proyecto" rendered="#{informacionBasicaController.emiteFisico}"/>
+				<p:outputPanel id="pnlUbicaciones" >
+						<p:dataTable id="listaubicacionesSuia" value="#{informacionBasicaController.listaUbicacionesGeograficas}" var="ubicacion" emptyMessage="#{labels['common.table.empty']}"
+	                   			  style="table-layout=auto" rendered="#{!informacionBasicaController.emiteFisico}">
+						<f:facet name="header">
+						</f:facet>							
+						<p:column headerText="Provincia">
+							<h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+						</p:column>
+						<p:column headerText="Cantón">
+							<h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}" />
+						</p:column>
+						<p:column headerText="Parroquia">
+							<h:outputText value="#{ubicacion.nombre}"/>
+						</p:column>
+					</p:dataTable>
+				
+					<p:dataTable id="listaubicaciones" value="#{informacionBasicaController.ubicacionesGeograficas}" var="ubicacion" emptyMessage="#{labels['common.table.empty']}"
+	                   			  style="table-layout=auto" rendered="#{informacionBasicaController.emiteFisico}">
+						<f:facet name="header">
+						</f:facet>							
+						<p:column headerText="Provincia">
+							<h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+						</p:column>
+						<p:column headerText="Cantón">
+							<h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+						</p:column>
+						<p:column headerText="Parroquia">
+							<h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}"/>
+						</p:column>
+						<p:column styleClass="w15" headerText="Acciones">
+							<center>
+								<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process="listaubicaciones" update="listaubicaciones, :form:opnlEnteSeguimiento" 
+									actionListener="#{informacionBasicaController.eliminarUbicacion(ubicacion)}" rendered="#{informacionBasicaController.habilitarIngreso}">
+									<p:confirm header="Estimado Usuario" icon="ui-icon-alert" message="¿Está seguro de eliminar la ubicación geográfica?"/>
+								</p:commandButton>
+							</center>												
+						</p:column>
+					</p:dataTable>
+				</p:outputPanel>
+					
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75" rendered="#{informacionBasicaController.emiteSuia or informacionBasicaController.emiteFisico  }">
+					<h:outputText value="Actividad del CIIU *" for="actividadCiiu"/>
+					<h:outputText value="#{informacionBasicaController.actividadCiiu.descripcion}" 
+					rendered="#{!informacionBasicaController.habilitarIngreso}"/>
+					<p:selectOneMenu id="actividadCiiu" value="#{informacionBasicaController.actividadCiiu}" 
+					required="true" requiredMessage="Actividad del CIIU es requerido" styleClass="w100" filter="true" filterMatchMode="contains" converter="selectItemConverter"
+					rendered="#{informacionBasicaController.habilitarIngreso}">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOptiosubActividadCiiun="true"/>
+						<f:selectItems value="#{informacionBasicaController.actividadCiiuList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+						<p:ajax event="change" listener="#{informacionBasicaController.actividadCiiuListener}" update="subActividadCiiu"/>						
+					</p:selectOneMenu>
+
+					<h:outputText value="SubActividad del CIIU *" for="subActividadCiiu"/>
+					<h:outputText value="#{informacionBasicaController.informacionProyecto.actividadCiiu.descripcion}" 
+					rendered="#{!informacionBasicaController.habilitarIngreso}"/>						
+					<p:selectOneMenu id="subActividadCiiu" value="#{informacionBasicaController.informacionProyecto.actividadCiiu}" 
+					required="true" requiredMessage="SubActividad del CIIU es requerido" styleClass="w100" filter="true" filterMatchMode="contains" converter="selectItemConverter"
+					rendered="#{informacionBasicaController.habilitarIngreso}">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{informacionBasicaController.subActividadCiiuList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>												
+					</p:selectOneMenu>
+
+					<h:outputText value="Ente Responsable que emitió el permiso ambiental *" for="enteResponsable"/>
+					<h:outputText value="#{informacionBasicaController.informacionProyecto.areaResponsable.areaName}" 
+					rendered="#{!informacionBasicaController.habilitarIngreso}"/>
+					<p:selectOneMenu id="enteResponsable" value="#{informacionBasicaController.informacionProyecto.areaResponsable}" disabled="#{informacionBasicaController.emiteSuia}"
+					required="true" requiredMessage="Ente responsable es requerido" styleClass="w100" filter="true" filterBy="#{item.areaName}" filterMatchMode="contains" converter="selectItemConverter"
+					rendered="#{informacionBasicaController.habilitarIngreso}">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{informacionBasicaController.areasList}" var="item" itemValue="#{item}" itemLabel="#{item.areaName} (#{item.areaAbbreviation})"/>
+					</p:selectOneMenu>
+					
+					<h:outputText value="Ente Responsable de Control y Seguimiento *" for="enteSeguimiento"/>
+					<h:outputText value="#{informacionBasicaController.informacionProyecto.areaSeguimiento.areaName}" 
+					rendered="#{!informacionBasicaController.habilitarIngreso}"/>
+					<p:outputPanel id="opnlEnteSeguimiento" rendered="#{informacionBasicaController.habilitarIngreso}">
+						<p:selectOneMenu id="enteSeguimiento" value="#{informacionBasicaController.informacionProyecto.areaSeguimiento}"  disabled="#{informacionBasicaController.emiteSuia}"
+						required="true" requiredMessage="Ente seguimiento es requerido" styleClass="w100" filter="true" filterBy="#{item.areaName}" filterMatchMode="contains" converter="selectItemConverter">
+							<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+							<f:selectItems value="#{informacionBasicaController.obtenerEnteSeguimientoListaUno()}" var="item" itemValue="#{item}" itemLabel="#{item.areaName} (#{item.areaAbbreviation})"/>
+						</p:selectOneMenu>
+					</p:outputPanel>
+
+				</p:panelGrid>
+				
+			
+				
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75" >
+					<h:outputText value="¿Es gestor de residuos y desechos peligrosos o especiales o realiza gestión propia (interna) de residuos o desechos peligrosos o especiales? *" for="gestorResiduos"/>
+					<p:selectOneRadio id="gestorResiduos" layout="grid" columns="1"
+						value="#{informacionBasicaController.gestionDesechos}" rendered="#{informacionBasicaController.habilitarIngreso}"
+						required="true"
+						requiredMessage="Es gestor de residuos y desechos peligrosos o especiales o realiza gestión propia (interna) de residuos o desechos peligrosos o especiales es requerido">
+						<f:selectItem itemLabel="SI" itemValue="#{true}"/>
+						<f:selectItem itemLabel="NO" itemValue="#{false}"/>
+						<p:ajax update="gestionDesechosGrid, pnlGART, panelDesechosGrid" />
+					</p:selectOneRadio>
+					<h:outputLabel value="#{informacionBasicaController.gestionDesechos?'SI':'NO'}" rendered="#{!informacionBasicaController.habilitarIngreso}"/>
+				</p:panelGrid>
+				
+				
+				
+				</p:outputPanel>
+				
+			</p:panelGrid>
+			<p:outputPanel rendered="true">
+			
+			
+			<p:panelGrid id="tecnicoGrid" columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText
+						value="1.4. Información del técnico que reporta"/>
+				</f:facet>
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+					<h:outputText value="Cédula / RUC *" for="cedulaRuc"/>
+					<h:outputText value="#{informacionBasicaController.tecnicoResponsable.identificador}" rendered="#{!informacionBasicaController.habilitarIngreso}"/>
+					<p:inputText id="cedulaRuc" value="#{informacionBasicaController.tecnicoResponsable.identificador}"
+					required="true" requiredMessage="Cédula/RUC es requerido" maxlength="13" onkeypress="return numbersonly(this, event);"
+					rendered="#{informacionBasicaController.habilitarIngreso}">
+						<p:ajax event="blur" listener="#{informacionBasicaController.validarCedulaListener}" update="tecnicoGrid"/>
+					</p:inputText>
+					
+					<h:outputText value="Nombre / Razón Social *" for="nombreTecnico"/>					
+					<p:inputText id="nombreTecnico" value="#{informacionBasicaController.tecnicoResponsable.nombre}"
+					required="true" requiredMessage="Nombre es requerido" maxlength="200" disabled="true"/>					
+					
+					<h:outputText value="Correo electrónico *" for="correoTecnico"/>
+					<h:outputText value="#{informacionBasicaController.tecnicoResponsable.correo}" rendered="#{!informacionBasicaController.habilitarIngreso}"/>
+					<p:inputText id="correoTecnico" value="#{informacionBasicaController.tecnicoResponsable.correo}"
+					required="true" requiredMessage="Correo electrónico es requerido" maxlength="100" disabled="#{empty informacionBasicaController.tecnicoResponsable.identificador}"
+					rendered="#{informacionBasicaController.habilitarIngreso}">
+						<p:ajax event="blur" listener="#{informacionBasicaController.validarCorreoListener}" update="@this"/>
+					</p:inputText>
+					
+					<h:outputText value="Teléfono *" for="telefonoTecnico"/>
+					<h:outputText value="#{informacionBasicaController.tecnicoResponsable.telefono}" rendered="#{!informacionBasicaController.habilitarIngreso}"/>
+					<p:inputText id="telefonoTecnico" value="#{informacionBasicaController.tecnicoResponsable.telefono}"
+					required="true" requiredMessage="Teléfono es requerido" maxlength="9" disabled="#{empty informacionBasicaController.tecnicoResponsable.identificador}"
+					onkeypress="return numbersonly(this, event);"
+					rendered="#{informacionBasicaController.habilitarIngreso}"/>
+					
+					<h:outputText value="Celular *" for="celularTecnico"/>
+					<h:outputText value="#{informacionBasicaController.tecnicoResponsable.celular}" rendered="#{!informacionBasicaController.habilitarIngreso}"/>
+					<p:inputText id="celularTecnico" value="#{informacionBasicaController.tecnicoResponsable.celular}"
+					required="true" requiredMessage="Celular:es requerido" maxlength="10" disabled="#{empty informacionBasicaController.tecnicoResponsable.identificador}"
+					onkeypress="return numbersonly(this, event);"
+					rendered="#{informacionBasicaController.habilitarIngreso}"/>
+				</p:panelGrid>
+				
+			</p:panelGrid>
+			</p:outputPanel>
+			<p:panelGrid id="validacionGrid" columns="1" layout="grid" styleClass="w100" rendered="#{informacionBasicaController.habilitarRevision}">
+				<f:facet name="header">
+					<h:outputText
+						value="Validar informacion"/>
+				</f:facet>
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+					<h:outputText value="¿La Información ingresada es Correcta?" for="informacionCorrecta"/>					
+					<p:selectOneRadio id="informacionCorrecta" layout="grid" columns="1"
+						value="#{informacionBasicaController.informacionProyecto.informacionValidada}"
+						required="true"	requiredMessage="¿La Información ingresada es Correcta?">
+						<f:selectItem itemLabel="Si" itemValue="#{true}"/>
+						<f:selectItem itemLabel="No" itemValue="#{false}"/>																
+					</p:selectOneRadio>	
+				</p:panelGrid>
+			</p:panelGrid>
+			
+			<p:panelGrid id="observacionesGrid" columns="1" layout="grid" styleClass="w100" rendered="#{informacionBasicaController.informacionProyecto.id != null}">
+				<observaciones:tablaObservaciones idComponent="observaciones"
+						componenteActualizarEliminar="observaciones"
+						seccion="InformacionProyecto"
+						nombreClase="InformacionProyecto"
+						idClase="#{informacionBasicaController.informacionProyecto.id}"		
+						aparace="#{informacionBasicaController.habilitarObservaciones}"
+						mostrarSiVacio="#{informacionBasicaController.habilitarObservaciones}"
+						soloLectura="#{!informacionBasicaController.editarObservaciones}"/>
+			</p:panelGrid>
+			
+			<div class="buttons main">
+				<p:commandButton value="Regresar" styleClass="secondary" icon="ui-icon-arrowthick-1-w" action="#{informacionBasicaController.verTablaInfBasica}" ajax="false" immediate="true" rendered="#{not empty informacionBasicaController.informacionProyectoList}"/>
+				<p:commandButton value="Guardar" icon="ui-icon-disk" action="#{informacionBasicaController.guardar}" update="@all btnEnviar codigoProyecto" 
+				rendered="#{informacionBasicaController.habilitarIngreso}"/>
+				<p:commandButton value="Enviar" icon="ui-icon-check" action="#{informacionBasicaController.guardarRevision}" update=":messages" 
+				rendered="#{informacionBasicaController.habilitarRevision}"/>
+				<p:commandButton id="btnEnviar" value="Enviar" icon="ui-icon-check" process=":form" actionListener="#{informacionBasicaController.validarDatos}" oncomplete="PF('clausulaDiag').show();" title="Enviar la información a validar"
+				disabled="#{informacionBasicaController.informacionProyecto.id==null}"
+				rendered="#{informacionBasicaController.habilitarIngreso}"/>				
+			</div>			
+			<p:dialog id="clausulaDiag" widgetVar="clausulaDiag" header="Cláusula" width="900px" closable="false" style="text-align:justify">
+				<h:outputText value="#{informacionBasicaController.clausulaOperador}" escape="false"/>						
+				<t:div styleClass="buttons">
+					<p:commandButton icon="ui-icon-cancel" value="Cancelar" process="@this" oncomplete="PF('clausulaDiag').hide()" styleClass="secondary"/>
+					<p:commandButton icon="ui-icon-check"  value="Aceptar"  action="#{informacionBasicaController.enviar}"  update="@all :messages" oncomplete="PF('clausulaDiag').hide()"/>			
+				</t:div>
+			</p:dialog>
+		</h:form>		
+		<h:form id="formDialogs">	
+			<p:dialog id="reporteDiag" widgetVar="reporteDiag" header="Agregar Reporte RETCE" width="500px" closable="false" styleClass="alCenter" resizable="false">
+				<p:commandButton rendered="false" icon="ui-icon-plus" value="Descargas" process="@this" action="descargasLiquidas.jsf" oncomplete="PF('reporteDiag').hide()" styleClass="primary w25"/>				
+				<h:panelGrid columns="3" styleClass="w100" columnClasses="w33 valigntop, w33 valigntop, w33 valigntop">
+					<p:commandLink action="/control/retce/emisionesAtmosfericas?faces-redirect=true" immediate="true" ajax="false">
+						<h:panelGrid columns="1" styleClass="w100 alCenter" columnClasses="alCenter">
+							<img src="#{request.contextPath}/resources/images/Emisiones.png" class="sectorImages" />
+							<h3>
+								<h:outputText value="Emisiones" styleClass="encabezado1_4em noMargins" />
+							</h3>
+						</h:panelGrid>
+					</p:commandLink>
+					<p:commandLink action="/control/retce/descargasLiquidas?faces-redirect=true" immediate="true" ajax="false">
+						<h:panelGrid columns="1" styleClass="w100 alCenter" columnClasses="alCenter">
+							<img src="#{request.contextPath}/resources/images/Descargas.png" class="sectorImages" />
+							<h3>
+								<h:outputText value="Descargas" styleClass="encabezado1_4em noMargins" />
+							</h3>
+						</h:panelGrid>
+					</p:commandLink>
+					<p:commandLink onclick="PF('reporteDiag').hide(); PF('subReporteDiag').show();" immediate="true" >
+						<h:panelGrid columns="1" styleClass="w100 alCenter" columnClasses="alCenter">
+								<img src="#{request.contextPath}/resources/images/Declaracion-anual-de-residuos-y-desechos-peligrosos-y-especiales.png" class="sectorImages" />
+								<h3>
+									<h:outputText value="Declaración Anual de Residuos y Desechos Peligrosos y Especiales" styleClass="encabezado1_4em noMargins" />
+								</h3>
+						</h:panelGrid>
+					</p:commandLink>
+					<p:commandLink action="/control/retce/sustanciasQuimicasPeligrosas?faces-redirect=true" immediate="true" ajax="false">
+						<h:panelGrid columns="1" styleClass="w100 alCenter" columnClasses="alCenter">
+							<img src="#{request.contextPath}/resources/images/SUSTANCIAS_QUIMICAS.png" class="sectorImages" />
+							<h3>
+								<h:outputText value="Sustancias Químicas" styleClass="encabezado1_4em noMargins" />
+							</h3>
+						</h:panelGrid>
+					</p:commandLink>
+					<p:commandLink action="/control/retce/consumoRecursos?faces-redirect=true" immediate="true" ajax="false">
+						<h:panelGrid columns="1" styleClass="w100 alCenter" columnClasses="alCenter">
+							<img src="#{request.contextPath}/resources/images/consumoRecursos.png" class="sectorImages" />
+							<h3>
+								<h:outputText value="Consumo de Recursos (en el Proceso Productivo)" styleClass="encabezado1_4em noMargins" />
+							</h3>
+						</h:panelGrid>
+					</p:commandLink>
+					<p:commandLink action="/control/retce/derrames?faces-redirect=true" immediate="true" ajax="false">
+						<h:panelGrid columns="1" styleClass="w100 alCenter" columnClasses="alCenter">
+							<img src="#{request.contextPath}/resources/images/SituacionesEmergentesAmbientalesDerrames.png" class="sectorImages" />
+							<h3>
+								<h:outputText value="Situaciones Emergentes Ambientales Derrames" styleClass="encabezado1_4em noMargins" />
+							</h3>
+						</h:panelGrid>
+					</p:commandLink>
+					<p:commandLink action="/control/retce/sustanciasRetce?faces-redirect=true" immediate="true" ajax="false">
+						<h:panelGrid columns="1" styleClass="w100 alCenter" columnClasses="alCenter">
+							<img src="#{request.contextPath}/resources/images/SUSTANCIAS_QUIMICAS.png" class="sectorImages" />
+							<h3>
+								<h:outputText value="Sustancias RETCE" styleClass="encabezado1_4em noMargins" />
+							</h3>
+						</h:panelGrid>
+					</p:commandLink>
+				</h:panelGrid>
+				<br/>
+				<div class="alCenter">
+					<p:commandButton type="button" styleClass="secondary" value="Cancelar" onclick="PF('reporteDiag').hide()" />
+				</div>
+			</p:dialog>
+
+			<p:dialog id="subReporteDiag" widgetVar="subReporteDiag"
+				header="Agregar Reporte RETCE" width="400px" closable="false"
+				styleClass="alCenter" resizable="false">
+				<h:panelGrid columns="2" styleClass="w100" columnClasses="w50, w50">
+					<p:commandLink
+						action="/control/retce/gestorDesechosPeligrososLista?faces-redirect=true"
+						immediate="true" ajax="false">
+						<h:panelGrid columns="1" styleClass="w100 alCenter"
+							columnClasses="alCenter">
+							<img
+								src="#{request.contextPath}/resources/images/Declaracion-gestor.png"
+								class="sectorImages" />
+							<h3>
+								<h:outputText value="Declaración de Gestor" styleClass="encabezado1_4em noMargins" />
+							</h3>
+						</h:panelGrid>
+					</p:commandLink>
+					<p:commandLink
+						action="/control/retce/generadorDesechosPeligrosos?faces-redirect=true"
+						immediate="true" >
+						<h:panelGrid columns="1" styleClass="w100 alCenter"
+							columnClasses="alCenter">
+							<img
+								src="#{request.contextPath}/resources/images/Declaracion-generador.png"
+								class="sectorImages" />
+							<h3>
+								<h:outputText value="Declaración de Generador"
+									styleClass="encabezado1_4em noMargins" />
+							</h3>
+						</h:panelGrid>
+					</p:commandLink>
+				</h:panelGrid>
+				<br/>
+				<div class="alCenter">
+					<p:commandButton type="button" styleClass="secondary"
+						value="Cancelar" onclick="PF('subReporteDiag').hide()" />
+				</div>
+			</p:dialog>
+
+			<p:dialog header="Atención" id="alertaSeleccioFaseDiag" widgetVar="alertaSeleccioFaseDiag" modal="true"  width="400">
+				<p:panel style="text-align:justify;">
+					<f:facet name="header">
+						<h:outputText value="Estimado usuario, los desechos que corresponden a las fases de Eliminación (reúso, reciclaje, tratamiento, coprocesamiento, incineración y/o Disposición final (celda/relleno de seguridad) deberán ser declarados en la sección de almacenamiento en la declaración gestión anual  de residuos y desechos peligrosos y especiales en el periodo correspondiente." /><br/>
+					</f:facet>
+				</p:panel>
+				<br/><br/>
+				<div class="buttons">
+				<center>
+					<p:commandButton type="button" value="Aceptar" onclick="PF('alertaSeleccioFaseDiag').hide()" />
+				</center>
+				</div>
+			</p:dialog>
+
+			
+			<p:dialog header="Documentos adjuntos al proceso" widgetVar="dlg_verDocumentos"  id="dlg_verDocumentos" modal="true" width="700">
+					<h:panelGrid columns="1" columnClasses="w25 alTop,field_mrg alTop" id="pnl_documentos">
+						<p:dataTable value="#{informacionBasicaController.listarDocumentosPorProceso}" var="varDocumentos" emptyMessage="#{labels['common.table.empty']}">
+							<p:column headerText="Nombre documento" styleClass="singleLine">
+								<h:outputText value="#{varDocumentos.nombre}" />
+							</p:column>
+							<p:column styleClass="alCenter w20px">
+								<p:commandButton ajax="false" immediate="true" id="btnDescargar" onclick="PrimeFaces.monitorDownload(start, stop);" icon="ui-icon-search" styleClass="button-small primary" >
+									<p:fileDownload value="#{informacionBasicaController.descargarDocumentoInclusion(varDocumentos)}"/>
+								</p:commandButton>
+							</p:column>
+						</p:dataTable>
+					</h:panelGrid>
+					<p:separator />
+					<div class="buttons">
+						<p:commandButton type="button" value="Cerrar" onclick="PF('dlg_verDocumentos').hide()" />
+					</div>
+				</p:dialog>
+				<p:dialog header="Ubicación Geográfica" widgetVar="dlg_ubicaciones"  id="dlg_ubicaciones" modal="true" width="700">
+					<p:panelGrid id="pngUbicacion" columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75" >							
+							<h:outputText value="Provincia *"/>
+							<p:selectOneMenu id="provincia" required="true" requiredMessage="Provincia es requerido"
+							value="#{informacionBasicaController.provincia}" converter="selectItemConverter" styleClass="w100"
+							rendered="#{informacionBasicaController.habilitarIngreso}">
+								<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+								<f:selectItems value="#{informacionBasicaController.provinciasList}" var="item" itemLabel="#{item.nombre}" itemValue="#{item}"/>
+								<p:ajax event="change" update="canton parroquia" listener="#{informacionBasicaController.seleccionarProvincia}"/>
+							</p:selectOneMenu>
+							
+							<h:outputText value="Cantón *"/>					
+							<p:selectOneMenu id="canton" required="true" requiredMessage="Cantón es requerido"
+							value="#{informacionBasicaController.canton}" converter="selectItemConverter" styleClass="w100"
+							rendered="#{informacionBasicaController.habilitarIngreso}">
+								<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+								<f:selectItems value="#{informacionBasicaController.cantonesList}" var="item" itemLabel="#{item.nombre}" itemValue="#{item}"/>
+								<p:ajax event="change" update="parroquia" listener="#{informacionBasicaController.seleccionarCanton}"/>
+							</p:selectOneMenu>
+							
+							<h:outputText value="Parroquia *"/>
+							<p:selectOneMenu id="parroquia" required="true" requiredMessage="Parroquia es requerido"
+							value="#{informacionBasicaController.parroquia}" converter="selectItemConverter" styleClass="w100"
+							rendered="#{informacionBasicaController.habilitarIngreso}">
+								<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+								<f:selectItems value="#{informacionBasicaController.parroquiasList}" var="item" itemLabel="#{item.nombre}" itemValue="#{item}"/>
+							</p:selectOneMenu>
+						</p:panelGrid>				
+						<t:div styleClass="buttons">
+							<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('dlg_ubicaciones').hide()" styleClass="secondary"/>
+						</t:div>
+					</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

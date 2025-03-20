@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:t="http://myfaces.apache.org/tomahawk">
+					
+	<p:panelGrid columns="1" layout="grid" styleClass="buttonAdjuntarCoordenadasContainer w100" rendered="#{ingresoDigitalizacionProyectosController.mostrarOtrasCoordenadas}">				
+		<f:facet name="header">
+			<p:outputLabel value="&nbsp;&nbsp;"/>
+			<p:commandButton value="Adjuntar" onclick="PF('adjuntarCoordenadasPSAD').show()" styleClass="buttonAdjuntarCoordenadas button-small-text toRight field_mrg" type="button" icon="ui-icon-document" />
+			<p:commandButton rendered="#{!empty cargarCoordenadasDigitalizacionBean.plantillaCoordenadas and ingresoDigitalizacionProyectosController.sistemareferenciaSeleccionado eq 'WGS84'}" value="Descargar plantilla" styleClass="button-small-text toRight field_mrg" icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true">
+				<p:fileDownload value="#{cargarCoordenadasDigitalizacionBean.plantillaCoordenadas}" />
+			</p:commandButton>
+			<p:commandButton rendered="#{!empty cargarCoordenadasDigitalizacionBean.plantillaCoordenadasPsad  and ingresoDigitalizacionProyectosController.sistemareferenciaSeleccionado eq 'PSAD56'}" value="Descargar plantilla" styleClass="button-small-text toRight field_mrg" icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true">
+				<p:fileDownload value="#{cargarCoordenadasDigitalizacionBean.plantillaCoordenadasPsad}" />
+			</p:commandButton>
+		</f:facet>
+		<p:dataTable id="tbl_coordenadas_psad" rowIndexVar="index" value="#{cargarCoordenadasDigitalizacionBean.coordinatesWrappersGeo}" var="item" emptyMessage="#{labels['common.table.empty']}">
+			<p:subTable value="#{item.coordenadas}" var="coordenada">
+				<p:columnGroup type="header">
+					<p:row>
+						<p:column headerText="#{item.tipoForma}" styleClass="alCenter w100 table-column-header" colspan="3" />
+					</p:row>
+					<p:row>
+						<p:column headerText="Shape" styleClass="alCenter table-column-header" />
+						<p:column headerText="X" styleClass="alCenter table-column-header" />
+						<p:column headerText="Y" styleClass="alCenter table-column-header" />				
+					</p:row>
+				</p:columnGroup>
+				<p:column headerText="Shape" styleClass="alCenter">
+					<h:outputText value="#{coordenada.orden}" />
+				</p:column>
+				<p:column headerText="X" styleClass="alCenter">
+					<h:outputText value="#{coordenada.x.intValue()}" />
+				</p:column>
+				<p:column headerText="Y" styleClass="alCenter">
+					<h:outputText value="#{coordenada.y.intValue()}" />
+				</p:column>		
+			</p:subTable>
+		</p:dataTable>
+		<h:outputText value="Introducir la información de la división política administrativa descrita en la resolución de la Autorización Administrativa Ambiental otorgada" />
+		<p:dataTable id="tablaUbicacionesPSAD" value="#{adicionarUbicacionesPSADBean.ubicacionesSeleccionadas}" var="ubicacion" emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<p:commandButton value="Adicionar" onclick="PF('dlgUbicacionPSAD').show()" styleClass="button-small-text toRight field_mrg" update="dlgUbicacionPSAD"
+						type="button" icon="ui-icon-document"/>
+			</f:facet>
+			<p:column headerText="Provincia">
+				<h:outputText value="#{ubicacion.codificacionInec.length() eq 6 ?  ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre : ubicacion.codificacionInec.length() eq 4 ? ubicacion.ubicacionesGeografica.nombre : ubicacion.codificacionInec.length() eq 2 ? ubicacion.nombre : ''}" />
+			</p:column>
+			<p:column headerText="Cantón">
+				<h:outputText value="#{ubicacion.codificacionInec.length() eq 6 ? ubicacion.ubicacionesGeografica.nombre : ubicacion.codificacionInec.length() eq 4 ? ubicacion.nombre : ''}">
+				</h:outputText>
+			</p:column>
+			<p:column headerText="Parroquia">
+				<h:outputText value="#{ubicacion.codificacionInec.length() eq 6 ? ubicacion.nombre : ''}"/>
+		    </p:column>
+			<p:column styleClass="w20px">
+				<p:commandButton update=":form:tablaUbicacionesPSAD" styleClass="button-small primary" process="@this" icon="ui-icon-circle-close" actionListener="#{adicionarUbicacionesPSADBean.quitarUbicacion(ubicacion)}" >
+					<p:confirm icon="ui-icon-alert" header="Eliminar ubicación" message="¿Desea eliminar la ubicación?" />
+				</p:commandButton>
+			</p:column>
+		</p:dataTable>
+	</p:panelGrid>
+	
+	<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{ingresoDigitalizacionProyectosController.mostrarOtrasCoordenadas}">
+		<f:facet name="header">
+			<h:outputText value="Interseca con" />
+		</f:facet>
+		<h:panelGrid columns="1" >
+			<h:outputText value="Favor seleccionar las áreas protegidas o bosques protectores con las cuales intersecó su proyecto al momento de la emisión de la Resolución Ambiental" />
+			<h:panelGrid columns="3" styleClass="w100" columnClasses="null w15, null w50, null w35">
+				<h:outputText value="Áreas Protegidas"/>
+				<p:selectOneMenu id="cmbSnap"
+					value="#{ingresoDigitalizacionProyectosController.nombreAreaProtegida}"
+					style="width:100%" filter="true" filterMatchMode="contains" >
+					<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+					<f:selectItems value="#{ingresoDigitalizacionProyectosController.listaAreasProtegidas}"  var="item" itemLabel="#{item}" itemValue="#{item}"/>
+					<p:ajax process="@this" update=":form:tbl_areaProtegidaSelect :form:pngCoordenadasUbicacionWgs" listener="#{ingresoDigitalizacionProyectosController.ingresarAreasProtegidas()}"/>
+				</p:selectOneMenu>
+				<h:outputText value=""/>
+			</h:panelGrid>
+			<h:panelGrid columns="1">
+				<p:dataTable id="tbl_areaProtegidaSelect" value="#{ingresoDigitalizacionProyectosController.areasProtegidasSeleccionadas}" rowIndexVar="index" var="item"
+					emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Áreas Protegidas" styleClass="alCenter w50">
+						<h:outputText value="#{item}" />
+					</p:column>
+					<p:column styleClass="w50">
+						<center>
+							<p:commandButton icon="ui-icon-trash" title="Eliminar" process="@this" styleClass="primary"
+								actionListener="#{ingresoDigitalizacionProyectosController.eliminarAreaProtegida(item)}" update=":form:tbl_areaProtegidaSelect :form:pngCoordenadasUbicacionWgs">
+								<p:confirm icon="ui-icon-alert" header="Eliminar Área Protegida" message="¿Desea eliminar el Área Protegida?" />
+							</p:commandButton>
+						</center>
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+		</h:panelGrid>
+		<h:panelGrid columns="1">
+			<h:panelGrid columns="3" styleClass="w100" columnClasses="null w15, null w50, null w35">
+				<h:outputText value="Bosque protector"/>
+				<p:selectOneMenu id="cmbBosque" value="#{ingresoDigitalizacionProyectosController.nombreBosqueProtector}"
+					style="width:100%" filter="true" filterMatchMode="contains">
+					<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+					<f:selectItems value="#{ingresoDigitalizacionProyectosController.listaBosquesProtectores}" var="item" itemLabel="#{item}" itemValue="#{item}" />
+					<p:ajax process="@this" update=":form:tbl_bosqueSelect :form:pngCoordenadasUbicacionWgs" listener="#{ingresoDigitalizacionProyectosController.ingresarBosquesProtectores()}"/>					
+				</p:selectOneMenu>
+				<h:outputText value=""/>
+			</h:panelGrid>
+			<h:panelGrid columns="1">
+				<p:dataTable id="tbl_bosqueSelect" value="#{ingresoDigitalizacionProyectosController.bosquesProtectoresSeleccionados}" rowIndexVar="index" var="item"
+					emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Bosques Protectores" styleClass="alCenter w50">
+						<h:outputText value="#{item}" />
+					</p:column>
+					<p:column styleClass="w50">
+						<center>
+							<p:commandButton icon="ui-icon-trash" title="Eliminar" process="@this" styleClass="primary"
+								actionListener="#{ingresoDigitalizacionProyectosController.eliminarBosqueProtector(item)}" update=":form:tbl_bosqueSelect :form:pngCoordenadasUbicacionWgs">
+								<p:confirm icon="ui-icon-alert" header="Eliminar Bosque Protector" message="¿Desea eliminar el Bosque Protector?" />
+							</p:commandButton>
+						</center>
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+		</h:panelGrid>
+	</p:panelGrid>
+	
+	<p:dialog header="Agregar ubicación" id="dlgUbicacionPSAD" widgetVar="dlgUbicacionPSAD" modal="true" width="350" resizable="false" onShow="bodyOverflow(false)" onHide="bodyOverflow(true)">
+		<h:panelGrid columns="2" id="panelUbicacionPSAD" styleClass="w100 alCenter" columnClasses="alRight, field_mrg w66 alLeft">
+			<p:outputLabel value="Provincia" for="provincia_panelUbicacionPSAD" />
+			<p:selectOneMenu value="#{adicionarUbicacionesPSADBean.provincia}" converter="selectItemConverter" id="provincia_panelUbicacionPSAD" styleClass="w100">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+				<f:selectItems value="#{adicionarUbicacionesPSADBean.provincias}" />
+				<p:ajax listener="#{adicionarUbicacionesPSADBean.cargarCantones()}" update=":form:panelUbicacionPSAD" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Cantón" for="canton_panelUbicacionPSAD" />
+			<p:selectOneMenu value="#{adicionarUbicacionesPSADBean.canton}" converter="selectItemConverter" id="canton_panelUbicacionPSAD" styleClass="w100">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+				<f:selectItems value="#{adicionarUbicacionesPSADBean.cantones}" />
+				<p:ajax listener="#{adicionarUbicacionesPSADBean.cargarParroquias()}" update=":form:panelUbicacionPSAD" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Parroquia" rendered="#{adicionarUbicacionesPSADBean.mostrarParroquias}" for="parroquia_panelUbicacionPSAD" />
+			<p:selectOneMenu value="#{adicionarUbicacionesPSADBean.parroquia}" converter="selectItemConverter" id="parroquia_panelUbicacionPSAD" styleClass="w100" rendered="#{adicionarUbicacionesPSADBean.mostrarParroquias}">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+				<f:selectItems value="#{adicionarUbicacionesPSADBean.parroquias}" />
+			</p:selectOneMenu>
+		</h:panelGrid>
+		<p:separator />
+		<div class="buttons">
+			<p:commandButton actionListener="#{adicionarUbicacionesPSADBean.agregarUbicacion()}" process=":form:panelUbicacionPSAD @this" value="Agregar" update=":form:tablaUbicacionesPSAD dlgUbicacionPSAD" oncomplete="dialogWidgetVar_showModalAddLocationPSAD(xhr, status, args)" />
+		</div>
+	</p:dialog>
+					
+	<p:dialog header="Adjuntar coordenadas" widgetVar="adjuntarCoordenadasPSAD" modal="true" resizable="false">
+		<p:panelGrid columns="1" columnClasses="label, value">
+			<h:outputText value="Seleccione el archivo excel (.xls)" />
+			<p:fileUpload uploadLabel="Subir" auto="true" cancelLabel="Cancelar" label="Seleccionar" fileUploadListener="#{ingresoDigitalizacionProyectosController.handleFileUploadOtroSistema}" 
+						mode="advanced" dragDropSupport="false" update=":form:tablaUbicacionesPSAD, tbl_coordenadas_psad" multiple="false" allowTypes="/(\.|\/)(xls)$/" 
+						oncomplete="PF('adjuntarCoordenadasPSAD').hide()" invalidFileMessage="El archivo es inválido." invalidSizeMessage="El archivo es demasiado grande." />
+		</p:panelGrid>
+		<div class="buttons">
+			<p:commandButton type="button" value="Cerrar" onclick="PF('adjuntarCoordenadasPSAD').hide()" />
+		</div>
+	</p:dialog>
+	
+
+	<script type="text/javascript">
+		function dialogWidgetVar_showModalAddLocationPSAD(xhr, status, args) {
+			PF('dlgUbicacionPSAD').show();
+	    	if (args.addLocation) {
+	        	PF('dlgUbicacionPSAD').hide();
+	    	}            
+		}
+	</script>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions">
+
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<h:form id="form">
+			<p:panel header="Reemplazar documentos">
+				<h:panelGrid styleClass="w66" columns="2" columnClasses="w50, field_mrg" id="filtroContainer">
+					<p:outputLabel for="filtro" value="Buscar carpeta" styleClass="bold" />
+					<h:outputText />
+					<p:inputText id="filtro" value="#{documentos.carpeta}" styleClass="w100" />
+					<h:panelGroup>
+						<div class="buttons-inline">
+							<p:commandButton id="filterButton" icon="ui-icon-check" styleClass="primary" process="@this filtro" actionListener="#{documentos.filtrar()}" update="filtroContainer documentosContainer" />
+							<p:commandButton icon="ui-icon-refresh" styleClass="secondary" process="@this" actionListener="#{documentos.reset()}" update="filtroContainer documentosContainer" />
+						</div>
+					</h:panelGroup>
+				</h:panelGrid>
+
+				<h:panelGrid id="documentosContainer" columns="1" styleClass="w100 separatorTop">
+					<h:outputText styleClass="encabezado alJutify" value="Recuerde: un documento es 'Reemplazable' cuando existe una entrada en la base de datos del sistema para una entrada en el Gestor Documental. Si un documento aparece como 'No reemplazable', se puede editar directamente en el Gestor Documental." rendered="#{empty documentos.documentos}" />
+					<h:panelGroup rendered="#{!empty documentos.documentos}">
+						<p:dataTable value="#{documentos.documentos}" var="documento" rowIndexVar="index" emptyMessage="#{labels['common.table.empty']}" rows="50" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+							<p:column styleClass="alCenter w20px">
+								<h:outputText value="#{index + 1}" />
+							</p:column>
+							<p:column headerText="Documento" styleClass="singleLine" filterBy="#{documento.nombre}" filterMatchMode="contains" sortBy="#{documento.nombre}">
+								<h:outputText value="#{documento.nombre}" title="#{documento.nombre}" />
+							</p:column>
+							<p:column headerText="Tipo" styleClass="alCenter w10" sortBy="#{documento.extension}">
+								<h:outputText value="#{documento.extension}" />
+							</p:column>
+							<p:column headerText="¿Reemplazable?" styleClass="alCenter w10">
+								<h:outputText value="#{not empty documento.documento}" converter="booleanToStringConverter" />
+							</p:column>
+							<p:column styleClass="alCenter w20px">
+								<p:commandButton process="@this" actionListener="#{documentos.select(documento)}" update=":form:reemplazarDocumento" oncomplete="PF('reemplazarDocumento').show()" styleClass="button-small primary" icon="ui-icon-pencil" disabled="#{empty documento.documento}" />
+							</p:column>
+						</p:dataTable>
+					</h:panelGroup>
+				</h:panelGrid>
+
+				<p:dialog header="Reemplazar documento" id="reemplazarDocumento" widgetVar="reemplazarDocumento" modal="true" resizable="false" width="400">
+					<p:panelGrid columns="1" styleClass="w100">
+						<h:outputText value="#{documentos.documentoReemplazable.nombre}" />
+						<h:outputText value="Seleccione el archivo (.#{documentos.documentoReemplazable.extension})" />
+						<p:fileUpload uploadLabel="Subir" auto="true" cancelLabel="Cancelar" label="Seleccionar" fileUploadListener="#{documentos.handleFileUpload}" mode="advanced" dragDropSupport="false" update=":form:documentosContainer" multiple="false" allowTypes="/(\.|\/)(#{documentos.documentoReemplazable.extension})$/i" invalidFileMessage="El archivo es inválido." invalidSizeMessage="El archivo es demasiado grande." oncomplete="PF('reemplazarDocumento').hide()" />
+					</p:panelGrid>
+					<div class="buttons">
+						<p:commandButton type="button" value="Cerrar" onclick="PF('reemplazarDocumento').hide()" />
+					</div>
+				</p:dialog>
+			</p:panel>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

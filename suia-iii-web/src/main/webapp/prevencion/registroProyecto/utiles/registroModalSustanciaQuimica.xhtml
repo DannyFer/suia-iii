@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+	<h:panelGrid styleClass="w100 separatorBottom" columns="2" columnClasses="w50, field_mrg">
+		<p:outputLabel for="filtroSustancia" value="Filtro" styleClass="bold" />
+		<h:outputText />
+		<h:panelGroup>
+			<p:inputText id="filtroSustancia" value="#{agregarSustanciasQuimicasBean.filter}" styleClass="w100" title="#{helps['registro.desecho.filtro']}" />
+			<p:tooltip for="filtroSustancia" escape="false" showDelay="1200" trackMouse="true" />
+		</h:panelGroup>
+		<h:panelGroup>
+			<div class="buttons-inline">
+				<p:commandButton icon="ui-icon-check" styleClass="primary" process="@this filtroSustancia" actionListener="#{agregarSustanciasQuimicasBean.init()}" update=":#{p:component('seleccionarSustanciaQuimica')}" oncomplete="PF('seleccionarSustanciaQuimica').show()" />
+				<p:commandButton icon="ui-icon-refresh" styleClass="secondary" process="@this" actionListener="#{agregarSustanciasQuimicasBean.reset()}" update=":#{p:component('seleccionarSustanciaQuimica')}" oncomplete="PF('seleccionarSustanciaQuimica').show()" />
+			</div>
+		</h:panelGroup>
+	</h:panelGrid>
+
+	<p:tree value="#{agregarSustanciasQuimicasBean.catalogo}" id="arbolCatalogoSustancias" var="catalogo" dynamic="true" selectionMode="single" styleClass="w100 h200px" rendered="#{!agregarSustanciasQuimicasBean.catalogo.leaf}">
+		<p:treeNode expandedIcon="ui-icon-folder-open" collapsedIcon="ui-icon-folder-collapsed" type="folder">
+			<h:outputText value="#{catalogo}" />
+		</p:treeNode>
+		<p:treeNode icon="ui-icon-document" type="document">
+			<h:outputText value="#{catalogo}" />
+		</p:treeNode>
+		<p:ajax event="expand" update="arbolCatalogoSustancias" listener="#{agregarSustanciasQuimicasBean.onNodeExpand}" />
+		<p:ajax event="select" oncomplete="PF('seleccionarSustanciaQuimica').hide()" update=":#{agregarSustanciasQuimicasBean.nombreFormulario}:pnlClaveSustancia" listener="#{agregarSustanciasQuimicasBean.onNodeSelect}" />
+	</p:tree>
+	<p:panel rendered="#{agregarSustanciasQuimicasBean.catalogo.leaf}" styleClass="h200px alCenter">
+		<h:outputText value="No se encontraron resultados" styleClass="bold" />
+	</p:panel>
+	<p:separator />
+	<div class="buttons">
+		<p:commandButton type="button" value="Aceptar" onclick="PF('seleccionarSustanciaQuimica').hide()" />
+	</div>
+</html>

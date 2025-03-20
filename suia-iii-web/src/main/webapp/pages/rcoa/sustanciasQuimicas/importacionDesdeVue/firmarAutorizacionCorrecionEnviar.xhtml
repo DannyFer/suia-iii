@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task-operador.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="context-extra">
+		<h:outputText value="Código RSQ" />
+		<h:outputText value="#{firmarAutorizacionCorreccionController.codigoRSQ}" />
+		<p:commandButton ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="button-small primary" immediate="true"
+			rendered="#{firmarAutorizacionCorreccionController.oficio eq null ? false : true}">
+			<p:fileDownload value="#{firmarAutorizacionCorreccionController.cargarDatosTablaVentanaRsq()}" />
+		</p:commandButton>
+
+		<p:commandButton ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="button-small primary" immediate="true"
+			rendered="#{firmarAutorizacionCorreccionController.oficio eq null ? true : false}">
+		</p:commandButton>
+
+		<h:outputText value="Número de Solicitud" />
+		<h:outputText value="#{firmarAutorizacionCorreccionController.codigo}" />
+		<p:commandButton ajax="false" icon="ui-icon-search" styleClass="primary button-small" immediate="true"
+			action="#{firmarAutorizacionCorreccionController.seleccionarListenerAux()}">
+		</p:commandButton>		
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form id="form">
+			<h:panelGroup>
+				<h:panelGrid styleClass="alCenter w100" columns="1">
+					<h:outputText value="#{firmarAutorizacionCorreccionController.nombreFormulario}"
+						styleClass="encabezado1_4em" />
+
+					<h:panelGrid columns="4">
+						<p:commandButton id="cbDescargaDoc" value="Descargar documento a Firmar" ajax="false" disabled="#{firmarAutorizacionCorreccionController.correccionNoAprobada}"
+							icon="ui-icon-arrowthick-1-s" styleClass="primary" immediate="true">
+							<p:fileDownload value="#{firmarAutorizacionCorreccionController.descargarDocumento()}" />
+						</p:commandButton>
+            		</h:panelGrid>
+					<h:panelGrid styleClass="alCenter w66" columns="1" 
+						rendered="#{!firmarAutorizacionCorreccionController.ambienteProduccion}">
+						<p:panel styleClass="alCenter" >
+							<h:panelGrid styleClass="alCenter w50" columns="2">
+								<h:outputText value="¿Cuenta con token?" styleClass="encabezado" style="text-align:right"/>
+
+								<p:selectOneRadio id="verificaToken" value="#{firmarAutorizacionCorreccionController.token}" disabled="false">
+									<f:selectItem itemLabel="Sí" itemValue="true" />
+									<f:selectItem itemLabel="No" itemValue="false" />
+									<p:ajax event="change" update=":form :formDialogs"
+										listener="#{firmarAutorizacionCorreccionController.guardarToken}" />
+								</p:selectOneRadio>
+							</h:panelGrid>
+						</p:panel>
+					</h:panelGrid>
+				</h:panelGrid>
+			</h:panelGroup>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton id="cbFirmaDoc" value="Firmar documento sin token" type="button" styleClass="large" icon="ui-icon-key"
+						rendered="#{!firmarAutorizacionCorreccionController.token and !firmarAutorizacionCorreccionController.correccionNoAprobada}"
+						update=":formDialogs:pnlFirmaManual" onclick="PF('signDialogDocumento').show();" 
+						disabled="#{firmarAutorizacionCorreccionController.correccionNoAprobada}"/>
+					
+					<p:commandButton id="cbFirmaDocEnProd" value="Firmar documento" styleClass="large" icon="ui-icon-key"
+						rendered="#{firmarAutorizacionCorreccionController.token}" 
+						action="#{firmarAutorizacionCorreccionController.firmarDocumento()}"> 
+					</p:commandButton>
+					
+					<p:commandButton value="Enviar" icon="ui-icon-check"
+						action="#{firmarAutorizacionCorreccionController.completarTarea()}">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+		</h:form>
+
+		<h:form id="formDialogs">
+			<p:dialog header="Firma Electrónica" id="signDialogDocumento"
+				widgetVar="signDialogDocumento" closeOnEscape="false" modal="true"
+				resizable="false" width="auto" height="auto" position="center top"
+				rendered="#{!firmarAutorizacionCorreccionController.correccionNoAprobada}">
+				<p:panel id="pnlFirmaManual">
+					<h:panelGrid columns="2" cellpadding="10" style="text-align:right !important">
+						<p:outputLabel value="1. Descargar el documento" styleClass="bold" />
+						<p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary">
+							<p:fileDownload value="#{firmarAutorizacionCorreccionController.descargarDocumento()}"/>
+						</p:commandButton>
+
+						<p:outputLabel for="uploadRequired" value="2. Adjunte el documento firmado" styleClass="bold" />
+						<p:fileUpload fileUploadListener="#{firmarAutorizacionCorreccionController.uploadListenerDocumentos}"
+							multiple="false" sizeLimit="5242880"
+							allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Tamaño de archivo no válido"
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update="lblNombreDocFirmado"
+							rendered="#{!firmarAutorizacionCorreccionController.token}">
+							<f:attribute name="clave" value=":form" />
+						</p:fileUpload>
+
+						<p:outputLabel value="" />
+						<h:outputText id="lblNombreDocFirmado" value="#{firmarAutorizacionCorreccionController.documentoManual.nombre}" />
+					</h:panelGrid>
+				</p:panel>
+
+				<h:inputHidden id="uploadRequired" required="false" />
+				<p:separator/>
+				<div style="display: block; width: 100%; text-align: right;">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialogDocumento').hide()" icon="ui-icon-close" />
+				</div>
+			</p:dialog>
+			
+			<p:dialog header="Justificación No Aprobación de Corrección Importación" id="signDialogDocumento1"
+				widgetVar="signDialogDocumento1" closeOnEscape="false" modal="true"
+				resizable="false" width="auto" height="auto" position="center top"
+				rendered="#{!firmarAutorizacionCorreccionController.correccionNoAprobada}"> <!--  -->
+				<p:panel id="pnlJustificaNoAproba">
+					<h:panelGrid columns="2" cellpadding="20" style="text-align:right !important">
+						<p:outputLabel value="Motivo de No Aprobación" styleClass="bold" />
+						<h:inputTextarea id="itJustifaNoAproba1" cols="60" rows="10" readonly="false" maxlength="600"  
+							value="#{firmarAutorizacionCorreccionController.justificacionNoAprobacion}"> 
+						</h:inputTextarea>
+					</h:panelGrid>
+				</p:panel>
+
+				<p:separator/>
+				<div style="display: block; width: 100%; text-align: right;">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialogDocumento1').hide()" icon="ui-icon-close" update=":form"/>
+				</div>
+			</p:dialog>
+					 
+				<p:dialog modal="true" id="dlgVisualizeDoc" widgetVar="dlgVisualizeDoc"
+					header="Reporte de Importación Sustancias Químicas desde Vue" resizable="true" width="900px" height="700px">
+	
+					<h:panelGrid id="pnlVisualizeDoc">
+						<object id="pdf_docImp" type="application/pdf" data="#{firmarAutorizacionCorreccionController.urlFormulario}?pfdrid_c=true" width="400%" height="700px">
+							Su navegador no soporta la visualización de pdf. Puede descargar el documento presionando el siguiente botón:
+						</object>
+					</h:panelGrid>
+	
+					<div class="buttons main">
+						<p:commandButton icon="ui-icon-cancel" value="Cerrar" onclick="PF('dlgVisualizeDoc').hide();" 
+							process="@this" styleClass="secondary" />
+					</div>
+				</p:dialog>
+				
+				
+			<p:dialog header="Detalle de Sustancias Químicas de Solicitud #{firmarAutorizacionCorreccionController.solicitud.reqNo}" id="idDialog"
+				widgetVar="idDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="70%" height="auto" position="center center">
+				<p:panel id="pnlDialog">
+					<h:panelGrid columns="1" cellpadding="10" style="text-align:right !important">
+						<p:dataTable value="#{firmarAutorizacionCorreccionController.LDetalleSolicitudImportacionRSQ}" var="tarea" filterDelay="600" widgetVar="bandejaTable" rows="20" paginatorAlwaysVisible="false" paginator="true" paginatorPosition="bottom" emptyMessage="#{labels['common.table.empty']}">
+                        <p:column headerText="Código" styleClass="alCenter singleLine">
+                            <h:outputText value="#{tarea.actividadSustancia.gestionarProductosQuimicosProyectoAmbiental.sustanciaquimica.numeroCas}" title="#{tarea.actividadSustancia.registroSustanciaQuimica.registroSustancia}" />
+
+                        </p:column>
+                        <p:column headerText="Sustancia" styleClass="singleLine">
+                            <h:outputText value="#{tarea.actividadSustancia.gestionarProductosQuimicosProyectoAmbiental.sustanciaquimica.descripcion}" title="#{tarea.actividadSustancia.gestionarProductosQuimicosProyectoAmbiental.sustanciaquimica.descripcion}" />
+                        </p:column>
+                        <p:column headerText="Cupo Cantidad" styleClass="singleLine">
+							<h:outputText value="#{tarea.actividadSustancia.cupoControl}" />
+						</p:column>
+                        <p:column headerText="Subpartida Aranceralia" styleClass="singleLine">
+                            <h:outputText value="#{tarea.subPartidaArancelaria}" title="#{tarea.subPartidaArancelaria}" />
+                        </p:column>
+                        <p:column headerText="País de Origen" styleClass="alCenter w15">
+                            <h:outputText value="#{tarea.ubicacionGeografica.nombre}" />
+                        </p:column>
+                        <p:column headerText="Peso Neto" styleClass="singleLine">
+                            <h:outputText value="#{tarea.pesoNeto}" />
+                        </p:column>
+                        <p:column headerText="Unidad Peso Neto" styleClass="singleLine">
+							<h:outputText value="#{tarea.unidadPesoNeto}"/>
+						</p:column>
+                        <p:column headerText="Peso Bruto" styleClass="singleLine">
+                            <h:outputText value="#{tarea.pesoBruto}"/>
+                        </p:column>
+                        <p:column headerText="Unidad Peso Bruto" styleClass="singleLine">
+							<h:outputText value="#{tarea.unidadPesoBruto}"/>
+						</p:column>
+                    </p:dataTable>
+					</h:panelGrid>
+				</p:panel>            
+        </p:dialog>
+			
+			
+		</h:form>
+		
+		<script type="text/javascript">
+            function handleActividadRequest(xhr, status, args) {
+                if (args.validationFailed || !args.actividadIn) {
+                }
+                else {
+                    PF('signDialogDocumento1').hide();
+                }
+            }
+        </script>
+	</ui:define>
+</ui:composition>

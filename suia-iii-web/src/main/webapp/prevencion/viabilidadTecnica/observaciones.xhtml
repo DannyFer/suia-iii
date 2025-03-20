@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<ui:composition >
+
+		<h:form> 
+
+			<p:growl id="msg" />
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="TABLA DE OBSERVACIONES" />
+				</f:facet>
+				<f:facet name="header">
+
+					<p:commandButton styleClass="button-small-text toRight field_mrg"
+						icon="ui-icon-plusthick" value="Adicionar" update="@none"
+						process="@none" oncomplete="PF('adicionarObservacion').show()" />
+
+				</f:facet>
+
+
+				<p:dataTable id="tablaObservaciones" paginator="true" rows="10"
+					paginatorPosition="bottom" emptyMessage="#{labels['common.table.empty']}"
+					value="#{observacionesViabilidadTecnicaBean.listaObservaciones}"
+					paginatorAlwaysVisible="false" var="observacion" rowIndexVar="i">
+					<p:column headerText="N°">
+						<h:outputText value="#{i+1}" />
+					</p:column>
+					<p:column headerText="Tema">
+						<h:outputText value="#{observacion.campo}" />
+					</p:column>
+					<p:column headerText="Observación">
+						<h:outputText value="#{observacion.descripcion}" />
+					</p:column>
+
+					<p:column headerText="Nombre técnico">
+						<h:outputText value="#{observacion.usuario.nombre}" />
+					</p:column>
+					<p:column headerText="Acciones" styleClass="w40px alCenter">
+						<p:commandButton icon="ui-icon-pencil"
+							styleClass="button-small primary"
+							update=":#{p:component('dialogObservacionesEditar')}"
+							process=":#{p:component('tablaObservaciones')} :#{p:component('dialogObservacionesEditar')}"
+							actionListener="#{observacionesViabilidadTecnicaBean.cargarObservaciones(observacion)}"
+							oncomplete="PF('dialogObservacionesEditar').show()" />
+						<p:commandButton icon="ui-icon-circle-close"
+							styleClass="button-small primary"
+							
+							process=":#{p:component('tablaObservaciones')} :#{p:component('dialogObservacionesEditar')}"
+							actionListener="#{observacionesViabilidadTecnicaController.eliminarObservacion(observacion)}"
+							update=":#{p:component('dialogObservacionesEditar')} :#{p:component('tablaObservaciones')} ">
+							<p:confirm header="Confirmación"
+								message="¿Está seguro que desea eliminar esta observación?"
+								icon="ui-icon-alert" />
+						</p:commandButton>
+					</p:column>
+				</p:dataTable>
+
+				<div align="left">
+					<h:outputText value="Requiere Inspeccion: " />
+					<p:selectBooleanCheckbox
+						value="#{observacionesViabilidadTecnicaBean.requiereInspeccion}">
+						<p:ajax update="msg"
+							listener="#{observacionesViabilidadTecnicaController.requiereInspeccion()}" />
+					</p:selectBooleanCheckbox>
+				</div>
+				<div align="right">
+					<p:commandButton styleClass="primary" value="Anexar Inspeccion"
+						oncomplete="PF('pasu_uploadFile').show()" process="@this" />
+				</div>
+				<div class="buttons" align="right">
+					<p:commandButton type="button" styleClass="primary"
+						icon="ui-icon-arrow-1-e" value="Siguiente" action="#{next_page}" />
+				</div>
+			</p:panelGrid>
+
+
+			<!-- +++++++++++++++++++++++++++++++DIALOGO DE OBSERBACIONES INSERTAR+++++++++++++++++++++++++++++++++++++++++++ -->
+			<p:dialog id="dialogObservaciones" header="Ingreso de observaciones"
+				widgetVar="adicionarObservacion" modal="true" width="380" height="200"
+				resizable="false">
+				<p:panel styleClass="w100">
+				<h:panelGrid columns="1"  styleClass="w100" columnClasses="w50"  >
+					<f:facet name="header"  >
+						<p:outputLabel value="Tema"  />
+					</f:facet>
+					
+					<p:inputText id="tema"
+	 					value="#{observacionesViabilidadTecnicaBean.observacionesformulario.campo}" />
+	              </h:panelGrid>
+	              <h:panelGrid columns="1"  styleClass="w100" columnClasses="w50"  >
+					<f:facet name="header">
+						<p:outputLabel value="Observaciones" for="observaciones" />
+					</f:facet>
+					<p:inputTextarea id="observaciones"
+						value="#{observacionesViabilidadTecnicaBean.observacionesformulario.descripcion}" />
+
+				</h:panelGrid>
+				</p:panel>
+				<p:separator />
+				<div class="buttons">
+
+					<p:commandButton process=":#{p:component('dialogObservaciones')}"
+						update=":#{p:component('tablaObservaciones')}" value="Agregar"
+						actionListener="#{observacionesViabilidadTecnicaController.guardarObservaciones()}"
+						oncomplete="PF('adicionarObservacion').hide()" />
+				</div>
+			</p:dialog>
+
+
+			<!--  +++++++++++++++++++++++++++++++++DIALOGO DE OBSERVACIONES MODIFICAR+++++++++++++++++++++++++++++++++++++++++-->
+			<p:dialog id="dialogObservacionesEditar"
+				header="Modificar Observacion" widgetVar="dialogObservacionesEditar"
+				modal="true" width="350" resizable="false">
+				<h:panelGrid columns="2" styleClass="w100 alCenter"
+					columnClasses="alRight, field_mrg w66 alLeft">
+					<p:outputLabel value="Tema" for="temaModificar" />
+					<p:inputText id="temaModificar"
+						value="#{observacionesViabilidadTecnicaBean.observacionesformulario.campo}" />
+					<p:outputLabel value="Observaciones" for="observacionesModificar" />
+					<p:inputTextarea id="observacionesModificar"
+						value="#{observacionesViabilidadTecnicaBean.observacionesformulario.descripcion}" maxlength="500"/>
+
+				</h:panelGrid>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton
+						process="@form :#{p:component('dialogObservacionesEditar')}"
+						update="@form :#{p:component('tablaObservaciones')}"
+						value="Modificar"
+						actionListener="#{observacionesViabilidadTecnicaController.editarObservaciones()}"
+						oncomplete="PF('dialogObservacionesEditar').hide()" />
+				</div>
+			</p:dialog>
+
+
+
+
+			<p:dialog header="Adjuntar" id="pasu_uploadFile"
+				widgetVar="pasu_uploadFile" modal="false" resizable="false">
+				<p:outputPanel>
+
+					<h:panelGrid cellpadding="2" styleClass="w100">
+
+						<p:outputLabel value="Anexo  (Archivo imagen): *" />
+
+						<p:fileUpload id="pasu_archFoto" width="100%"
+							sizeLimit="209715200" allowTypes="/(\.|\/)(gif|jpe?g|png)$/"
+							fileUploadListener="#{observacionesViabilidadTecnicaController.adjuntarArchivo}"
+							label="Seleccionar" cancelLabel="Cancelar" uploadLabel="Adjuntar"
+							auto="true" dragDropSupport="false" mode="advanced"
+							style="width:410px;"
+							invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo gif, jpeg o png."
+							invalidSizeMessage="Debe adjuntar un archivo no mayor de 2 Mb." />
+					</h:panelGrid>
+
+				</p:outputPanel>
+
+				<div class="buttons">
+					<p:commandButton type="button" value="Cerrar" id="pasu_btnFoto"
+						onclick="PF('pasu_uploadFile').hide()" />
+				</div>
+			</p:dialog>
+		</h:form>
+</ui:composition>
+</html>

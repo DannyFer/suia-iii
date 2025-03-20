@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+		<ui:define name="content">
+		<ui:include src="../contenido/menu.xhtml" />
+		<div class="content">
+		<f:loadBundle var="labels" basename="ec.gob.ambiente.core.resources.labels_es" />
+      <h:form id="frmCalidadAire" enctype="multipart/form-data">
+       	<p:growl id="msgs" globalOnly="true" />         
+             <p:panel>
+             <p:panelGrid columns="1" layout="grid" styleClass="w100">
+             <f:facet name="header">
+				<p:commandButton value="Adicionar" action="#{calidadAireController.agregarCalidadAire()}" immediate="true" update=":#{p:component('frmAire')}"
+						 onclick="PF('dlgAire').show()" id="btnCalidadAire"  icon="ui-icon-plusthick" styleClass="button-small-text toRight field_mrg" >
+						<p:tooltip id="ttAire" for="btnCalidadAire"
+							value="Agregar Calidad del Aire"></p:tooltip>
+					</p:commandButton>
+			<mae:panelGridHeaderHelp value="Calidad del Aire" conector="calidadAireHelp"  help="#{helps['no.help.yet']}" />
+			</f:facet>
+				<p:dataTable id="tblAire" paginator="true" rows="10" value="#{calidadAireController.medioFisicoBean.listaCalidadAire}"
+						 	 var="calidadAire" paginatorPosition="bottom" scrollable="true" scrollWidth="720" emptyMessage="#{labels['common.table.empty']}">
+					<p:columnGroup type="header">
+						<p:row>
+							<p:column colspan="9" 	headerText="Calidad del Aire" width="1200"/>
+						</p:row>
+						<p:row>
+							<p:column rowspan="2" headerText="Acciones" width="100"/>
+							<p:column rowspan="2" headerText="Laboratorio" width="100"/>
+							<p:column rowspan="2" headerText="Parámetro" width="100" />
+							<p:column rowspan="2" headerText="Límite (μg/m3)" width="60"/>
+							<p:column rowspan="2" headerText="Código" width="60"/>
+							<p:column rowspan="2" headerText="Descripción" width="60"/>
+							<p:column colspan="2" headerText="Coordenadas UTM (WGS 84)" width="150"/>
+							<p:column rowspan="2" headerText="Resultado (μg/m3)" width="60"/>
+						</p:row>
+						<p:row>
+							<p:column headerText="X" width="75"/>
+							<p:column headerText="Y" width="75"/>
+						</p:row>
+						</p:columnGroup>
+						<p:column>
+					 <p:commandButton icon="ui-icon-pencil" action="#{calidadAireController.seleccionarCalidadAire(calidadAire)}"
+                                 title="Editar"
+                                 oncomplete="PF('dlgAire').show();" update=":#{p:component('frmAire')}"/>
+                	<p:commandButton icon="ui-icon-trash" action="#{calidadAireController.eliminarcalidadAire(calidadAire)}"
+                                 title="Remover"
+                                 update=":#{p:component('tblAire')}"/>
+					</p:column>
+					<p:column styleClass="#{calidadAire.color}">
+						<h:outputText value="#{calidadAire.laboratorio.descripcion}" />
+					</p:column>
+					<p:column styleClass="#{calidadAire.color}">
+						<h:outputText value="#{calidadAire.parametro.descripcion}" />
+					</p:column>
+					<p:column styleClass="#{calidadAire.color}">
+						<h:outputText value="#{calidadAire.limite}" />
+					</p:column>
+					<p:column styleClass="#{calidadAire.color}">
+						<h:outputText value="#{calidadAire.codigo}" />
+					</p:column>
+					<p:column styleClass="#{calidadAire.color}">
+						<h:outputText value="#{calidadAire.descripcion}" />
+					</p:column>
+					<p:column styleClass="#{calidadAire.color}">
+						<h:outputText value="#{calidadAire.coordenadaGeneral.x}" >
+						<f:convertNumber pattern="##########.##"/>
+						</h:outputText>
+					</p:column>
+					<p:column styleClass="#{calidadAire.color}">
+						<h:outputText value="#{calidadAire.coordenadaGeneral.y}" >
+						<f:convertNumber pattern="##########.##"/>
+						</h:outputText>
+					</p:column>
+					<p:column styleClass="#{calidadAire.color}">
+						<h:outputText value="#{calidadAire.resultado}" />
+					</p:column>
+					
+				</p:dataTable>
+				</p:panelGrid>
+				</p:panel>
+				
+			<div class="buttons main">
+				<p:commandButton id="btnGuardar" value="Guardar" icon="ui-icon-check" action="#{calidadAireController.guardar()}" 
+								update=":#{p:component('tblAire')}"/>
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel" action="#{calidadAireController.cancelar()}" process="@this">
+					<p:confirm header="Confirmación" message="¿Está seguro de cancelar?" icon="ui-icon-alert" />
+				</p:commandButton>
+			</div>	
+	</h:form>
+	
+	<p:dialog id="agregarAire" header="Calidad del Aire" widgetVar="dlgAire" modal="true" width="400" resizable="false">
+	<h:form id="frmAire">
+	<p:panel id="pnlAire">
+	<h:panelGrid columns="2" styleClass="w100 alCenter" columnClasses="alRight, field_mrg w66 alLeft">
+		<p:outputLabel value="Laboratorio" for="cmbLaboratorio"/>
+		<p:selectOneMenu
+					value="#{calidadAireController.medioFisicoBean.calidadAire.laboratorio}"
+					required="true" id="cmbLaboratorio"
+					converter="selectItemConverter2" style="width:100%" requiredMessage="El campo laboratorio es requerido.">
+					<f:selectItems value="#{calidadAireController.medioFisicoBean.laboratorios}" />
+		</p:selectOneMenu>
+		<p:outputLabel value="Parámetro" for="cmbParametro"/>
+		<p:selectOneMenu
+					value="#{calidadAireController.medioFisicoBean.calidadAire.parametro}"
+					required="true" id="cmbParametro"
+					converter="selectItemConverter2" style="width:100%" requiredMessage="El campo parámetro es requerido.">
+					<f:selectItems value="#{calidadAireController.medioFisicoBean.parametros}" />
+					<p:ajax listener="#{calidadAireController.cargarUnidad()}" update="outLimite"></p:ajax>
+		</p:selectOneMenu>
+		<p:outputLabel value="Límite (μg/m3)" />
+		<p:inputText  id="outLimite" value="#{calidadAireController.medioFisicoBean.calidadAire.parametro.valor}" />
+		<p:outputLabel value="Código" for="txtCodigo"/>
+		<p:inputText id="txtCodigo" value="#{calidadAireController.medioFisicoBean.calidadAire.codigo}" required="true" requiredMessage="El campo código es requerido."/>
+		<p:outputLabel value="Descripción" for="txtDescripcion"/>
+		<p:inputText id="txtDescripcion" value="#{calidadAireController.medioFisicoBean.calidadAire.descripcion}" required="true" requiredMessage="El campo descripción es requerido."/>
+		<p:outputLabel value="Coordenada X" for="txtX"/>
+		<p:inputText id="txtX" required="true" value="#{radiacionController.medioFisicoBean.calidadAire.coordenadaGeneral.x}"
+					 onkeypress="return NumCheckDouble(event,this);" requiredMessage="El campo coordenada x es requerido.">
+		</p:inputText>
+		<p:outputLabel value="Coordenada Y" for="txtY"/>
+		<p:inputText id="txtY" required="true" value="#{radiacionController.medioFisicoBean.calidadAire.coordenadaGeneral.y}"
+						 onkeypress="return NumCheckDouble(event,this);" requiredMessage="El campo coordenada y es requerido.">
+		</p:inputText>
+		<p:outputLabel value="Resultado" for="txtResultado"/>
+		<p:inputText id="txtResultado" value="#{radiacionController.medioFisicoBean.calidadAire.resultado}" required="true"
+		 			onkeypress="return NumCheckDouble(event,this);" requiredMessage="El campo resultado es requerido."/>	
+		
+	</h:panelGrid>
+	</p:panel>
+	<p:separator />
+	<div class="buttons">
+		<p:commandButton action="#{calidadAireController.agregarAListaCalidadAire()}"  value="Agregar" update=":#{p:component('msgs')}, :#{p:component('tblAire')}"  
+				oncomplete="handlAireRequest(xhr, status, args)" />
+	</div>
+	</h:form>
+</p:dialog>
+<script type="text/javascript">
+        function handlAireRequest(xhr, status, args) {
+            if (args.validationFailed || !args.aireIn) {
+                PF('dlgAire').jq.effect("shake", {times: 5}, 100);
+            }
+            else {
+                PF('dlgAire').hide();
+                $('#loginLink').fadeOut();
+            }
+        }
+    </script>
+    </div>
+    </ui:define>
+    </ui:composition>

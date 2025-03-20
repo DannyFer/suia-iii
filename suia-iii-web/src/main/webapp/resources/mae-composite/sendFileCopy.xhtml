@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:composite="http://java.sun.com/jsf/composite" xmlns:p="http://primefaces.org/ui" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+	<composite:interface>
+		<composite:attribute name="rendered" required="false" type="java.lang.Boolean" default="true" />
+		<composite:attribute name="readOnly" required="false" type="java.lang.Boolean" default="false" />
+		<composite:attribute name="autoSave" required="true" type="java.lang.Boolean" default="false" />
+		<composite:attribute name="onlySystemEmail" required="true" type="java.lang.Boolean" default="false" />
+		<composite:attribute name="entityId" required="true" type="java.lang.Integer" />
+		<composite:attribute name="className" required="true" type="java.lang.String" />
+		<composite:attribute name="discriminator" required="true" type="java.lang.String" />
+	</composite:interface>
+
+	<composite:implementation>
+		<h:panelGroup id="cc_send_copy_container_cc_#{cc.attrs.className}_#{cc.attrs.entityId}_#{cc.attrs.discriminator}" styleClass="cc_send_copy_container_cc_#{cc.attrs.className}_#{cc.attrs.entityId}_#{cc.attrs.discriminator}">
+			<pe:tooltip adjustY="5" myPosition="top center" atPosition="middle center" escape="false" for="@(.cc_send_copy_email_item_cc)" />
+			<p:panelGrid columns="3" styleClass="w100" style="margin-bottom: 7px;" columnClasses="w20px alCenter bg_light, field_mrg, bg_light w20px alCenter">
+				<h:outputText styleClass="text-blue encabezado1_5em_clean" value="CC" title="Con copia" />
+				<p:dataList value="#{sendCopyBean.destinatarios(cc.attrs.className, cc.attrs.entityId, cc.attrs.discriminator)}" var="item" type="none" emptyMessage="#{labels['common.table.empty']}" styleClass="noBorder">
+					<h:panelGrid columns="2" styleClass="toLeft field_mrg">						
+						<p:outputLabel value="#{item}" styleClass="cc_send_copy_email_item_cc" title="#{sendCopyBean.showInfo(item)}" />						
+						<p:commandButton styleClass="button-small border-radius50px primary" process="@this" actionListener="#{sendCopyBean.eliminar(cc.attrs.className, cc.attrs.entityId, cc.attrs.discriminator, item, cc.attrs.autoSave)}" update="@(.cc_send_copy_container_cc_#{cc.attrs.className}_#{cc.attrs.entityId}_#{cc.attrs.discriminator})" icon="ui-icon-close" title="Eliminar" />
+					</h:panelGrid>
+				</p:dataList>
+				<p:commandButton styleClass="button-small toRight field_mrg primary" process="@this" icon="ui-icon-plusthick" oncomplete="PF('cc_send_copy_container_cc_modal_add_#{cc.attrs.className}_#{cc.attrs.entityId}_#{cc.attrs.discriminator}').show()" update="cc_send_copy_container_cc_modal_add_#{cc.attrs.className}_#{cc.attrs.entityId}_#{cc.attrs.discriminator}" actionListener="#{sendCopyBean.clear()}" title="Adicionar destinatario" />
+			</p:panelGrid>
+			<p:dialog header="Adicionar destinatario" id="cc_send_copy_container_cc_modal_add_#{cc.attrs.className}_#{cc.attrs.entityId}_#{cc.attrs.discriminator}" widgetVar="cc_send_copy_container_cc_modal_add_#{cc.attrs.className}_#{cc.attrs.entityId}_#{cc.attrs.discriminator}" modal="true" resizable="false" width="250">
+				<p:autoComplete value="#{sendCopyBean.value}" cacheTimeout="45000" cache="true" minQueryLength="4" completeMethod="#{sendCopyBean.executeQuery}" style="width: 100% !important;" styleClass="w100">
+					<p:ajax event="query" global="false" />
+				</p:autoComplete>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Aceptar" actionListener="#{sendCopyBean.adicionar(cc.attrs.className, cc.attrs.entityId, cc.attrs.discriminator, cc.attrs.autoSave, cc.attrs.onlySystemEmail)}" process="cc_send_copy_container_cc_modal_add_#{cc.attrs.className}_#{cc.attrs.entityId}_#{cc.attrs.discriminator}" update="cc_send_copy_container_cc_#{cc.attrs.className}_#{cc.attrs.entityId}_#{cc.attrs.discriminator}" oncomplete="update_#{cc.attrs.className}_#{cc.attrs.entityId}_#{cc.attrs.discriminator}(xhr, status, args)" />
+					<p:commandButton type="button" value="Cancelar" styleClass="secondary" onclick="PF('cc_send_copy_container_cc_modal_add_#{cc.attrs.className}_#{cc.attrs.entityId}_#{cc.attrs.discriminator}').hide()" />
+				</div>
+			</p:dialog>
+			<script type="text/javascript">
+			function update_#{cc.attrs.className}_#{cc.attrs.entityId}_#{cc.attrs.discriminator}(xhr, status, args) {
+				PF('cc_send_copy_container_cc_modal_add_#{cc.attrs.className}_#{cc.attrs.entityId}_#{cc.attrs.discriminator}').show();
+	    		if(args.destinatario) {
+	    			PF('cc_send_copy_container_cc_modal_add_#{cc.attrs.className}_#{cc.attrs.entityId}_#{cc.attrs.discriminator}').hide();
+	    		}            
+			}
+			</script>
+		</h:panelGroup>
+	</composite:implementation>
+
+</ui:composition>

@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100"
+	style="margin-top: 15px !important;">
+	<f:facet name="header">
+		<h:outputText value="DISPOSICIÓN FINAL FUERA DE LA INSTALACIÓN" />
+	</f:facet>
+
+	<p:dataTable
+		value="#{disposicionDesechosRetceBean.listaDisposicionFueraInstalacion}"
+		var="desecho" emptyMessage="#{labels['common.table.empty']}">
+		<f:facet name="header">
+			<h:outputText value="Desechos" />
+		</f:facet>
+
+		<p:column styleClass="w50"
+			headerText="Nombre del residuo o desecho peligroso o especial">
+			<h:outputText value="#{desecho.desechoPeligroso.descripcion}" />
+		</p:column>
+		<p:column headerText="Código">
+			<h:outputText value="#{desecho.desechoPeligroso.clave}" />
+		</p:column>
+		<p:column headerText="Unidad">
+			<h:outputText value="#{desecho.tipoUnidad.descripcion}" />
+		</p:column>
+		<p:column headerText="Cantidad" styleClass="alCenter">
+			<h:outputText value="#{desecho.cantidad}" />
+		</p:column>
+		<p:column style="text-align: center; width: 33px;"
+			rendered="#{disposicionDesechosRetceBean.mostrarHistorialDesechos}">
+			<h:outputText styleClass="text-orange"
+				rendered="#{desecho.nuevoEnModificacion}" value="Nuevo" />
+		</p:column>
+	</p:dataTable>
+	<h:panelGrid styleClass="panel_data" columns="2"
+		rendered="#{disposicionDesechosRetceBean.listaDesechosEliminados != null}"
+		columnClasses="header background-orange, null" rowClasses="null, alt">
+		<h:outputText value="Desechos eliminados" />
+		<p:commandButton styleClass="button-small orange"
+			icon="ui-icon-search" process="@this"
+			oncomplete="PF('verDesechosEliminadosDisposicion').show()" immediate="true"
+			title="Ver Historial" />
+	</h:panelGrid>
+
+	<br />
+	<br />
+
+	<p:dataTable
+		value="#{disposicionDesechosRetceBean.listaEmpresasGestoras}"
+		var="item" emptyMessage="#{labels['common.table.empty']}">
+		<f:facet name="header">
+			<h:outputText value="Empresas Gestoras" />
+		</f:facet>
+
+		<p:column headerText="Empresa gestora" styleClass="w50">
+			<h:outputText
+						value="#{(item.empresaGestora.prestadorServiciosDesechos.nombre eq 'OTRA') ? item.otraEmpresa : item.empresaGestora.prestadorServiciosDesechos}" />
+		</p:column>
+		<p:column headerText="Número de autorización">
+			<h:outputText value="#{item.empresaGestora.prestadorServiciosDesechos.nombre ne 'OTRA' ? item.empresaGestora.codigoPermisoAmbiental : 'N/A'}" />
+		</p:column>
+		<p:column style="text-align: center; width: 33px;"
+			rendered="#{disposicionDesechosRetceBean.mostrarHistorialEmpresa}">
+			<h:outputText styleClass="text-orange"
+				rendered="#{item.nuevoEnModificacion}" value="Nuevo" />
+		</p:column>
+	</p:dataTable>
+	<h:panelGrid styleClass="panel_data" columns="2"
+		rendered="#{disposicionDesechosRetceBean.listaEmpresasHistorialEliminadas != null}"
+		columnClasses="header background-orange, null" rowClasses="null, alt">
+		<h:outputText value="Empresas eliminadas" />
+		<p:commandButton styleClass="button-small orange"
+			icon="ui-icon-search" process="@this"
+			oncomplete="PF('verEmpresasEliminadasDisposicion').show()" immediate="true"
+			title="Ver Historial" />
+	</h:panelGrid>
+
+</p:panelGrid>
+
+<p:dialog id="verDesechosEliminadosDisposicion" widgetVar="verDesechosEliminadosDisposicion"
+	modal="true" resizable="false" width="700" header="Desechos Eliminados">
+	<p:dataTable
+		value="#{disposicionDesechosRetceBean.listaDesechosEliminados}"
+		var="desecho" emptyMessage="#{labels['common.table.empty']}">
+		<p:column headerText="Fecha modificación" style="width: 80px;">
+			<h:outputText value="#{desecho.fechaCreacion}" />
+		</p:column>
+		<p:column styleClass="w50"
+			headerText="Nombre del residuo o desecho peligroso o especial">
+			<h:outputText value="#{desecho.desechoPeligroso.descripcion}" />
+		</p:column>
+		<p:column headerText="Código">
+			<h:outputText value="#{desecho.desechoPeligroso.clave}" />
+		</p:column>
+		<p:column headerText="Unidad">
+			<h:outputText value="#{desecho.tipoUnidad.descripcion}" />
+		</p:column>
+		<p:column headerText="Cantidad" styleClass="alCenter">
+			<h:outputText value="#{desecho.cantidad}" />
+		</p:column>
+	</p:dataTable>
+	<br />
+	<br />
+</p:dialog>
+
+<p:dialog id="verEmpresasEliminadasDisposicion" widgetVar="verEmpresasEliminadasDisposicion"
+	modal="true" resizable="false" width="700" header="Empresas Eliminados">
+	<p:dataTable
+		value="#{disposicionDesechosRetceBean.listaEmpresasHistorialEliminadas}"
+		var="item" emptyMessage="#{labels['common.table.empty']}">
+		<p:column headerText="Fecha modificación" style="width: 80px;">
+			<h:outputText value="#{item.fechaCreacion}" />
+		</p:column>
+		<p:column headerText="Empresa gestora" styleClass="w50">
+			<h:outputText
+				value="#{item.empresaGestora.prestadorServiciosDesechos}" />
+		</p:column>
+		<p:column headerText="Número de autorización">
+			<h:outputText value="#{item.empresaGestora.codigoPermisoAmbiental}" />
+		</p:column>
+	</p:dataTable>
+	<br />
+	<br />
+</p:dialog>
+
+</html>
