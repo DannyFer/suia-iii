@@ -1,4 +1,3 @@
-
 package ec.gob.ambiente.prevencion.categoriaii.mineria.controller;
 
 import java.io.ByteArrayInputStream;
@@ -173,8 +172,8 @@ public class ComponenteSocialSDController implements Serializable{
 		
 		areaEstudio = documentosRcoaFacade.documentoXTablaIdXIdDocUno(proyectoLicenciaCoa.getId(),TipoDocumentoSistema.AREA_ESTUDIO_020,CategoriaIILicencia.class.getSimpleName());
 		ubicacion = documentosRcoaFacade.documentoXTablaIdXIdDocUno(proyectoLicenciaCoa.getId(),TipoDocumentoSistema.UBICACION_020,CategoriaIILicencia.class.getSimpleName());
-		tipoClima = documentosRcoaFacade.documentoXTablaIdXIdDocUno(proyectoLicenciaCoa.getId(),TipoDocumentoSistema.TIPO_CLIMA_020,CategoriaIILicencia.class.getSimpleName());
-		pisos = documentosRcoaFacade.documentoXTablaIdXIdDocUno(proyectoLicenciaCoa.getId(),TipoDocumentoSistema.PISOS_020,CategoriaIILicencia.class.getSimpleName());
+		tipoClima = documentosRcoaFacade.documentoXTablaIdXIdDocUno(proyectoLicenciaCoa.getId(),TipoDocumentoSistema.GEOLOGICO_020,CategoriaIILicencia.class.getSimpleName());
+		pisos = documentosRcoaFacade.documentoXTablaIdXIdDocUno(proyectoLicenciaCoa.getId(),TipoDocumentoSistema.GEOMORFOLOGICO_020,CategoriaIILicencia.class.getSimpleName());
 	}
 	
 	public void guardarDatos(){
@@ -233,12 +232,12 @@ public class ComponenteSocialSDController implements Serializable{
 			
 			if (tipoClima.getId() == null){
 				tipoClima.setIdTabla(proyectoLicenciaCoa.getId());
-				tipoClima = documentosRcoaFacade.guardarDocumentoAlfresco(proyectoLicenciaCoa.getCodigoUnicoAmbiental(), "LicenciaAmbientalCategoriaII", idProcessInstance, tipoClima, TipoDocumentoSistema.TIPO_CLIMA_020);
+				tipoClima = documentosRcoaFacade.guardarDocumentoAlfresco(proyectoLicenciaCoa.getCodigoUnicoAmbiental(), "LicenciaAmbientalCategoriaII", idProcessInstance, tipoClima, TipoDocumentoSistema.GEOLOGICO_020);
 			}
 			
 			if (pisos.getId() == null){
 				pisos.setIdTabla(proyectoLicenciaCoa.getId());
-				pisos = documentosRcoaFacade.guardarDocumentoAlfresco(proyectoLicenciaCoa.getCodigoUnicoAmbiental(), "LicenciaAmbientalCategoriaII", idProcessInstance, pisos, TipoDocumentoSistema.PISOS_020);
+				pisos = documentosRcoaFacade.guardarDocumentoAlfresco(proyectoLicenciaCoa.getCodigoUnicoAmbiental(), "LicenciaAmbientalCategoriaII", idProcessInstance, pisos, TipoDocumentoSistema.GEOMORFOLOGICO_020);
 			}
 			
 			if(validarDocumentosAnexos().size() > 0){
