@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+	<ui:define name="content">
+		<style type="text/css">
+.ui-panelgrid-header .ui-widget-header td {
+	background: #008A8A !important;
+}
+
+.pnlHeaders .ui-widget-content {
+	border: none !important;
+}
+
+.pnlHeaders .ui-datagrid-header {
+	text-align: left !important;
+	background: #008A8A !important;
+	color: #FFFFFF !important;
+	font-weight: bold;
+	padding-top: 0 !important;
+}
+</style>
+
+		<f:event type="preRenderView"
+			listener="#{ingresarInfoViabilidadController.validarTareaBpm()}" />
+
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText
+						value="#{ingresarInfoViabilidadController.cabeceraPanel}" />
+				</f:facet>
+				<h:outputText
+					value="#{ingresarInfoViabilidadController.infoPanel}"
+					escape="false" />
+				<h:outputText
+					value="Si el documento para la obtención de la Viabilidad Ambiental ya ha sido ingresado anteriormente al sistema, se deberá volver a ingresar el mismo documento."
+					escape="false"
+					rendered="#{ingresarInfoViabilidadController.esForestal and ingresarInfoViabilidadController.proyectoRetroceso}" />
+				<h:outputText
+					value="En el caso de que no disponga del documento de viabilidad ambiental que fue ingresado anteriormente, lo puede solicitar a mesadeayuda@ambiente.gob.ec"
+					escape="false"
+					rendered="#{ingresarInfoViabilidadController.esForestal and ingresarInfoViabilidadController.proyectoRetroceso}" />
+				<br />
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w50, null">
+					<p:outputLabel
+						value="Formato o guía para obtener el informe de viabilidad ambiental: *"
+						style="color: white" />
+					<p:commandButton icon="ui-icon-arrowthick-1-s" value="Descargar"
+						styleClass="primary toLeft" title="Ver" ajax="false"
+						immediate="true"
+						disabled="#{ingresarInfoViabilidadController.esForestal and ingresarInfoViabilidadController.proyectoRetroceso}">
+						<p:fileDownload
+							value="#{ingresarInfoViabilidadController.descargarGuia()}" />
+					</p:commandButton>
+				</p:panelGrid>
+
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w50, null">
+					<p:outputLabel
+						value="Adjuntar documento para obtener el informe de viabilidad ambiental: *"
+						style="color: white" />
+					<p:outputPanel id="pnlDocumento">
+						<p:fileUpload
+							fileUploadListener="#{ingresarInfoViabilidadController.uploadDocumento}"
+							multiple="false" sizeLimit="20971520"
+							allowTypes="/(\.|\/)(pdf)$/" label="Admite .pdf de 20MB"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 MB."
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" required="true" update="pnlDocumento" />
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="button-small primary toLeft" title="Ver" ajax="false"
+							immediate="true"
+							rendered="#{ingresarInfoViabilidadController.documentoRespuestas.nombre ne null}">
+							<p:fileDownload
+								value="#{ingresarInfoViabilidadController.descargar(ingresarInfoViabilidadController.documentoRespuestas)}" />
+						</p:commandButton>
+						<h:outputText
+							value="#{ingresarInfoViabilidadController.documentoRespuestas.nombre}"
+							rendered="#{ingresarInfoViabilidadController.documentoRespuestas.nombre ne null}" />
+					</p:outputPanel>
+				</p:panelGrid>
+			</p:panelGrid>
+
+			<h:inputHidden
+				validator="#{ingresarInfoViabilidadController.validateDatosIngreso}" />
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Enviar"
+						action="#{ingresarInfoViabilidadController.enviar()}"
+						icon="ui-icon-check" process="@this form">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+</ui:composition>

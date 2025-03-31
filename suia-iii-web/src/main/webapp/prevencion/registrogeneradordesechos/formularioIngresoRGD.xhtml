@@ -1,0 +1,155 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" 
+xmlns:ui="http://java.sun.com/jsf/facelets" 
+xmlns:h="http://java.sun.com/jsf/html" 
+xmlns:p="http://primefaces.org/ui"
+xmlns:pe="http://primefaces.org/ui/extensions"   
+xmlns:f="http://java.sun.com/jsf/core"
+template="/WEB-INF/templates/default.xhtml" >
+
+<ui:define name="content">
+      <style>
+            .col1 {
+                width: 30%;
+            }
+            .col2 {
+                width: 70%;
+            }
+            .anchoTexto1 {
+			    width: 600px !important
+            }
+            .anchoTexto2 {
+			    width: 200px !important
+            }
+            .calendarClass input {
+			    width: 200px !important
+			}
+        </style>
+<p:outputPanel id="pnlDatos1">
+	<p:panel header="Ingreso Registro Generador de Desechos">
+	<h:form id="frmDatos1" >
+		<h:panelGrid columns="2" width="100%" columnClasses="col1,col2" rendered="#{registroGeneradorDesechoIngresoController.mostrarFormulario}">
+			<h:outputLabel value="Usuario *:" />
+			<h:panelGroup>
+				<p:inputText styleClass="anchoTexto2" value="#{registroGeneradorDesechoIngresoController.usuarioId}" maxlength="40" required="true" requiredMessage="El campo usuario es requerido" disabled="#{!registroGeneradorDesechoIngresoController.permitirMotificar}"/>
+				<p:commandButton value="Validar" update=":#{p:component('frmDatos1')}" disabled="#{!registroGeneradorDesechoIngresoController.permitirMotificar}"
+						action="#{registroGeneradorDesechoIngresoController.validarRUC()}"
+						style="vertical-align: top" styleClass="primary" />
+			</h:panelGroup>
+			<h:outputLabel value="Empresa" />
+			<p:inputText id="txtEmpresa" styleClass="anchoTexto1" value="#{registroGeneradorDesechoIngresoController.empresaNombre}" disabled="true"/>
+			<h:outputLabel value="Representante legal" />
+			<p:inputText id="txtNombre" styleClass="anchoTexto1" value="#{registroGeneradorDesechoIngresoController.usuarioNombre}" disabled="true"/>
+			<h:outputLabel value="Cédula representante" />
+			<p:inputText id="txtRuc" styleClass="anchoTexto2" value="#{registroGeneradorDesechoIngresoController.representanteCI}" disabled="true"/>
+		</h:panelGrid>
+	</h:form>
+	<h:form id="frmDatos">
+		<p:outputPanel rendered="#{registroGeneradorDesechoIngresoController.mostrarFormulario}">
+		<h:panelGrid columns="2" width="100%" columnClasses="col1,col2" >
+			<h:outputLabel value="Fecha *:" />
+			<p:calendar id="idFecha" styleClass="calendarClass" value="#{registroGeneradorDesechoIngresoController.generadorDesechosPeligrosos.fechaCreacion}" pattern="dd/MM/yyyy" readonlyInput="true" required="true" requiredMessage="El campo fecha es requerido" disabled="#{!registroGeneradorDesechoIngresoController.permitirMotificar}"
+						maxdate="#{registroGeneradorDesechoIngresoController.fechaActual}" navigator="true"  >
+			</p:calendar>
+			<h:outputLabel value="Código de Registro Generador:" />
+			<p:inputText styleClass="anchoTexto2" converter="toUpperCaseConverter" style="text-transform: uppercase;" value="#{registroGeneradorDesechoIngresoController.generadorDesechosPeligrosos.codigo}" maxlength="40" required="true" requiredMessage="El campo código de registro generador es requerido" disabled="#{!registroGeneradorDesechoIngresoController.permitirMotificar}"/>
+			<h:outputLabel value="Sector *:" />
+			<p:selectOneMenu required="true" requiredMessage="El campo  sector es requerido"
+				value="#{registroGeneradorDesechoIngresoController.tipoSectorId}" id="cmb_tipo_sector"
+				 style="width: 200px" disabled="#{!registroGeneradorDesechoIngresoController.permitirMotificar}" >
+				<f:selectItem itemLabel="Seleccione" itemValue="" />
+				<f:selectItems value="#{registroGeneradorDesechoIngresoController.tiposSectores}" var="sector" itemLabel="#{sector.nombre}" itemValue="#{sector.id}" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Area *:" />
+			<p:selectOneMenu filter="true" filterMatchMode="contains" disabled="#{!registroGeneradorDesechoIngresoController.permitirMotificar}"
+				required="true" requiredMessage="El campo  área es requerido"
+				value="#{registroGeneradorDesechoIngresoController.areaId}" id="cmb_area"
+				 style="width: 600px" >
+				<f:selectItem itemLabel="Seleccione" itemValue="" />
+				<f:selectItems value="#{registroGeneradorDesechoIngresoController.listaAreas}" var="area" itemLabel="#{area.areaName} - #{area.areaAbbreviation}" itemValue="#{area.id}" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Eliminación dentro establecimiento:" />
+			<p:selectOneMenu required="true" requiredMessage="El campo eliminación dentro establecimiento es requerido"
+				value="#{registroGeneradorDesechoIngresoController.generadorDesechosPeligrosos.eliminacionDentroEstablecimiento}"
+				 style="width: 600px" disabled="#{!registroGeneradorDesechoIngresoController.permitirMotificar}" >
+				<f:selectItem itemLabel="Seleccione" itemValue="" />
+				<f:selectItem itemLabel="SI" itemValue="true" />
+				<f:selectItem itemLabel="NO" itemValue="false" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Responsabilidad extendida:" />
+			<p:selectOneMenu required="true" requiredMessage="El campo responsabilidad extendida es requerido" disabled="#{!registroGeneradorDesechoIngresoController.permitirMotificar}"
+				value="#{registroGeneradorDesechoIngresoController.generadorDesechosPeligrosos.responsabilidadExtendida}" style="width: 600px" >
+				<f:selectItem itemLabel="Seleccione" itemValue="" />
+				<f:selectItem itemLabel="SI" itemValue="true" />
+				<f:selectItem itemLabel="NO" itemValue="false" />
+			</p:selectOneMenu>
+			<p:outputLabel value="Observaciones:" />
+			<p:inputTextarea id="txtObservaciones" rows="4" styleClass="anchoTexto1" value="#{registroGeneradorDesechoIngresoController.generadorDesechosPeligrosos.observaciones}" readonly="#{cargaTrabajoController.cargaTrabajo.proyectoId != null}"
+								autoResize="false" maxlength="256" disabled="#{!registroGeneradorDesechoIngresoController.permitirMotificar}"/>
+			</h:panelGrid>	
+		</p:outputPanel>
+		<br/><br/>
+        <p:outputPanel id="pnlDatos" rendered="#{!registroGeneradorDesechoIngresoController.mostrarFormulario}">
+	     <p:dataTable id="dtbTrabajos" widgetVar="dtbTrabajos"
+                         value="#{registroGeneradorDesechoIngresoController.listaGeneradorDesechosPeligrosos}"
+                         var="carga" paginator="true" rows="10">
+				<p:column headerText="Fecha" width="10%" >
+                    <h:outputText value="#{carga.fechaCreacion}">
+                    	<f:convertDateTime pattern="dd-MM-yyyy"/>
+                    </h:outputText>
+                </p:column>
+                 <p:column headerText="Código de Registro Generador" filterBy="#{carga.codigo}" filterMatchMode="contains" width="15%">
+                    <h:outputText value="#{carga.codigo}"/>
+                </p:column>
+                <p:column headerText="Usuario" filterBy="#{carga.usuario.nombre}" filterMatchMode="contains" width="10%">
+                    <h:outputText value="#{carga.usuario.nombre}"/>
+                </p:column>
+                <p:column headerText="Sector" width="15%">
+                    <h:outputText value="#{carga.tipoSector.nombre}"/>
+                </p:column>
+                <p:column headerText="Area" width="40%">
+                    <h:outputText value="#{carga.areaResponsable.areaName}"/>
+                </p:column>
+				<p:column headerText="Acción" width="10%">
+                    <p:commandButton title="Editar" icon="ui-icon-pencil" styleClass="primary button-small"
+                    		rendered="#{carga.finalizado and loginBean.usuario.nombre eq carga.usuarioCreacion}"
+                    		action="#{registroGeneradorDesechoIngresoController.editar(carga)}" update=":#{p:component('frmDatos')},:#{p:component('frmDatos1')}" >
+                    </p:commandButton>
+                    <p:commandButton title="Ver" icon="ui-icon-search" styleClass="primary button-small"
+                    		rendered="false"
+                    		action="#{registroGeneradorDesechoIngresoController.ver(carga)}" update=":#{p:component('frmDatos')},:#{p:component('frmDatos1')}" >
+                    </p:commandButton>
+                 </p:column>
+            </p:dataTable>
+            </p:outputPanel>
+		<br/>
+			<div class="buttons" style="width:30%;">
+				<p:commandButton value="Guardar"
+					action="#{registroGeneradorDesechoIngresoController.guardar()}" 
+					rendered="#{registroGeneradorDesechoIngresoController.mostrarFormulario and registroGeneradorDesechoIngresoController.permitirMotificar}"
+					update=":#{p:component('pnlDatos1')}"
+					process="@form"
+					icon="ui-icon-check"  />
+				<p:commandButton value="Limpiar"
+					action="#{registroGeneradorDesechoIngresoController.nuevo()}" process="@form"
+					rendered="#{registroGeneradorDesechoIngresoController.mostrarFormulario and registroGeneradorDesechoIngresoController.permitirMotificar}"
+					immediate="true" icon="ui-icon-cancel" />
+				<p:commandButton value="Cancelar"
+					onclick="PF('statusDialog').show();"
+					action="#{registroGeneradorDesechoIngresoController.cancelar()}" 
+					rendered="#{registroGeneradorDesechoIngresoController.mostrarFormulario}"
+					update=":#{p:component('pnlDatos1')}"
+					icon="ui-icon-cancel" immediate="true" />
+			</div>
+			<div class="buttons" style="width:10%;">
+				<p:commandButton value="Nuevo" 
+					action="#{registroGeneradorDesechoIngresoController.nuevo()}" process="@form"
+					rendered="#{!registroGeneradorDesechoIngresoController.mostrarFormulario}"
+					update=":#{p:component('pnlDatos1')}, :#{p:component('frmDatos')}, :#{p:component('frmDatos1')}" 
+					icon="ui-icon-cancel" />
+			</div>
+		<br/>
+            </h:form>
+     </p:panel>
+</p:outputPanel>
+</ui:define>
+</ui:composition>

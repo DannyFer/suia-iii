@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" template="/WEB-INF/templates/default-task.xhtml" xmlns:f="http://java.sun.com/jsf/core">
+	<ui:define name="content">
+
+		<h:form id="form-recibir-info">
+			<br />
+			<h:panelGrid styleClass="alCenter w100" columns="1">
+				<h:outputText value="Estimado usuario, atendiendo a su solicitud se emite el pronunciamiento favorable correspondiente" styleClass="encabezado" />
+				<h:panelGrid styleClass="alCenter w66" columns="1">
+					<p:panel styleClass="alCenter">
+						<h2>
+							<h:outputText value="#{recibirPronunciamientoController.aprobacionRequisitosTecnicos.solicitud}" styleClass="bold" />
+						</h2>
+					</p:panel>
+				</h:panelGrid>
+				<br />
+				<h:outputText value="Para completar la actividad, descargue el Oficio de Pronunciamiento Favorable y haga clic en el botón Aceptar." styleClass="encabezado text-red" />
+				<p:separator />
+				<h:panelGrid columns="2" cellpadding="10" style="text-align:right !important"  rendered="#{!recibirPronunciamientoController.showSurvey()}">
+					<p:outputLabel value="Descargue su Oficio de Pronunciamiento Favorable" styleClass="bold" />
+					<p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary" disabled="#{empty recibirPronunciamientoController.oficioDoc}">
+						<p:fileDownload value="#{recibirPronunciamientoController.getStream(recibirPronunciamientoController.oficioDoc)}" />
+					</p:commandButton>
+				</h:panelGrid>
+				<h:panelGrid columns="2" text-align="left" columnClasses="header, w20px alCenter" rowClasses="null, alt" 
+				rendered="#{recibirPronunciamientoController.showSurvey()}" width="500" >
+				<h:outputText  value="Estimado Proponente se solicita completar la siguiente encuesta, una vez realizado dicha tareas podrá obtener la documentación de su proyecto" />
+				<p:commandButton value="Encuesta" styleClass="primary" update="surveyDialog"
+                    	actionListener="#{recibirPronunciamientoController.showDialogSurvey()}" />
+			</h:panelGrid>
+				
+				
+			</h:panelGrid>
+
+			<div class="buttons main">
+				<p:commandButton value="Aceptar" action="#{recibirPronunciamientoController.enviarAprobacionRequisitosTecnicos()}" icon="ui-icon-check"  disabled="#{recibirPronunciamientoController.showSurvey()}"/>
+			</div>
+			
+<p:dialog id="surveyDialog" header="Encuesta de Satisfacción de Servicios" modal="true" closable="true" resizable="false"
+				visible="#{recibirPronunciamientoController.showSurveyD}" onHide="location.reload();">
+				<iframe frameborder="0" align="left" src="#{recibirPronunciamientoController.urlLinkSurvey()}"
+					scrolling="auto" width="925" height="450" marginheight="5" marginwidth="10"></iframe>
+		    </p:dialog>
+		</h:form>
+
+			
+		    
+		<p:dialog id="generadorDlg" header="Informativo"
+				  widgetVar="generadorWdgt" modal="true" closable="false" height="140" width="500" resizable="false">
+			<h:panelGroup id="generadorInner" layout="block" style="margin:10px;">
+				<h:outputText
+						value="#{helps['rg.mensaje.informativo.inclusion.desecho']}"
+						styleClass="bold text-red alJustify" />
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Aceptar" styleClass="primary"
+									 onclick="PF('generadorWdgt').hide();"
+									 action="#{recibirPronunciamientoController.completarTarea()}" />
+				</div>
+			</h:panelGroup>
+		</p:dialog>
+
+		<p:dialog id="generadorNoVoluntaioDlg" header="Informativo"
+				  widgetVar="generadorNoVoluntaioWdgt" modal="true" closable="false" height="140" width="500" resizable="false">
+			<h:panelGroup id="generadorInnerNoVoluntario" layout="block" style="margin:10px;">
+				<h:outputText
+						value="#{helps['rg.mensaje.informativo.inclusion.desecho.no.voluntario']}"
+						styleClass="bold text-red alJustify" />
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Aceptar" styleClass="primary"
+									 onclick="PF('generadorNoVoluntaioWdgt').hide();"
+									 action="#{recibirPronunciamientoController.completarTarea()}" />
+				</div>
+			</h:panelGroup>
+		</p:dialog>
+
+		<script type="text/javascript">
+			function showModalAddGenerador(xhr, status, args) {
+				if (args.generador) {
+					PF('generadorWdgt').show();
+				}
+				else{
+					PF('generadorNoVoluntaioWdgt').show();
+				}
+			}
+
+		</script>
+	</ui:define>
+</ui:composition>
+</html>

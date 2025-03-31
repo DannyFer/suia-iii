@@ -1,0 +1,1580 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+<style type="text/css">
+.cssPnlMainContent .ui-panelgrid-cell {
+	padding: 4px 0px !important;
+}
+
+.cssPanelContent {
+	padding-bottom: 15px;
+}
+
+.cssPanelContent .ui-widget-content {
+	border: none !important;
+}
+
+.cssPanelContent .panel_data tr td {
+	border: 1px solid #aaaaaa !important;
+}
+
+.cssPanelContent .ui-panelgrid-content {
+	padding: 0px !important;
+}
+
+.pnlHeadersSecundario {
+	padding-top: 20px !important;
+}
+
+.pnlHeaders .ui-panelgrid-header {
+	text-align: left !important;
+	background: #008A8A !important;
+	color: #FFFFFF !important;
+	font-weight: bold;
+	padding: 0px 10px 8px 10px !important;
+}
+
+.cssPanelContent .panel_data .cssRadioInterno tr td {
+	border: none !important;
+}
+
+.cssPanelContent .panel_data .cssRadioInterno td {
+	padding: 0px !important;
+}
+
+.ui-selectoneradio label {
+	margin-left: -1px !important;
+}
+</style>
+
+<h:panelGrid styleClass="w100" id="pnlInforme">
+	<object type="application/pdf"
+		data="#{elaborarDocumentosViabilidadPfnController.urlInforme}?pfdrid_c=true"
+		width="100%" height="500px">
+		Su navegador no soporta la visualización de pdf. Puede descargar el
+		documento presionando el siguiente botón:
+		<p:commandButton value="Descargar" styleClass="primary" ajax="false"
+			immediate="true" icon="ui-icon-arrowthick-1-s">
+			<p:fileDownload
+				value="#{elaborarDocumentosViabilidadPfnController.getStream(1)}" />
+		</p:commandButton>
+	</object>
+	<br />
+	<br />
+	<h:panelGrid columns="2" styleClass="w100" columnClasses="w25, null">
+		<h:outputText value="Tipo de informe" />
+		<p:selectOneRadio id="rdbTipoInforme" required="true"
+			requiredMessage="El campo 'Tipo de informe' es requerido"
+			value="#{elaborarDocumentosViabilidadPfnController.esInformeViabilidad}">
+			<f:selectItem itemLabel="Informe de viabilidad" itemValue="true" />
+			<f:selectItem itemLabel="Informe de observaciones" itemValue="false" />
+			<p:ajax event="change" process="@this" update="tab"
+				listener="#{elaborarDocumentosViabilidadPfnController.seleccionarTipoPronunciamiento}" />
+		</p:selectOneRadio>
+	</h:panelGrid>
+
+	<br />
+	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<h:outputText value="1. Datos generales" />
+		</f:facet>
+		<p:panelGrid columns="2" styleClass="panel_data w100"
+			columnClasses="header w25, null">
+			<p:outputLabel for="txtNombreTecnico" value="Nombres y Apellidos"
+				style="color: white" />
+			<p:inputText required="true"  maxlength="200"
+				value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.nombreTecnico}"
+				id="txtNombreTecnico">
+				<p:ajax process="@this" />
+			</p:inputText>
+
+			<p:outputLabel for="txtCargoTecnico" value="Cargo"
+				style="color: white" />
+			<p:inputText required="true"  maxlength="200"
+				value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.cargoTecnico}"
+				id="txtCargoTecnico">
+				<p:ajax process="@this" />
+			</p:inputText>
+
+			<p:outputLabel for="txtAreaTecnico" value="Área" style="color: white" />
+			<p:inputText required="true"  maxlength="200"
+				value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.areaTecnico}"
+				id="txtAreaTecnico">
+				<p:ajax process="@this" />
+			</p:inputText>
+		</p:panelGrid>
+	</p:panelGrid>
+
+	<br />
+
+	<h:panelGroup id="pnlTextos">
+		<p:fieldset legend="2. Antecedentes" toggleable="true"
+			toggleSpeed="500" collapsed="false">
+			<h:panelGrid columns="1" styleClass="w100">
+				<control:imputConTextoEnriquecido
+					requiredMessage="El campo 'Antecedentes' es requerido"
+					valor="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.antecedentes}"
+					soloLectura="false" />
+			</h:panelGrid>
+		</p:fieldset>
+
+		<br />
+
+		<p:fieldset legend="3. Marco Legal" toggleable="true"
+			toggleSpeed="500" collapsed="false">
+			<control:imputConTextoEnriquecido
+				requiredMessage="El campo 'Marco Legal' es requerido"
+				valor="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.marcoLegal}"
+				soloLectura="false" />
+		</p:fieldset>
+
+		<br />
+
+		<p:fieldset legend="4. Objetivo" toggleable="true" toggleSpeed="500"
+			collapsed="false">
+			<h:panelGrid columns="1" styleClass="w100">
+				<control:imputConTextoEnriquecido
+					requiredMessage="El campo 'Objetivo' es requerido"
+					valor="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.objetivo}"
+					soloLectura="false" />
+			</h:panelGrid>
+		</p:fieldset>
+	</h:panelGroup>
+
+	<p:panelGrid columns="1" layout="grid" styleClass="w100"
+		rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.viabilidadProyecto.requiereInspeccionTecnica}">
+		<f:facet name="header">
+			<h:outputText value="5. Datos de la inspección realizada" />
+		</f:facet>
+		<p:panelGrid columns="2" styleClass="panel_data w100"
+			columnClasses="header w25, null">
+			<p:outputLabel for="txtFechaInspeccion"
+				value="Fecha inspección de campo" style="color: white" />
+			<h:panelGrid styleClass="w25 panelContenedor">
+				<p:calendar id="txtFechaInspeccion" required="true"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.fechaInspeccion}"
+					timeZone="America/Guayaquil" readonlyInput="true"
+					pattern="dd/MM/yyyy" maxdate="today">
+					<p:ajax event="dateSelect" process="@this" />
+				</p:calendar>
+			</h:panelGrid>
+
+			<p:outputLabel value="Delegados del operador para inspección"
+				style="color: white" />
+			<p:dataTable id="tblDelegadoOperador"
+				value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaDelegadosOperador}"
+				var="item" emptyMessage="#{labels['common.table.empty']}">
+				<f:facet name="header">
+					<p:commandButton value="Adicionar"
+						action="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.nuevoDelegado()}"
+						oncomplete="PF('dlgDelegadoOperador').show()"
+						update=":frmDialogosAdicionales:pnlDatosDelegado"
+						styleClass="button-small-text toRight field_mrg" process="@this"
+						icon="ui-icon-plusthick" />
+				</f:facet>
+				<p:column headerText="Cedula">
+					<h:outputText value="#{item.cedula}" />
+				</p:column>
+				<p:column headerText="Nombres y Apellidos">
+					<h:outputText value="#{item.nombre}" />
+				</p:column>
+				<p:column headerText="Cargo" styleClass="alCenter">
+					<h:outputText value="#{item.cargo}" />
+				</p:column>
+				<p:column headerText="Acción" styleClass="w70px alCenter">
+					<p:commandButton icon="ui-icon-pencil" title="Editar"
+						process="@this" styleClass="primary"
+						actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.editarDelegado(item)}"
+						oncomplete="PF('dlgDelegadoOperador').show()"
+						update=":frmDialogosAdicionales:pnlDatosDelegado tblDelegadoOperador" />
+
+					<p:commandButton icon="ui-icon-trash" title="Eliminar"
+						process="@this" styleClass="primary"
+						actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.eliminarDelegado(item)}"
+						update="tblDelegadoOperador" />
+				</p:column>
+			</p:dataTable>
+
+			<p:outputLabel value="Delegados del MAATE para la inspección"
+				style="color: white" />
+			<p:dataTable id="tblEquipoTecnico"
+				value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaTecnicosDelegados}"
+				var="item" emptyMessage="#{labels['common.table.empty']}">
+				<f:facet name="header">
+					<p:commandButton value="Adicionar"
+						update=":frmDialogosAdicionales:pnlDatosTecnicoDelegado"
+						action="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.nuevoTecnicoDelegado()}"
+						oncomplete="PF('dlgTecnicoDelegado').show()"
+						styleClass="button-small-text toRight field_mrg" process="@this"
+						icon="ui-icon-plusthick" />
+				</f:facet>
+
+				<p:column headerText="Cedula">
+					<h:outputText value="#{item.usuario.nombre}" />
+				</p:column>
+				<p:column headerText="Nombres y Apellidos">
+					<h:outputText value="#{item.usuario.persona.nombre}" />
+				</p:column>
+				<p:column headerText="Cargo" styleClass="alCenter">
+					<h:outputText value="#{item.cargo}" />
+				</p:column>
+				<p:column headerText="Acción" styleClass="w70px alCenter">
+					<p:commandButton icon="ui-icon-pencil" title="Editar"
+						process="@this" styleClass="primary"
+						actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.editarTecnicoDelegado(item)}"
+						oncomplete="PF('dlgTecnicoDelegado').show()"
+						update=":frmDialogosAdicionales:pnlDatosTecnicoDelegado tblEquipoTecnico" />
+					<p:commandButton icon="ui-icon-trash" title="Eliminar"
+						process="@this" styleClass="primary"
+						actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.eliminarTecnico(item)}"
+						update="tblEquipoTecnico" />
+				</p:column>
+			</p:dataTable>
+		</p:panelGrid>
+		<br />
+		<p:panelGrid columns="2" styleClass="panel_data w100"
+			columnClasses="null w50, null w50">
+			<f:facet name="header">
+				<h:outputText
+					value="5.1. Coordenadas de sitios de referencia durante el recorrido DATUM UTM WGS 84 Zona 17 Sur" />
+				<p:commandButton value="Adicionar"
+					action="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.nuevaCoordenada()}"
+					update=":frmDialogosAdicionales:pnlDatosCoordenada"
+					oncomplete="PF('dlgAddCoordenada').show()"
+					styleClass="button-small-text toRight field_mrg" process="@this"
+					icon="ui-icon-plusthick" />
+			</f:facet>
+
+			<p:dataTable id="tblCoordenadas" rowIndexVar="index"
+				value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaCoordenadas}"
+				var="item" emptyMessage="#{labels['common.table.empty']}">
+				<p:column headerText="Punto" styleClass="alCenter">
+					<h:outputText value="#{index + 1}" />
+				</p:column>
+				<p:column headerText="Coordenada X">
+					<h:outputText value="#{item.coordenadaX}" />
+				</p:column>
+				<p:column headerText="Coordenada Y">
+					<h:outputText value="#{item.coordenadaY}" />
+				</p:column>
+				<p:column headerText="Descripción">
+					<h:outputText value="#{item.descripcion}" />
+				</p:column>
+				<p:column headerText="Elevación (m.s.n.m.) ">
+					<h:outputText value="#{item.elevacion}" />
+				</p:column>
+				<p:column headerText="Acción" styleClass="w70px alCenter">
+					<p:commandButton icon="ui-icon-pencil" title="Editar"
+						process="@this" styleClass="primary"
+						actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.editarCoordenada(item)}"
+						oncomplete="PF('dlgAddCoordenada').show()"
+						update=":frmDialogosAdicionales:pnlDatosCoordenada tblCoordenadas" />
+
+					<p:commandButton icon="ui-icon-trash" title="Eliminar"
+						process="@this" styleClass="primary"
+						actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.eliminarCoordenada(item)}"
+						update="tblCoordenadas" />
+				</p:column>
+			</p:dataTable>
+		</p:panelGrid>
+		<br />
+		<p:panelGrid columns="1" styleClass="panel_data w100"
+			columnClasses="null">
+			<f:facet name="header">
+				<h:outputText value="5.2. Verificación del recurso forestal" />
+			</f:facet>
+
+			<h:panelGroup id="pnlCensoForestal">
+				<h:panelGrid columns="2" styleClass="w100" columnClasses="w5, null">
+					<p:selectBooleanCheckbox
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.esMuestreoCenso}">
+						<p:ajax update="pnlCensoForestal" />
+					</p:selectBooleanCheckbox>
+
+					<h:outputText style="font-weight: bold;" value="Muestreo o censo" />
+				</h:panelGrid>
+				<p:dataTable id="tblCensoForestal" rowIndexVar="index"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaEspeciesMuestreoCenso}"
+					var="especie" emptyMessage="#{labels['common.table.empty']}"
+					rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.esMuestreoCenso}">
+					<f:facet name="header">
+						<p:commandButton value="Adicionar"
+							action="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.nuevoMuestreoCenso()}"
+							update=":frmDialogosAdicionales:pnlDatosMuestreoCenso"
+							oncomplete="PF('dlgAddMuestreoCenso').show()"
+							styleClass="button-small-text toRight field_mrg" process="@this"
+							icon="ui-icon-plusthick" />
+					</f:facet>
+					<p:columnGroup type="header">
+						<p:row>
+							<p:column rowspan="2" headerText="Código unidad muestral" />
+							<p:column rowspan="2"
+								headerText="Número de registro del individuo" />
+							<p:column colspan="3" headerText="Taxonomía" />
+							<p:column rowspan="2" headerText="Nombre común" />
+							<p:column rowspan="2" headerText="DAP (m)" />
+							<p:column rowspan="2" headerText="HC (m)" />
+							<p:column rowspan="2" headerText="HT (m)" />
+							<p:column rowspan="2" headerText="Acción" />
+						</p:row>
+						<p:row>
+							<p:column headerText="Familia" />
+							<p:column headerText="Género" />
+							<p:column headerText="Especie" />
+						</p:row>
+					</p:columnGroup>
+
+					<p:column headerText="Código unidad muestral">
+						<h:outputText value="#{especie.nombreSitio}" />
+					</p:column>
+					<p:column headerText="Número">
+						<h:outputText value="#{index + 1}" />
+					</p:column>
+					<p:column headerText="Familia">
+						<h:outputText value="#{especie.familiaEspecie.hiclScientificName}" />
+					</p:column>
+					<p:column headerText="Género">
+						<h:outputText value="#{especie.generoEspecie.hiclScientificName}" />
+					</p:column>
+					<p:column headerText="Especie">
+						<h:outputText value="#{especie.especie.sptaScientificName}" />
+					</p:column>
+					<p:column headerText="Nombre común">
+						<h:outputText value="#{especie.nombreComun}" />
+					</p:column>
+					<p:column headerText="DAP (m)">
+						<h:outputText value="#{especie.alturaDap }" />
+					</p:column>
+					<p:column headerText="HC (m)">
+						<h:outputText value="#{especie.alturaComercial}" />
+					</p:column>
+					<p:column headerText="HT (m)">
+						<h:outputText value="#{especie.alturaTotal}" />
+					</p:column>
+					<p:column headerText="Acción" styleClass="w70px alCenter">
+						<p:commandButton icon="ui-icon-pencil" title="Editar"
+							process="@this" styleClass="primary"
+							actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.editarMuestreoCenso(especie)}"
+							oncomplete="PF('dlgAddMuestreoCenso').show()"
+							update=":frmDialogosAdicionales:pnlDatosMuestreoCenso tblCensoForestal" />
+
+						<p:commandButton icon="ui-icon-trash" title="Eliminar"
+							process="@this" styleClass="primary"
+							actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.eliminarMuestreoCenso(especie)}"
+							update="tblCensoForestal" />
+					</p:column>
+				</p:dataTable>
+			</h:panelGroup>
+
+			<h:panelGroup id="pnlCaracterizacion">
+				<h:panelGrid columns="2" styleClass="w100" columnClasses="w5, null">
+					<p:selectBooleanCheckbox
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.esCaracterizacionCualitativa}">
+						<p:ajax update="pnlCaracterizacion" />
+					</p:selectBooleanCheckbox>
+
+					<h:outputText style="font-weight: bold;"
+						value="Caracterización cualitativa" />
+				</h:panelGrid>
+				<p:dataTable id="tblCaracterizacion" rowIndexVar="index"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaEspeciesCaracterizacionCualitativa}"
+					var="item" emptyMessage="#{labels['common.table.empty']}"
+					rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.esCaracterizacionCualitativa}">
+					<f:facet name="header">
+						<p:commandButton value="Adicionar"
+							action="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.nuevaCaracterizacion()}"
+							update=":frmDialogosAdicionales:pnlDatosCaracterizacionCualitativa"
+							oncomplete="PF('dlgAddCaracterizacionCualitativa').show()"
+							styleClass="button-small-text toRight field_mrg" process="@this"
+							icon="ui-icon-plusthick" />
+					</f:facet>
+					<p:column headerText="Familia">
+						<h:outputText value="#{item.familiaEspecie.hiclScientificName}" />
+					</p:column>
+					<p:column headerText="Género">
+						<h:outputText value="#{item.generoEspecie.hiclScientificName}" />
+					</p:column>
+					<p:column headerText="Especie">
+						<h:outputText value="#{item.especie.sptaScientificName}" />
+					</p:column>
+					<p:column headerText="Nombre común">
+						<h:outputText value="#{item.nombreComun}" />
+					</p:column>
+					<p:column headerText="Acción" styleClass="w70px alCenter">
+						<p:commandButton icon="ui-icon-pencil" title="Editar"
+							process="@this" styleClass="primary"
+							actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.editarCaracterizacion(item)}"
+							oncomplete="PF('dlgAddCaracterizacionCualitativa').show()"
+							update=":frmDialogosAdicionales:pnlDatosCaracterizacionCualitativa tblCaracterizacion" />
+						<p:commandButton icon="ui-icon-trash" title="Eliminar"
+							process="@this" styleClass="primary"
+							actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.eliminarCaracterizacion(item)}"
+							update="tblCaracterizacion" />
+					</p:column>
+				</p:dataTable>
+			</h:panelGroup>
+		</p:panelGrid>
+		<br />
+		<p:panelGrid columns="1" styleClass="panel_data w100"
+			columnClasses="null w50, null w50">
+			<f:facet name="header">
+				<h:outputText value="5.3. Fotografías del recorrido" />
+			</f:facet>
+			<p:dataTable id="tblFotosRecorrido"
+				value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaFotosRecorrido}"
+				var="item" emptyMessage="#{labels['common.table.empty']}">
+				<f:facet name="header">
+					<p:commandButton value="Adicionar"
+						action="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.nuevaFotografia(3)}"
+						oncomplete="PF('dlgAddFotografia').show()"
+						update=":frmDialogosAdicionales:pnlDatosFotografia"
+						disabled="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaFotosRecorrido.size() >= 10}"
+						styleClass="button-small-text toRight field_mrg" process="@this"
+						icon="ui-icon-plusthick" />
+				</f:facet>
+				<p:column headerText="Fotografía" styleClass="alCenter">
+					<p:commandLink value="#{item.nombre}" ajax="false" immediate="true">
+						<p:fileDownload
+							value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.descargarFotografia(item)}" />
+					</p:commandLink>
+				</p:column>
+				<p:column headerText="Descripción">
+					<h:outputText value="#{item.descripcion}" />
+				</p:column>
+				<p:column headerText="Fecha inspección">
+					<h:outputText value="#{item.fechaFotografia}" />
+				</p:column>
+				<p:column headerText="Acción" styleClass="w70px alCenter">
+					<p:commandButton icon="ui-icon-pencil" title="Editar"
+						process="@this" styleClass="primary"
+						actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.editarFotografia(item)}"
+						oncomplete="PF('dlgAddFotografia').show()"
+						update=":frmDialogosAdicionales:pnlDatosFotografia tblFotosRecorrido" />
+					<p:commandButton icon="ui-icon-trash" title="Eliminar"
+						process="@this" styleClass="primary"
+						actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.eliminarFotografia(3, item)}"
+						update="tblFotosRecorrido" />
+				</p:column>
+
+			</p:dataTable>
+		</p:panelGrid>
+	</p:panelGrid>
+
+	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<h:outputText value="6. Criterios de la revisión" />
+		</f:facet>
+
+		<p:panelGrid columns="1"
+			styleClass="panel_data w100 cssPnlMainContent" columnClasses="null"
+			layout="grid">
+			<f:facet name="header">
+				<h:outputText
+					value="6.1. Verificación de los datos del informe de factibilidad" />
+			</f:facet>
+
+			<ui:remove>
+				<p:panelGrid columns="1" styleClass="w100, cssPanelContent"
+					columnClasses="null" layout="grid">
+					<h:panelGrid columns="2" styleClass="w100"
+						columnClasses="w25, null">
+						<h:outputText value="Superficie de intersección (ha):"
+							style="font-weight: bold;" />
+						<h:outputText style="font-weight: bold;"
+							value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.totalAreaInterseccion}" />
+					</h:panelGrid>
+
+				</p:panelGrid>
+			</ui:remove>
+
+			<p:panelGrid id="pnlZonificacionBosque" columns="1"
+				styleClass="w100, cssPanelContent" columnClasses="null"
+				layout="grid">
+				<h:panelGrid columns="2" styleClass="w100" columnClasses="w5, null">
+					<p:selectBooleanCheckbox
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarZonificacionBosque}">
+						<p:ajax update="pnlDatosZonificacionBosque" />
+					</p:selectBooleanCheckbox>
+
+					<h:outputText style="font-weight: bold;"
+						value="Zonificación del bosque protector:" />
+				</h:panelGrid>
+
+				<h:panelGroup id="pnlDatosZonificacionBosque">
+					<p:panel
+						rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarZonificacionBosque}">
+						<h:panelGrid columns="2" styleClass="w100"
+							columnClasses="w50, null"
+							rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarZonificacionBosque}">
+							<p:outputLabel for="rdbBpZonificacion"
+								value="El bosque protector tiene zonificación" />
+							<p:selectOneRadio id="rdbBpZonificacion" required="true"
+								value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.bpTieneZonificacion}">
+								<f:selectItem itemLabel="Si" itemValue="true" />
+								<f:selectItem itemLabel="No" itemValue="false" />
+								<p:ajax process="@this" />
+							</p:selectOneRadio>
+
+							<p:outputLabel for="rdbBpPlanManejo"
+								value="El bosque protector cuenta con Plan de Manejo Integral" />
+							<p:selectOneRadio id="rdbBpPlanManejo" required="true"
+								value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.bpTienePlanManejo}">
+								<f:selectItem itemLabel="Si" itemValue="true" />
+								<f:selectItem itemLabel="No" itemValue="false" />
+								<p:ajax process="@this" />
+							</p:selectOneRadio>
+
+							<p:outputLabel for="rdbBpInfraestructura"
+								value="Existe infraestructura del proyecto" />
+							<p:selectOneRadio id="rdbBpInfraestructura" required="true"
+								value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.bpTieneInfraestructura}">
+								<f:selectItem itemLabel="Si" itemValue="true" />
+								<f:selectItem itemLabel="No" itemValue="false" />
+								<p:ajax process="@this" />
+							</p:selectOneRadio>
+						</h:panelGrid>
+
+						<h:panelGrid columns="1" styleClass="w100" columnClasses="null"
+							rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarZonificacionBosque}">
+							<p:inputTextarea id="txtDetalleApoyo" maxlength="8000" rows="5"
+								required="true" style="resize: none;" autoResize="false"
+								requiredMessage="El campo 'Indicar las características del área' es requerido."
+								placeholder="Indicar las características del área sobre la cual se va a ubicar la infraestructura del proyecto, obra o actividad"
+								value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.caracteristicasInfraestructura}">
+								<p:ajax process="@this" />
+							</p:inputTextarea>
+						</h:panelGrid>
+					</p:panel>
+
+				</h:panelGroup>
+			</p:panelGrid>
+
+			<p:panelGrid id="pnlCoberturaVegetalProyecto" columns="1"
+				styleClass="w100, cssPanelContent" columnClasses="null"
+				layout="grid">
+				<h:panelGrid columns="1" styleClass="w100" columnClasses="null">
+					<h:outputText style="font-weight: bold;"
+						value="Tipo de cobertura vegetal" />
+				</h:panelGrid>
+				<p:dataTable id="tblCoberturaVegetal" rowIndexVar="index"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaAfectacionCoberturaVegetal}"
+					var="item" emptyMessage="#{labels['common.table.empty']}"
+					styleClass="panel_data" rows="10" paginator="true"
+					paginatorAlwaysVisible="false" paginatorPosition="bottom"
+					currentPageReportTemplate="{currentPage} de {totalPages}">
+					<p:column headerText="Tipo de cobertura vegetal y uso de suelo">
+						<h:outputText value="#{item.detalleInterseccion.nombreGeometria}" />
+					</p:column>
+					<p:column
+						headerText="Superficie total de la cobertura vegetal y uso de suelo"
+						styleClass="alRight w10">
+						<h:outputText value="#{item.detalleInterseccion.porcentajeAreaInterseccion * elaborarDocumentosViabilidadPfnController.proyectoLicenciaCoa.superficie}">
+							<f:convertNumber pattern="#0.00" locale="en_US" />
+						</h:outputText>
+					</p:column>
+					<p:column
+						headerText="Superficie verificada por el técnico">
+						<p:inputText value="#{item.superficieDescripcion}" maxlength="200"
+							required="true"
+							requiredMessage="El campo 'Superficie' de la sección Tipo de cobertura vegetal es requerido.">
+							<p:ajax process="@this" />
+						</p:inputText>
+					</p:column>
+					<p:column headerText="Afectación a la cobertura vegetal"
+						styleClass="w10">
+						<p:selectOneRadio styleClass="cssRadioInterno"
+							value="#{item.afectacion}" required="true"
+							requiredMessage="El campo 'Afectación' de la sección Tipo de cobertura vegetal es requerido.">
+							<f:selectItem itemLabel="Si" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax process="@this" />
+						</p:selectOneRadio>
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+
+			<p:panelGrid id="pnlEcosistemasProyecto" columns="1"
+				styleClass="w100, cssPanelContent" columnClasses="null"
+				layout="grid">
+				<h:panelGrid columns="1" styleClass="w100" columnClasses="null">
+					<h:outputText style="font-weight: bold;"
+						value="Ecosistemas del área del proyecto" />
+				</h:panelGrid>
+				<p:dataTable id="tblEcosistemas" rowIndexVar="index"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaAfectacionEcosistemas}"
+					var="item" emptyMessage="#{labels['common.table.empty']}"
+					styleClass="panel_data" rows="10" paginator="true"
+					paginatorAlwaysVisible="false" paginatorPosition="bottom"
+					currentPageReportTemplate="{currentPage} de {totalPages}">
+					<p:column headerText="Código del ecosistema">
+						<h:outputText value="#{item.detalleInterseccion.codigoConvenio}" />
+					</p:column>
+					<p:column headerText="Nombre del ecosistema">
+						<h:outputText value="#{item.detalleInterseccion.nombreGeometria}" />
+					</p:column>
+					<p:column headerText="Superficie total del ecosistema"
+						styleClass="alRight w10">
+						<h:outputText value="#{item.detalleInterseccion.porcentajeAreaInterseccion * elaborarDocumentosViabilidadPfnController.proyectoLicenciaCoa.superficie}">
+							<f:convertNumber pattern="#0.00" locale="en_US" />
+						</h:outputText>
+					</p:column>
+					<p:column
+						headerText="Superficie verificada por el técnico">
+						<p:inputText value="#{item.superficieDescripcion}" maxlength="200"
+							required="true"
+							requiredMessage="El campo 'Superficie' de la sección Ecosistemas del área del proyecto es requerido.">
+							<p:ajax process="@this" />
+						</p:inputText>
+					</p:column>
+					<p:column headerText="Afectación al ecosistema" styleClass="w10">
+						<p:selectOneRadio styleClass="cssRadioInterno"
+							value="#{item.afectacion}" required="true"
+							requiredMessage="El campo 'Afectación' de la sección Ecosistemas del área del proyecto es requerido.">
+							<f:selectItem itemLabel="Si" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax process="@this" />
+						</p:selectOneRadio>
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+
+			<p:panelGrid id="pnlEcosistemasFragiles" columns="1"
+				styleClass="w100, cssPanelContent" columnClasses="null"
+				layout="grid">
+				<h:panelGrid columns="2" styleClass="w100" columnClasses="w5, null">
+					<p:selectBooleanCheckbox
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarEcosistemasFragiles}">
+						<p:ajax update="pnlEcosistemasFragiles" />
+					</p:selectBooleanCheckbox>
+
+					<h:outputText style="font-weight: bold;"
+						value="Ecosistemas frágiles (enlistar según observación en campo)" />
+				</h:panelGrid>
+
+				<p:panel
+					rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarEcosistemasFragiles}">
+					<h:panelGrid columns="1" styleClass="w100" columnClasses="null"
+						rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarEcosistemasFragiles}">
+						<p:inputTextarea id="txtEcosistemasFragiles" maxlength="8000"
+							rows="5" required="true" style="resize: none;" autoResize="false"
+							value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.detalleEcosistemasFragiles}"
+							requiredMessage="El campo 'Ecosistemas frágiles' es requerido.">
+							<p:ajax process="@this" />
+						</p:inputTextarea>
+					</h:panelGrid>
+				</p:panel>
+			</p:panelGrid>
+
+			<p:panelGrid id="pnlUnidadesHidrograficas" columns="1"
+				styleClass="w100, cssPanelContent" columnClasses="null"
+				layout="grid">
+				<h:panelGrid columns="2" styleClass="w100" columnClasses="w5, null">
+					<p:selectBooleanCheckbox
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarUnidadesHidrograficas}">
+						<p:ajax update="pnlUnidadesHidrograficas" />
+					</p:selectBooleanCheckbox>
+
+					<h:outputText style="font-weight: bold;"
+						value="Identificación de unidades hidrográficas" />
+				</h:panelGrid>
+
+				<p:panel
+					rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarUnidadesHidrograficas}">
+
+					<p:commandButton value="Adicionar"
+						action="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.nuevaUnidadHidrografica()}"
+						update=":frmDialogosAdicionales:pnlDatosUnidadHidrografica"
+						oncomplete="PF('dlgAddUnidadHidrografica').show()"
+						styleClass="button-small-text toRight" process="@this" />
+
+					<p:dataTable id="tblUnidadHidrografica" rowIndexVar="index"
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaUnidadesHidrografica}"
+						var="item" emptyMessage="#{labels['common.table.empty']}"
+						rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarUnidadesHidrograficas}"
+						styleClass="panel_data">
+						<p:column headerText="Nombre de la unidad hidrográfica">
+							<h:outputText value="#{item.nombre}" />
+						</p:column>
+						<p:column headerText="Características de la unidad hidrográfica">
+							<h:outputText
+								value="#{item.caracteristica eq 1 ? 'Permanente' : 'Estacional' }" />
+						</p:column>
+						<p:column headerText="Coordenada X">
+							<h:outputText value="#{item.coordenadaX}" />
+						</p:column>
+						<p:column headerText="Coordenada Y">
+							<h:outputText value="#{item.coordenadaY}" />
+						</p:column>
+						<p:column headerText="Afectación a la unidad hidrográfica">
+							<h:outputText value="#{item.afectacion ? 'Si' : 'No' }" />
+						</p:column>
+						<p:column headerText="Acción" styleClass="w70px alCenter">
+							<p:commandButton icon="ui-icon-pencil" title="Editar"
+								process="@this" styleClass="primary"
+								actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.editarUnidadHidrografica(item)}"
+								oncomplete="PF('dlgAddUnidadHidrografica').show()"
+								update=":frmDialogosAdicionales:pnlDatosUnidadHidrografica tblUnidadHidrografica" />
+							<p:commandButton icon="ui-icon-trash" title="Eliminar"
+								process="@this" styleClass="primary"
+								actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.eliminarUnidadHidrografica(item)}"
+								update="tblUnidadHidrografica" />
+						</p:column>
+					</p:dataTable>
+				</p:panel>
+			</p:panelGrid>
+
+			<p:panelGrid id="pnlBajoConvenio" columns="1"
+				styleClass="w100, cssPanelContent" columnClasses="null"
+				layout="grid">
+				<h:panelGrid columns="1" styleClass="w100" columnClasses="null">
+					<h:outputText style="font-weight: bold;"
+						value="Afectación a áreas bajo convenios (conservación o restauración)" />
+				</h:panelGrid>
+				<p:dataTable id="tblBajoConvenio" rowIndexVar="index"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaAfectacionConvenios}"
+					var="item" emptyMessage="#{labels['common.table.empty']}"
+					styleClass="panel_data" rows="10" paginator="true"
+					paginatorAlwaysVisible="false" paginatorPosition="bottom"
+					currentPageReportTemplate="{currentPage} de {totalPages}">
+					<p:column headerText="Tipo de convenio" styleClass="w10">
+						<h:outputText value="#{item.detalleInterseccion.tipoConvenio}" />
+					</p:column>
+					<p:column headerText="Código de convenio" styleClass="w20">
+						<h:outputText value="#{item.detalleInterseccion.codigoConvenio}" />
+					</p:column>
+					<p:column headerText="Nombre del beneficiario">
+						<h:outputText
+							value="#{item.detalleInterseccion.beneficiarioConvenio}" />
+					</p:column>
+					<p:column headerText="Afectación a la cobertura vegetal"
+						styleClass="w10">
+						<p:selectOneRadio styleClass="cssRadioInterno"
+							value="#{item.afectacion}" required="true"
+							requiredMessage="El campo 'Afectación' de la sección Afectación a áreas bajo convenios es requerido.">
+							<f:selectItem itemLabel="Si" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax process="@this" />
+						</p:selectOneRadio>
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+
+			<p:panelGrid id="pnlDescripcionActividades" columns="1"
+				styleClass="w100, cssPanelContent" columnClasses="null"
+				layout="grid">
+				<h:panelGrid columns="2" styleClass="w100" columnClasses="w5, null">
+					<p:selectBooleanCheckbox
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarDescripcionActividades}">
+						<p:ajax update="pnlDescripcionActividades" />
+					</p:selectBooleanCheckbox>
+
+					<h:outputText style="font-weight: bold;"
+						value="Descripción de actividades del proyecto (enlistar las actividades que implica el proyecto, obra o actividad)" />
+				</h:panelGrid>
+
+				<h:panelGrid columns="1" styleClass="w100" columnClasses="null"
+					rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarDescripcionActividades}">
+					<h:panelGrid id="pnlTextos3" columns="1" styleClass="w100">
+						<control:imputConTextoEnriquecido
+							requiredMessage="El campo 'Descripción de actividades del proyecto' es requerido"
+							valor="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.descripcionActividades}"
+							soloLectura="false" />
+					</h:panelGrid>
+				</h:panelGrid>
+			</p:panelGrid>
+
+			<p:panelGrid id="pnlCaracterizacionCuantitativaMuestreo" columns="1"
+				styleClass="w100, cssPanelContent" columnClasses="null"
+				layout="grid">
+				<h:panelGrid columns="1" styleClass="w100" columnClasses="null">
+					<h:outputText style="font-weight: bold;" value="Recurso forestal" />
+				</h:panelGrid>
+
+				<h:panelGrid columns="2" styleClass="w100" columnClasses="w5, null">
+					<p:selectBooleanCheckbox
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarCuantitativaMuestreo}">
+						<p:ajax event="change"
+							update="pnlCaracterizacionCuantitativaMuestreo"
+							listener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.showCuantitativaMuestreo()}"
+							process="@this">
+						</p:ajax>
+					</p:selectBooleanCheckbox>
+
+					<h:outputText style="font-weight: bold;"
+						value="Caracterización Cuantitativa Muestreo" />
+				</h:panelGrid>
+
+				<p:panel
+					rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarCuantitativaMuestreo}">
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100 pnlHeaders">
+						<f:facet name="header">
+							<h:outputText value="Análisis de área basal y volumen" />
+						</f:facet>
+					</p:panelGrid>
+					<p:dataTable id="tblAnalisisAreaBasal" rowIndexVar="index"
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaSitiosMuestrales}"
+						var="item" emptyMessage="#{labels['common.table.empty']}"
+						rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarCuantitativaMuestreo}"
+						styleClass="panel_data">
+						<p:column headerText="Código unidad muestral">
+							<h:outputText value="#{item.nombreSitio}" />
+						</p:column>
+						<p:column headerText="Superficie de unidad muestral (m2)">
+							<h:outputText value="#{item.areaSitio}" />
+						</p:column>
+						<p:column headerText="Número de individuos de la unidad muestral">
+							<h:outputText
+								value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.getTotalEspeciesSitio(item)}" />
+						</p:column>
+						<p:column headerText="Área basal (m2)">
+							<h:outputText value="#{item.sumatoriaAreaBasal}" />
+						</p:column>
+						<p:column headerText="Volumen comercial (m3)">
+							<h:outputText value="#{item.sumatoriaVolumenComercial}" />
+						</p:column>
+						<p:column headerText="Volumen total (m3)">
+							<h:outputText value="#{item.sumatoriaVolumenTotal}" />
+						</p:column>
+						<p:column headerText="Acción" styleClass="w70px alCenter">
+							<p:commandButton icon="ui-icon-arrowthick-1-s" immediate="true"
+								styleClass="button-small primary" title="Ver" ajax="false"
+								action="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.generarReporteAnalisisAreaBasal(item)}" />
+						</p:column>
+					</p:dataTable>
+
+					<p:panelGrid columns="1" layout="grid"
+						styleClass="w100 pnlHeaders pnlHeadersSecundario">
+						<f:facet name="header">
+							<h:outputText value="Promedios del área basal y volumen" />
+						</f:facet>
+					</p:panelGrid>
+					<p:dataTable id="tblPromedioAreaBasal" rowIndexVar="index"
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaPromediosAreaBasalVolumen}"
+						var="item" emptyMessage="#{labels['common.table.empty']}"
+						rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarCuantitativaMuestreo}"
+						styleClass="panel_data">
+						<p:column headerText="Promedio del área basal m2">
+							<h:outputText value="#{item.promedioAreaBasal}" />
+						</p:column>
+						<p:column headerText="Promedio del Volumen total m3">
+							<h:outputText value="#{item.promedioVolumenT}" />
+						</p:column>
+						<p:column headerText="Promedio del Volumen comercial m3">
+							<h:outputText value="#{item.promedioVolumenC}" />
+						</p:column>
+						<p:column headerText="Valor de área basal por hectárea m2">
+							<h:outputText value="#{item.areaBasalPorH}" />
+						</p:column>
+						<p:column headerText="Valor del volumen total por hectárea">
+							<h:outputText value="#{item.volumenTotalPorH}" />
+						</p:column>
+						<p:column headerText="Valor del volumen comercial por hectárea">
+							<h:outputText value="#{item.volumenComercialPorH}" />
+						</p:column>
+					</p:dataTable>
+
+					<p:panelGrid columns="1" layout="grid"
+						styleClass="w100 pnlHeaders pnlHeadersSecundario">
+						<f:facet name="header">
+							<h:outputText value="Análisis de Índice de valor de importancia" />
+						</f:facet>
+					</p:panelGrid>
+					<p:dataTable id="tblValorImportancia" rowIndexVar="index"
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaResultadosIvi}"
+						var="item" emptyMessage="#{labels['common.table.empty']}"
+						rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarCuantitativaMuestreo}"
+						styleClass="panel_data">
+						<p:column headerText="Código de unidad muestral">
+							<h:outputText value="#{item.nombreSitio}" />
+						</p:column>
+						<p:column headerText="Especie de mayor porcentaje DnR">
+							<h:outputText value="#{item.especieDnr}" />
+						</p:column>
+						<p:column headerText="Valor %">
+							<h:outputText value="#{item.valorDnr}" />
+						</p:column>
+						<p:column headerText="Especie de mayor porcentaje DmR">
+							<h:outputText value="#{item.especieDmr}" />
+						</p:column>
+						<p:column headerText="Valor %">
+							<h:outputText value="#{item.valorDmr}" />
+						</p:column>
+						<p:column headerText="Especie de mayor porcentaje IVI">
+							<h:outputText value="#{item.especieIvi}" />
+						</p:column>
+						<p:column headerText="Valor %">
+							<h:outputText value="#{item.valorIvi}" />
+						</p:column>
+					</p:dataTable>
+
+					<p:panelGrid columns="1" layout="grid"
+						styleClass="w100 pnlHeaders pnlHeadersSecundario">
+						<f:facet name="header">
+							<h:outputText value="Análisis de índices de diversidad" />
+						</f:facet>
+					</p:panelGrid>
+					<p:dataTable id="tblIndiceDiversidad" rowIndexVar="index"
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaInterpretacionIndices}"
+						var="item" emptyMessage="#{labels['common.table.empty']}"
+						rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarCuantitativaMuestreo}"
+						styleClass="panel_data">
+						<p:column headerText="Código de unidad muestral">
+							<h:outputText value="#{item.sitio.nombreSitio}" />
+						</p:column>
+						<p:column headerText="Número de individuos de la unidad muestral"
+							styleClass="w5">
+							<h:outputText value="#{item.nroIndividuos}" />
+						</p:column>
+						<p:column headerText="Índice de Shannon">
+							<h:outputText value="#{item.sitio.indiceShanon}" />
+						</p:column>
+						<p:column headerText="Interpretación" styleClass="w20">
+							<p:selectOneRadio required="true" styleClass="cssRadioInterno"
+								requiredMessage="El campo 'Interpretación' es requerido"
+								value="#{item.interpretacionShannon}" layout="grid" columns="3">
+								<f:selectItem itemLabel="Alto" itemValue="1" />
+								<f:selectItem itemLabel="Medio" itemValue="2" />
+								<f:selectItem itemLabel="Bajo" itemValue="3" />
+								<p:ajax process="@this" />
+							</p:selectOneRadio>
+						</p:column>
+						<p:column headerText="Exponencial de Shannon">
+							<h:outputText value="#{item.sitio.exponencialShannon}" />
+						</p:column>
+						<p:column headerText="Índice de Simpson">
+							<h:outputText value="#{item.sitio.indiceSimpson}" />
+						</p:column>
+						<p:column headerText="Interpretación" styleClass="w20">
+							<p:selectOneRadio required="true" styleClass="cssRadioInterno"
+								requiredMessage="El campo 'Interpretación' es requerido"
+								value="#{item.interpretacionSimpson}">
+								<f:selectItem itemLabel="Alto" itemValue="1" />
+								<f:selectItem itemLabel="Medio" itemValue="2" />
+								<f:selectItem itemLabel="Bajo" itemValue="3" />
+								<p:ajax process="@this" />
+							</p:selectOneRadio>
+						</p:column>
+						<p:column headerText="Inverso de Simpson">
+							<h:outputText value="#{item.sitio.indiceSimpson eq 0 ? 'Indefinido' : item.sitio.inversoSimpson}" />
+						</p:column>
+				<!-- 		<p:column headerText="Acción" styleClass="w40px alCenter">
+							<p:commandButton icon="ui-icon-arrowthick-1-s" immediate="true"
+								styleClass="button-small primary" title="Ver" ajax="false"
+								action="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.generarReporteIndiceDiversidad(item.sitio)}" />
+						</p:column> -->
+					</p:dataTable>
+
+					<p:panelGrid columns="1" layout="grid"
+						styleClass="w100 pnlHeaders pnlHeadersSecundario">
+						<f:facet name="header">
+							<h:outputText value="Tabla de cálculo del área basal y volumen muestreo" />
+						</f:facet>
+					</p:panelGrid>
+					<p:dataTable id="dtCalculaBasalMuestreo" var="calculo"
+										styleClass="table table-hover"
+										value="#{ingresarInformacionViabilidadPfnController.listaEspeciesMuestreo}"
+										paginator="true" paginatorAlwaysVisible="false"
+										paginatorPosition="bottom" rowIndexVar="index"
+										emptyMessage="#{labels['common.table.empty']}"
+										currentPageReportTemplate="{currentPage} de {totalPages}"
+										rows="10" rowsPerPageTemplate="5,10,15">
+
+										<p:columnGroup type="header">
+											<p:row>
+												<p:column rowspan="2"
+													headerText="Código de la Unidad Muestral" />
+												<p:column rowspan="2" headerText="N° de individuo" />
+												<p:column colspan="3" headerText="Taxonomía" />
+												<p:column rowspan="2" headerText="Nombre común" />
+												<p:column rowspan="2"
+													headerText="Diámetro a la altura del pecho DAP (m)" />
+												<p:column rowspan="2" headerText="Altura Total HT (m)" />
+												<p:column rowspan="2" headerText="Altura comercial HC (m)" />
+												<p:column rowspan="2" headerText="Área basal AB (m2)" />
+												<p:column rowspan="2" headerText="Volumen total Vt (m3)" />
+												<p:column rowspan="2" headerText="Volumen comercial Vc (m3)" />
+
+											</p:row>
+											<p:row>
+												<p:column headerText="Familia" />
+												<p:column headerText="Género" />
+												<p:column headerText="Especie" />
+											</p:row>
+										</p:columnGroup>
+										<p:column>
+											<h:outputText styleClass="cssColumnDescription"
+												value="#{calculo.sitioMuestral.nombreSitio}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{index + 1}" />
+										</p:column>
+										<p:column>
+											<h:outputText
+												value="#{calculo.familiaEspecie.hiclScientificName}" />
+										</p:column>
+										<p:column>
+											<h:outputText
+												value="#{calculo.generoEspecie.hiclScientificName}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.especie.sptaScientificName}" />
+										</p:column>
+										<p:column>
+											<h:outputText styleClass="cssColumnDescription"
+												value="#{calculo.nombreComun}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.alturaDap}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.alturaTotal}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.alturaComercial}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.areaBasal}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.volumenTotal}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.volumenComercial}" />
+										</p:column>
+
+									</p:dataTable>
+									<!-- Ivan -->
+									<br/>
+									<p:dataTable id="dtSumatoriaBasalMuestreo" var="sitio"
+										styleClass="table table-hover"
+										value="#{ingresarInformacionViabilidadPfnController.listaSitioSumatoria}"
+										paginator="true" paginatorAlwaysVisible="false"
+										paginatorPosition="bottom"
+										emptyMessage="#{labels['common.table.empty']}"
+										currentPageReportTemplate="{currentPage} de {totalPages}"
+										rows="10" rowsPerPageTemplate="5,10,15">
+
+										<p:column headerText="Código de la Unidad Muestral">
+											<h:outputText value="#{sitio.nombreSitio}" />
+										</p:column>
+										<p:column
+											headerText="Sumatoria del área basal de cada sitio de muestreo">
+											<h:outputText value="#{sitio.sumatoriaAreaBasal}" />
+										</p:column>
+										<p:column
+											headerText="Sumatoria del volumen total de cada sitio de muestreo">
+											<h:outputText value="#{sitio.sumatoriaVolumenTotal}" />
+										</p:column>
+										<p:column
+											headerText="Sumatoria del volumen comercial de cada sitio de muestreo">
+											<h:outputText value="#{sitio.sumatoriaVolumenComercial}" />
+										</p:column>
+
+									</p:dataTable>
+	
+				</p:panel>
+			</p:panelGrid>
+
+			<p:panelGrid id="pnlCaracterizacionCuantitativaCenso" columns="1"
+				styleClass="w100, cssPanelContent" columnClasses="null"
+				layout="grid">
+				<h:panelGrid columns="2" styleClass="w100" columnClasses="w5, null">
+					<p:selectBooleanCheckbox
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarCuantitativaCenso}">
+						<p:ajax event="change"
+							update="pnlCaracterizacionCuantitativaCenso"
+							listener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.showCuantitativaCenso()}"
+							process="@this" />
+					</p:selectBooleanCheckbox>
+
+					<h:outputText style="font-weight: bold;"
+						value="Caracterización Cuantitativa Censo" />
+				</h:panelGrid>
+
+				<p:panel
+					rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarCuantitativaCenso}">
+					<p:panelGrid columns="1" styleClass="w100, cssPanelContent"
+						columnClasses="null" layout="grid">
+						<h:panelGrid columns="2" styleClass="w100"
+							columnClasses="w25, null">
+							<h:outputText value="Superficie del censo:"
+								style="font-weight: bold;" />
+							<h:outputText style="font-weight: bold;"
+								value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.proyectoLicenciaCoa.superficie}" />
+						</h:panelGrid>
+
+					</p:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100 pnlHeaders">
+						<f:facet name="header">
+							<h:outputText value="Resultados de caracterización cuantitativa" />
+						</f:facet>
+					</p:panelGrid>
+					<p:dataTable id="tblAnalisisAreaBasalCenso" rowIndexVar="index"
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaSitiosMuestralesCenso}"
+						var="item" emptyMessage="#{labels['common.table.empty']}"
+						rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarCuantitativaCenso}"
+						styleClass="panel_data">
+						<p:column headerText="Número de individuos">
+							<h:outputText value="#{item.nroIndividuos}" />
+						</p:column>
+						<p:column headerText="Área basal (m2)">
+							<h:outputText value="#{item.sumatoriaAreaBasal}" />
+						</p:column>
+						<p:column headerText="Volumen comercial (m3)">
+							<h:outputText value="#{item.sumatoriaVolumenComercial}" />
+						</p:column>
+						<p:column headerText="Volumen total (m3)">
+							<h:outputText value="#{item.sumatoriaVolumenTotal}" />
+						</p:column>
+						<p:column headerText="Acción" styleClass="w70px alCenter">
+							<p:commandButton icon="ui-icon-arrowthick-1-s" immediate="true"
+								styleClass="button-small primary" title="Ver" ajax="false"
+								action="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.generarReporteAnalisisAreaBasal(item)}" />
+						</p:column>
+					</p:dataTable>
+
+					<p:panelGrid columns="1" layout="grid"
+						styleClass="w100 pnlHeaders pnlHeadersSecundario">
+						<f:facet name="header">
+							<h:outputText value="Análisis de Índice de valor de importancia" />
+						</f:facet>
+					</p:panelGrid>
+					<p:dataTable id="tblValorImportanciaCenso" rowIndexVar="index"
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaResultadosIviCenso}"
+						var="item" emptyMessage="#{labels['common.table.empty']}"
+						rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarCuantitativaCenso}"
+						styleClass="panel_data">
+						<p:column headerText="Especie de mayor porcentaje DnR">
+							<h:outputText value="#{item.especieDnr}" />
+						</p:column>
+						<p:column headerText="Valor %">
+							<h:outputText value="#{item.valorDnr}" />
+						</p:column>
+						<p:column headerText="Especie de mayor porcentaje DmR">
+							<h:outputText value="#{item.especieDmr}" />
+						</p:column>
+						<p:column headerText="Valor %">
+							<h:outputText value="#{item.valorDmr}" />
+						</p:column>
+						<p:column headerText="Especie de mayor porcentaje IVI">
+							<h:outputText value="#{item.especieIvi}" />
+						</p:column>
+						<p:column headerText="Valor %">
+							<h:outputText value="#{item.valorIvi}" />
+						</p:column>
+					</p:dataTable>
+
+					<p:panelGrid columns="1" layout="grid"
+						styleClass="w100 pnlHeaders pnlHeadersSecundario">
+						<f:facet name="header">
+							<h:outputText value="Análisis de índices de diversidad" />
+						</f:facet>
+					</p:panelGrid>
+					<p:dataTable id="tblIndiceDiversidadCenso" rowIndexVar="index"
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaInterpretacionIndicesCenso}"
+						var="item" emptyMessage="#{labels['common.table.empty']}"
+						rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarCuantitativaCenso}"
+						styleClass="panel_data">
+						<p:column headerText="Número de individuos de la unidad muestral"
+							styleClass="w10">
+							<h:outputText value="#{item.nroIndividuos}" />
+						</p:column>
+						<p:column headerText="Índice de Shannon" styleClass="w10">
+							<h:outputText value="#{item.sitio.indiceShanon}" />
+						</p:column>
+						<p:column headerText="Interpretación" styleClass="w20">
+							<p:selectOneRadio required="true" styleClass="cssRadioInterno"
+								requiredMessage="El campo 'Interpretación' es requerido"
+								value="#{item.interpretacionShannon}" layout="grid" columns="3">
+								<f:selectItem itemLabel="Alto" itemValue="1" />
+								<f:selectItem itemLabel="Medio" itemValue="2" />
+								<f:selectItem itemLabel="Bajo" itemValue="3" />
+								<p:ajax process="@this" />
+							</p:selectOneRadio>
+						</p:column>
+						<p:column headerText="Exponencial de Shannon" styleClass="w10">
+							<h:outputText value="#{item.sitio.exponencialShannon}" />
+						</p:column>
+						<p:column headerText="Índice de Simpson" styleClass="w10">
+							<h:outputText value="#{item.sitio.indiceSimpson}" />
+						</p:column>
+						<p:column headerText="Interpretación" styleClass="w20">
+							<p:selectOneRadio required="true" styleClass="cssRadioInterno"
+								requiredMessage="El campo 'Interpretación' es requerido"
+								value="#{item.interpretacionSimpson}">
+								<f:selectItem itemLabel="Alto" itemValue="1" />
+								<f:selectItem itemLabel="Medio" itemValue="2" />
+								<f:selectItem itemLabel="Bajo" itemValue="3" />
+								<p:ajax process="@this" />
+							</p:selectOneRadio>
+						</p:column>
+						<p:column headerText="Inverso de Simpson" styleClass="w10">
+							<h:outputText value="#{item.sitio.indiceSimpson eq 0 ? 'Indefinido' : item.sitio.inversoSimpson}" />
+						</p:column>
+						<p:column headerText="Acción" styleClass="w70px alCenter">
+							<p:commandButton icon="ui-icon-arrowthick-1-s" immediate="true"
+								styleClass="button-small primary" title="Ver" ajax="false"
+								action="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.generarReporteIndiceDiversidad(item.sitio)}" />
+						</p:column>
+					</p:dataTable>
+
+					<br/>
+					<p:dataTable id="dtCalculaBasal" var="calculo"
+										styleClass="table table-hover"
+										value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaEspeciesCenso}"
+										paginator="true" paginatorAlwaysVisible="false"
+										paginatorPosition="bottom"
+										emptyMessage="#{labels['common.table.empty']}"
+										currentPageReportTemplate="{currentPage} de {totalPages}"
+										rows="10" rowsPerPageTemplate="5,10,15">
+
+										<p:columnGroup type="header">
+											<p:row>
+												<p:column rowspan="2" headerText="N° de individuo" />
+												<p:column colspan="3" headerText="Taxonomía" />
+												<p:column rowspan="2" headerText="Nombre común" />
+												<p:column rowspan="2"
+													headerText="Diámetro a la altura del pecho DAP (m)" />
+												<p:column rowspan="2" headerText="Altura Total HT (m)" />
+												<p:column rowspan="2" headerText="Altura comercial HC (m)" />
+												<p:column rowspan="2" headerText="Área basal AB (m2)" />
+												<p:column rowspan="2" headerText="Volumen total Vt (m3)" />
+												<p:column rowspan="2" headerText="Volumen comercial Vc (m3)" />
+											<!-- 	<p:column rowspan="2" headerText="Acción" style="width:40px !important" />  -->
+											</p:row>
+											<p:row>
+												<p:column headerText="Familia" />
+												<p:column headerText="Género" />
+												<p:column headerText="Especie" />
+											</p:row>
+										</p:columnGroup>
+										<p:column>
+											<h:outputText
+												value="#{1+ingresarInformacionViabilidadPfnController.listaEspeciesCenso.indexOf(calculo)}" />
+										</p:column>
+										<p:column>
+											<h:outputText
+												value="#{calculo.familiaEspecie.hiclScientificName}" />
+										</p:column>
+										<p:column>
+											<h:outputText
+												value="#{calculo.generoEspecie.hiclScientificName}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.especie.sptaScientificName}" />
+										</p:column>
+										<p:column>
+											<h:outputText styleClass="cssColumnDescription"
+												value="#{calculo.nombreComun}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.alturaDap}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.alturaTotal}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.alturaComercial}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.areaBasal}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.volumenTotal}" />
+										</p:column>
+										<p:column>
+											<h:outputText value="#{calculo.volumenComercial}" />
+										</p:column>
+								<!-- 		<p:column styleClass="w70px alCenter">
+
+										</p:column>   -->
+									</p:dataTable>					
+									<div class="buttons main">
+										<p:commandButton immediate="true"
+											title="Ver" ajax="false" value="Descargar Matriz"
+											actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.generarReporteTaxonomia()}">
+										</p:commandButton>
+									</div>
+									<br/>
+									<p:dataTable id="dtSumatoriaBasalCenso" var="sitio"
+										styleClass="table table-hover"
+										value="#{ingresarInformacionViabilidadPfnController.listaSitioSumatoriaCenso}"
+										paginator="true" paginatorAlwaysVisible="false"
+										paginatorPosition="bottom"
+										emptyMessage="#{labels['common.table.empty']}"
+										currentPageReportTemplate="{currentPage} de {totalPages}"
+										rows="10" rowsPerPageTemplate="5,10,15">
+
+										<p:column styleClass="w70px alCenter"
+											headerText="Sumatoria del área basal del Censo">
+											<h:outputText value="#{sitio.sumatoriaAreaBasal}" />
+										</p:column>
+										<p:column styleClass="w70px alCenter"
+											headerText="Sumatoria del volumen total del Censo">
+											<h:outputText value="#{sitio.sumatoriaVolumenTotal}" />
+										</p:column>
+										<p:column styleClass="w70px alCenter"
+											headerText="Sumatoria del volumen comercial del Censo">
+											<h:outputText value="#{sitio.sumatoriaVolumenComercial}" />
+										</p:column>
+									</p:dataTable>
+
+									<br/>			
+				</p:panel>
+			</p:panelGrid>
+
+			<p:panelGrid id="pnlEspeciesImportancia" columns="1"
+				styleClass="w100, cssPanelContent" columnClasses="null"
+				layout="grid">
+				<h:panelGrid columns="2" styleClass="w100" columnClasses="w5, null">
+					<p:selectBooleanCheckbox
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarEspeciesImportancia}">
+						<p:ajax event="change" update="pnlEspeciesImportancia"
+							listener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.showEspeciesImportancia()}"
+							process="@this" />
+					</p:selectBooleanCheckbox>
+
+					<h:outputText style="font-weight: bold;"
+						value="Especies de importancia" />
+				</h:panelGrid>
+
+				<p:panel
+					rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarEspeciesImportancia}">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100 pnlHeaders">
+						<f:facet name="header">
+							<h:outputText value="Registro de especies del área de estudio" />
+						</f:facet>
+					</p:panelGrid>
+					<p:dataTable id="tblEspeciesImportancia" rowIndexVar="index"
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaEspeciesImportancia}"
+						var="item" emptyMessage="#{labels['common.table.empty']}"
+						rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarEspeciesImportancia}"
+						styleClass="panel_data">
+						<p:column headerText="Familia">
+							<h:outputText value="#{item.familiaEspecie.hiclScientificName}" />
+						</p:column>
+						<p:column headerText="Género">
+							<h:outputText value="#{item.generoEspecie.hiclScientificName}" />
+						</p:column>
+						<p:column headerText="Especie">
+							<h:outputText value="#{item.especie.sptaScientificName}" />
+						</p:column>
+						<p:column headerText="Frecuencia">
+							<h:outputText value="#{item.frecuencia}" />
+						</p:column>
+						<p:column headerText="Estado de conservación UICN">
+							<h:outputText value="#{item.estadoConservacion.nombre}" />
+						</p:column>
+						<p:column headerText="Apéndice CITES">
+							<h:outputText value="#{item.estadoCites.nombre}" />
+						</p:column>
+						<p:column headerText="Aprovechamiento condicionado">
+							<h:outputText
+								value="#{item.aprovechamientoCondicionado ? 'SI' : 'NO'}" />
+						</p:column>
+						<p:column headerText="Especies endémicas">
+							<h:outputText value="#{item.especieEndemica ? 'SI' : 'NO'}" />
+						</p:column>
+					</p:dataTable>
+				</p:panel>
+			</p:panelGrid>
+
+			<p:panelGrid id="pnlCaracterizacionCualitativa" columns="1"
+				styleClass="w100, cssPanelContent" columnClasses="null"
+				layout="grid">
+				<h:panelGrid columns="2" styleClass="w100" columnClasses="w5, null">
+					<p:selectBooleanCheckbox
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarCaracterizacionCualitativa}">
+						<p:ajax event="change" update="pnlCaracterizacionCualitativa"
+							listener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.showCualitativa()}"
+							process="@this" />
+					</p:selectBooleanCheckbox>
+
+					<h:outputText style="font-weight: bold;"
+						value="Caracterización Cualitativa" />
+				</h:panelGrid>
+
+				<p:panel
+					rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarCaracterizacionCualitativa}">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100 pnlHeaders">
+						<f:facet name="header">
+							<h:outputText
+								value="Registro cualitativo de especies del área de estudio" />
+						</f:facet>
+					</p:panelGrid>
+					<p:dataTable id="tblCaracterizacionCualitativa" rowIndexVar="index"
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaEspeciesCualitativa}"
+						var="item" emptyMessage="#{labels['common.table.empty']}"
+						rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarCaracterizacionCualitativa}"
+						styleClass="panel_data">
+						<p:column headerText="Código o nombre del sitio">
+							<h:outputText value="#{item.sitioMuestral.nombreSitio}" />
+						</p:column>
+						<p:column headerText="Familia">
+							<h:outputText value="#{item.familiaEspecie.hiclScientificName}" />
+						</p:column>
+						<p:column headerText="Género">
+							<h:outputText value="#{item.generoEspecie.hiclScientificName}" />
+						</p:column>
+						<p:column headerText="Especie">
+							<h:outputText value="#{item.especie.sptaScientificName}" />
+						</p:column>
+						<p:column headerText="Frecuencia">
+							<h:outputText value="#{item.frecuencia}" />
+						</p:column>
+						<p:column headerText="Estado de conservación UICN">
+							<h:outputText value="#{item.estadoConservacion.nombre}" />
+						</p:column>
+						<p:column headerText="Apéndice CITES">
+							<h:outputText value="#{item.estadoCites.nombre}" />
+						</p:column>
+						<p:column headerText="Aprovechamiento condicionado">
+							<h:outputText
+								value="#{item.aprovechamientoCondicionado ? 'SI' : 'NO'}" />
+						</p:column>
+						<p:column headerText="Especies endémicas">
+							<h:outputText value="#{item.especieEndemica ? 'SI' : 'NO'}" />
+						</p:column>
+					</p:dataTable>
+				</p:panel>
+			</p:panelGrid>
+
+			<p:panelGrid id="pnlAfectacionPfn" columns="1"
+				styleClass="w100, cssPanelContent" columnClasses="null"
+				layout="grid">
+				<h:panelGrid columns="2" styleClass="w100" columnClasses="w5, null">
+					<p:selectBooleanCheckbox
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarAfectacionesPfn}">
+						<p:ajax update="pnlAfectacionPfn" />
+					</p:selectBooleanCheckbox>
+
+					<h:outputText style="font-weight: bold;"
+						value="Afectaciones al Patrimonio Forestal Nacional" />
+				</h:panelGrid>
+
+				<p:panel
+					rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarAfectacionesPfn}">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100 pnlHeaders">
+						<f:facet name="header">
+							<h:outputText
+								value="Análisis de las posibles afectaciones y medidas a implementar" />
+						</f:facet>
+					</p:panelGrid>
+					<p:dataTable id="tblAfectacionPfn" rowIndexVar="index"
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listaAfectacionForestal}"
+						var="item" emptyMessage="#{labels['common.table.empty']}"
+						rendered="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.habilitarAfectacionesPfn}"
+						styleClass="panel_data">
+						<p:column headerText="Actividad">
+							<h:outputText value="#{item.actividad}" />
+						</p:column>
+						<p:column
+							headerText="Descripción de la posible afectación al Patrimonio Forestal Nacional">
+							<p:inputText value="#{item.descripcionAfectacionTecnico}"
+								maxlength="2000" required="true"
+								requiredMessage="El campo 'Descripción de la posible afectación' es requerido.">
+								<p:ajax process="@this" />
+							</p:inputText>
+						</p:column>
+						<p:column headerText="Medida propuesta">
+							<p:inputText value="#{item.medidaPropuestaTecnico}"
+								maxlength="2000" required="true"
+								requiredMessage="El campo 'Medida propuesta' es requerido.">
+								<p:ajax process="@this" />
+							</p:inputText>
+						</p:column>
+					</p:dataTable>
+				</p:panel>
+			</p:panelGrid>
+
+		</p:panelGrid>
+	</p:panelGrid>
+
+
+	<h:panelGroup id="pnlTextos2">
+		<p:fieldset legend="7. Conclusiones" toggleable="true"
+			toggleSpeed="500" collapsed="false">
+			<h:panelGrid columns="1" styleClass="w100">
+				<h:outputText
+					value="Entre las conclusiones se deberá detallar todas las observaciones identificadas en el informe de factibilidad o las que permitan determinar si el pronunciamiento de viabilidad ambiental es favorable o no favorable" />
+
+				<control:imputConTextoEnriquecido
+					requiredMessage="El campo 'Conclusiones' es requerido"
+					valor="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.conclusiones}"
+					soloLectura="false" />
+			</h:panelGrid>
+		</p:fieldset>
+
+		<br />
+
+		<p:fieldset legend="8. Recomendaciones" toggleable="true"
+			toggleSpeed="500" collapsed="false">
+			<h:panelGrid columns="1" styleClass="w100">
+				<h:outputText
+					value="Entre las recomendaciones se deberá solicitar al operador absolver las observaciones, o a la Dirección de Bosques, emitir el pronunciamiento de viabilidad ambiental favorable o no favorable" />
+				<control:imputConTextoEnriquecido
+					requiredMessage="El campo 'Recomendaciones' es requerido"
+					valor="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.informeInspeccion.recomendaciones}"
+					soloLectura="false" />
+			</h:panelGrid>
+		</p:fieldset>
+	</h:panelGroup>
+
+	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<h:outputText value="9. Mapa del proyecto" />
+		</f:facet>
+
+		<ui:remove><p:commandLink value="Generar mapa de intersección y recorrido"
+			ajax="false" immediate="true">
+			<p:fileDownload
+				value="#{elaborarDocumentosViabilidadPfnController.generarMapaRecorrido()}" />
+		</p:commandLink></ui:remove>
+
+		<h:outputText value="Mapa de intersección y recorrido" />
+
+		<p:commandButton icon="ui-icon-gear" value="Generar"
+						styleClass="primary toLeft" title="Generar" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{elaborarDocumentosViabilidadPfnController.generarMapaRecorrido()}" />
+					</p:commandButton>
+
+	</p:panelGrid>
+
+	<h:inputHidden
+		validator="#{elaborarDocumentosViabilidadPfnController.validateDatosIngresoInforme}" />
+
+</h:panelGrid>
+
+<h:panelGroup id="pnlButtonsInforme">
+	<div class="buttons main">
+		<p:commandButton value="Guardar" styleClass="secondary"
+			icon="ui-icon-disk" process="@this :form:tab:pnlInforme"
+			update="pnlButtonsInforme :form:tab:pnlInforme" immediate="true"
+			disabled="#{elaborarDocumentosViabilidadPfnController.esInformeViabilidad eq null}"
+			actionListener="#{elaborarDocumentosViabilidadPfnController.guardarInforme()}">
+			<p:ajax process="pnlTextos pnlTextos2 pnlTextos3" />
+		</p:commandButton>
+		<p:commandButton value="Siguiente" icon="ui-icon-arrowthick-1-e"
+			update="tab" process="@this :form:tab:pnlInforme"
+			disabled="#{!elaborarDocumentosViabilidadPfnController.informeGuardado}"
+			action="#{elaborarDocumentosViabilidadPfnController.siguiente}" />
+	</div>
+</h:panelGroup>
+
+
+
+</html>

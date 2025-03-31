@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:t="http://myfaces.apache.org/tomahawk"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+                xmlns:pe="http://primefaces.org/ui/extensions">
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{descripcionProyectoPmaBean.validarTareaBpm()}"/>
+        <ui:include src="contenido/menu.xhtml" />
+        <div class="content">
+            <h:form id="frmCronograma">
+                <p:growl id="msgs" globalOnly="true"/>
+                <p:panel id="parte9" rendered="#{cronogramaCostruccionController.cronogramaConstruccionBean.habilitar}"  header="10. CRONOGRAMA DE CONSTRUCCIÓN Y OPERACIÓN DEL PROYECTO">
+                    <p:panelGrid columns="4" layout="grid" styleClass="w100"
+                                 columnClasses="w25, field_mrg w25">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp
+                                value="Cronograma"
+                                conector="generalHelp"
+                                image="#{request.contextPath}/resources/images/help-how.png"
+                                help="#{helps['registro.general']}" />
+                        </f:facet>
+                        <p:outputLabel value="Tipo de Actividad:" />
+                        <p:selectOneMenu id="cb_tipo_actividad" 
+                                         value="#{cronogramaCostruccionController.cronogramaConstruccionBean.catalogoGeneralSeleccionado}"
+                                         converter="selectItemConverter2">
+                            <p:ajax event="change" listener="#{cronogramaCostruccionController.seleccionarTipoActividad()}" 
+                                    update=":#{p:component('frmCronograma')}"/>
+                            <f:selectItems value="#{cronogramaCostruccionController.cronogramaConstruccionBean.listaTipoActividad}" />
+                        </p:selectOneMenu>
+
+                    </p:panelGrid>
+
+                    <p:panelGrid id="pnlActividades" columns="1" layout="grid" styleClass="w100" columnClasses=""
+                                 rendered="#{cronogramaCostruccionController.cronogramaConstruccionBean.catalogoGeneralSeleccionado.id != null}">
+
+                        <f:facet name="header">
+                            <p:commandButton value="Exportar"  styleClass="button-small-text toRight field_mrg" icon="ui-icon-arrowstop-1-s"
+                                             onclick="PF('exportarDlg').show();"
+                                             rendered="#{cronogramaCostruccionController.cronogramaConstruccionBean.listaActividadTabla != null and not empty cronogramaCostruccionController.cronogramaConstruccionBean.listaActividadTabla}">
+                            </p:commandButton>
+                            <p:commandButton value="Adicionar"  styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick"
+                                             action="#{cronogramaCostruccionController.agregarActividad()}" update=":#{p:component('pnlActividad')}" 
+                                             oncomplete="PF('dlgActividad').show();"
+                                             >
+                            </p:commandButton>
+                            <mae:panelGridHeaderHelp
+                                value="#{cronogramaCostruccionController.cronogramaConstruccionBean.catalogoGeneralSeleccionado.fase.nombre}"
+                                conector="generalHelp"
+                                image="#{request.contextPath}/resources/images/help-how.png"
+                                help="#{helps['registro.general']}" />
+                        </f:facet>
+                        <p:dataTable id="tblActividades" value="#{cronogramaCostruccionController.cronogramaConstruccionBean.listaActividadTabla}"
+                                     var="actividad" paginator="true" rows="5" styleClass="w100"
+                                     emptyMessage="#{labels['common.table.empty']}">
+
+                            <p:column>
+                                <f:facet name="header" >
+                                    <h:outputText value="Actividad" />
+                                </f:facet>
+                                <h:outputText value="#{actividad.descripcion}" />
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header" >
+                                    <h:outputText value="Fecha inicio" />
+                                </f:facet>
+                                <h:outputText value="#{actividad.fechaInicio}" >
+                                    <f:convertDateTime pattern="dd-MM-yyyy" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header" >
+                                    <h:outputText value="Fecha fin" />
+                                </f:facet>
+                                <h:outputText value="#{actividad.fechaFin}" >
+                                    <f:convertDateTime pattern="dd-MM-yyyy" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column exportable="false">
+                                <f:facet name="header" >
+                                    <h:outputText value="Acciones" />
+                                </f:facet>
+                                <div class="buttons-inline alCenter">
+                                    <p:commandButton icon="ui-icon-pencil" action="#{cronogramaCostruccionController.seleccionarActividad(actividad)}"
+                                                     title="Editar" styleClass="primary"
+                                                     oncomplete="PF('dlgActividad').show();" update=":#{p:component('pnlActividad')}"/>
+                                    <p:commandButton icon="ui-icon-trash" action="#{cronogramaCostruccionController.seleccionarActividad(actividad)}"
+                                                     title="Remover" styleClass="secondary"
+                                                     oncomplete="PF('deleteBookingWdgt').show();"/>
+                                </div>
+                            </p:column>
+                        </p:dataTable>
+                    </p:panelGrid>
+
+
+
+
+                    <br/>
+                    <div class="buttons main">
+                        <p:commandButton value="Guardar" action="#{cronogramaCostruccionController.guardar()}" 
+                                         icon="ui-icon-check"
+                                         update="#{p:component('frmCronograma')}"/>
+                        <p:commandButton value="Cancelar" action="/prevencion/categoria2/fichaAmbiental/cronogramaConstruccion.jsf" 
+                                         styleClass="secondary" icon="ui-icon-cancel"
+                                         ajax="false" immediate="true"/>
+                    </div>
+                    <br/>
+
+                    <pe:timeline id="timeline" value="#{cronogramaCostruccionController.model}" var="booking"
+                                 rendered="#{cronogramaCostruccionController.cronogramaConstruccionBean.catalogoGeneralSeleccionado.id != null}"
+                                 timeZone="America/Guayaquil"  
+                                 zoomMax="#{cronogramaCostruccionController.cronogramaConstruccionBean.zoomMax}"  
+                                 zoomMin="#{cronogramaCostruccionController.cronogramaConstruccionBean.zoomMin}"
+                                 start="#{cronogramaCostruccionController.cronogramaConstruccionBean.start}"  
+                                 end="#{cronogramaCostruccionController.cronogramaConstruccionBean.end}"
+                                 axisOnTop="true"
+                                 zoomable="true"
+                                 locale="es"
+                                 showNavigation="true"
+                                 selectable="false"
+                                 editable="false" timeChangeable="false"  
+                                 minHeight="250" widgetVar="timelineWdgt">
+
+                        <h:panelGrid columns="1">  
+                            <h:outputLabel value="Actividad:" style="font-size: 75%"/> 
+                            <h:outputText value="#{booking.descripcion}" style="font-size: 75%"/> 
+                        </h:panelGrid>   
+                    </pe:timeline> 
+
+
+                    <p:dialog id="deleteBookingDlg" header="Confirmación" widgetVar="deleteBookingWdgt"  
+                              modal="true" dynamic="true">  
+                        <h:panelGroup id="deleteBookingInner" layout="block" style="margin:10px;">  
+                            <h:outputText value="¿Está usted seguro de eliminar esta actividad?"/>  
+                        </h:panelGroup>  
+
+                        <f:facet name="footer">  
+                            <h:panelGroup layout="block" style="text-align:right; padding:2px; white-space:nowrap;">  
+                                <p:commandButton value="Eliminar" process="deleteBookingDlg" update=":#{p:component('pnlActividades')}, :#{p:component('timeline')}"  
+                                                 action="#{cronogramaCostruccionController.remover()}"  
+                                                 oncomplete="PF('deleteBookingWdgt').hide()"/>  
+                                <p:commandButton type="button" value="Cerrar" onclick="PF('deleteBookingWdgt').hide()"/>  
+                            </h:panelGroup>  
+                        </f:facet>  
+                    </p:dialog>  
+
+                    <p:dialog id="exportar" header="Confirmación" widgetVar="exportarDlg" resizable="false"  
+                              modal="true" dynamic="true" closable="false" width="250" height="100">  
+                        <p:panelGrid columns="1" columnClasses="label, value">
+                            <h:outputText value="Descargue el archivo en formato excel (.xls)" />
+                        </p:panelGrid>
+                        <div class="buttons alCenter">
+                            <p:commandButton value="Descargar" ajax="false" update=":#{p:component('pnlActividades')}, :#{p:component('timeline')}"  
+                                             icon="ui-icon-arrowstop-1-s">
+                                <p:dataExporter type="xls" target="tblActividades" fileName="cronograma" />
+                            </p:commandButton>
+                            <p:commandButton value="Cerrar" icon="ui-icon-close" 
+                                             onclick="PF('exportarDlg').hide()"/>  
+                        </div>
+                    </p:dialog>  
+                    
+                    
+
+                </p:panel>
+                <p:dialog id="dlgInfo" header="Información" widgetVar="dlgInfo" resizable="false"  
+                              modal="true" dynamic="true" closable="false" width="250" height="80">  
+                        <p:panelGrid columns="1" columnClasses="label, value">
+                            <h:outputText value="#{cronogramaCostruccionController.cronogramaConstruccionBean.mensaje}" />
+                        </p:panelGrid>
+                        <div class="buttons alCenter">
+                            <p:commandButton value="Aceptar" action="/prevencion/categoria2/fichaAmbiental/default.jsf" 
+                                         styleClass="secondary" icon="ui-icon-check"
+                                         ajax="false" immediate="true"/>
+                        </div>
+                    </p:dialog> 
+            </h:form>
+        </div>
+        <p:dialog header="Detalle actividad" widgetVar="dlgActividad" modal="true" resizable="false" draggable="false"
+                  width="450" height="200">    
+            <h:form>
+                <p:panel>  
+                    <h:panelGrid id="pnlActividad" columns="2" >  
+                        <h:outputLabel value="*Actividad:"/>  
+                        <p:inputText value="#{cronogramaCostruccionController.cronogramaConstruccionBean.actividad.descripcion}"  
+                                     label="*Actividad: " size="40" maxlength="250"/>  
+
+                        <h:outputLabel value="*Desde: "/>  
+                        <p:calendar value="#{cronogramaCostruccionController.cronogramaConstruccionBean.actividad.fechaInicio}"  
+                                    timeZone="America/Guayaquil"  readonlyInput="true"
+                                    pattern="dd/MM/yyyy" label="Desde"/>  
+
+                        <h:outputLabel value="*Hasta: "/>  
+                        <p:calendar value="#{cronogramaCostruccionController.cronogramaConstruccionBean.actividad.fechaFin}"  
+                                    timeZone="America/Guayaquil"  readonlyInput="true"
+                                    pattern="dd/MM/yyyy" label="Hasta"/>  
+                    </h:panelGrid>  
+
+                    <br/>
+                    <center>   
+                        <p:commandButton value="Guardar" update=":#{p:component('pnlActividades')}, :#{p:component('timeline')}, :#{p:component('msgs')}"  
+                                         action="#{cronogramaCostruccionController.guardarActividad()}"  
+                                         oncomplete="handleActividadRequest(xhr, status, args);"/>   
+                    </center>
+                </p:panel>
+            </h:form>
+        </p:dialog> 
+        <script type="text/javascript">
+            function handleActividadRequest(xhr, status, args) {
+                if (args.validationFailed || !args.actividadIn) {
+                }
+                else {
+                    PF('dlgActividad').hide();
+                    $('#loginLink').fadeOut();
+                }
+            }
+        </script>
+
+    </ui:define>
+</ui:composition>

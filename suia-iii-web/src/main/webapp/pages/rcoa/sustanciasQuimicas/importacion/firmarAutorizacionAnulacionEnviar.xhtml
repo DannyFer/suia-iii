@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task-operador.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="context-extra">
+	<h:outputText value="Código RSQ" />
+	<h:outputText value="#{firmarAutorizacionAnulacionController.codigoRSQ}" />
+		<p:commandButton ajax="false" icon="ui-icon-arrowthick-1-s"
+			styleClass="button-small primary" immediate="true" rendered="#{firmarAutorizacionAnulacionController.oficio eq null ? false : true}">
+			<p:fileDownload value="#{firmarAutorizacionAnulacionController.descargarDocumentoRsq()}" />
+		</p:commandButton>
+		
+		<p:commandButton ajax="false" icon="ui-icon-arrowthick-1-s"
+			styleClass="button-small primary" immediate="true" rendered="#{firmarAutorizacionAnulacionController.oficio eq null ? true : false}">
+			
+		</p:commandButton>
+
+		<h:outputText value="Trámite" />
+	<h:outputText value="#{firmarAutorizacionAnulacionController.codigo}" />
+		<p:button href="/pages/rcoa/sustanciasQuimicas/importacion/ingresoInformacionImportacionVer.jsf" target="_blank" icon="ui-icon-search"
+		styleClass="primary button-small"/>		
+	</ui:define>
+
+	<ui:define name="content">
+		
+
+		<h:form id="form">
+			<h:panelGroup>
+				<h:panelGrid styleClass="alCenter w100" columns="1">
+					<h:outputText value="#{firmarAutorizacionAnulacionController.nombreFormulario}"
+						styleClass="encabezado1_4em" />
+						
+						
+						<p:commandButton value="Descargar documento a Firmar" ajax="false"
+							icon="ui-icon-arrowthick-1-s" styleClass="primary"
+							immediate="true">
+							<p:fileDownload
+								value="#{firmarAutorizacionAnulacionController.descargarDocumento()}" />
+						</p:commandButton>
+						
+						
+
+					<h:panelGrid styleClass="alCenter w66" columns="1" rendered="#{!firmarAutorizacionAnulacionController.ambienteProduccion}">
+						<p:panel styleClass="alCenter">
+							<h:panelGrid styleClass="alCenter w50" columns="2">
+								<h:outputText value="¿Cuenta con token?" styleClass="encabezado"
+									style="text-align:right" />
+								<p:selectOneRadio id="verificaToken"
+									value="#{firmarAutorizacionAnulacionController.token}">
+									<f:selectItem itemLabel="Sí" itemValue="true" />
+									<f:selectItem itemLabel="No" itemValue="false" />
+									<p:ajax event="change" update=":form :formDialogs"
+										listener="#{firmarAutorizacionAnulacionController.guardarToken}" />
+								</p:selectOneRadio>
+							</h:panelGrid>
+						</p:panel>
+					</h:panelGrid>
+				</h:panelGrid>
+			</h:panelGroup>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Firmar documento " type="button"
+						styleClass="large" icon="ui-icon-key"
+						rendered="#{!firmarAutorizacionAnulacionController.token}"
+						update=":formDialogs:pnlFirmaManual"
+						onclick="PF('signDialogDocumento').show();" />
+					<p:commandButton value="Firmar documento" type="button"
+						styleClass="large" icon="ui-icon-key"
+						rendered="#{firmarAutorizacionAnulacionController.token}"
+						onclick="window.location.href='#{firmarAutorizacionAnulacionController.firmarDocumento()}'" />
+
+					<p:commandButton value="Enviar"
+						action="#{firmarAutorizacionAnulacionController.completarTarea()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+
+				</div>
+			</h:panelGroup>
+
+
+		</h:form>
+
+		<h:form id="formDialogs">
+			<p:dialog header="Firma Electrónica" id="signDialogDocumento"
+				widgetVar="signDialogDocumento" closeOnEscape="false" modal="true"
+				resizable="false" width="auto" height="auto" position="center top">
+				<p:panel id="pnlFirmaManual">
+					<h:panelGrid columns="2" cellpadding="10"
+						style="text-align:right !important">
+
+						<p:outputLabel value="1. Descargar el documento" styleClass="bold" />
+						<p:commandButton value="Descargar" ajax="false"
+							icon="ui-icon-arrowthick-1-s" styleClass="primary"
+							immediate="true">
+							<p:fileDownload
+								value="#{firmarAutorizacionAnulacionController.descargarDocumento()}" />
+						</p:commandButton>
+
+						<p:outputLabel for="uploadRequired"
+							value="2. Adjunte el documento firmado" styleClass="bold" />
+						<p:fileUpload
+							fileUploadListener="#{firmarAutorizacionAnulacionController.uploadListenerDocumentos}"
+							multiple="false" sizeLimit="5242880"
+							allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Tamaño de archivo no válido"
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update="lblNombreDocFirmado"
+							rendered="#{!firmarAutorizacionAnulacionController.token}">
+							<f:attribute name="clave" value=":form" />
+						</p:fileUpload>
+						<p:outputLabel value="" />
+						<h:outputText id="lblNombreDocFirmado"
+							value="#{firmarAutorizacionAnulacionController.documentoManual.nombre}" />
+					</h:panelGrid>
+				</p:panel>
+				<h:inputHidden id="uploadRequired"
+					required="#{!firmarAutorizacionAnulacionController.token and !firmarAutorizacionAnulacionController.documentoSubido}" />
+				<p:separator />
+				<div style="display: block; width: 100%; text-align: right;">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialogDocumento').hide()" icon="ui-icon-close" />
+				</div>
+			</p:dialog>
+		</h:form>
+
+
+
+	</ui:define>
+</ui:composition>

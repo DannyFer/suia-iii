@@ -1,0 +1,232 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+
+		<style type="text/css">
+.ui-fileupload-content {
+	border: none !important;
+	padding: 0px;
+}
+
+.ui-fileupload-buttonbar {
+	text-align: right !important;
+}
+</style>
+
+		<h:form id="form">
+		<p:tabView>
+		<p:tab title="Archivar Proyectos">
+			<p:panel header="Archivar Proyectos">
+				<h:panelGrid styleClass="w100" columns="2"
+					columnClasses="w50, field_mrg" id="filtroContainer">
+					<p:outputLabel for="filtro" value="Buscar proyecto"
+						styleClass="bold" />
+					<h:outputText />
+					<p:inputText id="filtro"
+						value="#{archivarProyectosController.codigoTramite}"
+						styleClass="w100" />
+					<h:panelGroup>
+						<div class="buttons-inline">
+							<p:commandButton id="filterButton" value="Validar"
+								icon="ui-icon-check" styleClass="primary" process="@this filtro"
+								actionListener="#{archivarProyectosController.validarCodigo}"
+								update="filtroContainer btnArchivar" />
+						</div>
+					</h:panelGroup>
+
+					<h:panelGroup>
+						<p:outputLabel value="Motivo de archivación" />
+						<p:inputTextarea id="motivo"
+							value="#{archivarProyectosController.motivo}"
+							disabled="#{archivarProyectosController.deshabilitado}"
+							required="true"
+							requiredMessage="El campo Motivo de la archivación es requerido" />
+						<br />
+						<br />
+						<h:panelGrid
+							rendered="#{archivarProyectosController.mostrarPaneles}">
+							<h:outputText
+								value="Es necesario que adjunte la Solicitud del pedido de Proponente que sustente el archivo del proyecto en formato .pdf" />
+							<h:outputLabel value="Adjuntar archivo *" />
+							<p:fileUpload
+								fileUploadListener="#{archivarProyectosController.uploadSolicitud}"
+								id="fileSolicitud" multiple="false" sizeLimit="20971520"
+								allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no v lido"
+								invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 MB."
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblSolicitud" required="true"/>
+							<h:outputLabel id="lblSolicitud" value="#{archivarProyectosController.documentoSolicitud.nombreDocumento}"/>
+						</h:panelGrid>
+						
+						<h:panelGrid
+							rendered="#{archivarProyectosController.mostrarPaneles and archivarProyectosController.esFinalizado}">
+							<br/>
+							<h:outputText
+								value="Es necesario que adjunte la Resolución de extinción del proyecto en formato .pdf" />
+							<p:outputLabel value="Adjuntar archivo *" />
+							<p:fileUpload
+								fileUploadListener="#{archivarProyectosController.uploadResolucion}"
+								id="fileResolucion" multiple="false" sizeLimit="20971520"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 MB."
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblResolucion" required="true"/>
+							<h:outputLabel id="lblResolucion" value="#{archivarProyectosController.documentoResolucion.nombreDocumento}" />
+						</h:panelGrid>
+					</h:panelGroup>
+				</h:panelGrid>
+
+				<div class="buttons main">
+					<p:commandButton id="btnArchivar" value="Archivar proyecto"
+						icon="ui-icon-check"
+						action="#{archivarProyectosController.archivar}"
+						styleClass="extraLarge" update="@form"
+						disabled="#{archivarProyectosController.deshabilitado}">
+						<p:confirm header="Confirmación"
+							message=" Está seguro que desea archivar este proyecto?"
+							icon="ui-icon-alert" />
+					</p:commandButton>
+					<p:commandButton value="Cancelar" icon="ui-icon-close"
+						action="#{archivarProyectosController.cancelar}" update="@form">
+						<p:confirm header="Confirmación"
+							message=" Está seguro que desea cancelar el archivo de este proyecto?"
+							icon="ui-icon-alert" />
+					</p:commandButton>
+				</div>
+
+			</p:panel>
+		</p:tab>
+		
+		<p:tab title="Archivo Masivo">
+	
+					<h:panelGroup id="containerArchivoMasivo">
+						<p:panelGrid columns="1" layout="grid"	styleClass="buttonAdjuntarproyectos w100">
+
+							<f:facet name="header">
+								<h:outputText value="Listado de proyectos para archivar" />
+								<p:commandButton value="Adjuntar"
+									styleClass="button-small-text toRight field_mrg" type="button" icon="ui-icon-document" onclick="PF('adjuntarProyectos').show()" />
+								<p:commandButton value="Descargar plantilla"
+									styleClass="button-small-text toRight field_mrg" icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true">
+									<p:fileDownload	value="#{archivarMasivoController.getPlantillaArchivoMasivo()}" />
+								</p:commandButton>
+							</f:facet>
+							
+							<p:dataTable id="tbl_proyectos_archivo" rowIndexVar="index"
+								value="#{archivarMasivoController.listaProyectoCustom}"
+								var="proyecto" emptyMessage="#{labels['common.table.empty']}">
+								<p:columnGroup type="header">
+									<p:row>
+										<p:column headerText="Código de proyecto" styleClass="alCenter table-column-header" />
+										<p:column headerText="Motivo de archivo" styleClass="alCenter table-column-header" />
+										<p:column headerText="Proyecto completado" styleClass="alCenter table-column-header" />
+									</p:row>
+								</p:columnGroup>
+
+								<p:column headerText="Código de proyecto" styleClass="alCenter w15">
+									<h:outputText value="#{proyecto.codigo}" />
+								</p:column>
+
+								<p:column headerText="Motivo de archivo" styleClass="alCenter w15">
+									<h:outputText value="#{proyecto.motivoEliminar}" />
+								</p:column>
+
+								<p:column headerText="Proyecto completado" styleClass="alCenter w15">
+									<h:outputText
+										value="#{proyecto.finalizado}" />
+								</p:column>
+							</p:dataTable>
+						</p:panelGrid>
+						<br />
+					
+					<h:panelGrid rendered="#{archivarMasivoController.panelesMasivo}">
+						<h:outputText
+							value="Es necesario que adjunte la Solicitud del pedido de Proponente que sustente el archivo del proyecto en formato .pdf" />
+						<h:outputLabel value="Adjuntar archivo *" />
+						<p:fileUpload
+								fileUploadListener="#{archivarMasivoController.uploadSolicitud}"
+								id="archivoSolicitud" multiple="false" sizeLimit="20971520"
+								allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no v lido"
+								invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 MB."
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblMasSolicitud" required="true"/>
+							<h:outputLabel id="lblMasSolicitud" value="#{archivarMasivoController.documentoSolicitud.nombreDocumento}"/>
+					</h:panelGrid>
+
+					<h:panelGrid
+						rendered="#{archivarMasivoController.panelesMasivo and archivarMasivoController.finalizado}">
+						<br />
+						<h:outputText
+							value="Es necesario que adjunte la Resolución de extinción del proyecto formato .pdf" />
+						<p:outputLabel value="Adjuntar archivo *" />
+						<p:fileUpload
+								fileUploadListener="#{archivarMasivoController.uploadResolucion}"
+								id="archivoResolucion" multiple="false" sizeLimit="20971520"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no v lido"
+								invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 MB."
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblMasResolucion" required="true"/>
+							<h:outputLabel id="lblMasResolucion" value="#{archivarMasivoController.documentoResolucion.nombreDocumento}" />
+					</h:panelGrid>
+
+					<div class="buttons main">
+						<p:commandButton id="btnArchivarMasivo" value="Archivar proyectos"
+							icon="ui-icon-check"
+							action="#{archivarMasivoController.archivarMasivo}"
+							styleClass="extraLarge" update="containerArchivoMasivo"
+							disabled="#{archivarMasivoController.deshabilitado}">
+							<p:confirm header="Confirmación"
+								message=" Está seguro que desea archivar los proyectos?"
+								icon="ui-icon-alert" />
+						</p:commandButton>
+						<p:commandButton value="Cancelar" icon="ui-icon-close" 
+						action="#{archivarMasivoController.cancelarMasivo}" update="containerArchivoMasivo">
+							<p:confirm header="Confirmación" 
+								message=" Está seguro que desea cancelar el archivo de este proyecto?"
+								icon="ui-icon-alert" />
+						</p:commandButton>
+					</div>
+					
+					</h:panelGroup>
+
+					<p:dialog header="Adjuntar proyectos" widgetVar="adjuntarProyectos"
+						modal="true" resizable="false" draggable="false">
+						<p:panelGrid columns="1" columnClasses="label, value">
+							<h:outputText value="Seleccione el archivo excel (.xls)" />
+							<p:fileUpload uploadLabel="Subir" auto="true"
+								cancelLabel="Cancelar" label="Seleccionar"
+								fileUploadListener="#{archivarMasivoController.handleFileUploadProyectos}"
+								mode="advanced" dragDropSupport="false" multiple="false"
+								allowTypes="/(\.|\/)(xls)$/"
+								invalidFileMessage="El archivo es inválido."
+								invalidSizeMessage="El archivo es demasiado grande."
+								update="containerArchivoMasivo"
+								oncomplete="PF('adjuntarProyectos').hide()" />
+						</p:panelGrid>
+						<div class="buttons">
+							<p:commandButton type="button" value="Cerrar" onclick="PF('adjuntarProyectos').hide()" />
+						</div>
+					</p:dialog>
+				</p:tab>
+			</p:tabView>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+	<ui:define name="content">
+		<ui:include src="../contenido/menu.xhtml" />
+		<div class="content">
+		<h:form id="frmFicha" enctype="multipart/form-data">
+		  <p:growl id="msgs" globalOnly="true"/>
+			<p:panel>
+			
+		<h:panelGrid columns="2" id="pgAdjunto">
+		<h:outputLabel value="*Adjuntar Documento:"/>
+				<p:fileUpload id="idArchivo" auto="true" label="Adjuntar"
+								fileUploadListener="#{fichaTecnicaController.handleFileUpload}"
+								mode="advanced" value="#{fichaTecnicaBean.fichaTecnica.nombreArchivo}"
+								skinSimple="true" required="true" sizeLimit="10000000"
+								allowTypes="/(\.|\/)(pdf)$/" update=":frmFicha:lblArchivo :frmFicha:lblDescargar :frmFicha:pgAdjunto" />
+								<p:outputLabel value="#{fichaTecnicaBean.fichaTecnica.nombreArchivo}" id="lblArchivo" style="color:blue"/>
+								<p:commandLink ajax="false" value="Descargar" id="lblDescargar" 
+										 onclick="PrimeFaces.monitorDownload(start, stop);"	rendered="#{fichaTecnicaBean.visibleDocumento}"	style="color:blue">
+										 <p:fileDownload value="#{fichaTecnicaController.descargar()}"/>
+										 </p:commandLink>
+		</h:panelGrid>
+		<p:panelGrid columns="1" layout="grid" styleClass="w100">
+             <f:facet name="header">
+			<p:commandButton value="Adicionar" action="#{fichaTecnicaController.agregarCoordenada}" immediate="true"
+			update=":#{p:component('frmCoordenada')}" id="btnAgregar"  onclick="PF('dlgCoordenada').show()"
+			  icon="ui-icon-plusthick" styleClass="button-small-text toRight field_mrg">
+			<p:tooltip id="acciontt" for="btnAgregar" value="Agregar Coordenada" ></p:tooltip>
+			</p:commandButton>
+			<mae:panelGridHeaderHelp value="Ficha Técnica" conector="fichaTecnicaHelp"  help="#{helps['no.help.yet']}" />
+		</f:facet>
+			<p:dataTable id="tblCoordenadas" value="#{fichaTecnicaBean.coordenadas}" var="coordenada" 
+						paginator="true" rows="10" paginatorPosition="bottom" scrollable="true" scrollWidth="720" emptyMessage="No existe datos">
+				<f:facet name="header">
+					<h:outputText value="Sistema de coordenadas UTM WGS84 Zona (correspondiente al Huso Horario)" />	
+				</f:facet>
+				<p:column headerText="Acciones" width="60">
+				 <p:commandButton icon="ui-icon-pencil" action="#{fichaTecnicaController.seleccionarFicha(coordenada)}"
+                                 title="Editar"
+                                 oncomplete="PF('dlgCoordenada').show();" update=":#{p:component('frmCoordenada')}"/>
+                <p:commandButton icon="ui-icon-trash" action="#{fichaTecnicaController.eliminarCoordenada(coordenada)}"
+                                 title="Remover"
+                                 update=":#{p:component('tblCoordenadas')}"/>
+				</p:column>
+				<p:column headerText="Punto/Vértice">
+				<h:outputText value="#{coordenada.puntoVertice}" />
+				</p:column>
+				<p:column headerText="Este (X)">
+				<h:outputText value="#{coordenada.x}" />
+				</p:column>
+				<p:column headerText="Norte (Y)">
+					<h:outputText value="#{coordenada.y}" />
+				</p:column>
+				<p:column headerText="Descripción">
+					<h:outputText value="#{coordenada.descripcion}" />
+				</p:column>
+			</p:dataTable>
+			</p:panelGrid>
+			</p:panel>
+		
+			<div class="buttons main">
+				<p:commandButton id="btnGuardar" value="Guardar" icon="ui-icon-check" action="#{fichaTecnicaController.guardarCoordenada()}" 
+								update=":frmFicha:tblCoordenadas"/>
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel" action="#{fichaTecnicaController.cancelar()}" process="@this">
+					<p:confirm header="Confirmación" message="¿Está seguro de cancelar?" icon="ui-icon-alert" />
+				</p:commandButton>
+			</div>	
+			
+			</h:form>
+			
+	<p:dialog id="agregarCoordenada" header="Coordenada" widgetVar="dlgCoordenada" modal="true" width="350" resizable="false">
+	<h:form id="frmCoordenada">
+	<p:panel id="pnlCoordenada">
+	<h:panelGrid columns="2" styleClass="w100 alCenter" columnClasses="alRight, field_mrg w66 alLeft">
+		<p:outputLabel value="Punto/Vértice" for="txtPunto"/>
+		<p:inputText id="txtPunto" value="#{fichaTecnicaController.fichaTecnicaBean.coordenadaGeneral.puntoVertice}" required="true" requiredMessage="El campo punto/vértice es requerido."/>
+		<p:outputLabel value="X" for="txtX"/>
+		<p:inputText id="txtX" required="true" value="#{fichaTecnicaController.fichaTecnicaBean.coordenadaGeneral.x}" requiredMessage="El campo x es requerido."/>
+		<p:outputLabel value="Y" for="txtY"/>
+		<p:inputText id="txtY" required="true" value="#{fichaTecnicaController.fichaTecnicaBean.coordenadaGeneral.y}" requiredMessage="El campo y es requerido."/>
+		<p:outputLabel value="Descripción" for="txtDescripcion"/>
+		<p:inputText id="txtDescripcion" required="true" value="#{fichaTecnicaController.fichaTecnicaBean.coordenadaGeneral.descripcion}" requiredMessage="El campo descripción es requerido."/>
+	</h:panelGrid>
+	</p:panel>
+	
+	<p:separator />
+	<div class="buttons">
+		<p:commandButton action="#{fichaTecnicaController.asignarListaCoordenadas()}"  value="Agregar" update=":#{p:component('msgs')}, :#{p:component('tblCoordenadas')}"  
+				oncomplete="handlFichaRequest(xhr, status, args)" />
+	</div>
+	</h:form>
+</p:dialog>
+			<script type="text/javascript">
+        function handlFichaRequest(xhr, status, args) {
+            if (args.validationFailed || !args.coordenadaIn) {
+                PF('dlgCoordenada').jq.effect("shake", {times: 5}, 100);
+            }
+            else {
+                PF('dlgCoordenada').hide();
+                $('#loginLink').fadeOut();
+            }
+        }
+    </script>
+			<script type="text/javascript">
+				function start() {
+    				PF('statusDialog').show();
+				}
+
+				function stop() {
+    				PF('statusDialog').hide();
+			}
+	</script>
+		</div>
+	</ui:define>
+</ui:composition>
+
+

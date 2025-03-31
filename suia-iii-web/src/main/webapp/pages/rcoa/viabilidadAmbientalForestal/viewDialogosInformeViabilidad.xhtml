@@ -1,0 +1,574 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+<h:form id="frmDialogosAdicionales">
+	<p:dialog id="dlgDelegadoOperador" widgetVar="dlgDelegadoOperador"
+		modal="true" resizable="false" width="600" header="Datos delegado">
+		<h:panelGrid columns="2" styleClass="panel_data w100"
+			id="pnlDatosDelegado" columnClasses="header w25, null"
+			rowClasses="null, alt">
+			<p:outputLabel for="cedulaDelegado" styleClass="ui-label-form"
+				value="Cédula" />
+			<h:panelGroup>
+				<p:inputText required="true" id="cedulaDelegado"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.delegadoOperador.cedula}"
+					maxlength="10">
+					<pe:keyFilter regEx="/[a-z0-9]/i " />
+					<p:ajax event="change"
+						listener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.validarCedulaListener}"
+						update="nombreDelegado" />
+				</p:inputText>
+			</h:panelGroup>
+
+			<p:outputLabel value="Nombres y Apellidos" for="nombreDelegado"
+				styleClass="ui-label-form" />
+			<p:inputText id="nombreDelegado"
+				value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.delegadoOperador.nombre}"
+				readonly="true" />
+
+			<p:outputLabel value="Cargo" for="cargoDelgado"
+				styleClass="ui-label-form" />
+			<p:inputText id="cargoDelgado" required="true"
+				value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.delegadoOperador.cargo}"
+				maxlength="200" />
+		</h:panelGrid>
+		<br />
+		<div class="buttons">
+			<p:commandButton styleClass="primary" value="Aceptar"
+				actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.agregarDelegadoOperador()}"
+				oncomplete="handleDlgDelegadoOperador(xhr, status, args)"
+				process="@this pnlDatosDelegado"
+				update=":form:tab:tblDelegadoOperador" />
+			<p:commandButton value="Cancelar" styleClass="secondary"
+				actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.nuevoDelegado()}"
+				oncomplete="PF('dlgDelegadoOperador').hide()" process="@this"
+				update=":frmDialogosAdicionales:pnlDatosDelegado">
+				<p:resetInput target="@form" />
+			</p:commandButton>
+		</div>
+	</p:dialog>
+
+	<p:dialog id="dlgTecnicoDelegado" widgetVar="dlgTecnicoDelegado"
+		modal="true" resizable="false" width="600"
+		header="Datos técnico delegado">
+		<h:panelGrid columns="2" styleClass="panel_data w100"
+			id="pnlDatosTecnicoDelegado" columnClasses="header w25, null"
+			rowClasses="null, alt">
+			<p:outputLabel for="cedulaTecnicoDelegado" styleClass="ui-label-form"
+				value="Cédula" />
+			<p:inputText required="true" id="cedulaTecnicoDelegado"
+				value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.tecnicoDelegado.cedula}"
+				maxlength="10">
+				<pe:keyFilter regEx="/[a-z0-9]/i " />
+				<p:ajax event="change"
+					listener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.buscarUsuario}"
+					update="nombreTecnicoDelegado" />
+			</p:inputText>
+
+			<p:outputLabel value="Nombre" for="nombreTecnicoDelegado"
+				styleClass="ui-label-form" />
+			<p:inputText id="nombreTecnicoDelegado"
+				value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.tecnicoDelegado.usuario.persona.nombre}"
+				readonly="true" />
+
+			<p:outputLabel value="Cargo" for="cargoTecnicoDelgado"
+				styleClass="ui-label-form" />
+			<p:inputText id="cargoTecnicoDelgado" required="true"
+				value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.tecnicoDelegado.cargo}"
+				maxlength="200" />
+		</h:panelGrid>
+		<br />
+		<div class="buttons">
+			<p:commandButton styleClass="primary" value="Aceptar"
+				actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.agregarTecnicoDelegado()}"
+				oncomplete="handleDlgTecnicoDelegado(xhr, status, args)"
+				process="@this pnlDatosTecnicoDelegado"
+				update=":form:tab:tblEquipoTecnico" />
+			<p:commandButton value="Cancelar" styleClass="secondary"
+				actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.nuevoTecnicoDelegado()}"
+				oncomplete="PF('dlgTecnicoDelegado').hide()" process="@this"
+				update="frmDialogosAdicionales:pnlDatosTecnicoDelegado">
+				<p:resetInput target="@form" />
+			</p:commandButton>
+		</div>
+	</p:dialog>
+
+	<p:dialog id="dlgAddCoordenada" widgetVar="dlgAddCoordenada"
+		modal="true" resizable="false" width="600" header="Coordenadas" closable="false">
+		<h:panelGroup id="pnlDatosCoordenada">
+			<h:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25, null" rowClasses="null, alt">
+
+				<p:outputLabel value="Coordenada X" styleClass="ui-label-form" />
+				<pe:inputNumber id="coordX"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.nuevaCoordenada.coordenadaX}"
+					required="true" autocomplete="off"
+					requiredMessage="El campo 'Coordenada X' es requerido."
+					decimalPlaces="2" thousandSeparator="" maxValue="9999999999.99">
+					<p:ajax process="@this" />
+					<p:tooltip for="coordX" escape="false" trackMouse="true"
+						value="Coordenanda X en formato WGS84 17S" />
+				</pe:inputNumber>
+
+				<p:outputLabel value="Coordenada Y" styleClass="ui-label-form" />
+				<pe:inputNumber id="coordY"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.nuevaCoordenada.coordenadaY}"
+					required="true" autocomplete="off"
+					requiredMessage="El campo 'Coordenada Y' es requerido."
+					decimalPlaces="2" thousandSeparator="" maxValue="9999999999.99">
+					<p:ajax process="@this" />
+					<p:tooltip for="coordY" escape="false" trackMouse="true"
+						value="Coordenanda Y en formato WGS84 17S" />
+				</pe:inputNumber>
+
+				<p:outputLabel for="txtDescripcionCoordenada" value="Descripción"
+					style="color: white" />
+				<p:inputText id="txtDescripcionCoordenada" required="true"
+					maxlength="200"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.nuevaCoordenada.descripcion}" />
+
+				<p:outputLabel value="Elevación (m.s.n.m.)"
+					for="txtElevacionCoordenada" styleClass="ui-label-form" />
+				<pe:inputNumber id="txtElevacionCoordenada"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.nuevaCoordenada.elevacion}"
+					required="true" autocomplete="off"
+					requiredMessage="El campo 'Elevación (m.s.n.m.)' es requerido."
+					decimalPlaces="2" thousandSeparator="" maxValue="9999999.99">
+					<p:ajax process="@this" />
+				</pe:inputNumber>
+			</h:panelGrid>
+			<h:inputHidden
+				validator="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.validateCooordedana}" />
+		</h:panelGroup>
+
+		<br />
+		<div class="buttons">
+			<p:commandButton styleClass="primary" value="Aceptar"
+				actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.agregarCoordenada()}"
+				oncomplete="handleDlgAddCoordenada(xhr, status, args)"
+				process="@this pnlDatosCoordenada"
+				update=":form:tab:tblCoordenadas pnlDatosCoordenada " />
+			<p:commandButton value="Cancelar" styleClass="secondary"
+				actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.nuevaCoordenada()}"
+				oncomplete="PF('dlgAddCoordenada').hide()" process="@this"
+				update="pnlDatosCoordenada">
+				<p:resetInput target="@form" />
+			</p:commandButton>
+		</div>
+	</p:dialog>
+
+	<p:dialog id="dlgAddMuestreoCenso" widgetVar="dlgAddMuestreoCenso"
+		modal="true" resizable="false" width="600" header="Muestreo o censo">
+		<h:panelGroup id="pnlDatosMuestreoCenso">
+			<h:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25, null" rowClasses="null, alt">
+				<p:outputLabel for="txtCodigoMuestral"
+					value="Código unidad muestral" style="color: white" />
+				<p:inputText id="txtCodigoMuestral" required="true" maxlength="50"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.registroEspeciesForestales.nombreSitio}" />
+
+				<p:outputLabel value="Nivel de taxonomía" for="rdbTaxonomiaMuestreo"
+					style="color: white" />
+				<p:selectOneRadio id="rdbTaxonomiaMuestreo"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.registroEspeciesForestales.nivelTaxonomia}"
+					unselectable="true" required="true">
+					<f:selectItem itemLabel="Género" itemValue="1" />
+					<f:selectItem itemLabel="Especie" itemValue="2" />
+					<p:ajax update="pnlEspecieMuestreoCenso"
+						listener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.desbloquearTaxonomia}" />
+				</p:selectOneRadio>
+			</h:panelGrid>
+
+			<h:panelGrid columns="2" styleClass="panel_data w100"
+				id="pnlEspecieMuestreoCenso" columnClasses="header w25, null"
+				rowClasses="null, alt">
+				<p:outputLabel value="Familia:" for="cmbFamiliaMuestreo"
+					style="color: white" />
+				<p:selectOneMenu id="cmbFamiliaMuestreo"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.objFamilia}"
+					style="width: 100%" required="true" converter="selectItemConverter"
+					filter="true" filterMatchMode="startsWith"
+					disabled="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.blockFamilia}">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="#{null}" noSelectionOption="true" />
+					<f:selectItems
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listFamilia}"
+						var="familia" itemLabel="#{familia.hiclScientificName}"
+						itemValue="#{familia}" />
+					<p:ajax update="cmbGeneroMuestreo"
+						listener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.obtenerListaGeneroPorFamilia}" />
+				</p:selectOneMenu>
+
+				<p:outputLabel value="Género:" for="cmbGeneroMuestreo"
+					style="color: white" />
+				<p:selectOneMenu id="cmbGeneroMuestreo"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.objGenero}"
+					styleClass="w100" required="true" converter="selectItemConverter"
+					filter="true" filterMatchMode="startsWith"
+					disabled="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.blockGenero}">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="#{null}" noSelectionOption="true" />
+					<f:selectItems
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listGenero}"
+						var="genero" itemLabel="#{genero.hiclScientificName}"
+						itemValue="#{genero}" />
+					<p:ajax update="cmbEspecieMuestreo"
+						listener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.obtenerListaEspecies}" />
+				</p:selectOneMenu>
+
+				<p:outputLabel value="Especie:" for="cmbEspecieMuestreo"
+					style="color: white" />
+				<p:selectOneMenu id="cmbEspecieMuestreo"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.objEspecie}"
+					styleClass="w100" required="true" converter="selectItemConverter"
+					disabled="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.blockEspecie}">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="#{null}" noSelectionOption="true" />
+					<f:selectItems
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listEspecie}"
+						var="especie" itemLabel="#{especie.sptaScientificName}"
+						itemValue="#{especie}" />
+				</p:selectOneMenu>
+
+				<p:outputLabel for="txtNombreComunMuestreo" value="Nombre común"
+					style="color: white" />
+				<p:inputText id="txtNombreComunMuestreo" maxlength="200"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.registroEspeciesForestales.nombreComun}" />
+
+				<p:outputLabel value="Diámetro a la altura del pecho DAP (m)"
+					for="txtDapMuestreo" style="color: white" />
+				<pe:inputNumber id="txtDapMuestreo" thousandSeparator=""
+					maxValue="9999999.99" minValue="0" required="true"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.registroEspeciesForestales.alturaDap}"
+					validatorMessage="El campo DAP es menor al valor mínimo permitido de 0.0001">
+					<f:validateDoubleRange minimum="0.01" />
+				</pe:inputNumber>
+
+				<p:outputLabel value="Altura Total HT (m)" for="txtAlturaMuestreo"
+					style="color: white" />
+				<pe:inputNumber id="txtAlturaMuestreo" thousandSeparator=""
+					maxValue="9999999.99" minValue="0" required="true"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.registroEspeciesForestales.alturaTotal}"
+					validatorMessage="El campo Altura total es menor al valor mínimo permitido de 0.0001">
+					<f:validateDoubleRange minimum="0.01" />
+				</pe:inputNumber>
+
+				<p:outputLabel value="Altura comercial HC (m)"
+					for="txtAlturaComercialMuestreo" style="color: white" />
+				<pe:inputNumber id="txtAlturaComercialMuestreo" thousandSeparator=""
+					maxValue="9999999.99" minValue="0" required="true"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.registroEspeciesForestales.alturaComercial}"
+					validatorMessage="El campo Altura total es menor al valor mínimo permitido de 0.0001">
+					<f:validateDoubleRange minimum="0.01" />
+				</pe:inputNumber>
+			</h:panelGrid>
+
+		</h:panelGroup>
+
+		<br />
+		<div class="buttons">
+			<p:commandButton styleClass="primary" value="Aceptar"
+				actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.agregarMuestreoCenso()}"
+				oncomplete="handleDlgAddMuestreoCenso(xhr, status, args)"
+				process="@this pnlDatosMuestreoCenso"
+				update=":form:tab:tblCensoForestal pnlDatosMuestreoCenso " />
+			<p:commandButton value="Cancelar" styleClass="secondary"
+				actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.nuevoMuestreoCenso()}"
+				oncomplete="PF('dlgAddMuestreoCenso').hide()" process="@this"
+				update="pnlDatosMuestreoCenso">
+				<p:resetInput target="@form" />
+			</p:commandButton>
+		</div>
+	</p:dialog>
+
+	<p:dialog id="dlgAddCaracterizacionCualitativa"
+		widgetVar="dlgAddCaracterizacionCualitativa" modal="true"
+		resizable="false" width="600" header="Caracterización cualitativa">
+		<h:panelGroup id="pnlDatosCaracterizacionCualitativa">
+			<h:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25, null" rowClasses="null, alt">
+				<p:outputLabel value="Nivel de taxonomía" for="rdbTaxonomia"
+					style="color: white" />
+				<p:selectOneRadio id="rdbTaxonomia"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.registroEspeciesForestales.nivelTaxonomia}"
+					unselectable="true" required="true">
+					<f:selectItem itemLabel="Género" itemValue="1" />
+					<f:selectItem itemLabel="Especie" itemValue="2" />
+					<p:ajax update="pnlDatosCaracterizacionCualitativa"
+						listener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.desbloquearTaxonomia}" />
+				</p:selectOneRadio>
+
+				<p:outputLabel value="Familia:" for="cmbFamilia"
+					style="color: white" />
+				<p:selectOneMenu id="cmbFamilia"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.objFamilia}"
+					style="width: 100%" required="true" converter="selectItemConverter"
+					filter="true" filterMatchMode="startsWith"
+					disabled="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.blockFamilia}">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="#{null}" noSelectionOption="true" />
+					<f:selectItems
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listFamilia}"
+						var="familia" itemLabel="#{familia.hiclScientificName}"
+						itemValue="#{familia}" />
+					<p:ajax update="cmbGenero"
+						listener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.obtenerListaGeneroPorFamilia}" />
+				</p:selectOneMenu>
+
+				<p:outputLabel value="Género:" for="cmbGenero" style="color: white" />
+				<p:selectOneMenu id="cmbGenero"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.objGenero}"
+					styleClass="w100" required="true" converter="selectItemConverter"
+					filter="true" filterMatchMode="startsWith"
+					disabled="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.blockGenero}">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="#{null}" noSelectionOption="true" />
+					<f:selectItems
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listGenero}"
+						var="genero" itemLabel="#{genero.hiclScientificName}"
+						itemValue="#{genero}" />
+					<p:ajax update="cmbEspecie"
+						listener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.obtenerListaEspecies}" />
+				</p:selectOneMenu>
+
+				<p:outputLabel value="Especie:" for="cmbEspecie"
+					style="color: white" />
+				<p:selectOneMenu id="cmbEspecie"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.objEspecie}"
+					styleClass="w100" required="true" converter="selectItemConverter"
+					disabled="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.blockEspecie}">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="#{null}" noSelectionOption="true" />
+					<f:selectItems
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.listEspecie}"
+						var="especie" itemLabel="#{especie.sptaScientificName}"
+						itemValue="#{especie}" />
+				</p:selectOneMenu>
+
+				<p:outputLabel for="txtNombreComun" value="Nombre común"
+					style="color: white" />
+				<p:inputText id="txtNombreComun" maxlength="200"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.registroEspeciesForestales.nombreComun}" />
+			</h:panelGrid>
+		</h:panelGroup>
+
+		<br />
+		<div class="buttons">
+			<p:commandButton styleClass="primary" value="Aceptar"
+				actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.agregarCaracterizacion()}"
+				oncomplete="handleDlgAddCaracterizacionCualitativa(xhr, status, args)"
+				process="@this pnlDatosCaracterizacionCualitativa"
+				update=":form:tab:tblCaracterizacion pnlDatosCaracterizacionCualitativa " />
+			<p:commandButton value="Cancelar" styleClass="secondary"
+				actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.nuevaCaracterizacion()}"
+				oncomplete="PF('dlgAddCaracterizacionCualitativa').hide()"
+				process="@this" update="pnlDatosCaracterizacionCualitativa">
+				<p:resetInput target="@form" />
+			</p:commandButton>
+		</div>
+	</p:dialog>
+
+	<p:dialog id="dlgAddFotografia" widgetVar="dlgAddFotografia"
+		modal="true" resizable="false" width="700" header="Datos fotografía">
+		<h:panelGroup id="pnlDatosFotografia">
+			<h:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w30, null" rowClasses="null, alt">
+
+				<p:outputLabel value="Fotografía" styleClass="ui-label-form" />
+				<h:panelGroup id="pnlDocimagen">
+					<p:fileUpload id="fileFoto" multiple="false"
+						fileUploadListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.uploadFileFoto}"
+						sizeLimit="20971520" allowTypes="/(\.|\/)(jpg)$/"
+						label="Admite .jpg de 20Mb" uploadLabel="Subir"
+						invalidFileMessage="Tipo de archivo no válido"
+						invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+						cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+						auto="true" required="true" update="pnlDocimagen" />
+					<h:outputText
+						value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.nuevaFotografia.nombre}" />
+				</h:panelGroup>
+
+				<p:outputLabel for="txtDescripcionFoto"
+					value="Descripción fotografia" style="color: white" />
+				<p:inputText id="txtDescripcionFoto" required="true" maxlength="200"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.nuevaFotografia.descripcion}" />
+
+				<p:outputLabel for="txtFechaInspeccionFoto"
+					value="Fecha inspección de campo" style="color: white" />
+				<p:calendar id="txtFechaInspeccionFoto"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.nuevaFotografia.fechaFotografia}"
+					timeZone="America/Guayaquil" readonlyInput="true" required="true"
+					pattern="dd/MM/yyyy" maxdate="today" />
+			</h:panelGrid>
+			<h:inputHidden
+				validator="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.validateDatosFoto}" />
+		</h:panelGroup>
+
+		<br />
+		<div class="buttons">
+			<p:commandButton styleClass="primary" value="Aceptar"
+				actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.agregarFotografia()}"
+				oncomplete="handleDlgAddFotografia(xhr, status, args)"
+				process="@this pnlDatosFotografia"
+				update=":form:tab:tblFotosRecorrido pnlDatosFotografia" />
+			<p:commandButton value="Cancelar" styleClass="secondary"
+				actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.cancelarFotografia()}"
+				oncomplete="PF('dlgAddFotografia').hide()" process="@this"
+				update="pnlDatosFotografia">
+				<p:resetInput target="@form" />
+			</p:commandButton>
+		</div>
+	</p:dialog>
+
+	<p:dialog id="dlgAddUnidadHidrografica"
+		widgetVar="dlgAddUnidadHidrografica" modal="true" resizable="false"
+		width="600" header="Identificación de unidades hidrográficas" closable="false">
+		<h:panelGroup id="pnlDatosUnidadHidrografica">
+			<h:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25, null" rowClasses="null, alt">
+				<p:outputLabel for="txtNombreUnidadHidro"
+					value="Nombre de la unidad hidrográfica" style="color: white" />
+				<p:inputText id="txtNombreUnidadHidro" maxlength="200"
+					required="true"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.registroUnidadHidrografica.nombre}" />
+
+				<p:outputLabel value="Característica de la unidad hidrográficas"
+					for="rdbCaracteristicaUnidad" style="color: white" />
+				<p:selectOneRadio id="rdbCaracteristicaUnidad"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.registroUnidadHidrografica.caracteristica}"
+					unselectable="true" required="true">
+					<f:selectItem itemLabel="Permanente" itemValue="1" />
+					<f:selectItem itemLabel="Estacional" itemValue="2" />
+				</p:selectOneRadio>
+
+				<p:outputLabel value="Coordenada X" styleClass="ui-label-form"
+					for="txtCoordenadaX" />
+				<pe:inputNumber id="txtCoordenadaX"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.registroUnidadHidrografica.coordenadaX}"
+					required="true" autocomplete="off"
+					requiredMessage="El campo 'Coordenada X' es requerido."
+					decimalPlaces="2" thousandSeparator="" maxValue="9999999999.99">
+					<p:ajax process="@this" />
+					<p:tooltip for="coordX" escape="false" trackMouse="true"
+						value="Coordenanda X en formato WGS84 17S" />
+				</pe:inputNumber>
+
+				<p:outputLabel value="Coordenada Y" styleClass="ui-label-form"
+					for="txtCoordenadaY" />
+				<pe:inputNumber id="txtCoordenadaY"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.registroUnidadHidrografica.coordenadaY}"
+					required="true" autocomplete="off"
+					requiredMessage="El campo 'Coordenada Y' es requerido."
+					decimalPlaces="2" thousandSeparator="" maxValue="9999999999.99">
+					<p:ajax process="@this" />
+					<p:tooltip for="coordY" escape="false" trackMouse="true"
+						value="Coordenanda Y en formato WGS84 17S" />
+				</pe:inputNumber>
+
+				<p:outputLabel for="rdbAfectacionUnidad"
+					value="Afectación unidad hidrográfica" style="color: white" />
+				<p:selectOneRadio id="rdbAfectacionUnidad"
+					value="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.registroUnidadHidrografica.afectacion}"
+					unselectable="true" required="true">
+					<f:selectItem itemLabel="Si" itemValue="true" />
+					<f:selectItem itemLabel="No" itemValue="false" />
+				</p:selectOneRadio>
+			</h:panelGrid>
+
+			<h:inputHidden
+				validator="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.validateUnidadHidrografica}" />
+		</h:panelGroup>
+
+		<br />
+		<div class="buttons">
+			<p:commandButton styleClass="primary" value="Aceptar"
+				actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.agregarUnidadHidrografica()}"
+				oncomplete="handleDlgAddUnidadHidrografica(xhr, status, args)"
+				process="@this pnlDatosUnidadHidrografica"
+				update=":form:tab:tblUnidadHidrografica pnlDatosUnidadHidrografica " />
+			<p:commandButton value="Cancelar" styleClass="secondary"
+				actionListener="#{elaborarDocumentosViabilidadPfnController.informeRevisionViabilidadPfnBean.nuevaUnidadHidrografica()}"
+				oncomplete="PF('dlgAddUnidadHidrografica').hide()" process="@this"
+				update="pnlDatosUnidadHidrografica">
+				<p:resetInput target="@form" />
+			</p:commandButton>
+		</div>
+	</p:dialog>
+</h:form>
+
+<script type="text/javascript">
+	function handleDlgDelegadoOperador(xhr, status, args) {
+		if (args.validationFailed || !args.addDelegadoOperador) {
+			PF('dlgDelegadoOperador').show();
+		}
+		else {
+			PF('dlgDelegadoOperador').hide();
+		}
+	}
+
+	function handleDlgTecnicoDelegado(xhr, status, args) {
+		if (args.validationFailed || !args.addTecnioDelegado) {
+			PF('dlgTecnicoDelegado').show();
+		}
+		else {
+			PF('dlgTecnicoDelegado').hide();
+		}
+	}
+
+	function handleDlgAddFotografia(xhr, status, args) {
+		if (args.validationFailed || !args.addFotografia) {
+			PF('dlgAddFotografia').show();
+		}
+		else {
+			PF('dlgAddFotografia').hide();
+		}
+	}
+
+	function handleDlgAddCoordenada(xhr, status, args) {
+		if (args.validationFailed || !args.addCoordenada) {
+			PF('dlgAddCoordenada').show();
+		}
+		else {
+			PF('dlgAddCoordenada').hide();
+		}
+	}
+
+	function handleDlgAddMuestreoCenso(xhr, status, args) {
+		if (args.validationFailed || !args.addMuestreoCenso) {
+			PF('dlgAddMuestreoCenso').show();
+		}
+		else {
+			PF('dlgAddMuestreoCenso').hide();
+		}
+	}
+
+	function handleDlgAddCaracterizacionCualitativa(xhr, status, args) {
+		if (args.validationFailed || !args.addCaracterizacionCualitativa) {
+			PF('dlgAddCaracterizacionCualitativa').show();
+		}
+		else {
+			PF('dlgAddCaracterizacionCualitativa').hide();
+		}
+	}
+
+	function handleDlgAddUnidadHidrografica(xhr, status, args) {
+		if (args.validationFailed || !args.addUnidadHidrografica) {
+			PF('dlgAddUnidadHidrografica').show();
+		}
+		else {
+			PF('dlgAddUnidadHidrografica').hide();
+		}
+	}
+</script>
+
+</html>

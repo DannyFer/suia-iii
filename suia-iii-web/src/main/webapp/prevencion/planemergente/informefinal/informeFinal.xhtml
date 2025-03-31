@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="content">
+        <p:panel>
+            <f:facet name="header">Informe final de cumplimiento</f:facet>
+            <h:form id="informeFinal">
+                <p:dataTable value="#{informeFinalContoller.accionesImformeFinal}" var="accion" rowIndexVar="i" emptyMessage="Sin resultados">
+                    <p:columnGroup type="header">
+                        <p:row>
+                            <p:column rowspan="2" headerText="Descripción del evento"/>
+                            <p:column rowspan="2" headerText="Medidas correctivas"/>
+                            <p:column colspan="2" headerText="Alcance (Afectación)"/>
+                            <p:column rowspan="2" headerText="Responsable"/>
+                            <p:column colspan="2" headerText="Periodo de Ejecución"/>
+                            <p:column rowspan="2" headerText="Presupuesto Proyectado de la Medida "/>
+                            <p:column rowspan="2" headerText="Factor Ambiental"/>
+                            <p:column rowspan="2" headerText="Especificación del Factor Ambiental"/>
+                            <p:column rowspan="2" headerText="Acciones" width="80px"/>
+                        </p:row>
+                        <p:row>
+                            <p:column headerText="Área/Volumen afectado"/>
+                            <p:column headerText="Área/Volumen recuperado"/>
+                            <p:column headerText="Fecha inicio"/>
+                            <p:column headerText="Fecha fin"/>
+                        </p:row>
+                    </p:columnGroup>
+
+                    <p:column><h:outputLabel value="#{accion.eventoOcurrido.descripcion}" /></p:column>
+                    <p:column><h:outputLabel value="#{accion.medidaCorrectivas.size()} medidas" /></p:column>
+                    <p:column>
+                        <h:outputLabel value="#{accion.areaAfectada}" /> <h:outputLabel value="#{accion.unidadAreaAfectada}" />
+                    </p:column>
+                    <p:column>
+                        <h:outputLabel value="#{accion.areaRecuperada}" /> <h:outputLabel value="#{accion.unidadAreaRecuperada}" />
+                    </p:column>
+                    <p:column><h:outputLabel value="#{accion.responsable}" /></p:column>
+                    <p:column>
+                        <h:outputLabel value="#{accion.fechaInicio}" />
+                    </p:column>
+                    <p:column>
+                        <h:outputLabel value="#{accion.fechaFin}" />
+                    </p:column>
+                    <p:column><h:outputLabel value="#{accion.presupuesto}" /></p:column>
+                    <p:column><h:outputLabel value="#{accion.factorAmbiental}" /></p:column>
+                    <p:column><h:outputLabel value="#{accion.especificacionFactorAmbiental}" /></p:column>
+                    <p:column>
+                        <p:commandButton icon="ui-icon-pencil" update=":informeFinalEditarDialog"  styleClass="button-small primary" title="Editar" actionListener="#{informeFinalContoller.mostrar(i)}" />
+                        <p:commandButton icon="ui-icon-trash"  styleClass="button-small primary" title="Eliminar" actionListener="#{informeFinalContoller.eliminar(i)}" />
+                    </p:column>
+                </p:dataTable>
+                <t:div styleClass="buttons">
+                    <p:outputLabel value="Medios de verificación .PDF, JPG, .PNG, .ZIP" />
+                    <p:commandButton icon="ui-icon-help" type="buttom" onclick="PF('ayuda').show()" />
+                    <p:commandButton value="Adicionar" icon="ui-icon-disk" actionListener="#{informeFinalContoller.adjuntarMedioVerificación}" />
+                </t:div>
+            </h:form>
+        </p:panel>
+        <br/><br/>
+        <h:form>
+            <t:div styleClass="buttons main">
+                <p:commandButton actionListener="#{informeFinalContoller.guardar}" id="btnGuardar" value="Guardar" update="@form" oncomplete="window.scrollTo(0,0);" icon="ui-icon-disk"/>
+                <p:commandButton id="btnEnviar" value="Enviar" update="@form" oncomplete="window.scrollTo(0,0);" icon="ui-icon-check" actionListener="#{informeFinalContoller.enviarTarea}">
+                    <p:confirm message="¿Estás seguro que desea enviar esta tarea?" header="Confirmación" icon="ui-icon-alert" />
+                </p:commandButton>
+                <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                    <p:commandButton value="Si" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                    <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+                </p:confirmDialog>
+            </t:div>
+        </h:form>
+        <br/><br/>
+
+        <ui:include src="informeFinalEditar.xhtml"/>
+
+        <h:form>
+            <p:dialog header="AYUDA" modal="true" widgetVar="ayuda" resizable="false">
+                <p:panelGrid columns="1" layout="grid">
+                    <p:outputLabel value="Usted debe Adjuntar en un archivo .ZIP todos los Medios de Verificación previamente ingresados en el sistema." />
+                    <div class="buttons">
+                        <p:commandButton type="button" value="Cerrar" onclick="PF('ayuda').hide()" />
+                    </div>
+                </p:panelGrid>
+            </p:dialog>
+        </h:form>
+        <div class="clear"></div>
+    </ui:define>
+</ui:composition>
+</html>

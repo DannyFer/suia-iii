@@ -1,0 +1,513 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+	
+	<h:form id="frmEliminacionesDes">
+	<h:panelGroup>
+		<p:panelGrid columns="1" layout="grid"
+			styleClass="w100" columnClasses="w25, field_mrg w25">
+			<p:dataTable value="#{gestorDesechosPeligrososController.listDesechosEliminacion}" var="item">
+				<p:column headerText="Nombre del Desecho" filterBy="#{item.desechoPeligroso.descripcion}" filterMatchMode="contains">
+					<h:outputText value="#{item.desechoPeligroso.descripcion}" />
+				</p:column>
+				<p:column headerText="Código" filterBy="#{item.desechoPeligroso.clave}" filterMatchMode="contains" styleClass="alCenter w15">
+					<h:outputText value="#{item.desechoPeligroso.clave}" />
+				</p:column>
+				<p:column headerText="Modalidad" styleClass="alCenter w15">
+					<h:outputText value="#{item.modalidad.nombre}" />
+				</p:column>
+				<p:column headerText="Tipo Eliminación" styleClass="alCenter w15">
+					<h:outputText value="#{item.tipoEliminacionDesecho.nombre}" />
+				</p:column>
+				<p:column headerText="Clave">
+					<h:outputLabel styleClass="text-area" value="#{item.tipoEliminacionDesecho.clave}" />
+				</p:column>
+				<p:column styleClass="w15" headerText="Acciones">
+					<center>
+						<p:commandButton icon="ui-icon-plus" styleClass="primary" update=":form:tabView:frmEliminacionesDes:idtbldesechos :form:tabView:frmEliminacionesDes:idtblSumatoriaDesechos"
+						action="#{gestorDesechosPeligrososController.tipoDesechoSeleccionado(item)}"/>
+					</center>
+				</p:column>
+			</p:dataTable>
+			
+
+			<p:dataTable id="idtbldesechos" var="desecho" value="#{gestorDesechosPeligrososController.listGestorDesechosEliminacion}">
+				<f:facet name="header">
+					<h:outputText value="Tipos de eliminación" />
+				</f:facet>
+				<p:column headerText="Nombre de desecho peligroso">
+					<h:outputText 
+						value="#{desecho.desechoPeligroso.descripcion}" />
+				</p:column>
+				<p:column headerText="Tipo">
+					<h:outputLabel styleClass="text-area"
+						value="#{desecho.eliminacionDesecho.tipoEliminacionDesecho.nombre}" />
+				</p:column>
+				<p:column headerText="Clave">
+					<h:outputLabel styleClass="text-area"
+						value="#{desecho.eliminacionDesecho.tipoEliminacionDesecho.clave}" />
+				</p:column>
+				<p:column headerText="Unidad">
+					<h:outputLabel styleClass="text-area"
+						value="#{desecho.unidadMedida.descripcion}" />
+				</p:column>
+				<p:column headerText="Cantidad">
+					<h:outputLabel styleClass="text-area"
+						value="#{desecho.cantidad}" />
+				</p:column>
+				<p:column styleClass="w15" headerText="Acciones">
+					<center>
+						<p:commandButton icon="ui-icon-pencil" styleClass="primary" oncomplete="PF('idDlgTipoEliminacion').show()" update=":form:tabView:frmEliminacionesDes:idDlgTipoEliminacion"
+						action="#{gestorDesechosPeligrososController.tipoEliminacionSeleccionado(desecho)}"/>						
+						<p:commandButton icon="ui-icon-trash" styleClass="primary" update=":form:tabView:frmEliminacionesDes:idtbldesechos :form:tabView:frmEliminacionesDes:idtblSumatoriaDesechos"
+						action="#{gestorDesechosPeligrososController.modificarEliminacion(desecho)}">
+							<p:confirm header="Confirmación" message="Esta seguro de eliminar?" icon="ui-icon-alert" />
+						</p:commandButton>
+						<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+							<p:commandButton value="Si" type="button"
+								styleClass="ui-confirmdialog-yes primary" icon="ui-icon-check" />
+							<p:commandButton value="No" type="button"
+								styleClass="ui-confirmdialog-no primary" icon="ui-icon-closethick" />
+						</p:confirmDialog>						
+					</center>												
+				</p:column>
+			</p:dataTable>
+		</p:panelGrid>
+		
+		<p:panelGrid columns="1" layout="grid"
+			styleClass="w100" columnClasses="w25, field_mrg w25">
+			<p:dataTable id="idtblSumatoriaDesechos" 
+			var="desecho" value="#{gestorDesechosPeligrososController.listGestorDesechosEliminacion}">
+				<f:facet name="header">
+					<h:outputText value="Sumatoria tipos de eliminación" />
+				</f:facet>
+				<p:column headerText="Nombre de desecho peligroso">
+					<h:outputText 
+						value="#{desecho.desechoPeligroso.descripcion}" />
+				</p:column>
+				<p:column headerText="Tipo">
+					<h:outputLabel styleClass="text-area"
+						value="#{desecho.eliminacionDesecho.tipoEliminacionDesecho.nombre}" />
+				</p:column>
+				<p:column headerText="Clave">
+					<h:outputLabel styleClass="text-area"
+						value="#{desecho.eliminacionDesecho.tipoEliminacionDesecho.clave}" />
+				</p:column>
+				<p:column headerText="Unidad">
+					<h:outputLabel styleClass="text-area"
+						value="t" />
+				</p:column>
+				<p:column headerText="Cantidad">
+					<h:outputLabel styleClass="text-area"
+						value="#{desecho.cantidadTonelada}" />
+				</p:column>				
+			</p:dataTable>
+		</p:panelGrid>
+		
+		<h:panelGroup>
+			<p:panelGrid id="observacionesEliminacionGrid" columns="1" layout="grid" styleClass="w100" rendered="#{gestorDesechosPeligrososController.verObservaciones}">
+				<f:facet name="header">
+					<h:outputText value="Observaciones"/>
+				</f:facet>
+				<p:dataTable var="item" value="#{gestorDesechosPeligrososController.listObservacionesEliminacion}">
+					<p:column headerText="Campo">
+						<h:outputText value="#{item.campo}"/>
+					</p:column>
+					<p:column headerText="Detalle">
+						<h:outputText value="#{item.descripcion}"/>
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+		</h:panelGroup>
+	</h:panelGroup>
+	
+	<p:dialog widgetVar="idDlgTipoEliminacion" modal="true" 
+		id="idDlgTipoEliminacion" resizable="false" header="Tipo : #{gestorDesechosPeligrososController.gestorDesechosEliminacion.eliminacionDesecho.tipoEliminacionDesecho.nombre}">
+		<p:panelGrid columns="2" styleClass="panel_data w100"
+			columnClasses="header w25,null w75">
+			<h:outputText value="Unidad" />
+			<p:selectOneMenu styleClass="w100" converter="selectItemConverter" value="#{gestorDesechosPeligrososController.gestorDesechosEliminacion.unidadMedida}">
+				<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+				<f:selectItems
+					value="#{gestorDesechosPeligrososController.listUnidad}" var="item"
+					itemLabel="#{item.descripcion}" itemValue="#{item}" />
+			</p:selectOneMenu>
+
+			<h:outputText value="Cantidad" />
+			<pe:inputNumber maxValue="9999999999" decimalPlaces="2" value="#{gestorDesechosPeligrososController.gestorDesechosEliminacion.cantidad}">
+				
+			</pe:inputNumber>
+			
+			<h:outputText value="Reporte en unidades (U) únicamente para los desechos ES-04 y ES-06"
+			rendered="#{gestorDesechosPeligrososController.desechoES0406}" />
+			<pe:inputNumber maxValue="9999999999" rendered="#{gestorDesechosPeligrososController.desechoES0406}"
+				value="#{gestorDesechosPeligrososController.gestorDesechosEliminacion.cantidadEs0406}">
+				
+			</pe:inputNumber>
+
+			<h:outputText
+				value="¿Genera un residuo o desecho posterior al tratamiento realizado?" />
+			<p:selectOneRadio unselectable="true" value="#{gestorDesechosPeligrososController.gestorDesechosEliminacion.generaDesecho}">
+				<f:selectItem itemLabel="Si" itemValue="true" />
+				<f:selectItem itemLabel="No" itemValue="false" />
+				<p:ajax event="change" update="idPlg1 idPnlDesechoPeligroso idPnlDesechoNoPeligroso" listener="#{gestorDesechosPeligrososController.refrescarDesechos}"/>
+			</p:selectOneRadio>
+			
+		</p:panelGrid>
+		<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75" id="idPlg1">
+			<h:outputText id="idLblTipoDesecho" value="Tipo de residuo/desecho generado" rendered="#{gestorDesechosPeligrososController.gestorDesechosEliminacion.generaDesecho}" />
+			<p:selectOneButton id="idCmbTipoDesecho" rendered="#{gestorDesechosPeligrososController.gestorDesechosEliminacion.generaDesecho}" 
+				value="#{gestorDesechosPeligrososController.gestorDesechosEliminacion.tipoDesecho}">
+				<f:selectItem itemLabel="Residuo/desecho peligroso o especial" itemValue="1" />
+				<f:selectItem itemLabel="No peligroso" itemValue="2" />
+				<p:ajax event="change" update="idPnlDesechoPeligroso idPnlDesechoNoPeligroso" listener="#{gestorDesechosPeligrososController.tipoDesecho}"/>
+			</p:selectOneButton>
+		</p:panelGrid>
+
+		<p:panel id="idPnlDesechoPeligroso" visible="#{gestorDesechosPeligrososController.gestorDesechosEliminacion.tipoDesecho==1}"
+			header="Residuo/desecho peligroso o especial generado" >
+			
+			<t:div styleClass="buttons">
+				<p:commandButton value="Agregar" icon="ui-icon-plus" update="idDialogResiduosPeligrosos" oncomplete="PF('idDialogResiduosPeligrosos').show()"
+				action="#{gestorDesechosPeligrososController.nuevoResiduoPeligrososNoPeligrosos}"/>
+			</t:div>
+			<br />
+			<p:dataTable id="idTableDeschoDetallePeligroso" value="#{gestorDesechosPeligrososController.listarGestorDesechosEliminacionDesechoPeligroso}"
+			var="item" style="width: 500px;" scrollable="true" scrollHeight="150">
+				<p:column headerText="Nombre del Desecho">
+					<h:outputText
+						value="#{item.desechoPeligroso.descripcion}" />				
+				</p:column>
+				<p:column headerText="Código">
+					<h:outputText
+						value="#{item.desechoPeligroso.clave}" />										
+				</p:column>
+				<p:column headerText="Unidad">
+					<h:outputText
+						value="#{item.unidadMedida.descripcion}" />
+				</p:column>
+				<p:column headerText="Cantidad">
+					<h:outputText
+						value="#{item.cantidad}" />
+				</p:column>
+				<p:column styleClass="w15" headerText="Acciones">
+					<center>
+						<p:commandButton icon="ui-icon-pencil" styleClass="primary" oncomplete="PF('idDialogResiduosPeligrosos').show()" update=":form:tabView:frmEliminacionesDes:idDialogResiduosPeligrosos"
+						action="#{gestorDesechosPeligrososController.residuoPeligrosoSeleccionado(item)}"/>						
+						<p:commandButton icon="ui-icon-trash" styleClass="primary" update=":form:tabView:frmEliminacionesDes:idTableDeschoDetallePeligroso"
+						action="#{gestorDesechosPeligrososController.modificarResiduoPeligroso(item)}">
+							<p:confirm header="Confirmación" message="Esta seguro de eliminar?" icon="ui-icon-alert" />
+						</p:commandButton>
+						<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+							<p:commandButton value="Si" type="button"
+								styleClass="ui-confirmdialog-yes primary" icon="ui-icon-check" />
+							<p:commandButton value="No" type="button"
+								styleClass="ui-confirmdialog-no primary" icon="ui-icon-closethick" />
+						</p:confirmDialog>						
+					</center>												
+				</p:column>
+			</p:dataTable>
+		</p:panel>
+		
+		
+		
+		<p:panel id="idPnlDesechoNoPeligroso" visible="#{gestorDesechosPeligrososController.gestorDesechosEliminacion.tipoDesecho==2}"
+			header="Residuo/desecho no peligroso" >		
+			
+			<t:div styleClass="buttons">
+				<p:commandButton value="Agregar" icon="ui-icon-plus" update="idDialogResiduosNoPeligrosos" oncomplete="PF('idDialogResiduosNoPeligrosos').show()"
+				action="#{gestorDesechosPeligrososController.nuevoResiduoPeligrososNoPeligrosos}"/>
+			</t:div>
+			<br />
+			<p:dataTable id="idTableDeschoDetalleNoPeligroso" value="#{gestorDesechosPeligrososController.listarGestorDesechosEliminacionDesechoNoPeligroso}"
+			var="item" style="width: 500px;" scrollable="true" scrollHeight="150">
+				<p:column headerText="tipo de desecho/residuo generado">
+					<h:outputText
+						value="#{item.residuoGenerado}" />				
+				</p:column>				
+				<p:column headerText="Unidad">
+					<h:outputText
+						value="#{item.unidadMedida.descripcion}" />
+				</p:column>
+				<p:column headerText="Cantidad">
+					<h:outputText
+						value="#{item.cantidad}" />
+				</p:column>
+				<p:column styleClass="w15" headerText="Acciones">
+					<center>
+						<p:commandButton icon="ui-icon-pencil" styleClass="primary" oncomplete="PF('idDialogResiduosNoPeligrosos').show()" 
+						update=":form:tabView:frmEliminacionesDes:idDialogResiduosNoPeligrosos"
+						action="#{gestorDesechosPeligrososController.residuoNoPeligrosoSeleccionado(item)}"/>						
+						<p:commandButton icon="ui-icon-trash" styleClass="primary" update=":form:tabView:frmEliminacionesDes:idTableDeschoDetalleNoPeligroso"
+						action="#{gestorDesechosPeligrososController.modificarResiduoNoPeligroso(item)}">
+							<p:confirm header="Confirmación" message="Esta seguro de eliminar?" icon="ui-icon-alert" />
+						</p:commandButton>
+						<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+							<p:commandButton value="Si" type="button"
+								styleClass="ui-confirmdialog-yes primary" icon="ui-icon-check" />
+							<p:commandButton value="No" type="button"
+								styleClass="ui-confirmdialog-no primary" icon="ui-icon-closethick" />
+						</p:confirmDialog>						
+					</center>												
+				</p:column>
+			</p:dataTable>
+		</p:panel>
+		
+		<p:panel header="Sustancias RETCE (voluntario hasta la expedición de norma)" id="idPnlSustanciaRetce">		
+			<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+				<h:outputText value="Sustancias identificadas" for="nombreContaminante"/>
+				<p:selectOneMenu id="nombreContaminante" value="#{gestorDesechosPeligrososController.gestorDesechosEliminacion.catalogoSustancias}" styleClass="w100"  converter="selectItemConverter">
+					<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+					<f:selectItems value="#{gestorDesechosPeligrososController.catalogoSustanciasRetceList}" var="item" itemLabel="#{item.descripcionProductoQuimico}" itemValue="#{item}"/>
+				</p:selectOneMenu>					
+
+				<h:outputText value="Cantidad (t/año)" />
+				<pe:inputNumber maxValue="999999" decimalPlaces="2" value="#{gestorDesechosPeligrososController.gestorDesechosEliminacion.cantidadDesechoRetce}">
+					
+				</pe:inputNumber>
+				
+				<h:outputText value="Método de estimación" />
+				<p:selectOneMenu styleClass="w100" value="#{gestorDesechosPeligrososController.gestorDesechosEliminacion.metodoEstimacion}">
+					<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+					<f:selectItem itemLabel="Medición directa" itemValue="Medición directa" />
+					<f:selectItem itemLabel="Factores de emisión" itemValue="Factores de emisión" />
+					<f:selectItem itemLabel="Balance de materiales" itemValue="Balance de materiales" />
+					<f:selectItem itemLabel="Cálculos de ingeniería" itemValue="Cálculos de ingeniería" />
+					<f:selectItem itemLabel="Uso de datos históricos  de muestreo en la fuente" itemValue="Uso de datos históricos  de muestreo en la fuente" />.
+					<p:ajax event="change" update="idPnlSustanciaRetce" listener="#{gestorDesechosPeligrososController.verAdjuntoCalculo}"/>
+				</p:selectOneMenu>
+				
+				
+			</p:panelGrid>
+			<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75" id="idPlgAdjinforme" rendered="#{gestorDesechosPeligrososController.esMedicionDirecta}"> 
+				
+				<h:outputText value="Seleccionar laboratorio" rendered="#{gestorDesechosPeligrososController.esMedicionDirecta}"/>
+				<p:commandButton value="Buscar" icon="ui-icon-search" styleClass="primary" action="#{gestorDesechosPeligrososController.buscarLaboratorio}"
+					oncomplete="PF('dialogLaboratorio').show()" rendered="#{gestorDesechosPeligrososController.esMedicionDirecta}"
+					update="dialogLaboratorio"/>
+					
+				<h:outputText value="Laboratorio" rendered="#{gestorDesechosPeligrososController.esMedicionDirecta}"/>
+				<h:outputText value="#{gestorDesechosPeligrososController.gestorDesechosEliminacion.laboratorioGeneral.nombre}" rendered="#{gestorDesechosPeligrososController.esMedicionDirecta}"/>
+				
+				<h:outputText id="idLblInforme" value="Informe de laboratorio" rendered="#{gestorDesechosPeligrososController.adjuntaArchivoCalculo}"/>
+				<p:panelGrid columns="1">
+					<h:outputText value="#{gestorDesechosPeligrososController.documentoInformeLaboratorio.nombre}"/>
+					<p:fileUpload id="fileInformeLaboratorio" rendered="#{gestorDesechosPeligrososController.adjuntaArchivoCalculo}"
+	                                             fileUploadListener="#{gestorDesechosPeligrososController.fileUploadInformeLaboratorio}"
+	                                             allowTypes="/(\.|\/)(pdf)$/" label="Adjuntar archivos .pdf (20Mb)"                                              
+	                                             uploadLabel="Subir" auto="true"                                              
+	                                             cancelLabel="Cancelar"
+	                                             invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+	                                             invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+	                                             styleClass="w100 toLeft primary" mode="advanced"
+	                                             update="idPlgAdjinforme"/>
+                </p:panelGrid>
+			</p:panelGrid>
+			<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75" id="idPlgAdjcalculo" rendered="#{!gestorDesechosPeligrososController.esMedicionDirecta}">
+				<h:outputText id="idLblCalculo" value="Cálculo" rendered="#{gestorDesechosPeligrososController.adjuntaArchivoCalculo}"/>
+               <p:panelGrid columns="1">
+				<h:outputText value="#{gestorDesechosPeligrososController.documentoCalculo.nombre}"/>
+				<p:fileUpload id="fileCalculo" rendered="#{gestorDesechosPeligrososController.adjuntaArchivoCalculo}"
+                                             fileUploadListener="#{gestorDesechosPeligrososController.fileUploadCalculo}"
+                                             allowTypes="/(\.|\/)(xls)$/" label="Adjuntar archivos .xls (20Mb)"                                              
+                                             uploadLabel="Subir" auto="true"                                              
+                                             cancelLabel="Cancelar"
+                                             invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+                                             invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+                                             styleClass="w100 toLeft primary" mode="advanced"
+                                             update="idPlgAdjcalculo"/>
+               </p:panelGrid>
+			</p:panelGrid>
+		</p:panel>
+		<t:div styleClass="buttons">
+			<p:commandButton value="Guardar" icon="ui-icon-disk" action="#{gestorDesechosPeligrososController.guardarEliminacion()}" 
+			update=":form:tabView:frmEliminacionesDes:idtbldesechos :form:tabView:frmEliminacionesDes:idtblSumatoriaDesechos" />
+		</t:div>
+
+	</p:dialog>
+	
+	<p:dialog id="idDialogResiduosPeligrosos" widgetVar="idDialogResiduosPeligrosos">
+		<p:panelGrid columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<p:commandButton value="Seleccionar"
+					oncomplete="PF('seleccionarDesecho').show()"
+					styleClass="button-small-text toRight field_mrg"
+					icon="ui-icon-check"
+					actionListener="#{agregarDesechoPeligroso.reset()}"
+					process="@this" update=":form:tabView:frmDesechos"/>
+				<mae:panelGridHeaderHelp value="Desecho *" conector="desechoHelp"
+					help="#{helps['desecho.seleccionar']}" width="500px" />
+			</f:facet>
+			<p:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25,null w75">
+				<h:outputText value="Desecho" />
+				<h:outputText
+					value="#{gestorDesechosPeligrososController.gestorDesechosEliminacionDesechoPeligroso.desechoPeligroso.descripcion}" />
+
+				<h:outputText value="Código" />
+				<h:outputText
+					value="#{gestorDesechosPeligrososController.gestorDesechosEliminacionDesechoPeligroso.desechoPeligroso.clave}" />
+
+				<h:outputText value="Unidad" />
+				<p:selectOneMenu styleClass="w100" converter="selectItemConverter" value="#{gestorDesechosPeligrososController.gestorDesechosEliminacionDesechoPeligroso.unidadMedida}">
+					<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+					<f:selectItems
+						value="#{gestorDesechosPeligrososController.listUnidad}"
+						var="item" itemLabel="#{item.descripcion}" itemValue="#{item}" />
+				</p:selectOneMenu>
+
+				<h:outputText value="Cantidad" />
+				<pe:inputNumber maxValue="9999999999" decimalPlaces="2" value="#{gestorDesechosPeligrososController.gestorDesechosEliminacionDesechoPeligroso.cantidad}">
+					
+				</pe:inputNumber>
+			</p:panelGrid>
+			<t:div styleClass="buttons">
+				<p:commandButton value="Guardar" icon="ui-icon-disk" update="idTableDeschoDetallePeligroso" 
+				action="#{gestorDesechosPeligrososController.guardarResiduosPeligorsosNoPeligrosos}"/>
+			</t:div>
+		</p:panelGrid>
+	</p:dialog>
+	
+	
+	
+	<p:dialog id="idDialogResiduosNoPeligrosos" widgetVar="idDialogResiduosNoPeligrosos">
+		<p:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25,null w75">
+				<h:outputText value="Especifique el tipo de desecho/residuo generado" />
+				<p:inputText maxlength="150" value="#{gestorDesechosPeligrososController.gestorDesechosEliminacionDesechoNoPeligroso.residuoGenerado}"/>					
+
+				<h:outputText value="Unidad" />
+				<p:selectOneMenu styleClass="w100" converter="selectItemConverter"
+					value="#{gestorDesechosPeligrososController.gestorDesechosEliminacionDesechoNoPeligroso.unidadMedida}">
+					<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+					<f:selectItems
+						value="#{gestorDesechosPeligrososController.listUnidad}"
+						var="item" itemLabel="#{item.descripcion}" itemValue="#{item}" />
+				</p:selectOneMenu>
+
+				<h:outputText value="Cantidad" />
+				<pe:inputNumber maxValue="9999999999" decimalPlaces="2"
+					value="#{gestorDesechosPeligrososController.gestorDesechosEliminacionDesechoNoPeligroso.cantidad}">
+					
+				</pe:inputNumber>
+			</p:panelGrid>
+			<t:div styleClass="buttons">
+				<p:commandButton value="Guardar" icon="ui-icon-disk" update="idTableDeschoDetalleNoPeligroso" oncomplete="PF('idDialogResiduosNoPeligrosos').hide()"
+				action="#{gestorDesechosPeligrososController.guardarResiduosPeligorsosNoPeligrosos}"/>
+			</t:div>
+	</p:dialog>
+	
+	
+	
+	<p:dialog id="dialogLaboratorio" 
+		header="DATOS  DEL LABORATORIO"
+		widgetVar="dialogLaboratorio" modal="true" resizable="false"
+		width="800">
+		<h:panelGroup>
+			<h:panelGroup id="pnlLaboratorio">				
+				<h:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null" rowClasses="null, alt">
+					<p:outputLabel styleClass="ui-label-form" value="RUC" />
+					<p:inputText id="rucLaboratorio"
+						value="#{gestorDesechosPeligrososController.laboratorio.ruc}"
+						maxlength="20">
+						<pe:keyFilter regEx="/[a-z0-9]/i " />
+						<p:ajax event="blur"
+							listener="#{gestorDesechosPeligrososController.validarCedula}"
+							update="razonSocial numeroSae fechaVigencia btnGuardarLab" />
+					</p:inputText>
+					<p:outputLabel value="Nombre o Razón Social"
+						styleClass="ui-label-form" />
+					<p:inputText id="razonSocial"
+						value="#{gestorDesechosPeligrososController.laboratorio.nombre}"
+						readonly="true" />
+					<p:outputLabel value="N° de Registro de SAE"
+						styleClass="ui-label-form" />
+					<p:inputText id="numeroSae"
+						value="#{gestorDesechosPeligrososController.laboratorio.resgistroSae}"
+						maxlength="30" />
+
+					<p:outputLabel value="Vigencia del registro" styleClass="ui-label-form" />
+					<p:calendar id="fechaVigencia" readonlyInput="true"
+						value="#{gestorDesechosPeligrososController.laboratorio.fechaVigencia}"
+						locale="es" navigator="true" pattern="dd-MM-yyyy">
+					</p:calendar>
+				</h:panelGrid>
+			</h:panelGroup>
+			<br />
+			<div class="buttons">
+				<p:commandButton styleClass="primary" id="btnGuardarLab"
+							value="#{gestorDesechosPeligrososController.laboratorio.id==null?'Guardar':'Actualizar/Seleccionar'}"
+							action="#{gestorDesechosPeligrososController.guardarLaboratorio}"
+							oncomplete="PF('dialogLaboratorio').hide()" update="idPlgAdjcalculo"/>
+			</div>
+		</h:panelGroup>
+	</p:dialog>
+</h:form>
+
+
+
+<h:form id="frmDesechos">
+	<p:dialog header="Seleccionar desecho" id="seleccionarDesecho"
+		widgetVar="seleccionarDesecho" modal="true" resizable="false"
+		width="600">
+		<h:panelGrid styleClass="w100 separatorBottom" columns="2"
+			columnClasses="w50, field_mrg">
+			<p:outputLabel for="filtroDesecho" value="Filtro" styleClass="bold" />
+			<h:outputText />
+			<h:panelGroup>
+				<p:inputText id="filtroDesecho"
+					value="#{agregarDesechoPeligroso.filter}" styleClass="w100"
+					title="#{helps['registro.desecho.filtro']}" />
+				<p:tooltip for="filtroDesecho" escape="false" showDelay="1200"
+					trackMouse="true" />
+			</h:panelGroup>
+			<h:panelGroup>
+				<div class="buttons-inline">
+					<p:commandButton icon="ui-icon-check" styleClass="primary"
+						process="@this filtroDesecho"
+						actionListener="#{agregarDesechoPeligroso.init()}"
+						update="seleccionarDesecho"
+						oncomplete="PF('seleccionarDesecho').show()" />
+					<p:commandButton icon="ui-icon-refresh" styleClass="secondary"
+						process="@this"
+						actionListener="#{agregarDesechoPeligroso.reset()}"
+						update="seleccionarDesecho"
+						oncomplete="PF('seleccionarDesecho').show()" />
+				</div>
+			</h:panelGroup>
+		</h:panelGrid>
+
+		<p:tree value="#{agregarDesechoPeligroso.catalogo}"
+			id="arbolCatalogoDesecho" var="catalogo" dynamic="true"
+			selectionMode="single" styleClass="w100 h200px"
+			rendered="#{!agregarDesechoPeligroso.catalogo.leaf}">
+			<p:treeNode expandedIcon="ui-icon-folder-open"
+				collapsedIcon="ui-icon-folder-collapsed" type="folder">
+				<h:outputText value="#{catalogo}" />
+			</p:treeNode>
+			<p:treeNode icon="ui-icon-document" type="document">
+				<h:outputText value="#{catalogo}" />
+			</p:treeNode>
+			<p:ajax event="expand" update="arbolCatalogoDesecho"
+				listener="#{agregarDesechoPeligroso.onNodeExpand}" />
+			<p:ajax event="select" oncomplete="PF('seleccionarDesecho').hide(),PF('idDialogResiduosPeligrosos').show()"
+				listener="#{gestorDesechosPeligrososController.onNodeSelect}" update=":form:tabView:frmEliminacionesDes:idDialogResiduosPeligrosos"/>
+		</p:tree>
+		<p:panel rendered="#{agregarDesechoPeligroso.catalogo.leaf}"
+			styleClass="h200px alCenter">
+			<h:outputText value="No se encontraron resultados" styleClass="bold" />
+		</p:panel>
+		<p:separator />
+		<div class="buttons">
+			<p:commandButton type="button" value="Aceptar"
+				onclick="PF('seleccionarDesecho').hide()" />
+		</div>
+	</p:dialog>
+</h:form>
+
+<h:form id="frmLaboratorio">
+	
+</h:form>
+
+
+</html>

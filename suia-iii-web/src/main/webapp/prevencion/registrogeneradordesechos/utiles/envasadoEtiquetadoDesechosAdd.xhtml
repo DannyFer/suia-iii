@@ -1,0 +1,120 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:p="http://primefaces.org/ui" xmlns:pe="http://primefaces.org/ui/extensions"
+	  xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<p:panel id="adicionarEnvasadoEtiquetadoDesecho" widgetVar="adicionarEnvasadoEtiquetadoDesecho" toggleable="true" toggleOrientation="vertical" styleClass="colapsablePanel" collapsed="true">
+	<p:ajax event="toggle" listener="#{envasadoEtiquetadoDesechosBean.toggleHandle}" update=":form:adicionarEnvasadoEtiquetadoDesecho" process="@this" />
+	<h:panelGroup id="datosEnvasadoEtiquetadoDesecho">
+		<h:panelGroup rendered="#{envasadoEtiquetadoDesechosBean.panelAdicionarVisible}">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Datos generales" />
+				</f:facet>
+
+				<h:panelGrid styleClass="w100 separatorBottom" columns="1">
+					<p:outputLabel value="Seleccionar desecho" for="desechoPeligrosoEE" />
+					<p:selectOneMenu id="desechoPeligrosoEE" value="#{envasadoEtiquetadoDesechosBean.desechoPeligrosoEtiquetado.desechoPeligroso}" styleClass="w100" converter="selectItemConverter" required="true">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+						<f:selectItems value="#{envasadoEtiquetadoDesechosBean.desechosPeligrosoDisponibles}" />
+						<p:ajax process="@this" listener="#{envasadoEtiquetadoDesechosBean.updateDesechoPeligroso}" update="desechoPeligrosoContainerEE unidadMedidaEE" />
+					</p:selectOneMenu>
+				</h:panelGrid>
+
+				<h:panelGroup id="desechoPeligrosoContainerEE">
+					<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w25, null" rowClasses="null, alt" rendered="#{not empty envasadoEtiquetadoDesechosBean.desechoPeligrosoEtiquetado.desechoPeligroso}">
+						<h:outputText value="Desecho" />
+						<h:outputText value="#{envasadoEtiquetadoDesechosBean.desechoPeligrosoEtiquetado.desechoPeligroso.descripcion}" />
+						<h:outputText value="Código" />
+						<h:outputText value="#{envasadoEtiquetadoDesechosBean.desechoPeligrosoEtiquetado.desechoPeligroso.clave}" />
+						<h:outputText value="CRTIB" title="#{helps['generadorDesecho.crtib']}" />
+						<h:outputText value="#{envasadoEtiquetadoDesechosBean.desechoPeligrosoEtiquetado.desechoPeligroso.nombresCRITB}" />
+					</h:panelGrid>
+				</h:panelGroup>
+
+				<h:panelGrid styleClass="w100 separatorBottom" columns="3" columnClasses="w33, field_mrg w33, field_mrg w33">
+					<p:outputLabel for="tipoEnvase" value="Tipo de envase" />
+					<p:outputLabel for="capacidad" value="Capacidad del envase" />
+					<p:outputLabel for="unidadMedidaEE" value="Unidad de medida" />
+					<p:selectOneMenu id="tipoEnvase" value="#{envasadoEtiquetadoDesechosBean.desechoPeligrosoEtiquetado.tipoEnvase}" styleClass="w100" required="true" converter="selectItemConverter">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+						<f:selectItems value="#{envasadoEtiquetadoDesechosBean.tiposEnvases}" />
+						<p:ajax process="@this" update="otroTipoEnvaseContainer" />
+					</p:selectOneMenu>
+					<p:inputText id="capacidad" value="#{envasadoEtiquetadoDesechosBean.desechoPeligrosoEtiquetado.cantidad}" styleClass="w100" required="true" maxlength="8">
+						<pe:keyFilter mask="num" />
+						<f:convertNumber maxIntegerDigits="10" maxFractionDigits="10" pattern="#0.0000"/>
+						<f:validateDoubleRange minimum="0.0001" maximum="9000000" />
+					</p:inputText>
+					<p:selectOneMenu value="#{envasadoEtiquetadoDesechosBean.desechoPeligrosoEtiquetado.unidadMedida}" id="unidadMedidaEE" styleClass="w100" required="true" disabled="#{!envasadoEtiquetadoDesechosBean.desechoPeligrosoEtiquetado.desechoPeligroso.desechoES_04 and !envasadoEtiquetadoDesechosBean.desechoPeligrosoEtiquetado.desechoPeligroso.desechoES_06}" converter="selectItemConverter">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+						<f:selectItems value="#{envasadoEtiquetadoDesechosBean.unidadesMedidas}" />
+						<p:ajax process="@this" />
+					</p:selectOneMenu>
+				</h:panelGrid>
+
+				<h:panelGroup id="otroTipoEnvaseContainer">
+					<h:panelGrid styleClass="w33 separatorBottom" columns="1" columnClasses="w100" rendered="#{envasadoEtiquetadoDesechosBean.desechoPeligrosoEtiquetado.tipoEnvase.otro}">
+						<p:outputLabel for="otroEnvase" value="Otro tipo de envase" />
+						<p:inputText id="otroEnvase" value="#{envasadoEtiquetadoDesechosBean.desechoPeligrosoEtiquetado.otroTipoEnvase}" styleClass="w100" required="true" maxlength="150">
+							<f:validateLength maximum="150" />
+						</p:inputText>
+					</h:panelGrid>
+				</h:panelGroup>
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<p:commandButton value="Descargar plantilla" styleClass="button-small-text toRight field_mrg" icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true" >
+						<p:fileDownload value="#{envasadoEtiquetadoDesechosBean.plantillaEtiqueta}" />
+					</p:commandButton>
+					<mae:panelGridHeaderHelp value="Etiquetado *" conector="envasadoEtiquetadoDesechoHelp11" rendered="true" 
+									 help="Recuerde que la plantilla que se descarga debe ser llenada y subida en el sistema." width="600px" />
+				</f:facet>
+
+				<h:panelGrid styleClass="w100 separatorBottom" columns="2" columnClasses="w50 alTop, field_mrg w50 alTop">
+					<p:outputLabel for="metodoEtiquetado" value="Método de etiquetado" />
+					<p:outputLabel id="adjuntarEtiqueta" value="#{not empty envasadoEtiquetadoDesechosBean.desechoPeligrosoEtiquetado.modeloEtiqueta ? envasadoEtiquetadoDesechosBean.desechoPeligrosoEtiquetado.modeloEtiqueta.nombre : 'Modelo de etiqueta (.xls) *'}" />
+					<h:panelGrid styleClass="w100" columns="1" columnClasses="w100 alTop" id="metodoEtiquetadoContainer">
+						<p:selectOneMenu id="metodoEtiquetado" value="#{envasadoEtiquetadoDesechosBean.desechoPeligrosoEtiquetado.tipoEtiquetado}" styleClass="w100" required="true" converter="selectItemConverter">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+							<f:selectItems value="#{envasadoEtiquetadoDesechosBean.tiposEtiquetados}" />
+							<p:ajax process="@this" update="metodoEtiquetadoContainer" />
+						</p:selectOneMenu>
+						<h:outputText />
+						<p:outputLabel for="otroMetodoEtiquetado" value="Otro tipo de etiquetado" rendered="#{envasadoEtiquetadoDesechosBean.desechoPeligrosoEtiquetado.tipoEtiquetado.otro}" />
+						<p:inputText id="otroMetodoEtiquetado" value="#{envasadoEtiquetadoDesechosBean.desechoPeligrosoEtiquetado.otroMetodoEtiquetado}" styleClass="w100" required="true" maxlength="150" rendered="#{envasadoEtiquetadoDesechosBean.desechoPeligrosoEtiquetado.tipoEtiquetado.otro}">
+							<f:validateLength maximum="150" />
+						</p:inputText>
+					</h:panelGrid>
+					<p:fileUpload id="adjuntarEtiquetaUpload" fileUploadListener="#{envasadoEtiquetadoDesechosBean.uploadListenerModeloEtiqueta}" multiple="false" sizeLimit="209715200" allowTypes="/(\.|\/)(xls)$/" label="Seleccionar" uploadLabel="Subir" invalidFileMessage="Tipo de archivo no válido" invalidSizeMessage="Tamaño de archivo no válido" cancelLabel="Cancelar" mode="advanced" dragDropSupport="false" auto="true" update="adjuntarEtiqueta" />
+				</h:panelGrid>
+
+				<h:panelGroup>
+					<p:outputLabel value="Observaciones sobre el método de etiquetado" for="observacionesEE" styleClass="bold" />
+					<p:inputTextarea id="observacionesEE" value="#{envasadoEtiquetadoDesechosBean.desechoPeligrosoEtiquetado.observaciones}" rows="2" styleClass="w100" autoResize="false" maxlength="200" />
+				</h:panelGroup>
+			</p:panelGrid>
+			<h:inputHidden validator="#{envasadoEtiquetadoDesechosBean.validateData}" />
+		</h:panelGroup>
+	</h:panelGroup>
+
+	<div class="buttons">
+		<p:commandButton value="#{envasadoEtiquetadoDesechosBean.editar ? 'Actualizar' : 'Aceptar'}" actionListener="#{envasadoEtiquetadoDesechosBean.aceptar()}" oncomplete="toogleEnvasadoEtiquetado(xhr, status, args)" process="@this datosEnvasadoEtiquetadoDesecho" update="listadoEnvasadoEtiquetadoDesechos datosEnvasadoEtiquetadoDesecho" />
+		<p:commandButton value="Cancelar" styleClass="secondary" actionListener="#{envasadoEtiquetadoDesechosBean.cancelar()}" oncomplete="PF('adicionarEnvasadoEtiquetadoDesecho').toggle()" process="@this" update="datosEnvasadoEtiquetadoDesecho">
+			<p:resetInput target="@form" />
+		</p:commandButton>
+	</div>
+
+	<p:separator />
+</p:panel>
+
+<script type="text/javascript">
+	function toogleEnvasadoEtiquetado(xhr, status, args) {
+		if(args.addEnvasadoEtiquetado) {
+			PF('adicionarEnvasadoEtiquetadoDesecho').toggle();
+		}
+	}
+</script>
+
+</html>

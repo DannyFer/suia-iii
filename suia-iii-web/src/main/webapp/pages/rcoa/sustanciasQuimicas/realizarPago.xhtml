@@ -1,0 +1,182 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+
+	<ui:define name="content">
+		<style type="text/css">
+.noHeader tr td {
+	padding-left: 0px;
+	padding-right: 0px;
+}
+</style>
+
+		<h:form id="formPagoInformacion">
+			<p:panel>				
+
+				<h:panelGrid styleClass="panel_data w100" columns="2"
+					columnClasses="header w25, bold w75" rowClasses="null, alt">
+
+					<h:outputText value="Valor total a pagar" />
+					<h:panelGroup>
+						<h:outputText value="#{pagoSustanciasQuimicasServiciosBean.montoTotal}">
+							<f:convertNumber pattern="#0.00" />
+						</h:outputText>
+						<h:outputText value=" USD" />
+					</h:panelGroup>
+				</h:panelGrid>
+
+
+				<h:panelGrid styleClass="panel_data w100" columns="2"
+					columnClasses="header w25, bold w75" rowClasses="null, alt">
+					<h:outputText value="Generar NUT"
+						rendered="#{pagoSustanciasQuimicasServiciosBean.generarNUT and pagoSustanciasQuimicasServiciosBean.documentosSustanciascoasNUT.size() == 0}" />
+					<h:panelGroup
+						rendered="#{pagoSustanciasQuimicasServiciosBean.generarNUT and pagoSustanciasQuimicasServiciosBean.documentosSustanciascoasNUT.size() == 0}">
+						<p:commandButton icon="	ui-icon-document"
+							styleClass="primary button-small"
+							action="#{pagoSustanciasQuimicasServiciosBean.generarNUT()}" process="@this"
+							rendered="#{pagoSustanciasQuimicasServiciosBean.generarNUT}">
+							<p:confirm header="Aviso"
+								message="Usted debe generar el NUT si aún no ha realizado el pago en la institución bancaria"
+								icon="ui-icon-alert" />
+						</p:commandButton>
+						<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+							<p:commandButton value="Cancelar" type="button"
+								styleClass="ui-confirmdialog-no primary toRight"
+								icon="ui-icon-closethick" />
+							<p:commandButton value="Generar" type="button"
+								styleClass="ui-confirmdialog-yes primary toRight"
+								icon="ui-icon-check" />
+						</p:confirmDialog>
+					</h:panelGroup>
+					<h:outputText value="Descargar NUT"
+						rendered="#{pagoSustanciasQuimicasServiciosBean.documentosSustanciascoasNUT.size() > 0}" />
+					<h:panelGroup
+						rendered="#{pagoSustanciasQuimicasServiciosBean.documentosSustanciascoasNUT.size() > 0}">
+						<p:dataTable styleClass="noHeader borderless"
+							value="#{pagoSustanciasQuimicasServiciosBean.documentosSustanciascoasNUT}"
+							var="documento">
+							<p:column style="text-align: left; background-color: #f5f5f5;">
+								<h:outputText value="#{documento.nombre}" />
+								<p:commandButton icon="ui-icon-arrowthick-1-s"
+									styleClass="button-small primary" title="Ver"
+									style="margin-left: 10px" ajax="false" immediate="true">
+									<p:fileDownload
+										value="#{pagoSustanciasQuimicasServiciosBean.descargar(documento)}" />
+								</p:commandButton>
+							</p:column>
+						</p:dataTable>
+					</h:panelGroup>
+				</h:panelGrid>
+
+				<ui:remove>
+					<p:panelGrid id="pnl_transacciones" columns="3" layout="grid"
+						styleClass="w100"
+						columnClasses="w33, field_mrg w33, field_mrg w33">
+						<f:facet name="header">
+							<mae:panelGridHeaderHelp value="Ingreso de transacciones"
+								conector="generalHelp" render="false"
+								image="#{request.contextPath}/resources/images/help-how.png"
+								help="#{helps['no.help.yet']}" />
+						</f:facet>
+						<p:outputLabel for="institucionBancaria"
+							value="Institución bancaria" />
+						<p:outputLabel for="numeroTransaccion"
+							value="Número de comprobante" />
+						<h:outputText />
+						<p:selectOneMenu id="institucionBancaria"
+							converter="selectItemConverter" required="true" styleClass="w100">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}"
+								itemValue="" noSelectionOption="true" />
+							<f:selectItems
+								value="#{pagosTasaController.institucionesFinancieras}"
+								var="institucion" itemLabel="#{institucion.nombreInstitucion}"
+								itemValue="#{institucion}" />
+						</p:selectOneMenu>
+						<p:inputText id="numeroTransaccion" placeholder="Ej: 584777"
+							required="true" value="#{pagosTasaController.numeroTransaccion}"
+							maxlength="50" />
+
+
+					</p:panelGrid>
+				</ui:remove>
+
+				<p:panelGrid id="pnl_transacciones"
+					rendered="#{pagoSustanciasQuimicasServiciosBean.montoTotalProyecto>0}" columns="3"
+					layout="grid" styleClass="w100"
+					columnClasses="w33, field_mrg w33, field_mrg w33">
+					<f:facet name="header">
+						<mae:panelGridHeaderHelp value="Ingreso de transacciones"
+							conector="generalHelp" render="false"
+							image="#{request.contextPath}/resources/images/help-how.png"
+							help="#{helps['no.help.yet']}" />
+					</f:facet>
+					<p:outputLabel for="institucionBancaria"
+						value="Instituci&oacute;n bancaria" />
+					<p:outputLabel for="numeroTransaccion"
+						value="N&uacute;mero de comprobante" />
+					<h:outputText />
+					<p:selectOneMenu id="institucionBancaria"
+						disabled="#{pagoSustanciasQuimicasServiciosBean.cumpleMontoProyecto}"
+						converter="selectItemConverter" required="true"
+						value="#{pagoSustanciasQuimicasServiciosBean.transaccionFinanciera.institucionFinanciera}"
+						styleClass="w100">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}"
+							itemValue="" noSelectionOption="true" />
+						<f:selectItems
+							value="#{pagoSustanciasQuimicasServiciosBean.institucionesFinancieras}"
+							var="institucion" itemLabel="#{institucion.nombreInstitucion}"
+							itemValue="#{institucion}" />
+						<p:ajax update=":formPagoInformacion:pnl_transacciones"
+							listener="#{pagoSustanciasQuimicasServiciosBean.obtenerEntesAcreditados()}"
+							event="change" />
+					</p:selectOneMenu>
+					<p:inputText id="numeroTransaccion" placeholder="Ej: 584777"
+						required="true"
+						disabled="#{pagoSustanciasQuimicasServiciosBean.cumpleMontoProyecto}"
+						value="#{pagoSustanciasQuimicasServiciosBean.transaccionFinanciera.numeroTransaccion}"
+						maxlength="50" />
+					<p:commandButton value="Adicionar" icon="ui-icon-plusthick"
+						disabled="#{pagoSustanciasQuimicasServiciosBean.cumpleMontoProyecto}"
+						action="#{pagoSustanciasQuimicasServiciosBean.guardarTransaccion(1)}"
+						styleClass="primary" update=":#{p:component('pnl_transacciones')}"
+						process="@this numeroTransaccion" />
+
+					<p:outputLabel for="entidadBancaria" value="Entidad bancaria"
+						rendered="#{pagoSustanciasQuimicasServiciosBean.eligioEnte}" />
+					<h:outputText rendered="#{pagoSustanciasQuimicasServiciosBean.eligioEnte}" />
+					<h:outputText rendered="#{pagoSustanciasQuimicasServiciosBean.eligioEnte}" />
+					<p:selectOneMenu id="entidadBancaria"
+						converter="selectItemConverter" required="true"
+						value="#{pagoSustanciasQuimicasServiciosBean.transaccionFinanciera.institucionFinanciera}"
+						styleClass="w100" rendered="#{pagoSustanciasQuimicasServiciosBean.eligioEnte}">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}"
+							itemValue="" noSelectionOption="true" />
+						<f:selectItems value="#{pagoSustanciasQuimicasServiciosBean.entesAcreditados}"
+							var="institucion" itemLabel="#{institucion.nombreInstitucion}"
+							itemValue="#{institucion}" />
+					</p:selectOneMenu>
+					<h:outputText rendered="#{pagoSustanciasQuimicasServiciosBean.eligioEnte}" />
+					<h:outputText rendered="#{pagoSustanciasQuimicasServiciosBean.eligioEnte}" />
+				</p:panelGrid>
+
+
+				<p:outputPanel id="pnlFinalizarBtn">
+					<div class="buttons main">
+						<p:commandButton value="Enviar" id="btnEnviar"
+							icon="ui-icon-check"
+							action="#{pagosTasaController.completarTarea}" />
+					</div>
+				</p:outputPanel>
+			</p:panel>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

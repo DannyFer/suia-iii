@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:p="http://primefaces.org/ui">
+
+<f:loadBundle var="helps" basename="ec.gob.ambiente.core.resources.helps_es" />
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="Mineros artesanales" />
+	</f:facet>
+	<h:panelGrid styleClass="panel_data mw50" columns="2" columnClasses="header, null" rowClasses="null, alt">
+		<h:outputText value="Su proyecto tiene mineros artesanales" />
+		<h:outputText value="#{verProyectoBean.proyecto.minerosArtesanales}" converter="booleanToStringConverter" />
+	</h:panelGrid>
+
+
+</p:panelGrid>
+
+<h:panelGroup id="minerosArtesanalesGeneralContainer" rendered="#{!verProyectoBean.mineriaArtesanalOLibreAprovechamiento}">
+	<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{verProyectoBean.proyecto.minerosArtesanales}">
+		<f:facet name="header">
+			<h:outputText value="Listado de mineros artesanales" />
+		</f:facet>
+		<p:dataTable value="#{verProyectoBean.proyecto.proyectoMinerosArtesanales}" var="proyectoMinero" emptyMessage="#{labels['common.table.empty']}">
+			<p:column headerText="Nombre">
+				<h:outputText value="#{proyectoMinero.mineroArtesanal.nombre}" />
+			</p:column>
+			<p:column headerText="Código">
+				<h:outputText value="#{proyectoMinero.mineroArtesanal.codigo}" />
+			</p:column>
+			<p:column headerText="Contrato de operación">
+				<p:commandButton icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true">
+					<p:fileDownload value="#{registroProyectoMineriaController.getStream(proyectoMinero.mineroArtesanal.contratoOperacion)}" />
+				</p:commandButton>
+			</p:column>
+		</p:dataTable>
+	</p:panelGrid>
+</h:panelGroup>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:panelGrid columns="2" styleClass="w100" columnClasses="w50, w50">
+			<h:outputText value="Tipo de material" />
+			<h:outputText value="Concesiones mineras" rendered="#{!verProyectoBean.mineriaArtesanalOLibreAprovechamiento}" />
+		</h:panelGrid>
+	</f:facet>
+	<h:panelGrid columns="2" styleClass="w100" columnClasses="w50, field_mrg w50">
+		<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header, null" rowClasses="null, alt">
+			<h:outputText value="#{registroProyectoMineriaController.labelMateriales}" />
+			<h:outputText value="#{verProyectoBean.proyecto.tipoMaterial}" />
+		</h:panelGrid>
+		<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header, null" rowClasses="null, alt" rendered="#{!verProyectoBean.mineriaArtesanalOLibreAprovechamiento}">
+			<h:outputText value="Cuenta con varias concesiones mineras" />
+			<h:outputText value="#{verProyectoBean.proyecto.concesionesMinerasMultiples}" converter="booleanToStringConverter" />
+		</h:panelGrid>
+		<h:outputText rendered="#{verProyectoBean.mineriaArtesanalOLibreAprovechamiento}" />
+	</h:panelGrid>
+</p:panelGrid>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{!verProyectoBean.mineriaArtesanalOLibreAprovechamiento and !verProyectoBean.proyecto.concesionesMinerasMultiples}">
+	<f:facet name="header">
+		<h:outputText value="Código minero" />
+	</f:facet>
+	<h:panelGrid styleClass="panel_data w50" columns="2" columnClasses="header, null" rowClasses="null, alt">
+		<h:outputText value="Código" />
+		<h:outputText value="#{verProyectoBean.proyecto.codigoMinero}" />
+	</h:panelGrid>
+</p:panelGrid>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{verProyectoBean.proyecto.concesionesMinerasMultiples}">
+	<f:facet name="header">
+		<h:outputLink value="Listado de concesiones mineras" />
+	</f:facet>
+	<p:panel>
+		<p:dataList type="none" value="#{verProyectoBean.proyecto.concesionesMineras}" var="concesion" rowIndexVar="index">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Concesión minera #{index + 1}" />
+				</f:facet>
+				<h:panelGrid styleClass="w100" columns="2" columnClasses="w50 alTop, field_mrg w50 alTop">
+					<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="Nombre" />
+						<h:outputText value="#{concesion.nombre}" />
+						<h:outputText value="Código" />
+						<h:outputText value="#{concesion.codigo}" />
+					</h:panelGrid>
+					<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="Área" />
+						<h:outputText value="#{concesion.area} #{concesion.unidad}" />
+						<h:outputText value="Altitud" />
+						<h:outputText value="#{concesion.altitud} msnm" />
+					</h:panelGrid>
+				</h:panelGrid>
+				<p:dataTable value="#{concesion.concesionesUbicacionesGeograficas}" var="ubicacion">
+					<p:column headerText="Provincia">
+						<h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+					</p:column>
+					<p:column headerText="Cant&oacute;n">
+						<h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+					</p:column>
+					<p:column headerText="Parroquia">
+						<h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}" />
+					</p:column>
+				</p:dataTable>
+				<h:panelGroup>
+					<h:outputText value="Dirección" styleClass="bold" />
+					<p:inputTextarea value="#{concesion.direccion}" rows="2" styleClass="w100" readonly="true" />
+				</h:panelGroup>
+			</p:panelGrid>
+		</p:dataList>
+	</p:panel>
+</p:panelGrid>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{verProyectoBean.mineriaArtesanalOLibreAprovechamiento and verProyectoBean.proyecto.mineriaAreasConcesionadas}">
+	<f:facet name="header">
+		<h:outputText value="Datos del área concesionada" />
+	</f:facet>
+	<h:panelGrid styleClass="w100" columns="2" columnClasses="w50 alTop, field_mrg w50 alTop">
+		<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header, null" rowClasses="null, alt">
+			<h:outputText value="Nombre de la concesión" />
+			<h:outputText value="#{verProyectoBean.proyecto.concesionMinera.nombre}" />
+			<h:outputText value="Código de la concesión" />
+			<h:outputText value="#{verProyectoBean.proyecto.concesionMinera.codigo}" />
+			<h:outputText value="Contrato de operación" rendered="#{!verProyectoBean.mineriaLibreAprovechamientoProyectoExPost}" />
+			<p:commandButton disabled="#{empty verProyectoBean.proyecto.mineroArtesanal.contratoOperacion}" icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true" rendered="#{!verProyectoBean.mineriaLibreAprovechamientoProyectoExPost}">
+				<p:fileDownload value="#{registroProyectoMineriaController.getStream(verProyectoBean.proyecto.mineroArtesanal.contratoOperacion)}" />
+			</p:commandButton>
+		</h:panelGrid>
+		<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header, null" rowClasses="null, alt">
+			<h:outputText value="Titular de derechos mineros" />
+			<h:outputText value="#{verProyectoBean.proyecto.mineroArtesanal.usuario.persona.nombre}" />
+			<h:outputText value="#{verProyectoBean.labelCodigoMineroMineriaAreaConcesionada}" />
+			<h:outputText value="#{verProyectoBean.proyecto.mineroArtesanal.codigo}" />
+			<h:outputText value="#{verProyectoBean.labelRegistroMineroArtesanalMRNNRMineriaAreaConcesionada}" />
+			<p:commandButton disabled="#{empty verProyectoBean.proyecto.mineroArtesanal.registroMineroArtesanal}" icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true">
+				<p:fileDownload value="#{registroProyectoMineriaController.getStream(verProyectoBean.proyecto.mineroArtesanal.registroMineroArtesanal)}" />
+			</p:commandButton>
+		</h:panelGrid>
+	</h:panelGrid>
+</p:panelGrid>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{verProyectoBean.mineriaArtesanalOLibreAprovechamiento and !verProyectoBean.proyecto.mineriaAreasConcesionadas}">
+	<f:facet name="header">
+		<h:outputText value="Datos del área libre" />
+	</f:facet>
+	<h:panelGrid styleClass="w100" columns="2" columnClasses="w50 alTop, field_mrg w50 alTop">
+		<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header, null" rowClasses="null, alt">
+			<h:outputText value="Titular de derechos mineros" />
+			<h:outputText value="#{verProyectoBean.proyecto.mineroArtesanal.usuario.persona.nombre}" />
+			<h:outputText value="#{verProyectoBean.labelCodigoMineroMineriaAreaLibre}" />
+			<h:outputText value="#{verProyectoBean.proyecto.mineroArtesanal.codigo}" />
+		</h:panelGrid>
+		<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header, null" rowClasses="null, alt">
+			<h:outputText value="#{verProyectoBean.labelRegistroMineroArtesanalMRNNRMineriaAreaLibre}" />
+			<p:commandButton disabled="#{empty verProyectoBean.proyecto.mineroArtesanal.registroMineroArtesanal}" icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true">
+				<p:fileDownload value="#{registroProyectoMineriaController.getStream(verProyectoBean.proyecto.mineroArtesanal.registroMineroArtesanal)}" />
+			</p:commandButton>
+		</h:panelGrid>
+	</h:panelGrid>
+</p:panelGrid>
+
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<h:panelGroup id="sustanciasRetce">
+	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<h:outputText value="SUSTANCIAS RETCE (VOLUNTARIO HASTA LA EXPEDICIÓN DE LA NORMA)" />
+		</f:facet>
+
+		<p:panelGrid columns="1" styleClass="panel_data w100">
+			
+			<p:panelGrid id="ingresoSustancia" columns="2" styleClass="panel_data w100"
+				columnClasses="header w25, null w75">
+				<h:outputText value="Código del punto de monitoreo aprobado: " />
+				<p:inputText value="#{emisionesAtmosfericasController.detalleEmision.codigoPuntoMonitoreo}"
+					maxlength="50" readonly = "true"/>
+									
+				<h:outputText value="Fuente fija de combustión:" />
+				<p:inputText id="idFuente"
+					value="#{emisionesAtmosfericasController.detalleEmision.fuenteFijaCombustion.fuente}"
+					readonly="true"/>
+					
+				<h:outputText value="Nombre del contaminante: *" />
+				<p:selectOneMenu id="tipoSustancia"
+							value="#{emisionesAtmosfericasController.idCatalogoSusRetce}"
+							style="width:100%" filter="true"
+							filterMatchMode="contains">
+							<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+							<f:selectItems
+								value="#{emisionesAtmosfericasController.listaCatalogoSustanciasRetce}"
+								var="item" itemLabel="#{item.descripcionProductoQuimico}" itemValue="#{item.id}" />
+								<p:ajax event="change" listener="#{emisionesAtmosfericasController.catalogoSustanciaRetceListener}" 
+								/>
+						</p:selectOneMenu>
+				
+				
+				<h:outputText value="Reporte (t/año): *" />
+				<p:inputText id="idReporte"
+					value="#{emisionesAtmosfericasController.sustanciaRetceIngresada.reporteToneladaAnio}">
+					<pe:keyFilter mask="num" />
+				</p:inputText>
+				
+				<h:outputText value="Método de estimación: *" />
+				<p:selectOneMenu id="metodoEstimacion"
+							value="#{emisionesAtmosfericasController.idMetodoEstimacionSustancia}"
+							style="width:100%">
+							<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+							<f:selectItems
+								value="#{emisionesAtmosfericasController.listaMetodoEstimacion}"
+								var="item" itemLabel="#{item.descripcion}"
+								itemValue="#{item.id}" />
+							<p:ajax event="change" listener="#{emisionesAtmosfericasController.metodoEstimacionSustanciaListener}"
+							update=":form:ingresoSustanciaPnl :form:btnLaboratorio :form:lblLaboratorio"/>
+						</p:selectOneMenu>						
+				
+			</p:panelGrid>
+			
+			
+			<p:panelGrid id="ingresoSustanciaPnl" columns="2" styleClass="panel_data w100"
+				columnClasses="header w25, null w75">
+			<h:outputText id="lblLaboratorio" value="Escoja un laboratorio: *" rendered="#{emisionesAtmosfericasController.mostrarLaboratorios}"/>			
+
+				<p:commandButton id="btnLaboratorio" update=":form:laboratoriosVer"
+							styleClass="button-small primary" process="@this"
+							icon="ui-icon-plus" oncomplete="PF('agregarLaboratorio').show()"
+							rendered="#{emisionesAtmosfericasController.mostrarLaboratorios}">							
+				</p:commandButton>
+				<h:outputText id="lblLaboratorioEscogido" value="Laboratorio: "
+					rendered="#{emisionesAtmosfericasController.mostrarLaboratorios}" />
+				<p:inputText id="laboratorioEscogido" rendered="#{emisionesAtmosfericasController.mostrarLaboratorios}"
+					value="#{emisionesAtmosfericasController.sustanciaRetceIngresada.datosLaboratorio.nombre}"
+					readonly="true">					
+				</p:inputText>
+
+				<h:outputText value="Cálculo: (Adjunte documento de respaldo)*"/>
+				<h:panelGroup>
+					<p:fileUpload
+						fileUploadListener="#{emisionesAtmosfericasController.uploadListenerDocumentoRespaldoSustancias}"
+						multiple="false" sizeLimit="20971520" allowTypes="/(\.|\/)(pdf)$/"
+						label="Seleccionar (pdf 20Mb)" uploadLabel="Subir"
+						invalidFileMessage="Tipo de archivo no válido"
+						invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+						cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+						auto="true" update="nombreDocSus"/>
+				<h:outputText id="nombreDocSus" value="#{emisionesAtmosfericasController.documentoRespaldoSustancias.nombre}"/>
+				</h:panelGroup>			
+			</p:panelGrid>						
+			
+			<h:panelGroup>
+			<div class="buttons">
+					<p:commandButton 
+						actionListener="#{emisionesAtmosfericasController.agregarSustancia()}"
+						process="@this idReporte" value="Agregar"
+						update=":form:sustanciasTbl :form:ingresoSustanciaPnl :form:ingresoSustancia" styleClass="primary">
+						<p:resetInput target=":form:ingresoSustancia" />
+					</p:commandButton>
+					
+					<p:commandButton 
+						actionListener="#{emisionesAtmosfericasController.cancelarSustancia()}"
+						process="@this" value="Cancelar"
+						update=":form:sustanciasTbl :form:ingresoSustanciaPnl :form:ingresoSustancia" styleClass="secondary">
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+			
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" id="sustanciasTbl">
+				
+				<p:dataTable
+					value="#{emisionesAtmosfericasController.listaSustanciasRetce}"
+					var="sustancia" emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Código del punto de monitoreo aprobado" style="text-align:center;">
+						<h:outputText value="#{sustancia.codigoPuntoMonitoreo}" />
+					</p:column>
+					<p:column headerText="Fuente fija de combustión" style="text-align:center;">
+						<h:outputText value="#{sustancia.fuenteFija}" />
+					</p:column>
+					<p:column headerText="Nombre del contaminante" style="text-align:center;">
+						<h:outputText value="#{sustancia.catologSustanciasRetce.descripcionProductoQuimico}" 
+									style="word-wrap: break-word;"/>
+					</p:column>
+					<p:column headerText="Reporte (ton/año)" style="text-align:center;">
+						<h:outputText value="#{sustancia.reporteToneladaAnio}" />
+					</p:column>
+					<p:column headerText="Método de estimación" style="text-align:center;">
+						<h:outputText value="#{sustancia.catalogoMetodoEstimacion.descripcion}" />
+					</p:column>
+					<p:column headerText="Laboratorio" style="text-align:center;">
+						<h:outputText value="#{sustancia.datosLaboratorio.nombre}" />
+					</p:column>
+					<p:column headerText="Documento de Respaldo" style="text-align:center;">
+						<p:commandButton id="fileDownload"
+							icon="ui-icon-arrowthickstop-1-s" styleClass="primary"
+							ajax="false" process="@this" title="Descargar"
+							rendered="#{sustancia.documento eq null ? false : true}">
+							<p:fileDownload
+								value="#{emisionesAtmosfericasController.getDocumentoSustancia(sustancia.documento)}" />
+						</p:commandButton>
+					</p:column>
+
+					<p:column headerText="Acciones" styleClass="w60px alCenter" style="text-align:center;">
+						<p:commandButton
+							styleClass="button-small primary" process="@this" 
+							actionListener="#{emisionesAtmosfericasController.cargarInformacionSustancia(sustancia)}"
+							icon="ui-icon-pencil" update=":form:ingresoSustancia :form:ingresoSustanciaPnl">						
+						</p:commandButton>
+						<p:commandButton update=":form:sustanciasTbl"
+                                             styleClass="button-small primary" process="@this"
+                                             icon="ui-icon-circle-close"
+                                             actionListener="#{emisionesAtmosfericasController.eliminarSustancia(sustancia)}">
+                                <p:confirm header="Confirmación"
+                                           message="¿Está seguro que desea eliminar los datos?"
+                                           icon="ui-icon-alert"/>
+                            </p:commandButton> 
+
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+
+		</p:panelGrid>
+	</p:panelGrid>
+	
+	<p:dialog header="Laboratorio"
+				id="agregarLaboratorio" widgetVar="agregarLaboratorio" modal="true"
+				width="900" resizable="false" draggable="true" closable="false">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" id="laboratoriosVer">			
+				
+				<p:dataTable
+					value="#{emisionesAtmosfericasController.listaLaboratorios}"
+					var="lab" emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="RUC">
+						<h:outputText value="#{lab.ruc}" />
+					</p:column>
+					<p:column headerText="Nombre o Razón Social">
+						<h:outputText value="#{lab.nombre}" />
+					</p:column>
+					<p:column headerText="N° de Registro de SAE">
+						<h:outputText value="#{lab.numeroRegistroSAE}" />
+					</p:column>
+					<p:column headerText="Vigencia del Registro">
+						<h:outputText value="#{lab.fechaVigenciaRegistro}" />
+					</p:column>				
+
+					<p:column styleClass="w15 alCenter">
+					<div class="buttons alCenter">
+					<p:commandButton styleClass="primary" process="@this"
+						actionListener="#{emisionesAtmosfericasController.agregarLaboratorio(lab)}"
+						value="Seleccionar" oncomplete="PF('agregarLaboratorio').hide()" update=":form:laboratorioEscogido">
+					</p:commandButton>
+					</div>
+				</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+			 <p:commandButton value="Cerrar" onclick="PF('agregarLaboratorio').hide()"
+                                     styleClass="toRight primary" process="@this"/>	
+				
+	</p:dialog>
+</h:panelGroup>
+</html>

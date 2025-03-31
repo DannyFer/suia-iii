@@ -1,0 +1,897 @@
+<ui:composition template="/WEB-INF/templates/default-nologin.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+	<ui:define name="content">
+		<style type="text/css">
+.valigntop {
+	vertical-align: top;
+}
+
+.ui-datatable-pink table {
+	width: 100%;
+	table-layout: auto;
+	font-size: 12px;
+}
+
+.tree-table-no-header thead {
+	/*display: none*/
+	text-align: center !important;
+}
+
+.ui-datatable-header {
+	height: 30px;
+	text-shadow: none;
+}
+
+.textoCenterColumnContent {
+	text-align: center !important;
+}
+
+.textoTitulo {
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+	filter: Alpha(Opacity = 100) !important;
+	opacity: 100 !important;
+	box-shadow: none !important;
+	color: red !important;
+	font-weight: bold !important;
+}
+
+.textoTitulo td {
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+	filter: Alpha(Opacity = 100) !important;
+	opacity: 100 !important;
+	box-shadow: none !important;
+	color: red !important;
+	font-weight: bold !important;
+}
+
+.quitarBordeGrid.ui-panelgrid>*>tr, .quitarBordeGrid.ui-panelgrid .ui-panelgrid-cell
+	{
+	border: none;
+}
+
+.encabezadoIconos {
+	font-weight: bold;
+	display: block;
+	margin-bottom: 14px;
+	margin-top: 14px;
+	font-size: 1em;
+	margin: 0 !important;
+}
+
+.sectorIconos {
+	width: 110px;
+	height: 120px;
+}
+</style>
+		<h:form id="form" prependId="false"
+			onkeypress="if (event.keyCode == 13) {return false; }">
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText
+						value="Datos de la Autorizaciones Administrativas Ambientales (AAA)" />
+				</f:facet>
+				
+				<h:panelGrid id="pnltecnico" layout="grid" styleClass="panel_data w100"
+					columnClasses="header w25,null w25, header w25,null w25"
+					columns="4" rendered="#{ingresarInformacionAAAController.habilitarEditar}">
+					<h:outputText value="Técnico:" />
+					<h:outputText value="#{ingresarInformacionAAAController.usuarioTecnico.persona.nombre}"/>
+					<h:outputText value="Fecha actualización:" />
+					<h:outputText value="#{ingresarInformacionAAAController.fechaActual}">
+					 	<f:convertDateTime pattern="yyyy-MM-dd HH:mm" />
+					</h:outputText>					
+				</h:panelGrid>
+				
+				<h:panelGrid id="pnlAutorizacionPrincipal" layout="grid" styleClass="panel_data w100"
+					columnClasses="header w25,null w25, header w25,null w25"
+					columns="4" rendered="#{ingresarInformacionAAAController.autorizacionPrincipal eq null ? false : true}">
+					
+					<h:outputText value="N° Resolución Administrativa Ambiental Principal*" />					
+					<h:outputText value="#{ingresarInformacionAAAController.autorizacionPrincipal.resolucion}"/>
+					
+					<h:outputText value="N° Fecha emisión de la Autorización Administrativa Ambiental (AAA): *" />
+					<h:outputText value="#{ingresarInformacionAAAController.autorizacionPrincipal.fechaResolucion}"/>					
+									
+					<h:outputText value="Cédula / RUC operador: *" />
+					<h:outputText value="#{ingresarInformacionAAAController.autorizacionPrincipal.identificacionUsuario}"/>
+					
+					<h:outputText value="Nombre del operador: *" />
+					<h:outputText value="#{ingresarInformacionAAAController.autorizacionPrincipal.nombreUsuario}" />
+									
+				</h:panelGrid>
+				<p:separator/>
+				
+				<h:panelGrid layout="grid" styleClass="panel_data w100"
+					columnClasses="header w25,null w25, header w25,null w25"
+					columns="4" rendered="#{ingresarInformacionAAAController.autorizacionPrincipal eq null ? false : true}">
+
+					<h:outputText value="N° Resolución (Inclusiones, Reforma, Actualización): *" 
+						disabled="true"/>
+					<p:inputText value="#{ingresarInformacionAAAController.autorizacionAdministrativa.resolucion}" style="text-transform: uppercase;">
+					<p:ajax process="@this"/>
+					</p:inputText>
+
+					<h:outputText value="Fecha emisión (Inclusiones, Reforma, Actualización): *" />
+					<p:calendar id="txtFechaemisionAso" disabled="true"
+									value="#{ingresarInformacionAAAController.autorizacionAdministrativa.fechaResolucion}"
+									timeZone="America/Guayaquil" readonlyInput="true" navigator="true"
+									pattern="dd/MM/yyyy" maxdate="today">
+						<p:ajax event="dateSelect" process="@this"	update="txtCodigoProyectoAso txtFechaEmisionInicioAso" />
+					</p:calendar>
+
+					<h:outputText value="Fecha de inicio del proces de Regularización Ambiental: *" rendered="#{ingresarInformacionAAAController.autorizacionAdministrativa.sistema eq 0 or ingresarInformacionAAAController.autorizacionAdministrativa.sistema eq 1}"/>
+					<p:calendar id="txtFechaEmisionInicioAso" disabled="true"
+									rendered="#{ingresarInformacionAAAController.autorizacionAdministrativa.sistema eq 0 or ingresarInformacionAAAController.autorizacionAdministrativa.sistema eq 1}"
+									value="#{ingresarInformacionAAAController.autorizacionAdministrativa.fechaInicioResolucion}"
+									timeZone="America/Guayaquil" readonlyInput="true" navigator="true" maxdate="#{ingresarInformacionAAAController.autorizacionAdministrativa.fechaResolucion}" 
+									pattern="dd/MM/yyyy">
+						<p:ajax event="dateSelect" process="@this" update="txtFechaEmisionInicioAso"/>
+					</p:calendar>
+					<h:outputText value="Código del proyecto (Inclusión, Reforma, Actualización) *" />
+					<p:inputText id="txtCodigoProyectoAso" value="#{ingresarInformacionAAAController.autorizacionAdministrativa.codigoProyecto}" disabled="true"/>
+				</h:panelGrid>
+				
+
+				<h:panelGrid layout="grid" styleClass="panel_data w100" id="pnlProyecto"
+					columnClasses="header w25,null w25, header w25,null w25"
+					columns="4" disabled="true">
+
+					<h:outputText value="N° Resolución Administrativa Ambiental*" />
+					<p:inputText id="txtResolucion" value="#{ingresarInformacionAAAController.autorizacionAdministrativa.resolucion}" disabled="true"
+									style="text-transform: uppercase;" >
+					<p:ajax event="blur" process="@this" update="txtCodigoProyecto" />
+					</p:inputText>
+
+					<h:outputText value="Fecha emisión de la Autorización Administrativa Ambiental (AAA): *" />
+					<p:calendar id="txtFechaemision" disabled="true"
+									value="#{ingresarInformacionAAAController.autorizacionAdministrativa.fechaResolucion}"
+									timeZone="America/Guayaquil" readonlyInput="true" navigator="true"
+									pattern="dd/MM/yyyy" maxdate="today">
+						<p:ajax event="dateSelect" process="@this" update="txtCodigoProyecto txtFechaEmisionInicio" />
+					</p:calendar>
+					<h:outputText value="Fecha de inicio del proces de Regularización Ambiental: *" rendered="#{ingresarInformacionAAAController.autorizacionAdministrativa.sistema eq 0 or ingresarInformacionAAAController.autorizacionAdministrativa.sistema eq 1}"/>
+					<p:calendar id="txtFechaEmisionInicio" 
+									rendered="#{ingresarInformacionAAAController.autorizacionAdministrativa.sistema eq 0 or ingresarInformacionAAAController.autorizacionAdministrativa.sistema eq 1}"
+									value="#{ingresarInformacionAAAController.autorizacionAdministrativa.fechaInicioResolucion}"
+									timeZone="America/Guayaquil" readonlyInput="true" navigator="true" maxdate="#{ingresarInformacionAAAController.autorizacionAdministrativa.fechaResolucion}"
+									pattern="dd/MM/yyyy" >
+						<p:ajax event="dateSelect" process="@this" update="txtFechaEmisionInicio"/>
+					</p:calendar>
+					<h:outputText value="" rendered="#{ingresarInformacionAAAController.autorizacionAdministrativa.sistema eq 0 or ingresarInformacionAAAController.autorizacionAdministrativa.sistema eq 1}"/>
+					<h:outputText value="" rendered="#{ingresarInformacionAAAController.autorizacionAdministrativa.sistema eq 0 or ingresarInformacionAAAController.autorizacionAdministrativa.sistema eq 1}"/>
+					
+					<h:outputText value="Cédula / RUC operador: *" />
+					<p:inputText value="#{ingresarInformacionAAAController.autorizacionAdministrativa.identificacionUsuario}" 
+						disabled="true" maxlength="50">
+					<p:ajax process="@this" listener="#{ingresarInformacionAAAController.buscarUsuario()}" update="pnlProyecto"/>
+					</p:inputText>
+
+					<h:outputText value="Nombre del operador: *" />
+					<p:inputText id="txtNombre" value="#{ingresarInformacionAAAController.autorizacionAdministrativa.nombreUsuario}" 
+						disabled="true" maxlength="200" required="true" requiredMessage="El campo Nombre del operador es requerido">
+					<p:ajax process="@this"/>
+					</p:inputText>
+
+					<h:outputText value="Código del proyecto *" />
+					<p:inputText id="txtCodigoProyecto" value="#{ingresarInformacionAAAController.autorizacionAdministrativa.codigoProyecto}" disabled="true"/>
+
+				</h:panelGrid>
+				
+				<h:panelGrid id="pngFases" layout="grid" styleClass="panel_data w100" columnClasses="header w25,null w25, header w25,null w25" columns="4">
+					<h:outputText value="Sector: *" disabled="true"/>
+					<h:outputText value="Sector (Inclusión, Reforma, Actualización): *" rendered="#{ingresarInformacionAAAController.autorizacionPrincipal eq null ? false : true}"/>
+					<p:selectOneMenu id="cmbSector" value="#{ingresarInformacionAAAController.idSector}" disabled="true">
+					<f:selectItem itemLabel="Seleccione" itemValue=""/>
+                    <f:selectItems value="#{ingresarInformacionAAAController.listaSectores}" var="sector" itemLabel="#{sector.nombre}" itemValue="#{sector.id}"/>	
+                    	<p:ajax event="change" listener="#{ingresarInformacionAAAController.cargarFases(false)}" update="pngFases"></p:ajax>				
+					</p:selectOneMenu>
+					<h:outputText value="#{ingresarInformacionAAAController.autorizacionPrincipal eq null ? 'Fase / Etapa: *' : 'Fase / Etapa (Inclusión, Reforma, Actualización): *'}" rendered="#{ingresarInformacionAAAController.idSector ne 3}"/>
+					<p:selectOneMenu id="cmbFase" value="#{ingresarInformacionAAAController.idFase}" disabled="true" rendered="#{ingresarInformacionAAAController.idSector ne 3}">
+					<f:selectItem itemLabel="Seleccione" itemValue=""/>
+                    <f:selectItems value="#{ingresarInformacionAAAController.listaFases}" var="fase" itemLabel="#{fase.nombre}" itemValue="#{fase.id}"/>
+                    	<p:ajax listener="#{ingresarInformacionAAAController.buscarFase()}"></p:ajax>				
+					</p:selectOneMenu>
+
+				</h:panelGrid>
+
+				<h:panelGrid styleClass="panel_data w100"
+					columnClasses="header w25,null w75" columns="2">
+
+					<h:outputText value="Autoridad Ambiental emisora de la AAA: *" disabled="true"/>
+					<h:outputText value="Autoridad Ambiental emisora de la AAA (Inclusión, Reforma, Actualización): *" rendered="#{ingresarInformacionAAAController.autorizacionPrincipal eq null ? false : true}"/>
+					<p:selectOneMenu id="cmbAreaEmisora" value="#{ingresarInformacionAAAController.idAreaEmisora}" disabled="true" filter="true" filterMatchMode="contains">
+						<f:selectItem itemLabel="Seleccione" itemValue=""/>
+                    	<f:selectItems value="#{ingresarInformacionAAAController.listaAreasEmisoras}" var="area" itemLabel="#{area.areaName}" itemValue="#{area.id}"/>
+                    	<p:ajax listener="#{ingresarInformacionAAAController.buscarArea()}"></p:ajax>				
+					</p:selectOneMenu>
+
+					<h:outputText value="Direcciones Zonales y Galápagos: *" rendered="#{ingresarInformacionAAAController.esTecnico}"/>
+					<p:selectOneMenu id="cmbDireccion" value="#{ingresarInformacionAAAController.idDireccionZonal}" rendered="#{ingresarInformacionAAAController.esTecnico}" filter="true">
+					<f:selectItem itemLabel="Seleccione" itemValue=""/>
+                    <f:selectItems value="#{ingresarInformacionAAAController.listaDireccionesZonales}" var="area" itemLabel="#{area.areaName}" itemValue="#{area.id}"/>	
+                    
+                    <p:ajax listener="#{ingresarInformacionAAAController.buscarDireccion()}"></p:ajax>				
+					</p:selectOneMenu>
+
+					<h:outputText value="Tipo de permiso Ambiental: *" />
+					<p:inputText value="#{ingresarInformacionAAAController.autorizacionAdministrativa.tipoPermisoAmbiental}" 
+								rendered="#{ingresarInformacionAAAController.tieneTipoPermiso}" disabled="true"/>
+					
+					<p:selectOneMenu id="cmbPermisoAmbiental" value="#{ingresarInformacionAAAController.autorizacionAdministrativa.tipoPermisoAmbiental}" rendered="#{!ingresarInformacionAAAController.tieneTipoPermiso}">
+					<f:selectItem itemLabel="Seleccione" itemValue=""/>
+                    <f:selectItems value="#{ingresarInformacionAAAController.listaTipoPermisoAmbiental}" var="permiso" itemLabel="#{permiso}" itemValue="#{permiso}"/>	
+                    
+                    <p:ajax listener="#{ingresarInformacionAAAController.cambioAutorizacionAdministrativaAmbiental()}" update="txtAAA pnlDocumentos"></p:ajax>				
+					</p:selectOneMenu>
+
+					<h:outputText value="Autorización Administrativa Ambiental" />
+					<p:inputText id="txtAAA" value="#{ingresarInformacionAAAController.autorizacionAdministrativa.autorizacionAdministrativaAmbiental}" disabled="true"/>
+
+					<h:outputText value="Ente responsable de Control y Seguimiento: *" disabled="true"/>
+					<h:outputText value="Ente responsable de Control y Seguimiento (Inclusión, Reforma, Actualización): *" rendered="#{ingresarInformacionAAAController.autorizacionPrincipal eq null ? false : true}"/>
+					<p:inputText value="#{ingresarInformacionAAAController.autorizacionAdministrativa.areaResponsableControl}" rendered="#{ingresarInformacionAAAController.tieneEnteControl}"/>
+					
+					<p:selectOneMenu id="cmbAreaControlSeguimiento" value="#{ingresarInformacionAAAController.idEnteControl}" rendered="#{!ingresarInformacionAAAController.tieneEnteControl}" filter="true" filterMatchMode="contains" disabled="true">
+					<f:selectItem itemLabel="Seleccione" itemValue=""/>
+                    <f:selectItems value="#{ingresarInformacionAAAController.listaAreasControl}" var="area" itemLabel="#{area.areaName}" itemValue="#{area.id}"/>	
+                    
+                    <p:ajax listener="#{ingresarInformacionAAAController.buscarAreaEnteControl()}"></p:ajax>				
+					</p:selectOneMenu>
+
+				</h:panelGrid>
+
+				<h:panelGrid styleClass="panel_data w100" columns="2">
+
+					<h:panelGroup styleClass="btnsHelp">
+						<p:outputLabel id="nombrelbl"
+							value="Nombre del proyecto, obra o actividad" for="nombre" />
+					</h:panelGroup>
+					<h:panelGroup styleClass="btnsHelp">
+						<p:outputLabel value="Resumen del proyecto, obra o actividad"
+							for="resumen" />
+					</h:panelGroup>
+
+					<h:panelGroup id="nombreProyectoPnl" styleClass="w100" columns="1">
+
+						<p:inputTextarea
+							placeholder="Entre como mínimo 1 y como máximo 500 caracteres."
+							id="nombre" rows="2" styleClass="w100"
+							autoResize="false" maxlength="500" value="#{ingresarInformacionAAAController.autorizacionAdministrativa.nombreProyecto}"
+							disabled="true">
+							<f:validateLength minimum="1" />
+							<p:ajax process="nombre" immediate="true" />
+						</p:inputTextarea>
+
+					</h:panelGroup>
+
+					<h:panelGroup>
+						<p:inputTextarea
+							placeholder="Entre como mínimo 25 y como máximo 2500 caracteres."
+							id="resumen" rows="2" styleClass="w100"
+							autoResize="false" maxlength="500" value="#{ingresarInformacionAAAController.autorizacionAdministrativa.resumenProyecto}"
+							disabled="true">
+							<f:validateLength minimum="25" maximum="2500" />
+							<p:ajax process="resumen" immediate="true" />
+						</p:inputTextarea>
+					</h:panelGroup>
+
+				</h:panelGrid>
+
+			</p:panelGrid>
+
+
+			<p:panelGrid id="idPanelSiiu" columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Seleccione el código CIIU de su actividad"/>
+				</f:facet>
+
+				<h:panelGrid styleClass="panel_data " columns="2" columnClasses="header w25, null w75" rendered="#{ingresarInformacionAAAController.tieneActividad}">
+
+					<h:outputText value="Actividad del catálogo (nombre del catálogo) *"/>
+					<p:inputText value="#{ingresarInformacionAAAController.actividadAnterior}" disabled="true" rendered="#{ingresarInformacionAAAController.tieneActividad}"/>
+
+					<h:outputText value="Actividad económica del CIIU *"/>
+					<p:inputText value="#{ingresarInformacionAAAController.autorizacionAdministrativa.catalogoCIUU.nombre}" disabled="true"/>			
+						
+				</h:panelGrid>
+				
+				<h:panelGrid styleClass="panel_data " columns="4" columnClasses="header, null, cssJustificado"
+                                rowClasses="null, alt" rendered="#{!ingresarInformacionAAAController.tieneActividad}">
+                    <h:outputText value="Del listado del CIIU escoja la actividad económica:" />
+					<p:commandButton value="Catálogo" styleClass="primary" disabled="true"
+								type="button" icon="ui-icon-plus"
+								onclick="PF('idDialogCiiu1').show()"/>
+							
+							<h:outputText id="txtCiiuPrincipal"
+								value="#{ingresarInformacionAAAController.ciiuPrincipal.nombre}" />
+							<p:commandButton styleClass="primary" icon="ui-icon-trash"
+								update="txtCiiuPrincipal" process="@this" disabled="true"								
+								action="#{ingresarInformacionAAAController.limpiarCamposActividad()}">
+							</p:commandButton>
+							
+				</h:panelGrid>
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+			<h:panelGroup id="containerCoordenadas">
+			
+			<p:panelGrid columns="1" layout="grid" styleClass="buttonAdjuntarCoordenadasContainer w100" >
+				<f:facet name="header">
+					<h:outputText value="Ubicación geográfica e información de intersección" />
+				</f:facet>
+				<h:outputText value="Favor adjuntar las coordenadas y el sistema de referencia de la Autorización Administrativa Ambiental" />
+				<h:outputText value="Favor seleccionar el sistema de referencia" />
+				
+				<h:panelGrid columns="3" layout="grid">
+					<p:selectOneRadio id="sistemaReferencia" layout="grid" columns="3"  styleClass="textoTitulo" disabled="true"
+						value="#{ingresarInformacionAAAController.shapeDigitalizacion.sistemaReferencia}" immediate="true">						
+								<f:selectItems value="#{ingresarInformacionAAAController.listaSistemaReferencia}"
+									var="item" itemLabel="#{item}" itemValue="#{item}" />
+								<p:ajax process="@this"/>						
+					</p:selectOneRadio>	
+					
+					<h:outputText value="Zona" />
+					<p:selectOneMenu id="zona" disabled="true"
+						value="#{ingresarInformacionAAAController.shapeDigitalizacion.zona}">
+						<f:selectItem itemLabel="Escoja la zona" />
+						<f:selectItem itemLabel="15N" itemValue="15N" />
+						<f:selectItem itemLabel="15S" itemValue="15S" />
+						<f:selectItem itemLabel="16N" itemValue="16N" />
+						<f:selectItem itemLabel="16S" itemValue="16S" />
+						<f:selectItem itemLabel="17N" itemValue="17N" />
+						<f:selectItem itemLabel="17S" itemValue="17S" />
+						<f:selectItem itemLabel="18N" itemValue="18N" />
+						<f:selectItem itemLabel="18S" itemValue="18S" />
+						<p:ajax process="@this"/>
+					</p:selectOneMenu>
+				</h:panelGrid>				
+						
+				<h:outputText value="#{helps['rcoa.registro.coordenadas']}" />
+				<p:outputLabel value="Seleccionar el formato de las coordenadas" styleClass="bold"/>
+				<p:dataTable id="tbl_coordenadas" rowIndexVar="index" value="#{ingresarInformacionAAAController.coordinatesWrappersGeo}" var="item" emptyMessage="#{labels['common.table.empty']}">
+					<p:subTable value="#{item.coordenadas}" var="coordenada">
+						<p:columnGroup type="header">
+							<p:row>
+								<p:column headerText="Shape" styleClass="alCenter table-column-header" />
+								<p:column headerText="X" styleClass="alCenter table-column-header" />
+								<p:column headerText="Y" styleClass="alCenter table-column-header" />											
+							</p:row>
+						</p:columnGroup>
+						<p:column headerText="Shape" styleClass="alCenter w15">
+							<h:outputText value="#{coordenada.orden}" />
+						</p:column>
+						<p:column headerText="X" styleClass="alCenter w15">
+							<h:outputText value="#{coordenada.x.intValue()}" />
+						</p:column>
+						<p:column headerText="Y" styleClass="alCenter w15">
+							<h:outputText value="#{coordenada.y.intValue()}" />
+						</p:column>									
+					</p:subTable>
+				</p:dataTable>
+			</p:panelGrid>					
+		</h:panelGroup>
+			
+			<h:panelGrid id="pngUbicaciones">
+				<h:outputText value="Información obtenida automáticamente en función de la información limítrofe vigente" />
+				<p:dataTable id="idtableubicaciones" value="#{ingresarInformacionAAAController.ubicacionesSeleccionadas}"
+					var="ubicacion" emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Provincia">
+						<h:outputText
+							value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+					</p:column>
+					<p:column headerText="Cantón">
+						<h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}"/>
+					</p:column>
+					<p:column headerText="Parroquia">
+						<h:outputText value="#{ubicacion.nombre}"/>								
+					</p:column>							
+				</p:dataTable>
+			</h:panelGrid>
+				
+			<h:panelGrid columns="1">
+				<h:outputText value="Introducir la información de la división política administrativa descrita en la resolución de la Autorización Administrativa Ambiental otorgada" />
+				<p:dataTable id="tbl_ubicacion" value="#{ingresarInformacionAAAController.listaUbicacionesSeleccionadas}" rowIndexVar="index" var="item"
+					emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Provincia" styleClass="alCenter w15">
+						<h:outputText value="#{item.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+					</p:column>
+					<p:column headerText="Cantón" styleClass="alCenter w15">
+						<h:outputText value="#{item.ubicacionesGeografica.nombre}" />
+					</p:column>
+					<p:column headerText="Parroquia" styleClass="alCenter w15">
+						<h:outputText value="#{item.nombre}" />
+					</p:column>
+					<p:column styleClass="w15">
+						<f:facet name="header">						
+						</f:facet>
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+
+		</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Interseca con" />
+				</f:facet>
+				
+				<h:panelGroup>
+				<h:panelGrid columns="2" id="pnlAreasProtegidas">
+				<p:dataTable id="tbl_snap" rowIndexVar="index" var="item"
+						emptyMessage="#{labels['common.table.empty']}" value="#{ingresarInformacionAAAController.areasProtegidas}">
+						<p:column headerText="SISTEMA NACIONAL DE ÁREAS PROTEGIDAS - SNAP" styleClass="alCenter w15">
+							<h:outputText value="#{item}" />
+						</p:column>
+					</p:dataTable>
+					
+					<p:dataTable id="tbl_bosques" rowIndexVar="index" var="item" value="#{ingresarInformacionAAAController.bosquesProtectores}"
+						emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="BOSQUES PROTECTORES" styleClass="alCenter w15">
+							<h:outputText value="#{item}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+				</h:panelGroup>
+				<p:separator/>
+				<h:panelGrid columns="1" >
+					<h:panelGrid columns="1">
+						<p:dataTable id="tbl_areaProtegidaSelect" value="#{ingresarInformacionAAAController.areasProtegidasSeleccionadas}" rowIndexVar="index" var="item"
+							emptyMessage="#{labels['common.table.empty']}">
+							<p:column headerText="Áreas Protegidas" styleClass="alCenter w50">
+								<h:outputText value="#{item}" />
+							</p:column>
+						</p:dataTable>
+					</h:panelGrid>
+				</h:panelGrid>
+				
+				<h:panelGrid columns="1">
+					<h:panelGrid columns="1">				
+						<p:dataTable id="tbl_bosqueSelect" value="#{ingresarInformacionAAAController.bosquesProtectoresSeleccionados}" rowIndexVar="index" var="item"
+							emptyMessage="#{labels['common.table.empty']}">
+							<p:column headerText="Bosques Protectores" styleClass="alCenter w50">
+								<h:outputText value="#{item}" />
+							</p:column>
+						</p:dataTable>
+					</h:panelGrid>
+				</h:panelGrid>
+
+			</p:panelGrid>
+
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Documentos del proyecto" />
+				</f:facet>
+				
+				<h:panelGrid id="pnlDocumentos" layout="grid" styleClass="panel_data w100"
+					columnClasses="header w25,null w10, null w20, null w20, null w25"
+					columns="4">
+					
+					<h:outputText value="Certificado de Intersección: *" />					
+					<p:commandButton id="fileRLDownload"
+						icon="ui-icon-arrowthickstop-1-s" styleClass="secondary"
+						ajax="false" process="@this" title="Descargar"
+						disabled="#{ingresarInformacionAAAController.certificadoInterseccion.contenidoDocumento==null}"
+						immediate="true">
+						<p:fileDownload
+							value="#{ingresarInformacionAAAController.documentoCertificadoDownload}" />
+					</p:commandButton>
+					<p:outputLabel id="fileNameCer1"
+						value="#{ingresarInformacionAAAController.certificadoInterseccion.nombre}"/>
+					<h:outputText value="Admite .pdf .rar .zip de 20MB" />
+					
+					<h:outputText value="Mapa del Certificado de Intersección: *" />					
+					<p:commandButton id="fileMPDownload"
+						icon="ui-icon-arrowthickstop-1-s" styleClass="secondary"
+						ajax="false" process="@this" title="Descargar"
+						disabled="#{ingresarInformacionAAAController.documentoMapa.contenidoDocumento==null}"
+						immediate="true">
+						<p:fileDownload
+							value="#{ingresarInformacionAAAController.documentoMapaDownload}" />
+					</p:commandButton>
+					<p:outputLabel id="fileNameMp1"
+						value="#{ingresarInformacionAAAController.documentoMapa.nombre}"/>
+					<h:outputText value="Admite .pdf .rar .zip de 20MB" />
+					
+					<h:outputText value="Resolución (Inclusion, Reforma, Actualización): *" />					
+					<p:commandButton id="fileResolucionDownload"
+						icon="ui-icon-arrowthickstop-1-s" styleClass="secondary"
+						ajax="false" process="@this" title="Descargar"
+						disabled="#{ingresarInformacionAAAController.documentoResolucion.contenidoDocumento==null}"
+						immediate="true">
+						<p:fileDownload
+							value="#{ingresarInformacionAAAController.documentoResolucionDownload}" />
+					</p:commandButton>
+					<p:outputLabel id="fileNameResolucion1"
+						value="#{ingresarInformacionAAAController.documentoResolucion.nombre}"/>
+					<h:outputText value="Admite .pdf .rar .zip de 20MB" />
+					
+					<h:outputText value="Ficha Ambiental: *" rendered="#{ingresarInformacionAAAController.mostrarDocumentoFicha}"/>					
+					<p:commandButton id="fileFichaDownload"
+						icon="ui-icon-arrowthickstop-1-s" styleClass="secondary"
+						ajax="false" process="@this" title="Descargar"
+						disabled="#{ingresarInformacionAAAController.documentoFichaAmbiental.contenidoDocumento==null}"
+						immediate="true" 
+						rendered="#{ingresarInformacionAAAController.mostrarDocumentoFicha}">
+						<p:fileDownload
+							value="#{ingresarInformacionAAAController.documentoFichaAmbientalDownload}" />
+					</p:commandButton>
+					<p:outputLabel id="fileNameFicha1"
+						value="#{ingresarInformacionAAAController.documentoFichaAmbiental.nombre}" 
+						rendered="#{ingresarInformacionAAAController.mostrarDocumentoFicha}"/>
+					<h:outputText value="Admite .pdf .rar .zip de 50MB" rendered="#{ingresarInformacionAAAController.mostrarDocumentoFicha}"/>
+					
+					<h:outputText value="Estudio de Impacto Ambiental: *" rendered="#{ingresarInformacionAAAController.mostrarDocumentoEstudio}"/>					
+					<p:commandButton id="fileEstudioDownload"
+						icon="ui-icon-arrowthickstop-1-s" styleClass="secondary"
+						ajax="false" process="@this" title="Descargar"
+						disabled="#{ingresarInformacionAAAController.documentoEstudioImpactoAmbiental.contenidoDocumento==null}"
+						immediate="true" rendered="#{ingresarInformacionAAAController.mostrarDocumentoEstudio}">
+						<p:fileDownload
+							value="#{ingresarInformacionAAAController.documentoEstudioImpactoAmbientalDownload}" />
+					</p:commandButton>
+					<p:outputLabel id="fileNameEstudio1"
+						value="#{ingresarInformacionAAAController.documentoEstudioImpactoAmbiental.nombre}" 
+						rendered="#{ingresarInformacionAAAController.mostrarDocumentoEstudio}"/>
+					<h:outputText value="Admite .pdf .rar .zip de 50MB" rendered="#{ingresarInformacionAAAController.mostrarDocumentoEstudio}"/>
+					
+					<h:outputText value="Documentos habilitantes propios de la Autorización: *" />					
+					<p:commandButton id="fileHabilitanteDownload"
+						icon="ui-icon-arrowthickstop-1-s" styleClass="secondary"
+						ajax="false" process="@this" title="Descargar"
+						disabled="#{ingresarInformacionAAAController.documentosHabilitantes.contenidoDocumento==null}"
+						immediate="true">
+						<p:fileDownload
+							value="#{ingresarInformacionAAAController.documentosHabilitantesDownload}" />
+					</p:commandButton>
+					<p:outputLabel id="fileNameHabilitante1"
+						value="#{ingresarInformacionAAAController.documentosHabilitantes.nombre}"/>
+					<h:outputText value="Admite .pdf .rar .zip de 20MB" />
+					
+					<h:outputText value="Otros documentos:" />					
+					<p:commandButton id="fileOtroDocDownload"
+						icon="ui-icon-arrowthickstop-1-s" styleClass="secondary"
+						ajax="false" process="@this" title="Descargar"
+						disabled="#{ingresarInformacionAAAController.otrosDocumentos.contenidoDocumento==null}"
+						immediate="true">
+						<p:fileDownload
+							value="#{ingresarInformacionAAAController.otrosDocumentosDownload}" />
+					</p:commandButton>
+					<p:outputLabel id="fileNameOtro1"
+						value="#{ingresarInformacionAAAController.otrosDocumentos.nombre}"/>
+					<h:outputText value="Admite .pdf .rar .zip de 20MB" />
+					
+				
+				</h:panelGrid>
+				
+				<h:outputText value="En el caso de que no cuente con el documento solicitado deberá adjuntar un archivo en .pdf incluyendo la justificación con la correspondiente firma electrónica" />
+
+			</p:panelGrid>
+			
+			
+			<p:dialog header="Catalogo CIIU - Actividad principal" widgetVar="idDialogCiiu1" modal="true" resizable="false" width="700px">
+			
+				<p:panelGrid columns="1" columnClasses="label, value">
+					<p:dataTable id="idTablaCiiu1" var="item" emptyMessage="#{labels['common.table.empty']}"
+					value="#{ingresarInformacionAAAController.listaCatalogoCiiu}"
+					paginator="true" rows="10" scrollable="true" scrollHeight="400" 
+					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" style="width:660px;"
+				    paginatorPosition="bottom">				    
+				    	<p:column style="width:100px;" 
+				    	headerText="Código" filterBy="#{item.codigo}" filterMatchMode="contains">
+							<h:outputText value="#{item.codigo}" />
+						</p:column>
+						<p:column style="width:440px;" headerText="Nombre"  filterBy="#{item.nombre}" filterMatchMode="contains">
+							<h:outputText value="#{item.nombre}" />
+						</p:column>
+						<p:column style="width:50px;"  >
+							<p:commandButton icon="ui-icon-check" styleClass="primary" action="#{ingresarInformacionAAAController.ciiu1(item)}" 
+							oncomplete="PF('idDialogCiiu1').hide()" process="@this"  update=":form:idPanelSiiu" disabled="true"/>
+						</p:column>						
+					</p:dataTable>
+				</p:panelGrid>
+				
+				<div class="buttons">
+					<p:commandButton value="Cerrar" process="@this"
+						onclick="PF('idDialogCiiu1').hide()" />
+				</div>
+			</p:dialog>
+			
+			<p:dialog header="Adjuntar coordenadas" width="600" height="auto"
+				widgetVar="adjuntarCoordenadas" modal="true" resizable="false">
+												
+				<br />
+				<p:panelGrid columns="1" styleClass="w100" columnClasses="label, value">
+					<h:outputText value="Seleccione el archivo excel (.xls)" />
+					<p:fileUpload uploadLabel="Subir" auto="true"
+						cancelLabel="Cancelar" label="Seleccionar"
+						fileUploadListener="#{ingresarInformacionAAAController.handleFileUpload}"
+						mode="advanced" dragDropSupport="false" multiple="false"
+						allowTypes="/(\.|\/)(xls)$/"
+						invalidFileMessage="El archivo es inválido."
+						invalidSizeMessage="El archivo es demasiado grande." 
+						update="@form"/>
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton type="button" value="Cerrar"
+						onclick="PF('adjuntarCoordenadas').hide()" />
+				</div>
+			</p:dialog>
+			
+			<p:dialog header="Seleccionar Ubicación geográfica" width="600" height="auto" id="ubicacionDlg"
+				widgetVar="ubicacionDlg" modal="true" resizable="false"
+				style=" position: absolute;  top: 100%;  width: 100%;">
+												
+				<br />
+				<p:panelGrid styleClass="panel_data w100" columns="2"
+					columnClasses="header w25, null w25">
+					<h:outputText value="Provincia*" />
+					<p:selectOneMenu id="cmbProvincia"
+						value="#{ingresarInformacionAAAController.idProvincia}"
+						style="width:100%" filter="true" filterMatchMode="contains">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+						<f:selectItems
+							value="#{ingresarInformacionAAAController.listaProvincias}"
+							var="item" itemLabel="#{item.nombre}" itemValue="#{item.id}" />
+						<p:ajax process="@this" listener="#{ingresarInformacionAAAController.buscarCantonesListener()}" update="cmbCanton"/>
+					</p:selectOneMenu>
+
+					<h:outputText value="Cantón*" />
+					<p:selectOneMenu id="cmbCanton"
+						value="#{ingresarInformacionAAAController.idCanton}"
+						style="width:100%" filter="true" filterMatchMode="contains">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+						<f:selectItems
+							value="#{ingresarInformacionAAAController.listaCantones}"
+							var="item" itemLabel="#{item.nombre}" itemValue="#{item.id}" />
+						<p:ajax process="@this" listener="#{ingresarInformacionAAAController.buscarParroquiasListener()}" update="cmbParroquia"/>
+					</p:selectOneMenu>
+
+					<h:outputText value="Parroquia*" />
+					<p:selectOneMenu id="cmbParroquia"
+						value="#{ingresarInformacionAAAController.idParroquia}"
+						style="width:100%" filter="true" filterMatchMode="contains">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+						<f:selectItems
+							value="#{ingresarInformacionAAAController.listaParroquias}"
+							var="item" itemLabel="#{item.nombre}" itemValue="#{item.id}" />
+						<p:ajax process="@this"/>
+					</p:selectOneMenu>
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton value="Guardar" actionListener="#{ingresarInformacionAAAController.llenarTablaUbicaciones()}"
+						update=":form:tbl_ubicacion" process="@this" styleClass="primary"/>					
+					<p:commandButton type="button" value="Cerrar"
+						onclick="PF('ubicacionDlg').hide()"/>
+				</div>
+			</p:dialog>
+
+			<p:dialog modal="true" id="fileRLDiag" widgetVar="fileRLDiag"
+				header="Certificado de Intersección" width="700px"
+				closable="false">
+				<p:fileUpload id="fileRL" 
+					update="fileNameCer1 fileNameCer fileRLDownload"
+					oncomplete="PF('fileRLDiag').hide()"
+					fileUploadListener="#{ingresarInformacionAAAController.uploadDocumentoCertificado}"
+					mode="advanced" auto="true" sizeLimit="20971520" fileLimit="1"
+					label="Seleccione"
+					invalidFileMessage="El tipo de archivo no es correcto."
+					invalidSizeMessage="Tamaño de archivo incorrecto"
+					allowTypes="/(\.|\/)(pdf|rar|zip)$/">
+				</p:fileUpload>
+				<p:outputLabel id="fileNameCer"
+					value="#{ingresarInformacionAAAController.certificadoInterseccion.nombre}" />
+				<div styleClass="buttons">
+					<p:commandButton icon="ui-icon-cancel" value="Cerrar"
+						process="@this" oncomplete="PF('fileRLDiag').hide()"
+						styleClass="secondary" />
+				</div>
+			</p:dialog>
+			
+			<p:dialog modal="true" id="fileMPDiag" widgetVar="fileMPDiag"
+				header="Mapa" width="700px"
+				closable="false">
+				<p:fileUpload id="fileMP" 
+					update="fileNameMp1 fileNameMp fileMPDownload"
+					oncomplete="PF('fileMPDiag').hide()"
+					fileUploadListener="#{ingresarInformacionAAAController.uploadDocumentoMapa}"
+					mode="advanced" auto="true" sizeLimit="20971520" fileLimit="1"
+					label="Seleccione"
+					invalidFileMessage="El tipo de archivo no es correcto."
+					invalidSizeMessage="Tamaño de archivo incorrecto"
+					allowTypes="/(\.|\/)(pdf|rar|zip)$/">
+				</p:fileUpload>
+				<p:outputLabel id="fileNameMp"
+					value="#{ingresarInformacionAAAController.documentoMapa.nombre}" />
+				<div styleClass="buttons">
+					<p:commandButton icon="ui-icon-cancel" value="Cerrar"
+						process="@this" oncomplete="PF('fileMPDiag').hide()"
+						styleClass="secondary" />
+				</div>
+			</p:dialog>
+			
+			<p:dialog modal="true" id="fileResolucion" widgetVar="fileResolucion"
+				header="Resolución (Inclusion, Reforma, Actualización)" width="700px"
+				closable="false">
+				<p:fileUpload id="fileRes" 
+					update="fileNameResolucion1 fileNameRes fileResolucionDownload"
+					oncomplete="PF('fileResolucion').hide()"
+					fileUploadListener="#{ingresarInformacionAAAController.uploadDocumentoResolucion}"
+					mode="advanced" auto="true" sizeLimit="20971520" fileLimit="1"
+					label="Seleccione"
+					invalidFileMessage="El tipo de archivo no es correcto."
+					invalidSizeMessage="Tamaño de archivo incorrecto"
+					allowTypes="/(\.|\/)(pdf|rar|zip)$/">
+				</p:fileUpload>
+				<p:outputLabel id="fileNameRes"
+					value="#{ingresarInformacionAAAController.documentoResolucion.nombre}" />
+				<div styleClass="buttons">
+					<p:commandButton icon="ui-icon-cancel" value="Cerrar"
+						process="@this" oncomplete="PF('fileResolucion').hide()"
+						styleClass="secondary" />
+				</div>
+			</p:dialog>
+			
+			<p:dialog modal="true" id="fileFichaAmbiental" widgetVar="fileFichaAmbiental"
+				header="Ficha Ambiental" width="700px"
+				closable="false">
+				<p:fileUpload id="fileFicha" 
+					update="fileNameFicha1 fileNameFicha fileFichaDownload"
+					oncomplete="PF('fileFichaAmbiental').hide()"
+					fileUploadListener="#{ingresarInformacionAAAController.uploadDocumentoFichaAmbiental}"
+					mode="advanced" auto="true" sizeLimit="52428800" fileLimit="1"
+					label="Seleccione"
+					invalidFileMessage="El tipo de archivo no es correcto."
+					invalidSizeMessage="Tamaño de archivo incorrecto"
+					allowTypes="/(\.|\/)(pdf|rar|zip)$/">
+				</p:fileUpload>
+				<p:outputLabel id="fileNameFicha"
+					value="#{ingresarInformacionAAAController.documentoFichaAmbiental.nombre}" />
+				<div styleClass="buttons">
+					<p:commandButton icon="ui-icon-cancel" value="Cerrar"
+						process="@this" oncomplete="PF('fileFichaAmbiental').hide()"
+						styleClass="secondary" />
+				</div>
+			</p:dialog>
+			
+			<p:dialog modal="true" id="fileEstudioImpacto" widgetVar="fileEstudioImpacto"
+				header="Estudio de Impacto Ambiental" width="700px"
+				closable="false">
+				<p:fileUpload id="fileEstudio" 
+					update="fileNameEstudio1 fileNameEstudio fileEstudioDownload"
+					oncomplete="PF('fileEstudioImpacto').hide()"
+					fileUploadListener="#{ingresarInformacionAAAController.uploadDocumentoEstudioImpactoAmbiental}"
+					mode="advanced" auto="true" sizeLimit="52428800" fileLimit="1"
+					label="Seleccione"
+					invalidFileMessage="El tipo de archivo no es correcto."
+					invalidSizeMessage="Tamaño de archivo incorrecto"
+					allowTypes="/(\.|\/)(pdf|rar|zip)$/">
+				</p:fileUpload>
+				<p:outputLabel id="fileNameEstudio"
+					value="#{ingresarInformacionAAAController.documentoEstudioImpactoAmbiental.nombre}" />
+				<div styleClass="buttons">
+					<p:commandButton icon="ui-icon-cancel" value="Cerrar"
+						process="@this" oncomplete="PF('fileEstudioImpacto').hide()"
+						styleClass="secondary" />
+				</div>
+			</p:dialog>
+			
+			<p:dialog modal="true" id="fileDocumentoHabilitante" widgetVar="fileDocumentoHabilitante"
+				header="Documentos habilitantes propios de la Autorización" width="700px"
+				closable="false">
+				<p:fileUpload id="fileHab" 
+					update="fileNameHabilitante1 fileNameHab fileHabilitanteDownload"
+					oncomplete="PF('fileDocumentoHabilitante').hide()"
+					fileUploadListener="#{ingresarInformacionAAAController.uploadDocumentosHabilitantes}"
+					mode="advanced" auto="true" sizeLimit="20971520" fileLimit="1"
+					label="Seleccione"
+					invalidFileMessage="El tipo de archivo no es correcto."
+					invalidSizeMessage="Tamaño de archivo incorrecto"
+					allowTypes="/(\.|\/)(pdf|rar|zip)$/">
+				</p:fileUpload>
+				<p:outputLabel id="fileNameHab"
+					value="#{ingresarInformacionAAAController.documentosHabilitantes.nombre}" />
+				<div styleClass="buttons">
+					<p:commandButton icon="ui-icon-cancel" value="Cerrar"
+						process="@this" oncomplete="PF('fileDocumentoHabilitante').hide()"
+						styleClass="secondary" />
+				</div>
+			</p:dialog>
+			
+			<p:dialog modal="true" id="fileOtroDocumento" widgetVar="fileOtroDocumento"
+				header="Otros documentos" width="700px"
+				closable="false">
+				<p:fileUpload id="fileOtro" 
+					update="fileOtroDocDownload fileNameOtro1 fileNameOtro"
+					oncomplete="PF('fileOtroDocumento').hide()"
+					fileUploadListener="#{ingresarInformacionAAAController.uploadOtrosDocumentos}"
+					mode="advanced" auto="true" sizeLimit="20971520" fileLimit="1"
+					label="Seleccione"
+					invalidFileMessage="El tipo de archivo no es correcto."
+					invalidSizeMessage="Tamaño de archivo incorrecto"
+					allowTypes="/(\.|\/)(pdf|rar|zip)$/" process="@this">
+				</p:fileUpload>
+				<p:outputLabel id="fileNameOtro"
+					value="#{ingresarInformacionAAAController.otrosDocumentos.nombre}" />
+				<div styleClass="buttons">
+					<p:commandButton icon="ui-icon-cancel" value="Cerrar"
+						process="@this" oncomplete="PF('fileOtroDocumento').hide()"
+						styleClass="secondary" />
+				</div>
+			</p:dialog>
+
+			<p:dialog modal="true" id="siguienteDlg" widgetVar="siguienteDlg"
+				width="350px" closable="false">
+				<div class="alCenter">
+					<h:outputText value="¿Está seguro de registrar la información del proyecto? una vez enviada no podrá modificarla." />
+				<br />
+				<br />
+				</div>
+				<div class="buttons main">
+					<p:commandButton id="btnCancelar" value="Cancelar"
+						process="@this" oncomplete="PF('siguienteDlg').hide()"
+						styleClass="primary" disabled="true"/>
+						
+						<p:commandButton value="Aceptar" disabled="true" oncomplete="PF('siguienteDlg').hide()"
+						process="@this" update="@this btnCancelar" actionListener="#{ingresarInformacionAAAController.siguiente()}"
+						styleClass="primary"/>
+				</div>
+			</p:dialog>
+
+			<p:dialog modal="true" id="siguienteDlgDigitalizacion" widgetVar="siguienteDlgDigitalizacion" width="350px" closable="false">
+				<div class="alCenter">
+					<h:outputText value="¿Está seguro de proceder con la digitalización y asociación  del(os) presente(s) proyecto(s) a su proyecto principal?" />
+				<br />
+				<br />
+				</div>
+				<div class="buttons main">
+					<p:commandButton id="btnCancelarD" value="Cancelar" actionListener="#{ingresarInformacionAAAController.continuarSiguiente()}"
+						process="@this" oncomplete="PF('siguienteDlgDigitalizacion').hide()" styleClass="primary" />
+						<p:commandButton value="Aceptar" process="@this" update="@this" oncomplete="PF('siguienteDlgDigitalizacion').hide()"
+						actionListener="#{ingresarInformacionAAAController.continuar()}" styleClass="primary"/>
+				</div>
+			</p:dialog>
+
+
+			<p:dialog modal="true" id="mdlFinalizacion" widgetVar="mdlFinalizacion" width="350px" closable="false">
+				<div class="alCenter">
+					<h:outputLabel value="“Estimado usuario, usted ha completado el proceso de digitalización y asociación" />
+					<br/><br/>
+					<h:outputText value="¿Desea realizar la digitalización de más Autorizaciones Administrativas Ambientales?" />
+				<br />
+				<br />
+				</div>
+				<div class="buttons main">
+					<p:commandButton value="No" actionListener="#{ingresarInformacionAAAController.redireccionarBandeja()}"
+						oncomplete="PF('mdlFinalizacion').hide()" process="@this" styleClass="primary" />
+						<p:commandButton value="Si" process="@this" update="@this" oncomplete="PF('mdlFinalizacion').hide()"
+						actionListener="#{ingresarInformacionAAAController.redireccionarProyectos()}" styleClass="primary"/>
+				</div>
+			</p:dialog>
+
+			<p:dialog modal="true" id="certificadoInterseccion" widgetVar="certificadoInterseccion" width="350px" closable="false">
+				<div class="alCenter">
+					<h:outputText value="#{ingresarInformacionAAAController.mensajeCI}" />
+				<br />
+				<br />
+				</div>
+				<div class="buttons main">
+					<p:commandButton value="No" actionListener="#{ingresarInformacionAAAController.noEsCI()}"
+						oncomplete="PF('certificadoInterseccion').hide()" process="@this" styleClass="primary" />
+						<p:commandButton value="Si" process="@this" update="@this" oncomplete="PF('certificadoInterseccion').hide()"
+						actionListener="#{ingresarInformacionAAAController.esCI()}" styleClass="primary"/>
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

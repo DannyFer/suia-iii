@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<p:dialog header="Identificación y Descripción de impactos ambientales" id="adicionarEvaluacion" widgetVar="adicionarEvaluacion" modal="true" resizable="false" width="700">
+	<h:panelGroup id="datosEvaluacion">
+		<h:panelGrid styleClass="w100 separatorBottom" columns="2" columnClasses="w50, field_mrg w50">
+			<p:outputLabel for="etapaOFase" value="Etapa/Fase" />
+			<p:outputLabel for="actividad" value="Actividad" />
+
+			<p:selectOneMenu
+					id="etapaOFase" required="true"
+					value="#{evaluacionAspectoAmbientalBean.catalogoCategoriaFase}"
+					converter="selectItemConverter">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue=""
+							  noSelectionOption="true"/>
+				<f:selectItems
+						value="#{evaluacionAspectoAmbientalBean.catalogoCategoriaFases}" var="catalogo" itemLabel="#{catalogo.fase.nombre}" itemValue="#{catalogo}"/>
+				<p:ajax event="change" update="actividad"
+						listener="#{evaluacionAspectoAmbientalController.cargarActividades}"/>
+			</p:selectOneMenu>
+
+
+			<p:selectOneMenu
+					id="actividad" required="true"
+					value="#{evaluacionAspectoAmbientalBean.evaluacionAspectoAmbiental.actividadLicenciamiento}"
+					converter="selectItemConverter">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue=""
+							  noSelectionOption="true"/>
+				<f:selectItems
+						value="#{evaluacionAspectoAmbientalBean.actividades}" var="actividad" itemLabel="#{actividad.nombreActividad}" itemValue="#{actividad}"/>
+
+			</p:selectOneMenu>
+
+
+
+		</h:panelGrid>
+
+		<p:panelGrid columns="1" layout="grid">
+			<f:facet name="header">
+				<p:commandButton value="Adicionar" process="@this" actionListener="#{detalleEvaluacionAspectoAmbientalController.clear()}" update="datosDetalle" oncomplete="PF('adicionarDetalleEvaluacion').show()" styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick" />
+				<h:outputText value="Detalles asociados a la evaluación *" />
+			</f:facet>
+			<p:dataTable id="tbl_detalles_evaluacion" rowIndexVar="index" emptyMessage="#{labels['common.table.empty']}" value="#{detalleEvaluacionAspectoAmbientalBean.detalleEvaluacionAspectoAmbientalLista}" var="detalle">
+				<p:column headerText="No." styleClass="w20px alCenter">
+					<h:outputText value="#{index + 1}" />
+				</p:column>
+				<p:column headerText="Componente">
+					<h:outputText value="#{detalle.componente}" />
+				</p:column>
+				<p:column headerText="Aspecto ambiental" styleClass="singleLine">
+					<h:outputText value="#{detalle.aspectoAmbiental}" />
+				</p:column>
+				<p:column headerText="Impactos identificados">
+					<h:outputText value="#{detalle.impactosIdentificados}" />
+				</p:column>
+				<p:column headerText="Resultados">
+					<h:outputText value="#{detalle.resultados}" />
+				</p:column>
+				<p:column styleClass="w40px">
+					<p:commandButton styleClass="button-small primary" process="@this tbl_detalles_evaluacion" update="tbl_detalles_evaluacion :frmDatos:datosDetalle" icon="ui-icon-pencil" actionListener="#{detalleEvaluacionAspectoAmbientalController.edit(detalle)}" oncomplete="PF('adicionarDetalleEvaluacion').show()" />
+					<p:commandButton styleClass="button-small primary" process="@this tbl_detalles_evaluacion" update="tbl_detalles_evaluacion" icon="ui-icon-circle-close" actionListener="#{detalleEvaluacionAspectoAmbientalController.delete(detalle)}">
+						<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar ese detalle?" icon="ui-icon-alert" />
+					</p:commandButton>
+				</p:column>
+			</p:dataTable>
+		</p:panelGrid>
+		<h:inputHidden id="validateDetallesEvaluacionAspectosAmbientales" validator="#{evaluacionAspectoAmbientalController.validateData}" />
+	</h:panelGroup>
+
+	<p:separator />
+	<div class="buttons">
+		<p:commandButton value="Aceptar" actionListener="#{evaluacionAspectoAmbientalController.aceptar()}" process="@this datosEvaluacion" update="tbl_evaluaciones datosEvaluacion" oncomplete="handleEvaluacion(xhr, status, args)" />
+	</div>
+
+	<script type="text/javascript">
+        function handleEvaluacion(xhr, status, args) {
+            if (!args.addEvaluacion) {
+            	PF('adicionarEvaluacion').show();
+            }
+            else {
+                PF('adicionarEvaluacion').hide();
+            }
+        }
+    </script>
+</p:dialog>
+
+<ui:include src="/prevencion/licenciamiento-ambiental/eia/impactoAmbiental/utiles/adicionarDetalleEvaluacionAspectoAmbientalModal.xhtml" />
+
+
+</html>

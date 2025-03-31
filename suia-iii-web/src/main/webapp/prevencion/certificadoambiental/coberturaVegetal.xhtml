@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:t="http://myfaces.apache.org/tomahawk"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+    <ui:define name="content">    
+        
+            <p:panel id="parte1" header="INVENTARIO FORESTAL">
+                <h:panelGrid columns="1" layout="grid" styleClass="w100" cellpadding="4" cellspacing="4">
+                    <h:form id="ficha">
+                        <p:outputLabel value="Su proyecto tiene remoción de cobertura vegetal nativa." />
+                                               
+						<ui:remove><center><br/><br/><b><p:outputLabel value="El proyecto requiere remoción de
+						cobertura vegetal nativa, por lo tanto queda suspendido temporalmente hasta culminar con el proceso de
+						actualización de la Norma Técnica." style="color: red;"/></b></center></ui:remove>
+							
+                        <h:panelGroup id="pnl_remocion_vegetal" >
+                            <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                         rendered="#{coberturaVegetalCAController.inventarioForestalPma.remocionVegetal}">
+                                <f:facet name="header">
+                                    <mae:panelGridHeaderHelp value="Remoción de cobertura vegetal nativa"
+                                                             conector="generalHelp"
+                                                             image="#{request.contextPath}/resources/images/help-how.png"
+                                                             help="#{helps['no.help.yet']}"/>
+                                </f:facet>
+
+                                <h:panelGrid columns="2">
+                                    <p:outputLabel value="Descargar plantilla del inventario forestal"/>
+                                    <p:commandButton value="Descargar" ajax="false" id="btnDescargar" immediate="true"
+                                                     onclick="PrimeFaces.monitorDownload(start, stop);"
+                                                     styleClass="primary"
+                                                     icon="ui-icon-arrowthick-1-s">
+                                        <p:fileDownload
+                                                value="#{coberturaVegetalCAController.descargarPlantillaInventarioForestal()}"/>
+                                    </p:commandButton>
+                                </h:panelGrid>
+
+                                <h:outputText value="Seleccione el archivo excel (.xls)"/>
+
+                                <h:panelGrid styleClass="w25" cellpalding="2" columns="2">
+                                    <h:outputText id="nombreArchivoInventario"
+                                                  value="#{coberturaVegetalCAController.inventarioForestalPma.inventarioForestal.nombre}"/>
+                                    <p:commandButton ajax="false" immediate="true"
+                                                     rendered="#{!(coberturaVegetalCAController.inventarioForestalPma.inventarioForestal.id==null)}"
+                                                     onclick="PrimeFaces.monitorDownload(start, stop);"
+                                                     styleClass="primary"
+                                                     icon="ui-icon-arrowthick-1-s">
+                                        <p:fileDownload
+                                                value="#{coberturaVegetalCAController.descargar()}"/>
+                                    </p:commandButton>
+                                    <h:inputHidden id="nombreArchivoInventarioHidden"
+                                                   value="#{coberturaVegetalCAController.nombreFileInventarioForestal}"/>
+                                </h:panelGrid>
+
+                                <p:fileUpload id="filePlano"
+                                              fileUploadListener="#{coberturaVegetalCAController.fileUploadListenerInventarioForestal}"
+                                              value="#{coberturaVegetalCAController.file}" sizeLimit="1048576"
+                                              allowTypes="/(\.|\/)(xls|xlsx)$/" label="Seleccionar"
+                                              uploadLabel="Subir" auto="true"
+                                              update=":#{p:component('nombreArchivoInventario')},:#{p:component('nombreArchivoInventarioHidden')}"
+                                              cancelLabel="Cancelar"
+                                              invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo XLS o XLSX"
+                                              invalidSizeMessage="Debe adjuntar un archivo no mayor de 1 Mb."
+                                              styleClass="w50 toLeft" mode="advanced">
+                                </p:fileUpload>
+
+                                <h:panelGrid columns="1" layout="grid" styleClass="w50" cellpadding="2"
+                                             cellspacing="2">
+                                    <p:outputLabel for="textCantidadMadera" value="Cantidad de madera en pie (m3)"/>
+                                    <p:inputText id="textCantidadMadera" required="true"
+                                                 value="#{coberturaVegetalCAController.inventarioForestalPma.maderaEnPie}">
+                                        <f:validateDoubleRange minimum="0.1" maximum="500000"/>
+                                        <f:validateRequired disabled="false"/>
+                                        <pe:keyFilter mask="num"/>
+                                    </p:inputText>
+                                </h:panelGrid>
+
+                            </p:panelGrid>
+                        </h:panelGroup>
+
+                        <t:div styleClass="buttons main">                            
+                            <p:commandButton value="Guardar" 
+                                             action="#{coberturaVegetalCAController.guardar()}"
+                                             icon="ui-icon-disk" update=":#{p:component('ficha')}"/>
+                            <p:commandButton value="Enviar" disabled="#{coberturaVegetalCAController.pagoCobertura}"
+                                             action="#{coberturaVegetalCAController.completarTarea()}"
+                                             icon="ui-icon-disk" update=":#{p:component('ficha')}">
+                            	<p:confirm header="Confirmación"
+                                           message="#{coberturaVegetalCAController.mensajePagoCoberturaVegetal}"
+                                           icon="ui-icon-alert"/>
+                            </p:commandButton>
+                            <p:commandButton value="Aceptar" rendered="false"
+                                             action="/bandeja/bandejaTareas.jsf?faces-redirect=true"
+                                             icon="ui-icon-check"/>                                             
+                        </t:div>
+                    </h:form>
+                </h:panelGrid>
+            </p:panel>
+        
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+<h:panelGrid id="pnlObsSubPlan" columns="1" layout="grid"
+	styleClass="w100"
+	rendered="#{planEia.planManejo.planManejoObservacion.tieneObservaciones and estudioImpactoAmbientalController.mostrarObservaciones}">
+	<p:separator />
+	<br />
+
+	<p:dataList id="dtbObservacionesPma" type="none"
+		styleClass="noBorder cssTblObs#{planEia.subplan.codigo}"
+		paginator="true" rows="10" paginatorPosition="bottom"
+		currentPageReportTemplate="{currentPage} de {totalPages}"
+		value="#{planEia.listaObservacionesSubPlan}" var="obj"
+		emptyMessage="No hay observaciones hasta este momento.">
+		<f:facet name="header">
+			<p:commandButton value="Agregar" immediate="true"
+				styleClass="button-small-text toRight " icon="ui-icon-plusthick"
+				update="@(.cssTblObs#{planEia.subplan.codigo}), @(.cssRbtObs#{planEia.subplan.codigo})"
+				action="#{estudioImpactoAmbientalController.agregarObservacionPma(planEia)}" />
+			<h:outputText
+				value="Observaciones (total: #{planEia.listaObservacionesSubPlan.size()})" />
+		</f:facet>
+		<p:panelGrid columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<p:commandButton styleClass="button-small toRight field_mrg"
+					process="@this" icon="ui-icon-trash"
+					rendered="#{not (obj.disabled or !estudioImpactoAmbientalController.editarObservaciones)}"
+					actionListener="#{estudioImpactoAmbientalController.eliminarObservacionPma(planEia, obj)}"
+					update="@(.cssTblObs#{planEia.subplan.codigo}), @(.cssRbtObs#{planEia.subplan.codigo})">
+					<p:confirm header="Confirmación"
+						message="¿Está seguro que desea eliminar esta observación?"
+						icon="ui-icon-alert" />
+				</p:commandButton>
+				<h:outputText value="Observación del " />
+				<h:outputText value="#{obj.fechaRegistro}">
+					<f:convertDateTime pattern="dd/MM/yyyy" />
+				</h:outputText>
+			</f:facet>
+			<h:panelGrid styleClass="w100" columns="2"
+				columnClasses="w50 alTop, field_mrg w50 alTop">
+				<h:panelGrid styleClass="panel_data w100" columns="2"
+					columnClasses="header w50, null" rowClasses="null, alt">
+					<h:outputText value="Usuario" />
+					<h:outputText value="#{obj.usuario.persona.nombre}" />
+				</h:panelGrid>
+				<h:panelGrid styleClass="panel_data w100" columns="2"
+					columnClasses="header w50, null" rowClasses="null, alt">
+					<h:outputText value="Fecha" />
+					<h:outputText value="#{obj.fechaRegistro}">
+						<f:convertDateTime pattern="dd/MM/yyyy, h:mm:ss aa" />
+					</h:outputText>
+				</h:panelGrid>
+			</h:panelGrid>
+			<h:panelGrid styleClass="w100" columns="2"
+				columnClasses="w50 alTop, field_mrg w50 alCenter alTop"
+				rendered="#{estudioImpactoAmbientalController.editarObservaciones}">
+				<p:outputLabel value="Campo observado" styleClass="bold"
+					for="campoObservado" />
+				<p:outputLabel value="¿Observación corregida?" styleClass="bold"
+					rendered="#{!observacionesEsIARcoaController.esNuevoComentario(obj)}" />
+				<p:outputLabel value=""
+					rendered="#{observacionesEsIARcoaController.esNuevoComentario(obj)}" />
+				<p:inputText value="#{obj.campo}" id="campoObservado"
+					required="#{!obj.disabled}" readonly="#{obj.disabled}" disabled="#{!observacionesEsIARcoaController.esNuevoComentario(obj)}"
+					maxlength="200" />
+
+				<p:selectOneRadio value="#{obj.observacionCorregida}"
+					disabled="#{obj.disabled}"
+					rendered="#{!observacionesEsIARcoaController.esNuevoComentario(obj)}">
+					<f:selectItem itemLabel="Sí" itemValue="true" />
+					<f:selectItem itemLabel="No" itemValue="false" />
+				</p:selectOneRadio>
+				<p:outputLabel value=""
+					rendered="#{observacionesEsIARcoaController.esNuevoComentario(obj)}" />
+			</h:panelGrid>
+			<h:panelGrid styleClass="w100" columns="2"
+				columnClasses="w50 alTop, field_mrg w50 alTop"
+				rendered="#{!estudioImpactoAmbientalController.editarObservaciones}">
+				<h:panelGrid styleClass="panel_data w100" columns="2"
+					columnClasses="header w50, null" rowClasses="null, alt">
+					<h:outputText value="Campo observado" />
+					<h:outputText value="#{obj.campo}" required="#{!obj.disabled}" />
+				</h:panelGrid>
+				<h:panelGrid styleClass="panel_data w100" columns="2"
+					columnClasses="header w50, null" rowClasses="null, alt">
+					<h:outputText value="¿Observación corregida?" />
+					<h:outputText value="#{obj.observacionCorregida}"
+						converter="booleanToStringConverter" />
+				</h:panelGrid>
+			</h:panelGrid>
+
+			<p:outputLabel value="Observación" styleClass="bold"
+				for="observacion" />
+			<control:imputConTextoEnriquecido id="observacion"
+				valor="#{obj.descripcion}"
+				soloLectura="#{obj.disabled or !estudioImpactoAmbientalController.editarObservaciones or !observacionesEsIARcoaController.esNuevoComentario(obj)}"
+				requerido="#{!obj.disabled}"
+				requiredMessage="El campo 'Observación' es requerido" />
+		</p:panelGrid>
+	</p:dataList>
+
+	<p:separator />
+	<t:div styleClass="buttons main">
+		<p:commandButton value="Guardar observaciones" styleClass="extraLarge"
+			icon="ui-icon-disk"
+			action="#{estudioImpactoAmbientalController.guardarObservacionPma(planEia)}"
+			update="@(.cssTblObs#{planEia.subplan.codigo})"
+			rendered="#{estudioImpactoAmbientalController.editarObservaciones}"
+			process="pnlObsSubPlan" />
+	</t:div>
+
+</h:panelGrid>
+
+</html>

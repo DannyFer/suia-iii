@@ -1,0 +1,169 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition
+	template="/control/aprobacionRequisitosTecnicos/templates/verArt.xhtml">
+	<ui:define name="content-art">
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Recolección y transporte de desechos" />
+				</f:facet>
+				<p:panelGrid
+					rendered="#{!empty lavadoContenedoresYTratamientoEfluentesController.lavadoContenedoresYTratamientoEfluentesBean.desechosEspeciales}"
+					columns="1" layout="grid">
+					<f:facet name="header">
+						<h:outputText value="Anexos desechos" />
+					</f:facet>
+					<p:dataTable id="tblDesechos"
+						value="#{lavadoContenedoresYTratamientoEfluentesController.lavadoContenedoresYTratamientoEfluentesBean.desechosEspeciales}"
+						var="desecho" emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="#{labels['label.nombre.desecho.peligroso']}">
+							<h:outputText value="#{desecho.desechoPeligroso.descripcion}" />
+						</p:column>
+						<p:column styleClass="w60px alCenter">
+							<p:commandButton value="Anexo"
+								action="#{lavadoContenedoresYTratamientoEfluentesController.seleccionarDesechoEspecial(desecho)}"
+								title="Agregar" styleClass="primary"
+								update=":#{p:component('pngImagenes')}"
+								oncomplete="PF('agregarCaracteristicasImagenes').show();"
+								process="@this" />
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText
+							value="#{labels['label.lavado.contenedores.tratamiento.efluentes']}" />
+					</f:facet>
+					<p:dataTable
+						value="#{lavadoContenedoresYTratamientoEfluentesController.lavadoContenedoresYTratamientoEfluentesBean.listaLavadosContenedores}"
+						var="lavadoContenedor" id="tablaLavadoContenedor"
+						emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="#{labels['label.sitio.lavado']}">
+							<h:outputText value="#{lavadoContenedor.sitioLavado}" />
+						</p:column>
+						<p:column
+							headerText="#{labels['label.tipo.tratamiento.efluentes']}">
+							<h:outputText
+								value="#{lavadoContenedor.tipoTratamientoEfluentes}" />
+						</p:column>
+						<p:column headerText="#{labels['label.lugar.descarga']}">
+							<h:outputText value="#{lavadoContenedor.lugarDescarga}" />
+						</p:column>
+						<p:column headerText="#{labels['label.frecuencia.lavado']}">
+							<h:outputText value="#{lavadoContenedor.frecuenciaLavado}" />
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+			</p:panelGrid>
+			<div class="buttons main">
+				<p:commandButton value="Atrás" immediate="true" process="@this"
+					action="/control/aprobacionRequisitosTecnicos/desechoPeligrosoTransporte.jsf?faces-redirect=true"
+					icon="ui-icon-arrowthick-1-w" />
+				<p:commandButton value="Siguiente" immediate="true" process="@this"
+					action="#{lavadoContenedoresYTratamientoEfluentesController.recuparPaginaSiguienteModoVer()}"
+					rendered="#{lavadoContenedoresYTratamientoEfluentesController.isVisibleOpcionNavegarSiguienteEnMenuModoVer()}"
+					icon="ui-icon-arrowthick-1-e" />
+			</div>
+		</h:form>
+		<p:dialog header="Imágenes" id="agregarCaracteristicasImagenes"
+			widgetVar="agregarCaracteristicasImagenes" modal="true"
+			resizable="false" width="700">
+			<h:form>
+				<p:panelGrid styleClass="w100" id="pngImagenes"
+					columnClasses="w33, field_mrg w33, field_mrg w33">
+					<f:facet name="header">
+						<p:row>
+							<p:column styleClass="w33 " rendered="#{lavadoContenedoresYTratamientoEfluentesController.exPost}">
+							</p:column>
+							<p:column styleClass="w33" rendered="#{lavadoContenedoresYTratamientoEfluentesController.exPost}">
+								<h:outputText value="Descripción" />
+							</p:column>
+							<p:column styleClass="w33" rendered="#{lavadoContenedoresYTratamientoEfluentesController.exPost}">
+								<h:outputText value="#{labels['label.fotos']}" />
+							</p:column>
+						</p:row>
+					</f:facet>
+					<p:row>
+						<p:column>
+							<p:outputLabel for="txtMecanica"
+								value="#{labels['label.mecanica']}" />
+						</p:column>
+						<p:column>
+							<p:inputText id="txtMecanica"
+								value="#{lavadoContenedoresYTratamientoEfluentesController.lavadoContenedoresYTratamientoEfluentesBean.desechoEspecial.descripcionMecanica}"
+								styleClass="w100" disabled="true"/>
+						</p:column>
+						<p:column>
+							<h:panelGroup
+								rendered="#{lavadoContenedoresYTratamientoEfluentesController.lavadoContenedoresYTratamientoEfluentesBean.mostrarFotografia}">
+								<p:commandButton icon="ui-icon-search"
+									styleClass="button-small primary toLeft" title="Ver"
+									action="#{lavadoContenedoresYTratamientoEfluentesController.descargar(0)}"
+									ajax="false" id="btn_descargaMecanica"
+									disabled="#{lavadoContenedoresYTratamientoEfluentesController.lavadoContenedoresYTratamientoEfluentesBean.desechoEspecial.documentoMecanica.id==null}" />
+							</h:panelGroup>
+
+						</p:column>
+					</p:row>
+					<p:row>
+						<p:column>
+							<p:outputLabel for="txtEnfriamiento"
+								value="#{labels['label.enfriamiento']}" />
+						</p:column>
+						<p:column>
+							<p:inputText id="txtEnfriamiento"
+								value="#{lavadoContenedoresYTratamientoEfluentesController.lavadoContenedoresYTratamientoEfluentesBean.desechoEspecial.descripcionEnfriamiento}"
+								styleClass="w100" disabled="true"/>
+						</p:column>
+						<p:column>
+							<h:panelGroup
+								rendered="#{lavadoContenedoresYTratamientoEfluentesController.lavadoContenedoresYTratamientoEfluentesBean.mostrarFotografia}">
+								<p:commandButton icon="ui-icon-search"
+									styleClass="button-small primary toLeft" title="Ver"
+									action="#{lavadoContenedoresYTratamientoEfluentesController.descargar(1)}"
+									ajax="false" id="btn_descargaEnfriamiento"
+									disabled="#{lavadoContenedoresYTratamientoEfluentesController.lavadoContenedoresYTratamientoEfluentesBean.desechoEspecial.documentoEnfriamiento.id==null}" />
+							</h:panelGroup>
+
+						</p:column>
+					</p:row>
+					<p:row>
+						<p:column>
+							<p:outputLabel for="txtCaptacion"
+								value="#{labels['label.captacion']}" />
+						</p:column>
+						<p:column>
+							<p:inputText id="txtCaptacion"
+								value="#{lavadoContenedoresYTratamientoEfluentesController.lavadoContenedoresYTratamientoEfluentesBean.desechoEspecial.descripcionCaptacion}"
+								styleClass="w100" disabled="true"/>
+						</p:column>
+						<p:column>
+							<h:panelGroup
+								rendered="#{lavadoContenedoresYTratamientoEfluentesController.lavadoContenedoresYTratamientoEfluentesBean.mostrarFotografia}">
+								<p:commandButton icon="ui-icon-search"
+									styleClass="button-small primary toLeft" title="Ver"
+									action="#{lavadoContenedoresYTratamientoEfluentesController.descargar(2)}"
+									ajax="false" id="btn_descargaFotoCaptacion"
+									disabled="#{lavadoContenedoresYTratamientoEfluentesController.lavadoContenedoresYTratamientoEfluentesBean.desechoEspecial.documentoCaptacion.id==null}" />
+								<h:inputHidden id="nombreArchivoHiddenCaptacion" required="true"
+									value="#{lavadoContenedoresYTratamientoEfluentesController.lavadoContenedoresYTratamientoEfluentesBean.desechoEspecial.documentoCaptacion.nombre}" />
+							</h:panelGroup>
+
+						</p:column>
+					</p:row>
+				</p:panelGrid>
+
+			</h:form>
+		</p:dialog>
+	</ui:define>
+</ui:composition>
+</html>

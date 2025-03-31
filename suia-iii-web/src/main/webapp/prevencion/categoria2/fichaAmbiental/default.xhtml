@@ -1,0 +1,127 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+	<ui:define name="content">
+        <f:event type="preRenderView" listener="#{descripcionProyectoPmaBean.validarTareaBpm()}"/>
+		<ui:include src="contenido/menu.xhtml" />
+		<div class="content">
+			<h:form id="inicio_ficha">
+				<p:panel id="parte1" header="1. INFORMACI&Oacute;N DEL PROYECTO">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						columnClasses="w50, field_mrg w50">
+						<f:facet name="header">
+							<mae:panelGridHeaderHelp value="1.1 PROYECTO, OBRA O ACTIVIDAD"
+								conector="generalHelp" help="Información tomada del registro del proyecto" />
+						</f:facet>
+						<p:inputTextarea autoResize="true" disabled="true"
+							style="color:#2a7d9b;border-color:#ffffff"
+							value="#{descripcionProyectoPmaBean.proyecto.nombre}"
+							styleClass="w100" />
+					</p:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						columnClasses="w50, field_mrg w50">
+						<f:facet name="header">
+							<mae:panelGridHeaderHelp value="1.2 ACTIVIDAD ECON&Oacute;MICA"
+								conector="generalHelp"
+								help="#{helps['registro.actividadEconomica']}" />
+						</f:facet>
+						<p:inputTextarea autoResize="true" disabled="true"
+							style="color:#2a7d9b;border-color:#ffffff"
+							value="#{descripcionProyectoPmaBean.proyecto.catalogoCategoria.descripcion}"
+							styleClass="w100" />
+					</p:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						columnClasses="w100, field_mrg w100">
+						<f:facet name="header">
+							<mae:panelGridHeaderHelp
+								value="1.3 RESUMEN DEL PROYECTO, OBRA O ACTIVIDAD"
+								conector="generalHelp"
+								help="#{helps['registro.resumenProyecto']}" />
+						</f:facet>
+						<p:inputTextarea autoResize="true" disabled="true"
+							style="color:#2a7d9b;border-color:#ffffff"
+							value="#{descripcionProyectoPmaBean.proyecto.resumen}"
+							styleClass="w100" />
+					</p:panelGrid>
+
+					<h:panelGrid columns="1"
+						rendered="#{descripcionProyectoPmaBean.deshabilitarTablaTipoDesechoEspecial}">
+						<h:panelGroup id="tipoDesechoContainer"
+							rendered="#{descripcionProyectoPmaBean.deshabilitarTablaTipoDesechoEspecial}">
+							<br />
+							<p:outputLabel value="Tipos de desechos especiales" />
+							<br />
+							<br />
+							<p:dataTable
+								value="#{descripcionProyectoPmaBean.desechoPeligrososEspeciales}"
+								id="tableDesechosEspeciales" var="desechoEsp"
+								sortOrder="ASCENDING" rows="10" paginator="true"
+								paginatorAlwaysVisible="false" paginatorPosition="bottom"
+								emptyMessage="#{labels['common.table.empty']}">
+								<p:column headerText="Clave del desecho" styleClass="w20">
+									<table border="0" style="border-color: transparent">
+										<tr>
+											<td width="20px" style="border-color: #ffffff"><p:selectBooleanCheckbox
+													value="#{desechoEsp.seleccionado}">
+													<p:ajax
+														listener="#{descripcionProyectoPmaBean.validarSeleccionDesechoPeligroso(desechoEsp)}"
+														event="change"
+														update=":#{p:component('tableDesechosEspeciales')},:#{p:component('btnGuardar')}" />
+												</p:selectBooleanCheckbox></td>
+											<td style="border-color: #ffffff"><h:outputText
+													value="#{desechoEsp.clave}" /></td>
+										</tr>
+									</table>
+								</p:column>
+								<p:column headerText="Descripci&oacute;n del desecho"
+									styleClass="alJustify">
+									<h:outputText value="#{desechoEsp.descripcion}" />
+								</p:column>
+								<p:column
+									headerText="Capacidad de gesti&oacute;n (Unidad: ton/a&ntilde;o)"
+									styleClass="w20">
+									<center>
+										<p:inputText
+											disabled="#{desechoEsp.habilitarCapacidadGestion}"
+											value="#{desechoEsp.capacidadGestion}" styleClass="w50">
+											<f:validateDoubleRange minimum="0.0" maximum="500000" />
+											<pe:keyFilter mask="num" />
+										</p:inputText>
+									</center>
+								</p:column>
+							</p:dataTable>
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<f:facet name="footer">
+						<t:div styleClass="buttons main">
+							<p:commandButton id="btnGuardar" value="Guardar" update="@form"
+								oncomplete="window.scrollTo(0,0);"
+								action="#{descripcionProyectoPmaBean.guardarDescripcionProyectoAmbiental}"
+								icon="ui-icon-disk"
+								rendered="#{descripcionProyectoPmaBean.deshabilitarTablaTipoDesechoEspecial}"
+								disabled="#{descripcionProyectoPmaBean.deshabilitarBtnGuardar}" />
+							<p:commandButton value="Siguiente" immediate="true"
+								process="@this"
+								action="/prevencion/categoria2/fichaAmbiental/proyectoObra.jsf?faces-redirect=true"
+								icon="ui-icon-arrowthick-1-e" />
+						</t:div>
+					</f:facet>
+
+
+				</p:panel>
+			</h:form>
+		</div>
+	</ui:define>
+</ui:composition>

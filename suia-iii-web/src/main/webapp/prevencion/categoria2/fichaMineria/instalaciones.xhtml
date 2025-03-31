@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+    <!--Instalaciones Mineras-->
+    <h:form id="frmInstalaciones">
+        <p:panelGrid id="pnlInstalaciones" columns="1" layout="grid"
+                     styleClass="w100" columnClasses="w25, field_mrg w25">
+            <f:facet name="header">
+                <mae:panelGridHeaderHelp value="Instalaciones utilizadas" conector="generalHelp" render="false" 
+                	image="#{request.contextPath}/resources/images/help-how.png" 
+                	help="#{helps['no.help.yet']}" />
+            </f:facet>
+
+            <h:panelGrid columns="3" layout="grid" styleClass="w100" columnClasses="w30, w60">
+                <p:outputLabel value="Instalación *" />
+                <p:outputLabel value="Descripción *" />
+                <p:outputLabel />
+                
+                <p:selectOneMenu converter="selectItemConverter" style="width:200px" 
+                	value="#{descripcionActividadMineraController.descripcionActividadMineraBean.instalacion.catalogoInstalacion}">
+                    <f:selectItem itemLabel="#{labels['common.item.choose']}" 
+                    	itemValue="" noSelectionOption="true" />
+                    <f:selectItems
+                        value="#{descripcionActividadMineraController.descripcionActividadMineraBean.catalogoInstalaciones}"
+                        var="instalacion"
+                        itemLabel="#{instalacion.nombre}"
+                        itemValue="#{instalacion}" />
+                </p:selectOneMenu>
+                
+                <p:inputText maxlength="250" size="100"
+                    value="#{descripcionActividadMineraController.descripcionActividadMineraBean.instalacion.descripcion}" />
+                    
+                <p:commandButton value="Adicionar" styleClass="primary" 
+                	action="#{descripcionActividadMineraController.agregarInstalacion()}" 
+                	update=":#{p:component('pnlInstalaciones')}" />
+            </h:panelGrid>
+			<br/>
+            <p:dataTable id="tblInstalaciones" paginator="true" paginatorPosition="bottom" rows="5" var="instalacion" 
+            	value="#{descripcionActividadMineraController.descripcionActividadMineraBean.listaInstalaciones}" 
+            	emptyMessage="#{labels['common.table.empty']}">
+                <p:column headerText="#{msg['label.numero']}" width="5%">
+					<h:outputText value="#{instalacion.indice+1}" />
+				</p:column>
+                <p:column width="30%" headerText="Instalación">
+                    <h:outputText value="#{instalacion.catalogoInstalacion.nombre}" />
+                </p:column>
+                <p:column width="50%" headerText="Descripción">
+                    <h:outputText value="#{instalacion.descripcion}" />
+                </p:column>
+                <p:column width="15%" headerText="Acciones" style="text-align: center">
+                    <p:commandButton icon="ui-icon-pencil" styleClass="primary" 
+                    	action="#{descripcionActividadMineraController.editarInstalacion(instalacion)}" 
+                    	update=":#{p:component('pnlInstalaciones')}" />
+                    <p:commandButton icon="ui-icon-trash" styleClass="primary" 
+                    	action="#{descripcionActividadMineraController.eliminarInstalacion(instalacion)}" 
+                    	update=":#{p:component('tblInstalaciones')}, :#{p:component('pnlInstalaciones')}" />
+                </p:column>
+            </p:dataTable>
+        </p:panelGrid>
+    </h:form>
+</ui:composition>

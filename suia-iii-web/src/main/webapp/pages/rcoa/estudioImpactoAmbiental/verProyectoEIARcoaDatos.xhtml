@@ -1,0 +1,120 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="content">
+	
+		<style type="text/css">
+.ui-panelgrid-header td {
+	padding-left: 10px !important;
+	padding-bottom: 4px !important;
+	padding-top: 0px !important;
+	padding-right: 10px !important;
+}
+
+.tabClass {
+	border: none !important;
+}
+
+.ui-tabs .ui-tabs-panel {
+	padding: 12px 0px !important;
+}
+</style>
+<h:form id="frmDatosProyecto" >
+	<mae-components:readOnly>
+		<p:panelGrid columns="1" layout="grid" styleClass="w100"
+			columnClasses="w50, field_mrg w50">
+			<f:facet name="header">
+				<h:outputText value="Regularizaci&oacute;n Ambiental" />
+			</f:facet>
+		<h:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w30, null" rowClasses="null, alt">
+		<h:outputText value="Nombre del Proyecto:" />
+		<h:outputText value="#{estudioImpactoAmbientalController.proyectoLicenciaCoa.nombreProyecto}" />
+		<h:outputText value="Código del Proyecto:" />
+		<h:outputText value="#{estudioImpactoAmbientalController.proyectoLicenciaCoa.codigoUnicoAmbiental}" />
+		<h:outputText value="Superficie del Proyecto:" />
+		<h:outputText value="#{estudioImpactoAmbientalController.proyectoLicenciaCoa.superficie}" />
+		<h:outputText value="Sector del Proyecto:" />
+		<h:outputText value="#{estudioImpactoAmbientalController.sector.nombre}" />
+		
+		<h:outputText value="Código Minero:" rendered="#{estudioImpactoAmbientalController.sector.id eq 2}"/>
+		<p:outputPanel rendered="#{estudioImpactoAmbientalController.sector.id eq 2}">
+			<p:dataTable id="dtConcesiones" var="datos" value="#{estudioImpactoAmbientalController.listaActividadConcesiones}" >
+			<f:facet name="header">
+			<h:outputText value="Concesiones Mineras" />
+			</f:facet>
+				<p:column headerText="Código" width="25%">
+					<h:outputText value="#{datos.codigo}" />
+				</p:column>
+				<p:column headerText="Nombre" width="75%">
+					<h:outputText value="#{datos.nombre}" />
+				</p:column>
+			</p:dataTable>
+		</p:outputPanel>
+		
+		<h:outputText value="Bloques:" rendered="#{estudioImpactoAmbientalController.sector.id eq 1}"/>
+		<p:outputPanel rendered="#{estudioImpactoAmbientalController.sector.id eq 1}">
+			<p:dataTable id="dtBloques" var="datos" value="#{estudioImpactoAmbientalController.listaActividadBloques}" >
+				<p:column headerText="Nombre">
+					<h:outputText value="#{datos.bloque.nombre}" />
+				</p:column>
+			</p:dataTable>
+		</p:outputPanel>
+		
+		<h:outputText value="Fases del Proyecto:" rendered="#{estudioImpactoAmbientalController.sector.id eq 1 or estudioImpactoAmbientalController.sector.id eq 2 }" />
+		<p:selectManyCheckbox id="fasesSector" value="#{estudioImpactoAmbientalController.listaFasesSectorId}" layout="grid" columns="1" disabled="true" 
+				 rendered="#{estudioImpactoAmbientalController.sector.id eq 1 or estudioImpactoAmbientalController.sector.id eq 2 }"
+				  required="true" requiredMessage="El campo fases  es requerido">
+			<f:selectItems value="#{estudioImpactoAmbientalController.listaFasesPorSector}" var="item" 
+				itemLabel="#{item.nombre}" itemValue="#{item.id}" />
+			<p:ajax event="change" update="fasesSector" process="@this" bypassUpdates="true"/>
+		</p:selectManyCheckbox>
+	</h:panelGrid>
+	
+		</p:panelGrid>
+	<p:panelGrid id="pngAdjuntos" columns="1" layout="grid" styleClass="w100">
+			<p:dataTable id="dtAdjuntos" var="datos" value="#{estudioImpactoAmbientalController.listaDocumentosPorPagina}" styleClass="w75">
+			<f:facet name="header">
+			<h:outputText value="Estudio de Impacto Ambiental" />
+			</f:facet>
+			<p:column headerText="Documentos" width="75%">
+				<h:outputText value="#{datos.nombre}" />
+			</p:column>
+			<p:column headerText="Descargar" width="25%">
+				<p:commandButton oncomplete="PF('dlg_verDocumentos').show();" update=":frmDatosProyecto:pnlDocumentos" actionListener="#{estudioImpactoAmbientalController.verDocumentos(datos)}" styleClass="button-small primary" icon="ui-icon-zoomin"  />
+			</p:column>
+		</p:dataTable>
+	</p:panelGrid>
+
+		
+		
+	<p:outputPanel id="pnlDocumentos">
+		<p:dialog header="Documentos adjuntos al proceso - #{estudioImpactoAmbientalController.titulo}" widgetVar="dlg_verDocumentos" modal="true" width="700" height="300">
+			<h:panelGrid columns="1" columnClasses="w25 alTop,field_mrg alTop" id="pnl_documentos">
+				<p:dataTable value="#{estudioImpactoAmbientalController.listaDocumentosAdjuntos}" var="varDocumentos" emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Nombre documento" styleClass="singleLine">
+						<h:outputText value="#{varDocumentos.nombre}" />
+					</p:column>
+					<p:column styleClass="alCenter w20px">
+						<p:commandButton ajax="false" id="btnDescargar"
+					onclick="PrimeFaces.monitorDownload(start, stop);"
+					icon="ui-icon-search" styleClass="button-small primary"
+					title="Ver documento">
+							<p:fileDownload value="#{descargarDocumentosCoaController.descargarDocumentoEIA(varDocumentos)}" />
+						</p:commandButton>
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+		</p:dialog>
+	</p:outputPanel>
+	</mae-components:readOnly>
+</h:form>
+	</ui:define>
+	</ui:composition>

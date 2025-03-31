@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+        >
+<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}" target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+
+        <h:outputText value="Datos"
+                      rendered="#{bandejaTareasBean.tarea.getVariable('requiereFacilitador')!=null and bandejaTareasBean.tarea.getVariable('requiereFacilitador').toString().equals('false') }"/>
+        <h:outputText value="#{bandejaTareasBean.tarea.taskName}"
+                      rendered="#{bandejaTareasBean.tarea.getVariable('requiereFacilitador')!=null and bandejaTareasBean.tarea.getVariable('requiereFacilitador').toString().equals('false') }"/>
+
+        <h:outputLink value="#{request.contextPath}/prevencion/participacionsocial/ingresarInformeReunionInform.jsf?tipo=revisarDatos" target="_blank"
+                      rendered="#{bandejaTareasBean.tarea.getVariable('requiereFacilitador')!=null and bandejaTareasBean.tarea.getVariable('requiereFacilitador').toString().equals('false') }">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+
+    </ui:define>
+    <ui:define name="content">
+        <h:form id="form">
+
+            <f:event type="preRenderView" listener="#{revisarComentarioObservacionesPSController.validarTareaBpm()}"/>
+            <p:outputLabel for="requiere-modificaciones"
+                           value="¿Existen observaciones?"
+                           rendered="#{revisarComentarioObservacionesPSController.revisarComentarioObservacionesPSBean.revisar}"/>
+            <p:selectOneRadio id="requiere-modificaciones"
+                              value="#{revisarComentarioObservacionesPSController.revisarComentarioObservacionesPSBean.informacionCompleta}"
+                              required="#{revisarComentarioObservacionesPSController.revisarComentarioObservacionesPSBean.revisar}"
+                              rendered="#{revisarComentarioObservacionesPSController.revisarComentarioObservacionesPSBean.revisar}">
+                <f:selectItem itemLabel="Si" itemValue="true"/>
+                <f:selectItem itemLabel="No" itemValue="false"/>
+            </p:selectOneRadio>
+            <p:panel>
+                <f:facet name="header">
+                    <h:outputText value="Comentarios"/>
+
+                </f:facet>
+
+                <div style="overflow-x: scroll;">
+                    <p:dataTable value="#{revisarComentarioObservacionesPSBean.comentarios}" var="comentario"
+                                 filterDelay="600" widgetVar="bandejaTable" rows="20" paginatorAlwaysVisible="false"
+                                 paginator="true" paginatorPosition="bottom"
+                                 emptyMessage="#{labels['common.table.empty']}" style="width: 1538px;">
+                        <p:column headerText="Nombre" filterMatchMode="contains" filterBy="#{comentario.nombre}"
+                                  styleClass="alCenter w15">
+                            <h:outputText value="#{comentario.nombre}" title="#{comentario.nombre}"/>
+
+                        </p:column>
+                        <p:column headerText="Comunidad o institución" filterMatchMode="contains"
+                                  filterBy="#{comentario.nombreEntidad}" styleClass="singleLine w15">
+                            <h:outputText value="#{comentario.nombreEntidad}" title="#{comentario.nombreEntidad}"/>
+                        </p:column>
+                        <p:column headerText="Cargo" filterMatchMode="contains" filterBy="#{comentario.cargo}"
+                                  styleClass="singleLine w15">
+                            <h:outputText value="#{comentario.cargo}" title="#{comentario.cargo}"/>
+                        </p:column>
+                        <p:column headerText="Provincia" filterMatchMode="contains"
+                                  filterBy="#{comentario.ubicacionGeografica.nombre}" styleClass="alCenter w15">
+                            <h:outputText
+                                    value="#{comentario.ubicacionGeografica.ubicacionesGeografica.ubicacionesGeografica.nombre}"/>
+                        </p:column>
+                        <p:column headerText="Cantón" filterMatchMode="contains"
+                                  filterBy="#{comentario.ubicacionGeografica.nombre}" styleClass="alCenter w15">
+                            <h:outputText value="#{comentario.ubicacionGeografica.ubicacionesGeografica.nombre}"/>
+                        </p:column>
+                        <p:column headerText="Parroquia" filterMatchMode="contains"
+                                  filterBy="#{comentario.ubicacionGeografica.nombre}" styleClass="alCenter w15">
+                            <h:outputText value="#{comentario.ubicacionGeografica.nombre}"/>
+                        </p:column>
+
+                        <p:column headerText="Nro teléfono" filterMatchMode="contains" filterBy="#{comentario.telefono}"
+                                  styleClass="singleLine w15">
+                            <h:outputText value="#{comentario.telefono}" title="#{comentario.telefono}"/>
+                        </p:column>
+
+
+                        <p:column headerText="Correo electrónico" filterMatchMode="contains"
+                                  filterBy="#{comentario.correo}" styleClass="w15">
+                            <h:outputText value="#{comentario.correo}" title="#{comentario.correo}"/>
+                        </p:column>
+
+
+                        <p:column headerText="Comentario" filterMatchMode="contains" filterBy="#{comentario.comentario}" styleClass="w25">
+                            <h:outputText value="#{comentario.comentario}" title="#{comentario.comentario}" />
+                        </p:column>
+
+                        <p:column headerText="Documento" styleClass="singleLine alCenter w10">
+                            <h:outputText value="-"
+                                          rendered="#{!revisarComentarioObservacionesPSBean.documentos.containsKey(comentario.id)}"/>
+                            <p:commandButton id="downloadVisitaPrevia" icon="ui-icon-arrowthick-1-s"
+                                             ajax="false" styleClass="button-small primary" title="Ver"
+                                             immediate="true"
+                                             rendered="#{revisarComentarioObservacionesPSBean.documentos.containsKey(comentario.id)}">
+                                <p:fileDownload
+                                        value="#{revisarComentarioObservacionesPSBean.getStreamContent(comentario.id)}"/>
+                            </p:commandButton>
+                        </p:column>
+
+                    </p:dataTable>
+
+                </div>
+
+
+
+
+
+                <p:panelGrid columns="1" styleClass="w100" id="formPreguntasObservaciones" rendered="#{bandejaTareasBean.tarea.getVariable('requiereFacilitador')!=null and bandejaTareasBean.tarea.getVariable('requiereFacilitador').toString().equals('true') }">
+
+                    <p:dataTable id="tblPreguntasObservaciones" widgetVar="tblPreguntasObservaciones" rows="10"
+                                 paginator="true" paginatorAlwaysVisible="false" rowIndexVar="index"
+                                 var="pregunta" value="#{revisarComentarioObservacionesPSBean.listaPreguntas}">
+
+                        <f:facet name="header">
+                            <h:outputText value="Preguntas - observaciones realizados en el proceso"/>
+                        </f:facet>
+
+                        <p:column headerText="No" styleClass="alCenter w5">
+                            <h:outputText value="#{index + 1}"/>
+                        </p:column>
+
+                        <p:column headerText="Observaciones del proceso de participación social *"
+                                  filterMatchMode="contains" styleClass="alCenter w20"
+                                  filterValue="#{pregunta.pregunta}">
+                            <p:inputTextarea maxlength="2200" scrollHeight="10" required="true" id="preguntas"
+                                             style="height: 60px;overflow: auto"
+                                             requiredMessage="El campo 'Observaciones del proceso de participación social' es requerido."
+                                             disabled="true"
+                                             value="#{pregunta.pregunta}"
+                                             autoResize="true" styleClass="w100"><p:ajax/></p:inputTextarea>
+
+
+                        </p:column>
+
+                        <p:column headerText="Respuestas dadas durante el PPS"
+                                  filterMatchMode="contains" styleClass="alCenter w30"
+                                  filterValue="#{pregunta.respuestaFacilitador}">
+                            <p:inputTextarea maxlength="2200" scrollHeight="10" required="false"
+                                             id="respuestaFacilitador" style="height: 60px;overflow: auto"
+                                             disabled="true"
+                                             value="#{pregunta.respuestaFacilitador}"
+                                             autoResize="true" styleClass="w100"><p:ajax/></p:inputTextarea>
+
+
+                        </p:column>
+                        <p:column headerText="Detalle de la inclusión de las observaciones en el estudio ambiental o justificación de su no inclusión"
+                                  filterMatchMode="contains" styleClass="alCenter w30"
+                                  filterValue="#{pregunta.respuestaPromotor}">
+                            <p:inputTextarea maxlength="2200" scrollHeight="10" required="false"
+                                             id="respuestaPromotor" style="height: 60px;overflow: auto"
+                                             disabled="true"
+                                             value="#{pregunta.respuestaPromotor}"
+                                             autoResize="true" styleClass="w100"><p:ajax/></p:inputTextarea>
+
+
+                        </p:column>
+                    </p:dataTable>
+                </p:panelGrid>
+
+                <p:fragment>
+                    <h:panelGroup id="pnl2">
+
+                        <observaciones:tablaObservaciones aparace="true"
+                                                          soloLectura="#{!revisarComentarioObservacionesPSController.revisarComentarioObservacionesPSBean.revisar}"
+                                                          mostrarSiVacio="#{revisarComentarioObservacionesPSController.revisarComentarioObservacionesPSBean.revisar}"
+                                                          idClase="#{revisarComentarioObservacionesPSController.revisarComentarioObservacionesPSBean.proyectosBean.proyecto.id}"
+                                                          nombreClase="ParticipacionSocial"
+                                                          seccion="ingresarDocumentacion"
+                                                          rol="admin"
+                                                          respuestaActiva="#{bandejaTareasBean.tarea.getVariable('requiereFacilitador')!=null and bandejaTareasBean.tarea.getVariable('requiereFacilitador').toString().equals('false') }"
+                                                          componenteActualizarEliminar="pnl2"/>
+                    </h:panelGroup>
+                </p:fragment>
+
+
+                <div class="buttons main">
+                    <p:commandButton value="Enviar" action="#{revisarComentarioObservacionesPSController.finalizar}"
+                                     update=":form"
+                                     styleClass="primary " icon="ui-icon-check">
+                        <p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+                                   header="#{msg['header.confirmacion.envio.tarea']}"/>
+                    </p:commandButton>
+                </div>
+            </p:panel>
+        </h:form>
+
+
+    </ui:define>
+</ui:composition>
+</html>

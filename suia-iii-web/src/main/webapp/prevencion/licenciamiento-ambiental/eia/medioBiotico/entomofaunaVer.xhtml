@@ -1,0 +1,560 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+xmlns:ui="http://java.sun.com/jsf/facelets"
+xmlns:h="http://java.sun.com/jsf/html"
+xmlns:p="http://primefaces.org/ui"
+xmlns:f="http://java.sun.com/jsf/core"
+xmlns:controles="http://java.sun.com/jsf/composite/controles-prime"
+xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+xmlns:hh="http://java.sun.com/jsf/html"
+xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition
+template="/prevencion/licenciamiento-ambiental/eia/verEIA.xhtml">
+<ui:define name="content-eia">
+<h:form id="frmDatos">
+<h:panelGrid columns="1"
+         rendered="#{puntosMuestreoEIAController.tieneContenido}"
+         id="inventarioForestal">
+
+<p:panel header="Entomofauna">
+
+    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                 id="panelGridFlora">
+        <f:facet name="header">
+            <p:outputLabel value="Puntos de muestreo" for="hidPM"/>
+            <h:inputHidden id="hidPM"
+                           required="#{empty puntosMuestreoEIAController.listaPuntosMuestreo}"/>
+        </f:facet>
+
+        <p:dataTable id="tablaPuntosMuestreo"
+                     value="#{puntosMuestreoEIAController.listaPuntosMuestreo}"
+                     var="ide" paginator="true" rows="10" paginatorPosition="bottom"
+                     emptyMessage="#{labels['common.table.empty']}"
+                     paginatorAlwaysVisible="false" sortBy="#{ide.nombrePunto}">
+            <p:column headerText="Código">
+                <h:outputText value="#{ide.nombrePunto}"/>
+            </p:column>
+            <p:column headerText="Metodología">
+                <h:outputText value="#{ide.metodologiaPuntoMuestreo.nombre}"
+                              rendered="#{!ide.metodologiaPuntoMuestreo.otro}"/>
+                <h:outputText value="#{ide.metodologia}"/>
+            </p:column>
+            <p:column headerText="Fecha muestreo">
+                <h:outputText value="#{ide.fechaMuestreo}"/>
+            </p:column>
+            <p:column headerText="Altitud">
+                <h:outputText value="#{ide.altitude}"/>
+            </p:column>
+            <p:column styleClass="w40px alCenter">
+                <p:commandButton icon="ui-icon-search"
+                                 styleClass="button-small primary"
+                                 action="#{puntosMuestreoEIAController.editarPuntoMuestreo(ide)}"
+                                 update=":frmDlg3:dlg3" process="@this"
+                                 oncomplete="PF('dlg3').show()" />
+            </p:column>
+        </p:dataTable>
+
+    </p:panelGrid>
+
+    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                 id="panelGridEspecies">
+        <f:facet name="header">
+            <p:outputLabel value="Registro de especies" for="hidES"/>
+            <h:inputHidden id="hidES"
+                           required="#{empty puntosMuestreoEIAController.listaRegistroEspecies}"/>
+
+        </f:facet>
+
+        <p:dataTable id="tablaRegistroEspecies" filterDelay="600"
+                     value="#{puntosMuestreoEIAController.listaRegistroEspecies}"
+                     var="regesp" paginator="true" rows="10" paginatorPosition="bottom"
+                     emptyMessage="#{labels['common.table.empty']}" scrollable="true" scrollWidth="700" scrollHeight="auto"
+                     paginatorAlwaysVisible="false" sortBy="#{regesp.puntosMuestreo.nombrePunto}">
+
+            <p:columnGroup type="header">
+                <p:row>
+                    <p:column headerText="Punto de Muestreo" rowspan="2" width="70"
+                              filterMatchMode="contains" filterBy="#{regesp.puntosMuestreo.nombrePunto}"/>
+                    <p:column headerText="&lt;/br&gt;Clase" rowspan="2" width="100"
+                              filterMatchMode="contains" filterBy="#{regesp.clase}"/>
+                    <p:column headerText="&lt;/br&gt;Orden" rowspan="2" width="100"
+                              filterMatchMode="contains" filterBy="#{regesp.genero_orden}"/>
+                    <p:column headerText="&lt;/br&gt;Familia" rowspan="2" width="200"
+                              filterMatchMode="contains" filterBy="#{regesp.familia}"/>
+                    <p:column headerText="&lt;/br&gt;Género" rowspan="2" width="100"
+                              filterMatchMode="contains" filterBy="#{regesp.genero}"/>
+                    <p:column headerText="&lt;/br&gt;Nombre científico" rowspan="2" width="200"
+                              filterMatchMode="contains" filterBy="#{regesp.nombreCientifico}"/>
+                    <p:column  headerText="Nivel de Identificación" rowspan="2" width="100"
+                               filterMatchMode="contains" filterBy="#{regesp.nivelIdentificacion}"/>
+                    <p:column  headerText="&lt;/br&gt;Nombre común" rowspan="2" width="200"
+                               filterMatchMode="contains" filterBy="#{regesp.nombreLocal}"/>
+                    <p:column  headerText="&lt;/br&gt;N° Ind. Especie" rowspan="2" width="80"
+                               filterMatchMode="contains" filterBy="#{regesp.individuos}"/>
+                    <p:column headerText="&lt;/br&gt;Estado de conservación" colspan="3" width="240"/>
+                    <p:column  headerText="" rowspan="2"  width="40"/>
+                </p:row>
+
+                <p:row>
+                    <p:column headerText="&lt;/br&gt;UICN" width="80"
+                              filterMatchMode="contains" filterBy="#{regesp.uicn}"/>
+                    <p:column headerText="Libro Rojo Ecuador" width="80"
+                              filterMatchMode="contains" filterBy="#{regesp.libroRojoEcuador}"/>
+                    <p:column headerText="&lt;/br&gt;CITES" width="80"
+                              filterMatchMode="contains" filterBy="#{regesp.cites}"/>
+                </p:row>
+
+            </p:columnGroup>
+
+
+            <p:column>
+                <h:outputText value="#{regesp.puntosMuestreo.nombrePunto}"/>
+            </p:column>
+            <p:column>
+                <h:outputText value="#{regesp.clase}"/>
+            </p:column>
+            <p:column>
+                <h:outputText value="#{regesp.genero_orden}"/>
+            </p:column>
+            <p:column>
+                <h:outputText value="#{regesp.familia}"/>
+            </p:column>
+            <p:column>
+                <h:outputText value="#{regesp.genero}"/>
+            </p:column>
+            <p:column>
+                <h:outputText value="#{regesp.nombreCientifico}"/>
+            </p:column>
+            <p:column>
+                <h:outputText value="#{regesp.nivelIdentificacion}"/>
+            </p:column>
+            <p:column>
+                <h:outputText value="#{regesp.nombreLocal}"/>
+            </p:column>
+            <p:column>
+                <h:outputText value="#{regesp.individuos}"/>
+            </p:column>
+            <p:column>
+                <h:outputText value="#{regesp.uicn}"/>
+            </p:column>
+            <p:column>
+                <h:outputText value="#{regesp.libroRojoEcuador}"/>
+            </p:column>
+            <p:column>
+                <h:outputText value="#{regesp.cites}"/>
+            </p:column>
+            <p:column styleClass="w40px alCenter">
+                <p:commandButton icon="ui-icon-search"
+                                 styleClass="button-small primary"
+                                 action="#{puntosMuestreoEIAController.editarRegistroEspecies(regesp)}"
+                                 update=":frmDlg4:dlg4" process="@this"
+                                 oncomplete="PF('dlg4').show()"/>
+            </p:column>
+        </p:dataTable>
+
+    </p:panelGrid>
+
+    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                 id="panelGridAnalDiv">
+        <f:facet name="header">
+            <p:outputLabel value="Análisis de Diversidad" for="hisAnaDiv"/>
+            <h:inputHidden id="hisAnaDiv"
+                           required="#{empty puntosMuestreoEIAController.listaRegistroEspecies}"/>
+        </f:facet>
+        <p:dataTable id="tablaAnaDiv" styleClass="tablaAnaDiv"
+                     value="#{puntosMuestreoEIAController.listaAnalisisDiversidad}"
+                     var="anaDiv" paginator="true" rows="10" paginatorPosition="bottom"
+                     emptyMessage="#{labels['common.table.empty']}"
+                     paginatorAlwaysVisible="false" sortBy="#{anaDiv.puntosMuestreoEIA.nombrePunto}">
+
+            <p:columnGroup type="header">
+                <p:row>
+                    <p:column headerText="Punto de Muestreo"/>
+                    <p:column headerText="Shannon-Wiener"/>
+                    <p:column headerText="Simpson"/>
+                    <p:column headerText="Riqueza"/>
+                    <p:column headerText="Abundancia"/>
+
+                </p:row>
+            </p:columnGroup>
+
+            <p:column>
+                <h:outputText value="#{anaDiv.puntosMuestreoEIA.nombrePunto}"/>
+            </p:column>
+            <p:column>
+                <h:outputText value="#{anaDiv.shannon}"/>
+            </p:column>
+            <p:column>
+                <h:outputText value="#{anaDiv.simpson}"/>
+            </p:column>
+            <p:column>
+                <h:outputText value="#{anaDiv.riqueza}"/>
+            </p:column>
+            <p:column>
+                <h:outputText value="#{anaDiv.abundancia}"/>
+            </p:column>
+
+        </p:dataTable>
+
+    </p:panelGrid>
+
+    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                 id="panelGridSimilitudes">
+        <f:facet name="header">
+            <mae:panelGridHeaderHelp value="Cálculo de índice de similitudes de Jaccard y Sorensen"
+                                     conector="generalHelp"
+                                     help="#{msg['message.help.flora.jaccardsorensen']}"/>
+        </f:facet>
+
+        <p:dataTable id="tablaComparacionesGuardar" styleClass="tablaComparacionesGuardar" filterDelay="600"
+                     value="#{puntosMuestreoEIAController.listaComparacionesPtos}"
+                     var="compGuardar" paginator="true" rows="10" paginatorPosition="bottom"
+                     emptyMessage="#{labels['common.table.empty']}"
+                     paginatorAlwaysVisible="false" sortBy="#{compGuardar.muestraA.nombrePunto}">
+
+            <p:columnGroup type="header">
+                <p:row>
+                    <p:column headerText="Punto de Muestreo A"
+                              filterMatchMode="contains" filterBy="#{compGuardar.muestraA.nombrePunto}"/>
+                    <p:column headerText="Punto de Muestreo B"
+                              filterMatchMode="contains" filterBy="#{compGuardar.muestraB.nombrePunto}"/>
+                    <p:column headerText="Jaccard"/>
+                    <p:column headerText="Sorensen"/>
+                </p:row>
+            </p:columnGroup>
+
+            <p:column>
+                <h:outputText value="#{compGuardar.muestraA.nombrePunto}"/>
+            </p:column>
+            <p:column>
+                <h:outputText value="#{compGuardar.muestraB.nombrePunto}"/>
+            </p:column>
+            <p:column>
+                <h:outputText value="#{compGuardar.jaccard}"/>
+            </p:column>
+            <p:column>
+                <h:outputText value="#{compGuardar.sorensen}"/>
+            </p:column>
+        </p:dataTable>
+
+    </p:panelGrid>
+
+    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                 id="panelGridAbundancia">
+        <f:facet name="header">
+            <h:outputText value="Abundancia relativa"/>
+        </f:facet>
+
+        <p:dataTable id="tablaAbundancia" styleClass="tabla_Abundancia"
+                     value="#{puntosMuestreoEIAController.listaAbundancia}"
+                     var="pto" paginator="true" rows="10" paginatorPosition="bottom"
+                     emptyMessage="#{labels['common.table.empty']}"
+                     paginatorAlwaysVisible="false" sortBy="#{pto.nombrePunto}">
+            <p:column headerText="Punto">
+                <h:outputText value="#{pto.nombrePunto}"/>
+            </p:column>
+            <p:column headerText="Abundante">
+                <h:outputText value="#{pto.abundantes}"/>
+            </p:column>
+            <p:column headerText="Comunes">
+                <h:outputText value="#{pto.comunes}"/>
+            </p:column>
+            <p:column headerText="Poco comunes">
+                <h:outputText value="#{pto.pocoComunes}"/>
+            </p:column>
+            <p:column headerText="Raras">
+                <h:outputText value="#{pto.raras}"/>
+            </p:column>
+        </p:dataTable>
+
+    </p:panelGrid>
+
+</p:panel>
+</h:panelGrid>
+<h:panelGrid columns="1"
+         rendered="#{not puntosMuestreoEIAController.tieneContenido}"
+         id="justificacion">
+
+<p:outputLabel value="Justificación" for="just"/>
+
+<p:inputTextarea id="just" readonly="false"
+                 value="#{puntosMuestreoEIAController.justificacionEIA.justificacion}" required="true"
+                 cols="100" rows="7" maxlength="1000"
+                 styleClass="w100" autoResize="false"/>
+
+</h:panelGrid>
+
+</h:form>
+
+<h:form id="frmDlg3">
+<p:dialog id="dlg3" header="Punto de muestreo" widgetVar="dlg3"
+      modal="true" width="600" height="450" resizable="true" draggable="false">
+
+<p:tooltip for="punto" escape="false" showDelay="1200" trackMouse="true">
+    <h:outputText value="#{msg['message.help.entomofauna.codigo']}" escape="false"/>
+</p:tooltip>
+<h:panelGrid id="panelDatosHDialogo" columns="1"
+             styleClass="w100 separatorBottom"
+             columnClasses="w50, field_mrg w50">
+
+    <h:panelGrid columns="2" styleClass="w15 separatorBottom" columnClasses="w97,3">
+        <p:outputLabel id="pLabel" for="punto" value="Código"/>
+        <mae:btnHelp help="#{msg['message.help.entomofauna.codigo']}" conector="ayudaDesechos"
+                     buttonStyleClass="button-small toRight field_mrg primary"/>
+    </h:panelGrid>
+    <p:inputText id="punto" required="true" maxlength="5" converter="toUpperCaseConverter"
+                 value="#{puntosMuestreoEIAController.puntosMuestreoEIA.nombrePunto}"
+                 styleClass="w100">
+        <p:ajax event="blur" process="@this" update="@this"/>
+    </p:inputText>
+
+
+    <p:outputLabel for="metodologia" value="Metodología"/>
+
+    <p:selectOneMenu id="metodologia" required="true" styleClass="w100"
+                     value="#{puntosMuestreoEIAController.puntosMuestreoEIA.metodologiaPuntoMuestreo}"
+                     converter="selectItemConverter">
+
+        <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                      itemValue="" noSelectionOption="true"/>
+        <f:selectItems
+                value="#{puntosMuestreoEIAController.metodologiaPuntoMuestreos}"
+                var="muestra" itemLabel="#{muestra.nombre}" itemValue="#{muestra}"/>
+    </p:selectOneMenu>
+    <p:outputLabel for="metodologiaOtros" value="Nombre de la metodología"
+                   rendered="#{puntosMuestreoEIAController.puntosMuestreoEIA.metodologiaPuntoMuestreo.otro}"/>
+    <p:inputTextarea id="metodologiaOtros" readonly="true"
+                     rendered="#{puntosMuestreoEIAController.puntosMuestreoEIA.metodologiaPuntoMuestreo.otro}"
+                     value="#{puntosMuestreoEIAController.puntosMuestreoEIA.metodologia}" required="true"
+                     cols="100" rows="7" maxlength="1000"
+                     styleClass="w100" autoResize="false"></p:inputTextarea>
+
+    <p:outputLabel for="fechaMuestreo" value="Fecha muestreo"/>
+
+    <p:inputText id="fechaMuestreo"
+                 value="#{puntosMuestreoEIAController.puntosMuestreoEIA.fechaMuestreo}"
+                 styleClass="w100"></p:inputText>
+
+    <p:outputLabel for="altitud" value="Altitud"/>
+    <pe:inputNumber id="altitud" maxValue="5000" decimalPlaces="2" thousandSeparator=""
+                    value="#{puntosMuestreoEIAController.puntosMuestreoEIA.altitude}" disabled="true"
+                    styleClass="w100">
+    </pe:inputNumber>
+
+    <p:panelGrid id="panelDatosCoord" columns="4"
+                 styleClass="w100 separatorBottom">
+        <f:facet name="header">
+            <mae:panelGridHeaderHelp value="Coordenadas"
+                                     conector="generalHelp"
+                                     help="#{msg['message.help.flora.coordenada']}"/>
+        </f:facet>
+
+        <p:outputLabel for="x1" value="X1 (Este)" style="margin:15%;"/>
+
+        <pe:inputNumber id="x1" decimalPlaces="2" thousandSeparator="" disabled="true"
+                        value="#{puntosMuestreoEIAController.puntosMuestreoEIA.x1}"
+                        required="true" styleClass="w100">
+            <f:validateLength minimum="6"/>
+        </pe:inputNumber>
+
+        <p:outputLabel for="y1" value="Y1 (Norte)" style="margin:15%;"/>
+
+        <pe:inputNumber id="y1" decimalPlaces="2" thousandSeparator="" disabled="true"
+                        value="#{puntosMuestreoEIAController.puntosMuestreoEIA.y1}"
+                        required="true" styleClass="w100">
+            <f:validateLength minimum="7"/>
+        </pe:inputNumber>
+
+        <p:outputLabel for="x2" value="X2 (Este)" style="margin:15%;"/>
+
+        <pe:inputNumber id="x2" decimalPlaces="2" thousandSeparator="" disabled="true"
+                        value="#{puntosMuestreoEIAController.puntosMuestreoEIA.x2}"
+                        styleClass="w100" converter="replaceDoubleNullValue">
+            <f:validateLength minimum="6"/>
+        </pe:inputNumber>
+
+        <p:outputLabel for="y2" value="Y2 (Norte)" style="margin:15%;"/>
+
+        <pe:inputNumber id="y2" decimalPlaces="2" thousandSeparator="" disabled="true"
+                        value="#{puntosMuestreoEIAController.puntosMuestreoEIA.y2}"
+                        styleClass="w100" converter="replaceDoubleNullValue">
+            <f:validateLength minimum="7"/>
+        </pe:inputNumber>
+
+        <p:outputLabel for="x3" value="X3 (Este)" style="margin:15%;"/>
+
+        <pe:inputNumber id="x3" decimalPlaces="2" thousandSeparator="" disabled="true"
+                        value="#{puntosMuestreoEIAController.puntosMuestreoEIA.x3}"
+                        styleClass="w100" converter="replaceDoubleNullValue">
+            <f:validateLength minimum="6"/>
+        </pe:inputNumber>
+
+        <p:outputLabel for="y3" value="Y3 (Norte)" style="margin:15%;"/>
+
+        <pe:inputNumber id="y3" decimalPlaces="2" thousandSeparator="" disabled="true"
+                        value="#{puntosMuestreoEIAController.puntosMuestreoEIA.y3}"
+                        styleClass="w100" converter="replaceDoubleNullValue">
+            <f:validateLength minimum="7"/>
+        </pe:inputNumber>
+
+        <p:outputLabel for="x4" value="X4 (Este)" style="margin:15%;"/>
+
+        <pe:inputNumber id="x4" decimalPlaces="2" thousandSeparator="" disabled="true"
+                        value="#{puntosMuestreoEIAController.puntosMuestreoEIA.x4}"
+                        styleClass="w100" converter="replaceDoubleNullValue">
+            <f:validateLength minimum="6"/>
+        </pe:inputNumber>
+
+        <p:outputLabel for="y4" value="Y4 (Norte)" style="margin:15%;"/>
+
+        <pe:inputNumber id="y4" decimalPlaces="2" thousandSeparator="" disabled="true"
+                        value="#{puntosMuestreoEIAController.puntosMuestreoEIA.y4}"
+                        styleClass="w100" converter="replaceDoubleNullValue">
+            <f:validateLength minimum="7"/>
+        </pe:inputNumber>
+    </p:panelGrid>
+</h:panelGrid>
+
+<p:separator/>
+
+<div class="buttons">
+    <p:commandButton value="Aceptar" type="button"
+                     onclick="PF('dlg3').hide()" styleClass="secondary" />
+</div>
+
+<script type="text/javascript">
+    function showModalPuntosMuestreo(xhr, status, args) {
+        if (args.puntoMuestreo)
+            PF('dlg3').hide();
+        else
+            PF('dlg3').show();
+    }
+</script>
+
+</p:dialog>
+</h:form>
+
+<h:form id="frmDlg4">
+<p:dialog id="dlg4" header="Registro de especies" widgetVar="dlg4"
+      modal="true" width="600" height="460" resizable="false" draggable="false">
+
+<h:panelGrid id="panelDatosRegistro" columns="2"
+             styleClass="w100 separatorBottom panelDatosRegistro"
+             columnClasses="w50, field_mrg w50">
+
+    <p:outputLabel for="punto1" value="Punto de muestreo"/>
+    <p:outputLabel for="clase" value="Clase"/>
+
+
+    <p:selectOneMenu id="punto1" required="true" styleClass="w100"
+                     value="#{puntosMuestreoEIAController.registroEspeciesEIA.puntosMuestreo}"
+                     converter="selectItemConverter">
+
+        <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                      itemValue="" noSelectionOption="true"/>
+        <f:selectItems
+                value="#{puntosMuestreoEIAController.listaPuntosMuestreo}"
+                var="con" itemLabel="#{con.nombrePunto}" itemValue="#{con}"/>
+    </p:selectOneMenu>
+    <p:inputText id="clase" required="true"
+                 value="#{puntosMuestreoEIAController.registroEspeciesEIA.clase}"
+                 styleClass="w100" maxlength="100">
+    </p:inputText>
+
+    <p:outputLabel for="orden" value="Orden"/>
+    <p:outputLabel for="familia" value="Familia"/>
+
+    <p:inputText id="orden" required="true"
+                 value="#{puntosMuestreoEIAController.registroEspeciesEIA.genero_orden}"
+                 styleClass="w100" maxlength="100">
+    </p:inputText>
+    <p:inputText id="familia" required="true"
+                 value="#{puntosMuestreoEIAController.registroEspeciesEIA.familia}"
+                 styleClass="w100" maxlength="100"/>
+
+    <p:outputLabel for="genero" value="Género"/>
+    <p:outputLabel for="nombreCientifico" value="Nombre científico"/>
+
+    <p:inputText id="genero" required="true"
+                 value="#{puntosMuestreoEIAController.registroEspeciesEIA.genero}"
+                 styleClass="w100" maxlength="50">
+    </p:inputText>
+    <p:inputText id="nombreCientifico" required="true"
+                 value="#{puntosMuestreoEIAController.registroEspeciesEIA.nombreCientifico}"
+                 styleClass="w100" maxlength="100">
+    </p:inputText>
+
+    <p:outputLabel for="nivelIde" value="Nivel de identificación"/>
+    <p:outputLabel for="nombreComun" value="Nombre común"/>
+
+    <p:selectOneMenu id="nivelIde" required="true" styleClass="w100"
+                     value="#{puntosMuestreoEIAController.registroEspeciesEIA.nivelIdentificacion}">
+
+        <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                      itemValue="" noSelectionOption="true"/>
+        <f:selectItems
+                value="#{puntosMuestreoEIAController.nivelIdentificacion}"
+                var="con" itemLabel="#{con.descripcion}"
+                itemValue="#{con.descripcion}"/>
+    </p:selectOneMenu>
+
+    <p:inputText id="nombreComun" required="true"
+                 value="#{puntosMuestreoEIAController.registroEspeciesEIA.nombreLocal}"
+                 styleClass="w100" maxlength="100">
+    </p:inputText>
+
+    <p:outputLabel for="nroIndividuos"
+                   value="Nro. de individuos por especie"/>
+    <h:inputHidden/>
+    <pe:inputNumber id="nroIndividuos" maxValue="1000000000" decimalPlaces="0" thousandSeparator=""
+                    value="#{puntosMuestreoEIAController.registroEspeciesEIA.individuos}"
+                    required="true" styleClass="w100" disabled="true">
+    </pe:inputNumber>
+    <h:inputHidden/>
+
+    <h4>Estado de conservación</h4>
+    <h:inputHidden/>
+
+    <p:outputLabel for="uicn" value="UICN"/>
+    <p:outputLabel for="libroRojo" value="Libro Rojo Ecuador"/>
+
+    <p:inputText id="uicn"
+                 value="#{puntosMuestreoEIAController.registroEspeciesEIA.uicn}"
+                 styleClass="w100" maxlength="100">
+    </p:inputText>
+    <p:inputText id="libroRojo"
+                 value="#{puntosMuestreoEIAController.registroEspeciesEIA.libroRojoEcuador}"
+                 styleClass="w100" maxlength="100">
+    </p:inputText>
+
+
+    <p:outputLabel for="cites" value="CITES"/>
+    <h:inputHidden/>
+    <p:inputText id="cites"
+                 value="#{puntosMuestreoEIAController.registroEspeciesEIA.cites}"
+                 styleClass="w100" maxlength="100">
+    </p:inputText>
+
+</h:panelGrid>
+
+<p:separator/>
+
+<div class="buttons">
+    <p:commandButton value="Aceptar" type="button"
+                     onclick="PF('dlg4').hide()" styleClass="secondary" />
+</div>
+
+<script type="text/javascript">
+    function showModalRegistroEspecies(xhr, status, args) {
+        if (args.registroEspecies)
+            PF('dlg4').hide();
+        else
+            PF('dlg4').show();
+    }
+</script>
+
+</p:dialog>
+</h:form>
+
+</ui:define>
+</ui:composition>
+</html>

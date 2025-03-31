@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<f:loadBundle var="helps" basename="ec.gob.ambiente.core.resources.helps_es" />
+<h:form id="formConcesiones">
+	<p:dialog header="Adicionar concesión minera" id="adicionarConcesion" widgetVar="adicionarConcesion" modal="true" resizable="false" width="700">
+		<h:panelGroup id="datosGenerales">
+			<h:panelGrid styleClass="w100 separatorBottom" columns="2" columnClasses="w50, field_mrg w50" rendered="#{!catalogoActividadesBean.mostrarActualizar}">
+				<p:outputLabel for="concesionNombre" value="Nombre" />
+				<p:outputLabel for="concesionCodigo" value="Código" />
+				<p:inputText id="concesionNombre" value="#{concesionesBean.concesionMinera.nombre}" styleClass="w100"  readonly="#{concesionesBean.habilitartextinput or registroProyectoBean.habilitartextinput}"/>				
+				<p:inputText id="concesionCodigo" value="#{concesionesBean.concesionMinera.codigo}" styleClass="w100" required="true" readonly="#{concesionesBean.habilitartextinput or registroProyectoBean.habilitartextinput}"/>
+				<p:outputLabel value="Área o superficie de la concesión." for="concesionArea" />
+				<p:outputLabel value="Altura sobre el nivel del mar (msnm)" for="concesionAltitud" />
+				<h:panelGrid columns="2" styleClass="w66" columnClasses="w50, field_mrg w50">
+					<h:panelGroup>
+						<p:inputText value="#{concesionesBean.concesionMinera.area}" maxlength="10" styleClass="w100" id="concesionArea" required="true" readonly="#{concesionesBean.habilitartextinput or registroProyectoBean.habilitartextinput}">
+							<f:validateDoubleRange minimum="0.1" maximum="500000" />
+							<pe:keyFilter mask="num" />
+						</p:inputText>
+					</h:panelGroup>
+					<p:selectOneMenu value="#{concesionesBean.concesionMinera.unidad}" styleClass="w100" required="true">
+						<f:selectItem itemLabel="ha" itemValue="ha" />
+						<f:selectItem itemLabel="m2" itemValue="m2" />
+						<f:selectItem itemLabel="km2" itemValue="km2" />
+					</p:selectOneMenu>
+				</h:panelGrid>
+				<h:panelGrid columns="2" styleClass="w100" columnClasses="w100,w100">
+					<p:inputText value="#{concesionesBean.concesionMinera.altitud}" maxlength="5" styleClass="w100" id="concesionAltitud" required="true">
+						<f:validateDoubleRange minimum="0" maximum="5000" />
+						<pe:keyFilter mask="num" />
+					</p:inputText>
+					<mae:btnHelp help="#{formatearAyudaController.obtenerAyuda(helps['registro.altitudAyuda'])}" conector="alturaAyuda" />
+				</h:panelGrid>
+			</h:panelGrid>
+			
+			<h:panelGrid styleClass="w100 separatorBottom" columns="2" columnClasses="w50, field_mrg w50" rendered="#{catalogoActividadesBean.mostrarActualizar}">
+				<p:outputLabel for="concesionNombreSD" value="Nombre" />
+				<p:outputLabel for="concesionCodigoSD" value="Código" />				
+				<p:inputText id="concesionNombreSD" value="#{concesionesBean.concesionMinera.nombre}" styleClass="w100"  readonly="#{concesionesBean.habilitartextinput or registroProyectoBean.habilitartextinput}"/>				
+				<h:panelGrid columns="2">
+					<p:inputText id="concesionCodigoSD" value="#{concesionesBean.concesionMinera.codigo}" styleClass="w100" required="true" readonly="#{concesionesBean.habilitartextinput or registroProyectoBean.habilitartextinput}"/>
+					<p:commandButton value="Validar" styleClass="primary"
+							action="#{registroProyectoBean.validarConcesiones(concesionesBean.concesionMinera.codigo)}"
+							process="@this concesionCodigoSD concesionNombreSD" 
+							update="formConcesiones:datosGenerales,  formConcesiones:idAceptarCon, formConcesiones:idUbicacionesConcesiones" />
+				</h:panelGrid>
+				<p:outputLabel value="Fase." for="concesionFase" />
+				<p:outputLabel value="Área o superficie de la concesión." for="concesionAreaSD" />
+				<p:inputText id="concesionFase" value="#{concesionesBean.concesionMinera.fase}" styleClass="w100"  readonly="#{concesionesBean.habilitartextinput or registroProyectoBean.habilitartextinput}"/>				
+				<h:panelGrid columns="2" styleClass="w66" columnClasses="w50, field_mrg w50">
+					<h:panelGroup>
+						<p:inputText value="#{concesionesBean.concesionMinera.area}" maxlength="10" styleClass="w100" id="concesionAreaSD" required="true" readonly="#{concesionesBean.habilitartextinput or registroProyectoBean.habilitartextinput}">
+							<f:validateDoubleRange minimum="0.1" maximum="500000" />
+							<pe:keyFilter mask="num" />
+						</p:inputText>
+					</h:panelGroup>
+					<p:selectOneMenu value="#{concesionesBean.concesionMinera.unidad}" styleClass="w100" required="true" disabled="true">
+						<f:selectItem itemLabel="ha" itemValue="ha" />
+						<f:selectItem itemLabel="m2" itemValue="m2" />
+						<f:selectItem itemLabel="km2" itemValue="km2" />
+					</p:selectOneMenu>
+				</h:panelGrid>
+				<p:outputLabel value="Material a explorar/explotar." for="concesionMaterial" />
+				<p:outputLabel value="Altura sobre el nivel del mar (msnm)" for="concesionAltitudSD" />
+				<p:inputText id="concesionMaterial" value="#{concesionesBean.concesionMinera.material}" styleClass="w100"  readonly="#{concesionesBean.habilitartextinput or registroProyectoBean.habilitartextinput}"/>				
+				<h:panelGrid columns="2" styleClass="w100" columnClasses="w100,w100">
+					<p:inputText value="#{concesionesBean.concesionMinera.altitud}" maxlength="5" styleClass="w100" id="concesionAltitudSD" required="true">
+						<f:validateDoubleRange minimum="0" maximum="5000" />
+						<pe:keyFilter mask="num" />
+					</p:inputText>
+					<mae:btnHelp help="#{formatearAyudaController.obtenerAyuda(helps['registro.altitudAyuda'])}" conector="alturaAyuda" />
+				</h:panelGrid>
+				<p:outputLabel value="Fecha de inscripción." for="concesionFechaInscripcion" />
+				<p:outputLabel value=""  />
+				<p:inputText id="concesionFechaInscripcion" value="#{concesionesBean.concesionMinera.fechaInscripcion}" styleClass="w100"  readonly="#{concesionesBean.habilitartextinput or registroProyectoBean.habilitartextinput}"/>
+			</h:panelGrid>
+			
+			<h:inputHidden validator="#{concesionesBean.validateConcesion}" />
+		</h:panelGroup>
+
+		<p:separator />
+		<h:panelGroup>
+			<t:aliasBeansScope>
+				<t:aliasBean alias="#{adicionarUbicacionesAliasBean}" value="#{adicionarUbicaciones1Bean}" />
+				<p:outputPanel rendered="#{!catalogoActividadesBean.mostrarActualizar}">
+				<h:panelGrid columns="4" id="#{adicionarUbicacionesAliasBean.panelUbicacion}" styleClass="w100 separatorBottom" columnClasses="w33, field_mrg w33, field_mrg w33, field_mrg">
+					<p:outputLabel value="Provincia" for="provincia_#{adicionarUbicacionesAliasBean.panelUbicacion}" />
+					<p:outputLabel value="Cantón" for="canton_#{adicionarUbicacionesAliasBean.panelUbicacion}" />
+					<p:outputLabel value="Parroquia" for="parroquia_#{adicionarUbicacionesAliasBean.panelUbicacion}" />
+					<h:outputText />
+					<p:selectOneMenu value="#{adicionarUbicacionesAliasBean.provincia}" id="provincia_#{adicionarUbicacionesAliasBean.panelUbicacion}" converter="selectItemConverter" required="true" styleClass="w100">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+						<f:selectItems value="#{adicionarUbicacionesAliasBean.provincias}" />
+						<p:ajax listener="#{adicionarUbicacionesAliasBean.cargarCantones()}" update=":formConcesiones:#{adicionarUbicacionesAliasBean.panelUbicacion}" />
+					</p:selectOneMenu>
+					<p:selectOneMenu value="#{adicionarUbicacionesAliasBean.canton}" id="canton_#{adicionarUbicacionesAliasBean.panelUbicacion}" converter="selectItemConverter" required="true" styleClass="w100">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+						<f:selectItems value="#{adicionarUbicacionesAliasBean.cantones}" />
+						<p:ajax listener="#{adicionarUbicacionesAliasBean.cargarParroquias()}" update=":formConcesiones:#{adicionarUbicacionesAliasBean.panelUbicacion}" />
+					</p:selectOneMenu>
+					<p:selectOneMenu value="#{adicionarUbicacionesAliasBean.parroquia}" id="parroquia_#{adicionarUbicacionesAliasBean.panelUbicacion}" converter="selectItemConverter" required="true" styleClass="w100">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+						<f:selectItems value="#{adicionarUbicacionesAliasBean.parroquias}" />
+					</p:selectOneMenu>
+					<p:commandButton actionListener="#{adicionarUbicacionesAliasBean.agregarUbicacionAndClear()}" process=":formConcesiones:#{adicionarUbicacionesAliasBean.panelUbicacion} @this" value="Agregar" update=":formConcesiones:#{adicionarUbicacionesAliasBean.tablaUbicaciones} :formConcesiones:#{adicionarUbicacionesAliasBean.panelUbicacion}" styleClass="primary" />
+				</h:panelGrid>
+
+				<p:dataTable id="#{adicionarUbicacionesAliasBean.tablaUbicaciones}" value="#{adicionarUbicacionesAliasBean.ubicacionesSeleccionadas}" var="ubicacion" emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Provincia">
+						<h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+					</p:column>
+					<p:column headerText="Cant&oacute;n">
+						<h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}" />
+					</p:column>
+					<p:column headerText="Parroquia">
+						<h:outputText value="#{ubicacion.nombre}" />
+					</p:column>
+					<p:column styleClass="w20px">
+						<p:commandButton update=":formConcesiones:#{adicionarUbicacionesAliasBean.tablaUbicaciones}" styleClass="button-small primary" process="@this" icon="ui-icon-circle-close" actionListener="#{adicionarUbicacionesAliasBean.quitarUbicacion(ubicacion)}" />
+					</p:column>
+				</p:dataTable>
+				
+				</p:outputPanel>
+				
+				<p:outputPanel rendered="#{catalogoActividadesBean.mostrarActualizar}">
+					<p:dataTable id="idUbicacionesConcesiones" value="#{adicionarUbicacionesAliasBean.ubicacionesSeleccionadas}" var="ubicacion" emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="Provincia">
+							<h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+						</p:column>
+						<p:column headerText="Cant&oacute;n">
+							<h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}" />
+						</p:column>
+						<p:column headerText="Parroquia">
+							<h:outputText value="#{ubicacion.nombre}" />
+						</p:column>					
+					</p:dataTable>
+				</p:outputPanel>
+				<p:separator />
+				<br />
+				<h:panelGroup id="datosDireccion">
+					<p:outputLabel value="Dirección" for="direccionConcesion" styleClass="bold" />
+					<p:inputTextarea id="direccionConcesion" value="#{concesionesBean.concesionMinera.direccion}" required="true" rows="2" styleClass="w100" autoResize="false" maxlength="200" />
+				</h:panelGroup>
+			</t:aliasBeansScope>
+		</h:panelGroup>
+
+		<div class="buttons">			
+            <p:commandButton id="idAceptar" value="Aceptar" update="adicionarConcesion :form:listadoConcesiones :form:contenedor"  process="@this :formConcesiones:direccionConcesion :formConcesiones:datosGenerales" actionListener="#{concesionesBean.aceptar()}" oncomplete="handleConcesionesRequest(xhr, status, args)" 
+            		rendered="#{!catalogoActividadesBean.mostrarActualizar}"/>
+            
+            <p:commandButton id="idAceptarCon" value="Aceptar" update="adicionarConcesion :form:listadoConcesiones :form:contenedor"  process="@this :formConcesiones:direccionConcesion :formConcesiones:datosGenerales" actionListener="#{concesionesBean.aceptar()}" oncomplete="handleConcesionesRequest(xhr, status, args)" disabled="#{registroProyectoBean.estadoConcesion}" 
+            rendered="#{catalogoActividadesBean.mostrarActualizar}"/>
+        </div>
+
+		<script type="text/javascript">
+        function handleConcesionesRequest(xhr, status, args) {
+            if (args.validationFailed || !args.concesion) {
+            	PF('adicionarConcesion').show();
+            }
+            else {
+                PF('adicionarConcesion').hide();
+            }
+        }
+    </script>
+	</p:dialog>
+</h:form>
+</html>

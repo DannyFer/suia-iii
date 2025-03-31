@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" template="/WEB-INF/templates/default.xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+	<ui:define name="content">
+		<h:form id="form">
+			<p:panelGrid layout="grid" columns="1">
+				<f:facet name="header">
+					<h:outputText value="Flujos por categorías" />
+				</f:facet>
+				<p:dataList styleClass="noBorder" type="none" value="#{flujosCategoriasBean.categorias}" var="categoria" emptyMessage="#{labels['common.table.empty']}">
+					<h:panelGrid columns="2" styleClass="w100">
+						<h:outputText value="#{categoria.descripcion}" styleClass="encabezado1_5em text-button-primary" />
+						<p:commandButton actionListener="#{flujosCategoriasController.seleccionarCategoria(categoria)}" process="@this" update=":form:seleccionarFlujo" oncomplete="PF('seleccionarFlujo').show()" value="Adicionar flujo" icon="ui-icon-plus" styleClass="toRight primary" />
+					</h:panelGrid>
+					<p:dataTable rowStyleClass="#{flujosCategoriasBean.definicionValida(categoriaFlujo.flujo.idProceso) ? '' : 'text-red text-through'}" emptyMessage="#{labels['common.table.empty']}" var="categoriaFlujo" value="#{categoria.categoriaFlujos}" sortBy="#{categoriaFlujo.orden}" sortOrder="ascending">
+						<p:column headerText="Orden" styleClass="w5 alCenter bold">
+							<h:outputText value="#{categoriaFlujo.orden}" />
+						</p:column>
+						<p:column headerText="Identificador">
+							<h:outputText value="#{categoriaFlujo.flujo.idProceso}" />
+						</p:column>
+						<p:column headerText="Nombre">
+							<h:outputText value="#{categoriaFlujo.flujo.nombreFlujo}" />
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton process="@this" update="@form" styleClass="button-small primary" icon="ui-icon-arrowthick-1-n" actionListener="#{flujosCategoriasController.cambiarOrden(categoriaFlujo, false)}" disabled="#{categoriaFlujo.orden == 1}" />
+							<p:commandButton process="@this" update="@form" styleClass="button-small primary" icon="ui-icon-arrowthick-1-s" actionListener="#{flujosCategoriasController.cambiarOrden(categoriaFlujo, true)}" disabled="#{categoriaFlujo.orden == categoria.categoriaFlujos.size()}" />
+						</p:column>
+						<p:column styleClass="w20px alCenter">
+							<p:commandButton process="@this" update="@form" styleClass="button-small secondary" icon="ui-icon-trash" actionListener="#{flujosCategoriasController.eliminarCategoriaFlujo(categoriaFlujo)}">
+								<p:confirm header="Confirmación" message="¿Está seguro que desea remover el flujo de esta categoría?" icon="ui-icon-alert" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+					<br />
+					<br />
+				</p:dataList>
+			</p:panelGrid>
+
+			<p:dialog header="Seleccionar flujo" id="seleccionarFlujo" widgetVar="seleccionarFlujo" modal="true" resizable="false" width="800">
+				<p:dataTable value="#{flujosCategoriasBean.definicionesProcesos}" id="tableProcesos" var="proceso" emptyMessage="#{labels['common.table.empty']}" rows="10" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+					<p:column styleClass="w20px alCenter">
+						<p:selectBooleanCheckbox value="#{proceso.seleccionado}" />
+					</p:column>
+					<p:column headerText="ID">
+						<h:outputText value="#{proceso.id}" />
+					</p:column>
+					<p:column headerText="Nombre">
+						<h:outputText value="#{proceso.name}" />
+					</p:column>
+				</p:dataTable>
+				<div class="buttons">
+					<p:commandButton value="Aceptar" process="@this tableProcesos" update="@form" oncomplete="PF('seleccionarFlujo').hide()" actionListener="#{flujosCategoriasController.adicionarFlujos()}" />
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

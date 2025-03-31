@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="content">
+		<f:event type="preRenderView"
+			listener="#{revisarDocumentosApoyoViabilidadPfnController.validarTareaBpm()}" />
+
+		<h:form id="form">
+			<h:panelGroup id="pnlDatos">
+				<h:panelGrid styleClass="w100" id="pnlDocumentos">
+					<p:tabView id="tab"
+						activeIndex="#{revisarDocumentosApoyoViabilidadPfnController.activeIndex}">
+
+						<p:ajax event="tabChange" update="tab :form:pnlButtons"
+							listener="#{revisarDocumentosApoyoViabilidadPfnController.tabChange}" />
+
+						<p:tab title="Informe técnico" id="tbInforme">
+							<h:panelGrid styleClass="w100">
+								<object type="application/pdf"
+									data="#{revisarDocumentosApoyoViabilidadPfnController.urlInforme}?pfdrid_c=true"
+									width="100%" height="500px">
+									Su navegador no soporta la visualización de pdf. Puede
+									descargar el documento presionando el siguiente botón:
+									<p:commandButton value="Descargar" styleClass="primary"
+										ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+										<p:fileDownload
+											value="#{revisarDocumentosApoyoViabilidadPfnController.getStream(revisarDocumentosApoyoViabilidadPfnController.nombreInforme, revisarDocumentosApoyoViabilidadPfnController.archivoInforme)}" />
+									</p:commandButton>
+								</object>
+							</h:panelGrid>
+						</p:tab>
+						<p:tab id="tbOficio" title="Memorando">
+							<h:panelGrid styleClass="w100">
+								<object type="application/pdf"
+									data="#{revisarDocumentosApoyoViabilidadPfnController.urlOficio}?pfdrid_c=true"
+									width="100%" height="500px">
+									Su navegador no soporta la visualización de pdf. Puede
+									descargar el documento presionando el siguiente botón:
+									<p:commandButton value="Descargar" styleClass="primary"
+										ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+										<p:fileDownload
+											value="#{revisarDocumentosApoyoViabilidadPfnController.getStream(revisarDocumentosApoyoViabilidadPfnController.nombreOficio, revisarDocumentosApoyoViabilidadPfnController.archivoOficio)}" />
+									</p:commandButton>
+								</object>
+							</h:panelGrid>
+						</p:tab>
+					</p:tabView>
+
+					<h:panelGroup id="pnlObsInformeTecnico">
+						<p:panelGrid columns="1" layout="grid" styleClass="w100">
+							<f:event type="preRenderView"
+								listener="#{revisarDocumentosApoyoViabilidadPfnController.validarExisteObservacionesInformeOficio()}" />
+
+							<h:panelGrid columns="2" layout="grid" styleClass="w100"
+								columnClasses="w33, null">
+
+								<p:outputLabel value="¿Existen observaciones a los documentos?" />
+								<p:selectOneRadio
+									value="#{revisarDocumentosApoyoViabilidadPfnController.documentosRequiereCorrecciones}"
+									disabled="true" styleClass="cssRadioDisabled">
+									<f:selectItem itemLabel="Si" itemValue="#{true}" />
+									<f:selectItem itemLabel="No" itemValue="#{false}" />
+								</p:selectOneRadio>
+							</h:panelGrid>
+
+							<h:outputText styleClass="bold text-red alJustify"
+								value="Si es necesario realizar correcciones, el trámite regresará al técnico" />
+
+							<observaciones:tablaObservacionesViabilidad
+								idComponent="obsDocumentos"
+								seccion="Revision documentos apoyo PFN"
+								idActualizar=":form:pnlObsInformeTecnico :form:pnlButtons"
+								aparace="true" mostrarSiVacios="true"
+								idClase="#{revisarDocumentosApoyoViabilidadPfnController.viabilidadProyecto.id}"
+								nombreClase="revisionDocumentosApoyoPfn_#{revisarDocumentosApoyoViabilidadPfnController.numeroRevision}"
+								soloLectura="false" />
+						</p:panelGrid>
+					</h:panelGroup>
+				</h:panelGrid>
+			</h:panelGroup>
+
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Cancelar" immediate="true"
+						styleClass="secondary" action="/bandeja/bandejaTareas.jsf"
+						icon="ui-icon-cancel" />
+					<p:commandButton value="Atrás" icon="ui-icon-arrowthick-1-w"
+						update="tab pnlButtons" process="@this" styleClass="secondary"
+						action="#{revisarDocumentosApoyoViabilidadPfnController.atras}"
+						rendered="#{revisarDocumentosApoyoViabilidadPfnController.panelMostrar eq 2}" />
+					<p:commandButton value="Siguiente" icon="ui-icon-arrowthick-1-e"
+						update="pnlDatos pnlButtons"
+						action="#{revisarDocumentosApoyoViabilidadPfnController.siguiente}"
+						rendered="#{revisarDocumentosApoyoViabilidadPfnController.panelMostrar eq 1}" />
+					<p:commandButton value="Enviar" icon="ui-icon-check"
+						action="#{revisarDocumentosApoyoViabilidadPfnController.enviar}"
+						rendered="#{revisarDocumentosApoyoViabilidadPfnController.documentosRequiereCorrecciones 
+						and revisarDocumentosApoyoViabilidadPfnController.panelMostrar eq 2}">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+					<p:commandButton value="Firmar" styleClass="large"
+						icon="ui-icon-key"
+						rendered="#{!revisarDocumentosApoyoViabilidadPfnController.documentosRequiereCorrecciones 
+						and revisarDocumentosApoyoViabilidadPfnController.panelMostrar eq 2}"
+						update=":form:pnlButtons :formDialogs:pnlFirmaManual :formDialogs:pnlFirmaToken"
+						actionListener="#{revisarDocumentosApoyoViabilidadPfnController.guardarDocumentosFirma()}" />
+				</div>
+			</h:panelGroup>
+		</h:form>
+
+		<h:form id="formDialogs">
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600" height="auto" position="center top">
+
+				<p:panel>
+
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel
+							value="Memorando Nro: #{revisarDocumentosApoyoViabilidadPfnController.informeOficioApoyoViabilidadPfnBean.oficioPronunciamiento.numeroOficio}"
+							styleClass="bold" />
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold"
+							rendered="#{!revisarDocumentosApoyoViabilidadPfnController.esProduccion}" />
+						<p:selectOneRadio id="verificaToken"
+							value="#{revisarDocumentosApoyoViabilidadPfnController.token}"
+							rendered="#{!revisarDocumentosApoyoViabilidadPfnController.esProduccion}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change" update="pnlFirmaManual pnlFirmaToken"
+								listener="#{revisarDocumentosApoyoViabilidadPfnController.guardarToken}" />
+						</p:selectOneRadio>
+
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{revisarDocumentosApoyoViabilidadPfnController.esProduccion}" />
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{revisarDocumentosApoyoViabilidadPfnController.esProduccion}" />
+
+						<h:panelGroup id="pnlFirmaToken">
+							<p:commandButton value="Firmar documento" type="button"
+								styleClass="primary" icon="ui-icon-key"
+								rendered="#{revisarDocumentosApoyoViabilidadPfnController.token}"
+								onclick="window.location.href='#{revisarDocumentosApoyoViabilidadPfnController.urlAlfresco}'" />
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!revisarDocumentosApoyoViabilidadPfnController.token}">
+							<h:outputLabel value="1. Descargue el Memorando"
+								styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload
+									value="#{revisarDocumentosApoyoViabilidadPfnController.descargar()}" />
+							</p:commandButton>
+
+							<p:outputLabel for="uploadRequired"
+								value="2. Adjunte el Memorando firmado" styleClass="bold" />
+							<p:fileUpload
+								fileUploadListener="#{revisarDocumentosApoyoViabilidadPfnController.uploadListenerDocumentos}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreOficioFirmado"
+								rendered="#{!revisarDocumentosApoyoViabilidadPfnController.token}">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreOficioFirmado"
+								value="#{revisarDocumentosApoyoViabilidadPfnController.documentoFirmado.nombre}" />
+						</h:panelGrid>
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!revisarDocumentosApoyoViabilidadPfnController.token and !revisarDocumentosApoyoViabilidadPfnController.subido}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialogOficio').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						action="#{revisarDocumentosApoyoViabilidadPfnController.finalizar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+		</h:form>
+
+	</ui:define>
+</ui:composition>

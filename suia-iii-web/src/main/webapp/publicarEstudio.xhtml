@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+        >
+<h:head>
+    <h:outputStylesheet name="suia-layout.css" library="css"/>
+    <h:outputStylesheet name="suia-styles.css" library="css"/>
+    <h:outputStylesheet name="suia-pf-custom.css" library="css"/>
+    <h:outputScript name="util.js" library="js"/>
+    <style>
+        #form_comentarios .ui-dialog {
+            height: 98% !important;
+        }
+    </style>
+    <link rel="shortcut icon"
+          href="#{request.contextPath}/resources/images/favicon.ico"/>
+    <title>MAE</title>
+</h:head>
+<h:body>
+    <div>
+        <div class="header-left-part"></div>
+        <div id="header" class="containerHeader">           
+            <div class="header-right-part"></div>
+            <div class="clear"></div>
+            <div class="header-right-part-bar"></div>
+            <div class="clear"></div>
+        </div>
+        <div class="container bordercontainer">
+            <div id="page">
+                <div id="content">
+                    <ui:include src="/WEB-INF/templates/status.xhtml"/>
+                    <style>
+                        .col1 {
+                            width: 30%;
+                        }
+
+                        .col2 {
+                            width: 70%;
+                        }
+
+                        .colAlign {
+                            vertical-align: top;
+                            width: 30%;
+                        }
+                    </style>
+                    <p:growl globalOnly="true" id="msgs"/>
+
+                    <h:form id="form">
+                        <p:panel>
+                            <f:facet name="header">
+                                <h:outputText
+                                        value="PROCESO DE PARTICIPACIÓN SOCIAL DE PROYECTOS A LICENCIARSE"/>
+
+                            </f:facet>
+                            <p:outputLabel value="De acuerdo a lo estipulado en el artículo 13 del Acuerdo Ministerial 103 publicado en el registro oficial 657 del 14 de octubre del 2015, las observaciones y comentarios al estudio ambiental se receptarán hasta 7 días después de la aplicación del último mecanismo de participación social."/>
+                            <br/>
+                            <p:dataTable id="tableProyectos"
+                                         sortBy="#{proyecto.id}"
+                                         value="#{publicarEstudioController.publicarEstudioBean.proyectosPS}"
+                                         filteredValue="#{publicarEstudioController.publicarEstudioBean.proyectosPSFilter}"
+                                         var="proyecto"
+                                         rows="10" paginator="true"
+                                         paginatorPosition="bottom"
+                                         currentPageReportTemplate="{currentPage} de {totalPages}"
+                                         rowsPerPageTemplate="5,10,15"
+                                         emptyMessage="#{labels['common.table.empty']}">
+                                <p:column rendered="false" styleClass="alCenter w15">
+                                    <h:outputText value="#{proyecto.id}"/>
+                                </p:column>
+                                <p:column rendered="false" styleClass="alCenter w15">
+                                    <h:outputText value="#{proyecto.id_pps}"/>
+                                </p:column>
+                                <p:column headerText="Código"
+                                          filterBy="#{proyecto.codigo}"
+                                          filterMatchMode="contains" styleClass="alCenter w15">
+                                    <h:outputText value="#{proyecto.codigo}"/>
+                                </p:column>
+                                <p:column headerText="Nombre"
+                                          filterBy="#{proyecto.nombre}"
+                                          filterMatchMode="contains"
+                                          styleClass="w25">
+                                    <h:outputText value="#{proyecto.nombre}"
+                                                  title="#{proyecto.nombre}"/>
+                                </p:column>
+                                <p:column headerText="Sector"
+                                          filterMatchMode="equals"
+                                          styleClass="alCenter w15">
+                                    <f:facet name="filter">
+                                        <p:selectOneMenu onchange="PF('tableProyectos').filter()"
+                                                         converter="selectItemConverter2" widgetVar="sectores">
+                                            <f:selectItem itemLabel="" itemValue="-1"/>
+                                            <f:selectItems value="#{publicarEstudioBean.sectoresItems}"/>
+                                        </p:selectOneMenu>
+                                    </f:facet>
+                                    <h:outputText
+                                            value="#{proyecto.sector}"/>
+                                </p:column>
+                                <p:column headerText="Registro Ambiental"
+                                          filterMatchMode="equals"
+                                          styleClass="alCenter w15">
+                                    <h:outputText value="#{proyecto.fecha}"/>
+                                </p:column>
+                                <p:column headerText="Adicionar Comentarios"
+                                          styleClass="alCenter w40px">
+                                    <p:commandButton action="#{publicarEstudioController.seleccionarProyectoPS(proyecto)}"
+                                                     process="@this" update=":form_comentarios:comentarios"
+                                                     icon="ui-icon-search" styleClass="button-small primary"
+                                                     oncomplete="PF('comentarios').show()">
+                                    </p:commandButton>
+                                </p:column>
+                            </p:dataTable>
+
+
+                        </p:panel>
+
+
+                    </h:form>
+                    <h:form id="form_comentarios">
+                        <p:dialog header="Comentarios" id="comentarios"
+                                  onShow="#{proyectosBean.setProyecto(publicarEstudioController.publicarEstudioBean.proyectoPPS.proyectoLicenciamientoAmbiental)}"
+                                  widgetVar="comentarios" modal="true" resizable="false" width="600" height="90%">
+
+                            <p:panel styleClass="comentarios w100">
+                                <h:panelGrid styleClass="panel_data w100 comentarios" columns="2"
+                                             columnClasses="header w25, null" rowClasses="null, alt">
+                                    <h:outputText value="ID"/>
+                                    <h:outputText
+                                            value="#{publicarEstudioController.publicarEstudioBean.proyectoPPS.proyectoLicenciamientoAmbiental.id}"/>
+                                    <h:outputText value="Código"/>
+                                    <h:outputText
+                                            value="#{publicarEstudioController.publicarEstudioBean.proyectoPPS.proyectoLicenciamientoAmbiental.codigo}"/>
+                                    <h:outputText value="Fecha de registro"/>
+                                    <h:outputText
+                                            value="#{publicarEstudioController.publicarEstudioBean.proyectoPPS.proyectoLicenciamientoAmbiental.fechaRegistro}">
+                                        <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                    </h:outputText>
+                                    <h:outputText value="Nombre"/>
+                                    <h:outputText
+                                            value="#{publicarEstudioController.publicarEstudioBean.proyectoPPS.proyectoLicenciamientoAmbiental.nombre}"/>
+                                    <h:outputText value="Actividad"/>
+                                    <h:outputText
+                                            value="#{publicarEstudioController.publicarEstudioBean.proyectoPPS.proyectoLicenciamientoAmbiental.catalogoCategoria.descripcion}"/>
+                                    <h:outputText value="Ver detalles del proyecto"/>
+                                    <h:outputLink
+                                            value="#{request.contextPath}#{proyectosBean.seleccionarPublico(publicarEstudioBean.proyectoPPS.proyectoLicenciamientoAmbiental)}"
+                                            target="_blank">
+                                        <h:outputText value="Ver detalles"/>
+                                    </h:outputLink>
+                                    <h:outputText value="Ver detalles del EIA"/>
+                                    <h:outputLink value="#{request.contextPath}#{eia.verEIA()}"
+                                                  target="_blank">
+                                        <h:outputText value="Ver detalles"/>
+                                    </h:outputLink>
+
+                                </h:panelGrid>
+                                <p:separator/>
+
+
+                                <p:panelGrid columns="2" columnClasses="w40,w60" styleClass="w100">
+                                    <p:outputLabel value="Nombre" for="addNombre"/>
+                                    <h:inputText id="addNombre"
+                                                 value="#{publicarEstudioController.publicarEstudioBean.comentarioPPS.nombre}"
+                                                 required="true" styleClass="w100"/>
+                                    <p:outputLabel value="Comunidad o Institución" for="addComunidad"/>
+                                    <h:inputText id="addComunidad"
+                                                 value="#{publicarEstudioController.publicarEstudioBean.comentarioPPS.nombreEntidad}"
+                                                 required="true" styleClass="w100"/>
+                                    <p:outputLabel value="Cargo" for="addCargo"/>
+                                    <h:inputText id="addCargo"
+                                                 value="#{publicarEstudioController.publicarEstudioBean.comentarioPPS.cargo}"
+                                                 required="true" styleClass="w100"/>
+
+                                </p:panelGrid>
+
+                                <h:outputLabel value="Ubicación"/>
+                                <p:panelGrid columns="2" columnClasses="w40,w60" styleClass="w100">
+                                    <p:outputLabel value="Provincia" for="cmb_provincias"/>
+
+                                    <p:selectOneMenu value="#{publicarEstudioController.publicarEstudioBean.provincia}"
+                                                     id="cmb_provincias" required="true" styleClass="w100">
+                                        <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                                      itemValue="#{null}" noSelectionOption="true"/>
+                                        <f:selectItems
+                                                value="#{publicarEstudioController.publicarEstudioBean.provincias}"
+                                                var="provincia" itemValue="#{provincia}"
+                                                itemLabel="#{provincia.nombre}"/>
+                                        <f:converter converterId="selectItemConverter"/>
+                                        <p:ajax listener="#{publicarEstudioController.cargarCantones}"
+                                                update="cmb_cantones,cmb_parroquias"/>
+                                    </p:selectOneMenu>
+                                    <p:outputLabel value="Cantón" for="cmb_cantones"/>
+
+                                    <p:selectOneMenu value="#{publicarEstudioController.publicarEstudioBean.canton}"
+                                                     id="cmb_cantones"
+                                                     required="true" styleClass="w100">
+                                        <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                                      itemValue="#{null}" noSelectionOption="true"/>
+                                        <f:selectItems value="#{publicarEstudioController.publicarEstudioBean.cantones}"
+                                                       var="canton"
+                                                       itemValue="#{canton}" itemLabel="#{canton.nombre}"/>
+                                        <f:converter converterId="selectItemConverter"/>
+                                        <p:ajax listener="#{publicarEstudioController.cargarParroquias}"
+                                                update="cmb_parroquias"/>
+                                    </p:selectOneMenu>
+
+                                    <p:outputLabel value="Parroquia" for="cmb_parroquias"/>
+                                    <p:selectOneMenu value="#{publicarEstudioController.publicarEstudioBean.parroquia}"
+                                                     required="true"
+                                                     id="cmb_parroquias" styleClass="w100">
+                                        <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                                      itemValue="#{null}" noSelectionOption="true"/>
+                                        <f:selectItems
+                                                value="#{publicarEstudioController.publicarEstudioBean.parroquias}"
+                                                var="parroquia"
+                                                itemValue="#{parroquia}" itemLabel="#{parroquia.nombre}"/>
+                                        <f:converter converterId="selectItemConverter"/>
+
+                                    </p:selectOneMenu>
+
+
+                                </p:panelGrid>
+                                <p:panelGrid columns="2" columnClasses="w40,w60" styleClass="w100">
+                                    <p:outputLabel value="Nro de teléfono" for="addTelf"/>
+                                    <h:inputText id="addTelf"
+                                                 value="#{publicarEstudioController.publicarEstudioBean.comentarioPPS.telefono}"
+                                                 required="true" styleClass="w100"
+                                                 maxlength="15" onkeypress="return numbersonly(this,event)"/>
+
+                                    <p:outputLabel value="Correo Electrónico" for="addCorreo"/>
+                                    <h:inputText id="addCorreo"
+                                                 validatorMessage="Formato incrrecto de correo electrónico."
+                                                 value="#{publicarEstudioController.publicarEstudioBean.comentarioPPS.correo}"
+                                                 required="true" styleClass="w100">
+                                        <f:validateRegex
+                                                pattern="^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$"/>
+                                    </h:inputText>
+                                    <p:outputLabel value="Comentarios" for="addComentario"/>
+                                    <h:inputTextarea id="addComentario"
+                                                     value="#{publicarEstudioController.publicarEstudioBean.comentarioPPS.comentario}"
+                                                     required="true" styleClass="w100"/>
+
+                                </p:panelGrid>
+                                <p:panelGrid columns="1" layout="grid" styleClass="w100" id="convocatoriaPublica"
+                                             columnClasses=" " rendered="true">
+                                    <f:facet name="header">
+                                        <h:outputText value="Respaldo de Comentarios"/>
+                                    </f:facet>
+
+                                    <h:panelGrid columns="2" columnClasses="null, field_mrg">
+
+                                        <p:outputLabel
+                                                value="#{publicarEstudioController.documento==null ? 'Documento(.pdf|.zip|.rar)' :
+                                publicarEstudioController.documento.nombre}"/>
+                                        <p:commandButton id="downloadVisitaPrevia" icon="ui-icon-arrowthick-1-s"
+                                                         ajax="false" styleClass="button-small primary" title="Ver"
+                                                         immediate="true"
+                                                         rendered="#{publicarEstudioController.documento!=null}">
+                                            <p:fileDownload
+                                                    value="#{publicarEstudioController.streamContent}"/>
+                                        </p:commandButton>
+                                    </h:panelGrid>
+                                    <p:fileUpload
+                                            fileUploadListener="#{publicarEstudioController.uploadListenerDocumentos}"
+                                            multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf|zip|rar)$/i"
+                                            label="Seleccionar" uploadLabel="Subir"
+                                            invalidFileMessage="Tipo de archivo no válido"
+                                            invalidSizeMessage="Tamaño de archivo no válido"
+                                            cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                            auto="true" update="convocatoriaPublica"
+                                            >
+                                    </p:fileUpload>
+                                </p:panelGrid>
+
+
+                                <div class="buttons">
+
+
+                                    <p:commandButton value="Aceptar" update="@(.comentarios)"
+                                                     actionListener="#{publicarEstudioController.guardarComentario()}"
+                                                     rendered="true" styleClass="button-large primary"/>
+
+
+                                </div>
+                            </p:panel>
+                        </p:dialog>
+                    </h:form>
+
+                </div>
+
+            </div>
+        </div>
+        <ui:insert name="footer">
+            <ui:include src="/WEB-INF/templates/footer.xhtml"/>
+        </ui:insert>
+    </div>
+</h:body>
+</html>

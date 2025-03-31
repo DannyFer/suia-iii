@@ -1,0 +1,101 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+	<ui:define name="content">
+
+		<style type="text/css">
+.cssNoPago {
+	background: #fca752 !important;
+}
+</style>
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				columnClasses="w100">
+				<f:facet name="header">
+					Cargar Comprobante de Pago
+					</f:facet>
+
+				<h:outputText value="Pago(s) por solicitud" />
+				<p:dataTable value="#{cargarComprobanteNUTController.listaNuts}"
+					var="nutItem">
+					<p:columnGroup type="header">
+						<p:row>
+							<p:column headerText="NUT" />
+							<p:column headerText="Valor" />
+							<p:column headerText="Referencia" />
+							<p:column headerText="Fecha pago" />
+						</p:row>
+					</p:columnGroup>
+
+					<p:column
+						styleClass="#{nutItem.estadosNut.id ne 3 ? 'cssNoPago' : null}">
+						<h:outputText value="#{nutItem.nutCodigo}" />
+					</p:column>
+					<p:column
+						styleClass="#{nutItem.estadosNut.id ne 3 ? 'cssNoPago' : null}">
+						<h:outputText value="#{nutItem.nutValor}" />
+					</p:column>
+					<p:column
+						styleClass="#{nutItem.estadosNut.id ne 3 ? 'cssNoPago' : null}">
+						<h:outputText value="#{nutItem.bnfTramitNumber}" />
+					</p:column>
+					<p:column
+						styleClass="#{nutItem.estadosNut.id ne 3 ? 'cssNoPago' : null}">
+						<h:outputText value="#{nutItem.bnfFechaPago}">
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+						</h:outputText>
+					</p:column>
+				</p:dataTable>
+				<br />
+				<br />
+
+				<h:outputText value="Comprobante de pago *" />
+				<h:panelGrid columns="1" columnClasses="w100" id="gridComprobante">
+					<p:outputLabel
+						value="#{empty cargarComprobanteNUTController.documentoPago.nombre ? 'Archivo(.pdf|.rar|.zip)' : cargarComprobanteNUTController.documentoPago.nombre}" />
+					<p:commandButton id="downloadComprobante"
+						icon="ui-icon-arrowthick-1-s" ajax="false"
+						styleClass="button-small primary" title="Ver" immediate="true"
+						rendered="#{not empty cargarComprobanteNUTController.documentoPago.nombre}">
+						<p:fileDownload
+							value="#{cargarComprobanteNUTController.getStreamContent()}" />
+					</p:commandButton>
+				</h:panelGrid>
+				<h:panelGrid columns="1" columnClasses="w25">
+					<p:fileUpload id="fileUploadComprobante"
+						fileUploadListener="#{cargarComprobanteNUTController.adjuntarDocumento}"
+						multiple="false" sizeLimit="31457280"
+						allowTypes="/(\.|\/)(zip|rar|pdf)$/" label="Seleccionar"
+						uploadLabel="Subir" invalidFileMessage="Tipo de archivo no válido"
+						invalidSizeMessage="Tamaño de archivo no válido"
+						cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+						auto="true" update="gridComprobante downloadComprobante">
+					</p:fileUpload>
+				</h:panelGrid>
+
+			</p:panelGrid>
+			<t:div styleClass="buttons main">
+				<p:commandButton value="Enviar" icon="ui-icon-check"
+					disabled="#{!cargarComprobanteNUTController.isNutPagado}"
+					actionListener="#{cargarComprobanteNUTController.completarTarea()}"
+					process="@form" />
+			</t:div>
+			<p:dialog header="Validación de pago" widgetVar="dlgPago"
+				visible="#{!cargarComprobanteNUTController.isNutPagado}"
+				modal="true" resizable="false" width="400">
+				<h:panelGroup>
+					<h:outputText styleClass="alJustify"
+						value="Estimado proponente no puede subir el comprobante hasta que el pago sea validado por la entidad financiera." />
+						<br />
+				</h:panelGroup>
+			</p:dialog>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

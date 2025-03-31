@@ -1,0 +1,259 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+
+	<ui:composition template="/WEB-INF/templates/default.xhtml">
+		<ui:define name="content">
+			<style type="text/css">
+				.noHeader tr td {
+					padding-left: 0px;
+					padding-right: 0px;
+				}
+			</style>
+	
+			<h:outputStylesheet library="suia-css" name="suia-styles.css" />
+			<h:form id="frmDatos">
+				<p:panel styleClass="separatorTop colapsablePanelStandard" collapsed="#{!controlesBean.contextoActividadToggleVisible}"
+					toggleable="true" widgetVar="panelContextoActividad">
+					<f:facet name="header">
+						<h:outputText value="Contexto de la Actividad" />
+						<p:commandButton id="buttonPanelContextoActividad" styleClass="button-small-text toRight field_mrg" type="button" 
+							value="#{controlesBean.contextoActividadToggleVisible ? 'Cerrar' : 'Ver detalles'}"
+							onclick="PF('panelContextoActividad').toggle()" 
+							icon="#{controlesBean.contextoActividadToggleVisible ? 'ui-icon-carat-1-n' : 'ui-icon-carat-1-s'}"/>
+					</f:facet>
+					<p:ajax global="false" event="toggle" update="buttonPanelContextoActividad"  
+						listener="#{controlesBean.contextoActividadToggleListener}"/>
+	
+					<h:panelGrid id="pnlContextoMainDefaulTask" columns="3" styleClass="mw50 panel_data" columnClasses="header w25, null, alCenter w20px"
+						rowClasses="null, alt">
+						<h:outputText value="Actividad" />
+						<h:outputText value="Ingreso de Información de Importación" styleClass="bold" />
+						<h:outputText />
+						
+						<h:outputText value="Flujo" />
+						<h:outputText value="Registro Sustancias Quimicas (Importacion Exportacion)" />
+						<p:commandButton icon="ui-icon-search" onclick="PF('modalShowFlow').show()" styleClass="primary button-small" />
+						 
+						<h:outputText value="Usuario" />
+						<h:outputText value="#{ingresoInformacionImportacionController.loginBean.usuario.persona.nombre}"/>
+						<h:outputText />
+					</h:panelGrid>
+	
+					<p:dialog width="500" id="modalShowProponente" header="Operador" widgetVar="modalShowProponente" modal="true" resizable="false">
+						<h:panelGrid styleClass="w100" columns="1">
+							<h:panelGrid styleClass="panel_data mw50" columns="2" columnClasses="header, null" rowClasses="null, alt">
+								<h:outputText value="Nombre" />
+								<h:outputText value="#{ingresoParamsReporteImportacSustanciasQuimicasController.nombre}" />
+								
+								<h:outputText value="Representante legal"
+									rendered="#{!empty ingresoParamsReporteImportacSustanciasQuimicasController.representanteLegal}" />
+								<h:outputText value="#{ingresoParamsReporteImportacSustanciasQuimicasController.representanteLegal}"
+									rendered="#{!empty ingresoParamsReporteImportacSustanciasQuimicasController.representanteLegal}" />
+								
+								<h:outputText value="Correo" />
+								<h:outputText value="#{ingresoParamsReporteImportacSustanciasQuimicasController.correo}" />
+								
+								<h:outputText value="Teléfono"
+									rendered="#{!empty ingresoParamsReporteImportacSustanciasQuimicasController.telefono}" />
+								<h:outputText value="#{ingresoParamsReporteImportacSustanciasQuimicasController.telefono}"
+									rendered="#{!empty ingresoParamsReporteImportacSustanciasQuimicasController.telefono}" />
+								
+								<h:outputText value="Celular"
+									rendered="#{!empty ingresoParamsReporteImportacSustanciasQuimicasController.celular}" />
+								<h:outputText value="#{ingresoParamsReporteImportacSustanciasQuimicasController.celular}"
+									rendered="#{!empty ingresoParamsReporteImportacSustanciasQuimicasController.celular}" />
+							</h:panelGrid>
+							
+							<br />
+							<h:outputText value="Ubicación geográfica" styleClass="bold" />
+							<p:dataTable var="ubicacion" value="#{ingresoParamsReporteImportacSustanciasQuimicasController.ubicacionesGeografica}">
+								<p:column headerText="Provincia">
+									<h:outputText
+										value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}"/>
+								</p:column>
+								
+								<p:column headerText="Cant&oacute;n">
+									<h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}"/>
+								</p:column>
+								
+								<p:column headerText="Parroquia">
+									<h:outputText value="#{ubicacion.nombre}" />
+								</p:column>
+							</p:dataTable>
+						</h:panelGrid>
+						<p:separator />
+						
+						<div class="buttons">
+							<p:commandButton value="Cerrar" styleClass="primary" type="button" onclick="PF('modalShowProponente').hide()" />
+						</div>
+					</p:dialog>
+	
+					<p:dialog width="800" height="500" position="top" id="modalShowFlow"
+						styleClass="modalShowFlow" header="Detalles del flujo" widgetVar="modalShowFlow" modal="true" resizable="true">
+						<p:panel header="Diagrama" collapsed="false" toggleable="false" styleClass="alCenter">
+							<img src="#{request.contextPath}/resources/images/RegistroSustanciasQuimicasImportacionVue.png"/>
+						</p:panel>
+					</p:dialog>
+				</p:panel>
+			</h:form>
+	
+			<h:form id="frmInformacion">
+				<p:panel styleClass="separatorTop colapsablePanelStandard">
+					<f:facet name="header">
+						<h:outputText value="Datos de la Actividad" />
+					</f:facet>
+					
+					<p:panelGrid id="pnlParams" columns="1" 
+						rendered="#{ingresoParamsReporteImportacSustanciasQuimicasController.tipo}">  
+						<f:facet name="header">
+							<h:outputText value="Parámetros de búsqueda" />
+						</f:facet>
+	
+						<h:panelGrid id="pgParams" columns="2" layout="grid" styleClass="w400 noBorders" columnClasses="w35, field_mrg w35, w35, w35">
+							<p:outputLabel value="Tipo de Solicitud (*)" />
+							<p:selectOneMenu id="sOmTipoSolicitud" required="true" requiredMessage="Tipo de solicitud es requerido"
+								value="#{ingresoParamsReporteImportacSustanciasQuimicasController.paramSolicitudImportacionRSQVueDTO.tipoSolicitud}">
+								<f:selectItem itemLabel="Seleccione..." itemValue="-1" />
+								<f:selectItem itemValue="1" itemLabel="1. Solicitudes de Autorizaciones Emitidas" />
+								<f:selectItem itemValue="2" itemLabel="2. Solicitudes de Autorizaciones Anuladas" />
+								<f:selectItem itemValue="3" itemLabel="3. Solicitudes de Autorizaciones Pendientes" />
+								<f:selectItem itemValue="4" itemLabel="4. Solicitudes de Autorizaciones Corregidas" />
+								<f:selectItem itemValue="0" itemLabel="0. Todas" />
+							</p:selectOneMenu>
+							<p:outputLabel value="" />
+							
+							<!--  Aqui va el componente de fecha Inicio-->
+							<h:outputLabel for="fechaInicio" value="Fecha Inicio:" />
+							<h:panelGrid styleClass="w40" columns="1">
+								<p:calendar id="fechaInicio" required="true" locale="es" disabledWeekends="false" label="Fecha Inicio" navigator="true"
+									value="#{ingresoParamsReporteImportacSustanciasQuimicasController.paramSolicitudImportacionRSQVueDTO.fechaInicio}"
+									pattern="dd/MM/yyyy" readonlyInput="true" yearRange="2018:+0">
+								</p:calendar>
+							</h:panelGrid>
+							
+							<h:outputLabel for="fechaFin" value="Fecha Fin:"/>
+							<h:panelGrid styleClass="w40" columns="1">
+								<p:calendar id="fechaFin" required="true" locale="es" disabledWeekends="false" label="Fecha Fin" navigator="true"
+									value="#{ingresoParamsReporteImportacSustanciasQuimicasController.paramSolicitudImportacionRSQVueDTO.fechaFin}"
+									mindate="#{ingresoParamsReporteImportacSustanciasQuimicasController.paramSolicitudImportacionRSQVueDTO.fechaInicio}"
+									pattern="dd/MM/yyyy" readonlyInput="true" yearRange="2018:+0">
+								</p:calendar>
+							</h:panelGrid>
+							
+							<p:panelGrid columns="4" styleClass="panelNoBorder">
+								<p:commandButton icon="ui-icon-cancel" value="Limpiar"
+									styleClass="primary" action="#{ingresoParamsReporteImportacSustanciasQuimicasController.limpiar()}"
+									ajax="true"  update=":frmInformacion:sOmTipoSolicitud, :frmInformacion:fechaInicio, :frmInformacion:registroTable" process="@all"/>
+								
+								<!-- Botón Buscar -->
+								<p:commandButton icon="ui-icon-check" styleClass="secondary"
+									value="Buscar" action="#{ingresoParamsReporteImportacSustanciasQuimicasController.buscar()}"
+									update=":frmInformacion:registroTable" process="@all"/>
+							</p:panelGrid>
+						</h:panelGrid>
+					</p:panelGrid>
+				</p:panel>
+	
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" id="pnlVisualizacion" rendered="true">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="Listado de Autorizaciones de Importación" />
+						</f:facet>
+	
+						<p:panel styleClass="separatorTop colapsablePanelStandard">
+							<f:facet name="header">
+								<h:outputText value="Listado de Autorizaciones" />
+							</f:facet>
+	
+							<p:dataTable id="registroTable" var="registro" rows="10" paginator="true"
+								value="#{ingresoParamsReporteImportacSustanciasQuimicasController.listaSolicitudesDTO}"
+								paginatorAlwaysVisible="false" paginatorPosition="bottom" emptyMessage="#{labels['common.table.empty']}">
+	
+								<p:column headerText="No." width="25">
+									<h:outputText value="#{registro.indice}" />
+								</p:column>
+								
+								<p:column headerText="Número Solicitud" width="180"> 
+									<h:outputText value="#{registro.solicitudImportacionRSQ.tramite}" />
+								</p:column>
+								
+								<p:column headerText="Tipo de Solicitud" width="120"> 
+									<h:outputText value="#{registro.tipoSolicitud}" />
+								</p:column>
+								
+								<p:column headerText="Fecha inicio" width="120" > 
+									<h:outputText value="#{registro.fechaInicio}" />
+								</p:column>
+								
+								<p:column headerText="Fecha fin" width="120"> 
+									<h:outputText value="#{registro.fechaFin}" />
+								</p:column>
+								
+								<p:column headerText="Estado" width="100"> 
+									<h:outputText value="#{registro.estadoTramite}" />
+								</p:column>
+								
+								<p:column headerText="Seleccionar" width="60" style="text-align:center;">
+									<p:commandButton type="button" styleClass="primary" icon="ui-icon-play">
+										<p:ajax oncomplete="true" listener="#{ingresoParamsReporteImportacSustanciasQuimicasController.seleccionarListener(registro)}"
+											update=":formDialogs:pnlVisualizeDoc" >
+										</p:ajax>
+									</p:commandButton>	
+								</p:column>
+							</p:dataTable>
+						</p:panel>
+					</p:panelGrid>
+				</p:panelGrid>
+				
+				<!-- filterMatchMode="contains" filterBy="#{registro.solicitudImportacionRSQ.tramite}" -->
+				<!-- filterBy="#{registro.tipoSolicitud}" -->
+				<!-- filterBy="#{registro.solicitudImportacionRSQ.fechaInicioAutorizacion}" -->
+				<!-- filterBy="#{registro.solicitudImportacionRSQ.fechaFinAutorizacion}" -->
+				<!-- filterBy="#{registro.estadoTramite}" -->
+			
+				<h:panelGroup id="pnlButtons">
+					<div align="left">
+						<p:outputLabel>Descargar Archivo: </p:outputLabel>
+						
+						<h:commandButton value="" image="/resources/images/pdf-icon.png">
+							<p:fileDownload value="#{ingresoParamsReporteImportacSustanciasQuimicasController.descargarDocumento('pdf')}"/>
+						</h:commandButton>
+						<h:commandLink>
+				              <p:graphicImage value="/resources/images/excel.png" />
+				              <p:dataExporter type="xls" postProcessor="#{ingresoParamsReporteImportacSustanciasQuimicasController.postProcessXLS}"
+				                  target="registroTable" fileName="ImportSustanciasQuimicas" />
+				          </h:commandLink>						
+					</div>
+					
+					<div class="buttons main">
+						<p:commandButton id="btnCancelar" value="Cancelar" icon="ui-icon-cancel" styleClass="primary"
+							actionListener="#{ingresoParamsReporteImportacSustanciasQuimicasController.cerrar()}" />
+					</div>
+				</h:panelGroup>
+			</h:form>
+		
+			<h:form id="formDialogs">
+				<p:dialog modal="true" id="dlgVisualizeDoc" widgetVar="dlgVisualizeDoc"
+					header="Reporte de Importación Sustancias Químicas desde Vue" resizable="true" width="900px" height="700px">
+	
+					<h:panelGrid id="pnlVisualizeDoc">
+						<object id="pdf_docImp" type="application/pdf" data="#{ingresoParamsReporteImportacSustanciasQuimicasController.urlFormulario}?pfdrid_c=true" width="400%" height="700px">
+							Su navegador no soporta la visualización de pdf. Puede descargar el documento presionando el siguiente botón:
+						</object>
+					</h:panelGrid>
+	
+					<div class="buttons main">
+						<p:commandButton icon="ui-icon-cancel" value="Cerrar" onclick="PF('dlgVisualizeDoc').hide();" 
+							process="@this" styleClass="secondary" />
+					</div>
+				</p:dialog>
+			</h:form>
+		</ui:define>
+	</ui:composition>
+</html>

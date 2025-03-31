@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="context-extra">
+
+    </ui:define>
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{adjuntarCuestionarioBean.validarTareaBpm()}"/>
+        <h:form id="form">
+
+            <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                <f:facet name="header">
+                    <mae:panelGridHeaderHelp value="#{adjuntarCuestionarioBean.header}"
+                                             conector="generalHelp" render="false"
+                                             image="#{request.contextPath}/resources/images/help-how.png"
+                                             help="#{helps['no.help.yet']}"/>
+                </f:facet>
+
+                <h:outputText value="#{adjuntarCuestionarioBean.nota}" styleClass="toLeft text-red field_mrg"/>
+
+                <h:panelGrid cellpadding="4" styleClass="w50">
+
+                    <h:panelGrid id="panelBP" rendered="#{adjuntarCuestionarioBean.requiereBP}"
+                                 cellpadding="2" columns="2">
+
+                        <p:outputLabel value="#{adjuntarCuestionarioBean.labelDocumentoBP}"/>
+
+                        <p:commandButton ajax="false" icon="ui-icon-arrowthick-1-s"
+                                         styleClass="oculto primary">
+                            <p:fileDownload value="#{adjuntarCuestionarioBean.streamBP}"/>
+                        </p:commandButton>
+
+                    </h:panelGrid>
+
+                    <h:panelGrid id="panelSNAP" rendered="#{adjuntarCuestionarioBean.requiereSNAP}"
+                                 cellpadding="2" columns="2">
+
+                        <p:outputLabel value="#{adjuntarCuestionarioBean.labelDocumentoSNAP}"/>
+
+                        <p:commandButton ajax="false"
+                                         icon="ui-icon-arrowthick-1-s"
+                                         styleClass="oculto primary">
+                            <p:fileDownload value="#{adjuntarCuestionarioBean.streamSNAP}"/>
+                        </p:commandButton>
+
+                    </h:panelGrid>
+
+                    <h:panelGrid id="panelBPAdjunto" rendered="#{adjuntarCuestionarioBean.requiereBP}" styleClass="w100">
+
+                        <h:panelGrid id="label_DocumentoBP">
+
+                            <p:outputLabel rendered="#{adjuntarCuestionarioBean.cuestionarioBP != null}"
+                                           value="#{adjuntarCuestionarioBean.cuestionarioBP.name}"/>
+
+                            <p:outputLabel rendered="#{adjuntarCuestionarioBean.cuestionarioBP == null}"
+                                           value="#{adjuntarCuestionarioBean.labelAdjuntoBP}"/>
+
+                        </h:panelGrid>
+
+                        <p:fileUpload width="100%" required="true"
+                                      value="#{adjuntarCuestionarioBean.cuestionarioBP}"
+                                      sizeLimit="3145728" allowTypes="/(\.|\/)(pdf)$/"
+                                      fileUploadListener="#{adjuntarCuestionarioBean.uploadListenerBP}"
+                                      label="Seleccionar" cancelLabel="Cancelar" uploadLabel="Adjuntar" auto="true"
+                                      update=":#{p:component('marchCuestionarioBP')}, :#{p:component('label_DocumentoBP')}"
+                                      invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo pdf."
+                                      invalidSizeMessage="Debe adjuntar un archivo no mayor de 3 Mb."/>
+
+                        <p:growl id="marchCuestionarioBP" showDetail="true"/>
+
+                    </h:panelGrid>
+
+                    <h:panelGrid id="panelSNAPAdjunto" rendered="#{adjuntarCuestionarioBean.requiereSNAP}" styleClass="w100">
+
+                        <h:panelGrid id="label_DocumentoSNAP">
+
+                            <p:outputLabel rendered="#{adjuntarCuestionarioBean.cuestionarioSNAP != null}"
+                                           value="#{adjuntarCuestionarioBean.cuestionarioSNAP.name}"/>
+
+                            <p:outputLabel rendered="#{adjuntarCuestionarioBean.cuestionarioSNAP == null}"
+                                           value="#{adjuntarCuestionarioBean.labelAdjuntoSNAP}"/>
+
+                        </h:panelGrid>
+
+                        <p:fileUpload width="100%" required="true"
+                                      value="#{adjuntarCuestionarioBean.cuestionarioSNAP}"
+                                      sizeLimit="3145728" allowTypes="/(\.|\/)(pdf)$/"
+                                      fileUploadListener="#{adjuntarCuestionarioBean.uploadListenerSNAP}"
+                                      label="Seleccionar" cancelLabel="Cancelar" uploadLabel="Adjuntar" auto="true"
+                                      update=":#{p:component('marchCuestionarioSNAP')}, :#{p:component('label_DocumentoSNAP')}"
+                                      invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo pdf."
+                                      invalidSizeMessage="Debe adjuntar un archivo no mayor de 3 Mb."/>
+
+                        <p:growl id="marchCuestionarioSNAP" showDetail="true"/>
+
+                    </h:panelGrid>
+
+                </h:panelGrid>
+            </p:panelGrid>
+
+            <div class="buttons main">
+                <p:commandButton value="Enviar"
+                                 action="#{adjuntarCuestionarioController.iniciarTarea}"
+                                 title="Enviar datos" icon="ui-icon-check">
+                </p:commandButton>
+            </div>
+
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

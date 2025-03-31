@@ -1,0 +1,307 @@
+  <html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="Datos del Personal"/>		
+	</f:facet>	
+		
+	<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{registrarSustanciasQuimicasController.mostrarRepresenanteLegal}">
+		<f:facet name="header">
+			<h:outputText value="Representante Legal o Persona Natural" styleClass="primary" />
+			<mae:panelGridHeaderHelp conector="puntosHelp"
+				help="Estimado usuario si la información del Representante legal o Persona natural se encuentra desactualizada, deberá solicitar su actualización a Mesa de Ayuda mediante un correo electrónico."
+				width="600px" />
+		</f:facet>
+
+		<p:panelGrid id="gridRepLegal" columns="2" styleClass="w100 panel_data" columnClasses="header w25,w75">						
+							
+			<h:outputText value="Número de Cédula o Pasaporte"/>
+			<h:panelGroup id="cedulaGroup">
+			
+			<p:inputText id="idRepLegal" value="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.identificacionRepLegal}" style="width:200px!important" 
+			required="true" requiredMessage="Número de Cédula o Pasaporte es requerido"
+			maxlength="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.tipoIdentificacion.nombre.toUpperCase().contains('CEDULA')?'10':'20'}"
+			rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}"
+			disabled="#{empty registrarSustanciasQuimicasController.registroSustanciaQuimica.tipoIdentificacion}"/>
+			<h:outputText value="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.identificacionRepLegal}"
+			rendered="#{!registrarSustanciasQuimicasController.habilitarIngreso}"/>
+			
+			</h:panelGroup>			
+			
+			<h:outputText value="Nombre *"/>
+			<p:inputText id="nomRepLegal" value="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.nombreRepLegal}" maxlength="50"
+			required="true" requiredMessage="Nombre es requerido"
+			readonly="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.tipoIdentificacion.nombre.toUpperCase().contains('CEDULA')}"
+			rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}"
+			disabled="#{empty registrarSustanciasQuimicasController.registroSustanciaQuimica.tipoIdentificacion}">
+				<p:ajax process="@this"/>
+			</p:inputText>
+			<h:outputText value="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.nombreRepLegal}"
+			rendered="#{!registrarSustanciasQuimicasController.habilitarIngreso}"/>
+			
+			<h:outputText value="Teléfono *"/>
+			<p:inputText id="telRepLegal" value="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.telefonoRepLegal}" maxlength="10"
+			required="true" requiredMessage="Nombre es requerido"
+			rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}">
+			<p:ajax process="@this"/>
+			</p:inputText>
+			
+			<h:outputText value="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.telefonoRepLegal}"
+			rendered="#{!registrarSustanciasQuimicasController.habilitarIngreso}"/>	
+			
+			<h:outputText value="Correo *"/>
+			<p:inputText value="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.correoRepLegal}" maxlength="100"
+			required="true" requiredMessage="Correo es requerido"
+			rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}">
+			<p:ajax process="@this"/>
+			</p:inputText>
+			<h:outputText value="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.correoRepLegal}"
+			rendered="#{!registrarSustanciasQuimicasController.habilitarIngreso}"/>
+			
+			<h:outputText value="Dirección *"/>
+			<p:inputText value="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.direccionRepLegal}" maxlength="200"
+			required="true" requiredMessage="Dirección es requerido"
+			rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}">
+			<p:ajax process="@this"/>
+			</p:inputText>
+			<h:outputText value="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.direccionRepLegal}"
+			rendered="#{!registrarSustanciasQuimicasController.habilitarIngreso}"/>
+			
+			<h:inputHidden validator="#{registrarSustanciasQuimicasController.validarNombreResponsableRL}" />						
+		</p:panelGrid> 
+				
+	</p:panelGrid>
+
+	<p:panelGrid id="respTecnicoGrid" columns="1" layout="grid" styleClass="w100" rendered="#{registrarSustanciasQuimicasController.mostrarResponsablesTecnicos}">
+		<f:facet name="header">
+			<h:outputText value="Responsable Técnico"/>
+			<p:commandButton value="Adicionar" styleClass="button-small-text toRight field_mrg" icon="ui-icon-plus"
+			process="@this" actionListener="#{registrarSustanciasQuimicasController.crearResponsable}"
+			oncomplete="PF('respTecnicoDiag').show()" update=":formDialogs:respTecnicoDiag" 
+			rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}" resetValues="true"/>		
+		</f:facet>
+		
+		<p:dataTable id="respTecnicoTable" value="#{registrarSustanciasQuimicasController.getResponsableSustanciaQuimicaLista('TÉCNICO')}" var="item"
+	 		emptyMessage="#{labels['common.table.empty']}" lazy="true">
+			<p:column style="width:16px">
+            	<p:rowToggler />
+        	</p:column>
+						
+			<p:column headerText="Cédula/Pasaporte"
+				styleClass="alCenter singleLine">
+				<h:outputText value="#{item.identificacion}" />
+			</p:column>
+		
+			<p:column headerText="Nombre" styleClass="alCenter">
+				<h:outputText value="#{item.nombre}"/>
+			</p:column>
+		
+			<p:column headerText="Título SENESCYT" styleClass="alCenter">
+				<h:outputText value="#{item.numeroTitulo.replace(';',' ')}"/>
+				<br/>
+				<h:outputText value="#{item.nombreTitulo.replace(';',' ')}"/>
+				<br/>				
+				<p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar"
+					rendered="#{not empty item.documentoTitProfesional}">
+						<p:fileDownload value="#{documentosRSQController.streamedContentRsq(item.documentoTitProfesional)}"/>
+				</p:commandButton>
+				
+				<br/>
+				<h:outputText value="Operador Artesanal" rendered="#{item.tipoIdentificacion.nombre.toUpperCase().contains('ARTESANAL') and not empty item.documentoTitArtesanal}"/>
+                <br/>
+                <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar"
+					rendered="#{item.tipoIdentificacion.nombre.toUpperCase().contains('ARTESANAL') and  not empty item.documentoTitArtesanal}">
+						<p:fileDownload value="#{documentosRSQController.streamedContentRsq(item.documentoTitArtesanal)}"/>
+				</p:commandButton>
+			</p:column>
+			
+			<p:column headerText="Sustancia" styleClass="alCenter">
+				<h:outputText value="#{item.sustancias}"/>
+			</p:column>
+		
+			<p:column headerText="Lugar" styleClass="alCenter">
+				<h:outputText value="#{item.lugares}"/>
+			</p:column>
+		
+			<p:column headerText="Acciones" rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}">
+				<center>
+				<p:commandButton icon="ui-icon-pencil" title="Editar" styleClass="secondary"  process="@this" 
+					actionListener="#{registrarSustanciasQuimicasController.editarResponsable(item)}" oncomplete="PF('respTecnicoDiag').show()" update=":formDialogs:respTecnicoDiag"/>
+				<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process="respTecnicoTable" update=":form:respTecnicoGrid" 
+					actionListener="#{registrarSustanciasQuimicasController.eliminarResponsable(item)}">
+					<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar?" icon="ui-icon-alert"/>
+				</p:commandButton>
+				</center>
+			</p:column>
+			
+			<p:rowExpansion>
+            <p:panelGrid  styleClass="panel_data" columnClasses="header w25,w75" columns="2" >
+                
+                <h:outputText value="Teléfono" />
+                <h:outputText value="#{item.telefono}" />
+                
+                <h:outputText value="Correo" />
+                <h:outputText value="#{item.correo}" />
+                
+                <h:outputText value="Dirección" />
+                <h:outputText value="#{item.direccion}" /> 
+                
+                <h:outputText value="Responsabilidad Técnico" />
+                <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar"
+					rendered="#{not empty item.documentoResponsabilidadTec}">
+						<p:fileDownload value="#{documentosRSQController.streamedContentRsq(item.documentoResponsabilidadTec)}"/>
+				</p:commandButton> 
+				
+				<h:outputText value="Es operador Artesanal" rendered="false"/>
+                <h:panelGroup id="operadorArtesanal" rendered="false">
+                <h:outputText value="#{item.operadorArtesanal?'Si':'No'}" />
+                <br/>
+                <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar"
+					rendered="#{not empty item.documentoTitArtesanal}">
+						<p:fileDownload value="#{documentosRSQController.streamedContentRsq(item.documentoTitArtesanal)}"/>
+				</p:commandButton>
+		
+				</h:panelGroup> 
+                
+            </p:panelGrid>
+        	</p:rowExpansion>
+
+		</p:dataTable>
+
+		<p:dataTable id="mineroTable"
+			value="#{registrarSustanciasQuimicasController.getResponsableSustanciaQuimicaLista('ARTESANAL')}"
+			var="item" emptyMessage="#{labels['common.table.empty']}" lazy="true">
+			
+			<p:column headerText="Tipo de operador" styleClass="alCenter">
+				<h:outputText value="Minero Artesanal"/>
+			</p:column>
+			<p:column headerText="Sustancia" styleClass="alCenter">
+				<h:outputText value="#{item.sustancias}"/>
+			</p:column>
+			<p:column headerText="Tipo artesanal" styleClass="alCenter">
+                <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar"
+					rendered="#{item.tipoIdentificacion.nombre.toUpperCase().contains('ARTESANAL') and  not empty item.documentoTitArtesanal}">
+						<p:fileDownload value="#{documentosRSQController.streamedContentRsq(item.documentoTitArtesanal)}"/>
+				</p:commandButton>
+			</p:column>
+			<p:column headerText="Acciones" rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}">
+				<center>
+				<p:commandButton icon="ui-icon-pencil" title="Editar" styleClass="secondary"  process="@this" 
+					actionListener="#{registrarSustanciasQuimicasController.editarResponsable(item)}" oncomplete="PF('respTecnicoDiag').show()" update=":formDialogs:respTecnicoDiag"/>
+				<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process="mineroTable" update=":form:respTecnicoGrid" 
+					actionListener="#{registrarSustanciasQuimicasController.eliminarResponsable(item)}">
+					<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar?" icon="ui-icon-alert"/>
+				</p:commandButton>
+				</center>
+			</p:column>
+
+		</p:dataTable>
+
+
+		<h:inputHidden validator="#{registrarSustanciasQuimicasController.validarResponsablesTecnicos}" />			
+	</p:panelGrid>
+	
+	<p:panelGrid id="respBodegaGrid" columns="1" layout="grid" styleClass="w100" rendered="#{registrarSustanciasQuimicasController.mostrarResponsablesBodega}">
+		<f:facet name="header">
+			<h:outputText value="Responsable Bodega"/>
+			<p:commandButton value="Adicionar" styleClass="button-small-text toRight field_mrg" icon="ui-icon-plus"
+			process="@this" actionListener="#{registrarSustanciasQuimicasController.crearResponsable}"
+			oncomplete="PF('respBodegaDiag').show()" update=":formDialogs:respBodegaDiag"
+			rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}" resetValues="true"/>		
+		</f:facet>
+		
+		<p:dataTable id="respBodegaTable" value="#{registrarSustanciasQuimicasController.getResponsableSustanciaQuimicaLista('BODEGA')}" var="item"
+	 		emptyMessage="#{labels['common.table.empty']}" lazy="true">
+	 	<p:column style="width:16px">
+            	<p:rowToggler />
+        </p:column>
+        	
+		<p:column headerText="Cédula/Pasaporte"
+			styleClass="alCenter singleLine">
+			<h:outputText value="#{item.identificacion}" />
+		</p:column>
+		
+		<p:column headerText="Nombre" styleClass="alCenter singleLine">
+			<h:outputText value="#{item.nombre}"/>
+		</p:column>	
+		
+		<p:column headerText="Sustancia" styleClass="alCenter">
+			<h:outputText value="#{item.sustancias}"/>
+		</p:column>
+		
+		<p:column headerText="Lugar" styleClass="alCenter">
+			<h:outputText value="#{item.lugares}"/>
+		</p:column>
+		
+		<p:column headerText="Acciones" rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}">
+			<center>
+			<p:commandButton icon="ui-icon-pencil" title="Editar" styleClass="secondary"  process="@this" 
+				actionListener="#{registrarSustanciasQuimicasController.editarResponsable(item)}" oncomplete="PF('respBodegaDiag').show()" update=":formDialogs:respBodegaDiag"/>
+			<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process="respBodegaTable" update=":form:respBodegaGrid" 
+				actionListener="#{registrarSustanciasQuimicasController.eliminarResponsable(item)}">
+				<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar?" icon="ui-icon-alert"/>
+			</p:commandButton>
+			</center>
+		</p:column>
+		
+		<p:rowExpansion>
+            <p:panelGrid  styleClass="panel_data" columnClasses="header w25,w75" columns="2" >
+                
+                <h:outputText value="Teléfono" />
+                <h:outputText value="#{item.telefono}" />
+                
+                <h:outputText value="Correo" />
+                <h:outputText value="#{item.correo}" />
+                
+                <h:outputText value="Dirección" />
+                <h:outputText value="#{item.direccion}" /> 
+                
+            </p:panelGrid>
+        </p:rowExpansion>
+
+	</p:dataTable>
+	<h:inputHidden validator="#{registrarSustanciasQuimicasController.validarResponsablesBodega}" />			
+	</p:panelGrid>
+	
+	<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{registrarSustanciasQuimicasController.mostrarResponsableEstudiante}">
+	<f:facet name="header">
+		<h:outputText value="Representante Estudiante"/>
+		<p:commandButton icon="ui-icon-arrowthickstop-1-s" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar Formato" style="float:right">
+			<p:fileDownload value="#{documentosRSQController.streamedContentRsqPorNombre('FormularioAutoridadEducativaRSQ.pdf')}"/>
+		</p:commandButton>		
+	</f:facet>	
+	
+	<p:panelGrid  styleClass="panel_data" columnClasses="header w25,w75" columns="2" >
+        <h:outputText value="Sustancia" />
+        <h:outputText value="#{registrarSustanciasQuimicasController.sustanciasEstudiante}"/>
+    </p:panelGrid>
+		
+	<p:panelGrid columns="1" layout="grid" styleClass="w100">	
+		<h:outputLabel value="Adjuntar el formulario de Emisión o Renovación del Registro de Sustancias Químicas firmado por la Autoridad de la Institución Educativa" styleClass="primary"/>
+		<p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar"
+			rendered="#{not empty registrarSustanciasQuimicasController.documentoEmisionRsq}">
+			<p:fileDownload value="#{documentosRSQController.streamedContentRsq(registrarSustanciasQuimicasController.documentoEmisionRsq)}"/>
+		</p:commandButton>
+		<h:panelGroup rendered="#{registrarSustanciasQuimicasController.habilitarIngreso}">
+			<p:fileUpload id="fileDocumentoEmisionRsq"
+				fileUploadListener="#{registrarSustanciasQuimicasController.fileUploadEmisionRsqListener}"
+				sizeLimit="20971520" allowTypes="/(\.|\/)(pdf)$/"
+				label="Adjuntar archivo .pdf (20Mb)" update="@this labelDocumentoEmisionRsq"
+				uploadLabel="Subir" auto="true" cancelLabel="Cancelar"
+				invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+				invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+				styleClass="w100 toLeft primary" mode="advanced"/>
+			<h:inputHidden validator="#{registrarSustanciasQuimicasController.validarDocumentoEmisionRsq}" />
+			<h:outputText id="labelDocumentoEmisionRsq" value="#{registrarSustanciasQuimicasController.documentoEmisionRsq.nombre}"/>
+		</h:panelGroup>
+	</p:panelGrid>
+	</p:panelGrid>
+</p:panelGrid>
+</html>

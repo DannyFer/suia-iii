@@ -1,0 +1,73 @@
+<html
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"	
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+		<p:panelGrid id="laboratoriosGrid" columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="Datos Generales del Laboratorio"/>
+			</f:facet>				
+			<p:dataTable id="laboratoriosTable" value="#{descargasLiquidasController.datosLaboratorioList}" var="item" 
+				emptyMessage="#{labels['common.table.empty']}">
+				<f:facet name="header"> 
+					<p:commandButton icon="ui-icon-plus" value="Agregar" process="laboratoriosTable" 
+						style="float:right" actionListener="#{descargasLiquidasController.crearDatosLaboratorio}"
+						oncomplete="PF('laboratoriosDiag').show()" update=":formDialogs:laboratoriosDiag" rendered="#{descargasLiquidasController.habilitarIngreso}"/>
+				</f:facet>							
+				<p:column headerText="RUC">
+					<h:outputText value="#{item.ruc}"/>
+				</p:column>
+				<p:column headerText="Nombre o razón social">
+					<h:outputText value="#{item.nombre}"/>
+				</p:column>
+				<p:column headerText="N° de Registro de SAE">
+					<h:outputText value="#{item.numeroRegistroSAE}"/>
+				</p:column>
+				<p:column headerText="Vigencia del Registro">
+					<h:outputText value="#{item.fechaVigenciaRegistro}">
+					<f:convertDateTime pattern="dd/MM/yyyy"/>
+					</h:outputText>
+				</p:column>										
+				<p:column styleClass="w15" headerText="Documentos">
+					<center>
+						<p:commandButton icon="ui-icon-#{descargasLiquidasController.habilitarIngreso?'pencil':'search'}" title="Ver#{descargasLiquidasController.habilitarIngreso?' o Editar':''}" 
+						styleClass="#{descargasLiquidasController.habilitarIngreso?'secondary':'primary'}"  process="@this" 
+							actionListener="#{descargasLiquidasController.editarDatosLaboratorio(item)}" oncomplete="PF('laboratoriosDiag').show()" update=":formDialogs:laboratoriosDiag"/>
+						<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process="laboratoriosTable" update=":form:laboratoriosGrid" 
+							actionListener="#{descargasLiquidasController.eliminarDatosLaboratorio(item)}"
+							rendered="#{descargasLiquidasController.habilitarIngreso}">
+							<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar?" icon="ui-icon-alert"/>
+						</p:commandButton>
+						<p:commandButton icon="ui-icon-search" title="Ver Historial" styleClass="orange" process="@this" actionListener="#{descargasLiquidasController.datoLaboratorioHistoricoListener(item)}" oncomplete="PF('datolaboratorioDiagHistorial').show()" update=":formDialogsHistorial:datolaboratorioDiagHistorial"
+							rendered="#{item.tieneHistorial}" />
+					</center>												
+				</p:column>
+			</p:dataTable>
+			<p:dataTable id="laboratoriosHistoricoEliminadosTable" value="#{descargasLiquidasController.datosLaboratorioHistoricoEliminadosList}" var="item" 
+				emptyMessage="#{labels['common.table.empty']}"
+				rendered="#{not empty descargasLiquidasController.datosLaboratorioHistoricoEliminadosList}">											
+				<p:column headerText="RUC">
+					<h:outputText value="#{item.ruc}"/>
+				</p:column>
+				<p:column headerText="Nombre o razón social">
+					<h:outputText value="#{item.nombre}"/>
+				</p:column>
+				<p:column headerText="N° de Registro de SAE">
+					<h:outputText value="#{item.numeroRegistroSAE}"/>
+				</p:column>
+				<p:column headerText="Vigencia del Registro">
+					<h:outputText value="#{item.fechaVigenciaRegistro}">
+					<f:convertDateTime pattern="dd/MM/yyyy"/>
+					</h:outputText>
+				</p:column>										
+				<p:column styleClass="w15" headerText="Estado">
+							<center><h:outputText value="Eliminado" style="color:red"/></center>												
+						</p:column>
+			</p:dataTable>
+		</p:panelGrid>		
+</html>

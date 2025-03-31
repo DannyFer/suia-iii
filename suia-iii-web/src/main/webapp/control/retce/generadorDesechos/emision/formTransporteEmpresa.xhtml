@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<p:panel id="adicionarEmpresaGestora"
+	widgetVar="adicionarEmpresaGestora" toggleable="true"
+	toggleOrientation="vertical" styleClass="colapsablePanel"
+	collapsed="true">
+	<p:ajax event="toggle"
+		listener="#{transporteDesechosBean.toggleHandleEmpresaGestora}"
+		update=":form:adicionarEmpresaGestora" process="@this" />
+	<h:panelGroup id="datosEmpresaGestora">
+		<h:panelGroup rendered="#{transporteDesechosBean.panelEmpresaVisible}" id="datosEmpresaContainer">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" >
+				<f:facet name="header">
+					<h:outputText value="Empresa gestora" />
+				</f:facet>
+				<h:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null" rowClasses="null, alt">
+					<p:outputLabel value="Empresa gestora" for="empresaGestora"
+						styleClass="ui-label-form" />
+					<p:selectOneMenu
+						value="#{transporteDesechosBean.prestadorServicioSeleccionado}"
+						id="empresaGestora" styleClass="w100" required="true"
+						converter="selectItemConverter">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}"
+							itemValue="" noSelectionOption="true" />
+						<f:selectItems itemLabel="#{tipo.prestadorServiciosDesechos} #{tipo.codigoPermisoAmbiental}" itemValue="#{tipo}"
+							var="tipo" value="#{transporteDesechosBean.getPrestadoresDisponibles()}"  />
+						<p:ajax process="@this" update="datosEmpresaContainer"/>
+					</p:selectOneMenu>
+
+				</h:panelGrid>
+				<h:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null" rowClasses="null, alt" 
+					rendered="#{transporteDesechosBean.prestadorServicioSeleccionado ne null and transporteDesechosBean.prestadorServicioSeleccionado.prestadorServiciosDesechos ne 'OTRA'}">
+					<p:outputLabel value="Número de autorización"
+						styleClass="ui-label-form" />
+					<h:outputText required="true"
+						value="#{transporteDesechosBean.prestadorServicioSeleccionado.codigoPermisoAmbiental}"/>
+
+					<p:outputLabel value="Fecha de autorización"
+						styleClass="ui-label-form" />
+					<h:outputText required="true"
+						value="#{transporteDesechosBean.prestadorServicioSeleccionado.fechaPermisoAmbiental}"/>
+				</h:panelGrid>
+				<h:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null" rowClasses="null, alt" 
+					rendered="#{transporteDesechosBean.prestadorServicioSeleccionado ne null and transporteDesechosBean.prestadorServicioSeleccionado.prestadorServiciosDesechos eq 'OTRA'}">
+					<p:outputLabel value="Especifique"
+						styleClass="ui-label-form" for="otraEmpresa" />
+					<p:inputText required="true" id="otraEmpresa"  maxlength="100"
+						value="#{transporteDesechosBean.transporteEmpresaGestora.otraEmpresa}"/>
+				</h:panelGrid>
+			</p:panelGrid>
+		</h:panelGroup>
+	</h:panelGroup>
+
+	<div class="buttons">
+		<p:commandButton
+			value="#{transporteDesechosBean.editarEmpresaGestora ? 'Actualizar' : 'Aceptar'}"
+			actionListener="#{transporteDesechosBean.aceptarEmpresaGestora()}"
+			oncomplete="toggleEmpresasGestoras(xhr, status, args)"
+			process="@this datosEmpresaGestora"
+			update="datosEmpresaGestora tblEmpresasGestoras" />
+		<p:commandButton value="Cancelar" styleClass="secondary"
+			actionListener="#{transporteDesechosBean.cancelarEmpresaGestora()}"
+			oncomplete="PF('adicionarEmpresaGestora').toggle()" process="@this"
+			update="datosEmpresaGestora">
+			<p:resetInput target="@form" />
+		</p:commandButton>
+	</div>
+
+	<p:separator />
+</p:panel>
+
+
+<script type="text/javascript">
+	function toggleEmpresasGestoras(xhr, status, args) {
+		if(args.addEmpresasGestoras) {
+			PF('adicionarEmpresaGestora').toggle();
+		}
+	}
+</script>
+</html>

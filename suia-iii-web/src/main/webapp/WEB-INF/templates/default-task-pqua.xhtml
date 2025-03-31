@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+<h:head>
+	<h:outputStylesheet name="suia-layout.css" library="css" />
+	<h:outputStylesheet name="suia-styles.css" library="css" />
+	<h:outputStylesheet name="suia-pf-custom.css" library="css" />
+	<h:outputScript name="util.js" library="js" />
+	<link rel="shortcut icon"
+		href="#{request.contextPath}/resources/images/arbol.ico" />
+	<title>#{labels['label.siglas.institucion']}</title>
+</h:head>
+<h:body>
+	<pe:blockUI></pe:blockUI>
+	<t:div>
+		<t:div>
+			<ui:insert name="header">
+				<ui:include src="/WEB-INF/templates/header.xhtml" />
+			</ui:insert>
+		</t:div>
+		<t:div styleClass="clear" />
+		<t:div styleClass="container bordercontainer">
+			<t:div id="page">
+				<t:div id="content">
+					<ui:include src="/WEB-INF/templates/navegacion.xhtml" />
+					<ui:include src="/WEB-INF/templates/status.xhtml" />
+					<h:form id="frmMainDefaultTask">
+						<p:panel styleClass="separatorTop colapsablePanelStandard"
+							collapsed="#{!controlesBean.contextoActividadToggleVisible}"
+							toggleable="true" widgetVar="panelContextoActividad"
+							rendered="#{bandejaTareasBean.processId gt 0}">
+							<f:facet name="header">
+								<h:outputText value="Contexto de la Actividad" />
+								<p:commandButton id="buttonPanelContextoActividad"
+									value="#{controlesBean.contextoActividadToggleVisible ? 'Cerrar' : 'Ver detalles'}"
+									onclick="PF('panelContextoActividad').toggle()"
+									styleClass="button-small-text toRight field_mrg"
+									icon="#{controlesBean.contextoActividadToggleVisible ? 'ui-icon-carat-1-n' : 'ui-icon-carat-1-s'}"
+									type="button" />
+							</f:facet>
+							<p:ajax global="false" event="toggle"
+								listener="#{controlesBean.contextoActividadToggleListener}"
+								update="buttonPanelContextoActividad" />
+
+							<h:panelGrid id="pnlContextoMainDefaulTask" columns="3"
+								styleClass="mw50 panel_data"
+								columnClasses="header w25, null, alCenter w20px"
+								rowClasses="null, alt">
+								<h:outputText value="Actividad" />
+								<h:outputText value="#{bandejaTareasBean.tarea.taskName}"
+									styleClass="bold" />
+								<h:outputText />
+
+								<h:outputText value="Flujo" />
+								<h:outputText value="#{bandejaTareasBean.tarea.processName}" />
+								<p:commandButton icon="ui-icon-search"
+									action="#{visualizarDiagrama.init(bandejaTareasBean.tarea.processInstanceId)}"
+									styleClass="primary button-small" />
+
+								<h:outputText
+									value="Código" />
+								<h:outputText value="#{bandejaTareasBean.tarea.procedure}" />
+								<p:commandButton
+									rendered="#{bandejaTareasBean.verObservacionesPlaguicidas}"
+									action="#{proyectosBean.seleccionarPlaguicidas(false)}"
+									icon="ui-icon-search" styleClass="primary button-small" />
+								<h:outputLink target="_blank"
+									value="#{request.contextPath}/pages/rcoa/plaguicidasQuimicosUsoAgricola/proyectoVisualizacion/verResumenProyecto.jsf"
+									rendered="#{!bandejaTareasBean.verObservacionesPlaguicidas}">
+									<p:commandButton type="button"
+										action="#{proyectosBean.seleccionarPlaguicidas(true)}"
+										styleClass="primary button-small" icon="ui-icon-search" />
+								</h:outputLink>
+
+								<h:outputText value="Operador"
+									rendered="#{!empty proyectosBean.proponente or bandejaTareasBean.resolverTramite.dataResolved}" />
+								<h:outputText
+									value="#{!empty proyectosBean.proponente ? proyectosBean.proponente : bandejaTareasBean.resolverTramite.proponente}"
+									rendered="#{!empty proyectosBean.proponente or bandejaTareasBean.resolverTramite.dataResolved}" />
+								<p:commandButton type="button" icon="ui-icon-search"
+									onclick="PF('modalShowProponente').show()"
+									styleClass="primary button-small"
+									rendered="#{!empty proyectosBean.proponente or bandejaTareasBean.resolverTramite.dataResolved}" />
+								<ui:insert name="context-extra">
+
+								</ui:insert>
+							</h:panelGrid>
+
+							<p:dialog width="500" id="modalShowProponente" header="Operador"
+								widgetVar="modalShowProponente" modal="true" resizable="false">
+								<h:panelGrid styleClass="w100" columns="1">
+									<h:panelGrid styleClass="panel_data mw50" columns="2"
+										columnClasses="header, null" rowClasses="null, alt">
+										<h:outputText value="Nombre" />
+										<h:outputText
+											value="#{!empty proyectosBean.proponente ? proyectosBean.proponente : bandejaTareasBean.resolverTramite.proponente}" />
+										<h:outputText value="Representante legal"
+											rendered="#{!empty proyectosBean.representanteLegal}" />
+										<h:outputText
+											value="#{!empty proyectosBean.representanteLegal ? proyectosBean.representanteLegal : bandejaTareasBean.resolverTramite.proponente}"
+											rendered="#{!empty proyectosBean.representanteLegal}" />
+										<h:outputText value="Correo" />
+										<h:outputText
+											value="#{!empty proyectosBean.correo ? proyectosBean.correo : bandejaTareasBean.resolverTramite.proponente}" />
+										<h:outputText value="Teléfono"
+											rendered="#{!empty proyectosBean.numeroTelefonico}" />
+										<h:outputText
+											value="#{!empty proyectosBean.numeroTelefonico ? proyectosBean.numeroTelefonico : bandejaTareasBean.resolverTramite.proponente}"
+											rendered="#{!empty proyectosBean.numeroTelefonico}" />
+										<h:outputText value="Celular"
+											rendered="#{!empty proyectosBean.celular}" />
+										<h:outputText
+											value="#{!empty proyectosBean.celular ? proyectosBean.celular : bandejaTareasBean.resolverTramite.proponente}"
+											rendered="#{!empty proyectosBean.celular}" />
+									</h:panelGrid>
+									<br />
+									<h:outputText value="Ubicación geográfica" styleClass="bold" />
+									<p:dataTable
+										value="#{!empty proyectosBean.proponente ? proyectosBean.ubicacionProponente : bandejaTareasBean.resolverTramite.ubicacionProponente}"
+										var="ubicacion">
+										<p:column headerText="Provincia">
+											<h:outputText
+												value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+										</p:column>
+										<p:column headerText="Cant&oacute;n">
+											<h:outputText
+												value="#{ubicacion.ubicacionesGeografica.nombre}" />
+										</p:column>
+										<p:column headerText="Parroquia">
+											<h:outputText value="#{ubicacion.nombre}" />
+										</p:column>
+									</p:dataTable>
+								</h:panelGrid>
+								<p:separator />
+								<div class="buttons">
+									<p:commandButton value="Cerrar" styleClass="primary"
+										type="button" onclick="PF('modalShowProponente').hide()" />
+								</div>
+							</p:dialog>
+
+						</p:panel>
+					</h:form>
+					<p:panel header="Datos de la Actividad" styleClass="separatorTop">
+						<ui:insert name="content">
+							<h:outputText value="INSERT CONTENT FOR TEMPLATE" />
+						</ui:insert>
+					</p:panel>
+				</t:div>
+			</t:div>
+		</t:div>
+	</t:div>
+	<ui:insert name="footer">
+		<ui:include src="/WEB-INF/templates/footer.xhtml" />
+	</ui:insert>
+</h:body>
+</html>

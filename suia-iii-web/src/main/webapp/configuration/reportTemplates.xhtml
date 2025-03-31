@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" template="/WEB-INF/templates/default.xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:control="http://java.sun.com/jsf/composite/controles-prime" xmlns:t="http://myfaces.apache.org/tomahawk" xmlns:pe="http://primefaces.org/ui/extensions">
+	<ui:define name="content">
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<p:commandButton value="Adicionar" actionListener="#{reportTemplatesController.adicionar()}" oncomplete="PF('adicionarReportTemplate').show()" styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick" process="@this" update="@form" />
+					<h:outputText value="Plantillas HTML de reportes/documentos" />
+				</f:facet>
+				<h:panelGrid columns="1" styleClass="w100" columnClasses="w100">
+					<h:panelGrid columns="1" styleClass="w100">
+						<p:outputLabel value="Plantilla a editar" for="plantilla" />
+						<h:panelGrid columns="2" styleClass="w100" columnClasses="w50, field_mrg">
+							<p:selectOneMenu value="#{reportTemplatesBean.plantillaReporte}" required="true" id="plantilla" converter="selectItemConverter" styleClass="w100" filter="true" filterMatchMode="contains">
+								<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+								<f:selectItems value="#{reportTemplatesBean.plantillaReportes}" />
+								<p:ajax process="@this" update="@form" />
+							</p:selectOneMenu>
+							<h:panelGroup>
+								<div class="buttons-inline">
+									<p:commandButton disabled="#{!reportTemplatesBean.plantillaReporte.persisted}" icon="ui-icon-pencil" styleClass="primary" process="@this" update="adicionarReportTemplate" oncomplete="PF('adicionarReportTemplate').show()" />
+								</div>
+							</h:panelGroup>
+						</h:panelGrid>
+					</h:panelGrid>
+					<h:outputText />
+					<h:outputText />
+					<t:div styleClass="customLine">
+						<pe:ckEditor value="#{reportTemplatesBean.plantillaReporte.htmlPlantilla}" rendered="#{reportTemplatesBean.plantillaReporte.persisted}" />
+						<h:outputText value="Seleccione una plantilla" rendered="#{!reportTemplatesBean.plantillaReporte.persisted}" styleClass="w100 alCenter encabezado1_5em" />
+					</t:div>
+				</h:panelGrid>
+				<p:separator />
+			</p:panelGrid>
+
+			<div class="buttons main">
+				<p:commandButton value="Aceptar" actionListener="#{reportTemplatesController.aceptar()}" disabled="#{!reportTemplatesBean.plantillaReporte.persisted}" styleClass="primary">
+					<p:confirm header="Confirmación" message="¿Está seguro que desea guardar los cambios realizados a esta plantilla?" icon="ui-icon-alert" />
+				</p:commandButton>
+				<p:commandButton value="Eliminar" actionListener="#{reportTemplatesController.eliminar()}" disabled="#{!reportTemplatesBean.plantillaReporte.persisted}" styleClass="secondary">
+					<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar esta plantilla?" icon="ui-icon-alert" />
+				</p:commandButton>
+			</div>
+
+			<p:dialog header="Adicionar una nueva plantilla" id="adicionarReportTemplate" widgetVar="adicionarReportTemplate" modal="true" resizable="false" width="400">
+				<h:panelGrid styleClass="w100" columns="1" columnClasses="w100">
+					<p:outputLabel value="Nombre" for="nombre" />
+					<p:inputText value="#{reportTemplatesBean.plantillaReporte.nombreProceso}" styleClass="w100" rendered="true" id="nombre" />
+					<h:outputText />
+					<p:outputLabel value="Tipo de documento" for="tipo" />
+					<p:selectOneMenu value="#{reportTemplatesBean.plantillaReporte.tipoDocumento}" required="true" id="tipo" converter="selectItemConverter" styleClass="w100">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+						<f:selectItems value="#{reportTemplatesBean.tiposDocumento}" />
+					</p:selectOneMenu>
+				</h:panelGrid>
+
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Aceptar" actionListener="#{reportTemplatesController.aceptar()}" update="@form" process="@this adicionarReportTemplate" oncomplete="handleAdicionarReportTemplate(xhr, status, args)" />
+					<p:commandButton value="Cancelar" type="button" onclick="PF('adicionarReportTemplate').hide()" styleClass="secondary" />
+				</div>
+
+				<script type="text/javascript">
+        			function handleAdicionarReportTemplate(xhr, status, args) {
+            			if (args.validationFailed || !args.addTemplate) {
+            				PF('adicionarReportTemplate').show();
+            			}
+            			else {
+                			PF('adicionarReportTemplate').hide();
+            			}
+        			}
+    			</script>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

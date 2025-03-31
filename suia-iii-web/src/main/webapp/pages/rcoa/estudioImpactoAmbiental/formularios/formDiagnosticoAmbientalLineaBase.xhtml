@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+				<p:panelGrid id="pngAdjuntosDiagnostico" columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Adjuntar archivo de Diagnóstico ambiental de línea base " />
+					</f:facet>
+						<p:dataTable id="dtArchivosAdjuntosDiagnostico" var="adjunto" value="#{estudioImpactoAmbientalController.listaDocumentosAdjuntos}" emptyMessage="#{labels['common.table.empty']}">
+							<f:facet name="header">
+								<p:commandButton icon="ui-icon-plus" 
+									actionListener="#{estudioImpactoAmbientalController.getEtiqueta('')}" update=":formDialogAdjunto:adjuntosDiagGrid"
+									rendered="#{estudioImpactoAmbientalController.habilitadoIngreso}"
+									value="#{msg['button.agregar']}" process="dtArchivosAdjuntosDiagnostico"
+									style="float:right"
+									oncomplete="PF('adjuntoDiag').show()" />
+							</f:facet>
+							<p:column headerText="Nombre del adjunto" width="85%">
+								<h:outputText value="#{adjunto.nombre}" />
+							</p:column>
+							<p:column headerText="Acción">
+								<p:commandButton id="downloadAutorizacion"
+										icon="ui-icon-arrowthick-1-s"
+										styleClass="secondary" title="Ver" ajax="false"
+										immediate="true"
+										rendered="#{adjunto.nombre ne null}">
+										<p:fileDownload value="#{descargarDocumentosCoaController.descargarDocumentoEIA(adjunto)}" />
+								</p:commandButton>
+								<ui:remove><p:commandButton icon="ui-icon-pencil" title="#{msg['button.eliminar']}" styleClass="secondary"  process="dtArchivosAdjuntosDiagnostico" 
+										update=":form:pngAdjuntosDiagnostico" rendered="#{estudioImpactoAmbientalController.habilitadoIngreso}"
+										actionListener="#{estudioImpactoAmbientalController.eliminarAdjunto(adjunto)}"
+										oncomplete="PF('adjuntoDiag').show()">
+											<p:confirm header="Confirmación" message="¿Está seguro que desea Reemplazar el documento?" icon="ui-icon-alert" />
+								</p:commandButton>
+								</ui:remove>
+								<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process="dtArchivosAdjuntosDiagnostico" 
+										update=":form:pngAdjuntosDiagnostico" rendered="#{estudioImpactoAmbientalController.habilitadoIngreso}"
+										actionListener="#{estudioImpactoAmbientalController.eliminarAdjunto(adjunto)}">
+											<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar el documento?" icon="ui-icon-alert" />
+								</p:commandButton>
+							</p:column>
+						</p:dataTable>
+					</p:panelGrid>
+					<p:panelGrid id="observacionesGridDiagnostico" columns="1" layout="grid" styleClass="w100" rendered="#{estudioImpactoAmbientalController.informacionProyectoEia.id != null}">
+						<observaciones:tablaObservacionesEsIA idComponent="observacionesLinea"
+								componenteActualizarEliminar="observacionesLinea"
+								seccion="DiagnosticoAmbientalProyectoEIA"
+								nombreClase="#{estudioImpactoAmbientalController.nombreClaseObservaciones}"
+								idClase="#{estudioImpactoAmbientalController.idClaseObservaciones}"
+								aparace="#{estudioImpactoAmbientalController.mostrarObservaciones}"
+								mostrarSiVacio="#{estudioImpactoAmbientalController.mostrarObservaciones}"
+								soloLectura="#{!estudioImpactoAmbientalController.editarObservaciones}"/>
+					</p:panelGrid>	
+</ui:composition>

@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+        >
+
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}"
+                      target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small"
+                             icon="ui-icon-search"/>
+        </h:outputLink>
+    </ui:define>
+    <ui:define name="content">
+        <f:event type="preRenderView"
+                 listener="#{pagoLicenciaAmbiental2Bean.validarTareaBpm()}"/>
+
+        <h:form>
+
+            <h:panelGrid columns="1" layout="grid" styleClass="w100"
+                         columnClasses="w50, field_mrg w50">
+                <p:outputLabel value="Costo del proyecto" styleClass="bold"/> <p:outputLabel value="Valor del proyecto" for="txtValueP" style="display:none"/>
+                <h:panelGrid id="pnlCostoP" styleClass="panel_data w50" columns="3" columnClasses="header w50, w40, w10"
+                             rowClasses="null, alt">
+
+                    <h:outputText value="Valor del proyecto" />
+                    <p:inputText id="txtValueP" readonly="false"
+                                 value="#{pagoLicenciaAmbiental2Bean.licenciaAmbiental.costoInversion}"
+                                 onkeypress="return numbersonly(this, event, false);"
+                                 maxlength="10">
+                        <f:validateDoubleRange minimum="500.0" maximum="10000000000"/>
+                        <pe:keyFilter mask="num"/>
+                       <!-- <p:ajax process="@this" immediate="true" update="@(.panel_data)"
+                                listener="#{pagoLicenciaAmbiental2Bean.calcularValorTotal()}"/>-->
+                    </p:inputText>
+
+                    <p:commandButton styleClass="primary"  update="@(.panel_data)" icon="ui-icon-refresh" title="Guardar" actionListener="#{pagoLicenciaAmbiental2Bean.calcularValorTotal()}" />
+
+                </h:panelGrid>
+
+
+                <p:outputLabel value="Pago de licencia" styleClass="bold"/>
+
+
+                <h:panelGrid id="pnlTramite" styleClass="panel_data w50" columns="2" columnClasses="header w50, null"
+                             rowClasses="null, alt">
+                    <h:outputText value="Pago por servicios forestales "/>
+                    <h:outputText value="#{pagoLicenciaAmbiental2Bean.valorRemocion}">
+                        <f:convertNumber pattern="#0.00"/>
+                    </h:outputText>
+                    <h:outputText value="Pago por Seguimiento y Control (PSC)"/>
+                    <h:outputText value="#{pagoLicenciaAmbiental2Bean.valorPSC}">
+                        <f:convertNumber pattern="#0.00"/>
+                    </h:outputText>
+                    <h:outputText value="Pago mínimo por costo de proyecto"/>
+                    <h:outputText value="#{pagoLicenciaAmbiental2Bean.valorCP}">
+                        <f:convertNumber pattern="#0.00"/>
+                    </h:outputText>
+                    <h:outputText value="Valor total"/>
+                    <h:outputText value="#{pagoLicenciaAmbiental2Bean.valorTotal}">
+                        <f:convertNumber pattern="#0.00"/>
+                    </h:outputText>
+
+                </h:panelGrid>
+
+            </h:panelGrid>
+
+            <div class="buttons main">
+                <p:commandButton value="Realizar pago"
+                                 action="#{pagoLicenciaAmbiental2Bean.pagoLicencia}"
+                                 title="Realizar pago de licencia ambiental" icon="ui-icon-check"
+                                 styleClass="primary large">
+                                 
+                            <p:confirm header="Confirmación"
+                                           message="#{pagoLicenciaAmbiental2Bean.mensajePagoLicencia}"
+                                           icon="ui-icon-alert"/>
+                </p:commandButton>
+            </div>
+
+        </h:form>
+    </ui:define>
+</ui:composition>

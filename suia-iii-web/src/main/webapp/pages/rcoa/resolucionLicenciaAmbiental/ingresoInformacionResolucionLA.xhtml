@@ -1,0 +1,520 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+
+	<ui:define name="context-extra">
+		<h:outputText value="Datos" />
+		<h:outputText value="Estudio de Impacto Ambiental" />
+		<h:outputLink target="_blank"
+			value="#{request.contextPath}/pages/rcoa/estudioImpactoAmbiental/verProyectoEIAResumen.jsf">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+	</ui:define>
+
+	<ui:define name="content">
+
+		<style type="text/css">
+.ui-fileupload-content {
+	border: none !important;
+	padding: 0px;
+}
+
+.ui-fileupload-buttonbar {
+	text-align: right !important;
+}
+</style>
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{ingresoInformacionResolucionLAController.panel1}">
+				<f:facet name="header">
+					<h:outputText
+						value="Información de la Resolución de Licencia Ambiental emitida en físico" />
+				</f:facet>
+				<h:panelGrid styleClass="panel_data w100" columns="4"
+					columnClasses="header w20, null w27, header w20, null w27"
+					rowClasses="null, alt, null, alt">
+					<h:outputText value="N° Resolución Administrativa Ambiental:* " />
+					<p:inputText id="txt_resolucionLA"
+						value="#{ingresoInformacionResolucionLAController.resolucionAAA.numeroResolucion}"
+						maxlength="50">
+						<p:ajax process="@this" update="txt_resolucionLA"
+							listener="#{ingresoInformacionResolucionLAController.verificaNoExisteNumeroResolucion()}"></p:ajax>
+					</p:inputText>
+					<h:outputText
+						value="Fecha emisión de la Autorización Administrativa Ambiental (AAA):* " />
+					<p:calendar id="txt_fechaemision" locale="es"
+						label="Fecha Emisión Autorización" navigator="true"
+						value="#{ingresoInformacionResolucionLAController.resolucionAAA.fechaResolucion}"
+						pattern="dd-MM-yyyy" readonlyInput="true">
+						<p:ajax event="dateSelect" process="@this" />
+					</p:calendar>
+				</h:panelGrid>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Autorización Administrativa Ambiental" />
+					</f:facet>
+					<h:outputText
+						value="Adjuntar la Autorización Administrativa Ambiental, el documento debe estar en formato .pdf, se sugiere que el archivo tenga un máximo de 50MB."
+						style="color: #00aac3;" />
+					<p:separator />
+					<p:commandButton value="Añadir" icon="ui-icon-plus"
+						style="float:right;" styleClass="primary"
+						onclick="PF('adjuntarArchivoAAA').show();">
+					</p:commandButton>
+					<p:dataTable id="docAutorizacionAdministrativa"
+						value="#{ingresoInformacionResolucionLAController.listadocumentoResolucionAmbiental}"
+						emptyMessage="#{labels['common.table.empty']}" var="docAAA">
+						<p:column headerText="Documento" styleClass="alLeft w25">
+							<h:outputText value="#{docAAA.nombre}" title="#{docAAA.nombre}" />
+						</p:column>
+						<p:column headerText="Acciones" styleClass="alCenter w25">
+							<p:commandButton icon="ui-icon-arrowthick-1-s"
+								styleClass="primary" title="Ver" ajax="false" immediate="true">
+								<p:fileDownload
+									value="#{ingresoInformacionResolucionLAController.descargarDocumentos(docAAA)}" />
+							</p:commandButton>
+							<p:commandButton icon="ui-icon-trash" process="@this"
+								actionListener="#{ingresoInformacionResolucionLAController.eliminarDocumentoFicheros(docAAA,1)}"
+								update="docAutorizacionAdministrativa" />
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{ingresoInformacionResolucionLAController.panel2}">
+				<f:facet name="header">
+					<h:outputText
+						value="Información de la Póliza o Garantía Bancaria de Resolución de Licencia Ambiental" />
+				</f:facet>
+				<h:panelGrid styleClass="panel_data w100" columns="4"
+					columnClasses="header w20, null w27, header w20, null w27"
+					rowClasses="null, alt, null, alt">
+					<h:outputText value="N° Póliza o Garantía Bancaria:* " />
+					<p:inputText id="txt_numeroPoliza"
+						value="#{ingresoInformacionResolucionLAController.resolucionAAA.numeroPoliza}"
+						maxlength="20">
+						<p:ajax process="@this"></p:ajax>
+					</p:inputText>
+					<h:outputText value="Costo de implementación del PMA:* " />
+					<pe:inputNumber id="txtcostoPMA"
+						value="#{ingresoInformacionResolucionLAController.resolucionAAA.costoImplementacion}"
+						decimalPlaces="2" minValue="0.0" maxValue="999999.99"
+						onkeypress="if (event.keyCode == 13) {console.log('Enter presionado'); return false;}">
+						<p:ajax process="@this" />
+					</pe:inputNumber>
+				</h:panelGrid>
+				<h:outputText value="Vigencia de la Póliza o Garantía Bancaria"
+					style="color: #00aac3;" />
+				<h:panelGrid styleClass="panel_data w100" columns="4"
+					columnClasses="header w20, null w27, header w20, null w27"
+					rowClasses="null, alt, null, alt">
+					<h:outputText value="Desde:*" />
+					<p:calendar id="fechaInicio" locale="es" disabledWeekends="false"
+						label="Fecha Inicio" navigator="true"
+						value="#{ingresoInformacionResolucionLAController.resolucionAAA.fechaInicioVigenciaPoliza}"
+						pattern="dd-MM-yyyy" readonlyInput="true">
+						<p:ajax event="dateSelect" process="@this" update="fechaFin" />
+					</p:calendar>
+					<h:outputText value="Hasta:*" />
+					<p:calendar id="fechaFin" locale="es" disabledWeekends="false"
+						label="Fecha Fin" navigator="true"
+						mindate="#{ingresoInformacionResolucionLAController.resolucionAAA.fechaInicioVigenciaPoliza}"
+						value="#{ingresoInformacionResolucionLAController.resolucionAAA.fechaFinVigenciaPoliza}"
+						pattern="dd-MM-yyyy" readonlyInput="true">
+						<p:ajax event="dateSelect" process="@this" />
+					</p:calendar>
+				</h:panelGrid>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText
+							value="Póliza o Garantía Bancaria por el 100% del costo de implementación del PMA*" />
+					</f:facet>
+					<h:outputText
+						value="Adjuntar la Póliza o Garantía Bancaria por el 100% del costo de implementación del PMA, el documento debe estar en formato .pdf, se sugiere que el archivo tenga un máximo de 5MB"
+						style="color: #00aac3;" />
+					<p:separator />
+					<p:commandButton value="Añadir" icon="ui-icon-plus"
+						style="float:right;" styleClass="primary"
+						onclick="PF('adjuntarPolizaAAA').show();">
+					</p:commandButton>
+					<p:dataTable id="docPolizaAAA"
+						value="#{ingresoInformacionResolucionLAController.listadocumentoPolizaGarantiaBancariaAmbiental}"
+						emptyMessage="#{labels['common.table.empty']}" var="docAAA">
+						<p:column headerText="Documento" styleClass="alLeft w25">
+							<h:outputText value="#{docAAA.nombre}" title="#{docAAA.nombre}" />
+						</p:column>
+						<p:column headerText="Acciones" styleClass="alCenter w25">
+							<p:commandButton icon="ui-icon-arrowthick-1-s"
+								styleClass="primary" title="Ver" ajax="false" immediate="true">
+								<p:fileDownload
+									value="#{ingresoInformacionResolucionLAController.descargarDocumentos(docAAA)}" />
+							</p:commandButton>
+							<p:commandButton icon="ui-icon-trash" process="@this"
+								actionListener="#{ingresoInformacionResolucionLAController.eliminarDocumentoFicheros(docAAA,4)}"
+								update="docPolizaAAA" />
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{ingresoInformacionResolucionLAController.panel3}">
+				<f:facet name="header">
+					<h:outputText
+						value="Factura por emisión de Autorización Administrativa Ambiental*" />
+				</f:facet>
+				<h:outputText
+					value="Adjuntar la Factura por emisión de Autorización Administrativa Ambiental, el documento debe estar en formato .pdf, se sugiere que el archivo tenga un máximo de 5MB."
+					style="color: #00aac3;" />
+				<p:separator />
+				<p:commandButton value="Añadir" icon="ui-icon-plus"
+					style="float:right;" styleClass="primary"
+					onclick="PF('adjuntarFacturaAAA').show();">
+				</p:commandButton>
+				<p:dataTable id="docFacturaAdministracionAA"
+					value="#{ingresoInformacionResolucionLAController.listadocumentoFacturaEmisionAmbiental}"
+					emptyMessage="#{labels['common.table.empty']}" var="docAAA">
+					<p:column headerText="Documento" styleClass="alLeft w25">
+						<h:outputText value="#{docAAA.nombre}" title="#{docAAA.nombre}" />
+					</p:column>
+					<p:column headerText="Acciones" styleClass="alCenter w25">
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="primary" title="Ver" ajax="false" immediate="true">
+							<p:fileDownload
+								value="#{ingresoInformacionResolucionLAController.descargarDocumentos(docAAA)}" />
+						</p:commandButton>
+						<p:commandButton icon="ui-icon-trash" process="@this"
+							actionListener="#{ingresoInformacionResolucionLAController.eliminarDocumentoFicheros(docAAA,2)}"
+							update="docFacturaAdministracionAA" />
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{ingresoInformacionResolucionLAController.panel4}">
+				<f:facet name="header">
+					<h:outputText
+						value="Protocolización del pago por emisión de Autorización Administrativa Ambiental*" />
+				</f:facet>
+				<h:outputText
+					value="Adjuntar la Protocolización del pago por emisión de Autorización Administrativa Ambiental, el documento debe estar en formato .pdf, se sugiere que el archivo tenga un máximo de 10MB"
+					style="color: #00aac3;" />
+				<p:separator />
+				<p:commandButton value="Añadir" icon="ui-icon-plus"
+					style="float:right;" styleClass="primary"
+					onclick="PF('adjuntarProtocolizacionAAA').show();">
+				</p:commandButton>
+				<p:dataTable id="docProtocolizacionAAA"
+					value="#{ingresoInformacionResolucionLAController.listadocumentoProtocolizacionPagoAmbiental}"
+					emptyMessage="#{labels['common.table.empty']}" var="docAAA">
+					<p:column headerText="Documento" styleClass="alLeft w25">
+						<h:outputText value="#{docAAA.nombre}" title="#{docAAA.nombre}" />
+					</p:column>
+					<p:column headerText="Acciones" styleClass="alCenter w25">
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="primary" title="Ver" ajax="false" immediate="true">
+							<p:fileDownload
+								value="#{ingresoInformacionResolucionLAController.descargarDocumentos(docAAA)}" />
+						</p:commandButton>
+						<p:commandButton icon="ui-icon-trash" process="@this"
+							actionListener="#{ingresoInformacionResolucionLAController.eliminarDocumentoFicheros(docAAA,3)}"
+							update="docProtocolizacionAAA" />
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{ingresoInformacionResolucionLAController.panel5}">
+				<f:facet name="header">
+					<h:outputText
+						value="Justificación del costo de las medidas incluidas dentro del PMA*" />
+				</f:facet>
+				<h:outputText
+					value="Adjuntar la justificación del costo de las medidas incluidas dentro del PMA, el documento debe estar en formato .pdf, se sugiere que el archivo tenga un máximo de 10MB"
+					style="color: #00aac3;" />
+				<p:separator />
+				<p:commandButton value="Añadir" icon="ui-icon-plus"
+					style="float:right;" styleClass="primary"
+					onclick="PF('adjuntarJustificacionCostoPMA').show();">
+				</p:commandButton>
+				<p:dataTable id="docJustificacionCostoPMA"
+					value="#{ingresoInformacionResolucionLAController.listadocumentoJustificacionCostoMedidasAmbiental}"
+					emptyMessage="#{labels['common.table.empty']}" var="docAAA">
+					<p:column headerText="Documento" styleClass="alLeft w25">
+						<h:outputText value="#{docAAA.nombre}" title="#{docAAA.nombre}" />
+					</p:column>
+					<p:column headerText="Acciones" styleClass="alCenter w25">
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="primary" title="Ver" ajax="false" immediate="true">
+							<p:fileDownload
+								value="#{ingresoInformacionResolucionLAController.descargarDocumentos(docAAA)}" />
+						</p:commandButton>
+						<p:commandButton icon="ui-icon-trash" process="@this"
+							actionListener="#{ingresoInformacionResolucionLAController.eliminarDocumentoFicheros(docAAA,5)}"
+							update="docJustificacionCostoPMA" />
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{ingresoInformacionResolucionLAController.panel6}">
+				<f:facet name="header">
+					<h:outputText value="Cronograma valorado del PMA*" />
+				</f:facet>
+				<h:outputText
+					value="Adjuntar el cronograma valorado del PMA, el documento debe estar en formato .pdf, se sugiere que el archivo tenga un máximo de 10MB"
+					style="color: #00aac3;" />
+				<p:separator />
+				<p:commandButton value="Añadir" icon="ui-icon-plus"
+					style="float:right;" styleClass="primary"
+					onclick="PF('adjuntarCronogramaPMA').show();">
+				</p:commandButton>
+				<p:dataTable id="docCronogramaPMA"
+					value="#{ingresoInformacionResolucionLAController.listadocumentoCronogramaPMAAmbiental}"
+					emptyMessage="#{labels['common.table.empty']}" var="docAAA">
+					<p:column headerText="Documento" styleClass="alLeft w25">
+						<h:outputText value="#{docAAA.nombre}" title="#{docAAA.nombre}" />
+					</p:column>
+					<p:column headerText="Acciones" styleClass="alCenter w25">
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="primary" title="Ver" ajax="false" immediate="true">
+							<p:fileDownload
+								value="#{ingresoInformacionResolucionLAController.descargarDocumentos(docAAA)}" />
+						</p:commandButton>
+						<p:commandButton icon="ui-icon-trash" process="@this"
+							actionListener="#{ingresoInformacionResolucionLAController.eliminarDocumentoFicheros(docAAA,6)}"
+							update="docCronogramaPMA" />
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{ingresoInformacionResolucionLAController.panel7}">
+				<f:facet name="header">
+					<h:outputText
+						value="Factura por pago de tasa por control y seguimiento" />
+				</f:facet>
+				<h:outputText
+					value="Adjuntar la factura de pago de tasa por control y seguimiento, el documento debe estar en formato .pdf, se sugiere que el archivo tenga un máximo de 10MB"
+					style="color: #00aac3;" />
+				<p:separator />
+				<p:commandButton value="Añadir" icon="ui-icon-plus"
+					style="float:right;" styleClass="primary"
+					onclick="PF('adjuntarFacturaTasaCS').show();">
+				</p:commandButton>
+				<p:dataTable id="docFacturaTasaCS"
+					value="#{ingresoInformacionResolucionLAController.listadocumentoFacturaTasaCS}"
+					emptyMessage="#{labels['common.table.empty']}" var="docAAA">
+					<p:column headerText="Documento" styleClass="alLeft w25">
+						<h:outputText value="#{docAAA.nombre}" title="#{docAAA.nombre}" />
+					</p:column>
+					<p:column headerText="Acciones" styleClass="alCenter w25">
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="primary" title="Ver" ajax="false" immediate="true">
+							<p:fileDownload
+								value="#{ingresoInformacionResolucionLAController.descargarDocumentos(docAAA)}" />
+						</p:commandButton>
+						<p:commandButton icon="ui-icon-trash" process="@this"
+							actionListener="#{ingresoInformacionResolucionLAController.eliminarDocumentoFicheros(docAAA,7)}"
+							update="docFacturaTasaCS" />
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{ingresoInformacionResolucionLAController.panel8}">
+				<f:facet name="header">
+					<h:outputText
+						value="Factura por pago de tasa por Inventario Forestal" />
+				</f:facet>
+				<h:outputText
+					value="Adjuntar la factura de pago de tasa por Inventario Forestal, el documento debe estar en formato .pdf, se sugiere que el archivo tenga un máximo de 10MB"
+					style="color: #00aac3;" />
+				<p:separator />
+				<p:commandButton value="Añadir" icon="ui-icon-plus"
+					style="float:right;" styleClass="primary"
+					onclick="PF('adjuntarFacturaTasaIF').show();">
+				</p:commandButton>
+				<p:dataTable id="docFacturaTasaIF"
+					value="#{ingresoInformacionResolucionLAController.listadocumentoFacturaIF}"
+					emptyMessage="#{labels['common.table.empty']}" var="docAAA">
+					<p:column headerText="Documento" styleClass="alLeft w25">
+						<h:outputText value="#{docAAA.nombre}" title="#{docAAA.nombre}" />
+					</p:column>
+					<p:column headerText="Acciones" styleClass="alCenter w25">
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="primary" title="Ver" ajax="false" immediate="true">
+							<p:fileDownload
+								value="#{ingresoInformacionResolucionLAController.descargarDocumentos(docAAA)}" />
+						</p:commandButton>
+						<p:commandButton icon="ui-icon-trash" process="@this"
+							actionListener="#{ingresoInformacionResolucionLAController.eliminarDocumentoFicheros(docAAA,8)}"
+							update="docFacturaTasaIF" />
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" id="btnCancelar"
+					actionListener="#{ingresoInformacionResolucionLAController.cancelar()}"
+					process="@this" immediate="true" />
+				<p:commandButton id="btnEnviar" value="Enviar" styleClass="primary"
+					actionListener="#{ingresoInformacionResolucionLAController.guardarResolucion()}"
+					process="@this" />
+			</div>
+		</h:form>
+
+		<h:form>
+			<p:dialog header="Adjuntar archivo" width="600" height="auto"
+				widgetVar="adjuntarArchivoAAA" modal="true" resizable="false">
+				<p:panelGrid columns="1" styleClass="w100"
+					columnClasses="label, value">
+					<h:outputText value="Seleccione el archivo .pdf de 50mb" />
+					<p:fileUpload uploadLabel="Subir" auto="true"
+						cancelLabel="Cancelar" label="Seleccionar"
+						fileUploadListener="#{ingresoInformacionResolucionLAController.uploadListenerAAA}"
+						sizeLimit="52428800" mode="advanced" dragDropSupport="false"
+						multiple="false" allowTypes="/(\.|\/)(pdf)$/"
+						invalidFileMessage="El archivo es inválido."
+						invalidSizeMessage="El archivo es demasiado grande."
+						update="@([id$=docAutorizacionAdministrativa])" />
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton type="button" value="Cerrar"
+						onclick="PF('adjuntarArchivoAAA').hide()" />
+				</div>
+			</p:dialog>
+			<p:dialog header="Adjuntar archivo" width="600" height="auto"
+				widgetVar="adjuntarFacturaAAA" modal="true" resizable="false">
+				<p:panelGrid columns="1" styleClass="w100"
+					columnClasses="label, value">
+					<h:outputText value="Seleccione el archivo .pdf de 5mb" />
+					<p:fileUpload uploadLabel="Subir" auto="true"
+						cancelLabel="Cancelar" label="Seleccionar"
+						fileUploadListener="#{ingresoInformacionResolucionLAController.uploadListenerFacturaAAA}"
+						sizeLimit="5242880" mode="advanced" dragDropSupport="false"
+						multiple="false" allowTypes="/(\.|\/)(pdf)$/"
+						invalidFileMessage="El archivo es inválido."
+						invalidSizeMessage="El archivo es demasiado grande."
+						update="@([id$=docFacturaAdministracionAA])" />
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton type="button" value="Cerrar"
+						onclick="PF('adjuntarFacturaAAA').hide()" />
+				</div>
+			</p:dialog>
+			<p:dialog header="Adjuntar archivo" width="600" height="auto"
+				widgetVar="adjuntarProtocolizacionAAA" modal="true"
+				resizable="false">
+				<p:panelGrid columns="1" styleClass="w100"
+					columnClasses="label, value">
+					<h:outputText value="Seleccione el archivo .pdf de 10mb" />
+					<p:fileUpload uploadLabel="Subir" auto="true"
+						cancelLabel="Cancelar" label="Seleccionar"
+						fileUploadListener="#{ingresoInformacionResolucionLAController.uploadListenerProtocolizacionAAA}"
+						sizeLimit="10485760" mode="advanced" dragDropSupport="false"
+						multiple="false" allowTypes="/(\.|\/)(pdf)$/"
+						invalidFileMessage="El archivo es inválido."
+						invalidSizeMessage="El archivo es demasiado grande."
+						update="@([id$=docProtocolizacionAAA])" />
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton type="button" value="Cerrar"
+						onclick="PF('adjuntarProtocolizacionAAA').hide()" />
+				</div>
+			</p:dialog>
+			<p:dialog header="Adjuntar archivo" width="600" height="auto"
+				widgetVar="adjuntarPolizaAAA" modal="true" resizable="false">
+				<p:panelGrid columns="1" styleClass="w100"
+					columnClasses="label, value">
+					<h:outputText value="Seleccione el archivo .pdf de 5mb" />
+					<p:fileUpload uploadLabel="Subir" auto="true"
+						cancelLabel="Cancelar" label="Seleccionar"
+						fileUploadListener="#{ingresoInformacionResolucionLAController.uploadListenerPolizaAAA}"
+						sizeLimit="5242880" mode="advanced" dragDropSupport="false"
+						multiple="false" allowTypes="/(\.|\/)(pdf)$/"
+						invalidFileMessage="El archivo es inválido."
+						invalidSizeMessage="El archivo es demasiado grande."
+						update="@([id$=docPolizaAAA])" />
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton type="button" value="Cerrar"
+						onclick="PF('adjuntarPolizaAAA').hide()" />
+				</div>
+			</p:dialog>
+			<p:dialog header="Adjuntar archivo" width="600" height="auto"
+				widgetVar="adjuntarJustificacionCostoPMA" modal="true"
+				resizable="false">
+				<p:panelGrid columns="1" styleClass="w100"
+					columnClasses="label, value">
+					<h:outputText value="Seleccione el archivo .pdf de 10mb" />
+					<p:fileUpload uploadLabel="Subir" auto="true"
+						cancelLabel="Cancelar" label="Seleccionar"
+						fileUploadListener="#{ingresoInformacionResolucionLAController.uploadListenerJustificacionCostoPMA}"
+						sizeLimit="10485760" mode="advanced" dragDropSupport="false"
+						multiple="false" allowTypes="/(\.|\/)(pdf)$/"
+						invalidFileMessage="El archivo es inválido."
+						invalidSizeMessage="El archivo es demasiado grande."
+						update="@([id$=docJustificacionCostoPMA])" />
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton type="button" value="Cerrar"
+						onclick="PF('adjuntarJustificacionCostoPMA').hide()" />
+				</div>
+			</p:dialog>
+			<p:dialog header="Adjuntar archivo" width="600" height="auto"
+				widgetVar="adjuntarCronogramaPMA" modal="true" resizable="false">
+				<p:panelGrid columns="1" styleClass="w100"
+					columnClasses="label, value">
+					<h:outputText value="Seleccione el archivo .pdf de 10mb" />
+					<p:fileUpload uploadLabel="Subir" auto="true"
+						cancelLabel="Cancelar" label="Seleccionar"
+						fileUploadListener="#{ingresoInformacionResolucionLAController.uploadListenerCronogramaValoradoPMA}"
+						sizeLimit="10485760" mode="advanced" dragDropSupport="false"
+						multiple="false" allowTypes="/(\.|\/)(pdf)$/"
+						invalidFileMessage="El archivo es inválido."
+						invalidSizeMessage="El archivo es demasiado grande."
+						update="@([id$=docCronogramaPMA])" />
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton type="button" value="Cerrar"
+						onclick="PF('adjuntarCronogramaPMA').hide()" />
+				</div>
+			</p:dialog>
+			<p:dialog header="Adjuntar archivo" width="600" height="auto"
+				widgetVar="adjuntarFacturaTasaCS" modal="true" resizable="false">
+				<p:panelGrid columns="1" styleClass="w100"
+					columnClasses="label, value">
+					<h:outputText value="Seleccione el archivo .pdf de 10mb" />
+					<p:fileUpload uploadLabel="Subir" auto="true"
+						cancelLabel="Cancelar" label="Seleccionar"
+						fileUploadListener="#{ingresoInformacionResolucionLAController.uploadListenerFacturaTasaCS}"
+						sizeLimit="10485760" mode="advanced" dragDropSupport="false"
+						multiple="false" allowTypes="/(\.|\/)(pdf)$/"
+						invalidFileMessage="El archivo es inválido."
+						invalidSizeMessage="El archivo es demasiado grande."
+						update="@([id$=docFacturaTasaCS])" />
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton type="button" value="Cerrar"
+						onclick="PF('adjuntarFacturaTasaCS').hide()" />
+				</div>
+			</p:dialog>
+			<p:dialog header="Adjuntar archivo" width="600" height="auto"
+				widgetVar="adjuntarFacturaTasaIF" modal="true" resizable="false">
+				<p:panelGrid columns="1" styleClass="w100"
+					columnClasses="label, value">
+					<h:outputText value="Seleccione el archivo .pdf de 10mb" />
+					<p:fileUpload uploadLabel="Subir" auto="true"
+						cancelLabel="Cancelar" label="Seleccionar"
+						fileUploadListener="#{ingresoInformacionResolucionLAController.uploadListenerFacturaTasaIF}"
+						sizeLimit="10485760" mode="advanced" dragDropSupport="false"
+						multiple="false" allowTypes="/(\.|\/)(pdf)$/"
+						invalidFileMessage="El archivo es inválido."
+						invalidSizeMessage="El archivo es demasiado grande."
+						update="@([id$=docFacturaTasaIF])" />
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton type="button" value="Cerrar"
+						onclick="PF('adjuntarFacturaTasaIF').hide()" />
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

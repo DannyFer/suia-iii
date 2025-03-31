@@ -1,0 +1,333 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:pe="http://primefaces.org/ui/extensions" 
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="content">
+		<style type="text/css">
+			.qutarBordeGrid.ui-panelgrid>*>tr,.qutarBordeGrid.ui-panelgrid .ui-panelgrid-cell {
+				border: none;
+			}
+	</style>
+		<ui:include src="contenido/menu.xhtml" />
+		<div class="content">
+			<f:facet name="header">
+				<h:outputText value="&nbsp;&nbsp;&nbsp; Datos de la Actividad" />
+			</f:facet>
+		</div>
+		<p:panel styleClass="content" header="PLAN DE MANEJO AMBIENTAL CONSTRUCCIÓN" >
+					<p:accordionPanel id="acdPlan" activeIndex="#{planManejoAmbientalConstruccionCoaController.index}" value="#{planManejoAmbientalConstruccionCoaController.listaPlanPma}" var="planPma" dynamic="false">
+					   	<p:tab>
+				        <f:facet name="title">
+				        	<div>#{planPma.planNombre} #{planPma.planId eq 5 ?planManejoAmbientalConstruccionCoaController.codigoRGD:''}</div>
+				        </f:facet>
+				       <h:form id="frmPlanConstruccion">
+						<p:outputPanel id="pnlPmaConstruccion">
+				        <p:dataTable id="dttPlanes" var="plan" value="#{planPma.medidasProyecto}" styleClass="tablaP" 
+							paginator="true" paginatorAlwaysVisible="false"
+							paginatorPosition="bottom"
+							currentPageReportTemplate="{currentPage} de {totalPages}" rows="5" 
+							rowsPerPageTemplate="5,10,15">
+							<f:facet name="header">#{planPma.planNombre}
+							<p:commandButton ajax="false" value="Descargar" styleClass="button-small-text toRight field_mrg" title="Descargar formato subplan de cierre y abandono" 
+										icon="ui-icon-arrowthick-1-s" rendered="#{planPma.planId eq 9}">
+										<p:fileDownload value="#{planManejoAmbientalConstruccionCoaController.getPlantillaComponente()}" />
+								</p:commandButton>
+								<p:commandButton value="Adicionar" disabled="#{marcoLegalReferencialController.habilitarIngreso}"
+									styleClass="button-small-text toRight field_mrg"
+									icon="ui-icon-plusthick" immediate="true" rendered="false"
+									actionListener="#{planManejoAmbientalConstruccionCoaController.mostrarListaPlanAdicional(planPma.planNombre)}"
+									update=":formDetallePlan"
+									oncomplete="PF('dlgActividad').show();">
+								</p:commandButton>
+								<p:commandButton value="Adicionar" disabled="#{marcoLegalReferencialController.habilitarIngreso}"
+									styleClass="button-small-text toRight field_mrg"
+									icon="ui-icon-plusthick" immediate="true"
+									actionListener="#{planManejoAmbientalConstruccionCoaController.mostrarAdicionarPlanAdicional(planPma)}"
+									update=":formAddPlan"
+									oncomplete="PF('dlgAddPlan').show();">
+								</p:commandButton>
+								<br />
+							</f:facet>
+							<p:column style="text-align: justify" headerText="Aspecto Ambiental" width="20%">
+								<h:outputText style="text-align: justify !important; white-space: pre-line;	word-wrap: break-word;"
+									escape="false" value="#{plan.medidaVerificacionPma.id ne null ? plan.medidaVerificacionPma.aspectoAmbientalPma.descripcion : plan.aspectoAmbientalPma.descripcion}" />
+							</p:column>
+							<p:column style="text-align: justify" headerText="Medida Propuesta"  width="20%">
+								<h:outputText style="text-align: justify !important; white-space: pre-line;	word-wrap: break-word;"
+									escape="false" value="#{plan.medidaVerificacionPma.id ne null ? plan.medidaVerificacionPma.descripcion : plan.medidaPropuesta}" />
+							</p:column>
+							<p:column style="text-align: justify" headerText="Medio de verificación de la medida" width="20%">
+								<h:outputText style="text-align: justify !important; white-space: pre-line;	word-wrap: break-word;"
+									escape="false" value="#{plan.medidaVerificacionPma.id ne null ?plan.medidaVerificacionPma.medidaVerificacion :plan.medida }" />
+							</p:column>
+							<p:column style="text-align: justify" headerText="Frecuencia / Periocidad" width="12%">
+								<h:outputText style="text-align: justify !important; white-space: pre-line;	word-wrap: break-word;"
+									escape="false" value="#{plan.medidaVerificacionPma.id ne null ?plan.medidaVerificacionPma.frecuencia :plan.frecuencia }" />
+							</p:column>
+							<p:column id="columnafechaId" style="text-align: justify" headerText="Plazo" width="10%">
+								<h:outputText rendered="#{plan.medidaVerificacionPma.id ne null and !plan.medidaVerificacionPma.aplicaPlazo}" value="NO APLICA" />
+								<h:outputText rendered="#{plan.medidaVerificacionPma.id eq null and plan.plazoFecha eq null}" value="NO APLICA" />
+							   	<pe:inputNumber id="inputPlazo" value="#{plan.plazo}" maxValue="99" symbolPosition="s" disabled="#{marcoLegalReferencialController.habilitarIngreso}" 
+			                            required="true" requiredMessage="El campo plazo es requerido"
+			                            rendered="#{plan.medidaVerificacionPma.id ne null and plan.medidaVerificacionPma.aplicaPlazo and  plan.medidaVerificacionPma.tipoPlazo}"
+			                            decimalPlaces="1" decimalSeparator="," thousandSeparator=".">
+				                </pe:inputNumber>
+				                <h:outputText value="Elegir Fecha por favor" rendered="#{plan.medidaVerificacionPma.id ne null and plan.medidaVerificacionPma.aplicaPlazo and  !plan.medidaVerificacionPma.tipoPlazo}"/>
+				                <p:calendar  style="width: 200px !important" value="#{plan.plazoFecha}" pattern="dd/MM/yyyy" readonlyInput="true"
+											rendered="#{plan.medidaVerificacionPma.id ne null and plan.medidaVerificacionPma.aplicaPlazo and  !plan.medidaVerificacionPma.tipoPlazo}"
+											required="true" requiredMessage="El campo plazo es requerido"
+											 navigator="true">
+									<p:ajax update="@this columnafechaId"/>
+								</p:calendar>
+				                <p:calendar  style="width: 200px !important" value="#{plan.plazoFecha}" pattern="dd/MM/yyyy" readonlyInput="true"
+											rendered="#{plan.medidaVerificacionPma.id eq null and plan.plazoFecha ne null}"
+											required="true" requiredMessage="El campo plazo es requerido"
+											 navigator="true">
+									<p:ajax update="@this columnafechaId"/>
+								</p:calendar>
+							</p:column>
+							<p:column style="text-align: justify" headerText="Ponderación" width="8%" rendered="false">
+								<h:outputText style="text-align: left !important;" value="#{planManejoAmbientalConstruccionCoaController.ponderacion /  planPma.medidasProyecto.size()}" >
+									<f:convertNumber type="number" locale="Locale.US" groupingUsed="true" minFractionDigits="2" pattern="#0.00"/>
+								</h:outputText>
+							</p:column>
+							<p:column style="text-align: justify" headerText="Acciones" width="10%">
+								<p:commandButton icon="ui-icon-trash" rendered="false"
+									title="#{msg['button.eliminar']}" styleClass="secondary"
+									disabled="#{plan.medidaVerificacionPma.obligatorio or marcoLegalReferencialController.habilitarIngreso}"
+									update=":#{p:component('frmPlanConstruccion')}"
+									actionListener="#{planManejoAmbientalConstruccionCoaController.eliminarPMA(plan)}">
+									<p:confirm header="Estimado Usuario" icon="ui-icon-alert"
+										message="¿Está seguro de eliminar el plan ambiental del registro?" />
+								</p:commandButton>
+								<p:commandButton disabled="#{plan.medidaVerificacionPma.obligatorio or marcoLegalReferencialController.habilitarIngreso}"
+									title="#{msg['button.eliminar']}" styleClass="secondary" icon="ui-icon-trash"
+									rendered="#{plan.medidaVerificacionPma.id ne null}"
+									actionListener="#{planManejoAmbientalConstruccionCoaController.eliminarPlanPMA(plan)}"
+									immediate="true" update=" :formEliminarPlan:dlgEliminarPlan"
+									oncomplete="PF('dlgEliminarPlan').show();">
+									<p:resetInput target="@form" />
+								</p:commandButton>
+								<p:commandButton disabled="#{plan.medidaVerificacionPma.obligatorio or marcoLegalReferencialController.habilitarIngreso}"
+									title="#{msg['button.eliminar']}" styleClass="secondary" icon="ui-icon-trash"
+									rendered="#{plan.medidaVerificacionPma.id eq null}" process="dttPlanes"
+									actionListener="#{planManejoAmbientalConstruccionCoaController.eliminarPlanPMANuevo(plan)}"
+									immediate="true" update=":#{p:component('acdPlan')}" >
+									<p:confirm header="Estimado Usuario" icon="ui-icon-alert" message="¿Está seguro de eliminar el plan ambiental del registro?" />
+									<p:resetInput target="@form" />
+								</p:commandButton>
+								<p:commandButton disabled="#{plan.medidaVerificacionPma.obligatorio or marcoLegalReferencialController.habilitarIngreso}"
+									icon="ui-icon-pencil" title="#{msg['button.editar']}" styleClass="secondary" 
+									rendered="#{plan.medidaVerificacionPma.id eq null and false}" oncomplete="PF('dlgAddPlan').show();"
+									actionListener="#{planManejoAmbientalConstruccionCoaController.editarPlanPMANuevo(plan, planPma.listaAspectoAmbiental)}"
+									immediate="true" update=":#{p:component('acdPlan')} :formEliminarPlan:dlgEliminarPlan :formAddPlan">
+								</p:commandButton>
+							</p:column>
+							<p:columnGroup type="footer" rendered="false">
+							    <p:row>
+							       <p:column colspan="5" footerText="Total" />
+							       <p:column footerText="#{planManejoAmbientalConstruccionCoaController.ponderacion}" />
+							       <p:column footerText="" />
+							    </p:row>  
+							</p:columnGroup>
+						</p:dataTable>
+						<br />
+						<p:panelGrid id="pnlDocumentos" columns="2" styleClass="qutarBordeGrid"  columnClasses="header w30,null w70" rendered="true">
+							<h:outputText value="Si usted considera realizar alguna precisión con respecto a las medidas de este subplan, por favor inclúyalas en este campo" for="txtNumCedula"  />
+							<h:panelGroup>
+								<p:panelGrid  columns="2" styleClass="qutarBordeGrid">
+									<p:fileUpload id="docAdjunto" disabled="#{marcoLegalReferencialController.habilitarIngreso}"
+										fileUploadListener="#{planManejoAmbientalConstruccionCoaController.uploadFileDocumento}"
+										multiple="false" sizeLimit="20971520" allowTypes="/(\.|\/)(pdf)$/"
+										label="Seleccionar (pdf 20Mb)" uploadLabel="Subir"
+										invalidFileMessage="Tipo de archivo no válido"
+										invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+										cancelLabel="" mode="advanced" dragDropSupport="false" skinSimple="true" 
+										auto="true" required="true" update="pnlDocumentos dtArchivosAdjuntos" >
+										<f:attribute name="nombrePlan" value="#{planPma.planNombre}" />	
+									</p:fileUpload>
+									<h:outputText value="NOTA: Se puede subir varios archivos" styleClass="bold text-red alJustify"/>
+								</p:panelGrid>
+								<p:dataTable id="dtArchivosAdjuntos" var="adjunto" value="#{planPma.listaDocumentoAdjunto}" rendered="#{planPma.listaDocumentoAdjunto.size() gt 0 }">
+									<p:column headerText="Nombre del adjunto" width="75%">
+										<h:outputText value="#{adjunto.nombre}" />
+									</p:column>
+									<p:column headerText="Acción">
+										<p:commandButton id="downloadAutorizacion"
+												icon="ui-icon-arrowthick-1-s"
+												styleClass="secondary" title="Ver" ajax="false"
+												immediate="true" rendered="#{adjunto.nombre ne null}">
+												<p:fileDownload value="#{descargarDocumentosCoaController.descargarDocumento(adjunto)}" />
+										</p:commandButton>
+										<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process="dtArchivosAdjuntos" 
+												update=":@form"
+												action="#{planManejoAmbientalConstruccionCoaController.eliminarDocumento(planPma.planNombre, adjunto)}">
+													<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar el documento?" icon="ui-icon-alert" />
+										</p:commandButton>
+									</p:column>
+								</p:dataTable>
+							</h:panelGroup>
+						</p:panelGrid>
+		
+						<p:outputPanel>
+							<div class="buttons main">
+								<p:commandButton value="Guardar" id="btnGuardarPma" icon="ui-icon-disk" disabled="#{marcoLegalReferencialController.habilitarIngreso}"
+									immediate="false" update=":frmButons :frmButons:pnlPmaConstruccionBtn" process="@form"
+									actionListener="#{planManejoAmbientalConstruccionCoaController.guardarPma(planPma)}" >
+								</p:commandButton>
+							</div>
+						</p:outputPanel>
+				</p:outputPanel>
+						</h:form>
+					</p:tab>
+			      	</p:accordionPanel>
+
+			<h:form id="frmButons">
+				<p:outputPanel id="pnlPmaConstruccionBtn">
+					<div class="buttons main">
+						<p:commandButton value="Atrás" icon="ui-icon-arrowthick-1-w"
+							action="#{registroAmbientalController.atras()}" styleClass="wizard-custom-btn-back"
+							process="@this" />
+						<p:commandButton value="Guardar" id="btnGuardar" icon="ui-icon-disk" disabled="#{marcoLegalReferencialController.habilitarIngreso}"
+							immediate="true" update=":#{p:component('pnlPmaConstruccionBtn')}" rendered="false"
+							action="#{planManejoAmbientalConstruccionCoaController.guardar()}" />
+						<p:commandButton value="Siguiente" id="btnSiguiente" immediate="true"
+							disabled="#{!planManejoAmbientalConstruccionCoaController.validarDatos and !marcoLegalReferencialController.habilitarIngreso}"
+							process="@this" action="#{registroAmbientalController.siguiente()}" icon="ui-icon-arrowthick-1-e" />
+					</div>
+				</p:outputPanel>
+			</h:form>
+			<ui:include src="/pages/rcoa/registroAmbiental/popupFases.xhtml" />
+			<h:form id="formDetallePlan">
+				<p:dialog header="Detalle Plan" id="dlgActividad"
+					widgetVar="dlgActividad" modal="true" resizable="false"
+					rendered="true" draggable="false" width="750">
+			
+					<p:dataTable id="dtPlanes" var="plan" styleClass="table table-hover"
+						value="#{planManejoAmbientalConstruccionCoaController.listaPlanPmaParaAdicionar}"
+						rowKey="#{plan.id}" paginator="true" paginatorAlwaysVisible="false"
+						paginatorPosition="bottom"
+						currentPageReportTemplate="{currentPage} de {totalPages}" rows="3" rowsPerPageTemplate="5,10,15">
+						<f:facet name="header">#{plan.aspectoAmbientalPma.planManejoAmbientalPma.descripcion}
+						</f:facet>
+						<p:column style="text-align: justify" headerText="Aspecto Ambiental">
+							<h:outputText style="text-align: justify !important; white-space: pre-line;	word-wrap: break-word;"
+								escape="false" value="#{plan.aspectoAmbientalPma.descripcion}" />
+						</p:column>
+						<p:column style="text-align: justify" headerText="Medida Propuesta">
+							<h:outputText style="text-align: justify !important; white-space: pre-line;	word-wrap: break-word;"
+								escape="false" value="#{plan.descripcion}" />
+						</p:column>
+						<p:column style="text-align: justify" headerText="Medio de verificación de la medida" width="10%">
+							<h:outputText style="text-align: justify !important; white-space: pre-line;	word-wrap: break-word;"
+								escape="false" value="#{plan.medidaVerificacion}" />
+						</p:column>
+						<p:column style="text-align: justify" headerText="Frecuencia / Periocidad" width="10%">
+							<h:outputText style="text-align: justify !important; white-space: pre-line;	word-wrap: break-word;"
+								escape="false" value="#{plan.frecuencia}" />
+						</p:column>
+						<p:column style="text-align: justify" headerText="Adicionar" width="10%">
+							<p:commandButton icon="ui-icon-check"
+								title="#{msg['button.eliminar']}" styleClass="secondary"
+								process=":formDetallePlan"
+								update=":#{p:component('acdPlan')}"
+								oncomplete="PF('dlgActividad').hide();"
+								actionListener="#{planManejoAmbientalConstruccionCoaController.agregarPlan(plan)}">
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+					<br />
+				</p:dialog>
+			</h:form>
+			
+			<h:form id="formAddPlan">
+				<p:dialog header="Detalle Plan" id="dlgAddPlan"
+					widgetVar="dlgAddPlan" modal="true" resizable="false"
+					rendered="true" draggable="false" width="750">
+			
+					<p:panelGrid id="componenteAfectadoDiagGrid" columns="2" styleClass="panel_data w100" columnClasses="header w25,w25,header w25,w25">
+						<h:outputText value="Aspecto Ambiental *"/>
+							<p:selectOneMenu id="componenteAfectado" required="true" requiredMessage="El campo Aspecto Ambiental es requerido"
+							 styleClass="w100" value="#{planManejoAmbientalConstruccionCoaController.planPmaNuevo.aspectoAmbientalPma}" converter="selectItemConverter"
+							>
+								<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+								<f:selectItems value="#{planManejoAmbientalConstruccionCoaController.listaPlanAspectoAmbiental}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+							</p:selectOneMenu>
+						<h:outputText value="Medida Propuesta *"/>
+						<h:inputText  value="#{planManejoAmbientalConstruccionCoaController.planPmaNuevo.medidaPropuesta}" maxlength="1000"
+										required="true" requiredMessage="El campo medida propuesta es requerido" 
+										disabled="#{marcoLegalReferencialController.habilitarIngreso}"/>
+						<h:outputText value="Medio de verificación de la medida *"/>
+						<p:inputText value="#{planManejoAmbientalConstruccionCoaController.planPmaNuevo.medida}" maxlength="1000"
+										required="true" requiredMessage="El campo medio de verificación de la medida es requerido" disabled="#{marcoLegalReferencialController.habilitarIngreso}"/>
+						<h:outputText value="Frecuencia / Periocidad *"/>
+						<h:inputText value="#{planManejoAmbientalConstruccionCoaController.planPmaNuevo.frecuencia}" maxlength="100"
+										required="true" requiredMessage="El campo frecuencia es requerido" disabled="#{marcoLegalReferencialController.habilitarIngreso}"/>
+						<h:outputText value="Plazo *"/>
+						<p:outputPanel id="pnlPlazo">
+							<p:selectOneMenu id="somTipoPlazo" value="#{planManejoAmbientalConstruccionCoaController.tipoPlazo}" 
+							required="true" requiredMessage="El campo plazo es requerido">
+		                		<f:selectItem itemValue="" itemLabel="Seleccione" />
+		                		<f:selectItem itemLabel="Fecha de aplicación de medida" itemValue="fecha"/>
+		                        <f:selectItem itemLabel="No Aplica Plazo" itemValue="NoAplica"/>
+		                        <p:ajax event="change" update="pnlPlazo"/>
+		                	</p:selectOneMenu>
+				                <p:calendar  style="width: 100px !important" value="#{planManejoAmbientalConstruccionCoaController.valorPlazoFecha}" pattern="dd/MM/yyyy" readonlyInput="true"
+											rendered="#{planManejoAmbientalConstruccionCoaController.tipoPlazo eq 'fecha'}"
+											required="true" requiredMessage="El campo plazo es requerido"
+											 navigator="true">
+								</p:calendar>
+		                </p:outputPanel>
+					</p:panelGrid>
+					<br />
+						<p:outputPanel>
+							<div class="buttons main">
+								<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+									styleClass="wizard-custom-btn-back" immediate="true"
+									oncomplete="PF('dlgAddPlan').hide();" />
+								<p:commandButton value="Guardar" icon="ui-icon-disk" 
+									 update=":#{p:component('acdPlan')}"
+									oncomplete="if(!args.validationFailed) PF('dlgAddPlan').hide();"
+									actionListener="#{planManejoAmbientalConstruccionCoaController.agregarNuevoPMA()}" />
+							</div>
+						</p:outputPanel>
+				</p:dialog>
+				</h:form>
+				
+				<h:form id="formEliminarPlan">
+				<p:dialog header="Detalle Plan" id="dlgEliminarPlan"
+					widgetVar="dlgEliminarPlan" modal="true" resizable="false"
+					rendered="true" draggable="false" width="750">
+						<h:panelGrid styleClass="w100 " columns="2" columnClasses="w25, field_mrg w75">
+							<p:outputLabel value="Plan :" />
+			                <h:outputText value="#{planManejoAmbientalConstruccionCoaController.planPmaElimindo.medidaVerificacionPma.aspectoAmbientalPma.planManejoAmbientalPma.descripcion}"/>
+								
+							<p:outputLabel value="Justificativo técnico en relación a la actividad *" />
+							<p:inputTextarea id="txtDescripcion" value="#{planManejoAmbientalConstruccionCoaController.planPmaElimindo.justificacion}" rows="4" styleClass="w100"  
+									required="true" requiredMessage="El campo Justificativo es requerido" autoResize="false" maxlength="1000" />
+							</h:panelGrid>
+					
+						<p:outputPanel>
+							<div class="buttons main">
+								<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+									styleClass="wizard-custom-btn-back"
+									oncomplete="PF('dlgEliminarPlan').hide();" />
+								<p:commandButton value="Guardar" icon="ui-icon-disk" 
+									update=":#{p:component('acdPlan')}"
+									oncomplete="if(!args.validationFailed) PF('dlgEliminarPlan').hide();"
+									actionListener="#{planManejoAmbientalConstruccionCoaController.eliminarPMA(planManejoAmbientalConstruccionCoaController.planPmaElimindo)}" />
+							</div>
+						</p:outputPanel>
+					<br />
+				</p:dialog>
+			</h:form>
+
+		</p:panel>
+		<div class="clear"></div>
+	</ui:define>
+</ui:composition>

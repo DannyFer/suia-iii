@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{informacionGeneralController.validarTareaBpmV2()}"/>
+        <ui:include src="contenido/menuMineria.xhtml" />
+        <div class="content">
+            <h:form id="frmDatos">
+                <p:panel header="2. Características generales">
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp value="Tipo de minería" conector="generalHelp" render="false"
+                                                     image="#{request.contextPath}/resources/images/help-how.png"
+                                                     help="#{helps['registro.general']}" />
+                        </f:facet>
+
+                        <h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w10, w90">
+                            <p:outputLabel
+                                value="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.fichaAmbientalMineria.tipoMaterial.nombre}"
+                                for="txtOpciones" />
+                            <p:selectManyCheckbox
+                                value="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.opcionesTipoMaterial}"
+                                required="true" id="txtOpciones" layout="pageDirection">
+                                <f:selectItems
+                                    value="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.listaOpcionesTipoMaterial}" />
+                            </p:selectManyCheckbox>
+                            
+                        </h:panelGrid>
+                            
+                           <!-- Cris F: Boton de Historico -->
+						<h:panelGrid styleClass="panel_data" columns="2" rendered="#{not empty caracteristicasGeneralesController.listaFichaAmbientalMineraHisTipoMaterial}"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt">
+							<h:outputText id="fases_tipoMineria" value="Historial Tipo de Minería" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('tipoMineriaDlg').show()" 
+								immediate="true" title="Ver Historial"/>
+						</h:panelGrid>
+
+							<p:dialog widgetVar="tipoMineriaDlg" modal="true" draggable="false" resizable="false" header="Historial tipo de minería">
+								<h:form id="historicoTipoMineriaForm">
+
+									<p:dataTable id="tblTipoMineriaHistorico" rowIndexVar="index"
+										value="#{caracteristicasGeneralesController.listaFichaAmbientalMineraHisTipoMaterial}"
+										var="historico" emptyMessage="#{labels['common.table.empty']}"
+										style="overflow: auto; display:block; width: 500px">
+										<p:column headerText="Tipo de Minería Modificado">
+											<h:outputText styleClass="alJustify"
+												value="#{historico.catalogoTipoMaterialMostrar}" escape="false" style="white-space:pre-line;"/>
+										</p:column>
+										<p:column styleClass="w30 alCenter"
+											headerText="Fecha Modificación">
+											<h:outputText value="#{historico.fechaHistorico}">
+												<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+											</h:outputText>
+										</p:column>										
+									</p:dataTable>
+								</h:form>
+							</p:dialog>
+
+
+							<!-- Fin Historico -->                            
+                            
+                       
+                    </p:panelGrid>
+
+                    <br />
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp render="false"
+                                value="Predio donde se encuentra la actividad minera" conector="generalHelp"
+                                image="#{request.contextPath}/resources/images/help-how.png"
+                                help="#{helps['registro.general']}" />
+                        </f:facet>
+                        <h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w10, w60" id="pnlOtro">
+                            <p:outputLabel value="Predio"  for="cmbPredio:cpcmbPredio"/>
+                                <control:radioAjax identificador="cmbPredio" id="cmbPredio"
+                                                   lista="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.listaPredioActividadMinera}"
+                                                   valor="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.idPredio}"
+                                                   requerido="true" idComponenteActualizar="pnlOtro"
+                                                   ajax="#{caracteristicasGeneralesController.validarOtro()}"/>
+                                <h:inputHidden />
+                                <h:panelGrid columns="2"
+                                             rendered="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.catalogoOtro.equals(caracteristicasGeneralesController.caracteristicasGeneralesBean.idPredio)}">
+                                    <p:outputLabel value="Otro:" for="txtOtro:cptxtOtro" />
+                                    <control:todoTextoComoIngrese id="txtOtro" identificador="txtOtro" longitud="200" tamanio="30"
+                                                                  valor="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.otro}" requerido="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.catalogoOtro.equals(caracteristicasGeneralesController.caracteristicasGeneralesBean.idPredio)}"/>
+                                </h:panelGrid>
+                        </h:panelGrid>
+                        
+                         <!-- Cris F: Boton de Historico -->
+						<h:panelGrid styleClass="panel_data" columns="2" rendered="#{not empty caracteristicasGeneralesController.listaFichaAmbientalMineraHisPredio}"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt">
+							<h:outputText id="predio_historial" value="Predios eliminados" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('predioDlg').show()" 
+								immediate="true" title="Ver Historial"/>
+						</h:panelGrid>
+
+							<p:dialog widgetVar="predioDlg" modal="true" draggable="false" resizable="false" header="Historial predio donde se encuentra la actividad minera">
+								<h:form id="historicoPredioForm">
+
+									<p:dataTable id="tblPredioHistorico" rowIndexVar="index"
+										value="#{caracteristicasGeneralesController.listaFichaAmbientalMineraHisPredio}"
+										var="historico" emptyMessage="#{labels['common.table.empty']}"
+										style="overflow: auto; display:block; width: 500px">
+										<p:column headerText="Predios eliminados">
+											<h:outputText styleClass="alJustify"
+												value="#{historico.predio.descripcion eq 'Otro' ? historico.otrosPredios : historico.predio.descripcion}" />
+										</p:column>
+										<p:column styleClass="w30 alCenter"
+											headerText="Fecha Modificación">
+											<h:outputText value="#{historico.fechaHistorico}">
+												<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+											</h:outputText>
+										</p:column>										
+									</p:dataTable>
+								</h:form>
+							</p:dialog>
+							<!-- Fin Historico -->
+                        
+                        
+                    </p:panelGrid>
+
+                    <br />
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp value="Etapa de la actividad minera" render="false"
+                                                     conector="generalHelp"
+                                                     image="#{request.contextPath}/resources/images/help-how.png"
+                                                     help="#{helps['registro.general']}" />
+                        </f:facet>
+
+                        <h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w10, w60">
+                        	<p:outputLabel value="Etapa" for="cmbEtapa:cpcmbEtapa"/>
+                            <control:radio id="cmbEtapa" identificador="cmbEtapa" requerido="true" 
+                                           lista="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.listaEtapaActividadMinera}"
+                                           valor="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.idEtapa}" />
+                        </h:panelGrid>
+                        
+                        <!-- Cris F: Boton de Historico -->
+						<h:panelGrid styleClass="panel_data" columns="2" rendered="#{not empty caracteristicasGeneralesController.listaFichaAmbientalMineraHisActividad}"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt">
+							<h:outputText id="etapa_historial" value="Etapas eliminadas" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('etapaDlg').show()" 
+								immediate="true" title="Ver Historial"/>
+						</h:panelGrid>
+
+							<p:dialog widgetVar="etapaDlg" modal="true" draggable="false" resizable="false" header="Historial etapa de la actividad minera">
+								<h:form id="historicoEtapaForm">
+
+									<p:dataTable id="tblEtapaHistorico" rowIndexVar="index"
+										value="#{caracteristicasGeneralesController.listaFichaAmbientalMineraHisActividad}"
+										var="historico" emptyMessage="#{labels['common.table.empty']}"
+										style="overflow: auto; display:block; width: 500px">
+										<p:column headerText="Etapas eliminadas">
+											<h:outputText styleClass="alJustify"
+												value="#{historico.etapa.descripcion}" />
+										</p:column>
+										<p:column styleClass="w30 alCenter"
+											headerText="Fecha Modificación">
+											<h:outputText value="#{historico.fechaHistorico}">
+												<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+											</h:outputText>
+										</p:column>										
+									</p:dataTable>
+
+									
+								</h:form>
+							</p:dialog>
+
+
+							<!-- Fin Historico -->
+                        
+                    </p:panelGrid>
+
+                    <br />                    
+                    <f:facet name="footer">
+						<div class="buttons main">
+							<p:commandButton value="Atrás" immediate="true" process="@this" icon="ui-icon-arrowthick-1-w"
+								action="/prevencion/categoria2/v2/fichaMineria/default.jsf?faces-redirect=true"/>
+							<p:commandButton value="Guardar" icon="ui-icon-disk" update=":#{p:component('frmDatos')}" 
+								oncomplete="window.scrollTo(0,0);" action="#{caracteristicasGeneralesController.guardar()}"/>
+							<p:commandButton value="Siguiente" immediate="true" process="@this" icon="ui-icon-arrowthick-1-e"
+								action="/prevencion/categoria2/v2/fichaMineria/descripcionActividad.jsf?faces-redirect=true"/>
+						</div>
+					</f:facet>
+                </p:panel>
+                
+                <p:dialog id="dlgInfo" header="Información" widgetVar="dlgInfo" resizable="false" modal="true" dynamic="true" closable="false" width="250" height="100">
+					<p:panelGrid columns="1" columnClasses="label, value">
+						<h:outputText value="Existe información asociada en el punto 3 que se eliminará, está seguro de querer actualizar?" />
+					</p:panelGrid>
+					<div class="buttons alCenter">
+						<p:commandButton value="Aceptar" icon="ui-icon-check" action="#{caracteristicasGeneralesController.guardarEliminarActividades()}" 
+						update=":#{p:component('frmDatos')}" process="@this" oncomplete="PF('dlgInfo').hide()"/>
+						<p:commandButton value="Cancelar" action="/prevencion/categoria2/v2/fichaMineria/caracteristicas.jsf?faces-redirect=true" 
+						styleClass="secondary" icon="ui-icon-check" immediate="true" process="@this"/>
+					</div>
+				</p:dialog>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>

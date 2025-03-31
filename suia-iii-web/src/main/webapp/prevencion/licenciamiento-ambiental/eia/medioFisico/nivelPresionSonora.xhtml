@@ -1,0 +1,132 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui" xmlns:f="http://java.sun.com/jsf/core" xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+<ui:composition template="/prevencion/licenciamiento-ambiental/eia/medioFisico/calidadParametro.xhtml">
+
+    <ui:define name="muestras-content-end">
+
+        <h:panelGrid styleClass="w100 separatorBottom" columns="1" columnClasses="w100">
+            <p:outputLabel value="Fecha" for="fechaMuestra"/>
+            <p:calendar value="#{calidadComponenteBean.muestra.fechaMuestra}" id="fechaMuestra" required="true"
+                        locale="es" navigator="true" pattern="dd-MM-yyyy"
+                        maxdate="#{calidadComponenteBean.currentDate}"/>
+
+            <p:outputLabel value="Diurno/Nocturno" for="diurno"/>
+            <p:selectOneMenu value="#{calidadComponenteBean.muestra.diurno}" id="diurno"
+                    >
+                <f:selectItem itemLabel="Diurno" itemValue="true"/>
+                <f:selectItem itemLabel="Nocturno" itemValue="false"/>
+            </p:selectOneMenu>
+
+            <p:outputLabel value="Descripción del sitio de muestreo" for="descripcionMuestreo" />
+            <p:inputText value="#{calidadComponenteBean.muestra.descripcionSitioMuestra}" id="descripcionMuestreo"
+                         required="true" maxlength="200"/>
+
+
+            <!--Pa HIDROCARBUROS-->
+            <h:panelGrid styleClass="w100 separatorBottom" columns="1" columnClasses="w100">
+
+                <h:panelGrid columns="3" styleClass="w90" columnClasses="w35,field_mrg w50,w5">
+
+                    <p:outputLabel value="Tipo de zona según uso de suelo" for="zona"/>
+                    <p:selectOneMenu value="#{calidadComponenteBean.muestra.zona}" id="zona" >
+
+                        <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue=""
+                                      noSelectionOption="true"/>
+
+                        <f:selectItem itemLabel="Recidencial (R1)" itemValue="Recidencial (R1)"/>
+                        <f:selectItem itemLabel="Equipamiento de servicios sociales (EQ1)"
+                                      itemValue="Equipamiento de servicios sociales (EQ1)"/>
+                        <f:selectItem itemLabel="Equipamiento de servicios públicos (EQ2)"
+                                      itemValue="Equipamiento de servicios públicos (EQ2)"/>
+                        <f:selectItem itemLabel="Comercial (CM)" itemValue="Comercial (CM)"/>
+                        <f:selectItem itemLabel="Agrícola Residencial (AR)" itemValue="Agrícola Residencial (AR)"/>
+                        <f:selectItem itemLabel="Industrial (ID1/ID2)" itemValue="Industrial (ID1/ID2)"/>
+                        <f:selectItem itemLabel="Industrial (ID3/ID4)" itemValue="Industrial (ID3/ID4)"/>
+                        <f:selectItem itemLabel="Uso múltiple" itemValue="Uso múltiple"/>
+                        <f:selectItem itemLabel="Protección ecológica (PE)" itemValue="Protección ecológica (PE)"/>
+                        <f:selectItem itemLabel="Recursos Naturales (RN)" itemValue="Recursos Naturales (RN)"/>
+
+                    </p:selectOneMenu>
+
+                    <mae:btnHelp help="#{msg['message.help.NivelPresionSonora.codigo']}" conector="ayudaDesechos"
+                                 buttonStyleClass="button-small toRight field_mrg primary"/>
+                </h:panelGrid>
+
+                <h:panelGrid columns="2" styleClass="w100" columnClasses="w35, field_mrg w50,"
+                             style="max-width: 500px" id="calidad">
+
+                    <p:outputLabel value="Normativa" for="normativa1"/>
+                    <p:selectOneMenu value="#{calidadComponenteBean.normativa}" id="normativa1" required="true"
+                                     converter="selectItemConverter">
+                        <p:ajax event="change" update="calidad,parametro1"
+                                listener="#{calidadComponenteController.cargarTablas}"/>
+                        <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue=""
+                                      noSelectionOption="true"/>
+
+                        <f:selectItems value="#{calidadComponenteBean.normativas}"
+                                       var="normativa" itemValue="#{normativa}"
+                                       itemLabel="#{normativa.descripcion}"/>
+                    </p:selectOneMenu>
+
+                    <p:outputLabel value="Tabla" for="tabla1"/>
+                    <p:selectOneMenu value="#{calidadComponenteBean.tabla}" id="tabla1" required="true"
+                                     converter="selectItemConverter">
+
+                        <p:ajax event="change" update="calidad"
+                                listener="#{calidadComponenteController.cargarParametros}"/>
+                        <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue=""
+                                      noSelectionOption="true"/>
+                        <f:selectItems value="#{calidadComponenteBean.tablas}"
+                                       var="tabla" itemValue="#{tabla}" itemLabel="#{tabla.descripcion}"/>
+                    </p:selectOneMenu>
+
+                    <p:outputLabel value="Parámetro" for="parametro1"/>
+                    <p:selectOneMenu value="#{calidadComponenteBean.calidadComponente.parametroNormativas}"
+                                     id="parametro1"
+                                     required="true" converter="selectItemConverter">
+
+                        <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue=""
+                                      noSelectionOption="true"/>
+                        <f:selectItems value="#{calidadComponenteBean.parametros}" var="parametro"
+                                       itemValue="#{parametro}"
+                                       itemLabel="#{parametro.descripcion}">
+                        </f:selectItems>
+                        <p:ajax event="change" listener="#{calidadComponenteBean.cambiarColumna}"
+                                update="@(.resultadoAnalisis), @(.unidad)"/>
+                    </p:selectOneMenu>
+
+
+                    <p:outputLabel value="Laboratorio" for="laboratorio1"/>
+                    <p:selectOneMenu value="#{calidadComponenteBean.calidadComponente.laboratorio}" id="laboratorio1"
+                                     required="true" converter="selectItemConverter">
+                        <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue=""
+                                      noSelectionOption="true"/>
+                        <f:selectItems value="#{calidadComponenteBean.laboratorios}"
+                                       var="laboratorio" itemValue="#{laboratorio}"
+                                       itemLabel="#{laboratorio.nombre}"/>
+                    </p:selectOneMenu>
+
+                </h:panelGrid>
+
+                <h:panelGrid columns="3" styleClass="w50" columnClasses="w10, field_mrg w30,w10 "
+                             style="max-width: 500px" id="valores">
+
+                    <p:outputLabel value="Valor" for="valor"/>
+                    <pe:inputNumber id="valor" decimalPlaces="2" thousandSeparator=""
+                                    value="#{calidadComponenteBean.muestra.valor}"
+                                    required="true">
+                        <f:validateLength maximum="6"></f:validateLength>
+                    </pe:inputNumber>
+                    <p:outputLabel value="#{calidadComponenteBean.calidadComponente.parametroNormativas.unidad}" styleClass="unidad"/>
+
+                </h:panelGrid>
+
+            </h:panelGrid>
+
+
+        </h:panelGrid>
+    </ui:define>
+</ui:composition>
+</html>

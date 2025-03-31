@@ -1,0 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" template="/WEB-INF/templates/default-task.xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:control="http://java.sun.com/jsf/composite/controles-prime" xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+	<ui:define name="content">
+		<f:event type="preRenderView" listener="#{directorRevisarInformeOficioObservacionesICAController.validarTareaBpm()}" />
+		<h:form id="form">
+
+			<p:panel>
+				<h:panelGrid columns="1" styleClass="alCenter w100">
+					<p:outputLabel for="informeCumple" value="¿Es necesario realizar correcciones sobre el informe técnico o al oficio de pronunciamiento?" styleClass="bold" />
+					<p:selectOneRadio id="informeCumple" value="#{directorRevisarInformeOficioObservacionesICAController.requiereCorrecciones}" required="true">
+						<f:selectItem itemLabel="Si" itemValue="true" />
+						<f:selectItem itemLabel="No" itemValue="false" />
+					</p:selectOneRadio>
+					<h:outputText value="Si es necesario realizar correcciones, el trámite regresará al técnico asignado." styleClass="text-red bold" />
+				</h:panelGrid>
+			</p:panel>
+			<br />
+
+			<p:tabView id="tab">
+				<p:tab title="Informe técnico">
+					<object id="pdf_informe" type="application/pdf" data="#{directorRevisarInformeOficioObservacionesICAController.documentoICABean.informe.informePath}?pfdrid_c=true" width="100%" height="500px">
+						Su navegador no soporta la visualización de pdf. Puede descargar el documento presionando el siguiente botón:
+						<p:commandButton value="Descargar" styleClass="primary" ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+							<p:fileDownload value="#{directorRevisarInformeOficioObservacionesICAController.documentoICABean.stream(directorRevisarInformeOficioObservacionesICAController.documentoICABean.informe.nombreReporte, directorRevisarInformeOficioObservacionesICAController.documentoICABean.informe.archivoInforme)}" />
+						</p:commandButton>
+					</object>
+
+					<h:panelGroup id="tabInformeTecnico">
+						<observaciones:tablaObservaciones idComponent="tit" seccion="Informe técnico" componenteActualizarEliminar="tabInformeTecnico" aparace="true" mostrarSiVacio="true" idClase="#{directorRevisarInformeOficioObservacionesICAController.documentoICABean.solicitud.id}" nombreClase="SolicitudInspeccionControlAmbiental" soloLectura="false" />
+					</h:panelGroup>
+
+				</p:tab>
+				<p:tab title="Oficio de observaciones">
+					
+					<mae:sendFileCopy autoSave="false" entityId="#{directorRevisarInformeOficioObservacionesICAController.documentoICABean.oficioObservaciones.id}" className="SolicitudInspeccionControlAmbiental" discriminator="director" onlySystemEmail="false" />
+				
+					<object id="pdf_informe" type="application/pdf" data="#{directorRevisarInformeOficioObservacionesICAController.documentoICABean.oficioObservaciones.oficioPath}?pfdrid_c=true" width="100%" height="500px">
+						Su navegador no soporta la visualización de pdf. Puede descargar el documento presionando el siguiente botón:
+						<p:commandButton value="Descargar" styleClass="primary" ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+							<p:fileDownload value="#{directorRevisarInformeOficioObservacionesICAController.documentoICABean.stream(directorRevisarInformeOficioObservacionesICAController.documentoICABean.oficioObservaciones.nombreReporte, directorRevisarInformeOficioObservacionesICAController.documentoICABean.oficioObservaciones.archivoOficio)}" />
+						</p:commandButton>
+					</object>
+
+					<br />
+					<br />
+
+					<p:fieldset legend="CUMPLIMIENTO *" toggleable="true" toggleSpeed="500" collapsed="true">
+						<p:panelGrid columns="1" layout="grid" styleClass="w100">
+							<p:inputTextarea value="#{directorRevisarInformeOficioObservacionesICAController.documentoICABean.oficioObservaciones.cumplimiento}" rows="4" styleClass="w100" addLine="false" autoResize="false" />
+						</p:panelGrid>
+					</p:fieldset>
+
+					<br />
+
+					<p:fieldset legend="ESTABLECIDO *" toggleable="true" toggleSpeed="500" collapsed="true">
+						<p:panelGrid columns="1" layout="grid" styleClass="w100">
+							<p:inputTextarea value="#{directorRevisarInformeOficioObservacionesICAController.documentoICABean.oficioObservaciones.establecido}" rows="4" styleClass="w100" addLine="false" autoResize="false" />
+						</p:panelGrid>
+					</p:fieldset>
+
+					<br />
+					
+					<p:fieldset legend="OBSERVACIONES *" toggleable="true" toggleSpeed="500" collapsed="true">
+						<p:panelGrid columns="1" layout="grid" styleClass="w100">
+							<control:imputConTextoEnriquecido valor="#{directorRevisarInformeOficioObservacionesICAController.documentoICABean.oficioObservaciones.observaciones}" soloLectura="false" requerido="false" />
+						</p:panelGrid>
+					</p:fieldset>
+
+					<br />
+
+					<p:fieldset legend="RECOMENDACIONES" toggleable="true" toggleSpeed="500" collapsed="true">
+						<p:panelGrid columns="1" layout="grid" styleClass="w100">
+							<control:imputConTextoEnriquecido valor="#{directorRevisarInformeOficioObservacionesICAController.documentoICABean.oficioObservaciones.recomendaciones}" soloLectura="false" requerido="false" />
+						</p:panelGrid>
+					</p:fieldset>
+
+					<h:panelGroup id="tabOficioPronunciamiento">
+						<observaciones:tablaObservaciones idComponent="top" seccion="Oficio" componenteActualizarEliminar="tabOficioPronunciamiento" aparace="true" mostrarSiVacio="true" idClase="#{directorRevisarInformeOficioObservacionesICAController.documentoICABean.solicitud.id}" nombreClase="SolicitudInspeccionControlAmbiental" soloLectura="false" />
+					</h:panelGroup>
+
+				</p:tab>
+			</p:tabView>
+
+			<div class="buttons main">
+				<p:commandButton value="Guardar" update="@form" actionListener="#{directorRevisarInformeOficioObservacionesICAController.guardar()}" icon="ui-icon-disk" />
+				<p:commandButton value="Enviar" update="@form" action="#{directorRevisarInformeOficioObservacionesICAController.aceptar()}" icon="ui-icon-check">
+					<p:confirm message="#{msg['message.confirmacion.envio.tarea']}" header="#{msg['header.confirmacion.envio.tarea']}" />
+				</p:commandButton>
+				<p:commandButton value="Cancelar" action="#{directorRevisarInformeOficioObservacionesICAController.cancelar()}" icon="ui-icon-cancel" styleClass="secondary" process="@this">
+					<p:confirm message="#{msg['message.confirmacion.cancelacion.tarea']}" header="#{msg['header.confirmacion.cancelacion.tarea']}" />
+				</p:commandButton>
+			</div>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

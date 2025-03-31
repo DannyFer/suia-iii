@@ -1,0 +1,267 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<script type="text/javascript">
+	function deshabilitarBotonesDesechoDisposicion() {
+		$('.btnsEditarDesechoDisposicion').prop('disabled', true);
+		$('.btnsEditarDesechoDisposicion').addClass('ui-state-disabled');
+	};
+
+	function deshabilitarBotonesGestorDisposicion() {
+		$('.btnsEditarGestorDisposicion').prop('disabled', true);
+		$('.btnsEditarGestorDisposicion').addClass('ui-state-disabled');
+	};
+	</script>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText
+			value="DISPOSICIÓN FINAL FUERA DE LA INSTALACIÓN" />
+	</f:facet>
+
+	<p:outputLabel value="Disposición final corresponde a confinamiento en relleno de seguridad o reinyección controlada en pozo profundo."
+	styleClass="bold" escape="false" />
+	<p:panel id="adicionarDesechoDisposicion"
+		widgetVar="adicionarDesechoDisposicion" toggleable="true"
+		toggleOrientation="vertical" styleClass="colapsablePanel"
+		collapsed="true">
+		<p:ajax event="toggle"
+			listener="#{disposicionDesechosRetceBean.toggleHandleDesechoDisposicion}"
+			update=":form:adicionarDesechoDisposicion" process="@this" />
+		<h:panelGroup id="datosDesechoDisposicion">
+			<h:panelGroup
+				rendered="#{disposicionDesechosRetceBean.panelDesechoDisposicionVisible}">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Desecho" />
+					</f:facet>
+
+					<h:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25, null" rowClasses="null, alt">
+						<p:outputLabel value="Desecho" for="desechoDisposicion"
+							styleClass="ui-label-form" />
+						<p:selectOneMenu id="desechoDisposicion" 
+							value="#{disposicionDesechosRetceBean.desechoSeleccionado}"
+							styleClass="w100" converter="selectItemConverter" required="true">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}"
+								itemValue="" noSelectionOption="true" />
+							<f:selectItems
+								value="#{disposicionDesechosRetceBean.getDesechosPendientes()}" />
+							<p:ajax process="@this" listener="#{disposicionDesechosRetceBean.getInfoDesecho()}" update="unidadDisposicion cantidadDisposicionFinal"/>
+						</p:selectOneMenu>
+
+						<p:outputLabel value="Unidad" for="unidadDisposicion"
+							styleClass="ui-label-form" />
+						<p:selectOneMenu
+							value="#{disposicionDesechosRetceBean.disposicionFueraInstalacion.tipoUnidad}"
+							id="unidadDisposicion" styleClass="w100" required="true" disabled="true"
+							converter="selectItemConverter">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}"
+								itemValue="" noSelectionOption="true" />
+							<f:selectItems itemLabel="#{tipo.descripcion}"
+								itemValue="#{tipo}" var="tipo"
+								value="#{disposicionDesechosRetceBean.listaTipoUnidad}" />
+							<p:ajax process="@this" event="change" listener="#{disposicionDesechosRetceBean.validarCantidadEliminada()}" update="cantidadDisposicionFinal"/>
+						</p:selectOneMenu>
+
+						<p:outputLabel value="Cantidad" for="cantidadDisposicionFinal"
+							styleClass="ui-label-form" />
+						<pe:inputNumber id="cantidadDisposicionFinal" thousandSeparator=""
+							maxValue="9999999999.99" minValue="0" required="true" disabled="true"
+							value="#{disposicionDesechosRetceBean.disposicionFueraInstalacion.cantidad}">
+							<f:validateDoubleRange minimum="0.1" />
+							<p:ajax event="blur" process="@this"
+											listener="#{disposicionDesechosRetceBean.validarCantidadEliminada()}"
+											update="cantidadDisposicionFinal" />
+						</pe:inputNumber>
+
+					</h:panelGrid>
+
+				</p:panelGrid>
+			</h:panelGroup>
+		</h:panelGroup>
+
+		<div class="buttons">
+			<p:commandButton
+				value="#{disposicionDesechosRetceBean.editarDesechoDisposicion ? 'Actualizar' : 'Aceptar'}"
+				actionListener="#{disposicionDesechosRetceBean.aceptarDesechoDisposicion()}"
+				oncomplete="toogleDesechoDisposicion(xhr, status, args)"
+				process="@this datosDesechoDisposicion"
+				update="datosDesechoDisposicion tblDisposicionDesechos" />
+			<p:commandButton value="Cancelar" styleClass="secondary"
+				actionListener="#{disposicionDesechosRetceBean.cancelar()}"
+				oncomplete="PF('adicionarDesechoDisposicion').toggle()"
+				process="@this" update="datosDesechoDisposicion tblDisposicionDesechos">
+				<p:resetInput target="@form" />
+			</p:commandButton>
+		</div>
+
+		<p:separator />
+	</p:panel>
+
+	<p:dataTable id="tblDisposicionDesechos"
+		value="#{disposicionDesechosRetceBean.listaDisposicionFueraInstalacion}"
+		var="desecho" emptyMessage="#{labels['common.table.empty']}">
+		<f:facet name="header">
+			<p:commandButton value="Adicionar"
+				update=":form:datosDesechoDisposicion"
+				oncomplete="PF('adicionarDesechoDisposicion').toggle()"
+				onclick="deshabilitarBotonesDesechoDisposicion()"
+				styleClass="button-small-text toRight field_mrg btnsEditarDesechoDisposicion"  icon="ui-icon-plusthick" 
+				process="@this" style="float:right;" />
+			<h:outputText value="Desechos disposición final" />
+		</f:facet>
+
+		<p:column styleClass="w50"
+			headerText="Nombre del residuo o desecho peligroso o especial">
+			<h:outputText value="#{desecho.desechoPeligroso.descripcion}" />
+		</p:column>
+		<p:column headerText="Código">
+			<h:outputText value="#{desecho.desechoPeligroso.clave}" />
+		</p:column>
+		<p:column headerText="Unidad">
+			<h:outputText value="#{desecho.tipoUnidad.descripcion}" />
+		</p:column>
+		<p:column headerText="Cantidad" styleClass="alCenter">
+			<h:outputText value="#{desecho.cantidad}" />
+		</p:column>
+		<p:column styleClass="w70px alCenter">
+			<p:commandButton rendered="false"  icon="ui-icon-pencil" title="Editar" process="@this"
+				update=":form:datosDesechoDisposicion" styleClass="primary"
+				oncomplete="PF('adicionarDesechoDisposicion').toggle()"
+				onclick="deshabilitarBotonesDesechoDisposicion()"
+				actionListener="#{disposicionDesechosRetceBean.editarDesecho(desecho)}" />
+			<p:commandButton icon="ui-icon-trash" title="Eliminar"
+				process="@this" styleClass="primary btnsEditarDesechoDisposicion"
+				actionListener="#{disposicionDesechosRetceBean.eliminarDesecho(desecho)}"
+				update="tblDisposicionDesechos" />
+		</p:column>
+	</p:dataTable>
+	<br />
+
+	<p:panel id="adicionarEmpresaGestoraDisposicion"
+		widgetVar="adicionarEmpresaGestoraDisposicion" toggleable="true"
+		toggleOrientation="vertical" styleClass="colapsablePanel"
+		collapsed="true">
+		<p:ajax event="toggle"
+			listener="#{disposicionDesechosRetceBean.toggleHandleEmpresaGestora}"
+			update=":form:adicionarEmpresaGestoraDisposicion" process="@this" />
+		<h:panelGroup id="datosEmpresaGestoraDisposicion">
+			<h:panelGroup
+				rendered="#{disposicionDesechosRetceBean.panelEmpresaVisible}"
+				id="datosEmpresaDisposicionContainer">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Empresa gestora" />
+					</f:facet>
+					<h:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25, null" rowClasses="null, alt">
+						<p:outputLabel value="Empresa gestora" for="empresaGestoraDisposicion"
+							styleClass="ui-label-form" />
+						<p:selectOneMenu
+							value="#{disposicionDesechosRetceBean.prestadorServicioSeleccionado}"
+							id="empresaGestoraDisposicion" styleClass="w100" required="true"
+							converter="selectItemConverter">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}"
+								itemValue="" noSelectionOption="true" />
+							<f:selectItems
+								itemLabel="#{tipo.prestadorServiciosDesechos} #{tipo.codigoPermisoAmbiental}"
+								itemValue="#{tipo}" var="tipo"
+								value="#{disposicionDesechosRetceBean.getPrestadoresDisponibles()}" />
+							<p:ajax process="@this" update="datosEmpresaDisposicionContainer" />
+						</p:selectOneMenu>
+
+						<p:outputLabel value="Número de autorización"
+							styleClass="ui-label-form"
+							rendered="#{disposicionDesechosRetceBean.prestadorServicioSeleccionado ne null and disposicionDesechosRetceBean.prestadorServicioSeleccionado.prestadorServiciosDesechos ne 'OTRA'}" />
+						<h:outputText required="true"
+							value="#{disposicionDesechosRetceBean.prestadorServicioSeleccionado.codigoPermisoAmbiental}"
+							rendered="#{disposicionDesechosRetceBean.prestadorServicioSeleccionado ne null and disposicionDesechosRetceBean.prestadorServicioSeleccionado.prestadorServiciosDesechos ne 'OTRA'}" />
+
+						<p:outputLabel value="Especifique" styleClass="ui-label-form"
+							for="otraEmpresaDiposicion"
+							rendered="#{disposicionDesechosRetceBean.prestadorServicioSeleccionado ne null and disposicionDesechosRetceBean.prestadorServicioSeleccionado.prestadorServiciosDesechos eq 'OTRA'}" />
+						<p:inputText required="true" id="otraEmpresaDiposicion" maxlength="100"
+							value="#{disposicionDesechosRetceBean.transporteEmpresaGestora.otraEmpresa}"
+							rendered="#{disposicionDesechosRetceBean.prestadorServicioSeleccionado ne null and disposicionDesechosRetceBean.prestadorServicioSeleccionado.prestadorServiciosDesechos eq 'OTRA'}" />
+					</h:panelGrid>
+				</p:panelGrid>
+			</h:panelGroup>
+		</h:panelGroup>
+
+		<div class="buttons">
+			<p:commandButton
+				value="#{disposicionDesechosRetceBean.editarEmpresa ? 'Actualizar' : 'Aceptar'}"
+				actionListener="#{disposicionDesechosRetceBean.aceptarEmpresaGestora()}"
+				oncomplete="toggleEmpresasGestorasDisposicion(xhr, status, args)"
+				process="@this datosEmpresaGestoraDisposicion"
+				update="datosEmpresaGestoraDisposicion tblEmpresasGestorasDisposicion" />
+			<p:commandButton value="Cancelar" styleClass="secondary"
+				actionListener="#{disposicionDesechosRetceBean.cancelarEmpresaGestora()}"
+				oncomplete="PF('adicionarEmpresaGestoraDisposicion').toggle()" process="@this"
+				update="datosEmpresaGestoraDisposicion tblEmpresasGestorasDisposicion">
+				<p:resetInput target="@form" />
+			</p:commandButton>
+		</div>
+
+		<p:separator />
+	</p:panel>
+
+	<p:dataTable id="tblEmpresasGestorasDisposicion"
+		value="#{disposicionDesechosRetceBean.listaEmpresasGestoras}"
+		var="item" emptyMessage="#{labels['common.table.empty']}">
+		<f:facet name="header">
+			<p:commandButton value="Adicionar" update=":form:datosEmpresaGestoraDisposicion"
+				oncomplete="PF('adicionarEmpresaGestoraDisposicion').toggle()"
+				onclick="deshabilitarBotonesGestorDisposicion()"
+				styleClass="button-small-text toRight field_mrg btnsEditarGestorDisposicion"  icon="ui-icon-plusthick" 
+				process="@this" style="float:right;" />
+			<h:outputText value="Empresas Gestoras" />
+		</f:facet>
+
+		<p:column headerText="Empresa gestora" styleClass="w50">
+			<h:outputText
+						value="#{(item.empresaGestora.prestadorServiciosDesechos.nombre eq 'OTRA') ? item.otraEmpresa : item.empresaGestora.prestadorServiciosDesechos}" />
+		</p:column>
+		<p:column headerText="Número de autorización">
+			<h:outputText value="#{item.empresaGestora.prestadorServiciosDesechos.nombre ne 'OTRA' ? item.empresaGestora.codigoPermisoAmbiental : 'N/A'}" />
+		</p:column>
+		<p:column styleClass="w70px alCenter">
+			<p:commandButton rendered="false" icon="ui-icon-pencil" title="Editar" process="@this"
+				update=":form:datosEmpresaGestoraDisposicion" styleClass="primary btnsEditarGestorDisposicion"
+				oncomplete="PF('adicionarEmpresaGestoraDisposicion').toggle()"
+				onclick="deshabilitarBotonesGestorDisposicion()"
+				actionListener="#{disposicionDesechosRetceBean.editarEmpresaGestora(item)}" />
+			<p:commandButton icon="ui-icon-trash" title="Eliminar"
+				process="@this" styleClass="primary"
+				actionListener="#{disposicionDesechosRetceBean.eliminarEmpresaGestora(item)}"
+				update="tblEmpresasGestorasDisposicion" />
+		</p:column>
+	</p:dataTable>
+
+</p:panelGrid>
+
+
+<script type="text/javascript">
+	function toogleDesechoDisposicion(xhr, status, args) {
+		if(args.addDesechoDisposicion) {
+			PF('adicionarDesechoDisposicion').toggle();
+		}
+	}
+
+	function toggleEmpresasGestorasDisposicion(xhr, status, args) {
+		if(args.addEmpresaDisposicion) {
+			PF('adicionarEmpresaGestoraDisposicion').toggle();
+		}
+	}
+</script>
+
+</html>

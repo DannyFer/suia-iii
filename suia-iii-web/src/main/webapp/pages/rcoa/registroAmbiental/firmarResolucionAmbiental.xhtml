@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:pe="http://primefaces.org/ui/extension"
+	xmlns:f="http://java.sun.com/jsf/core">
+	<ui:define name="content">
+
+		<h:form id="frmEnviar">
+			<h:panelGroup>
+				<h:panelGrid styleClass="alCenter w100" columns="1">
+					<h:outputText value="Firmar y enviar Resolución Ambiental" styleClass="encabezado1_4em" />
+					<h:panelGrid styleClass="alCenter w66" columns="1" rendered="false">
+						<p:panel styleClass="alCenter">
+							<h:outputText value="Registro Ambiental #{firmarElectronicamenteResolucionAmbientalRcoaController.tramite}"
+								styleClass="encabezado" />
+						</p:panel>
+					</h:panelGrid>
+					<h:panelGrid styleClass="alCenter w66" columns="1">
+						<p:panel styleClass="alCenter" rendered="#{!firmarElectronicamenteResolucionAmbientalRcoaController.ambienteProduccion}">
+							<h:panelGrid styleClass="alCenter w50" columns="2">
+								<h:outputText value="¿Cuenta con token?" styleClass="encabezado"
+									style="text-align:right" />
+								<p:selectOneRadio id="verificaToken" disabled="#{firmarElectronicamenteResolucionAmbientalRcoaController.ambienteProduccion}" 
+												value="#{firmarElectronicamenteResolucionAmbientalRcoaController.token}">
+									<f:selectItem itemLabel="Sí" itemValue="true" />
+									<f:selectItem itemLabel="No" itemValue="false" />
+									<p:ajax event="change" update=":frmEnviar :formDialogs"
+										listener="#{firmarElectronicamenteResolucionAmbientalRcoaController.guardarToken}" />
+								</p:selectOneRadio>
+							</h:panelGrid>
+						</p:panel>
+					</h:panelGrid>
+				</h:panelGrid>
+			</h:panelGroup>
+			<h:panelGroup id="pnlFinalizarBtn">
+				<div class="buttons main">
+					<p:commandButton value="Visualizar registro"
+							styleClass="extraLarge buttonVisualizarFicha"
+							action="#{firmarElectronicamenteResolucionAmbientalRcoaController.cargarDatosResplucionCoa}"
+							update=":#{p:component('pgPdf')}" onclick="PF('dlgRegistro').show();" rendered="false"
+							icon="ui-icon-check" process="@this" >
+						</p:commandButton>
+						
+						<p:commandButton value="Firmar documento " type="button"
+						styleClass="large" icon="ui-icon-key"
+						rendered="#{!firmarElectronicamenteResolucionAmbientalRcoaController.token}"
+						update=":formDialogs:pnlFirmaRegistro"
+						onclick="PF('dlgDescargar').show();" />
+						
+
+					<p:commandButton value="Firmar documento" type="button"
+						styleClass="large" icon="ui-icon-key" 
+						rendered="#{firmarElectronicamenteResolucionAmbientalRcoaController.token}"
+						onclick="window.location.href='#{firmarElectronicamenteResolucionAmbientalRcoaController.firmarDocumento()}'" />
+					<p:commandButton value="Enviar"
+						action="#{firmarElectronicamenteResolucionAmbientalRcoaController.completarTarea()}"
+						icon="ui-icon-check"/>
+				</div>
+			</h:panelGroup>
+
+			<p:dialog header="Resolución Ambiental" id="dlgRegistro" styleClass="ventana" widgetVar="dlgRegistro" modal="true" height="500px"  width="90%">
+				<h:panelGroup id="pgPdf">
+					<object data="#{firmarElectronicamenteResolucionAmbientalRcoaController.pdf}?pfdrid_c=true" height="470px" width="100%">
+                            Su navegador no soporta la visualización de pdf. Puede descargar el documento presionando el siguiente botón:
+                            <p:commandButton value="Descargar" styleClass="primary" ajax="false" icon="ui-icon-arrowthick-1-s" 
+                            		action="#{descargarDocumentosCoaController.descargarDocumento(firmarElectronicamenteResolucionAmbientalRcoaController.documentoResolucionAmbiental)}"/>
+                        </object>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+
+		<h:form id="formDialogs">
+			<p:dialog header="Firma Electrónica" id="dlgDescargar"
+				widgetVar="dlgDescargar" closeOnEscape="false" modal="true"
+				resizable="false" width="auto" height="auto" position="center top">
+				<p:panel id="pnlFirmaRegistro">
+					<h:panelGrid columns="2" cellpadding="10"
+						style="text-align:right !important">
+						<h:outputLabel value="Descargar Registro" styleClass="bold" />
+						<p:commandButton value="Descargar" ajax="false"
+							icon="ui-icon-arrowthick-1-s" styleClass="primary"
+							immediate="true">
+							<p:fileDownload value="#{firmarElectronicamenteResolucionAmbientalRcoaController.getDocumentoRegistroA()}" />
+						</p:commandButton>
+
+						<p:outputLabel for="uploadRequired"
+							value="Adjunte documento firmado" styleClass="bold" />
+						<p:fileUpload
+							fileUploadListener="#{firmarElectronicamenteResolucionAmbientalRcoaController.uploadListenerDocumentos}"
+							multiple="false" sizeLimit="5242880"
+							allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Tamaño de archivo no válido"
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update="lblNombreDocumentoFirmado"
+							rendered="#{!firmarElectronicamenteResolucionAmbientalRcoaController.token}">
+							<f:attribute name="clave" value=":form" />
+						</p:fileUpload>
+						<p:outputLabel value="" />
+						<h:outputText id="lblNombreDocumentoFirmado"
+							value="#{firmarElectronicamenteResolucionAmbientalRcoaController.documentoManual.nombre}" />
+					</h:panelGrid>
+				</p:panel>
+				<h:inputHidden id="uploadRequired"
+					required="#{!firmarElectronicamenteResolucionAmbientalRcoaController.token and !firmarElectronicamenteResolucionAmbientalRcoaController.subido}" />
+				<p:separator />
+				<div style="display: block; width: 100%; text-align: right;">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('dlgDescargar').hide()" icon="ui-icon-close" />
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

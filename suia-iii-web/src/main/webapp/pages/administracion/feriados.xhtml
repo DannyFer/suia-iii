@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" 
+	xmlns:ui="http://java.sun.com/jsf/facelets" 
+	xmlns:h="http://java.sun.com/jsf/html" 
+	xmlns:p="http://primefaces.org/ui" 
+	template="/WEB-INF/templates/default.xhtml" 
+	xmlns:f="http://java.sun.com/jsf/core" 
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+	<ui:define name="content">
+	<style>
+	.ui-state-disabled .ui-state-default{background: none}
+	</style>
+		<h:form id="frmDatos">
+
+			<p:panelGrid id="actividadContainer" columns="1" layout="grid"
+				styleClass="w100">
+				<f:facet name="header">
+					<p:commandButton value="Adicionar"
+						rendered="#{feriadosController.mostrarFormNuevo}"
+						action="#{feriadosController.registrarNuevo()}" update="@form"
+						styleClass="button-small-text toRight field_mrg"
+						icon="ui-icon-plusthick" />
+					<h:outputText value="Feriados del sistema" />
+				</f:facet>
+
+				<p:growl id="msgs" globalOnly="true" />
+				<p:outputPanel id="pnlDatos">
+					<p:dataTable id="tablaFeriados" value="#{feriadosController.listaFeriados}"
+						var="feriado" paginator="true" rows="20"
+						paginatorPosition="bottom" widgetVar="tblFeriados"
+						rendered="#{feriadosController.mostrarFormNuevo}">
+						<p:column headerText="Nombre" filterBy="#{feriado.nombre}"
+							filterMatchMode="contains" styleClass="w30">
+							<h:outputText value="#{feriado.nombre}" />
+						</p:column>
+						<p:column headerText="Fecha Inicio">
+							<h:outputText value="#{feriado.fechaInicio}" />
+						</p:column>
+						<p:column headerText="Fecha Fin">
+							<h:outputText value="#{feriado.fechaFin}"/>
+						</p:column>
+						<p:column headerText="Tipo" filterBy="#{feriado.esFeriadoNacional}"
+							filterMatchMode="exact">
+							<f:facet name="filter">
+				                <p:selectOneMenu onchange="PF('tblFeriados').filter()" styleClass="custom-filter">
+				                    <f:selectItem itemLabel="Seleccione" itemValue="#{null}" noSelectionOption="true" />
+				                    <f:selectItem itemLabel="Nacional" itemValue="true" />
+									<f:selectItem itemLabel="Local" itemValue="false" />
+				                </p:selectOneMenu>
+				            </f:facet>
+							<h:outputText value="#{feriado.esFeriadoNacional ? 'Nacional' : 'Local'}" />
+						</p:column>
+						<p:column headerText="Localidad" 
+						filterBy="#{feriado.localidad.nombre} #{feriado.localidad.ubicacionesGeografica.nombre}"
+							filterMatchMode="contains">
+							<h:outputText value="#{feriado.localidad.ubicacionesGeografica != null and feriado.localidad.ubicacionesGeografica.codificacionInec != null ? feriado.localidad.ubicacionesGeografica.nombre.concat(' - ').concat(feriado.localidad.nombre) : feriado.localidad.nombre}" />
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton title="Editar"
+								styleClass="secondary button-small" icon="ui-icon-pencil"
+								action="#{feriadosController.seleccionarEditar(feriado)}"
+								update=":#{p:component('frmDatos')}">
+							</p:commandButton>
+							<p:commandButton title="Eliminar"
+								styleClass="secondary button-small" icon="ui-icon-trash"
+								action="#{feriadosController.seleccionarEliminar(feriado)}" 
+								oncomplete="PF('deleteWdgt').show()"
+								process="@this" update="@form">
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</p:outputPanel>
+
+				<p:dialog id="deleteDlg" header="Eliminar feriado"
+					widgetVar="deleteWdgt" modal="true" dynamic="true">
+						<p:outputPanel>
+							<p:panelGrid columns="2" columnClasses="label, value">
+								<h:outputText value="Justificación" />
+								<p:inputTextarea
+									value="#{feriadosController.feriadoSeleccionado.justificacionEliminacion}"
+									maxlength="250" rows="6" cols="33" required="true"
+									label="Justificación">
+								</p:inputTextarea>
+							</p:panelGrid>
+						</p:outputPanel>
+					
+					<div class="buttons">
+						<h:panelGroup layout="block" 
+							style="text-align:right; padding:2px; white-space:nowrap;">
+							<p:commandButton value="Aceptar" 
+								action="#{feriadosController.eliminarFeriado()}"
+								oncomplete="handleActividadRequest(xhr, status, args);" />
+							<p:commandButton type="button" value="Cerrar"
+								update="@frmDatos"
+								onclick="PF('deleteWdgt').hide()" />
+						</h:panelGroup>
+					</div>
+				</p:dialog>
+
+				<p:outputPanel id="pnlDatos1">
+					<p:panel header="Editar Feriado"
+						rendered="#{!feriadosController.mostrarFormNuevo}">
+						<p:panelGrid styleClass="w75 separatorBottom" columns="2" columnClasses="alLeft w25, null">
+							<h:outputLabel value="* Tipo feriado:" />
+							<p:selectOneRadio required="true" label="Tipo feriado"
+								value="#{feriadosController.feriadoSeleccionado.esFeriadoNacional}">
+								<f:selectItem itemLabel="Nacional" itemValue="true" />
+								<f:selectItem itemLabel="Local" itemValue="false" />
+								<p:ajax update="gridLblLocalidad gridPnlLocalidad" />
+							</p:selectOneRadio>
+
+							<h:outputLabel value="* Nombre:"  />
+							<p:inputText required="true" label="Nombre" 
+								value="#{feriadosController.feriadoSeleccionado.nombre}"
+								longitud="256" onchange="javascript:this.value = this.value.toUpperCase();" style="text-transform: uppercase">
+								<p:ajax update="@this" process="@this"></p:ajax>
+							</p:inputText>
+							
+							<h:outputLabel value="* Fecha Inicio:" />
+							<h:panelGrid styleClass="w40" columns="1">
+								<p:calendar id="fechaInicio" required="true" locale="es"
+									disabledWeekends="true" label="Fecha Inicio" navigator="true"
+									value="#{feriadosController.feriadoSeleccionado.fechaInicio}"
+									pattern="dd/MM/yyyy" readonlyInput="true" yearRange="2018:+2">
+									<p:ajax event="dateSelect" update=":#{p:component('fechaFin')}" 
+									listener="#{feriadosController.actualizarFechas()}" />
+								</p:calendar>
+							</h:panelGrid>
+
+							<h:outputLabel value="* Fecha Fin:" />
+							<h:panelGrid styleClass="w40" columns="1">
+								<p:calendar id="fechaFin" required="true" locale="es" 
+									disabledWeekends="true" label="Fecha Fin" navigator="true"
+									value="#{feriadosController.feriadoSeleccionado.fechaFin}"
+									mindate="#{feriadosController.feriadoSeleccionado.fechaInicio}"
+									pattern="dd/MM/yyyy" readonlyInput="true" yearRange="2018:+2">
+								</p:calendar>
+							</h:panelGrid>
+
+							<p:outputPanel id="gridLblLocalidad">
+								<h:outputLabel value="Localidad a la que aplica:" 
+									rendered="#{feriadosController.feriadoSeleccionado.esFeriadoNacional eq false}" />
+							</p:outputPanel>
+							<p:outputPanel id="gridPnlLocalidad">
+								<h:panelGrid id="pnlUbicacionGeografica" columns="2"
+									width="100%" columnClasses="col1,col2"
+									rendered="#{feriadosController.feriadoSeleccionado.esFeriadoNacional eq false}">
+									<h:outputLabel value="Provincia" />
+									<p:selectOneMenu
+										value="#{feriadosController.feriadoSeleccionado.idProvincia}"
+										style="width: 252px">
+										<f:selectItem itemValue="" itemLabel="Seleccione" />
+										<f:selectItems value="#{feriadosController.listaProvincia}"
+											var="provincia" itemLabel="#{provincia.nombre}"
+											itemValue="#{provincia.id}" />
+										<p:ajax listener="#{feriadosController.cargarCanton}"
+											event="change" update="pnlUbicacionGeografica" />
+									</p:selectOneMenu>
+
+									<h:outputLabel value="Cantón" />
+									<p:selectOneMenu
+										value="#{feriadosController.feriadoSeleccionado.idCanton}"
+										style="width: 252px">
+										<f:selectItem itemValue="" itemLabel="Seleccione" />
+										<f:selectItems value="#{feriadosController.listaCanton}"
+											var="canton" itemLabel="#{canton.nombre}"
+											itemValue="#{canton.id}" />
+									</p:selectOneMenu>
+								</h:panelGrid>
+							</p:outputPanel>
+						
+							<h:outputLabel value=" Descripción:"  />
+							<p:inputTextarea 
+								value="#{feriadosController.feriadoSeleccionado.descripcion}" maxlength="350" rows="6" cols="33">
+							</p:inputTextarea>
+						</p:panelGrid>
+						<div class="buttons main">
+							<p:commandButton icon="ui-icon-check" styleClass="primary"
+								value="Aceptar" action="#{feriadosController.guardar()}"
+								update=":#{p:component('frmDatos')}" />
+							<p:commandButton icon="ui-icon-cancel" value="Cancelar"
+								styleClass="secondary" action="#{feriadosController.cancelar()}"
+								ajax="false" immediate="true" />
+						</div>
+					</p:panel>
+				</p:outputPanel>
+			</p:panelGrid>
+		</h:form>
+		<script type="text/javascript">
+            function handleActividadRequest(xhr, status, args) {
+                if (args.validationFailed || !args.actividadIn) {
+                }
+                else {
+                    PF('deleteWdgt').hide();
+                }
+            }
+        </script>
+
+	</ui:define>
+</ui:composition>

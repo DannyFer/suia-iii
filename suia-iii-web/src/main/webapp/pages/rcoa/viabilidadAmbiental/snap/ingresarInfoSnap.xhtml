@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+	<ui:define name="content">
+		<style type="text/css">
+.ui-panelgrid-header .ui-widget-header td {
+	background: #008A8A !important;
+}
+
+.pnlHeaders .ui-widget-content {
+	border: none !important;
+}
+
+.pnlHeaders .ui-datagrid-header {
+	text-align: left !important;
+	background: #008A8A !important;
+	color: #FFFFFF !important;
+	font-weight: bold;
+	padding-top: 0 !important;
+}
+</style>
+
+		<f:event type="preRenderView"
+			listener="#{registrarSnapController.validarTareaBpm()}" />
+
+
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				id="pnlDatos">
+				<f:facet name="header">
+					<h:outputText
+						value="INFORMACIÓN COMPLEMENTARIA DEL PROPONENTE PARA EL ANÁLISIS DE LA VIABILIDAD AMBIENTAL DE UN PROYECTO, OBRA O ACTIVIDAD EN EL SISTEMA NACIONAL DE ÁREAS PROTEGIDAS" />
+				</f:facet>
+
+				<h:panelGroup rendered="#{registrarSnapController.verGeneral}">
+
+					<p:dataGrid var="cabecera"
+						value="#{registrarSnapController.preguntasForm1}" columns="1"
+						layout="grid">
+						<p:dataGrid var="pregunta" value="#{cabecera.listaPreguntas}"
+							columns="1" layout="grid" id="pnlCabeceras"
+							styleClass="pnlHeaders">
+							<f:facet name="header">
+								<h:outputText value="#{cabecera.descripcion}" />
+							</f:facet>
+
+							<p:panelGrid columns="2" styleClass="panel_data w100"
+								columnClasses="header w25, null">
+								<p:outputLabel for="txtFacilidades"
+									value="#{pregunta.descripcion}" style="color: white" />
+								<p:outputPanel styleClass="alRight">
+									<p:inputTextarea id="txtFacilidades" maxlength="6000" rows="5"
+										rendered="#{pregunta.tipo eq 2}" required="true"
+										style="resize: none;" autoResize="false"
+										value="#{pregunta.respuesta.respText}" />
+									<p:commandButton value="Guardar" process="@this txtFacilidades"
+										styleClass="secondary alRight"
+										action="#{registrarSnapController.guardarCampo(pregunta)}"
+										icon="ui-icon-disk" />
+								</p:outputPanel>
+							</p:panelGrid>
+
+						</p:dataGrid>
+					</p:dataGrid>
+				</h:panelGroup>
+
+				<h:panelGroup rendered="#{!registrarSnapController.verGeneral}">
+					<p:dataGrid var="cabecera"
+						value="#{registrarSnapController.preguntasForm2}" columns="1"
+						layout="grid">
+						<p:dataGrid var="pregunta" value="#{cabecera.listaPreguntas}"
+							columns="1" layout="grid" id="pnlCabeceras"
+							styleClass="pnlHeaders">
+							<f:facet name="header">
+								<h:outputText value="#{cabecera.descripcion}" />
+							</f:facet>
+
+							<p:panelGrid columns="2" styleClass="panel_data w100"
+								columnClasses="header w25, null">
+								<p:outputLabel for="txtFacilidades"
+									value="#{pregunta.descripcion}" style="color: white" />
+								<p:outputPanel styleClass="alRight">
+									<p:inputTextarea id="txtFacilidades" maxlength="6000" rows="5"
+										rendered="#{pregunta.tipo eq 2}" required="true"
+										style="resize: none;" autoResize="false"
+										value="#{pregunta.respuesta.respText}" />
+									<p:commandButton value="Guardar" process="@this txtFacilidades"
+										styleClass="secondary alRight"
+										action="#{registrarSnapController.guardarCampo(pregunta)}"
+										icon="ui-icon-disk" />
+								</p:outputPanel>
+							</p:panelGrid>
+
+						</p:dataGrid>
+					</p:dataGrid>
+
+					<br />
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="Documentación que sustente su pedido" />
+						</f:facet>
+
+						<h:outputText
+							value="#{registrarSnapController.notaSustento}"
+							escape="false" />
+
+						<p:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="header w25, null">
+
+
+							<p:outputLabel value="Adjuntar *" style="color: white" />
+							<p:outputPanel id="pnlDocSustento">
+								<p:fileUpload id="docSustento"
+									fileUploadListener="#{registrarSnapController.uploadFile}"
+									multiple="false" sizeLimit="10485760"
+									allowTypes="/(\.|\/)(pdf|zip|rar)$/"
+									label="Seleccionar (pdf, zip, rar 10Mb)" uploadLabel="Subir"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Debe adjuntar un archivo no mayor de 10 Mb."
+									cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+									auto="true" required="true" update="pnlDocSustento" />
+								<p:commandButton icon="ui-icon-arrowthick-1-s"
+									styleClass="button-small primary toLeft" title="Ver"
+									ajax="false" immediate="true"
+									rendered="#{registrarSnapController.documentoSustento.nombre ne null}">
+									<p:fileDownload
+										value="#{registrarSnapController.descargar(registrarSnapController.documentoSustento)}" />
+								</p:commandButton>
+								<h:outputText
+									value="#{registrarSnapController.documentoSustento.nombre}"
+									rendered="#{registrarSnapController.documentoSustento.nombre ne null}" />
+							</p:outputPanel>
+						</p:panelGrid>
+					</p:panelGrid>
+
+					<h:inputHidden
+						validator="#{registrarSnapController.validateDatosIngreso}" />
+				</h:panelGroup>
+
+			</p:panelGrid>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Regresar" immediate="true"
+						styleClass="secondary"
+						action="#{registrarSnapController.siguiente(true)}"
+						rendered="#{!registrarSnapController.verGeneral}"
+						update="pnlDatos pnlButtons" icon="ui-icon-arrowthick-1-w" />
+					<p:commandButton value="Guardar" process="@this form"
+						actionListener="#{registrarSnapController.guardarGeneral()}"
+						update="pnlButtons" icon="ui-icon-disk" />
+					<p:commandButton value="Siguiente" immediate="true"
+						styleClass="secondary"
+						action="#{registrarSnapController.siguiente(false)}"
+						disabled="#{!registrarSnapController.form1Guardado}"
+						rendered="#{registrarSnapController.verGeneral}"
+						update="pnlDatos pnlButtons" icon="ui-icon-arrowthick-1-e" />
+					<p:commandButton value="Enviar" immediate="true"
+						action="#{registrarSnapController.enviar()}"
+						disabled="#{!registrarSnapController.form1Guardado}"
+						rendered="#{!registrarSnapController.verGeneral}"
+						update="pnlDatos pnlButtons" icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+</ui:composition>

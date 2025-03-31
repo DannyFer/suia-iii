@@ -1,0 +1,64 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+	<ui:define name="context-extra">
+		<h:outputText value="Trámite" />
+		<h:outputText
+			value="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.codigo}" />
+		<h:outputLink value="ingresarInformacionRSQVer.jsf"
+			target="_blank">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+	</ui:define>
+	<ui:define name="content">
+		<h:form id="form">
+			<p:panel>
+				<f:facet name="header">
+					<p:outputLabel value="Informe Técnico" />
+				</f:facet>
+
+				<p:panelGrid columns="2" layout="grid">
+					<p:outputLabel value="Descargue el documento" styleClass="bold" />
+					<p:commandButton value="Descargar" ajax="false"
+						icon="ui-icon-arrowthick-1-s" styleClass="primary"
+						immediate="true">
+						<p:fileDownload value="#{revisarInformeInspeccionRSQController.descargarDocumento()}"/>
+					</p:commandButton>
+
+					<h:outputText value="¿Es necesario realizar correcciones sobre el informe técnico?*" />
+
+					<p:selectOneRadio id="correcciones" value="#{revisarInformeInspeccionRSQController.requiereCorreccionesInforme}">
+						<f:selectItem itemLabel="Si" itemValue="#{true}" />
+						<f:selectItem itemLabel="No" itemValue="#{false}" />
+						<p:ajax update="btnEnviar" />
+					</p:selectOneRadio>
+
+					<h:outputText value="Si es necesario realizar correcciones, el trámite regresará al técnico asignado" style="color:red;" />
+				</p:panelGrid>
+			</p:panel>
+
+			<observaciones:tablaObservacionesRSQ idComponent="@this"
+				componenteActualizarEliminar="@none" 
+				seccion="RSQInformeInspeccion"
+				nombreClase="InformeOficioRSQ"
+				idClase="#{revisarInformeInspeccionRSQController.informe.id}"
+				aparace="true" 
+				mostrarSiVacio="true" 
+				soloLectura="false" />
+				
+			<t:div styleClass="buttons main">
+				<p:commandButton id="btnEnviar" value="Enviar" icon="ui-icon-check"
+					action="#{revisarInformeInspeccionRSQController.enviar()}"
+					disabled="#{empty revisarInformeInspeccionRSQController.requiereCorreccionesInforme}" />
+			</t:div>
+		</h:form>
+	</ui:define>
+</ui:composition>

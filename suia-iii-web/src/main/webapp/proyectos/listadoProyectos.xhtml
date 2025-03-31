@@ -1,0 +1,303 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components">
+
+
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+
+	<ui:define name="content">
+		<f:loadBundle var="labels"
+			basename="ec.gob.ambiente.core.resources.labels_es" />
+
+		<p:tabView id="tabView">
+			<p:tab title="Listado de proyectos" id="tabProyectos">
+				<h:form id="form">
+					<h:panelGrid styleClass="toRight"
+						rendered="#{!empty proyectosController.proyectosBean.proyectosNoFinalizados}">
+						<p:commandLink id="linkPendientes"
+							value="Proyectos pendientes: #{proyectosController.proyectosBean.proyectosNoFinalizados.size()}"
+							onclick="PF('modalPendientes').show()"
+							styleClass="toRight text-red field_mrg" type="button"
+							rendered="#{!empty proyectosController.proyectosBean.proyectosNoFinalizados}" />
+						<br />
+					</h:panelGrid>
+
+					<p:dataTable id="tableProyectos" widgetVar="tableProyectos"
+						value="#{proyectosController.proyectosBean.proyectos}"
+						sortBy="#{proyecto.codigo}" sortOrder="descending" var="proyecto"
+						rows="10" paginator="true" paginatorAlwaysVisible="false"
+						paginatorPosition="bottom"
+						currentPageReportTemplate="{currentPage} de {totalPages}"
+						rowsPerPageTemplate="5,10,15"
+						emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="Código" filterBy="#{proyecto.codigo}"
+							filterMatchMode="contains" styleClass="alCenter w15"
+							sortBy="#{proyecto.codigo}">
+							<p:commandLink
+								action="#{proyectosController.seleccionar(proyecto)}"
+								process="@this">
+								<h:outputText value="#{proyecto.codigo}" />
+								<f:param name="id" value="#{proyecto.id}" />
+							</p:commandLink>
+						</p:column>
+						<p:column headerText="Nombre" filterBy="#{proyecto.nombre}"
+							filterMatchMode="contains" sortBy="#{proyecto.nombre}"
+							styleClass="w25">
+							<h:outputText value="#{proyecto.nombre}"
+								title="#{proyecto.nombre}" />
+						</p:column>
+						<p:column headerText="Registro" filterBy="#{proyecto.registro}"
+							filterMatchMode="contains" sortBy="#{proyecto.registro}"
+							styleClass="alCenter w15">
+							<h:outputText value="#{proyecto.registro}" />
+						</p:column>
+						<p:column headerText="Sector" filterBy="#{proyecto.sector}"
+							filterMatchMode="equals" sortBy="#{proyecto.sector}"
+							styleClass="alCenter w15">
+							<f:facet name="filter">
+								<p:selectOneMenu onchange="PF('tableProyectos').filter()"
+									converter="selectItemConverter2">
+									<f:selectItem itemLabel="" itemValue="-1" />
+									<f:selectItems value="#{proyectosBean.sectoresItems}" />
+								</p:selectOneMenu>
+							</f:facet>
+							<h:outputText value="#{proyecto.sector}" />
+						</p:column>
+						<p:column headerText="Responsable"
+							filterBy="#{proyecto.responsableSiglas}"
+							filterMatchMode="contains" sortBy="#{proyecto.responsableSiglas}"
+							styleClass="alCenter w15">
+							<h:outputText value="#{proyecto.responsableSiglas}"
+								title="#{proyecto.responsable}" />
+						</p:column>
+						<p:column headerText="Permiso ambiental"
+							filterBy="#{proyecto.categoriaNombrePublico}"
+							filterMatchMode="equals"
+							sortBy="#{proyecto.categoriaNombrePublico}"
+							styleClass="alCenter w20">
+							<f:facet name="filter">
+								<p:selectOneMenu onchange="PF('tableProyectos').filter()"
+									converter="selectItemConverter2" >
+									<f:selectItem itemLabel="" itemValue="-1" />
+									<f:selectItems value="#{proyectosBean.categoriasItems}" />
+								</p:selectOneMenu>
+							</f:facet>
+							<h:outputText value="#{proyecto.categoriaNombrePublico}" />
+						</p:column>
+						<p:column headerText="Consultas de Gestión"
+							styleClass="alCenter w10"
+							rendered="#{proyectosController.esSujetoDeControl}">
+
+							<p:commandButton update=":tabView:form:encuestaDialog"
+								styleClass="primary" icon="ui-icon-clipboard" process="@this"
+								actionListener="#{proyectosController.consultaEncuesta(proyecto)}"
+								oncomplete="PF('encuestaDialog').show()"
+								title="Llenar Consulta de gestión">
+
+
+
+								<f:setPropertyActionListener value="#{proyecto}"
+									target="#{proyectosController.proyectosBean.proyectoCustom}" />
+							</p:commandButton>
+						</p:column>
+						<ui:remove>
+							<p:column headerText="Registro" styleClass="alCenter w20">
+								<h:outputText value="#{proyecto.sourceType}" />
+							</p:column>
+						</ui:remove>
+						<p:column styleClass="alCenter w40px"
+							rendered="#{proyectosController.deletionActive or proyectosController.updateSuiaActive}">
+							<p:commandButton
+								rendered="#{!proyecto.internal and proyectosController.deletionActive}"
+								actionListener="#{proyectosController.marcar(proyecto)}"
+								process="@this" update=":formDelete:eliminarProyecto"
+								icon="ui-icon-trash" styleClass="button-small primary" />
+							<p:commandButton
+								rendered="#{proyecto.internal and proyectosController.deletionActive}"
+								disabled="#{proyecto.requestDeletion}"
+								actionListener="#{proyectosController.marcar(proyecto)}"
+								process="@this" update=":formDelete:eliminarProyecto"
+								icon="ui-icon-trash" styleClass="button-small primary"
+								oncomplete="PF('eliminarProyecto').show()" />
+							<p:commandButton
+								rendered="#{proyectosController.updateSuiaActive and proyectosController.isProyectoSuia(proyecto) }"
+								actionListener="#{proyectosController.eliminarProyectoIntegracion(proyecto)}"
+								process="@this" update=":formDelete:eliminarProyecto"
+								icon="ui-icon-arrow-4-diag" styleClass="button-small primary" />
+						</p:column>
+						<p:column styleClass="alCenter w10" headerText="Digitalización">
+							<p:button icon="ui-icon-zoomin" target="_blank"  href="#{proyectosController.mostrarDigitalizacion(proyecto)}"
+								styleClass="button-small primary" rendered="#{proyecto.categoria eq 'Digitalizacion'}"></p:button>
+						</p:column>
+					</p:dataTable>
+
+
+					<p:remoteCommand autoRun="true"
+						actionListener="#{proyectosController.verificarProyectosNoFinalizados()}"
+						process="@this"
+						oncomplete="showModalProyectosNoFinalizados(xhr, status, args)" />
+
+					<ui:include src="/proyectos/utiles/proyectosPendientes.xhtml" />
+
+					<p:dialog header="Consulta de Gestión" widgetVar="encuestaDialog"
+						modal="true" showEffect="fade" hideEffect="fade" resizable="false"
+						height="auto" width="700px" closable="false">
+
+						<div class="card">
+							<p:outputPanel id="encuestaDialog" style="height:auto">
+								<div style="margin-bottom: 10px"></div>
+								<p:panelGrid columns="2" columnClasses="header w25, null w75"
+									styleClass="panel_data w100">
+
+									<h:outputText styleClass="bold" value="Detalle proyecto" />
+									<h:outputText
+										value="Consulta de Gestión para el proyecto #{proyectosController.proyectosBean.proyectoCustom.codigo}" />
+								</p:panelGrid>
+
+								<div align="right" style="margin-bottom: 10px">
+									<h:outputText
+										value="El proyecto pertenece a una Direción Provincial"
+										styleClass="text-red"
+										rendered="#{proyectosController.esDireccionProvincial}" />
+									<br />
+									<h:outputText
+										value="Fecha: #{proyectosController.fechaEncuesta}" />
+								</div>
+
+								<p:outputPanel
+									rendered="#{!proyectosController.proyectoFinalizado and proyectosController.proyectoObservado}">
+
+									<ui:repeat var="encuesta"
+										value="#{proyectosController.listEncuesta}">
+
+										<p:panelGrid columns="3" columnClasses="w10, w100, w25">
+
+											<h:outputText value="#{encuesta.opcionesEncuesta.id}" />
+											<h:outputText value="#{encuesta.opcionesEncuesta.nombre}" />
+
+											<p:selectBooleanCheckbox value="#{encuesta.valor}">
+												<p:ajax update=":tabView:form:encuestaDialog"
+													process="@this"
+													listener="#{proyectosController.asignarEncuesta(encuesta)}" />
+											</p:selectBooleanCheckbox>
+
+										</p:panelGrid>
+
+									</ui:repeat>
+								</p:outputPanel>
+
+								<p:panelGrid columns="1" columnClasses="null w100"
+									styleClass="panel_data w100"
+									rendered="#{proyectosController.proyectoFinalizado}">
+									<h:outputText
+										rendered="#{proyectosController.proyectoFinalizado}"
+										value="El proyecto de código: #{proyectosController.proyectosBean.proyectoCustom.codigo}, ya se encuentra generado el permiso ambiental competente." />
+								</p:panelGrid>
+
+								<p:panelGrid columns="1" columnClasses="null w100"
+									styleClass="panel_data w100"
+									rendered="#{!proyectosController.proyectoObservado}">
+									<h:outputText
+										rendered="#{!proyectosController.proyectoObservado}"
+										value="El proyecto de código: #{proyectosController.proyectosBean.proyectoCustom.codigo}, aún no se encuentra en revisión por ningún Técnico." />
+								</p:panelGrid>
+
+
+								<div align="right" style="margin-top: 15px">
+									<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+										process="@this" onclick="PF('encuestaDialog').hide()"
+										styleClass="secondary"
+										actionListener="#{proyectosController.cancelarEncuesta}" />
+									<p:commandButton value="Enviar" icon="ui-icon-check"
+										rendered="#{!proyectosController.proyectoFinalizado and proyectosController.proyectoObservado}"
+										process="@this" onclick="PF('encuestaDialog').hide()"
+										styleClass="primary"
+										actionListener="#{proyectosController.guardarEncuesta}"
+										disabled="#{!proyectosController.habilitarGuardar}" />
+								</div>
+							</p:outputPanel>
+						</div>
+					</p:dialog>
+				</h:form>
+			</p:tab>
+
+
+			<p:tab title="Proyectos archivados" id="tabArchivados">
+				<ui:include src="/proyectos/listaProyectosArchivados.xhtml" />
+			</p:tab>
+
+
+		</p:tabView>
+
+		<h:form id="formDelete">
+
+			<p:dialog header="Eliminar proyecto" id="eliminarProyecto"
+				widgetVar="eliminarProyecto" modal="true" width="500"
+				resizable="false" closable="true" draggable="false">
+				<h:panelGrid columns="1" styleClass="w100">
+					<p:outputLabel
+						value="Motivo por el que desea eliminar este proyecto"
+						for="motivo" />
+					<p:inputTextarea id="motivo"
+						value="#{proyectosBean.proyectoCustom.motivoEliminar}"
+						required="true" autoResize="false" rows="3" maxlength="1000">
+						<f:validateLength minimum="20" />
+					</p:inputTextarea>
+				</h:panelGrid>
+				<h:panelGrid columns="3" columnClasses="alJustify">
+					<p:outputLabel id="mesajeEliminar"
+						value="Recuerde que el desistimiento del proyecto deberá ser en base a los artículos 154, 157 y 158 del ERJAFE. Para conocer más sobre estos artículos consulte la ayuda." />
+					<p:tooltip for="mesajeEliminar" escape="false" showDelay="1200"
+						trackMouse="true">
+						<h:outputText value="#{helps['proyecto.mensajeEliminar']}"
+							escape="false" />
+					</p:tooltip>
+					<mae:btnHelp help="#{helps['proyecto.mensajeEliminar']}"
+						conector="actividadHelp"
+						image="#{request.contextPath}/resources/images/help/articulosEliminarProyecto.png"
+						buttonStyleClass="button-small toRight field_mrg primary" />
+				</h:panelGrid>
+				<div class="buttons">
+					<p:commandButton value="Aceptar" icon="ui-icon-check"
+						actionListener="#{proyectosController.eliminar()}"
+						update=":formDelete:eliminarProyecto :tabView:form:tableProyectos"
+						oncomplete="showModalEliminarProyecto(xhr, status, args)" />
+					<p:commandButton value="Cancelar" styleClass="secondary"
+						icon="ui-icon-cancel" type="button"
+						onclick="PF('eliminarProyecto').hide()" />
+				</div>
+			</p:dialog>
+		</h:form>
+
+		<h:form>
+			<p:remoteCommand autoRun="true" oncomplete="cleanComponentsValues()" />
+		</h:form>
+
+		<script type="text/javascript">
+	        function showModalEliminarProyecto(xhr, status, args) {
+	        	PF('eliminarProyecto').show();
+	            if (args.eliminarProyecto) {
+	            	PF('eliminarProyecto').hide();
+	            }
+	        }
+
+	        function cleanComponentsValues() {
+	        	PF('categorias').selectValue(-1);
+				PF('sectores').selectValue(-1);
+	        }
+
+	        function showModalProyectosNoFinalizados(xhr, status, args) {
+	            if (args.mostrarNoFinalizados) {
+	            	PF('modalPendientes').show();
+	            }
+	        }
+    	</script>
+
+	</ui:define>
+</ui:composition>
+</html>

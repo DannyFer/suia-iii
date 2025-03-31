@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="content">
+
+		<script type="text/javascript">
+		 function removeDisabled() {
+		        $('.ui-state-disabled').removeClass('ui-state-disabled');
+		    }
+	</script>
+
+		<style type="text/css">
+.pnlSecundarias .ui-widget-content {
+	border: none !important;
+}
+
+.pnlSecundarias .panel_data tr td {
+	border: 1px solid #aaaaaa !important;
+}
+
+.ui-state-error {
+	color: #cd0a0a !important;
+}
+</style>
+
+
+		<h:form id="form">
+			<h:panelGroup id="pnlDatos">
+				<br />
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Agrupación" />
+					</f:facet>
+					<p:panel id="toggleable"
+						header="#{revisarAgrupacionController.agrupacionPrincipal.codigoProyecto}"
+						toggleable="true" toggleSpeed="500" widgetVar="panel"
+						collapsed="true">
+						<p:dataGrid emptyMessage="Sin resultados."
+							value="#{revisarAgrupacionController.detalleAgrupacion}"
+							var="item" columns="1" styleClass="pnlSecundarias">
+							<h:panelGrid columns="3" style="width:100%" layout="grid"
+								styleClass="panel_data w100" columnClasses="w25, w50, w25">
+								<h:outputText value="#{item.codigoProyecto}" />
+								<h:outputText value="#{item.nombreProyecto}" />
+								<h:outputText value="#{item.sector}" />
+
+							</h:panelGrid>
+						</p:dataGrid>
+					</p:panel>
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Validar información" />
+					</f:facet>
+					<p:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25, null">
+						<p:outputLabel value="¿La información ingresada es correcta?"
+							for="legal2" style="color: white" />
+						<p:selectOneRadio id="legal2"
+							value="#{revisarAgrupacionController.agrupacionPrincipal.agrupacionCorrecta}"
+							required="true">
+							<f:selectItem itemLabel="SI" itemValue="true" />
+							<f:selectItem itemLabel="NO" itemValue="false" />
+							<p:ajax process="@this" 
+								update="pnlAgrupacionNoCorrecta pnlButtons" />
+						</p:selectOneRadio>
+					</p:panelGrid>
+
+					<h:panelGroup id="pnlAgrupacionNoCorrecta">
+						<p:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="header w25, null"
+							rendered="#{revisarAgrupacionController.agrupacionPrincipal.agrupacionCorrecta != null and !revisarAgrupacionController.agrupacionPrincipal.agrupacionCorrecta}">
+							<p:outputLabel value="Documento de respaldo *"
+								style="color: white" />
+							<p:outputPanel id="pnlDocRespaldo">
+								<p:fileUpload id="docRespaldo" multiple="false"
+									fileUploadListener="#{revisarAgrupacionController.uploadFile}"
+									sizeLimit="10485760" allowTypes="/(\.|\/)(pdf)$/"
+									label="Seleccionar (pdf 10Mb)" uploadLabel="Subir"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Debe adjuntar un archivo no mayor de 10 Mb."
+									cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+									auto="true" required="true" update="pnlDocRespaldo" />
+								<p:commandButton icon="ui-icon-arrowthick-1-s"
+									styleClass="button-small primary toLeft" title="Ver"
+									ajax="false" immediate="true"
+									rendered="#{revisarAgrupacionController.documentoRespaldo.nombre ne null}">
+									<p:fileDownload
+										value="#{revisarAgrupacionController.descargar()}" />
+								</p:commandButton>
+								<h:outputText
+									value="#{revisarAgrupacionController.documentoRespaldo.nombre}"
+									rendered="#{revisarAgrupacionController.documentoRespaldo.nombre ne null}" />
+							</p:outputPanel>
+						</p:panelGrid>
+
+						<h:panelGroup id="pnlObsAgrupacion">
+							<observaciones:tablaObservacionesAgrupacion
+								idComponent="obsAgrupacion"
+								seccion="Agrupacion autorizaciones ambientales"
+								idActualizar=":form:pnlDatos :form:pnlButtons" aparace="true"
+								mostrarSiVacio="true" rendered="#{revisarAgrupacionController.agrupacionPrincipal.agrupacionCorrecta != null and !revisarAgrupacionController.agrupacionPrincipal.agrupacionCorrecta}"
+								idClase="#{revisarAgrupacionController.agrupacionPrincipal.id}"
+								nombreClase="agrupacionAutorizacionesAmbientales"
+								soloLectura="false" />
+						</h:panelGroup>
+					</h:panelGroup>
+				</p:panelGrid>
+
+				<h:inputHidden
+						validator="#{revisarAgrupacionController.validateRevision}" />
+			</h:panelGroup>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Enviar" process="form"
+						action="#{revisarAgrupacionController.enviar()}"
+						update="pnlDatos pnlButtons" icon="ui-icon-check"
+						oncomplete="removeDisabled()">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+</ui:composition>

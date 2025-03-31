@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+    <!--Actividades Mineras-->
+    <h:form id="frmActividades">
+        <p:panelGrid id="pnlActividades" columns="1" layout="grid"
+                     styleClass="w100" columnClasses="w25, field_mrg w25">
+            <f:facet name="header">
+                <mae:panelGridHeaderHelp value="Actividades del proceso" conector="generalHelp" 
+                	image="#{request.contextPath}/resources/images/help-how.png" 
+                	help="#{helps['registroMineria.actividadesProceso']}" />
+            </f:facet>
+
+			<h:panelGrid columns="2">
+				<p:outputLabel value="Fase:" />
+				<h:outputText value="#{descripcionActividadMineraController.descripcionActividadMineraBean.faseSeleccionada}" />
+			</h:panelGrid>
+
+			<h:panelGrid columns="4" layout="grid" cellpadding="0" cellspacing="5">
+                <p:outputLabel value="Actividad *" for="actividad"/>
+                <p:outputLabel value="Duración (días) *" for="dias"/>
+                <p:outputLabel value="Descripción *" for="descripcionAct"/>
+                <p:outputLabel />
+
+                <p:selectOneMenu converter="selectItemConverter" style="width:200px" id="actividad"
+                	value="#{descripcionActividadMineraController.descripcionActividadMineraBean.actividadMinera.actividadComercial}">
+                    <f:selectItem itemLabel="#{labels['common.item.choose']}" 
+                    	itemValue="" noSelectionOption="true" />
+                    <f:selectItems
+                        value="#{descripcionActividadMineraController.descripcionActividadMineraBean.listaActividades}"
+                        var="actividadComercial"
+                        itemLabel="#{actividadComercial.nombreActividad}"
+                        itemValue="#{actividadComercial}" />
+                </p:selectOneMenu>
+
+                <p:inputText maxlength="3" id="dias"  
+                	value="#{descripcionActividadMineraController.descripcionActividadMineraBean.actividadMinera.diasDuracion}">
+                    <pe:keyFilter mask="num" />
+                </p:inputText>
+
+                <p:inputText maxlength="250" size="85" id="descripcionAct"
+                    value="#{descripcionActividadMineraController.descripcionActividadMineraBean.actividadMinera.descripcion}" />
+
+                <p:commandButton value="Adicionar" styleClass="primary" 
+                	action="#{descripcionActividadMineraController.agregarActividadMinera()}" 
+                	update=":#{p:component('pnlActividades')}" />
+            </h:panelGrid>
+            <br/>
+            <p:dataTable id="tblActividades" paginator="true" paginatorPosition="bottom" rows="5" var="actividadMinera" 
+            	value="#{descripcionActividadMineraController.descripcionActividadMineraBean.listaActividadesSeleccionadas}" 
+            	emptyMessage="#{labels['common.table.empty']}">
+                <p:column headerText="#{msg['label.numero']}" width="5%">
+					<h:outputText value="#{actividadMinera.indice+1}" />
+				</p:column>
+                <p:column width="30%" headerText="Actividad">
+                    <h:outputText value="#{actividadMinera.actividadComercial.nombreActividad}" />
+                </p:column>
+                <p:column width="10%" headerText="Duraci&oacute;n">
+                    <h:outputText value="#{actividadMinera.diasDuracion}" />
+                </p:column>
+                <p:column width="38%" headerText="Descripci&oacute;n">
+                    <h:outputText value="#{actividadMinera.descripcion}" />
+                </p:column>
+                <p:column width="17%" headerText="Acciones" style="text-align: center">
+                    <p:commandButton icon="ui-icon-pencil" styleClass="primary" 
+                    	action="#{descripcionActividadMineraController.editarActividadMinera(actividadMinera,1)}" 
+                    	update=":#{p:component('pnlActividades')}" />
+                    <p:commandButton icon="ui-icon-trash" styleClass="primary" 
+                    	action="#{descripcionActividadMineraController.eliminarActividadMinera(actividadMinera)}" 
+                    	update=":#{p:component('tblActividades')}, :#{p:component('pnlActividades')}" />
+
+					<p:commandButton icon="ui-icon-search" styleClass="button orange"
+						action="#{descripcionActividadMineraController.obtenerHistoricoActividad(actividadMinera)}"
+						update=":#{p:component('tblActividadesHistorial')}"
+						rendered="#{actividadMinera.registroModificado}" 
+						title="Ver Historial"/>
+					<p:outputLabel styleClass="text-orange"
+						rendered="#{actividadMinera.registroModificado eq true ? false : actividadMinera.nuevoEnModificacion}" value="Nuevo" />
+				</p:column>
+            </p:dataTable>
+            
+            <h:panelGrid styleClass="panel_data" columns="2" rendered="#{not empty descripcionActividadMineraController.listaActividadMineraEliminados}"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt">
+							<h:outputText id="actividades_eliminadas" value="Actividades eliminadas" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('actividadesDlg').show()" 
+								action="#{descripcionActividadMineraController.obtenerListaActividad()}"
+								update=":#{p:component('tblActividadesHistorial')}"
+								title="Ver Historial"
+								/>
+				</h:panelGrid>
+        </p:panelGrid>
+    </h:form>
+
+	<p:dialog widgetVar="actividadesDlg" modal="true" draggable="false" resizable="false" width="700px" 
+		header="Historial actividades del proceso">
+		<h:form id="actividadesForm">
+		 <p:dataTable id="tblActividadesHistorial" var="actividadMinera" 
+            	value="#{descripcionActividadMineraController.listaActividadMineraHistorial}" 
+            	emptyMessage="#{labels['common.table.empty']}">               
+                <p:column width="30%" headerText="Actividad">
+                    <h:outputText value="#{actividadMinera.actividadComercial.nombreActividad}" />
+                </p:column>
+                <p:column width="10%" headerText="Duraci&oacute;n">
+                    <h:outputText value="#{actividadMinera.diasDuracion}" />
+                </p:column>
+                <p:column width="40%" headerText="Descripci&oacute;n">
+                    <h:outputText value="#{actividadMinera.descripcion}" />
+                </p:column>
+				<p:column styleClass="w20 alCenter" headerText="Fecha Modificación">
+					<h:outputText value="#{actividadMinera.fechaHistorico}">
+						<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+					</h:outputText>
+				</p:column>
+			</p:dataTable>
+		
+		</h:form>
+	</p:dialog>
+
+</ui:composition>

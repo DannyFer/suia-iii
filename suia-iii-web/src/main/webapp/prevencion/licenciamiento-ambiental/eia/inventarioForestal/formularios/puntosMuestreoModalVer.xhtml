@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui"
+      xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<p:dialog header="Ubicación de puntos de muestreos" id="adicionarPuntoMuestreo" widgetVar="adicionarPuntoMuestreo"
+          modal="true" resizable="false" width="700">
+    <h:panelGroup id="panelPuntoMuestreo">
+		<!--MarielaG para mostrar historico -->
+		<!-- cuando es un registro que se ingreso en la modificacion -->
+		<h:panelGrid columns="1" styleClass="w100 uppercase"
+			columnClasses="w100"
+			rendered="#{inventarioForestalController.esPuntoNuevo}">
+			<p:outputLabel value="Registro Nuevo" styleClass="bold text-orange" />
+		</h:panelGrid>
+		<!--fin historico -->
+
+		<h:panelGrid styleClass="w100 separatorBottom" columns="2" columnClasses="w50, field_mrg w50">
+            <p:outputLabel for="codigoParcela" value="Código de parcela"/>
+            <p:outputLabel for="areaParcela" value="Área de parcela (m2)"/>
+            <p:inputText id="codigoParcela"
+                         value="#{inventarioForestalController.inventarioForestalBean.inventarioForestalPunto.codigoParcela}"
+                         required="true"/>
+            <p:inputText id="areaParcela"
+                         value="#{inventarioForestalController.inventarioForestalBean.inventarioForestalPunto.areaParcela}"
+                         required="true"/>
+        </h:panelGrid>
+		
+        <h:panelGrid styleClass="w100 separatorBottom" columns="2" columnClasses="w50, field_mrg w50">
+            <p:outputLabel for="indiceSimpson" value="Índice de Simpson"/>
+            <p:outputLabel for="indiceShannon" value="Índice de Shannon"/>
+            <p:selectOneMenu id="indiceSimpson"
+                             value="#{inventarioForestalController.inventarioForestalBean.inventarioForestalPunto.indiceSimpson}"
+                             styleClass="w100">
+                <f:selectItem itemValue="0" itemLabel="Baja"></f:selectItem>
+                <f:selectItem itemValue="1" itemLabel="Media"></f:selectItem>
+                <f:selectItem itemValue="2" itemLabel="Alta"></f:selectItem>
+            </p:selectOneMenu>
+            <p:selectOneMenu id="indiceShannon"
+                             value="#{inventarioForestalController.inventarioForestalBean.inventarioForestalPunto.indiceShannon}"
+                             styleClass="w100">
+                <f:selectItem itemValue="0" itemLabel="Baja"></f:selectItem>
+                <f:selectItem itemValue="1" itemLabel="Media"></f:selectItem>
+                <f:selectItem itemValue="2" itemLabel="Alta"></f:selectItem>
+            </p:selectOneMenu>
+        </h:panelGrid>
+
+		<!-- MarielaG para mostrar historico INFO GENERAL-->
+		<h:panelGrid styleClass="panel_data separatorBottom" columns="2"
+			rendered="#{inventarioForestalController.inventarioForestalBean.listaInventarioPuntosHistorial.size() > 0}"
+			columnClasses="header background-orange, null" rowClasses="null, alt">
+			<h:outputText value="Historial información general" />
+			<p:commandButton styleClass="button-small primary" process="@this"
+				icon="ui-icon-search" oncomplete="PF('puntosDlg').show()" />
+		</h:panelGrid>
+		<!-- fin historico -->
+		
+		<br></br>
+
+		<p:panelGrid columns="1" layout="grid">
+            <f:facet name="header">
+                <h:outputText value="Coordenadas"/>
+            </f:facet>
+            <p:dataTable id="tableCoordenadas" rowIndexVar="index" emptyMessage="#{labels['common.table.empty']}"
+                         value="#{inventarioForestalController.inventarioForestalBean.listaCoordenadas}"
+                         var="coordenada">
+                <p:column headerText="Coordenada X">
+                    <h:outputText value="#{coordenada.x}"/>
+                </p:column>
+                <p:column headerText="Coordenada Y" styleClass="singleLine">
+                    <h:outputText value="#{coordenada.y}"/>
+                </p:column>
+				<!-- MarielaG para mostrar historico COORDENADA-->
+				<p:column styleClass="w5 alCenter"
+					rendered="#{inventarioForestalController.inventarioForestalBean.listaCoordenadasOriginal.size() > 0}">
+					<p:commandButton icon="ui-icon-search"
+						rendered="#{coordenada.registroModificado}"
+						styleClass="button-small orange"
+						action="#{inventarioForestalController.mostrarCoordenadaHistorial(coordenada)}"
+						update=":formCoordenadas:coordenadasDlg"
+						process="@this"
+						oncomplete="PF('coordenadasDlg').show()" />
+					<!-- REGISTRO NUEVO -->
+					<h:outputText value="Nuevo" styleClass="bold text-orange"
+						rendered="#{coordenada.nuevoEnModificacion}" />
+				</p:column>
+				<!-- fin historico -->
+			</p:dataTable>
+		</p:panelGrid>
+		<!-- MarielaG para mostrar historico -->
+		<h:panelGrid styleClass="panel_data" columns="2"
+			rendered="#{inventarioForestalController.inventarioForestalBean.listaCoordenadasEliminadasBdd.size() > 0}"
+			columnClasses="header background-orange, null" rowClasses="null, alt">
+			<h:outputText value="Coordenadas eliminadas" />
+			<p:commandButton styleClass="button-small primary" process="@this"
+				icon="ui-icon-search"
+				action="#{inventarioForestalController.fillCoordenadasEliminadas()}"
+				update=":formCoordenadas:coordenadasDlg"
+				oncomplete="PF('coordenadasDlg').show()" />
+		</h:panelGrid>
+		<!-- fin historico -->
+	</h:panelGroup>
+
+    <p:separator/>
+
+    <div class="buttons">
+        <p:commandButton value="Cerrar" actionListener="#{inventarioForestalController.cerrarPunto}"
+                         process="@this panelPuntoMuestreo" update="tablePuntosMuestreo panelPuntoMuestreo"
+                         oncomplete="handlePuntoMuestreo(xhr, status, args)"/>
+    </div>
+
+    <script type="text/javascript">
+        function handlePuntoMuestreo(xhr, status, args) {
+            if (!args.addPuntoMuestreo) {
+                PF('adicionarPuntoMuestreo').show();
+            }
+            else {
+                PF('adicionarPuntoMuestreo').hide();
+            }
+        }
+    </script>
+</p:dialog>
+</html>

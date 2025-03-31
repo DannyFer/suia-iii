@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+				xmlns:ui="http://java.sun.com/jsf/facelets"
+				xmlns:h="http://java.sun.com/jsf/html"
+				xmlns:p="http://primefaces.org/ui"
+				template="/WEB-INF/templates/default-task.xhtml"
+				xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+	<ui:define name="content">
+		<f:event type="preRenderView" listener="#{pagoServiciosCategoriaIIBean.validarTareaBpm()}"/>
+
+		<!--Transacciones-->
+		<p>Valor total a pagar:
+			<strong>
+				<h:outputText value="#{pagoServiciosCategoriaIIBean.montoTotal}">
+					<f:convertNumber pattern="#0.00" />
+				</h:outputText>
+				USD</strong></p>
+
+		<h:form id="formTransaction">
+
+			<p:panelGrid id="pnl_transacciones" columns="3" layout="grid"
+						 styleClass="w100" columnClasses="w25, field_mrg w25">
+				<f:facet name="header">
+					<mae:panelGridHeaderHelp value="Ingreso de transacciones"
+											 conector="generalHelp" render="false"
+											 image="#{request.contextPath}/resources/images/help-how.png"
+											 help="#{helps['no.help.yet']}" />
+				</f:facet>
+
+				<p:outputLabel for="institucionBancaria" value="Instituci&oacute;n bancaria:" />
+				<p:outputLabel for="numeroTransaccion" value="N&uacute;mero de comprobante:" />
+				<p:spacer width="15px" />
+
+				<p:selectOneMenu id="institucionBancaria" disabled="#{pagoServiciosCategoriaIIBean.cumpleMonto}" style="width: 200px;"
+								 converter="selectItemConverter" required="true"
+								 value="#{pagoServiciosCategoriaIIBean.transaccionFinanciera.institucionFinanciera}">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+								  itemValue="" noSelectionOption="true" />
+					<f:selectItems
+							value="#{pagoServiciosCategoriaIIBean.institucionesFinancieras}"
+							var="institucion" itemLabel="#{institucion.nombreInstitucion}"
+							itemValue="#{institucion}" />
+				</p:selectOneMenu>
+
+				<p:inputText id="numeroTransaccion" placeholder="Ej: 584777" required="true" disabled="#{pagoServiciosCategoriaIIBean.cumpleMonto}"
+							 value="#{pagoServiciosCategoriaIIBean.transaccionFinanciera.numeroTransaccion}"
+							 maxlength="50" />
+
+				<p:commandButton value="Adicionar" icon="ui-icon-disk" disabled="#{pagoServiciosCategoriaIIBean.cumpleMonto}"
+								 action="#{pagoServiciosCategoriaIIBean.guardarTransaccion()}" styleClass="primary"
+								 update=":#{p:component('tbl_transacciones')}, :#{p:component('pnl_transacciones')}" />
+			</p:panelGrid>
+
+		</h:form>
+
+		<h:form id="formTransactionList">
+
+			<p:dataTable id="tbl_transacciones"
+						 value="#{pagoServiciosCategoriaIIBean.transaccionesFinancieras}"
+						 var="transaccionFinanciera" emptyMessage="#{labels['common.table.empty']}">
+				<p:column width="26%" headerText="Instituci&oacute;n financiera">
+					<h:outputText
+							value="#{transaccionFinanciera.institucionFinanciera.nombreInstitucion}" />
+				</p:column>
+				<p:column width="26%" headerText="N&uacute;mero de comprobante">
+					<h:outputText value="#{transaccionFinanciera.numeroTransaccion}" />
+				</p:column>
+				<p:column width="26%" headerText="Monto transacci&oacute;n">
+					<h:outputText value="#{transaccionFinanciera.montoTransaccion}">
+						<f:convertNumber pattern="#0.00" />
+					</h:outputText>
+				</p:column>
+				<p:column width="20%" headerText="Acciones"
+						  style="text-align: center">
+					<p:commandButton icon="ui-icon-trash" styleClass="primary"
+									 action="#{pagoServiciosCategoriaIIBean.eliminarTransacion(transaccionFinanciera)}"
+									 update=":#{p:component('tbl_transacciones')}, :#{p:component('pnl_transacciones')}" />
+				</p:column>
+			</p:dataTable>
+
+		</h:form>
+
+		<br></br>
+
+		<p:dialog header="Pago de servicios" id="dlgPagoServicios" widgetVar="dlg1"
+				  modal="true" width="400" resizable="false" draggable="false">
+			<p:separator />
+			<h:form id="formConfirmation">
+				<h:panelGrid columns="1" styleClass="w100" columnClasses="alJustify">
+					<h:outputText value="Estimado usuario, el pago realizado sobrepasa la cantidad establecida. El monto restante podrá ser utilizado por usted en próximas transacciones." />
+
+					<h:panelGrid columns="3" styleClass="w100">
+						<p:spacer width="80px" />
+						<p:commandButton value="Aceptar" ajax="false" icon="ui-icon-check" styleClass="primary"
+										 action="#{pagoServiciosCategoriaIIController.completarPagoTarea()}" />
+
+						<p:commandButton value="Cancelar" onclick="PF('dlg1').hide();" styleClass="primary"
+										 icon="ui-icon-cancel">
+						</p:commandButton>
+					</h:panelGrid>
+				</h:panelGrid>
+			</h:form>
+
+		</p:dialog>
+
+		<h:form id="formSubmit">
+
+			<div class="buttons main">
+				<p:commandButton value="Enviar" update="dlContinuar"
+								 action="#{pagoServiciosCategoriaIIController.completarTarea()}"
+								 title="Enviar" icon="ui-icon-check">
+				</p:commandButton>
+			</div>
+
+			<p:dialog id="dlContinuar" widgetVar="continuarDialog" modal="true"
+					  closable="false" showEffect="fade" hideEffect="fade"
+					  resizable="false">
+				<f:facet name="header">Informaci&oacute;n</f:facet>
+				<p:panel>
+					<h:panelGrid columns="1" styleClass="w100" columnClasses="alCenter">
+						<p:outputLabel value="#{pagoServiciosCategoriaIIController.mensaje}"/>
+						<p:commandButton value="Aceptar" styleClass="primary" ajax="false"
+										 action="#{pagoServiciosCategoriaIIController.continuar()}"
+										 oncomplete="PF('continuarDialog').hide();"/>
+					</h:panelGrid>
+				</p:panel>
+			</p:dialog>
+		</h:form>
+
+	</ui:define>
+</ui:composition>
+</html>

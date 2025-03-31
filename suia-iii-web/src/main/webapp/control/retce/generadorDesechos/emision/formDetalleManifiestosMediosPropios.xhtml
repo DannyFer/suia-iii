@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<p:panel id="adicionarManifiesto" widgetVar="adicionarManifiesto"
+	toggleable="true" toggleOrientation="vertical"
+	styleClass="colapsablePanel" collapsed="true">
+	<p:ajax event="toggle"
+		listener="#{transporteDesechosBean.toggleHandleManifiesto}"
+		update=":form:adicionarManifiesto" process="@this" />
+	<h:panelGroup id="datosManifiesto">
+		<h:panelGroup
+			rendered="#{transporteDesechosBean.panelManifiestoVisible}">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Detalle Manifiesto" />
+				</f:facet>
+
+				<h:panelGrid columns="2" styleClass="panel_data w100"
+					id="datosDesechoManifiestoContainer"
+					columnClasses="header w25, null" rowClasses="null, alt">
+
+					<p:outputLabel value="N° de manifiesto (de la sección generador)"
+						for="nroManifiestoMedioPropio" styleClass="ui-label-form" />
+					<p:inputText id="nroManifiestoMedioPropio" maxlength="20"
+						required="true"
+						value="#{transporteDesechosBean.detalleManifiesto.numeroManifiesto}" />
+
+					<p:outputLabel
+						value="Fecha de embarque (de la sección transportista)"
+						for="fechaEmbarqueMedioPropio" styleClass="ui-label-form" />
+					<p:calendar id="fechaEmbarqueMedioPropio"
+						value="#{transporteDesechosBean.detalleManifiesto.fechaEmbarque}"
+						maxdate="31/12/#{transporteDesechosBean.generadorDesechosRetce.anioDeclaracion}"
+						timeZone="America/Guayaquil" readonlyInput="true" required="true"
+						pattern="dd/MM/yyyy" />
+
+					<ui:remove>
+					<p:outputLabel value="Manifiesto único"
+						for="manifiestoUnicoMedioPropio" styleClass="ui-label-form" />
+					<p:outputPanel id="pnlDocManifiestoUnico">
+						<p:fileUpload id="manifiestoUnicoMedioPropio"
+							fileUploadListener="#{transporteDesechosBean.uploadFileManifiestoUnico}"
+							multiple="false" sizeLimit="20971520"
+							allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar (pdf 20Mb)"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" required="true" update="pnlDocManifiestoUnico" />
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="button-small primary toLeft" title="Ver" ajax="false"
+							immediate="true"
+							rendered="#{transporteDesechosBean.documentoManifiestoUnico.nombre ne null}">
+							<p:fileDownload
+								value="#{transporteDesechosBean.descargar(transporteDesechosBean.documentoManifiestoUnico)}" />
+						</p:commandButton>
+					</p:outputPanel>
+					</ui:remove>
+
+					<p:outputLabel value="Desechos Manifiesto"
+						styleClass="ui-label-form" />
+					<p:dataTable id="tblDesechosManifiesto"
+						value="#{transporteDesechosBean.listaDetallesManifiestosDesechos}"
+						var="desecho" emptyMessage="#{labels['common.table.empty']}">
+						<f:facet name="header">
+							<p:commandButton value="Añadir"
+								update=":form:frmManifiesto:adicionarDesechoManifiesto"
+								oncomplete="PF('adicionarDesechoManifiesto').show()"
+								styleClass="primary" process="@this"
+								action="#{transporteDesechosBean.nuevoDesechoManifiesto}"
+								style="float:right;" />
+						</f:facet>
+						<p:column
+							headerText="Nombre del residuo o desecho peligroso o especial">
+							<h:outputText value="#{desecho.desechoPeligroso.descripcion}" />
+						</p:column>
+						<p:column headerText="Código">
+							<h:outputText value="#{desecho.desechoPeligroso.clave}" />
+						</p:column>
+						<p:column headerText="Unidad">
+							<h:outputText value="#{desecho.tipoUnidad.descripcion}" />
+						</p:column>
+						<p:column headerText="Cantidad" styleClass="alCenter">
+							<h:outputText value="#{desecho.cantidad}" />
+						</p:column>
+						<p:column styleClass="alCenter"
+							headerText="Reporte en unidades para los desechos ES-04 y ES-06 (únicamente para registros de generador por REP)">
+							<h:outputText
+								value="#{desecho.cantidadEnUnidades ne null ? desecho.cantidadEnUnidades : 'N/A'}" />
+						</p:column>
+						<p:column headerText="Acciones">
+							<p:commandButton icon="ui-icon-pencil" title="Editar"
+								process="@this"
+								update=":form:frmManifiesto:datosDesechoManifiesto tblDesechosManifiesto"
+								styleClass="primary"
+								oncomplete="PF('adicionarDesechoManifiesto').show()"
+								actionListener="#{transporteDesechosBean.editarDesechoManifiesto(desecho)}" />
+							<p:commandButton icon="ui-icon-trash" title="Eliminar"
+								process="@this" styleClass="primary"
+								actionListener="#{transporteDesechosBean.eliminarDesechoManifiesto(desecho)}"
+								update="tblDesechosManifiesto" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+				<h:inputHidden
+					validator="#{transporteDesechosBean.validateIngresoManifiesto}" />
+			</p:panelGrid>
+		</h:panelGroup>
+	</h:panelGroup>
+
+	<div class="buttons">
+		<p:commandButton
+			value="#{transporteDesechosBean.editarManifiesto ? 'Actualizar' : 'Aceptar'}"
+			actionListener="#{transporteDesechosBean.aceptarManifiesto()}"
+			oncomplete="toogleManifiesto(xhr, status, args)"
+			process="@this datosManifiesto"
+			update="datosManifiesto tblManifiestosMediosPropios tblResumenMediosPropios" />
+		<p:commandButton value="Cancelar" styleClass="secondary"
+			actionListener="#{transporteDesechosBean.cancelarManifiesto()}"
+			oncomplete="PF('adicionarManifiesto').toggle()" process="@this"
+			update="datosManifiesto tblManifiestosMediosPropios">
+			<p:resetInput target="@form" />
+		</p:commandButton>
+	</div>
+
+	<p:separator />
+</p:panel>
+
+<h:form id="frmManifiesto">
+	<p:dialog id="adicionarDesechoManifiesto"
+		widgetVar="adicionarDesechoManifiesto" header="Desecho manifiesto"
+		modal="true" resizable="false" width="800">
+		<h:panelGroup>
+			<p:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25, null w75" id="datosDesechoManifiesto">
+				<p:outputLabel value="Desecho" for="desechoMedioPropio"
+					styleClass="ui-label-form" />
+				<p:selectOneMenu id="desechoMedioPropio"
+					disabled="#{transporteDesechosBean.editarManifiestoDesecho}"
+					value="#{transporteDesechosBean.desechoSeleccionado}"
+					styleClass="w100" converter="selectItemConverter" required="true">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="" noSelectionOption="true" />
+					<f:selectItems
+						value="#{transporteDesechosBean.getDesechosPendientes()}" />
+					<p:ajax process="@this" update="datosDesechoManifiesto" listener="#{transporteDesechosBean.ponerUnidad()}"/>
+				</p:selectOneMenu>
+
+				<p:outputLabel value="Unidad" for="unidadMedioPropio"
+					styleClass="ui-label-form" />
+				<p:selectOneMenu
+					value="#{transporteDesechosBean.detalleManifiestoDesecho.tipoUnidad}" disabled="#{!transporteDesechosBean.habilitarUnidad}"
+					id="unidadMedioPropio" styleClass="w100" required="true"
+					converter="selectItemConverter">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="" noSelectionOption="true" />
+					<f:selectItems itemLabel="#{tipo.descripcion}" itemValue="#{tipo}"
+						var="tipo" value="#{transporteDesechosBean.listaTipoUnidad}" />
+					<p:ajax process="@this" />
+				</p:selectOneMenu>
+
+				<p:outputLabel value="Cantidad" for="cantidadMedioPropio"
+					styleClass="ui-label-form" />
+				<pe:inputNumber id="cantidadMedioPropio" thousandSeparator=""
+					maxValue="9999999999.99" minValue="0" required="true"
+					value="#{transporteDesechosBean.detalleManifiestoDesecho.cantidad}">
+					<f:validateDoubleRange minimum="0.01" />
+				</pe:inputNumber>
+
+				<p:outputLabel for="cantidadUnidadesMedioPropio"
+					rendered="#{transporteDesechosBean.desechoSeleccionado.desechoES_04 or transporteDesechosBean.desechoSeleccionado.desechoES_06}"
+					value="Reporte en unidades para los desechos ES-04 y ES-06 (únicamente para registros de generador por REP)"
+					styleClass="ui-label-form" />
+				<p:inputText id="cantidadUnidadesMedioPropio"
+					rendered="#{transporteDesechosBean.desechoSeleccionado.desechoES_04 or transporteDesechosBean.desechoSeleccionado.desechoES_06}"
+					thousandSeparator="" maxlength="10" required="true" 
+					value="#{transporteDesechosBean.detalleManifiestoDesecho.cantidadEnUnidades}">
+					<pe:keyFilter mask="num" />
+				</p:inputText>
+
+
+			</p:panelGrid>
+		</h:panelGroup>
+		<div class="buttons">
+			<p:commandButton value="Adicionar"
+				action="#{transporteDesechosBean.agregarDesechoManifiesto}"
+				styleClass="primary alLeft"
+				process="@this :form:frmManifiesto:datosDesechoManifiesto"
+				update=":form:tblDesechosManifiesto :form:frmManifiesto:datosDesechoManifiesto">
+				<f:param name="widgetVar" value="adicionarDesechoManifiesto"/>
+			</p:commandButton>
+		</div>
+	</p:dialog>
+
+</h:form>
+
+
+<script type="text/javascript">
+	function toogleManifiesto(xhr, status, args) {
+		if(args.addManifiesto) {
+			PF('adicionarManifiesto').toggle();
+		}
+	}
+</script>
+</html>

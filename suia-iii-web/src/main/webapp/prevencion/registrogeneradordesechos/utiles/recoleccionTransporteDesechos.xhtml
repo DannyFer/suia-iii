@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<h:panelGroup id="recoleccionTransporteDesecho">
+	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<p:commandButton value="Adicionar" onclick="PF('adicionarRecoleccionTransporte').toggle()" styleClass="button-small-text toRight field_mrg" process="@this" icon="ui-icon-plusthick">
+				<p:resetInput target=":form:adicionarRecoleccionTransporte" />
+			</p:commandButton>
+			<mae:panelGridHeaderHelp value="Prestadores de servicio de recolección y transporte de desechos *" conector="recoleccionTransporteDesechoHelp" help="#{helps['generadorDesecho.recoleccionTransporteDesecho']}" width="600px" />
+		</f:facet>
+
+		<p:outputLabel value="Estimado usuario, según los datos ingresados hasta el momento, esta pantalla no es requerida." styleClass="bold text-red" escape="false" rendered="#{(recoleccionTransporteDesechosBean.getGeneradoresDesechosRecolectores().isEmpty() and recoleccionTransporteDesechosBean.getDesechosDisponiblesTransporte().size() == 0 )}" />
+
+		<ui:include src="/prevencion/registrogeneradordesechos/utiles/recoleccionTransporteDesechosAdd.xhtml" />
+
+		<p:dataList id="listadoRecoleccionTransporte" type="none" value="#{recoleccionTransporteDesechosBean.generadoresDesechosRecolectores}" var="recoleccionTransporte" rowIndexVar="index" emptyMessage="#{labels['common.table.empty']}">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<p:commandButton styleClass="button-small toRight field_mrg" process="@this" update=":form:listadoRecoleccionTransporte :form:adicionarRecoleccionTransporte" actionListener="#{recoleccionTransporteDesechosBean.eliminar(recoleccionTransporte)}" icon="ui-icon-trash">
+						<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar los datos asociados al prestador de servicio de recolección y transporte de desechos?" icon="ui-icon-alert" />
+					</p:commandButton>
+					<p:commandButton styleClass="button-small toRight field_mrg" process="@this" update=":form:adicionarRecoleccionTransporte" actionListener="#{recoleccionTransporteDesechosBean.editar(recoleccionTransporte)}" icon="ui-icon-pencil" oncomplete="PF('adicionarRecoleccionTransporte').toggle()" />
+					<h:outputText value="Prestador de servicio #{(index + 1)}" />
+				</f:facet>
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w25, null" rowClasses="null, alt">
+					<h:outputText value="Desecho" />
+					<h:outputText value="#{recoleccionTransporte.desechoPeligroso.descripcion}" />
+					<h:outputText value="Código" />
+					<h:outputText value="#{recoleccionTransporte.desechoPeligroso.clave}" />
+					<h:outputText value="CRTIB" title="#{helps['generadorDesecho.crtib']}" />
+					<h:outputText value="#{recoleccionTransporte.desechoPeligroso.nombresCRITB}" />
+				</h:panelGrid>
+				
+				
+				<h:panelGrid styleClass="panel_data w50" columns="2" columnClasses="header w50, null" rowClasses="null, alt" rendered="#{recoleccionTransporte.ubicacionesGeograficaDestino.id>1}">
+					<h:outputText value="Provincia de destino" />
+					<h:outputText value="#{recoleccionTransporte.ubicacionesGeograficaDestino.ubicacionesGeografica}" />
+					<h:outputText value="Cantón de destino" />
+					<h:outputText value="#{recoleccionTransporte.ubicacionesGeograficaDestino}" />
+				</h:panelGrid>
+				<h:panelGrid styleClass="panel_data w50" columns="2" columnClasses="header w50, null" rowClasses="null, alt" rendered="#{recoleccionTransporte.ubicacionesGeograficaDestino.id==1}">					
+					<h:outputText value="Destino" />
+					<h:outputText value="Nivel Nacional" />
+				</h:panelGrid>
+				
+				
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w25, null" rowClasses="null, alt">
+					<h:outputText value="Ubicaciones geográficas de origen" />
+					<h:outputText value="#{recoleccionTransporte.generadorDesechosRecoletorUbicacionesGeograficas}" converter="listToStringConverter" />
+				</h:panelGrid>
+
+				<p:dataTable value="#{recoleccionTransporte.generadoresDesechosRecolectoresSedes}" var="recolectorSede" emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Empresa prestadora de servicios">
+						<h:outputText value="#{recolectorSede.sedePrestadorServiciosDesechos.prestadorServiciosDesechos}" />
+						<h:outputText value="#{recolectorSede.otraEmpresa}" rendered="#{recolectorSede.sedePrestadorServiciosDesechos eq null}"/>						
+					</p:column>
+					<p:column headerText="Permiso Ambiental" width="20%" rendered="#{recoleccionTransporteDesechosBean.tieneArchvoPermiso }">
+						<p:commandButton icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true" rendered="#{recolectorSede.permisoAmbiental != null}"> 
+							<p:fileDownload value="#{recoleccionTransporteDesechosBean.getFilePermiso(recolectorSede)}" />
+						</p:commandButton>			
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+		</p:dataList>
+	</p:panelGrid>
+</h:panelGroup>
+
+</html>

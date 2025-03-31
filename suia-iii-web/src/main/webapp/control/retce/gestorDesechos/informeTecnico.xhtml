@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:t="http://myfaces.apache.org/tomahawk"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+    <ui:define name="context-extra">
+		<h:outputText value="Datos" />
+		<h:outputText value="Gestor Desechos" />
+		<h:outputLink value="#{request.contextPath}/control/retce/gestorDesechos/gestorDesechosPeligrososVer.jsf">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+	</ui:define>
+    <ui:define name="content">    
+        <h:form id="form">
+        	<h:panelGrid styleClass="w100" id="informeGrid">
+        		<h:outputText value="Elaborar #{informeOficioGestorController.verOficio?'Oficio':'Informe Técnico'}" styleClass="bold" />
+				<p:separator />
+				<object type="application/pdf" height="600" width="100%" data="#{informeOficioGestorController.urlPdf}?pfdrid_c=true"/>
+				<p:panel>
+            		<h:panelGrid  id="obsInformeOficioGrid" columns="2" layout="grid" styleClass="w50" cellpadding="4" cellspacing="4" rendered="#{informeOficioGestorController.habilitarRevisar}">
+            			<p:outputLabel value="Tipo de pronunciamiento:" styleClass="bold"/>
+                		<h:outputText value="Pronunciamiento de #{informeOficioGestorController.informe.esReporteAprobacion?'Aprobación':'Observación'}"/>
+            			<p:outputLabel value="¿El Informe y Oficio están correctos?" styleClass="bold"/>
+                		<p:selectOneRadio value="#{informeOficioGestorController.informeOficioCorrectos}" required="false" requiredMessage="¿El Informe y Oficio están correctos? es requerido" disabled="false">						
+							<f:selectItem itemLabel="Si" itemValue="#{true}" itemDisabled="#{!informeOficioGestorController.informeOficioCorrectos}"/>
+							<f:selectItem itemLabel="No (Agregar Observaciones)" itemValue="#{false}" itemDisabled="#{informeOficioGestorController.informeOficioCorrectos}"/>												
+						</p:selectOneRadio>						
+					</h:panelGrid>		            	
+            	</p:panel>  
+							
+            	<p:panel id="panelInforme" rendered="#{!informeOficioGestorController.verOficio}">
+					<h:panelGrid columns="1" layout="grid" styleClass="w100" cellpadding="4" cellspacing="4" rendered="#{informeOficioGestorController.habilitarElaborar}">
+                		<p:outputLabel value="Tipo de pronunciamiento" styleClass="bold"/>
+                		<p:selectOneRadio id="tipoPronunciamiento" value="#{informeOficioGestorController.informe.esReporteAprobacion}" 
+							required="true" requiredMessage="Tipo de pronunciamiento es requerido." styleClass="w50">						
+							<f:selectItem itemLabel="Pronunciamiento Aprobación" itemValue="#{true}"/>
+							<f:selectItem itemLabel="Pronunciamiento Observación" itemValue="#{false}"/>												
+						</p:selectOneRadio>		
+						<p:outputLabel value="Observaciones" for="observaciones" styleClass="bold"/>                    	
+                    	<control:imputConTextoEnriquecido id="observaciones" valor="#{informeOficioGestorController.informe.observaciones}"
+							soloLectura="false" requerido="true" requiredMessage="Observaciones es requerido." longitudmáxima="2500"/>
+						
+                    	<p:outputLabel value="Conclusiones" for="conclusiones" styleClass="bold"/>                    	
+                    	<control:imputConTextoEnriquecido id="conclusiones" valor="#{informeOficioGestorController.informe.conclusiones}"
+							soloLectura="false" requerido="true" requiredMessage="Conclusiones es requerido." longitudmáxima="2500"/> 
+                        
+                        <p:outputLabel value="Recomendaciones" for="recomendaciones" styleClass="bold"/>
+                    	<control:imputConTextoEnriquecido id="recomendaciones" valor="#{informeOficioGestorController.informe.recomendaciones}"
+							soloLectura="false" requerido="true" requiredMessage="Recomendaciones es requerido." longitudmáxima="2500"/>							
+
+                    </h:panelGrid>
+                    <h:panelGroup rendered="#{informeOficioGestorController.informe.id !=null}">
+						<observaciones:tablaObservaciones idComponent="panelInformeObs"
+							componenteActualizarEliminar=":form:obsInformeOficioGrid"
+							idActualizar=":form:obsInformeOficioGrid :form:buttons"
+							seccion="Informe Técnico"
+							nombreClase="InformeTecnicoRetce"
+							idClase="#{informeOficioGestorController.informe.id}"							
+							aparace="#{informeOficioGestorController.habilitarObservaciones}"
+							mostrarSiVacio="true"
+							soloLectura="#{!informeOficioGestorController.editarObservaciones}" />
+					</h:panelGroup>	
+            	</p:panel>
+            	<p:panel id="panelOficio" rendered="#{informeOficioGestorController.verOficio}">
+                	<h:panelGroup rendered="#{informeOficioGestorController.oficio.id !=null}">
+						<observaciones:tablaObservaciones idComponent="panelOficioObs"
+							componenteActualizarEliminar=":form:obsInformeOficioGrid"
+							idActualizar=":form:obsInformeOficioGrid :form:buttons"
+							seccion="Oficio Pronunciamiento"
+							nombreClase="OficioPronunciamientoRetce"
+							idClase="#{informeOficioGestorController.oficio.id}"							
+							aparace="#{informeOficioGestorController.habilitarObservaciones}"
+							mostrarSiVacio="true"
+							soloLectura="#{!informeOficioGestorController.editarObservaciones}" />
+					</h:panelGroup>
+					<h:panelGrid columns="2" layout="grid" style="text_align:right" cellpadding="4" cellspacing="4" rendered="#{informeOficioGestorController.habilitarFirmar}">
+                    	<h:outputText value="¿Cuenta con Token?" styleClass="encabezado" style="alCenter"/>
+						<p:selectOneRadio id="verificaToken" value="#{informeOficioGestorController.token}" style="alCenter"
+						disabled="#{informeOficioGestorController.oficioFirmado}">
+										<f:selectItem itemLabel="Sí" itemValue="true" />
+										<f:selectItem itemLabel="No" itemValue="false" />
+										<p:ajax event="change" update=":form:buttons"/>
+						</p:selectOneRadio>
+                	</h:panelGrid>
+            	</p:panel>
+        	</h:panelGrid>
+        	<t:div styleClass="buttons main" id="buttons">                            
+         		<p:commandButton value="Atrás" icon="ui-icon-arrowthick-1-w" update=":form:informeGrid :form:buttons" process="@this" action="#{informeOficioGestorController.verOficioListener}" rendered="#{informeOficioGestorController.verOficio}" disabled="#{informeOficioGestorController.oficioFirmado}"/>
+         		<p:commandButton value="Guardar" icon="ui-icon-disk" update=":form:informeGrid :form:buttons" action="#{informeOficioGestorController.guardar()}" rendered="#{informeOficioGestorController.habilitarElaborar}"/>
+         		<p:commandButton value="Siguiente" icon="ui-icon-arrowthick-1-e" update=":form:informeGrid :form:buttons" action="#{informeOficioGestorController.verOficioListener}" rendered="#{!informeOficioGestorController.verOficio}" disabled="#{informeOficioGestorController.informe.id==null}"/>
+         		
+         		
+         		<p:commandButton value="Firmar" type="button" styleClass="large" 
+            	icon="ui-icon-key" rendered="#{informeOficioGestorController.verOficio and informeOficioGestorController.habilitarFirmar and !informeOficioGestorController.token}"  
+            	onclick="PF('signDialog').show();"
+            	disabled="#{!informeOficioGestorController.informeOficioCorrectos or informeOficioGestorController.oficioFirmado}"/>
+         		<p:commandButton value="Firma" type="button" styleClass="large" icon="ui-icon-key" 
+         		rendered="#{informeOficioGestorController.verOficio and informeOficioGestorController.habilitarFirmar and informeOficioGestorController.token}"  
+            	onclick="window.location.href='#{informeOficioGestorController.firmar()}'"
+            	disabled="#{!informeOficioGestorController.informeOficioCorrectos or informeOficioGestorController.oficioFirmado}"/>
+            	
+            	<p:commandButton value="Enviar" icon="ui-icon-check" action="#{informeOficioGestorController.enviar}" 
+            	rendered="#{informeOficioGestorController.verOficio}" disabled="#{!informeOficioGestorController.oficioGenerado}"/>         		            	
+        	</t:div>
+        	
+        	<p:dialog header="Firma Electronica" id="signDialog" widgetVar="signDialog" closeOnEscape="false" modal="true" resizable="false" width="auto" height="auto" position="center top">                
+                <p:panel>
+                    <h:panelGrid columns="2" cellpadding="10" style="text-align:right !important">
+                     	<p:outputLabel value="1. Descargue el documento" styleClass="bold"/>
+                        <p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary" immediate="true"
+                                actionListener="#{informeOficioGestorController.descargarFirmar}">
+                            <p:fileDownload
+                                    value="#{informeOficioGestorController.descargarFirmar()}"/>
+                        </p:commandButton>                        
+                                            
+                        <p:outputLabel value="2. Adjunte el documento firmado " styleClass="bold"/>
+                        <p:fileUpload
+                                fileUploadListener="#{informeOficioGestorController.uploadFileFirmar}"
+                                multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                                label="Seleccionar" uploadLabel="Subir"
+                                invalidFileMessage="Tipo de archivo no válido"
+                                invalidSizeMessage="Tamaño de archivo no válido"
+                                cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                auto="true" update="signDialog verificaToken buttons panelOficio">                            
+                        </p:fileUpload>
+                    </h:panelGrid>
+                </p:panel>                
+            </p:dialog>
+    	</h:form>
+    </ui:define>
+</ui:composition>

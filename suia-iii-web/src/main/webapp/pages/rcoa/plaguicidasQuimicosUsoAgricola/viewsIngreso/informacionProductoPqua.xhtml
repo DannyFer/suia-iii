@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100"
+	id="pnlRegistroProducto">
+	<f:facet name="header">
+		<h:outputText value="Información del producto" />
+	</f:facet>
+
+	<h:outputText
+		value="Estimado usuario, si usted posee más de un producto, debe realizar un trámite por cada producto bajo su titularidad." />
+
+	<p:panelGrid columns="2" styleClass="panel_data w100"
+		columnClasses="header w30,null w70">
+		<p:outputLabel value="Nombre Comercial del Producto"
+			style="color: white" for="cmbNombreComercial" />
+		<p:selectOneMenu id="cmbNombreComercial"
+			value="#{actualizarInformacionEtiquetaController.productoReporte}"
+			converter="selectItemConverter" filter="true"
+			filterMatchMode="startsWith" required="true">
+			<f:selectItem itemLabel="#{labels['common.item.choose']}"
+				itemValue="" noSelectionOption="true" />
+			<f:selectItems
+				value="#{actualizarInformacionEtiquetaController.listaProductos}"
+				var="item" itemLabel="#{item.nombreComercialProducto}"
+				itemValue="#{nombre}" />
+			<p:ajax process="@this"
+				update="pnlInfoProducto pnlOficioProrroga pnlButtons"
+				listener="#{actualizarInformacionEtiquetaController.seleccionarProductoReporte()}" />
+		</p:selectOneMenu>
+	</p:panelGrid>
+
+	<p:panelGrid id="pnlInfoProducto" columns="2"
+		styleClass="panel_data w100" columnClasses="header w30,null w70">
+		<h:outputText value="N° de Registro" />
+		<h:outputText
+			value="#{actualizarInformacionEtiquetaController.productoReporte.numeroRegistro}" />
+
+		<h:outputText value="Fecha Registro" />
+		<h:outputText
+			value="#{actualizarInformacionEtiquetaController.productoReporte.fechaRegistro}" />
+
+		<h:outputText value="Composición del Producto (Ingrediente activo)" />
+		<h:outputText escape="false"
+			value="#{actualizarInformacionEtiquetaController.productoReporte.tablaComposicionProducto}" />
+
+		<h:outputText value="Formulación" />
+		<h:outputText
+			value="#{actualizarInformacionEtiquetaController.productoReporte.formulacion}" />
+
+		<h:outputText value="Categoría Toxicológica (anterior etiqueta)" />
+		<h:outputText
+			value="#{actualizarInformacionEtiquetaController.productoReporte.categoriaToxicologica}" />
+
+		<h:outputText value="Color de franja (anterior etiqueta)" />
+		<h:outputText styleClass="bold"
+			value="#{actualizarInformacionEtiquetaController.productoReporte.colorFranja.nombre}"
+			style="color:#{actualizarInformacionEtiquetaController.productoReporte.colorFranja.valor}" />
+	</p:panelGrid>
+
+	<h:panelGroup id="pnlOficioProrroga">
+		<h:panelGroup>
+			<p:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w30,null"
+				rendered="#{actualizarInformacionEtiquetaController.productoReporte.prorroga}">
+				<h:outputText value="Ingresar Oficio de prórroga" />
+				<h:panelGroup>
+					<h:outputText value="Admite .pdf de 20Mb" />
+					<p:fileUpload id="file"
+						fileUploadListener="#{actualizarInformacionEtiquetaController.uploadProrroga}"
+						mode="advanced" auto="true" sizeLimit="20971520"
+						label="Seleccione"
+						invalidFileMessage="El tipo de archivo no es pdf." required="true"
+						invalidSizeMessage="Tamaño de archivo incorrecto"
+						allowTypes="/(\.|\/)(pdf)$/" update="idNombreDocumento">
+					</p:fileUpload>
+					<h:outputText id="idNombreDocumento"
+						value="#{actualizarInformacionEtiquetaController.documentoOficioProrroga.nombre}" />
+				</h:panelGroup>
+			</p:panelGrid>
+
+			<h:inputHidden
+				validator="#{actualizarInformacionEtiquetaController.validateRegistroProducto}" />
+		</h:panelGroup>
+	</h:panelGroup>
+</p:panelGrid>
+
+<h:panelGroup
+	rendered="#{actualizarInformacionEtiquetaController.esSubsanacion}">
+	<br />
+	<br />
+	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+		<observaciones:tablaObservacionesPqua
+			idComponent="observacionesProducto"
+			componenteActualizarEliminar="observacionesProducto"
+			seccion="InformacionProducto" nombreClase="ActualizacionEtiquetaPqua"
+			idClase="#{actualizarInformacionEtiquetaController.proyectoPlaguicidas.id}"
+			aparace="#{actualizarInformacionEtiquetaController.esSubsanacion}"
+			mostrarSiVacio="#{actualizarInformacionEtiquetaController.esSubsanacion}"
+			soloLectura="true" />
+	</p:panelGrid>
+</h:panelGroup>
+
+<h:panelGroup id="pnlButtons">
+	<div class="buttons main">
+		<p:commandButton id="btnCancelar" value="Cancelar"
+			icon="ui-icon-cancel" styleClass="primary"
+			actionListener="#{actualizarInformacionEtiquetaController.cerrar()}" />
+		<p:commandButton id="btnGuardar" value="Guardar" title="Guardar"
+			icon="ui-icon-disk" update="@all" process="@this pnlRegistroProducto"
+			actionListener="#{actualizarInformacionEtiquetaController.guardarRegistroProducto()}" />
+		<p:commandButton id="btnSiguiente" value="Siguiente"
+			icon="ui-icon-arrowthick-1-e"
+			oncomplete="PF('wizard').next();reloadWizard();"
+			styleClass="wizard-custom-btn-next"
+			actionListener="#{actualizarInformacionEtiquetaController.btnSiguiente}"
+			update="wizardInformacion"
+			disabled="#{!actualizarInformacionEtiquetaController.guardado}" />
+
+	</div>
+</h:panelGroup>
+
+
+<p:dialog id="dlgMsjProrroga" widgetVar="dlgMsjProrroga"
+	header="Estimado Operador" width="700px" closable="false"
+	styleClass="alCenter" resizable="false" modal="true">
+
+	<h:panelGrid columns="1" layout="grid" styleClass="w100 "
+		columnClasses="w100 alJustify">
+		Me permito informar que la
+			solicitud de su prórroga del producto solicitado se encuentra fuera
+			del tiempo establecido en base a la Resolución Nro. 0245 emitida el
+			15 de diciembre del 2021 por Agrocalidad.<br />
+		<br /> Artículo 5.-
+			El procedimiento para realizar la adaptación de las etiquetas al
+			Sistema Globalmente Armonizado (SGA) de etiquetado, es el siguiente:
+			<br />
+		<br />
+		<i>c)(...)Para lo cual la Agencia de Regulación y Control Fito y
+			Zoosanitario analizará la solicitud ingresada por el titular de
+			registro en la reunión ordinaria del Comité Técnico Nacional de
+			Plaguicidas, para otorgar la prórroga requerida, en caso que se
+			acepte la solicitud esta tendrá un término de 30 días adicionales a
+			partir de la emisión del oficio favorable de la prórroga, para
+			ingresar la información de subsanación.(...)</i>
+	</h:panelGrid>
+	<br />
+	<div class="alRight">
+		<p:commandButton styleClass="primary" value="Aceptar" immediate="true"
+			process="@this"
+			actionListener="#{actualizarInformacionEtiquetaController.bloquearIngresoTramite()}" />
+	</div>
+
+</p:dialog>
+
+<p:dialog id="dlgMsjTiempoSubanacion" widgetVar="dlgMsjTiempoSubanacion"
+	header="Estimado Operador" height="auto" width="700px" modal="true"
+	closable="false" styleClass="alCenter" resizable="false">
+
+	<h:panelGrid columns="1" layout="grid" styleClass="w100 "
+		columnClasses="w100 alJustify">
+		Me permito informar que la subsanación de observaciones del producto 
+		solicitado se encuentra fuera del tiempo establecido en base a la 
+		Resolución Nro.0245, emitida el 15 de diciembre del 2021 por Agrocalidad 
+		que establece lo siguiente: <br />
+		<br />
+		Artículo 5.- El procedimiento para realizar la adaptación de las etiquetas 
+		al Sistema Globalmente Armonizado (SGA) de etiquetado, es el siguiente:
+		<br />
+		<br />
+		b) (……) En el caso de que la solicitud ingresada por el titular de registro 
+		sea observada por el Ministerio de Ambiente, Agua y Transición Ecológica - MAATE 
+		y/o en la Agencia Nacional de Regulación, Control y Vigilancia Sanitaria - ARCSA 
+		Dr. Leopoldo Izquieta Pérez, el titular del registro deberá ingresar las 
+		subsanaciones en un término de 30 días contados a partir de la emisión del 
+		oficio de observación, de la entidad que corresponda. (…..).
+		
+	</h:panelGrid>
+	<br />
+	<div class="alRight">
+		<p:commandButton styleClass="primary" value="Aceptar" immediate="true"
+			process="@this"
+			actionListener="#{actualizarInformacionEtiquetaController.bloquearIngresoSubsanacion()}" />
+	</div>
+
+</p:dialog>
+
+
+</html>

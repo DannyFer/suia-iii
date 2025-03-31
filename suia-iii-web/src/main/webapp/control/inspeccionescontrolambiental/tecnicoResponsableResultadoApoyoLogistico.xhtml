@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" template="/WEB-INF/templates/default-task.xhtml" xmlns:f="http://java.sun.com/jsf/core">
+	<ui:define name="content">
+		<f:event type="preRenderView" listener="#{tecnicoResultadoApoyoLogisticoICAController.validarTareaBpm()}" />
+		<h:form id="form-recibir-info">
+			<h:panelGrid columns="2" columnClasses="null, field_mrg">
+				<p:outputLabel for="informeCumple" value="¿Se llegó a un acuerdo sobre la logística necesaria con el sujeto de control/jefe de trasporte del ministerio?" styleClass="bold" />
+				<p:selectOneRadio id="informeCumple" value="#{tecnicoResultadoApoyoLogisticoICAController.esApoyoLogisticoResuelto}" required="true">
+					<f:selectItem itemLabel="Si" itemValue="true" />
+					<f:selectItem itemLabel="No" itemValue="false" />
+					<p:ajax process="@this" update="label nota" />
+				</p:selectOneRadio>
+			</h:panelGrid>
+
+			<h:panelGroup id="nota">
+				<h:panelGroup rendered="#{!tecnicoResultadoApoyoLogisticoICAController.esApoyoLogisticoResuelto}">
+					<h:outputText value="Si se presentaron inconvenientes que impidieron llegar a un acuerdo sobre la logística, pero esto NO IMPIDE la ejecución de la inspección, ingrese los motivos y envíe esta tarea." styleClass="encabezado alJustify text-red" />
+					<h:outputText value="Si se presentaron inconvenientes que impidieron llegar a un acuerdo sobre la logística, y esto IMPIDE la correcta ejecución de la inspección, NO envíe esta tarea. Comuníquese con su superior." styleClass="encabezado alJustify text-red" />
+				</h:panelGroup>
+			</h:panelGroup>
+
+			<p:separator />
+			<br />
+
+			<h:panelGrid columns="1" styleClass="w100">
+				<p:outputLabel id="label" value="#{tecnicoResultadoApoyoLogisticoICAController.label}" styleClass="bold" />
+				<p:inputTextarea value="#{tecnicoResultadoApoyoLogisticoICAController.apoyoLogisticoDescripcion}" rows="4" styleClass="w100" addLine="false" autoResize="false" maxlength="500" />
+			</h:panelGrid>
+
+			<div class="buttons main">
+				<p:commandButton value="Enviar" update="@form" action="#{tecnicoResultadoApoyoLogisticoICAController.aceptar()}" icon="ui-icon-check">
+					<p:confirm message="#{msg['message.confirmacion.envio.tarea']}" header="#{msg['header.confirmacion.envio.tarea']}" />
+				</p:commandButton>
+				<p:commandButton value="Cancelar" immediate="true" action="/bandeja/bandejaTareas.jsf?faces-redirect=true" icon="ui-icon-cancel" styleClass="secondary">
+					<p:confirm message="#{msg['message.confirmacion.cancelacion.tarea']}" header="#{msg['header.confirmacion.cancelacion.tarea']}" />
+				</p:commandButton>
+			</div>
+
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

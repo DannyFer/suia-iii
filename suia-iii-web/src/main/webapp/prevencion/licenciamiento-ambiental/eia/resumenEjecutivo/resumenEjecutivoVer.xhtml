@@ -1,0 +1,99 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:controles="http://java.sun.com/jsf/composite/controles-prime">
+<ui:composition template="/prevencion/licenciamiento-ambiental/eia/verEIA.xhtml">
+	<ui:define name="content-eia">
+		<h:form id="frmDatos">
+			<p:panel header="Resumen ejecutivo" rendered="#{!loginBean.isUserInRole('SENAGUA')}">
+				<h:panelGrid columns="1" styleClass="w100" columnClasses="w33, field_mrg w33, field_mrg w33" rendered="#{!resumenEjecutivoBean.esMineriaNoMetalicos}">
+					<p:outputLabel value="Ingresar resumen ejecutivo" for="resumen" styleClass="bold" />
+					<p:inputTextarea value="#{resumenEjecutivoBean.estudio.resumenEjecutivo}" id="resumen" required="true" maxlength="1000" autoResize="false" rows="4" readonly="true">
+					</p:inputTextarea>
+				</h:panelGrid>
+				<!-- para mostrar historico -->
+				<!-- Cris F: cambio para tener una tabla -->
+				
+				<br />
+
+
+				<h:panelGrid columns="1" styleClass="w100"
+					columnClasses="w33, field_mrg w33, field_mrg w33"
+					rendered="#{resumenEjecutivoBean.mostrarTabla}">
+					<f:facet name="header">
+						<h3 align="left"><h:outputText value="Historial de cambios" styleClass="text-orange"/></h3>
+					</f:facet>
+
+					<p:dataTable id="tblResumenEjecutivo" rowIndexVar="index"
+						value="#{resumenEjecutivoBean.listaEstudioOriginales}"
+						var="resumen" emptyMessage="#{labels['common.table.empty']}"
+						rendered="#{resumenEjecutivoBean.mostrarTabla}"
+						style="height: 200px; overflow: auto; display:block;">
+						<p:column styleClass="w15 alCenter" headerText="Fecha Modificación">
+							<h:outputText value="#{resumen.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Resumen Ejecutivo">
+							<h:outputText styleClass="alJustify" value="#{resumen.resumenEjecutivo}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+				<!-- fin historico -->
+				<p:panelGrid columns="2" layout="grid" styleClass="w100"
+                             columnClasses="w50, w50" rendered="#{resumenEjecutivoBean.esMineriaNoMetalicos}">
+                    <f:facet name="header">
+                        <h:outputText value="Adjuntar resumen ejecutivo *" />                        
+                    </f:facet>
+                    <h:panelGrid styleClass="panel_data mw50" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="#{empty resumenEjecutivoBean.documentoGeneral.nombre ? 'Documento(.pdf)' : resumenEjecutivoBean.documentoGeneral.nombre}"
+							id="etiqueta" />                        
+                        <p:commandButton id="download" icon="ui-icon-search"
+                                         ajax="false" styleClass="button-small primary" title="Ver"
+                                         immediate="true"
+                                         rendered="#{not empty resumenEjecutivoBean.documentoGeneral.nombre}">
+                            <p:fileDownload
+                                    value="#{resumenEjecutivoBean.getStreamContent()}" />
+                        </p:commandButton>
+                    </h:panelGrid>
+                    
+                </p:panelGrid>
+                
+                <!-- para mostrar historico -->
+				<!-- Cris F: cambio para tener una tabla -->
+				
+				<h:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{resumenEjecutivoBean.esMineriaNoMetalicos and resumenEjecutivoBean.listaDocumentosHistorico.size() > 0}">
+					<f:facet name="header">
+						<h3 align="left"><h:outputText value="Historial de cambios" styleClass="text-orange"/></h3>
+					</f:facet>
+
+					<p:dataTable id="tblResumenEjecutivoDocs" rowIndexVar="index"
+						value="#{resumenEjecutivoBean.listaDocumentosHistorico}"
+						var="documento" emptyMessage="#{labels['common.table.empty']}">
+						<p:column styleClass="w15 alCenter" headerText="Fecha Modificación">
+							<h:outputText
+								value="#{documento.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Documento">
+							<h:outputText value="#{documento.nombre}" />
+						</p:column>
+						<p:column styleClass="w5 alCenter">
+							<p:commandButton id="downloadOriginal" rendered="true"
+							icon="ui-icon-search" ajax="false"
+							styleClass="button-small orange" title="Ver" immediate="true">
+							<p:fileDownload
+								value="#{resumenEjecutivoBean.getStreamContentOriginal(documento)}" />
+						</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+				<!-- fin historico -->
+                    
+               
+                
+			</p:panel>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

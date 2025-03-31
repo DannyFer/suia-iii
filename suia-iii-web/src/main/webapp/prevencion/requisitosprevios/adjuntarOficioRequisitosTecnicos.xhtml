@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:f="http://java.sun.com/jsf/core" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" template="/WEB-INF/templates/default-task.xhtml">
+	<ui:define name="context-extra">
+
+	</ui:define>
+	<ui:define name="content">
+		<f:event type="preRenderView" listener="#{adjuntarOficioRequisitosTecnicosBean.validarTareaBpm()}" />
+		<h:form>
+			<h:panelGrid columns="1" cellpadding="2" styleClass="w100">
+
+				<h:outputText value="Usted ha seleccionado que su proyecto realiza:  Gestión de desechos peligrosos /  Transporte de sustancias químicas peligrosas:" styleClass="bold" />
+
+				<h:outputLabel>¿Cuenta usted con la aprobación de los requisitos técnicos establecidos en los anexos B
+                    y/o C del Acuerdo Ministerial No. 026 de Registro Oficial No. 334 del 12 de mayo del
+                    2008?</h:outputLabel>
+
+				<h:panelGrid columns="2" style="margin-bottom:10px" cellpadding="5">
+					<p:outputLabel for="radioButtomPronunciamiento" />
+					<p:selectOneRadio id="radioButtomPronunciamiento" value="#{adjuntarOficioRequisitosTecnicosBean.aprobacionFavorable}">
+						<f:selectItem itemLabel="Sí" itemValue="true" />
+						<f:selectItem itemLabel="No" itemValue="false" />
+						<p:ajax process="@this" update=":#{p:component('pnl_adjuntar_oficio')}" />
+					</p:selectOneRadio>
+				</h:panelGrid>
+
+				<h:panelGroup id="pnl_adjuntar_oficio">
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{adjuntarOficioRequisitosTecnicosBean.aprobacionFavorable}">
+						<f:facet name="header">
+							<mae:panelGridHeaderHelp value="Adjuntar Oficio" render="false" conector="generalHelp" image="#{request.contextPath}/resources/images/help-how.png" help="#{helps['no.help.yet']}" />
+						</f:facet>
+
+						<h:panelGrid cellpadding="2" styleClass="w50">
+
+							<h:panelGrid id="labelOficio">
+
+								<p:outputLabel rendered="#{adjuntarOficioRequisitosTecnicosBean.oficio != null}" value="#{adjuntarOficioRequisitosTecnicosBean.oficio.name}" />
+
+								<p:outputLabel rendered="#{adjuntarOficioRequisitosTecnicosBean.oficio == null}" value="Oficio(.pdf)" />
+
+							</h:panelGrid>
+
+							<p:fileUpload id="archOficio" width="100%" required="true" value="#{adjuntarOficioRequisitosTecnicosBean.oficio}" sizeLimit="3145728" allowTypes="/(\.|\/)(pdf)$/" fileUploadListener="#{adjuntarOficioRequisitosTecnicosBean.adjuntarOficio}" label="Seleccionar" cancelLabel="Cancelar" uploadLabel="Adjuntar" auto="true" invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo pdf." invalidSizeMessage="Debe adjuntar un archivo no mayor de 3 Mb." />
+
+							<p:growl id="marchOficio" showDetail="true" />
+
+						</h:panelGrid>
+					</p:panelGrid>
+				</h:panelGroup>
+
+			</h:panelGrid>
+
+			<div class="buttons main">
+				<p:commandButton value="Enviar" action="#{adjuntarOficioRequisitosTecnicosController.realizarTarea}" title="Enviar datos" icon="ui-icon-check">
+				</p:commandButton>
+			</div>
+
+		</h:form>
+
+	</ui:define>
+</ui:composition>
+</html>

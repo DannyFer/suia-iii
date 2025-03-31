@@ -1,0 +1,263 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition
+	template="/control/aprobacionRequisitosTecnicos/templates/verArt.xhtml">
+	<ui:define name="content-art">
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				id="datosGenerales">
+				<f:facet name="header">
+					<h:outputText value="#{labels['label.modalidad.tratamiento']}" />
+				</f:facet>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText
+							value="Capacidad anual del proceso e identificación de cantidades de desechos para la ejecución del protocolo de pruebas" />
+					</f:facet>
+
+					<p:dataTable id="tblDesechos"
+						value="#{modalidadTratamientoController.modalidadTratamientoBean.modalidadTratamiento.listaDesechos}"
+						var="desechoTratamiento" rows="10"
+						emptyMessage="#{labels['common.table.empty']}"
+						style="table-layout=auto">
+						<p:column headerText="Nombre desecho">
+							<h:outputText value="#{desechoTratamiento.desecho.descripcion}" />
+						</p:column>
+						<p:column headerText="Código">
+							<h:outputText value="#{desechoTratamiento.desecho.clave}" />
+						</p:column>
+						<p:column headerText="Cantidad anual de tratamiento (T)">
+							<h:outputText value="#{desechoTratamiento.capacidadAnualProceso}">
+								<f:convertNumber minFractionDigits="2" />
+							</h:outputText>
+						</p:column>
+						<p:column
+							headerText="Cantidad máxima de desechos requeridos para protocolo de pruebas (T)">
+							<h:outputText
+								value="#{desechoTratamiento.cantidadMaximaDesechosPruebas}">
+								<f:convertNumber minFractionDigits="4" />
+							</h:outputText>
+						</p:column>
+					</p:dataTable>
+
+
+
+
+
+				</p:panelGrid>
+				<p:panelGrid styleClass="w100 separatorBottom" columns="1"
+					columnClasses="w50, field_mrg w50" layout="grid">
+					<f:facet name="header">
+						<h:outputText value="#{labels['label.manejo.desechos']}" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText
+							value="Plano de la Planta o del área donde se realiza el tratamiento" />
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="button-small primary toLeft" title="Ver"
+							action="#{modalidadTratamientoController.descargar(0)}"
+							ajax="false"
+							rendered="#{!(modalidadTratamientoController.modalidadTratamientoBean.modalidadTratamiento.documentoPlano.id==null)}" />
+					</h:panelGrid>
+				</p:panelGrid>
+				<!--<p:panelGrid styleClass="w100" columns="2"
+					columnClasses="w50, field_mrg w50" layout="grid">
+					<f:facet name="header">
+						<h:outputText value="#{labels['label.recoleccion.desechos']}" />
+					</f:facet>
+					<p:outputLabel for="transportePropio" value="Transporte propio" />
+					<p:selectBooleanCheckbox id="transportePropio" disabled="true"
+						value="#{modalidadTratamientoController.modalidadTratamientoBean.modalidadTratamiento.transportePropio}" />
+
+					<p:outputLabel for="transporteContratado"
+						value="Transporte contratado" />
+					<p:selectBooleanCheckbox id="transporteContratado" disabled="true"
+						value="#{modalidadTratamientoController.modalidadTratamientoBean.modalidadTratamiento.transporteContratado}">
+						<p:ajax process="@this" update="nombreEmpresa" />
+					</p:selectBooleanCheckbox>
+
+					<p:outputLabel for="nombreEmpresa" id="labelNombreEmpresa"
+						value="#{labels['label.empresa.autorizada']}" styleClass="bold" />
+					<p:inputText id="nombreEmpresa" required="true"
+						disabled="#{!modalidadTratamientoController.modalidadTratamientoBean.modalidadTratamiento.transporteContratado}"
+						value="#{modalidadTratamientoController.modalidadTratamientoBean.modalidadTratamiento.nombreEmpresaAutorizada}" />
+				</p:panelGrid>-->
+				<p:panelGrid styleClass="w100 separatorBottom" columns="1"
+							 columnClasses="w50, field_mrg w50" layout="grid">
+					<f:facet name="header">
+						<h:outputText value="#{labels['label.recoleccion.desechos']}" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+								 columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="Tipo transporte" />
+						<h:outputText value="Propio"
+									  rendered="#{modalidadTratamientoController.modalidadTratamientoBean.modalidadTratamiento.transportePropio}" />
+						<h:outputText value="Contratado"
+									  rendered="#{modalidadTratamientoController.modalidadTratamientoBean.modalidadTratamiento.transporteContratado}" />
+					</h:panelGrid>
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+								 columnClasses="header, null" rowClasses="null, alt"
+								 rendered="#{modalidadTratamientoController.modalidadTratamientoBean.modalidadTratamiento.transporteContratado}">
+						<h:outputText value="#{labels['label.empresa.autorizada']}" />
+						<h:outputText id="nombreEmpresa1" required="true"
+									  rendered="#{modalidadTratamientoController.modalidadTratamientoBean.modalidadTratamiento.transporteContratado}"
+									  value="#{modalidadTratamientoController.modalidadTratamientoBean.modalidadTratamiento.nombreEmpresaAutorizada}" />
+					</h:panelGrid>
+				</p:panelGrid>
+				<p:panelGrid styleClass="w100 separatorBottom" columns="1"
+					columnClasses="w100 field_mrg" layout="grid">
+					<f:facet name="header">
+						<h:outputText value="#{labels['label.tratamiento.desechos']}" />
+					</f:facet>
+
+					<p:panelGrid styleClass="w100 separatorBottom">
+						<p:row>
+							<p:column styleClass="w50">
+								<h:outputText value="Descripción de los siguientes requisitos:" />
+
+							</p:column>
+							<p:column styleClass="w50">
+								<h:panelGrid styleClass="w100 separatorBottom" columns="1"
+									columnClasses="w100, field_mrg">
+									<h:panelGrid styleClass="w50 toLeft" columns="3">
+										<p:commandButton icon="ui-icon-arrowthick-1-s"
+											styleClass="button-small primary toLeft" title="Ver"
+											action="#{modalidadTratamientoController.descargar(1)}"
+											ajax="false"
+											rendered="#{!(modalidadTratamientoController.modalidadTratamientoBean.modalidadTratamiento.documentoRequisitos.id==null)}" />
+
+									</h:panelGrid>
+
+								</h:panelGrid>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column styleClass="w100" colspan="2">
+								<h:outputText
+									value="#{labels['label.tratamiento.requisitos.uno']}"
+									escape="false" styleClass="alJustify" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<h:outputText value="Descripción de los siguientes requisitos:"
+									styleClass="bold" />
+							</p:column>
+							<p:column>
+								<h:panelGrid styleClass="w100 separatorBottom" columns="1"
+									columnClasses="w50, field_mrg">
+									<h:panelGrid styleClass="w50 toLeft" columns="3">
+										<p:commandButton icon="ui-icon-arrowthick-1-s"
+											styleClass="button-small primary toLeft" title="Ver"
+											action="#{modalidadTratamientoController.descargar(2)}"
+											ajax="false"
+											rendered="#{!(modalidadTratamientoController.modalidadTratamientoBean.modalidadTratamiento.documentoRequisitosProductoProceso.id==null)}" />
+
+									</h:panelGrid>
+
+								</h:panelGrid>
+							</p:column>
+						</p:row>
+						<p:row styleClass="w100">
+							<p:column styleClass="w100" colspan="2">
+								<h:outputText
+									value="#{labels['label.tratamiento.requisitos.dos']}"
+									escape="false" styleClass="alJustify" />
+							</p:column>
+						</p:row>
+					</p:panelGrid>
+
+				</p:panelGrid>
+				<p:panelGrid styleClass="w100" columns="1"
+					columnClasses="w100, field_mrg w100" layout="grid"
+					id="panelDesechosBiologicos">
+					<f:facet name="header">
+						<h:outputText
+							value="#{labels['label.tratamiento.desechos.biologicos']}" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data mw100" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText
+							value="¿Tratar desechos biológico infecciosos (Sanitarios)?" />
+						<h:outputText value="Si"
+							rendered="#{modalidadTratamientoController.modalidadTratamientoBean.trataDesechosBiologicos}" />
+						<h:outputText value="No"
+							rendered="#{!modalidadTratamientoController.modalidadTratamientoBean.trataDesechosBiologicos}" />
+					</h:panelGrid>
+
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+						columnClasses="header, null" rowClasses="null, alt"
+						rendered="#{modalidadTratamientoController.modalidadTratamientoBean.habilitarTrataDesechosBiologicos}">
+						<h:outputText
+							value="Tratamiento que dará a los desechos peligrosos indicando el tipo de tecnología que se empleará y las condiciones de diseño para la operación" />
+
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="button-small primary toLeft" title="Ver"
+							action="#{modalidadTratamientoController.descargar(3)}"
+							ajax="false"
+							rendered="#{!(modalidadTratamientoController.modalidadTratamientoBean.modalidadTratamiento.documentoDesechosBiologicos.id==null)}" />
+
+					</h:panelGrid>
+				</p:panelGrid>
+				<p:panelGrid columns="1" layout="grid">
+					<f:facet name="header">
+						<h:outputText value="#{labels['label.protocolo.pruebas']}" />
+					</f:facet>
+					<h:panelGroup>
+						<p:panelGrid>
+							<p:row>
+								<p:column styleClass="w50">
+									<h:outputText
+										value="Descripción de los siguientes requisitos de pruebas:" />
+								</p:column>
+								<p:column styleClass="w50">
+									<h:panelGrid styleClass="w100 separatorBottom" columns="1"
+										columnClasses="w100, field_mrg">
+										<h:panelGrid styleClass="w50 toLeft" columns="3">
+											<p:commandButton icon="ui-icon-arrowthick-1-s"
+												styleClass="button-small primary toLeft" title="Ver"
+												action="#{modalidadTratamientoController.descargar(4)}"
+												ajax="false"
+												rendered="#{!(modalidadTratamientoController.modalidadTratamientoBean.modalidadTratamiento.documentoPruebas.id==null)}" />
+
+										</h:panelGrid>
+
+									</h:panelGrid>
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column styleClass="w100" colspan="2">
+									<h:outputText
+										value="#{labels['label.tratamiento.pruebas.requisitos']}"
+										escape="false" styleClass="alJustify" />
+								</p:column>
+							</p:row>
+
+						</p:panelGrid>
+					</h:panelGroup>
+				</p:panelGrid>
+			</p:panelGrid>
+			<t:div styleClass="buttons main">
+				<p:commandButton value="#{labels['label.atras']}" immediate="true"
+					process="@this"
+					action="/control/aprobacionRequisitosTecnicos/recepcionDesechosPeligrosos.jsf?faces-redirect=true"
+					icon="ui-icon-arrowthick-1-w" />
+				<p:commandButton value="#{labels['label.siguiente']}"
+					immediate="true" process="@this"
+					action="#{aprobacionRequisitosTecnicosController.recuperarPageSiguiente(3,true,true)}"
+					icon="ui-icon-arrowthick-1-e" />
+			</t:div>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

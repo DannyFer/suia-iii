@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+        >
+<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}" target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+    </ui:define>
+    <ui:define name="content">
+        <f:loadBundle var="labels"
+                      basename="ec.gob.ambiente.core.resources.labels_es"/>
+        <f:event type="preRenderView" listener="#{aclararObservacionesComentariosController.validarTareaBpm()}"/>
+        <h:form id="form">
+            <p:panel>
+                <f:facet name="header">
+                    <h:outputText
+                            value="Ingresar respuestas a las observaciones"/>
+
+                </f:facet>
+
+                <p:panelGrid columns="1" styleClass="w100" rendered="false">
+                    <h:outputLabel value="Respuesta a observaciones"/>
+                    <p:dataTable id="tableObservacion" widgetVar="tableObservacion"
+                                 rows="10" paginator="true" paginatorAlwaysVisible="false"
+                                 paginatorPosition="bottom" styleClass="w100"
+                                 currentPageReportTemplate="{currentPage} de {totalPages}"
+                                 rowsPerPageTemplate="5,10,15"
+                                 emptyMessage="#{labels['common.table.empty']}"
+                                 value="#{aclararObservacionesComentariosBean.comentariosProyectosPPS}"
+                                 var="comentario">
+
+                        <p:column headerText="id" rendered="false"
+                                  styleClass="alCenter w10"
+                                >
+                            <p:outputLabel value="#{comentario.id}"></p:outputLabel>
+
+                        </p:column>
+
+                        <p:column headerText="Nro" styleClass="alCenter w5">
+                            <p:outputLabel
+                                    value="#{aclararObservacionesComentariosBean.numObservacion(comentario)}"></p:outputLabel>
+
+                        </p:column>
+
+
+                        <p:column headerText="Observación" styleClass="alCenter w15">
+
+                            <p:outputLabel value="#{comentario.observacionComplementaria}"></p:outputLabel>
+
+                        </p:column>
+
+                        <p:column headerText="Respuesta" styleClass="alCenter w15">
+
+                            <p:outputLabel value="#{comentario.accion}"></p:outputLabel>
+
+                        </p:column>
+
+
+                        <p:column headerText="Acciones"
+                                  styleClass="alCenter w5">
+                            <p:commandButton
+                                    actionListener="#{aclararObservacionesComentariosController.editarComentario(comentario)}"
+                                    update=":form_respuesta"
+                                    icon="ui-icon-plus" styleClass="button-small primary"
+                                    oncomplete="PF('respuesta').show()" rendered="#{empty comentario.accion}"
+                                    title="Agregar Respuesta"/>
+
+
+                            <p:commandButton
+                                    actionListener="#{aclararObservacionesComentariosController.editarComentario(comentario)}"
+                                    update=":form_respuesta"
+                                    icon="ui-icon-pencil" styleClass="button-small primary"
+                                    oncomplete="PF('respuesta').show()" rendered="#{not empty comentario.accion}"
+                                    title="Editar Respuesta"/>
+
+                        </p:column>
+
+
+                    </p:dataTable>
+
+
+                </p:panelGrid>
+
+
+                <p:fragment>
+                    <h:panelGroup id="pnl2">
+
+                        <observaciones:tablaObservaciones aparace="true"
+                                                          soloLectura="true"
+                                                          mostrarSiVacio="true"
+                                                          idClase="#{proyectosBean.proyecto.id}"
+                                                          nombreClase="ParticipacionSocial"
+                                                          seccion="revisarComentarioObservaciones"
+                                                          rol="admin"
+                                                          respuestaActiva="true"
+                                                          responder="true"
+                                                          componenteActualizarEliminar="pnl2"/>
+                    </h:panelGroup>
+                </p:fragment>
+
+
+                <div class="buttons main">
+                    <p:commandButton value="Enviar" update=":form"
+                                     action="#{aclararObservacionesComentariosController.finalizar()}"
+                                     icon="ui-icon-check"/>
+                </div>
+
+
+            </p:panel>
+
+
+        </h:form>
+        <h:form id="form_respuesta">
+            <p:dialog header="Respuesta a observaciones" id="respuesta"
+                      widgetVar="respuesta" modal="true" resizable="false" width="600">
+                <p:panelGrid columns="2" styleClass="w100">
+
+
+                    <h:inputTextarea value="#{aclararObservacionesComentariosBean.comentarioPPS.accion}"
+                                     styleClass="w100"
+                                     required="true" requiredMessage="Respuesta obligatoria"/>
+
+
+                </p:panelGrid>
+
+                <div class="buttons">
+                    <p:commandButton value="Aceptar"
+                                     onclick="PF('respuesta').hide()"
+                                     actionListener="#{aclararObservacionesComentariosController.guardarComentario()}"
+                                     update=":form"/>
+
+                    <p:commandButton value="Cancelar" onclick="PF('respuesta').hide()"/>
+
+                </div>
+            </p:dialog>
+        </h:form>
+
+
+    </ui:define>
+</ui:composition>
+</html>

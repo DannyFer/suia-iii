@@ -1,0 +1,246 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="context-extra">
+		<h:panelGroup> 
+			<h:outputText value="Mapa de certificado" />
+		</h:panelGroup>
+		<h:outputText value="Descargar documento mapa de certificado" />
+		<p:commandButton ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary button-small" immediate="true">
+			<p:fileDownload value="#{firmaElectronicaOperadorPreliminarController.descargarMapa()}" />
+		</p:commandButton>
+
+		<h:panelGroup>
+			<h:outputText value="Certificado" />
+			<br />
+			<h:outputText value="de intersección" />
+		</h:panelGroup>
+		<h:outputText value="Descargar #{labels['roca.lc.certificado.categorizacion']}" />
+		<p:commandButton ajax="false" icon="ui-icon-arrowthick-1-s"	styleClass="primary button-small" immediate="true">
+			<p:fileDownload value="#{firmaElectronicaOperadorPreliminarController.descargarCertificadoInterseccion()}" />
+		</p:commandButton>
+		
+		<h:panelGroup> 
+			<h:outputText value="Información Preliminar" />
+		</h:panelGroup>
+		<h:outputText value="Descargar el resumen de la información preliminar" />
+		<p:commandButton ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary button-small" immediate="true">
+			<p:fileDownload value="#{firmaElectronicaOperadorPreliminarController.descargarInformacion()}" />
+		</p:commandButton>
+		
+		<h:outputText value="Guía elaboración EsIA" rendered="#{contextoTareaEIAController.requiereDescargaGuiasMineriaNoMetalico}" />
+		<h:outputText value="Descargar la Guía para elaboración de estudios de impacto ambiental" rendered="#{contextoTareaEIAController.requiereDescargaGuiasMineriaNoMetalico}" />
+		<p:commandButton ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary button-small" immediate="true" rendered="#{contextoTareaEIAController.requiereDescargaGuiasMineriaNoMetalico}">
+			<p:fileDownload value="#{firmaElectronicaOperadorPreliminarController.descargarGuiaNoMetalicos()}" />
+		</p:commandButton>
+	</ui:define>
+
+
+	<ui:define name="content">
+		<ui:remove>
+			<f:event type="preRenderView"
+				listener="#{firmaElectronicaOperadorPreliminarController.validarTareaBpm()}" />
+		</ui:remove>
+
+		<h:form id="form">
+
+			<h:panelGroup id="pnlFirma">
+				
+				<h:panelGrid styleClass="alCenter w100" columns="1" rendered="#{firmaElectronicaOperadorPreliminarController.esRegistroLicencia}">
+					<h:outputText value="Firmar Reporte de Información Preliminar"
+						styleClass="encabezado1_4em" />
+					<h:panelGrid styleClass="alCenter w66" columns="1" rendered="#{!firmaElectronicaOperadorPreliminarController.ambienteProduccion}">
+						<p:panel styleClass="alCenter">
+								<h:panelGrid styleClass="alCenter w50" columns="2" >
+									<h:outputText value="¿Cuenta con token?" styleClass="encabezado"
+										style="text-align:right" />
+									<p:selectOneRadio id="verificaToken"
+										value="#{firmaElectronicaOperadorPreliminarController.token}">
+										<f:selectItem itemLabel="Sí" itemValue="true" />
+										<f:selectItem itemLabel="No" itemValue="false" />
+										<p:ajax event="change" update=":form :formDialogs" listener="#{firmaElectronicaOperadorPreliminarController.guardarToken}" />
+									</p:selectOneRadio>
+								</h:panelGrid>
+						</p:panel>
+					</h:panelGrid>
+				</h:panelGrid>
+				
+				<br /><br />
+				
+				
+				
+				<p:outputLabel styleClass="alJustify" value="Yo, #{firmaElectronicaOperadorPreliminarController.representante} con cédula de identidad #{firmaElectronicaOperadorPreliminarController.cedula} declaro bajo juramento que toda la información ingresada corresponde a la realidad y reconozco la responsabilidad que genera la falsedad u ocultamiento de proporcionar datos falsos o errados, en atención a lo que establece el artículo 255 del Código Orgánico Integral Penal, que señala: Falsedad u ocultamiento de información ambiental.- La persona que emita o proporcione información falsa u oculte información que sea de sustento para la emisión y otorgamiento de permisos ambientales, estudios de impactos ambientales, auditorías y diagnósticos ambientales, permisos o licencias de aprovechamiento forestal, que provoquen el cometimiento de un error por parte de la autoridad ambiental, será sancionada con pena privativa de libertad de uno a tres años."/>
+				<br /><br />
+				<h:panelGrid columns="2" style="margin-bottom:10px"	cellpadding="5">
+					<h:outputLabel for="condiciones" style="font-weight: bold;"	value="He leído, entiendo y acepto la clausula de responsabilidad" />
+					<p:selectBooleanCheckbox id="condiciones" value="#{firmaElectronicaOperadorPreliminarController.acepta}">
+						<p:ajax update="pnlButtons" />
+					</p:selectBooleanCheckbox>
+				</h:panelGrid>
+				<br /><br />
+				
+			</h:panelGroup>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+			
+					<p:commandButton value="Firmar documento"
+						styleClass="large buttonLarge" icon="ui-icon-key"
+						rendered="#{firmaElectronicaOperadorPreliminarController.esRegistroLicencia}"
+						disabled="#{!firmaElectronicaOperadorPreliminarController.acepta}"
+						update="pnlButtons :formDialogs:pnlFirmaManual :formDialogs:pnlFirmaToken"
+						actionListener="#{firmaElectronicaOperadorPreliminarController.firmarInformacion()}" />
+				
+
+					<p:commandButton value="Enviar" process="@this" update="pnlButtons @form"
+						action="#{firmaElectronicaOperadorPreliminarController.completarTarea()}"
+						icon="ui-icon-check"
+						disabled="#{!firmaElectronicaOperadorPreliminarController.acepta}"
+						rendered="#{!firmaElectronicaOperadorPreliminarController.esRegistroLicencia and !firmaElectronicaOperadorPreliminarController.esEnte}"
+						widgetVar="btnEnviar" onstart="PF('btnEnviar').disable()" >
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"	header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+					
+					<p:commandButton value="Enviar" process="@this" update="pnlButtons @form"
+						action="#{firmaElectronicaOperadorPreliminarController.verificarExistenciaAutoridad()}"
+						icon="ui-icon-check"
+						disabled="#{!firmaElectronicaOperadorPreliminarController.acepta}"
+						rendered="#{!firmaElectronicaOperadorPreliminarController.esRegistroLicencia and firmaElectronicaOperadorPreliminarController.esEnte}"
+						widgetVar="btnEnviar" onstart="PF('btnEnviar').disable()">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"	header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+					
+				</div>
+			</h:panelGroup>
+		</h:form>
+
+		<h:form id="formDialogs">
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600" height="auto" position="center top">
+				<p:panel>
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel value="Reporte de Información Preliminar"
+							styleClass="bold" />
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold"
+							rendered="#{!firmaElectronicaOperadorPreliminarController.ambienteProduccion}" />
+						<p:selectOneRadio id="verificaToken"
+							value="#{firmaElectronicaOperadorPreliminarController.token}"
+							rendered="#{!firmaElectronicaOperadorPreliminarController.ambienteProduccion}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change" update="pnlFirmaManual pnlFirmaToken"
+								listener="#{firmaElectronicaOperadorPreliminarController.guardarToken}" />
+						</p:selectOneRadio>
+
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{firmaElectronicaOperadorPreliminarController.ambienteProduccion}" />
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{firmaElectronicaOperadorPreliminarController.ambienteProduccion}" />
+
+						<h:panelGroup id="pnlFirmaToken">
+							<p:commandButton value="Firmar documento" type="button"
+								styleClass="primary" icon="ui-icon-key"
+								rendered="#{firmaElectronicaOperadorPreliminarController.token}"
+								onclick="window.location.href='#{firmaElectronicaOperadorPreliminarController.urlAlfresco}'" />
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!firmaElectronicaOperadorPreliminarController.token}">
+							<p:outputLabel
+								value="1. Descargar el Resumen de la Información Preliminar"
+								styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload
+									value="#{firmaElectronicaOperadorPreliminarController.descargarInformacion()}" />
+							</p:commandButton>
+							<p:outputLabel for="uploadRequired"
+								value="2. Adjuntar el Resumen de la Información Preliminar firmado"
+								styleClass="bold" />
+							<p:fileUpload
+								fileUploadListener="#{firmaElectronicaOperadorPreliminarController.uploadListenerInformacionFirmada}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreDocFirmado"
+								rendered="#{!firmaElectronicaOperadorPreliminarController.token}">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreDocFirmado"
+								value="#{firmaElectronicaOperadorPreliminarController.nombreDocumentoFirmado}" />
+						</h:panelGrid>
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!firmaElectronicaOperadorPreliminarController.token and !firmaElectronicaOperadorPreliminarController.informacionSubida}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialog').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						action="#{firmaElectronicaOperadorPreliminarController.completarTarea()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+			
+			<p:dialog id="dlgBloqueEntes" widgetVar="dlgBloqueEntes"
+			header="Información" modal="true" resizable="false" width="700px"
+			closable="false">
+			<h:form>
+				<h:panelGroup>
+					<div>
+						Estimados/as usuarios/as, Les informamos que por el momento se
+						encuentra bloqueada la emisión de certificados y registros
+						ambientales, hasta que el Consorcio de Gobiernos Autónomos
+						Descentralizados Provinciales del Ecuador (CONGOPE) y la
+						Asociación de Municipalidades Ecuatorianas (AME), remita a esta
+						Cartera de Estado, el detalle de la información de cada una de las
+						nuevas autoridades y nuevos técnicos de los GAD Provinciales y GAD
+						Municipales, para el respectivo cambio de roles en el Sistema de
+						Regularización y Control Ambiental del Sistema Único de
+						Información Ambiental - SUIA. <br />
+
+					</div>
+
+				</h:panelGroup>
+
+				<div class="buttons">
+					<p:commandButton type="button" value="Cerrar"
+						onclick="PF('dlgBloqueEntes').hide()" />
+				</div>
+			</h:form>
+		</p:dialog>
+		</h:form>
+
+	</ui:define>
+</ui:composition>

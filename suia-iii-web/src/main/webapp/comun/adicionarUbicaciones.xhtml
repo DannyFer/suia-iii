@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+<f:loadBundle var="labels" basename="ec.gob.ambiente.core.resources.labels_es" />
+<p:dataTable id="#{adicionarUbicacionesAliasBean.tablaUbicaciones}" value="#{adicionarUbicacionesAliasBean.ubicacionesSeleccionadas}" var="ubicacion" emptyMessage="#{labels['common.table.empty']}">
+	<p:column headerText="Provincia">
+		<h:outputText value="#{adicionarUbicacionesAliasBean.mostrarParroquias ? ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre : ubicacion.ubicacionesGeografica.nombre}" />
+	</p:column>
+	<p:column headerText="Cant&oacute;n">
+		<h:outputText value="#{adicionarUbicacionesAliasBean.mostrarParroquias ? ubicacion.ubicacionesGeografica.nombre : ubicacion.nombre}">
+		</h:outputText>
+	</p:column>
+	<p:column headerText="Parroquia" rendered="#{!recoleccionTransporteDesechosBean.panelAdicionarVisible}">
+        <h:outputText value="#{ubicacion.nombre}" rendered="#{!cargarCoordenadasBean.verUbicacion}"/>
+        <h:outputText value="#{ubicacion.nombre}" />
+    </p:column>
+	<p:column styleClass="w20px" rendered="#{recoleccionTransporteDesechosBean.panelAdicionarVisible}">
+		<p:commandButton update=":form:#{adicionarUbicacionesAliasBean.tablaUbicaciones}" styleClass="button-small primary" process="@this" icon="ui-icon-circle-close" actionListener="#{adicionarUbicacionesAliasBean.quitarUbicacion(ubicacion)}" />
+	</p:column>
+</p:dataTable>
+<p:dialog header="Agregar ubicaci&oacute;n" id="#{adicionarUbicacionesAliasBean.dialogWidgetVar}" widgetVar="#{adicionarUbicacionesAliasBean.dialogWidgetVar}" modal="true" width="350" resizable="false" onShow="bodyOverflow(false)" onHide="bodyOverflow(true)">
+	<h:panelGrid columns="2" id="#{adicionarUbicacionesAliasBean.panelUbicacion}" styleClass="w100 alCenter" columnClasses="alRight, field_mrg w66 alLeft">
+		<p:outputLabel value="Provincia" for="provincia_#{adicionarUbicacionesAliasBean.panelUbicacion}" />
+		<p:selectOneMenu value="#{adicionarUbicacionesAliasBean.provincia}" converter="selectItemConverter" id="provincia_#{adicionarUbicacionesAliasBean.panelUbicacion}" styleClass="w100">
+			<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+			<f:selectItems value="#{adicionarUbicacionesAliasBean.provincias}" />
+			<p:ajax listener="#{adicionarUbicacionesAliasBean.cargarCantones()}" update=":form:#{adicionarUbicacionesAliasBean.panelUbicacion}" />
+		</p:selectOneMenu>
+		<p:outputLabel value="Cant&oacute;n" for="canton_#{adicionarUbicacionesAliasBean.panelUbicacion}" />
+		<p:selectOneMenu value="#{adicionarUbicacionesAliasBean.canton}" converter="selectItemConverter" id="canton_#{adicionarUbicacionesAliasBean.panelUbicacion}" styleClass="w100">
+			<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+			<f:selectItems value="#{adicionarUbicacionesAliasBean.cantones}" />
+			<p:ajax listener="#{adicionarUbicacionesAliasBean.cargarParroquias()}" update=":form:#{adicionarUbicacionesAliasBean.panelUbicacion}" />
+		</p:selectOneMenu>
+		<p:outputLabel value="Parroquia" rendered="#{adicionarUbicacionesAliasBean.mostrarParroquias}" for="parroquia_#{adicionarUbicacionesAliasBean.panelUbicacion}" />
+		<p:selectOneMenu value="#{adicionarUbicacionesAliasBean.parroquia}" converter="selectItemConverter" id="parroquia_#{adicionarUbicacionesAliasBean.panelUbicacion}" styleClass="w100" rendered="#{adicionarUbicacionesAliasBean.mostrarParroquias}">
+			<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+			<f:selectItems value="#{adicionarUbicacionesAliasBean.parroquias}" />
+		</p:selectOneMenu>
+	</h:panelGrid>
+	<p:separator />
+	<div class="buttons">
+		<p:commandButton actionListener="#{adicionarUbicacionesAliasBean.agregarUbicacion()}" process=":form:#{adicionarUbicacionesAliasBean.panelUbicacion} @this" value="Agregar" update=":form:#{adicionarUbicacionesAliasBean.tablaUbicaciones}" oncomplete="#{adicionarUbicacionesAliasBean.dialogWidgetVar}_showModalAddLocation(xhr, status, args)" />
+	</div>
+</p:dialog>
+
+<script type="text/javascript">
+	function #{adicionarUbicacionesAliasBean.dialogWidgetVar}_showModalAddLocation(xhr, status, args) {
+		PF('#{adicionarUbicacionesAliasBean.dialogWidgetVar}').show();
+    	if (args.addLocation) {
+        	PF('#{adicionarUbicacionesAliasBean.dialogWidgetVar}').hide();
+    	}            
+	}
+</script>
+</html>

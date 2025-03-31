@@ -1,0 +1,479 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+
+<h:form id="formEmpresa">
+
+<p:focus context="pnlValidar"/>
+	<p:dialog id="dlgEmpresa" widgetVar="dlgEmpresa" modal="true"
+		resizable="false" width="1000px" closable="false">
+
+		<p:panelGrid id="pnlEmpresa" columns="1" styleClass="panel_data w100">
+			<h:panelGrid styleClass="w100 panel_data" columns="2"
+				columnClasses="w25 header, w75 btnCenter" rowClasses="null, alt">
+
+				<h:outputText value="RUC / Cédula *" />
+				<h:panelGroup>
+					<h:panelGrid id="pnlValidar" styleClass="w100" columns="2"
+						columnClasses="w50 null, w50 null">
+						<p:inputText
+							value="#{empresasActivasRSQController.registro.usuarioCreacion}"
+							disabled="#{!empresasActivasRSQController.mostrarValidar}"
+							maxlength="20" autocomplete="false">
+							<p:ajax process="@this" />
+						</p:inputText>
+						<p:commandButton value="Validar" id="btnValidar"
+							update="nombreOperador pnlEmpresa" styleClass="primary"
+							immediate="true"
+							actionListener="#{empresasActivasRSQController.validarCedula()}" 
+							process="@this" />
+					</h:panelGrid>
+				</h:panelGroup>
+
+				<h:outputText value="Operador" />
+				<p:inputText id="nombreOperador"
+					value="#{empresasActivasRSQController.nombreOperador}" disabled="true" />
+
+				<h:outputText value="Representante Legal" rendered="#{empresasActivasRSQController.tieneRepresentante}" />
+				<p:inputText value="#{empresasActivasRSQController.registro.nombreRepLegal}"
+					disabled="true" rendered="#{empresasActivasRSQController.tieneRepresentante}" />
+
+				<h:outputText value="Código RSQ *" />
+				<p:inputText value="#{empresasActivasRSQController.registro.numeroAplicacion}"
+					disabled="#{!empresasActivasRSQController.mostrarValidar}"
+					maxlength="100">
+					<p:ajax process="@this" />
+				</p:inputText>
+
+				<h:outputText value="Vigencia de RSQ:" />
+				<p:calendar id="fechaInicio"
+					value="#{empresasActivasRSQController.registro.vigenciaDesde}"
+					pattern="dd/MM/yyyy" readonlyInput="true"
+					mindate="#{empresasActivasRSQController.fechaInicial}">
+					<p:ajax event="dateSelect" process="@this" 
+						update=":formPermiso:mesCmb" listener="#{empresasActivasRSQController.validarMes()}"/>
+				</p:calendar>
+			</h:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Sustancias químicas" />
+
+					<p:commandButton value="Adicionar" icon="ui-icon-plus"
+						actionListener="#{empresasActivasRSQController.nuevoRegistroSustancia(false)}"
+						oncomplete="PF('sustanciasQDiag').show()"
+						styleClass="button-small-text toRight field_mrg" 
+						immediate="true" update=":formPermiso:sustanciasQDiag">						
+						</p:commandButton>
+
+				</f:facet>
+				<p:dataTable id="tblSustancias"
+					value="#{empresasActivasRSQController.listaSustanciasQuimicasPermiso}"
+					var="sus">
+					<p:column headerText="Nombre de la sustancia">
+						<h:outputText value="#{sus.sustanciaQuimica.descripcion}" />
+					</p:column>
+
+					<p:column headerText="Cupo">
+						<h:outputText value="#{sus.cupo}" />
+					</p:column>
+
+					<p:column headerText="Stock inicial del año">
+						<h:outputText value="#{sus.stock}" />
+					</p:column>
+
+					<p:column headerText="Primer mes de declaración">
+						<h:outputText value="#{empresasActivasRSQController.mes(sus.mes)}" />
+					</p:column>
+
+					<p:column headerText="Año de declaración">
+						<h:outputText value="#{sus.anio}" />
+					</p:column>
+
+					<p:column headerText="Tipo de activación de la sustancia">
+						<h:outputText value="#{sus.tipoActivacion}" />
+					</p:column>
+
+					<p:column headerText="Acción">
+						<p:commandButton styleClass="primary" icon="ui-icon-pencil"
+							actionListener="#{empresasActivasRSQController.seleccionarSustancia(sus)}"
+							update=":formPermiso:sustanciasQDiag"
+							oncomplete="PF('sustanciasQDiag').show()" title="Modificar" 
+							immediate="true" process="@this"/>
+						<p:commandButton styleClass="primary" icon="ui-icon-trash"
+							actionListener="#{empresasActivasRSQController.eliminarSustancia(sus)}"
+							update=":formEmpresa:tblSustancias" title="Eliminar" immediate="true">
+							<p:confirm header="Confirmación"
+								message="¿Está seguro que desea eliminar la información?"
+								icon="ui-icon-alert" />
+						</p:commandButton>
+						
+						<p:commandButton styleClass="primary" icon="ui-icon-arrowthick-1-n"
+							actionListener="#{empresasActivasRSQController.ampliacionSustancia(sus)}"
+							update=":formAumento:aumentoDiag"
+							oncomplete="PF('aumentoDiag').show()" title="Ampliacion" 
+							immediate="true" process="@this"
+							rendered="#{sus.id eq null ? false : sus.realizaImportacion ? true : false}"/>
+						
+					</p:column>
+
+				</p:dataTable>
+			</p:panelGrid>
+
+			<h:panelGrid styleClass="w100 panel_data" columns="2"
+				columnClasses="w25 header, w75 btnCenter" rowClasses="null, alt">
+
+				<h:outputText value="Certificado" />
+				<p:dataTable id="tblDocumentos"
+					value="#{empresasActivasRSQController.listaDocumentos}" var="doc"
+					rows="5" paginator="true" paginatorAlwaysVisible="false"
+					paginatorPosition="bottom">
+				<p:column headerText="Nombre documento" style="width:40%;">
+						<h:outputText value="#{doc.nombre}" style="word-wrap: break-word;" />
+					</p:column>
+
+					<p:column headerText="Fecha" style="width:30%;">
+						<center>
+							<h:outputText value="#{doc.fechaCreacion}" />
+						</center>
+					</p:column>
+
+					<p:column style="width:30%;">
+						<f:facet name="header">
+							<p:commandButton icon="ui-icon-plus" value="Agregar"
+								styleClass="secondary" process="tblDocumentos"
+								update=":formEmpresa:adjuntarDocumento :formEmpresa:tblDocumentos"
+								oncomplete="PF('adjuntarDocumento').show()" />
+						</f:facet>
+
+						<center>
+							<p:commandButton id="fileDownload"
+								icon="ui-icon-arrowthickstop-1-s" styleClass="primary"
+								ajax="false" process="@this" title="Descargar"
+								disabled="#{doc.contenidoDocumento==null}" immediate="true">
+								<p:fileDownload value="#{empresasActivasRSQController.getDocumentoDownload(doc)}" />
+							</p:commandButton>
+						</center>
+					</p:column>
+
+				</p:dataTable>
+
+			</h:panelGrid>
+		</p:panelGrid>
+
+		<h:inputHidden validator="#{empresasActivasRSQController.validateInformacionSustancias}" />
+
+		<div class="buttons main">
+
+			<p:commandButton id="btnCancelar" value="Cancelar" title="Cancelar"
+				styleClass="secondary" icon="ui-icon-cancel"
+				onclick="PF('dlgEmpresa').hide()" immediate="true"
+				actionListener="#{empresasActivasRSQController.iniciarInformacion()}" 
+				update=":formEmpresa:dlgEmpresa :formPermiso:sustanciasQDiag">
+				<p:resetInput target=":formEmpresa:dlgEmpresa" />
+				</p:commandButton>
+
+			<p:commandButton value="Guardar" id="btnGuardar" process="dlgEmpresa"
+				icon="ui-icon-disk"
+				actionListener="#{empresasActivasRSQController.guardarRegistro()}"
+				oncomplete="if(!args.validationFailed) PF('dlgEmpresa').hide()">
+				<p:confirm header="Confirmación"
+					message="¿Está seguro que desea guardar la información? Si desea verificar la información de clic en Cancelar."
+					icon="ui-icon-alert" />
+			</p:commandButton>
+		</div>
+
+	</p:dialog>
+
+	<p:dialog width="500" id="adjuntarDocumento"
+		widgetVar="adjuntarDocumento" header="Adjuntar Documento Certificado"
+		modal="true" resizable="false">
+		<h:outputText value="Admite .pdf de 20Mb" />
+		<p:fileUpload id="file" oncomplete="PF('adjuntarDocumento').hide()"
+			fileUploadListener="#{empresasActivasRSQController.uploadDocumento}"
+			mode="advanced" auto="true" sizeLimit="20971520" label="Seleccione"
+			invalidFileMessage="El tipo de archivo no es pdf."
+			invalidSizeMessage="Tamaño de archivo incorrecto"
+			allowTypes="/(\.|\/)(pdf)$/" update=":formEmpresa:tblDocumentos">
+		</p:fileUpload>
+		<div class="buttons">
+			<p:commandButton icon="ui-icon-cancel" value="Cerrar" process="@this"
+				oncomplete="PF('adjuntarDocumento').hide()" styleClass="secondary" />
+		</div>
+
+	</p:dialog>
+
+</h:form>
+
+<h:form id="formPermiso">
+
+	<p:dialog width="600" id="sustanciasQDiag" widgetVar="sustanciasQDiag"
+		modal="true" resizable="false" closable="false">
+		<p:panelGrid id="pnlSustanciaQ" columns="1"
+			styleClass="panel_data w100">
+			<h:panelGrid styleClass="w100 panel_data" columns="2"
+				columnClasses="w30 header, w70 btnCenter" rowClasses="null, alt">
+
+				<h:outputText value="Seleccionar sustancia química *" />
+				<p:selectOneMenu id="cmbSustanciaQuimica"
+					value="#{empresasActivasRSQController.permisoDeclaracionRSQ.sustanciaQuimica}"
+					style="width: 100%" required="false"
+					requiredMessage="Sustancia química requerida"
+					converter="selectItemConverter" filter="true"
+					disabled="#{empresasActivasRSQController.modificacionSus}">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="#{null}" noSelectionOption="true" />
+					<f:selectItems
+						value="#{empresasActivasRSQController.listaSustancias}" var="sus"
+						itemLabel="#{sus.descripcion}" itemValue="#{sus}" />
+					<p:ajax event="change" process="@this" update="txtNombreSustancia cmbSustanciaQuimica" 
+						listener="#{empresasActivasRSQController.seleccionarSustancia(empresasActivasRSQController.permisoDeclaracionRSQ.sustanciaQuimica)}"/>
+				</p:selectOneMenu>
+
+
+				<h:outputText id="txtNombreSustancia"
+					value="#{empresasActivasRSQController.permisoDeclaracionRSQ.sustanciaQuimica.descripcion}" />
+				<h:panelGrid id="pnlIngresoSustancia" styleClass="w100 " columns="3"
+					columnClasses="w10 null, w30 null, w60 null" rowClasses="null, alt">
+
+					<p:selectBooleanCheckbox
+						value="#{empresasActivasRSQController.permisoDeclaracionRSQ.editarCupo}">
+						<p:ajax event="change" update="pnlIngresoSustancia"
+							process="@this">
+						</p:ajax>
+					</p:selectBooleanCheckbox>
+					<h:outputText value="Cupo" />
+					<pe:inputNumber id="cupo" maxValue="9999999999.99"
+						value="#{empresasActivasRSQController.permisoDeclaracionRSQ.cupo}"
+						decimalPlaces="2"
+						disabled="#{!empresasActivasRSQController.permisoDeclaracionRSQ.editarCupo}"
+						decimalSeparator="," thousandSeparator="" symbol=" kg"
+						symbolPosition="s">
+						<p:ajax process="@this" />
+					</pe:inputNumber>
+
+					<p:selectBooleanCheckbox
+						value="#{empresasActivasRSQController.permisoDeclaracionRSQ.editarStock}">
+						<p:ajax event="change" update="pnlIngresoSustancia"
+							process="@this">
+						</p:ajax>
+					</p:selectBooleanCheckbox>
+					<h:outputText value="Stock inicial del año" />
+					<pe:inputNumber id="stock" maxValue="9999999999.99"
+						value="#{empresasActivasRSQController.permisoDeclaracionRSQ.stock}"
+						decimalPlaces="2"
+						disabled="#{!empresasActivasRSQController.permisoDeclaracionRSQ.editarStock}"
+						decimalSeparator="," thousandSeparator="" symbol=" kg"
+						symbolPosition="s">
+						<p:ajax process="@this" />
+					</pe:inputNumber>
+				</h:panelGrid>
+
+				<h:outputText value="Primer mes declaración *" />							
+				<p:selectOneMenu id="mesCmb"
+					value="#{empresasActivasRSQController.permisoDeclaracionRSQ.mes}"
+					style="width:230px">
+					<f:selectItem itemLabel="Seleccione" itemValue="#{null}" />
+					<f:selectItems value="#{empresasActivasRSQController.listaMeses}"
+						var="item" itemLabel="#{item.mes}" itemValue="#{item.id}" />
+					<p:ajax process="@this" />
+				</p:selectOneMenu>				
+
+				<h:outputText value="Año de declaración" />
+				<p:inputText value="#{empresasActivasRSQController.permisoDeclaracionRSQ.anio}" disabled="true"/>
+				<ui:remove>
+				<p:selectOneMenu id="anioCmb"
+					value="#{empresasActivasRSQController.permisoDeclaracionRSQ.anio}"
+					style="width:230px" disabled="true">
+					<f:selectItems value="#{empresasActivasRSQController.anioList}"
+						var="item" itemLabel="#{item}" itemValue="#{item}"/>
+					<p:ajax process="@this" />
+				</p:selectOneMenu>
+				</ui:remove>	
+
+				<h:outputText value="Tipo de activación de RSQ" />
+				<h:panelGrid columns="1">
+					<p:selectBooleanCheckbox itemLabel="Licencia de importación"
+						value="#{empresasActivasRSQController.permisoDeclaracionRSQ.licenciaImportacion}">
+						<p:ajax process="@this">
+						</p:ajax>
+					</p:selectBooleanCheckbox>
+					<p:selectBooleanCheckbox
+						itemLabel="Declaración mensual de sustancias"
+						value="#{empresasActivasRSQController.permisoDeclaracionRSQ.declaracionSustancias}">
+						<p:ajax process="@this">
+						</p:ajax>
+					</p:selectBooleanCheckbox>
+					<p:selectBooleanCheckbox itemLabel="Guías de ruta"
+						value="#{empresasActivasRSQController.permisoDeclaracionRSQ.guiasRuta}">
+						<p:ajax process="@this">
+						</p:ajax>
+					</p:selectBooleanCheckbox>
+				</h:panelGrid>
+			</h:panelGrid>
+		</p:panelGrid>
+
+		<h:inputHidden
+			validator="#{empresasActivasRSQController.validateInformacionPermiso}" />
+
+		<div class="buttons main">
+
+			<p:commandButton id="btnCancelarS" value="Cancelar" title="Cancelar"
+				styleClass="secondary" icon="ui-icon-cancel" immediate="true"
+				oncomplete="PF('sustanciasQDiag').hide()"
+				actionListener="#{empresasActivasRSQController.nuevoRegistroSustancia(false)}"
+				update="sustanciasQDiag">
+				<p:resetInput target="sustanciasQDiag" />
+			</p:commandButton>
+
+			<p:commandButton value="Guardar" id="btnGuardarS"
+				icon="ui-icon-disk" 				
+				actionListener="#{empresasActivasRSQController.guardarPermisoValidacion()}"
+				oncomplete="if(!args.validationFailed) PF('sustanciasQDiag').hide();">
+			</p:commandButton>
+		</div>
+
+	</p:dialog>
+</h:form>
+
+<h:form id="formMensaje">
+
+	<p:dialog width="400" id="mensajeDialog" widgetVar="mensajeDialog"
+		header="Mensaje" modal="true" resizable="false">
+
+		<div>El registro que desea modificar tiene declaraciones
+			pendientes. Si se modifica el registro el operador
+			no podrá realizar las declaraciones faltantes. ¿Está seguro de
+			modificar el permiso de declaración?</div>
+
+		<p:outputPanel>
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+					styleClass="wizard-custom-btn-back" immediate="true"
+					oncomplete="PF('mensajeDialog').hide();"
+					actionListener="#{empresasActivasRSQController.nuevoRegistroSustancia(true)}"
+					update=":formPermiso:sustanciasQDiag">
+					<p:resetInput target=":formPermiso:sustanciasQDiag" />
+				</p:commandButton>
+
+				<p:commandButton value="Aceptar" id="btnAceptar"
+					process="mensajeDialog @this :formPermiso:sustanciasQDiag" icon=" ui-icon-check"
+					actionListener="#{empresasActivasRSQController.guardarRegistroPermiso()}"
+					update=":formEmpresa:tblSustancias"
+					oncomplete="PF('mensajeDialog').hide();">
+				</p:commandButton>
+			</div>
+		</p:outputPanel>
+	</p:dialog>
+
+</h:form>
+
+<h:form id="formAumento">
+
+	<p:dialog width="600" id="aumentoDiag" widgetVar="aumentoDiag"
+		modal="true" resizable="false" closable="false">
+		
+		<f:facet name="header">
+				<h:outputText value="Ampliación de Cupo" />
+			</f:facet>
+		
+		<p:panelGrid id="pnlSustanciaQ" columns="1"
+			styleClass="panel_data w100">
+			
+			<h:panelGrid styleClass="w100 panel_data" columns="2"
+				columnClasses="w30 header, w70 btnCenter" rowClasses="null, alt">
+
+				<h:outputText value="Sustancia química seleccionada:*" />
+				<h:outputText id="txtNombreSustancia"
+					value="#{empresasActivasRSQController.permisoDeclaracionRSQ.sustanciaQuimica.descripcion}" />
+
+
+				<h:outputText value="Cantidad Solicitada:*" />
+				<pe:inputNumber id="stock" maxValue="9999999999.99"
+					value="#{empresasActivasRSQController.permisoDeclaracionRSQ.ampliacionCupo}"
+					decimalPlaces="2"
+					decimalSeparator="," thousandSeparator="" symbol=" kg"
+					symbolPosition="s">
+					<p:ajax process="@this" />
+				</pe:inputNumber>
+				
+				<h:outputText value="Documento de respaldo:*" />
+				
+				<h:panelGroup>
+				<h:outputText value="Admite .pdf de 20Mb" />
+				<p:fileUpload id="file" 
+					fileUploadListener="#{empresasActivasRSQController.uploadDocumentoRespaldo}"
+					mode="advanced" auto="true" sizeLimit="20971520" label="Seleccione"
+					invalidFileMessage="El tipo de archivo no es pdf."
+					invalidSizeMessage="Tamaño de archivo incorrecto"
+					allowTypes="/(\.|\/)(pdf)$/" update=":formEmpresa:tblDocumentos txtNombreDoc">
+				</p:fileUpload>
+				<h:outputText id="txtNombreDoc" value="#{empresasActivasRSQController.permisoDeclaracionRSQ.documentoRespaldo.nombre}" />
+				</h:panelGroup>
+
+			</h:panelGrid>
+		</p:panelGrid>
+
+		<h:inputHidden validator="#{empresasActivasRSQController.validateInformacionAumento}" />
+
+		<div class="buttons main">
+
+			<p:commandButton id="btnCancelarS" value="Cancelar" title="Cancelar"
+				styleClass="secondary" icon="ui-icon-cancel" immediate="true"
+				oncomplete="PF('aumentoDiag').hide()"
+				update=":formAumento:aumentoDiag"
+				actionListener="#{empresasActivasRSQController.limpiarAmpliacion()}"
+				process="@this">
+				<p:resetInput target="aumentoDiag" />
+			</p:commandButton>
+
+			<p:commandButton value="Guardar" id="btnGuardarS" icon="ui-icon-disk"
+				actionListener="#{empresasActivasRSQController.guardarInfoAmpliacion()}"
+				oncomplete="if(!args.validationFailed) PF('aumentoDiag').hide();"
+				update=":formMensajeCupo:mensajeCupoDialog">
+			</p:commandButton>
+		</div>
+
+	</p:dialog>
+</h:form>
+
+
+<h:form id="formMensajeCupo">
+
+	<p:dialog width="400" id="mensajeCupoDialog" widgetVar="mensajeCupoDialog"
+		header="Mensaje" modal="true" resizable="false" closable="false">
+
+		<div>Acaba de solicitar la ampliación del cupo en #{empresasActivasRSQController.permisoDeclaracionRSQ.ampliacionCupo}, 
+		por lo tanto, el nuevo cupo establecido para la sustancia química 
+		#{empresasActivasRSQController.permisoDeclaracionRSQ.sustanciaQuimica.descripcion} es de #{empresasActivasRSQController.totalCupo}. 
+		¿Está seguro de solicitar esta ampliación?"</div>
+
+		<p:outputPanel>
+			<div class="buttons main">
+				<p:commandButton value="No" icon="ui-icon-cancel"
+					styleClass="wizard-custom-btn-back" immediate="true"
+					oncomplete="PF('mensajeCupoDialog').hide();"
+					actionListener="#{empresasActivasRSQController.limpiarAmpliacion()}">
+				</p:commandButton>
+
+				<p:commandButton value="Si" id="btnAceptar"
+					process="mensajeCupoDialog @this " icon=" ui-icon-check"
+					actionListener="#{empresasActivasRSQController.guardarInformacionAmpliacion()}"
+					oncomplete="PF('mensajeCupoDialog').hide();"
+					update=":formEmpresa:tblSustancias">
+				</p:commandButton>
+			</div>
+		</p:outputPanel>
+	</p:dialog>
+
+</h:form>
+
+</html>

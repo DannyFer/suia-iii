@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk" xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="contentVerticalPadding" id="proyectoContainer">
+				<f:facet name="header">
+					<p:commandButton value="Seleccionar" styleClass="button-small-text toRight field_mrg" icon="ui-icon-check" actionListener="#{inspeccionControlAmbientalIniciarController.seleccionarProyecto}" process="motivoContainer @this" />
+					<h:outputText value="Proyecto objeto de la inspección *" />
+				</f:facet>
+				<h:panelGrid styleClass="panel_data w50" columns="2" columnClasses="header w25, null" rowClasses="null, alt">
+					<h:outputText value="Proyecto" />
+					<h:outputText value="#{inspeccionControlAmbientalIniciarController.proyectoCustom.nombre}" rendered="#{not empty inspeccionControlAmbientalIniciarController.proyectoCustom}" />
+					<h:outputText value="(Seleccione)" rendered="#{empty inspeccionControlAmbientalIniciarController.proyectoCustom}" />
+					<h:outputText value="Código" />
+					<h:outputText value="#{inspeccionControlAmbientalIniciarController.proyectoCustom.codigo}" />
+					<h:outputText value="Sector" />
+					<h:outputText value="#{inspeccionControlAmbientalIniciarController.proyectoCustom.sector}" />
+					<h:outputText value="Registro" />
+					<h:outputText value="#{inspeccionControlAmbientalIniciarController.proyectoCustom.registro}" />
+					<h:outputText value="Modificar" rendered="#{not empty inspeccionControlAmbientalIniciarController.proyectoCustom}" />
+					<p:commandButton styleClass="button-small primary" icon="ui-icon-pencil" actionListener="#{inspeccionControlAmbientalIniciarController.eliminarProyecto}" process="@this" update="proyectoContainer" rendered="#{not empty inspeccionControlAmbientalIniciarController.proyectoCustom}" />
+				</h:panelGrid>
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="contentVerticalPadding" id="tecnicoContainer">
+				<f:facet name="header">
+					<p:commandButton value="Seleccionar" styleClass="button-small-text toRight field_mrg" icon="ui-icon-check" actionListener="#{inspeccionControlAmbientalIniciarController.seleccionarTecnico}" process="motivoContainer @this" />
+					<h:outputText value="Técnico responsable de la inspección *" />
+				</f:facet>
+				<h:panelGrid styleClass="panel_data w50" columns="2" columnClasses="header w25, null" rowClasses="null, alt">
+					<h:outputText value="Usuario" />
+					<h:outputText value="#{inspeccionControlAmbientalIniciarController.tecnico.nombre}" rendered="#{not empty inspeccionControlAmbientalIniciarController.tecnico}" />
+					<h:outputText value="(Seleccione)" rendered="#{empty inspeccionControlAmbientalIniciarController.tecnico}" />
+					<h:outputText value="Nombre" />
+					<h:outputText value="#{inspeccionControlAmbientalIniciarController.tecnico.persona.nombre}" />
+					<h:outputText value="Área" />
+					<h:outputText value="#{inspeccionControlAmbientalIniciarController.tecnico.area.areaAbbreviation}" />
+					<h:outputText value="Modificar" rendered="#{not empty inspeccionControlAmbientalIniciarController.tecnico}" />
+					<p:commandButton styleClass="button-small primary" icon="ui-icon-pencil" actionListener="#{inspeccionControlAmbientalIniciarController.eliminarTecnico}" process="@this" update="tecnicoContainer" rendered="#{not empty inspeccionControlAmbientalIniciarController.tecnico}" />
+				</h:panelGrid>
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="contentVerticalPadding" id="motivoContainer">
+				<f:facet name="header">
+					<h:outputText value="Motivo de la inspección" />
+				</f:facet>
+				<h:panelGrid columns="1" styleClass="w100">
+					<p:outputLabel value="Motivo" styleClass="bold" />
+					<control:imputConTextoEnriquecido valor="#{inspeccionControlAmbientalIniciarController.motivoSolicitud}" soloLectura="false" requiredMessage="El campo 'Motivo' es requerido." />
+				</h:panelGrid>
+			</p:panelGrid>
+			<h:inputHidden validator="#{inspeccionControlAmbientalIniciarController.validateProyectoTecnico}" />
+			<div class="buttons main">
+				<p:commandButton value="Enviar" action="#{inspeccionControlAmbientalIniciarController.iniciarProceso()}" icon="ui-icon-check" disabled="#{!inspeccionControlAmbientalIniciarController.permitirContinuar}">
+					<p:confirm header="Confirmación" message="Esta acción dará inicia a una nueva Solicitud de Inspección de Control Ambiental. ¿Está seguro que desea continuar?" icon="ui-icon-alert" />
+				</p:commandButton>
+				<p:commandButton value="Cancelar" action="/procesos/procesos.jsf?faces_redirect=true" icon="ui-icon-cancel" styleClass="secondary" immediate="true" />
+			</div>
+
+			<p:dialog header="Advertencia" id="showModalOtrosProcesos" widgetVar="showModalOtrosProcesos" modal="true" width="500" closable="true" draggable="false" resizable="false">
+				<p:separator />
+				<h:panelGrid columns="1" styleClass="w100">
+					<h:outputText value="Estimado usuario:" styleClass="bold alJustify" />
+					<h:outputText value="Recuerde que usted tiene #{inspeccionControlAmbientalIniciarController.procesosActivos} proceso(s) en curso de 'Inspección de Control Ambiental'." styleClass="bold text-red alJustify" />
+					<h:outputText />
+					<h:outputText value="Si requiere iniciar un nuevo proceso, cierre esta ventana." styleClass="bold alJustify" />
+					<h:outputText value="Si desea continuar un proceso ya iniciado, haga clic en el botón 'Ir a bandeja'." styleClass="bold alJustify" />
+					<h:outputText value="Si desea verificar el estado de un proceso que ya no se encuentra en su bandeja, haga clic en el botón 'Ir a procesos'." styleClass="bold alJustify" />
+				</h:panelGrid>
+				<p:separator />
+				<t:div styleClass="buttons">
+					<p:commandButton value="Ir a procesos" styleClass="secondary" style="float: left;" action="/procesos/listadoProcesosUsuario.jsf?faces-redirect=true" />
+					<p:commandButton value="Cerrar y continuar" type="button" styleClass="primary" onclick="PF('showModalOtrosProcesos').hide();" />
+					<p:commandButton value="Ir a bandeja" styleClass="secondary" immediate="true" action="/bandeja/bandejaTareas.jsf?faces-redirect=true" />
+				</t:div>
+			</p:dialog>
+
+			<p:remoteCommand rendered="#{inspeccionControlAmbientalIniciarController.showModalOtrosProcesos and !inspeccionControlAmbientalIniciarController.showedModalOtrosProcesos}" actionListener="#{inspeccionControlAmbientalIniciarController.updateShowModalOtrosProcesos()}" autoRun="true" process="@this" update="showModalOtrosProcesos" oncomplete="showModalOtrosProcesos(xhr, status, args)" />
+
+			<script type="text/javascript">
+        		function showModalOtrosProcesos(xhr, status, args) {
+            		if (#{inspeccionControlAmbientalIniciarController.showModalOtrosProcesos}) {
+            	    	PF('showModalOtrosProcesos').show();
+            		}                    
+        		}
+		    </script>
+		</h:form>
+
+	</ui:define>
+</ui:composition>
+
+</html>

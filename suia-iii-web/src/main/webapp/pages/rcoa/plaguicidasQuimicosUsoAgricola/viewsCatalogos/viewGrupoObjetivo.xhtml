@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+
+<div style="padding-bottom: 12px; padding-left: 4px;">
+	<h:outputText value="Grupo Objetivo" styleClass="bold" />
+</div>
+
+<h:panelGrid styleClass="w100">
+
+
+	<p:dataTable id="dtbGrupo" var="item" styleClass="table table-hover"
+		value="#{administracionCatalogosPquaController.listaGrupoObjetivo}"
+		paginator="true" paginatorAlwaysVisible="false"
+		paginatorPosition="bottom"
+		emptyMessage="#{labels['common.table.empty']}"
+		currentPageReportTemplate="{currentPage} de {totalPages}" rows="10"
+		rowsPerPageTemplate="5,10,15" rowIndexVar="index">
+		<p:column headerText="Nro." styleClass="w70px alCenter">
+			<h:outputText value="#{index + 1}" />
+		</p:column>
+		<p:column headerText="Grupo objetivo">
+			<h:outputText value="#{item.descripcion}" />
+		</p:column>
+		<p:column headerText="Acción" styleClass="w10 alCenter">
+			<f:facet name="header">
+				<p:commandButton value="Agregar" title="Agregar"
+					styleClass="secondary" process="@this" icon="ui-icon-plus"
+					actionListener="#{administracionCatalogosPquaController.agregarGrupo()}"
+					update=":form:tab:dlgGrupoObjetivo"
+					oncomplete="PF('dlgGrupoObjetivo').show();" resetValues="true" />
+			</f:facet>
+
+			<p:commandButton styleClass="button-small primary" process="@this"
+				icon="ui-icon-pencil" resetValues="true"
+				actionListener="#{administracionCatalogosPquaController.editarGrupo(item)}"
+				oncomplete="PF('dlgGrupoObjetivo').show();" immediate="true"
+				update=":form:tab:dlgGrupoObjetivo" />
+			<p:commandButton styleClass="button-small primary" process="@this"
+				icon="ui-icon-trash"
+				actionListener="#{administracionCatalogosPquaController.eliminarGrupo(item)}"
+				update="dtbGrupo">
+				<p:confirm icon="ui-icon-alert" header="Confirmación"
+					message="¿Está seguro de eliminar el registro?" />
+			</p:commandButton>
+		</p:column>
+	</p:dataTable>
+
+</h:panelGrid>
+
+<p:dialog header="Gupo objetivo" id="dlgGrupoObjetivo"
+	widgetVar="dlgGrupoObjetivo" modal="true" resizable="false" width="600"
+	closable="false">
+
+	<p:panelGrid columns="2" styleClass="panel_data w100"
+		columnClasses="header w25, null">
+		<p:outputLabel value="Grupo objetivo:" style="color: white"
+			for="txtDescripcionGrupo" />
+		<p:inputText id="txtDescripcionGrupo" autocomplete="off"
+			value="#{administracionCatalogosPquaController.grupoSeleccionado.descripcion}"
+			maxlength="200" required="true" />
+	</p:panelGrid>
+
+	<br />
+	<p:outputPanel>
+		<div class="buttons main">
+			<p:commandButton value="Cancelar" resetValues="true"
+				actionListener="#{administracionCatalogosPquaController.limpiarGrupo()}"
+				oncomplete="PF('dlgGrupoObjetivo').hide();" process="@this" />
+			<p:commandButton value="Aceptar"
+				actionListener="#{administracionCatalogosPquaController.aceptarGrupo()}"
+				oncomplete="handledlgGrupo(xhr, status, args)"
+				update="dlgGrupoObjetivo dtbGrupo" process="dlgGrupoObjetivo" />
+		</div>
+	</p:outputPanel>
+</p:dialog>
+
+<script type="text/javascript">
+	function handledlgGrupo(xhr, status, args) {
+		if (args.validationFailed || !args.addGrupo) {
+			PF('dlgGrupoObjetivo').show();
+		}
+		else {
+			PF('dlgGrupoObjetivo').hide();
+		}
+	}
+	</script>
+
+</html>

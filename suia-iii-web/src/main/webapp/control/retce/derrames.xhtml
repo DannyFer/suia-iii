@@ -1,0 +1,537 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">				
+		<style type="text/css">
+		.ui-fileupload-content{
+			border:none !important;
+			padding: 0px;
+		}
+		.ui-inputfield[readonly="readonly"]{
+			background: none repeat-x scroll 50% 50% #f5f5f5 !important;
+    	}
+    	
+		.textoCenterColumnContent{
+		    text-align: center !important;
+		}
+		</style>	
+		<h:form id="formTable" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }" rendered="#{!derramesController.verFormulario}">			
+			<p:panel style="text-align:center;">
+				<f:facet name="header">
+					<h:outputText value="REGISTRO DE EMISIONES Y TRANSFERENCIA DE CONTAMINANTES EN EL ECUADOR" styleClass="uppercase"/><br/>
+					<h:outputText value="SITUACIONES AMBIENTALES EMERGENTES / DERRAMES" styleClass="uppercase"/>
+				</f:facet>
+			</p:panel>
+			
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Reportes de Situaciones Emergentes Ambientales / Derrames"/>
+				</f:facet>
+				<p:dataTable id="descargasTable" value="#{derramesController.derramesList}" var="item" emptyMessage="#{labels['common.table.empty']}"
+					paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rows="5">				
+					<f:facet name="header">
+						<p:commandButton value="#{msg['button.agregar']}" icon="ui-icon-plus" actionListener="#{derramesController.crearDerrame()}" process="@this" update="@all"  style="float:right" resetValues="true"/>
+					</f:facet>
+					<p:column headerText="Proyecto">
+						<h:outputText value="#{item.informacionProyecto.codigo}"/>
+					</p:column>
+					<p:column headerText="Código">
+						<h:outputText value="#{item.codigo}"/>
+					</p:column>											
+					<p:column headerText="Producto Derramado">
+						<h:outputText value="#{item.productoDerramado}"/>
+					</p:column>
+					<p:column headerText="Causa">
+						<h:outputText value="#{item.causa}"/>
+					</p:column>
+					<p:column headerText="Fecha Ocurrencia">
+						<h:outputText value="#{item.fechaOcurrenciaDesde}">
+							<f:convertDateTime pattern="dd/MM/YYYY"/>
+						</h:outputText>
+					</p:column>
+					<p:column headerText="Volumen Derramado">
+						<h:outputText value="#{item.volumenDerramado}"/>
+					</p:column>
+					<p:column styleClass="w10" headerText="Acciones">
+						<center>
+							<p:commandButton icon="ui-icon-search" title="Ver" styleClass="primary" process="@this" update="@all" action="#{derramesController.seleccionarDerrame(item)}"
+							rendered="#{item.enviado}"/>
+							<p:commandButton icon="ui-icon-pencil" title="Editar" styleClass="secondary" process="@this" update="@all" action="#{derramesController.seleccionarDerrame(item)}"
+							rendered="#{!item.enviado}"/>
+							<p:commandButton icon="ui-icon-trash" title="Eliminar" styleClass="secondary" process="@this" update="@all" action="#{derramesController.eliminarDerrame(item)}"
+							rendered="#{!item.enviado}">
+								<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar?" icon="ui-icon-alert"/>
+							</p:commandButton>					
+						</center>												
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+		</h:form>
+		<h:form id="form" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }" rendered="#{derramesController.verFormulario}">
+			<p:panel style="text-align:center;">
+				<f:facet name="header">
+					<h:outputText value="REGISTRO DE EMISIONES Y TRANSFERENCIA DE CONTAMINANTES EN EL ECUADOR" styleClass="uppercase"/><br/>
+					<h:outputText value="SITUACIONES AMBIENTALES EMERGENTES / DERRAMES" styleClass="uppercase"/>
+				</f:facet>
+			</p:panel>							
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Reporte de Derrames"/>
+				</f:facet>							
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+					<h:outputText value="Código"/>
+					<h:outputText value="#{derramesController.derrames.codigo}"/>
+					
+					<h:outputText value="Proyecto"/>
+					<h:outputText id="codigoProyecto" value="#{derramesController.derrames.informacionProyecto.codigo}"/>
+					<h:outputText value="Nombre Proyecto"/>
+					<h:outputText id="nombreProyecto" value="#{derramesController.derrames.informacionProyecto.nombreProyecto}"/>
+					
+					<h:outputText value="Reporte de Emergencia *" for="reporteEmergencia"/>
+					<h:outputText value="#{derramesController.derrames.catalogoReporteEmergencia.descripcion}" rendered="#{!derramesController.habilitarIngreso}"/>
+					<h:panelGroup id="reporteEmergenciaGroup" rendered="#{derramesController.habilitarIngreso}">					
+					<p:selectOneMenu id="reporteEmergencia" required="true" requiredMessage="Reporte de Emergencia es requerido"
+					value="#{derramesController.derrames.catalogoReporteEmergencia}" converter="selectItemConverter" styleClass="w100">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{derramesController.catalogoDerrameReporteEmergenciaList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+						<p:ajax event="change" update="reporteEmergenciaGroup"/>
+					</p:selectOneMenu>
+					<p:inputText id="reporteEmergenciaOtro" value="#{derramesController.derrames.otroReporteEmergencia}"
+					required="true" requiredMessage="Reporte de Emergencia (Especifique) es requerido"  onkeypress="return !numbersonly(this, event);"
+					rendered="#{derramesController.derrames.catalogoReporteEmergencia.descripcion.contains('Otro')}" maxlength="50" title="Campo alfanumérico de 50 caracteres."/>
+					</h:panelGroup>
+					
+					<h:outputText value="Causas del Derrame *" for="causasDerrame"/>
+					<h:outputText value="#{derramesController.derrames.causa}" rendered="#{!derramesController.habilitarIngreso}"/>
+					<h:panelGroup id="causasDerrameGroup" rendered="#{derramesController.habilitarIngreso}">
+					<p:selectOneMenu id="causasDerrame" required="true" requiredMessage="Causas del Derrame es requerido"
+					value="#{derramesController.derrames.catalogoCausa}" converter="selectItemConverter" styleClass="w100">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{derramesController.catalogoDerrameCausaList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+						<p:ajax event="change" update="causasDerrameGroup"/>
+					</p:selectOneMenu>
+					<p:outputLabel value="Especifique *" rendered="#{derramesController.derrames.catalogoCausa.descripcion.contains('Otro')}"/>
+					<p:inputText id="causasDerrameOtro" value="#{derramesController.derrames.otroCausa}"
+					required="true" requiredMessage="Causas del Derrame (Especifique) es requerido" 
+					rendered="#{derramesController.derrames.catalogoCausa.descripcion.contains('Otro')}" maxlength="100" title="Campo alfanumérico de 100 caracteres."/>
+					</h:panelGroup>
+					
+				</p:panelGrid>
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+					
+					<h:outputText value="Reporte de Notificación" for="fileReporteNotificacion"/>
+					<h:panelGroup id="groupFileReporteNotificacion">
+                    <p:fileUpload id="fileReporteNotificacion"
+                                              fileUploadListener="#{derramesController.fileUploadReporteNotificacion}"
+                                              value="#{derramesController.fileReporteNotificacion}" sizeLimit="20971520"
+                                              allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar (pdf 20Mb)"
+                                              update="groupFileReporteNotificacion"
+                                              uploadLabel="Subir" auto="true"                                              
+                                              cancelLabel="Cancelar"
+                                              invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+                                              invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+                                              styleClass="w100 toLeft" mode="advanced"
+                                              required="true"
+                                              rendered="#{derramesController.habilitarIngreso}"/>
+                    <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar"
+					rendered="#{derramesController.adjuntoReporteNotificacion.id!=null or derramesController.adjuntoReporteNotificacion.contenidoDocumento!=null}">
+								<p:fileDownload value="#{derramesController.documentoReporteNotificacion}"/>
+					</p:commandButton>
+					<h:outputText id="nombreReporteNotificacion" value="#{derramesController.adjuntoReporteNotificacion.nombre}"/>					                    
+                    </h:panelGroup>
+					<h:outputText value="Fecha de Ocurrencia del Derrame (Desde)*" for="fechaOcurrenciaDesde"/>
+					<h:outputText value="#{derramesController.derrames.fechaOcurrenciaDesde}" rendered="#{!derramesController.habilitarIngreso}">
+						<f:convertDateTime pattern="dd/MM/YYY"/>
+					</h:outputText>
+					<p:calendar id="fechaOcurrenciaDesde" styleClass="calendarClass" value="#{derramesController.derrames.fechaOcurrenciaDesde}" 
+					pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" 
+					required="true" requiredMessage="Fecha de Ocurrencia del Derrame (Desde) es requerido" maxdate="#{derramesController.fechaActual}"
+					rendered="#{derramesController.habilitarIngreso}"/>
+					
+				</p:panelGrid>
+				<p:panelGrid columns="4" styleClass="panel_data w100" columnClasses="header w25,w25,header w25,w25">	
+
+					<h:outputText value="Fecha de Ocurrencia del Derrame (Hasta)*" for="fechaOcurrenciaHasta" rendered="false"/>
+					<h:outputText value="#{derramesController.derrames.fechaOcurrenciaHasta}" rendered="#{!derramesController.habilitarIngreso and false}">
+						<f:convertDateTime pattern="dd/MM/YYY"/>
+					</h:outputText>
+					<p:calendar id="fechaOcurrenciaHasta" styleClass="calendarClass" value="#{derramesController.derrames.fechaOcurrenciaHasta}" 
+					pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" 
+					required="true" requiredMessage="Fecha de Ocurrencia del Derrame (Hasta) es requerido" maxdate="#{derramesController.fechaActual}"
+					rendered="#{derramesController.habilitarIngreso and false}"/>						
+										
+					<h:outputText value="Fecha de Notificación del Derrame *" for="fechaNotificacion"/>
+					<h:outputText value="#{derramesController.derrames.fechaNotificacion}" rendered="#{!derramesController.habilitarIngreso}">
+						<f:convertDateTime pattern="dd/MM/YYY"/>
+					</h:outputText>
+					<p:calendar id="fechaNotificacion" styleClass="calendarClass" value="#{derramesController.derrames.fechaNotificacion}" 
+					pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" 
+					required="true" requiredMessage="Fecha de Notificación del Derrame es requerido" maxdate="#{derramesController.fechaActual}"
+					rendered="#{derramesController.habilitarIngreso}"/>						
+					
+					<h:outputText value="Código del Derrame(Si aplica)"/>
+					<h:outputText value="#{derramesController.derrames.codigoDerrame}" rendered="#{!derramesController.habilitarIngreso}"/>
+					<p:inputText id="codigoDerrame" value="#{derramesController.derrames.codigoDerrame}"
+					required="false" requiredMessage="Código del Derrame es requerido" maxlength="100" title="Campo alfanumérico de 100 caracteres."
+					rendered="#{derramesController.habilitarIngreso}"/>
+				
+				</p:panelGrid>
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,w75">	
+					<h:outputText value="Infraestructura asociada al Derrame *"/>
+					<h:outputText value="#{derramesController.derrames.infraestructura}" rendered="#{!derramesController.habilitarIngreso}"/>
+					<h:panelGroup id="infraestructuraDerrameGroup" rendered="#{derramesController.habilitarIngreso}">
+					<p:selectOneMenu id="infraestructuraDerrame" required="true" requiredMessage="Infraestructura asociada al Derrame es requerido"
+					value="#{derramesController.derrames.catalogoInfraestructura}" converter="selectItemConverter" styleClass="w100">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{derramesController.catalogoDerrameInfraestructuraList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+						<p:ajax event="change" update="infraestructuraDerrameGroup"/>
+					</p:selectOneMenu>
+					<p:outputLabel value="Especifique *" rendered="#{derramesController.derrames.catalogoInfraestructura.descripcion.contains('Otro')}"/>
+					<p:inputText id="infraestructuraDerrameOtro" value="#{derramesController.derrames.otroInfraestructura}"
+					required="true" requiredMessage="Infraestructura asociada al Derrame (Especifique) es requerido" 
+					rendered="#{derramesController.derrames.catalogoInfraestructura.descripcion.contains('Otro')}" maxlength="100" title="Campo alfanumérico de 100 caracteres."/>
+					</h:panelGroup>
+					
+				</p:panelGrid>
+				<p:outputLabel	value="Ubicación del derrame"	styleClass="bold" escape="false" />		
+				
+				<h:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="header w25, null" rowClasses="null, alt">
+							<p:outputLabel
+								value="Coordenadas referenciales del derrame (formato WGS84 17S) *"
+								styleClass="ui-label-form" />
+				<p:panelGrid columns="4" styleClass="panel_data w100" columnClasses="header w20,w30,header w20,w30">
+					<h:outputText value="X *" for="coordX"/>
+					<h:outputText value="#{derramesController.derrames.coordenadaX}" rendered="#{!derramesController.habilitarIngreso}"/>					
+					<pe:inputNumber id="coordX" value="#{derramesController.derrames.coordenadaX}" decimalPlaces="4" thousandSeparator="" maxValue="9999999999.9999" 
+					required="true" requiredMessage="Coordenada X es requerido" title="Coordenanda X en formato WGS84 17S" 
+					rendered="#{derramesController.habilitarIngreso}">
+						<p:ajax process="@this" update="pngUbicacion" event="change" listener="#{derramesController.validarCoordenadas}"/>
+					</pe:inputNumber>
+					
+					<h:outputText value="Y *" for="coordY"/>
+					<h:outputText value="#{derramesController.derrames.coordenadaY}" rendered="#{!derramesController.habilitarIngreso}"/>					
+					<pe:inputNumber id="coordY" value="#{derramesController.derrames.coordenadaY}" decimalPlaces="4" thousandSeparator="" maxValue="9999999999.9999" 
+					required="true" requiredMessage="Coordenada Y es requerido" title="Coordenanda Y en formato WGS84 17S"
+					rendered="#{derramesController.habilitarIngreso}">
+						<p:ajax process="@this" update="pngUbicacion" event="change" listener="#{derramesController.validarCoordenadas}"/>
+					</pe:inputNumber>
+				</p:panelGrid>
+				</h:panelGrid>
+				<p:panelGrid id="pngUbicacion" columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+					
+					<h:outputText value="Provincia *"/>
+					<h:outputText value="#{derramesController.derrames.ubicacionesGeografica.ubicacionesGeografica.ubicacionesGeografica.nombre}" rendered="#{!derramesController.habilitarIngreso}"/>					
+					<p:selectOneMenu id="provincia" required="false" disabled="true" requiredMessage="Provincia es requerido"
+					value="#{derramesController.provincia}" converter="selectItemConverter" styleClass="w100"
+					rendered="#{derramesController.habilitarIngreso}">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{derramesController.provinciasList}" var="item" itemLabel="#{item.nombre}" itemValue="#{item}"/>
+						<p:ajax event="change" update="canton parroquia" listener="#{derramesController.seleccionarProvincia}"/>
+					</p:selectOneMenu>
+					
+					<h:outputText value="Cantón *"/>
+					<h:outputText value="#{derramesController.derrames.ubicacionesGeografica.ubicacionesGeografica.nombre}" rendered="#{!derramesController.habilitarIngreso}"/>					
+					<p:selectOneMenu id="canton" required="false" disabled="true" requiredMessage="Cantón es requerido"
+					value="#{derramesController.canton}" converter="selectItemConverter" styleClass="w100"
+					rendered="#{derramesController.habilitarIngreso}">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{derramesController.cantonesList}" var="item" itemLabel="#{item.nombre}" itemValue="#{item}"/>
+						<p:ajax event="change" update="parroquia" listener="#{derramesController.seleccionarCanton}"/>
+					</p:selectOneMenu>
+					
+					<h:outputText value="Parroquia *"/>
+					<h:outputText value="#{derramesController.derrames.ubicacionesGeografica.nombre}" rendered="#{!derramesController.habilitarIngreso}"/>					
+					<p:selectOneMenu id="parroquia" required="false" requiredMessage="Parroquia es requerido"
+					value="#{derramesController.derrames.ubicacionesGeografica}" converter="selectItemConverter" styleClass="w100"
+					rendered="#{derramesController.habilitarIngreso}">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{derramesController.parroquiasList}" var="item" itemLabel="#{item.nombre}" itemValue="#{item}"/>						
+					</p:selectOneMenu>
+					
+					<h:outputText value="Lugar o Dirección específica del Derrame *" for="direccionDerrame"/>
+					<h:outputText value="#{derramesController.derrames.direccion}" rendered="#{!derramesController.habilitarIngreso}"/>
+					<p:inputText id="direccionDerrame" value="#{derramesController.derrames.direccion}"
+					required="true" requiredMessage="Lugar o Dirección específica del Derrame es requerido" maxlength="200" title="Campo alfanumérico de 200 caracteres."
+					rendered="#{derramesController.habilitarIngreso}"/>
+				</p:panelGrid>
+
+				<p:outputLabel	value="Características del producto derramado"	styleClass="bold" escape="false" />		
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+					<h:outputText value="Producto derramado *" for="productoDerramado"/>
+					<h:outputText value="#{derramesController.derrames.productoDerramado}" rendered="#{!derramesController.habilitarIngreso}"/>
+					<h:panelGroup id="productoDerramadoGroup" rendered="#{derramesController.habilitarIngreso}">
+					<p:selectOneMenu id="productoDerramado" required="true" requiredMessage="Producto derramado es requerido"
+					value="#{derramesController.derrames.catalogoProductoDerramado}" converter="selectItemConverter" styleClass="w100"
+					filter="true" filterMatchMode="contains">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{derramesController.catalogoDerrameProductoList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+						<p:ajax event="change" update="productoDerramadoGroup"/>
+					</p:selectOneMenu>
+					<p:outputLabel value="Especifique *" rendered="#{derramesController.derrames.catalogoProductoDerramado.descripcion.contains('Otro') or derramesController.derrames.catalogoProductoDerramado.descripcion.contains('Acuerdo Ministerial 142')}"/>
+					<p:inputText id="productoDerramadoOtro" value="#{derramesController.derrames.otroProductoDerramado}"
+					required="true" requiredMessage="Infraestructura asociada al Derrame (Especifique) es requerido" 
+					rendered="#{derramesController.derrames.catalogoProductoDerramado.descripcion.contains('Otro')}" maxlength="100" title="Campo alfanumérico de 100 caracteres."/>
+					
+					<p:selectOneMenu id="productoDerramadoSustancia" required="true" requiredMessage="Sustancia Producto Derramado es requerido"
+					 value="#{derramesController.derrames.sustanciaQuimicaPeligrosa}" converter="selectItemConverter" styleClass="w100"
+					 rendered="#{derramesController.derrames.catalogoProductoDerramado.descripcion.contains('Acuerdo Ministerial 142')}"
+					 filter="true" filterMatchMode="contains">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{derramesController.sustanciaQuimicaPeligrosaList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>						
+					</p:selectOneMenu>
+					</h:panelGroup>
+				</p:panelGrid>
+				
+				<p:panelGrid columns="4" styleClass="panel_data w100" columnClasses="header w25,w25,header w25,w25">
+					<h:outputText value="Volumen derramado (gal) *" for="volumenDerramado"/>
+					<h:outputText value="#{derramesController.derrames.volumenDerramado}" rendered="#{!derramesController.habilitarIngreso}"/>
+					<pe:inputNumber id="volumenDerramado" value="#{derramesController.derrames.volumenDerramado}" decimalPlaces="4" thousandSeparator="" maxValue="9999999999.9999"
+					required="true" requiredMessage="Volumen derramado (gal) es requerido" title="Volumen Derramado en galones"
+					rendered="#{derramesController.habilitarIngreso}"/>
+					
+					<h:outputText value="Volumen recuperado (gal) *" for="volumenRecuperado"/>
+					<h:outputText value="#{derramesController.derrames.volumenRecuperado}" rendered="#{!derramesController.habilitarIngreso}"/>
+					<pe:inputNumber id="volumenRecuperado" value="#{derramesController.derrames.volumenRecuperado}" decimalPlaces="4" thousandSeparator="" maxValue="9999999999.9999" 
+					required="true" requiredMessage="Volumen recuperado (gal) es requerido" title="Volumen Recuperado en galones"
+					rendered="#{derramesController.habilitarIngreso}"/>
+				</p:panelGrid>
+				
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Información del Contaminante Liberado al Ambiente"/>
+				</f:facet>
+				<p:dataTable id="componentesTable" value="#{derramesController.componenteAfectadoList}" var="item" emptyMessage="#{labels['common.table.empty']}"
+					paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rows="5">				
+					<f:facet name="header">
+							<p:commandButton value="#{msg['button.agregar']}" icon="ui-icon-plus" actionListener="#{derramesController.crearComponenteAfectado()}" 
+							oncomplete="PF('componenteAfectadoDiag').show()" process="@this" update=":formDialogs:componenteAfectadoDiag" style="float:right"
+							rendered="#{derramesController.habilitarIngreso}">
+							<p:resetInput target=":formDialogs:componenteAfectadoDiagGrid" />
+							</p:commandButton>
+						</f:facet>	
+					<p:column headerText="Componente Afectado">
+						<h:outputText value="#{item.catalogoComponenteAfectado.descripcion}"/>
+					</p:column>											
+					<p:column headerText="Contaminante">
+						<h:outputText value="#{item.contaminante}"/>
+					</p:column>
+					<p:column headerText="Concentracion Inicial">
+						<h:outputText value="#{item.concentracionInicial}"/>
+					</p:column>
+					<p:column headerText="Unidad">
+						<h:outputText value="#{item.unidad}"/>
+					</p:column>
+					<p:column headerText="Área Afectada">
+						<h:outputText value="#{item.areaAfectada}">
+							<f:convertNumber maxIntegerDigits="10" maxFractionDigits="3"/>
+						</h:outputText>
+					</p:column>
+					<p:column headerText="Número de Personas Afectadas">
+						<h:outputText value="#{item.personasAfectadas}">
+						<f:convertNumber maxIntegerDigits="10" minFractionDigits="0"/>
+						</h:outputText>
+					</p:column>
+					<p:column styleClass="w15" headerText="Acciones">
+						<center>
+							<p:commandButton icon="ui-icon-#{derramesController.habilitarIngreso?'pencil':'search'}" title="#{derramesController.habilitarIngreso?'Editar':'Ver'}" styleClass="#{derramesController.habilitarIngreso?'secondary':'primary'}" process="@this" action="#{derramesController.editarComponenteAfectado(item)}" 
+							update=":formDialogs:componenteAfectadoDiag" oncomplete="PF('componenteAfectadoDiag').show()">
+								 <p:resetInput target=":formDialogs:componenteAfectadoDiagGrid" />
+							</p:commandButton>
+							<p:commandButton icon="ui-icon-trash" title="Eliminar" styleClass="secondary" process="@this" action="#{derramesController.eliminarComponenteAfectado(item)}" update=":form:componentesTable"
+							rendered="#{derramesController.habilitarIngreso}">
+								<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar?" icon="ui-icon-alert"/>
+							</p:commandButton>					
+						</center>												
+					</p:column>
+				</p:dataTable>				
+			</p:panelGrid>
+			<h:inputHidden validator="#{derramesController.validarFormulario}"/>	
+			<div class="buttons main">
+			    <p:commandButton value="#{derramesController.habilitarIngreso?'Cancelar':'Cerrar'}" styleClass="secondary" icon="ui-icon-cancel" action="#{derramesController.ocultarFormulario}" process="@this" update="@all"/>
+				<p:commandButton value="Guardar" icon="ui-icon-disk" action="#{derramesController.guardar}" update=":form"
+				rendered="#{derramesController.habilitarIngreso}"/>
+				<p:commandButton value="Enviar" icon="ui-icon-check" 
+				onclick="PF('finalizeDlg').show();"	process="@this"
+				disabled="#{empty derramesController.derrames.id}"
+				rendered="#{derramesController.habilitarIngreso}">
+					<p:confirm header="Confirmación" message="¿Está seguro que desea finalizar?" icon="ui-icon-alert"/>
+				</p:commandButton>
+			</div>						
+		</h:form>
+		<h:form id="formDialogs" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }" rendered="#{derramesController.verFormulario}">
+		
+			<p:dialog modal="true" id="finalizeDlg" widgetVar="finalizeDlg"  header="Cláusula"
+				resizable="false" width="650px">
+				
+				<p align="justify">#{derramesController.mensajeResponsabilidad}</p>			
+					
+					<t:div styleClass="buttons main">
+					<p:commandButton icon="ui-icon-check" value="Enviar" 
+					action="#{derramesController.enviar}" update="@all" styleClass="large"
+					 oncomplete="PF('wizard').loadStep('pasoCaracteristicas', false)" immediate="true"/>
+					<p:commandButton icon="ui-icon-cancel" value="Cancelar" onclick="PF('finalizeDlg').hide();" process="@this" styleClass="secondary"/>	
+					
+				</t:div>
+			</p:dialog>
+			
+			<p:dialog id="componenteAfectadoDiag" widgetVar="componenteAfectadoDiag" header="Componente Afectado" width="900px" closable="false">								
+				<p:panelGrid id="componenteAfectadoDiagGrid" columns="4" styleClass="panel_data w100" columnClasses="header w25,w25,header w25,w25">				
+					
+					<h:outputText value="Componente Afectado *"/>
+					<h:outputText value="#{derramesController.componenteAfectado.catalogoComponenteAfectado.descripcion}" rendered="#{!derramesController.habilitarIngreso}"/>
+					<p:selectOneMenu id="componenteAfectado" required="true" requiredMessage="Componente Afectado es requerido"
+					value="#{derramesController.componenteAfectado.catalogoComponenteAfectado}" converter="selectItemConverter" styleClass="w100"
+					rendered="#{derramesController.habilitarIngreso}">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{derramesController.catalogoDerrameComponenteAfectadoList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+						<p:ajax event="change" update="componenteAfectadoDiagGrid pngEspeciesValoradas cuerpoHidricoGroupLabel cuerpoHidricoGroupInput" listener="#{derramesController.mostrarCampos()}"/>						
+					</p:selectOneMenu>
+					
+					<h:panelGroup id="cuerpoHidricoGroupLabel">
+					<h:outputText value="Nombre del Cuerpo Hídrico Afectado *" rendered="#{derramesController.componenteAfectado.catalogoComponenteAfectado.descripcion.contains('Agua')}"/>					
+					</h:panelGroup>
+					<h:panelGroup id="cuerpoHidricoGroupInput">
+					<h:outputText value="#{derramesController.componenteAfectado.nombreCuerpoHidrico}" rendered="#{derramesController.componenteAfectado.catalogoComponenteAfectado.descripcion.contains('Agua') and !derramesController.habilitarIngreso}"/>
+					<p:inputText id="cuerpoHidrico" value="#{derramesController.componenteAfectado.nombreCuerpoHidrico}"
+					required="true" requiredMessage="Nombre del Cuerpo Hídrico Afectado es requerido" maxlength="100" title="Campo alfanumérico de 100 caracteres."
+					rendered="#{derramesController.componenteAfectado.catalogoComponenteAfectado.descripcion.contains('Agua') and derramesController.habilitarIngreso}"/>
+					</h:panelGroup>
+					
+					<h:outputText value="Contaminante *" rendered="#{derramesController.habilitarIngreso and !derramesController.componenteNinguno}"/>
+					<h:outputText value="#{derramesController.componenteAfectado.catalogoContaminante.descripcion}" rendered="#{!derramesController.habilitarIngreso  and !derramesController.componenteNinguno}"/>
+					<h:panelGroup id="contaminanteGroup" rendered="#{derramesController.habilitarIngreso and !derramesController.componenteNinguno}">
+					<p:selectOneMenu id="contaminante" required="true" requiredMessage="Contaminante es requerido"
+					value="#{derramesController.componenteAfectado.catalogoContaminante}" converter="selectItemConverter" styleClass="w100">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{derramesController.catalogoDerrameContaminanteList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+						<p:ajax event="change" update="contaminanteGroup"/>						
+					</p:selectOneMenu>
+					<p:inputText id="contaminanteOtro" value="#{derramesController.componenteAfectado.otroContaminante}"
+					required="true" requiredMessage="Contaminante (Especifique) es requerido" 
+					rendered="#{derramesController.componenteAfectado.catalogoContaminante.descripcion.contains('Otro')}" maxlength="100" title="Campo alfanumérico de 100 caracteres."/>
+					</h:panelGroup>
+					
+					<h:outputText value="Concentración Inicial *" rendered="#{derramesController.habilitarIngreso and !derramesController.componenteNinguno}"/>
+					<h:outputText value="#{derramesController.componenteAfectado.concentracionInicial}" rendered="#{!derramesController.habilitarIngreso and !derramesController.componenteNinguno}"/>
+					<pe:inputNumber id="conecntracionInicial" value="#{derramesController.componenteAfectado.concentracionInicial}" decimalPlaces="2" thousandSeparator="" maxValue="99999.99" 
+					required="true" requiredMessage="Concentración Inicial es requerido" title="5 enteros 2 decimales"
+					rendered="#{derramesController.habilitarIngreso and !derramesController.componenteNinguno}"/>
+					
+					<h:outputText value="Unidad de Medida (de acuerdo a la normativa aplicable)*" rendered="#{derramesController.habilitarIngreso and !derramesController.componenteNinguno}"/>
+					<h:outputText value="#{derramesController.componenteAfectado.unidad}" rendered="#{!derramesController.habilitarIngreso and !derramesController.componenteNinguno}"/>
+					<p:inputText id="unidadMedida" value="#{derramesController.componenteAfectado.unidad}"
+					required="true" requiredMessage="Unidad de Medida es requerido" maxlength="50" title="Campo alfanumérico de 50 caracteres."
+					rendered="#{derramesController.habilitarIngreso and !derramesController.componenteNinguno}"/>
+					
+					
+					
+					<h:outputText value="Tipo de afectación*" rendered="#{derramesController.habilitarIngreso and derramesController.tipoAfectacion}"/>
+					<h:outputText value="#{derramesController.componenteAfectado.catalogoTipoAfectacion.descripcion}" rendered="#{!derramesController.habilitarIngreso and derramesController.tipoAfectacion}"/>
+					<h:panelGroup id="tipoAfectacionGroup" rendered="#{derramesController.habilitarIngreso and derramesController.tipoAfectacion}">
+					<p:selectOneMenu id="tipoAfectacion" required="true" requiredMessage="Tipo afectación es requerido"
+					value="#{derramesController.componenteAfectado.catalogoTipoAfectacion}" converter="selectItemConverter" styleClass="w100">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{derramesController.catalogoTypoAfectadoList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+						<p:ajax event="change" update="tipoAfectacionGroup"/>						
+					</p:selectOneMenu>
+					<p:outputLabel value="Especifique *" rendered="#{derramesController.componenteAfectado.catalogoTipoAfectacion.descripcion.contains('Otro')}"/>
+					<p:inputText id="tipoAfectacionOtro" value="#{derramesController.componenteAfectado.otroTipoAfectacion}"
+					required="true" requiredMessage="Tipo afectación (Especifique) es requerido" 
+					rendered="#{derramesController.componenteAfectado.catalogoTipoAfectacion.descripcion.contains('Otro')}" maxlength="200" title="Campo alfanumérico de 200 caracteres."/>
+					</h:panelGroup>
+					
+					<h:outputText value="#{derramesController.labelProcesoTratamiento}" rendered="#{derramesController.procesoTratamiento}"/>
+					<h:outputText value="#{derramesController.componenteAfectado.catalogoTratamientoSuelo.descripcion}" rendered="#{!derramesController.habilitarIngreso and derramesController.procesoTratamiento}"/>
+					<p:selectOneMenu id="tratamientoSuelos" required="true" requiredMessage="Proceso de Tratamioento de Suelo / Sedimentos / Lastre / Agua es requerido"
+					value="#{derramesController.componenteAfectado.catalogoTratamientoSuelo}" converter="selectItemConverter" styleClass="w100"
+					rendered="#{derramesController.habilitarIngreso and derramesController.procesoTratamiento}">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{derramesController.catalogoDerrameTratamientoSuelosList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>						
+					</p:selectOneMenu>
+										
+					<h:outputText value="#{derramesController.labelVolumenContaminados}" rendered="#{derramesController.volumenContaminados}"/>
+					<h:outputText value="#{derramesController.componenteAfectado.contaminante}" rendered="#{!derramesController.habilitarIngreso and derramesController.volumenContaminados}"/>
+					<pe:inputNumber id="suelosContaminados" value="#{derramesController.componenteAfectado.suelosSedimentosContaminados}" decimalPlaces="0" thousandSeparator="" maxValue="99999" 
+					required="true" requiredMessage="Volumen de Suelo / Sedimentos / Lastre / Agua contaminados (m3) es requerido" title="5 enteros"
+					rendered="#{derramesController.habilitarIngreso and derramesController.volumenContaminados}"/>
+					
+					<h:outputText value="#{derramesController.labelVolumenRemediados}" rendered="#{derramesController.volumenRemediados}"/>
+					<h:outputText value="#{derramesController.componenteAfectado.suelosSedimentosRemediados}" rendered="#{!derramesController.habilitarIngreso and derramesController.volumenRemediados}"/>
+					<pe:inputNumber id="suelosRemediados" value="#{derramesController.componenteAfectado.suelosSedimentosRemediados}" decimalPlaces="0" thousandSeparator="" maxValue="99999" 
+					required="true" requiredMessage="Volumne de Suelo / Sedimentos / Lastre / Agua remediados es requerido" title="5 enteros"
+					rendered="#{derramesController.habilitarIngreso and derramesController.volumenRemediados}"/>
+					
+					<h:outputText value="Área Afectada (m2) *" rendered="#{derramesController.habilitarIngreso and derramesController.areaAfectada}"/>
+					<h:outputText value="#{derramesController.componenteAfectado.areaAfectada}" rendered="#{!derramesController.habilitarIngreso and derramesController.areaAfectada}"/>
+					<pe:inputNumber id="areaAfectada" value="#{derramesController.componenteAfectado.areaAfectada}" decimalPlaces="3" thousandSeparator="" maxValue="9999999999.999" 
+					required="true" requiredMessage="Área Afectada es requerido" title="10 enteros 3 decimales"
+					rendered="#{derramesController.habilitarIngreso and derramesController.areaAfectada}"/>
+					
+					<h:outputText value="Número de Personas Afectadas *" rendered="#{derramesController.personasAfectadas}"/>
+					<h:outputText value="#{derramesController.componenteAfectado.personasAfectadas}" rendered="#{!derramesController.habilitarIngreso and derramesController.personasAfectadas}"/>
+					<pe:inputNumber id="personasAfectadas" value="#{derramesController.componenteAfectado.personasAfectadas}" decimalPlaces="0" thousandSeparator="" maxValue="9999999999" 
+					required="true" requiredMessage="Número de Personas Afectadas es requerido" title="10 enteros"
+					rendered="#{derramesController.habilitarIngreso and derramesController.personasAfectadas}"/>
+				</p:panelGrid>					
+				<p:panelGrid id="pngEspeciesValoradas" columns="2" styleClass="panel_data w100" columnClasses="header w25,w75">
+					<h:outputText value="Especies Afectadas *" rendered="#{derramesController.especiesAfectadas}"/>	
+				
+					<h:panelGroup id="groupFileEspecies" rendered="#{derramesController.especiesAfectadas}">
+						<p:commandButton value="Descargar plantilla" styleClass="button-small-text toRight field_mrg" icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true" >
+							<p:fileDownload value="#{derramesController.getPlantillaComponente()}" />
+						</p:commandButton>
+						<br/>
+                    <p:fileUpload id="fileEspeciesAfectadas"
+                                              fileUploadListener="#{derramesController.handleFileUpload}"
+                                              value="#{derramesController.fileEspeciesAfectadas}" sizeLimit="20971520"
+                                              allowTypes="/(\.|\/)(xls)$/" label="Seleccionar (pdf 20Mb)"
+                                              update="groupFileEspecies"
+                                              uploadLabel="Subir" auto="true"                                              
+                                              cancelLabel="Cancelar"
+                                              invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+                                              invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+                                              styleClass="w100 toLeft" mode="advanced"
+                                              required="true"
+                                              rendered="#{derramesController.habilitarIngreso}"/>
+                    <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar"
+					rendered="#{derramesController.adjuntoEspeciesAfectadas.id!=null or derramesController.adjuntoEspeciesAfectadas.contenidoDocumento!=null}">
+								<p:fileDownload value="#{derramesController.documentoEspeciesAfectadas}"/>
+					</p:commandButton>
+					<h:outputText id="nombreEspeciesAfectadas" value="#{derramesController.adjuntoEspeciesAfectadas.nombre}"/>	
+					<h:inputHidden required="true" requiredMessage="El adjunto es requerido" value="#{derramesController.adjuntoEspeciesAfectadas.nombre}"/>
+					<p:dataTable id="componentesProducto" value="#{derramesController.listaComponentesProyecto}" var="item" emptyMessage="#{labels['common.table.empty']}"
+					rowIndexVar="row"
+					paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rows="5">				
+					<f:facet name="header">
+						</f:facet>
+					<p:column headerText="#" width="5%" styleClass="textoCenterColumnContent">
+						<h:outputText value="#{row+1}" />
+					</p:column>
+					<p:column headerText="Nombre" styleClass="textoCenterColumnContent">
+						<h:outputText value="#{item.nombre}"/>
+					</p:column>
+					<p:column headerText="Familia" styleClass="textoCenterColumnContent">
+						<h:outputText value="#{item.familia}"/>
+					</p:column>
+					<p:column headerText="Especies" styleClass="textoCenterColumnContent">
+						<h:outputText value="#{item.especies}"/>
+					</p:column>
+					<p:column headerText="Genero" styleClass="textoCenterColumnContent">
+						<h:outputText value="#{item.genero}"/>
+					</p:column>
+				</p:dataTable>					                    
+                    </h:panelGroup>
+				</p:panelGrid>	
+				<t:div styleClass="buttons">
+					<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('componenteAfectadoDiag').hide()" styleClass="secondary"/>
+					<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}" process="componenteAfectadoDiag" oncomplete="if(!args.validationFailed) PF('componenteAfectadoDiag').hide();"
+						actionListener="#{derramesController.agregarComponenteAfectado()}" update="componenteAfectadoDiagGrid pngEspeciesValoradas :form:componentesTable"
+						rendered="#{derramesController.habilitarIngreso}"/>
+				</t:div>
+		</p:dialog>	
+		</h:form>		
+	</ui:define>
+</ui:composition>
+</html>

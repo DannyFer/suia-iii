@@ -1,0 +1,102 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:controles="http://java.sun.com/jsf/composite/controles-prime">
+<ui:composition
+	template="/prevencion/licenciamiento-ambiental/eia/verEIA.xhtml">
+	<ui:define name="content-eia">
+		<h:form id="frmDatos">
+			<p:panel
+				header="#{adjuntosEiaController.adjuntosEiaBean.nombrePanel}">
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Documento *" />
+					</f:facet>
+
+					<p:dataTable id="tablaAnexos" var="doc"
+						value="#{adjuntosEiaController.documentos}">
+						<p:column headerText="Nombre">
+							<h:outputText value="#{doc.descripcion}" />
+						</p:column>
+
+
+						<p:column headerText="Documento">
+							<h:outputText value="#{doc.nombre}" />
+						</p:column>
+
+						<p:column styleClass="w20px alCenter">
+							<!-- MarielaG para mostrar historico-->
+							<p:commandButton icon="ui-icon-search" process="@form"
+								rendered="#{doc.nuevoEnModificacion}"
+								styleClass="button-small orange" title="Descargar"
+								immediate="true" ajax="false">
+								<p:fileDownload
+									value="#{adjuntosEiaController.getStreamContentAnexo(doc)}" />
+							</p:commandButton>
+
+							<p:commandButton icon="ui-icon-search" process="@form"
+								rendered="#{!doc.nuevoEnModificacion}"
+								styleClass="button-small primary" title="Descargar"
+								immediate="true" ajax="false">
+								<p:fileDownload
+									value="#{adjuntosEiaController.getStreamContentAnexo(doc)}" />
+							</p:commandButton>
+							<!-- fin historico -->
+						</p:column>
+
+					</p:dataTable>
+
+				</p:panelGrid>
+				<br />
+				<!-- MarielaG para mostrar historico REGISTROS ELIMINADOS-->
+				<h:panelGrid styleClass="panel_data" columns="2"
+					rendered="#{adjuntosEiaController.documentosEliminadosBdd.size() > 0}"
+					columnClasses="header background-orange, null"
+					rowClasses="null, alt">
+					<h:outputText value="Historial Documentos" />
+					<p:commandButton styleClass="button-small primary" process="@this"
+						icon="ui-icon-search"
+						oncomplete="PF('documentosEliminadosDlg').show()" />
+				</h:panelGrid>
+				<!-- fin historico -->
+
+			</p:panel>
+		</h:form>
+
+		<!-- MarielaG para mostrar historico registros ELIMINADOS-->
+		<h:form id="formDocumentosEliminados">
+			<p:dialog header="Historial de documentos"
+				id="documentosEliminadosDlg" widgetVar="documentosEliminadosDlg"
+				modal="true" resizable="false" width="800">
+				<h:panelGroup id="datosOriginales">
+					<p:dataTable id="tablaAnexos" var="doc"
+						value="#{adjuntosEiaController.documentosEliminadosBdd}">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText value="#{doc.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Nombre">
+							<h:outputText value="#{doc.descripcion}" />
+						</p:column>
+						<p:column headerText="Documento">
+							<h:outputText value="#{doc.nombre}" />
+						</p:column>
+						<p:column styleClass="w20px alCenter">
+							<p:commandButton icon="ui-icon-search" process="@form"
+								styleClass="button-small primary" title="Descargar"
+								immediate="true" ajax="false">
+								<p:fileDownload
+									value="#{adjuntosEiaController.getStreamContentAnexo(doc)}" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+
+	</ui:define>
+</ui:composition>
+</html>

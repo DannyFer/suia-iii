@@ -1,0 +1,451 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:controles-prime="http://java.sun.com/jsf/composite/controles-prime">
+	<ui:define name="content">
+        <f:event type="preRenderView" listener="#{informacionGeneralController.validarTareaBpmV2()}"/>
+		<ui:include src="contenido/menuMineria.xhtml" />
+		<div class="content">
+			<h:form id="form">
+				<p:panel header="4. Características del área de influencia:">
+					<h:panelGrid>
+						<p:outputLabel value="Caracterización del medio físico"
+							style="font-weight:bold;" />
+					</h:panelGrid>
+					<br />
+					<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+						<f:facet name="header">
+                                                    <mae:panelGridHeaderHelp value="Localización" conector="generalHelp" render="false"
+								image="#{request.contextPath}/resources/images/help-how.png"
+								help="#{helps['registro.general']}" />
+						</f:facet>
+						<h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w30, w60">
+							<p:outputLabel value="Región geográfica" />
+							<p:selectManyCheckbox columns="2" layout="grid" disabled="true"
+								value="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.opcionesRegionesProyecto}">
+								<f:selectItems
+									value="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaRegiones}" />
+							</p:selectManyCheckbox>
+						</h:panelGrid>
+					</p:panelGrid>
+					
+					<br />
+					<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="">
+						<f:facet name="header">
+                                                    <mae:panelGridHeaderHelp value="Superficie y altitud" conector="generalHelp" render="false"
+								image="#{request.contextPath}/resources/images/help-how.png"
+								help="#{helps['registro.general']}" />
+						</f:facet>
+						<h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w30, w60">
+							<p:outputLabel value="Superficie del área de influencia directa " />
+							<h:outputText value="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.fichaAmbientalMineria.proyectoLicenciamientoAmbiental.area} #{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.fichaAmbientalMineria.proyectoLicenciamientoAmbiental.unidad}" />
+	
+							<p:outputLabel value="Altitud sobre el nivel del mar(msnm)" />
+							<h:outputText value="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.catalogoAltura.descripcion}" />
+						</h:panelGrid>
+					</p:panelGrid>
+					
+					<br />
+					<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+						<f:facet name="header">
+                                                    <mae:panelGridHeaderHelp value="Clima" conector="generalHelp" render="false"
+								image="#{request.contextPath}/resources/images/help-how.png"
+								help="#{helps['registro.general']}" />
+						</f:facet>
+						<h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w30, w60">
+							<p:outputLabel value="Descripción general " for="cmbDescricpcionGeneral:cpcmbDescricpcionGeneral" />
+							<controles-prime:combo identificador="cmbDescricpcionGeneral" id="cmbDescricpcionGeneral" requerido="true"
+								lista="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaClimaCombo}"
+								valor="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.idClima}"
+								rendered="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.apareceComboClima}" />
+							<h:outputText value="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.catalogoClima.descripcion}"
+								rendered="#{!caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.apareceComboClima}" />
+						</h:panelGrid>
+						
+						<!-- Cris F: Boton de Historico -->
+						<h:panelGrid styleClass="panel_data" columns="2"
+							rendered="#{not empty caracterisiticasAreaInfluenciaMineriaController.listaClimaHistorial}"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt">
+							<h:outputText id="climaHistorial"
+								value="Historial Clima" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('dlgClima').show()" 
+								title="Ver Historial"/>
+						</h:panelGrid>
+
+
+						<p:dialog widgetVar="dlgClima" id="dlgClima" modal="true" closable="true" draggable="false" resizable="false"
+							width="500px" header="Historial Clima">
+							<h:form>
+								<p:dataTable id="tbl_clima"
+									value="#{caracterisiticasAreaInfluenciaMineriaController.listaClimaHistorial}"
+									var="clima"
+									emptyMessage="#{labels['common.table.empty']}" rows="10"
+									paginator="true" paginatorAlwaysVisible="false"
+									paginatorPosition="bottom">
+
+									<p:column headerText="Descripción general">		
+									<h:outputText value="#{clima.clima.descripcion}"/>																											
+									</p:column>
+									<p:column headerText="Fecha Modificación">
+										<h:outputText value="#{clima.fechaHistorico}">
+										<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+										</h:outputText>
+									</p:column>
+
+								</p:dataTable>
+
+							</h:form>
+						</p:dialog>
+						
+					</p:panelGrid>
+					
+					<br />
+					<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+						<f:facet name="header">
+							<mae:panelGridHeaderHelp value="Geología, geomorfología y suelos" render="false"
+								conector="generalHelp" help="#{helps['registro.general']}"
+								image="#{request.contextPath}/resources/images/help-how.png"/>
+						</f:facet>
+						<h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w25, w75">
+							<p:outputLabel value="Ocupación actual del area de influencia" for="areaInfluencia"/>						
+							<h:panelGroup id="areaInfluenciaGroup">
+								<p:selectManyCheckbox
+									value="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.opcionesOcupacionAreaInfluencia}"
+									required="true" id="areaInfluencia" layout="grid" columns="2" styleClass="tb_w85 w100">
+									<f:selectItems
+										value="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaOcupacionAreaInfluenciaCombo}" />
+									<p:ajax update=":form:areaInfluenciaGroup" process="@this"></p:ajax>
+								</p:selectManyCheckbox>								
+								<h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w70, w50">
+									<h:outputText />
+									<h:panelGroup>
+										<p:outputLabel for="otraArea" value="Especifique:" rendered="#{caracterisiticasAreaInfluenciaMineriaController.muestraOpcionOtro(caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.opcionesOcupacionAreaInfluencia, caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaOcupacionAreaInfluenciaCombo)}"/>
+										<h:inputText
+											required="#{caracterisiticasAreaInfluenciaMineriaController.muestraOpcionOtro(caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.opcionesOcupacionAreaInfluencia, caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaOcupacionAreaInfluenciaCombo)}"
+											value="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.fichaAmbientalMineria.otrosAreaInfluencia}" id="otraArea"
+											rendered="#{caracterisiticasAreaInfluenciaMineriaController.muestraOpcionOtro(caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.opcionesOcupacionAreaInfluencia, caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaOcupacionAreaInfluenciaCombo)}">
+											<p:ajax update="@this" process="@this"></p:ajax>
+										</h:inputText>
+									</h:panelGroup>
+								</h:panelGrid>
+							</h:panelGroup>
+						</h:panelGrid>
+						<p:separator/>
+						<h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w30, w60">
+							<p:outputLabel value="Pendiente de suelo" for="chkPendienteSuelo:cpchkPendienteSuelo" />
+							<controles-prime:manyCheckBox id="chkPendienteSuelo" identificador="chkPendienteSuelo" requerido="true" columnas="2"
+								lista="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaPendienteSueloCombo}"
+								valor="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.opcionesPendienteSuelo}" />
+						</h:panelGrid>
+						<p:separator/>
+						<h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w30, w60">
+							<p:outputLabel value="Tipo de suelo" for="chkTipoSuelo:cpchkTipoSuelo" />
+							<controles-prime:manyCheckBox id="chkTipoSuelo" identificador="chkTipoSuelo" requerido="true" columnas="2"
+								lista="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaTipoSueloCombo}"
+								valor="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.opcionesTipoSuelo}"/>
+						</h:panelGrid>
+						<p:separator/>
+						<h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w30, w60">
+							<p:outputLabel value="Calidad del suelo" for="calidadSuelo" />
+							<h:panelGroup id="calidadSueloGroup">
+								<p:selectManyCheckbox
+									value="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.opcionesCalidadSuelo}"
+									required="true" id="calidadSuelo" layout="grid" columns="1" styleClass="tb_w50 w100">
+									<f:selectItems
+										value="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaCalidadSueloCombo}" />
+									<p:ajax update=":form:calidadSueloGroup" process="@this"></p:ajax>
+								</p:selectManyCheckbox>								
+								<h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w70, w50">
+									<h:panelGroup>
+										<p:outputLabel for="otraSuelo" value="Especifique:" rendered="#{caracterisiticasAreaInfluenciaMineriaController.muestraOpcionOtro(caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.opcionesCalidadSuelo, caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaCalidadSueloCombo)}"/>
+										<h:inputText
+											required="#{caracterisiticasAreaInfluenciaMineriaController.muestraOpcionOtro(caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.opcionesCalidadSuelo, caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaCalidadSueloCombo)}"
+											value="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.fichaAmbientalMineria.otrosCalidadSuelo}" id="otraSuelo"
+											rendered="#{caracterisiticasAreaInfluenciaMineriaController.muestraOpcionOtro(caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.opcionesCalidadSuelo, caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaCalidadSueloCombo)}">
+											<p:ajax update="@this" process="@this"></p:ajax>
+										</h:inputText>
+									</h:panelGroup>
+								</h:panelGrid>
+							</h:panelGroup>
+						</h:panelGrid>
+						
+						<p:separator/>
+						<h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w30, w60">
+							<p:outputLabel value="Permeabilidad del suelo " for="rvPerme:cprvPerme" />
+							<controles-prime:combo id="rvPerme" identificador="rvPerme" requerido="true"
+								valor="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.idPermeabilidadSuelo}"
+								lista="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaPermiabilidadSueloCombo}" />
+						</h:panelGrid>
+						<p:separator/>
+						<h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w30, w60">
+							<p:outputLabel value="Condiciones de drenaje" for="rvDrena:cprvDrena" />
+							<controles-prime:combo id="rvDrena" identificador="rvDrena" requerido="true"
+								valor="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.idCondicionesDrenaje}"
+								lista="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaCondicionesDrenajeCombo}"
+								 />
+						</h:panelGrid>
+						
+						<!-- Cris F: Boton de Historico -->
+						<h:panelGrid styleClass="panel_data" columns="2"
+							rendered="#{not empty caracterisiticasAreaInfluenciaMineriaController.listaGeologiaGeomorfologiaSuelosHistorial}"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt">
+							<h:outputText id="geologiaHistorial"
+								value="Historial geología, geomorfología y suelos" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('dlgGeologia').show()" 
+								title="Ver Historial"/>
+						</h:panelGrid>
+
+
+						<p:dialog widgetVar="dlgGeologia" id="dlgGeologia"
+							modal="true" closable="true" draggable="true" resizable="false"
+							width="1000px" header="Historial geología, geomorfología y suelos">
+							<h:form>
+								<p:dataTable id="tbl_geologia"
+									value="#{caracterisiticasAreaInfluenciaMineriaController.listaGeologiaGeomorfologiaSuelosHistorial}"
+									var="geologia"
+									emptyMessage="#{labels['common.table.empty']}" rows="10"
+									paginator="true" paginatorAlwaysVisible="false"
+									paginatorPosition="bottom">
+
+									<p:column headerText="Ocupación actual del área de influencia">		
+									<h:outputText value="#{geologia.areaInfluenciaMostrar}" escape="false" style="white-space:pre-line;"/>																											
+									</p:column>
+									<p:column headerText="Ocupación actual del área de influencia otros">		
+									<h:outputText value="#{geologia.otrosAreaInfluencia}" escape="false" style="white-space:pre-line;"/>																											
+									</p:column>
+									<p:column headerText="Pendiente de suelo">
+										<h:outputText value="#{geologia.pendienteSueloMostrar}" escape="false" style="white-space:pre-line;" />
+									</p:column>
+									<p:column headerText="Tipo de suelo">
+										<h:outputText value="#{geologia.tipoSueloMostrar}" escape="false" style="white-space:pre-line;" />
+									</p:column>
+									<p:column headerText="Calidad del suelo">
+										<h:outputText value="#{geologia.calidadSueloMostrar}" escape="false" style="white-space:pre-line;" />
+									</p:column>
+									<p:column headerText="Calidad del suelo otros">
+										<h:outputText value="#{geologia.otrosCalidadSuelo}" escape="false" style="white-space:pre-line;" />
+									</p:column>
+									<p:column headerText="Permeabilidad del suelo">
+										<h:outputText value="#{geologia.permeabilidadSuelo.descripcion}"/>
+									</p:column>
+									<p:column headerText="Condiciones de drenaje">
+										<h:outputText value="#{geologia.condicionesDrenaje.descripcion}"/>
+									</p:column>
+									<p:column headerText="Fecha Modificación">
+										<h:outputText value="#{geologia.fechaHistorico}">
+										<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+										</h:outputText>
+									</p:column>
+
+								</p:dataTable>
+
+							</h:form>
+						</p:dialog>
+
+					</p:panelGrid>
+					
+					<br />
+					<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+						<f:facet name="header">
+                                                    <mae:panelGridHeaderHelp value="Hidrología" conector="generalHelp" render="false"
+								image="#{request.contextPath}/resources/images/help-how.png"
+								help="#{helps['registro.general']}" />
+						</f:facet>
+						<h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w30, w60">
+							<p:outputLabel value="Recursos hídricos" for="chkRecursos:cpchkRecursos" />
+							<controles-prime:manyCheckBox id="chkRecursos" identificador="chkRecursos" requerido="true" columnas="2"
+								lista="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaRecursosHidricosCombo}"
+								valor="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.opcionesRecursosHidricos}" />
+						</h:panelGrid>
+						<p:separator/>
+						<h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w30, w60">
+							<p:outputLabel value="Nivel freático" for="rvPerme1:cprvPerme1" />
+							<controles-prime:combo id="rvPerme1" identificador="rvPerme1" requerido="true"
+								valor="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.idNivelFreatico}"
+								lista="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaNivelFreaticoCombo}" />
+						</h:panelGrid>
+						<p:separator/>
+						<h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w30, w60">
+							<p:outputLabel value="Precipitaciones" for="rvPerme2:cprvPerme2:" />
+							<controles-prime:combo id="rvPerme2" identificador="rvPerme2" requerido="true"
+								valor="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.idPrecipitaciones}"
+								lista="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaPrecipitacionesCombo}" />
+						</h:panelGrid>
+						<p:separator/>
+						<h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w30, w60">
+							<p:outputLabel value="Características del agua" for="rvPerme3:cprvPerme3" />
+							<controles-prime:combo id="rvPerme3" identificador="rvPerme3" requerido="true"
+								valor="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.idCaracteristicasAgua}"
+								lista="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaCaracteristicasAguaCombo}"/>
+						</h:panelGrid>
+						<p:separator/>
+						<h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w30, w60">
+							<p:outputLabel
+								value="Descripción de las principales fuentes de contaminación del agua (agricultura, ganadería, otras actividades mineras, etc.) "
+								for="txtDes1:cptxtDes1" />
+							<controles-prime:todoAreaTexto
+								valor="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.fichaAmbientalMineria.descripcionFuentesContaminacionAgua}"
+								identificador="txtDes1" id="txtDes1" longitud="500" tamanio="50" requerido="true" />
+						</h:panelGrid>
+						
+						<h:panelGrid styleClass="panel_data" columns="2"
+							rendered="#{not empty caracterisiticasAreaInfluenciaMineriaController.listaHidrologiaHistorial}"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt">
+							<h:outputText id="hidrologiaHistorial"
+								value="Historial Hidrología" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('dlgHidrologia').show()" 
+								title="Ver Historial"/>
+						</h:panelGrid>
+
+
+						<p:dialog widgetVar="dlgHidrologia" id="dlgHidrologia"
+							modal="true" closable="true" draggable="false" resizable="false"
+							width="900px" header="Historial hidrología">
+							<h:form>
+								<p:dataTable id="tbl_hidrologia"
+									value="#{caracterisiticasAreaInfluenciaMineriaController.listaHidrologiaHistorial}"
+									var="hidrologia"
+									emptyMessage="#{labels['common.table.empty']}" rows="10"
+									paginator="true" paginatorAlwaysVisible="false"
+									paginatorPosition="bottom">
+									
+									<p:column headerText="Recursos hídricos">
+										<h:outputText value="#{hidrologia.recursosHidricosMostrar}" escape="false" style="white-space:pre-line;" />
+									</p:column>
+									<p:column headerText="Nivel freático">
+										<h:outputText value="#{hidrologia.nivelFreatico}" escape="false" style="white-space:pre-line;" />
+									</p:column>
+									<p:column headerText="Precipitaciones">
+										<h:outputText value="#{hidrologia.precipitacionesAgua}" escape="false" style="white-space:pre-line;" />
+									</p:column>
+									<p:column headerText="Características del agua">
+										<h:outputText value="#{hidrologia.caracteristicasAgua}" escape="false" style="white-space:pre-line;" />
+									</p:column>
+									<p:column headerText="Descripción de las principales fuentes de contaminación del agua">
+										<h:outputText value="#{hidrologia.descripcionFuentesContaminacionAgua}" escape="false" style="white-space:pre-line;" />
+									</p:column>
+									<p:column headerText="Fecha Modificación">
+										<h:outputText value="#{hidrologia.fechaHistorico}">
+										<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+										</h:outputText>
+									</p:column>
+									
+								</p:dataTable>
+							</h:form>
+						</p:dialog>
+						
+						
+					</p:panelGrid>
+					
+					<br />
+					<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+						<f:facet name="header">
+                                                    <mae:panelGridHeaderHelp value="Aire" conector="generalHelp" render="false"
+								image="#{request.contextPath}/resources/images/help-how.png"
+								help="#{helps['registro.general']}" />
+						</f:facet>
+						
+						<h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w30, w60">
+							<p:outputLabel value="Características del aire " for="rvPerme11:cprvPerme11" />
+							<controles-prime:combo id="rvPerme11" identificador="rvPerme11" requerido="true" 
+								valor="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.idCaracteristicasAire}"
+								lista="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaCaracteristicasAireCombo}"/>
+						</h:panelGrid>
+						
+						<h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w30, w60">
+							<p:outputLabel value="Recirculación de aire " for="rvPerme22:cprvPerme22" />
+							<controles-prime:combo id="rvPerme22" identificador="rvPerme22" requerido="true"
+								valor="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.idRecirculacionAire}"
+								lista="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaRecirculacionAireCombo}"/>
+						</h:panelGrid>
+						
+						<h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w30, w60">
+							<p:outputLabel value="Ruido " for="rvPerme33:cprvPerme33" />
+							<controles-prime:combo identificador="rvPerme33" id="rvPerme33" requerido="true"
+								valor="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.idRuido}"
+								lista="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.listaRuidoCombo}" />
+						</h:panelGrid>
+						
+						<h:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w30, w60">
+							<p:outputLabel value="Descripción de las principales fuentes de ruido " for="txtRuidi:cptxtRuidi" />
+							<controles-prime:todoAreaTexto
+								valor="#{caracterisiticasAreaInfluenciaMineriaController.caracterisiticasAreaInfluenciaMineriaBean.fichaAmbientalMineria.descripcionFuentesRuido}"
+								identificador="txtRuidi" id="txtRuidi" longitud="500" tamanio="50" requerido="true" />
+						</h:panelGrid>
+						
+						<h:panelGrid styleClass="panel_data" columns="2"
+							rendered="#{not empty caracterisiticasAreaInfluenciaMineriaController.listaAireHistorial}"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt">
+							<h:outputText id="aireHistorial"
+								value="Historial Aire" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('dlgAire').show()" 
+								title="Ver Historial"/>
+						</h:panelGrid>
+
+
+						<p:dialog widgetVar="dlgAire" id="dlgAire"
+							modal="true" closable="true" draggable="false" resizable="false"
+							width="900px" header="Historial aire">
+							<h:form>
+								<p:dataTable id="tbl_aire"
+									value="#{caracterisiticasAreaInfluenciaMineriaController.listaAireHistorial}"
+									var="aire"
+									emptyMessage="#{labels['common.table.empty']}" rows="10"
+									paginator="true" paginatorAlwaysVisible="false"
+									paginatorPosition="bottom">
+									
+									<p:column headerText="Características del aire">
+										<h:outputText value="#{aire.caracteristicasAire}" escape="false" style="white-space:pre-line;" />
+									</p:column>
+									<p:column headerText="Recirculación de aire">
+										<h:outputText value="#{aire.recirculacionAire}" escape="false" style="white-space:pre-line;" />
+									</p:column>
+									<p:column headerText="Ruido">
+										<h:outputText value="#{aire.ruido}" escape="false" style="white-space:pre-line;" />
+									</p:column>
+									<p:column headerText="Descripción de las principales fuentes de ruido">
+										<h:outputText value="#{aire.descripcionFuentesRuido}" escape="false" style="white-space:pre-line;" />
+									</p:column>
+									<p:column headerText="Fecha Modificación">
+										<h:outputText value="#{aire.fechaHistorico}">
+										<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+										</h:outputText>
+									</p:column>
+								</p:dataTable>
+							</h:form>
+						</p:dialog>
+						
+					</p:panelGrid>
+					
+					<br />
+					<div class="buttons main">
+						<p:commandButton value="Atrás" immediate="true" process="@this" icon="ui-icon-arrowthick-1-w"
+							action="/prevencion/categoria2/v2/fichaMineria/descripcionActividad.jsf?faces-redirect=true" />
+						<p:commandButton value="Guardar" icon="ui-icon-disk" update=":#{p:component('form')}"
+							oncomplete="window.scrollTo(0,0);"
+							action="#{caracterisiticasAreaInfluenciaMineriaController.guardar()}" />
+						<p:commandButton value="Siguiente" immediate="true" process="@this" icon="ui-icon-arrowthick-1-e"
+							action="/prevencion/categoria2/v2/fichaMineria/muestreoInicial.jsf?faces-redirect=true" />
+					</div>
+				</p:panel>
+			</h:form>
+		</div>
+	</ui:define>
+</ui:composition>

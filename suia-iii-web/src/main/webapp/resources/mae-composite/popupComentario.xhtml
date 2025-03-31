@@ -1,0 +1,107 @@
+<ui:component xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:comp="http://java.sun.com/jsf/composite"
+	xmlns:h="http://java.sun.com/jsf/html">
+
+	<comp:interface shortDescription="Componente para comentarios">
+		<comp:attribute name="controllerComments"
+			shortDescription="Controlador de los comentarios" />
+	</comp:interface>
+
+	<comp:implementation>
+
+
+		<p:dialog widgetVar="popupComentarios" resizable="false"
+			closeOnEscape="true" modal="true" appendToBody="true"
+			showEffect="explode" hideEffect="explode" height="300" width="600">
+			<f:facet name="header">Comentarios</f:facet>
+			<h:form id="formPanelComentarios">
+				<h:panelGrid id="panelComentarios" columns="1">
+					<p:dataTable id="comments"
+						value="#{cc.attrs.controllerComments.comentariosBean.comentarios}"
+						var="comentario" rows="10" emptyMessage="No hay registros">
+						<p:column headerText="Responsable" resizable="true"
+							sortBy="#{comentario.idUsuario}">
+							<h:outputText value="#{comentario.idUsuario}" />
+						</p:column>
+						<p:column headerText="Cargo" resizable="true">
+							<h:outputText value="...cargo" />
+						</p:column>
+						<p:column headerText="Comentario" resizable="true"
+							sortBy="#{comentario.comentario}">
+							<h:outputText value="#{comentario.comentario}" />
+						</p:column>
+						<p:column headerText="Fecha" resizable="true"
+							sortBy="#{comentario.fecha}">
+							<h:outputText value="#{comentario.hora}" />
+						</p:column>
+						<p:column headerText="Hora" resizable="true"
+							sortBy="#{comentario.fecha}">
+							<h:outputText value="#{comentario.fecha}" />
+						</p:column>
+						<p:column headerText="Accion" resizable="true">
+							<p:commandButton value="Ver" styleClass="m-action-button"
+								icon="ui-icon-search" process="@this, comments"
+								oncomplete="PF('popupComentariosDetalle').show()">
+								<f:setPropertyActionListener
+									target="#{cc.attrs.controllerComments.comentariosBean.comentarioTarea}"
+									value="#{comentario}" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+				<h:panelGrid columns="1">
+					<p:commandButton id="idCancel" value="Cancelar"
+						icon="ui-icon-close" oncomplete="PF('popupComentarios').hide()"
+						process="@this" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<p:dialog widgetVar="popupComentariosDetalle" resizable="false"
+			closeOnEscape="true" modal="true" appendToBody="true"
+			showEffect="explode" hideEffect="explode" styleClass="m-dialog"
+			dynamic="true">
+			<f:facet name="header">Comentarios</f:facet>
+			<h:form id="formEditComentario">
+				<h:panelGrid id="pEdit" columns="2" bodyrows="1">
+					<p:outputLabel value="Responsable:" />
+					<p:inputText id="responsable"
+						value="#{cc.attrs.controllerComments.comentariosBean.comentarioTarea.idUsuario}"
+						style="width: 330px;" disabled="true" />
+
+					<p:outputLabel value="Cargo:" />
+					<p:inputTextarea id="idcargo" value="..cargo" style="width: 330px;"
+						cols="59" disabled="true" />
+
+					<p:outputLabel value="Fecha:" />
+					<p:inputText id="fecha"
+						value="#{cc.attrs.controllerComments.comentariosBean.comentarioTarea.fecha}"
+						style="width: 100px;" disabled="true">
+						<f:convertDateTime pattern="#{msg_general.dateformat}" />
+					</p:inputText>
+
+					<p:outputLabel value="Hora" />
+					<p:inputText id="hora"
+						value="#{cc.attrs.controllerComments.comentariosBean.comentarioTarea.fecha}"
+						style="width: 100px;" disabled="true" />
+
+					<p:outputLabel value="Comentario:" />
+					<p:inputTextarea id="idcomentarios"
+						value="#{cc.attrs.controllerComments.comentariosBean.comentarioTarea.comentario}"
+						rows="6" cols="59" style="width: 330px;" disabled="true"
+						maxlength="250">
+
+					</p:inputTextarea>
+
+				</h:panelGrid>
+				<h:panelGrid columns="1" styleClass="m-dialog-controls">
+					<p:commandButton id="idCancelEdit" value="Cancelar"
+						icon="ui-icon-close"
+						oncomplete="PF('popupComentariosDetalle').hide()" process="@this" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+	</comp:implementation>
+</ui:component>

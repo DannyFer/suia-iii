@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<h:form id="form" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }">
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100 alCenter">
+				<f:facet name="header">
+					<h:outputText value="Declaración Mensual de Registro de Sustancias Químicas" />
+				</f:facet>
+
+				<p:dataTable id="rsqTable"
+					value="#{declaracionSeleccionarRSQController.registroSustanciaQuimicaLista}"
+					var="item" emptyMessage="#{labels['common.table.empty']}"
+					lazy="true" styleClass="w50"
+					rendered="#{declaracionSeleccionarRSQController.mostrarListadoRSQ and declaracionSeleccionarRSQController.tienePermisos}">
+					<p:column headerText="Código RSQ" styleClass="alCenter w75">
+						<h:outputText value="#{item.numeroAplicacion}" />
+					</p:column>
+					<p:column headerText="Seleccionar" styleClass="alCenter w25">
+						<p:commandButton
+							action="#{declaracionSeleccionarRSQController.mostrarSustanciasQuimicas(item)}"
+							styleClass="#{declaracionSeleccionarRSQController.styleBtnRSQ(item)}"
+							icon="ui-icon-check" process="@this" update="@form">
+						</p:commandButton>
+					</p:column>
+				</p:dataTable>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					rendered="#{!declaracionSeleccionarRSQController.mostrarListadoRSQ and declaracionSeleccionarRSQController.tienePermisos}">
+					<h:panelGrid columns="1" styleClass="w100">
+						<h:outputText
+							value="#{declaracionSeleccionarRSQController.mensaje}"
+							escape="false" styleClass="alJustify" />
+					</h:panelGrid>
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					rendered="#{!declaracionSeleccionarRSQController.tienePermisos}">
+					<h:panelGrid columns="1" styleClass="w100">
+						<h:outputText
+							value="#{declaracionSeleccionarRSQController.mensajePermiso}"
+							escape="false" styleClass="alJustify" />
+					</h:panelGrid>
+				</p:panelGrid>
+
+			</p:panelGrid>
+
+			<ui:remove>
+			<div class="buttons main">
+				<p:commandButton value="Cerrar" styleClass="secondary"
+					process="@this">
+					<p:resetInput target="@form" />
+				</p:commandButton>
+			</div>
+			</ui:remove>
+
+			<p:dialog width="300" id="sustanciasDialog"
+				widgetVar="sustanciasDialog"
+				header="Seleccione la Sustancia Química a declarar" modal="true"
+				resizable="false">
+				
+				<p:dataTable id="sustanciaTable"
+					value="#{declaracionSeleccionarRSQController.listaSustanciasQuimicas}"
+					var="item" emptyMessage="#{labels['common.table.empty']}"
+					lazy="true" styleClass="w100">
+					<p:column headerText="Sustancia Química" styleClass="alCenter w75">
+						<h:outputText value="#{item.sustanciaQuimica.descripcion}" />
+					</p:column>
+					<p:column headerText="Seleccionar" styleClass="alCenter w25">
+						<p:commandButton
+							action="#{declaracionSeleccionarRSQController.seleccionarRegistro(item.registroSustanciaQuimica, item)}"
+							styleClass="primary"
+							icon="ui-icon-check" process="@this" update="@form">
+						</p:commandButton>
+					</p:column>
+				</p:dataTable>
+				
+
+
+			</p:dialog>
+
+			<p:dialog width="400" id="mensajeDialog" widgetVar="mensajeDialog"
+				header="Mensaje" modal="true" resizable="false">
+				
+				<div>
+				Estimado operador, tiene un trámite de Declaración Pendiente en la bandeja de Tareas, 
+				por favor culmine el trámite anterior para poder continuar con la declaración de este mes.
+				
+				</div>
+
+				<p:outputPanel>
+					<div class="buttons main">
+						<p:commandButton value="Cerrar" icon="ui-icon-cancel"
+							styleClass="wizard-custom-btn-back" immediate="true"
+							oncomplete="PF('mensajeDialog').hide();">
+						</p:commandButton>
+
+					</div>
+				</p:outputPanel>
+
+
+
+			</p:dialog>
+
+
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

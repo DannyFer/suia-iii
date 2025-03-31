@@ -1,0 +1,253 @@
+<html 
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"	
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">	
+		<p:dialog id="datoObtenidoDiag" widgetVar="datoObtenidoDiag" header="Ingresar Dato Obtenido" width="900px" closable="false" modal="true">								
+				<p:panelGrid id="datoObtenidoDiagGrid" columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">				
+					<h:outputText value="Parámetro *" for="parametro"/>
+					<p:selectOneMenu id="parametro" value="#{descargasLiquidasController.datoObtenido.parametrosTablas}" styleClass="w100" required="true" requiredMessage="parametro es requerido" converter="selectItemConverter">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{descargasLiquidasController.parametrosTablasList}" var="item" itemLabel="#{item.parametro.nombre}" itemValue="#{item}"/>
+					</p:selectOneMenu>
+					<ui:remove>
+					<h:outputText value="Método de estimación *" for="metodoEstimacion"/>
+					<p:selectOneMenu id="metodoEstimacion" value="#{descargasLiquidasController.datoObtenido.metodoEstimacion}" styleClass="w100" required="true" requiredMessage="Método de estimación es requerido" converter="selectItemConverter" rendered="true" disabled="true">						
+						<f:selectItems value="#{descargasLiquidasController.catalogoMetodoEstimacionList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+					</p:selectOneMenu>
+					</ui:remove>
+					<h:outputText value="Reporte *" for="valorReporte"/>					
+					<pe:inputNumber id="valorReporte" value="#{descargasLiquidasController.datoObtenido.valorIngresado}" required="true" requiredMessage="Reporte es requerido" decimalPlaces="5" thousandSeparator="" maxValue="99999.99999"/>								
+				</p:panelGrid>
+				<t:div styleClass="buttons">
+					<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('datoObtenidoDiag').hide()" styleClass="secondary"/>
+					<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}" process="datoObtenidoDiag" oncomplete="if(!args.validationFailed) PF('datoObtenidoDiag').hide();"
+						actionListener="#{descargasLiquidasController.agregarDatoObtenido()}" update="datoObtenidoDiagGrid :form:registroMedicionesGrid"/>
+				</t:div>
+		</p:dialog>	
+		<ui:remove>
+		<p:dialog id="sustanciasDiag" widgetVar="sustanciasDiag" header="Ingresar Sustancia RETCE" width="900px" closable="false">								
+				<p:panelGrid id="sustanciasDiagGrid" columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+					<h:outputText value="Nombre del contaminante *" for="nombreContaminante"/>
+					<p:selectOneMenu id="nombreContaminante" value="#{descargasLiquidasController.sustanciasRetce.catologSustanciasRetce}" styleClass="w100" required="true" requiredMessage="Método de estimación es requerido" converter="selectItemConverter" rendered="true">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{descargasLiquidasController.catalogoSustanciasRetceList}" var="item" itemLabel="#{item.descripcionProductoQuimico}" itemValue="#{item}"/>
+					</p:selectOneMenu>
+					
+					<h:outputText value="Método de estimación *" for="metodoEstimacionSustancia"/>
+					<p:selectOneMenu id="metodoEstimacionSustancia" value="#{descargasLiquidasController.sustanciasRetce.catalogoMetodoEstimacion}" styleClass="w100" required="true" requiredMessage="Método de estimación es requerido" converter="selectItemConverter" rendered="true">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{descargasLiquidasController.catalogoMetodoEstimacionList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+					</p:selectOneMenu>
+					<h:outputText value="Reporte *" for="valorReporteSustancia"/>					
+					<pe:inputNumber id="valorReporteSustancia" value="#{descargasLiquidasController.sustanciasRetce.reporteToneladaAnio}" required="true" requiredMessage="Reporte es requerido" decimalPlaces="5" thousandSeparator="" maxValue="99999.99999"/>
+				</p:panelGrid>	
+				<t:div styleClass="buttons">
+						<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('sustanciasDiag').hide()" styleClass="secondary"/>
+						<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}" styleClass="primary" process="sustanciasDiag" oncomplete="if(!args.validationFailed) PF('sustanciasDiag').hide();"
+							actionListener="#{descargasLiquidasController.agregarSustancias}" update="sustanciasDiagGrid :form:sustanciasRetceGrid"/>
+				</t:div>
+		</p:dialog>
+		</ui:remove>
+		<p:dialog id="laboratoriosDiag" widgetVar="laboratoriosDiag" header="Ingresar Laboratorio" modal="true" width="900px" height="650px" resizable="false" draggable="true" closable="false">								
+				<p:panelGrid id="laboratoriosDataDiagGrid" columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">				
+					<h:outputText value="RUC *" for="labRuc"/>
+					<h:outputText value="#{descargasLiquidasController.datosLaboratorio.ruc}" rendered="#{!descargasLiquidasController.habilitarIngreso}"/>
+					<p:inputText id="labRuc" value="#{descargasLiquidasController.datosLaboratorio.ruc}" disabled="#{descargasLiquidasController.editarLaboratorio}"
+					required="true" requiredMessage="Cédula/RUC es requerido" maxlength="13" onkeypress="return numbersonly(this, event);"
+					rendered="#{descargasLiquidasController.habilitarIngreso}">
+						<p:ajax event="blur" listener="#{descargasLiquidasController.validarLaboratorioListener}" update="@this labNombre"/>
+					</p:inputText>
+					
+					<h:outputText value="Nombre o razón social *" for="labNombre"/>
+					<h:outputText value="#{descargasLiquidasController.datosLaboratorio.nombre}" rendered="#{!descargasLiquidasController.habilitarIngreso}"/>
+					<p:inputText id="labNombre" value="#{descargasLiquidasController.datosLaboratorio.nombre}"
+					required="true" requiredMessage="Nombre es requerido" maxlength="200" disabled="true"
+					rendered="#{descargasLiquidasController.habilitarIngreso}"/>
+					
+					<h:outputText value="N° de Registro de SAE *" for="labRegistro"/>
+					<h:outputText value="#{descargasLiquidasController.datosLaboratorio.numeroRegistroSAE}" rendered="#{!descargasLiquidasController.habilitarIngreso}"/>
+					<p:inputText id="labRegistro" value="#{descargasLiquidasController.datosLaboratorio.numeroRegistroSAE}"
+					required="true" requiredMessage="N° de Registro de SAE es requerido" maxlength="30" title="Campo alfanumérico de 30 caracteres."
+					rendered="#{descargasLiquidasController.habilitarIngreso}"/>
+					
+					<h:outputText value="Vigencia del Registro *" for="labVigencia"/>
+					<h:outputText value="#{descargasLiquidasController.datosLaboratorio.fechaVigenciaRegistro}" rendered="#{!descargasLiquidasController.habilitarIngreso}"/>
+					<p:calendar id="labVigencia" styleClass="calendarClass" value="#{descargasLiquidasController.datosLaboratorio.fechaVigenciaRegistro}" 
+						pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" required="true" requiredMessage="Vigencia del Registro es requerido" 
+					rendered="#{descargasLiquidasController.habilitarIngreso}"/>
+	
+					<h:outputText value="Metodología *" for="labMetodologia"/>
+					<p:inputTextarea value="#{descargasLiquidasController.datosLaboratorio.metodologia}" rendered="#{!descargasLiquidasController.habilitarIngreso}" cols="12" rows="3" autoResize="true" />
+					<p:inputTextarea id="labMetodologia" value="#{descargasLiquidasController.datosLaboratorio.metodologia}" required="true" requiredMessage="El campo Metodología es requerido" rendered="#{descargasLiquidasController.habilitarIngreso}" cols="12" rows="5"  maxlength="5000" autoResize="false" style="max-height:200px; min-height:200px;" />
+					
+					<h:outputText value="Documentos *" />					
+					<h:panelGroup>
+
+					<p:panelGrid styleClass="panel_data w100">
+								<p:row>
+									<p:column style="text-align: center; background-color: #00aac3; color: #FFF; font-weight: bold; width: 75%">Nombre documento</p:column>
+									<p:column style="text-align: center; background-color: #00aac3; color: #FFF; font-weight: bold; width: 25%">Adjuntar</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<p:outputLabel value="Informe de monitoreo del Laboratorio" />
+									</p:column>
+									<p:column>
+										<p:fileUpload 
+                                              fileUploadListener="#{descargasLiquidasController.fileUploadInformeLaboratorio}"
+                                              sizeLimit="20971520"
+                                              allowTypes="/(\.|\/)(pdf|zip|rar)$/" label="Añadir"
+                                              uploadLabel="Subir" auto="true"                                              
+                                              cancelLabel="Cancelar"
+                                              invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+                                              invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+                                              styleClass="w100 toLeft primary" mode="advanced"
+                                              rendered="#{descargasLiquidasController.habilitarIngreso}" update="lblDocumentoTipo1">
+											<f:attribute name="tipoDocumento" value="1" />
+										</p:fileUpload>
+										<h:outputText id="lblDocumentoTipo1"
+									value="#{descargasLiquidasController.documentoTipo1}"/>
+									 <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar" rendered="#{!descargasLiquidasController.habilitarIngreso}">
+										<p:fileDownload value="#{descargasLiquidasController.documentoInformeLaboratorio}"/>
+									 </p:commandButton>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<p:outputLabel value="Registro de SAE del Laboratorio" />
+									</p:column>
+									<p:column>
+										<p:fileUpload 
+                                              fileUploadListener="#{descargasLiquidasController.fileUploadInformeLaboratorio}"
+                                              sizeLimit="20971520"
+                                              allowTypes="/(\.|\/)(pdf|zip|rar)$/" label="Añadir"
+                                              uploadLabel="Subir" auto="true"                                              
+                                              cancelLabel="Cancelar"
+                                              invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+                                              invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+                                              styleClass="w100 toLeft primary" mode="advanced"
+                                              rendered="#{descargasLiquidasController.habilitarIngreso}" update="lblDocumentoTipo2">
+											<f:attribute name="tipoDocumento" value="2" />
+										</p:fileUpload>
+										<h:outputText id="lblDocumentoTipo2"
+									value="#{descargasLiquidasController.documentoTipo2}" />
+									<p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar" rendered="#{!descargasLiquidasController.habilitarIngreso}">
+										<p:fileDownload value="#{descargasLiquidasController.documentoRegistroLaboratorio}"/>
+									 </p:commandButton>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<p:outputLabel value="Cadena de custodia" />
+									</p:column>
+									<p:column>
+										<p:fileUpload 
+                                              fileUploadListener="#{descargasLiquidasController.fileUploadInformeLaboratorio}"
+                                              sizeLimit="20971520"
+                                              allowTypes="/(\.|\/)(pdf|zip|rar)$/" label="Añadir"
+                                              uploadLabel="Subir" auto="true"                                              
+                                              cancelLabel="Cancelar"
+                                              invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+                                              invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+                                              styleClass="w100 toLeft primary" mode="advanced"
+                                              rendered="#{descargasLiquidasController.habilitarIngreso}" update="lblDocumentoTipo3">
+											<f:attribute name="tipoDocumento" value="3" />
+										</p:fileUpload>
+										<h:outputText id="lblDocumentoTipo3"
+									value="#{descargasLiquidasController.documentoTipo3}" />
+									 <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar" rendered="#{!descargasLiquidasController.habilitarIngreso}">
+										<p:fileDownload value="#{descargasLiquidasController.documentoCadenaCustodia}"/>
+									 </p:commandButton>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<p:outputLabel value="Protocolo de muestreo" />
+									</p:column>
+									<p:column>
+										<p:fileUpload 
+                                              fileUploadListener="#{descargasLiquidasController.fileUploadInformeLaboratorio}"
+                                              sizeLimit="20971520"
+                                              allowTypes="/(\.|\/)(pdf|zip|rar)$/" label="Añadir"
+                                              uploadLabel="Subir" auto="true"                                              
+                                              cancelLabel="Cancelar"
+                                              invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+                                              invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+                                              styleClass="w100 toLeft primary" mode="advanced"
+                                              rendered="#{descargasLiquidasController.habilitarIngreso}" update="lblDocumentoTipo4">
+											<f:attribute name="tipoDocumento" value="4" />
+										</p:fileUpload>
+										<h:outputText id="lblDocumentoTipo4"
+									value="#{descargasLiquidasController.documentoTipo4}" />
+									 <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar" rendered="#{!descargasLiquidasController.habilitarIngreso}">
+										<p:fileDownload value="#{descargasLiquidasController.documentoProtocoloMuestro}"/>
+									 </p:commandButton>									
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<p:outputLabel value="Documento adicional (opcional)" />
+									</p:column>
+									<p:column>
+										<p:fileUpload 
+                                              fileUploadListener="#{descargasLiquidasController.fileUploadInformeLaboratorio}"
+                                              sizeLimit="20971520"
+                                              allowTypes="/(\.|\/)(pdf|zip|rar)$/" label="Añadir"
+                                              uploadLabel="Subir" auto="true"                                              
+                                              cancelLabel="Cancelar"
+                                              invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+                                              invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+                                              styleClass="w100 toLeft primary" mode="advanced"
+                                              rendered="#{descargasLiquidasController.habilitarIngreso}" update="lblDocumentoTipo5">
+											<f:attribute name="tipoDocumento" value="5" />
+										</p:fileUpload>
+										<h:outputText id="lblDocumentoTipo5"
+									value="#{descargasLiquidasController.documentoTipo5}" />
+									 <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar" rendered="#{!descargasLiquidasController.habilitarIngreso}">
+										<p:fileDownload value="#{descargasLiquidasController.documentoAdicional}"/>
+									 </p:commandButton>									
+									</p:column>
+								</p:row>
+							</p:panelGrid>
+
+
+                    
+                    <h:inputHidden validator="#{descargasLiquidasController.validarDocumentoInformelaboratorio}"/>
+					<p:dataTable id="documentosLabTable" value="#{descargasLiquidasController.datosLaboratorio.listaDocumentosLaboratorios}" var="item" emptyMessage="#{labels['common.table.empty']}" styleClass="alCenter">						
+						<p:column headerText="Nombre documento">
+							<h:outputText value="#{item.nombre}"/>
+						</p:column>
+						<p:column headerText="Fecha" rendered="false">
+							<h:outputText value="#{item.fechaCreacion}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+						</p:column>
+						<p:column styleClass="w15 alCenter" headerText="Acciones">
+							<center>
+								<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process="documentosLabTable" update="documentosLabTable" 
+									actionListener="#{descargasLiquidasController.eliminarDocumentoLaboratorio(item)}"
+									rendered="#{descargasLiquidasController.habilitarIngreso}">
+									<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar?" icon="ui-icon-alert"/>
+								</p:commandButton>
+								<p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar">
+									<p:fileDownload value="#{descargasLiquidasController.getStreamedContentDocumento(item)}"/>
+								</p:commandButton>	
+							</center>												
+						</p:column>
+					</p:dataTable>	                    
+                    </h:panelGroup>
+				</p:panelGrid>	
+				<t:div styleClass="buttons">
+						<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('laboratoriosDiag').hide();return false;" styleClass="secondary"/>
+						<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}" styleClass="primary" process="laboratoriosDiag" oncomplete="if(!args.validationFailed) PF('laboratoriosDiag').hide();"
+							actionListener="#{descargasLiquidasController.agregarDatosLaboratorio()}" update="laboratoriosDataDiagGrid :form:laboratoriosGrid"
+							rendered="#{descargasLiquidasController.habilitarIngreso}"/>
+				</t:div>
+		</p:dialog>
+</html>

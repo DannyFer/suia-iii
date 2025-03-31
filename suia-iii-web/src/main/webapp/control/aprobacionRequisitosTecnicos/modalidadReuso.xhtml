@@ -1,0 +1,262 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	template="/control/aprobacionRequisitosTecnicos/templates/defaultTemplate.xhtml"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+	<ui:define name="content-art">
+		<h:form id="form">
+			<p:panel header="#{labels['label.modalidad.reuso']}"
+				styleClass="w100" id="datosGenerales">
+				<p:separator />
+				<h:outputText styleClass="w100 text-red bold"
+							  value="#{labels['msg.informacion.modalidad']}"/>
+				<p:separator />
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Capacidad anual del proceso" />
+					</f:facet>
+					<p:dataTable id="tblDesechos"
+						value="#{modalidadReusoController.modalidadReusoBean.modalidadReuso.listaDesechos}"
+						var="desechoReuso" rows="10" paginator="true"
+						paginatorAlwaysVisible="false" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="Nombre desecho">
+							<h:outputText value="#{desechoReuso.desecho.descripcion}" />
+						</p:column>
+						<p:column headerText="Código">
+							<h:outputText value="#{desechoReuso.desecho.clave}" />
+						</p:column>
+						<p:column headerText="Cantidad anual de proceso (T)">
+							<h:outputText value="#{desechoReuso.capacidadAnualProceso}">
+								<f:convertNumber minFractionDigits="2" />
+							</h:outputText>
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton icon="ui-icon-pencil"
+								action="#{modalidadReusoController.seleccionarDesecho(desechoReuso)}"
+								title="Editar" styleClass="button-small primary"
+								oncomplete="PF('editarDesechoWdgt').show();"
+								update=":#{p:component('datosGeneralesDesecho')}"
+								process="@this" />
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+				<p:panelGrid styleClass="w100" columns="1"
+					columnClasses="w50, field_mrg w50" layout="grid">
+					<f:facet name="header">
+						<h:outputText value="#{labels['label.manejo.desechos']}" />
+					</f:facet>
+					<h:panelGrid columns="1">
+						<p:outputLabel for="nombreArchivoPlanoHidden"
+							value="#{labels['label.plano.reuso']} (.zip|.rar)" escape="false" />
+					</h:panelGrid>
+					<h:panelGrid styleClass="w50 toLeft" columns="3">
+						<h:outputText id="nombreArchivo"
+							value="#{modalidadReusoController.modalidadReusoBean.modalidadReuso.documentoPlano.nombre}" />
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="button-small primary toLeft" title="Ver"
+							action="#{modalidadReusoController.descargar(0)}" ajax="false"
+							rendered="#{!(modalidadReusoController.modalidadReusoBean.modalidadReuso.documentoPlano.id==null)}" />
+						<h:inputHidden id="nombreArchivoPlanoHidden" required="true"
+							value="#{modalidadReusoController.modalidadReusoBean.modalidadReuso.documentoPlano.nombre}" />
+					</h:panelGrid>
+					<p:fileUpload id="filePlano"
+						fileUploadListener="#{modalidadReusoController.handleFileUpload}"
+						value="#{modalidadReusoController.file}" sizeLimit="5242880"
+						allowTypes="/(\.|\/)(zip|rar)$/" label="Seleccionar"
+						uploadLabel="Subir" auto="true"
+						update="nombreArchivo,nombreArchivoPlanoHidden"
+						cancelLabel="Cancelar"
+						invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+						invalidSizeMessage="Debe adjuntar un archivo no mayor de 5 Mb."
+						required="true" mode="advanced" styleClass="w50">
+						<f:attribute name="indice" id="indice" value="0" />
+					</p:fileUpload>
+				</p:panelGrid>
+				<p:panelGrid styleClass="w100" columns="2"
+					columnClasses="w50, field_mrg w50" layout="grid"
+					id="tipoTransporte">
+					<f:facet name="header">
+						<h:outputText value="#{labels['label.recoleccion.desechos']}" />
+					</f:facet>
+					<p:outputLabel for="transportePropio" value="Transporte propio" />
+					<p:selectBooleanCheckbox id="transportePropio"
+						value="#{modalidadReusoController.modalidadReusoBean.modalidadReuso.transportePropio}">
+						<p:ajax process="@this" update="validarTransporte" />
+					</p:selectBooleanCheckbox>
+					<p:outputLabel for="transporteContratado"
+						value="Transporte contratado" />
+					<p:selectBooleanCheckbox id="transporteContratado"
+						value="#{modalidadReusoController.modalidadReusoBean.modalidadReuso.transporteContratado}">
+						<p:ajax process="@this" update="nombreEmpresa,validarTransporte" />
+					</p:selectBooleanCheckbox>
+					<p:outputLabel for="nombreEmpresa" id="labelNombreEmpresa"
+						value="#{labels['label.empresa.autorizada']}" styleClass="bold" />
+					<p:inputText id="nombreEmpresa" required="true"
+						disabled="#{!modalidadReusoController.modalidadReusoBean.modalidadReuso.transporteContratado}"
+						value="#{modalidadReusoController.modalidadReusoBean.modalidadReuso.nombreEmpresaAutorizada}"
+						maxlength="100" />
+					<p:outputLabel />
+					<h:inputHidden id="validarTransporte"
+						value="#{modalidadReusoController.modalidadReusoBean.validacionTipoTransporte}">
+						<f:attribute name="campo1"
+							value="#{modalidadReusoController.modalidadReusoBean.modalidadReuso.transportePropio}" />
+						<f:attribute name="campo2"
+							value="#{modalidadReusoController.modalidadReusoBean.modalidadReuso.transporteContratado}" />
+						<f:validator validatorId="tipoTransporteValidator" />
+					</h:inputHidden>
+				</p:panelGrid>
+				<p:panelGrid styleClass="w100" columns="1"
+					columnClasses="w100 field_mrg" layout="grid">
+					<f:facet name="header">
+						<h:outputText value="#{labels['label.reuso.desechos']}" />
+					</f:facet>
+					<h:panelGroup layout="grid">
+						<p:panelGrid columns="1" styleClass="w100 separatorBottom"
+							layout="grid">
+							<p:outputLabel for="tipoManjeoDesecho"
+								value="Indicar cual es el tipo de manejo que se otorga a los desechos"
+								styleClass="bold" />
+							<p:selectManyCheckbox id="tipoManjeoDesecho" layout="grid"
+								columns="2" required="true"
+								requiredMessage="El campo 'Tipo de manejo de desechos' es requerido."
+								value="#{modalidadReusoController.modalidadReusoBean.tiposManejoDesechosSeleccionadas}"
+								converter="selectItemConverter">
+								<f:selectItems
+									value="#{modalidadReusoController.modalidadReusoBean.listaTipoManejoDesechosReuso}" />
+							</p:selectManyCheckbox>
+						</p:panelGrid>
+					</h:panelGroup>
+					<h:panelGroup>
+						<p:panelGrid styleClass="w100" columns="1">
+							<h:panelGrid styleClass="w100" columns="1">
+								<p:outputLabel for="nombreArchivoRequisitoHidden"
+									value="Presentar la descripción de los siguientes requisitos (.zip|.rar)"
+									styleClass="bold separatorTop" />
+								<h:panelGrid styleClass="w100 separatorBottom" columns="1"
+									columnClasses="w50, field_mrg">
+									<h:panelGrid styleClass="w50 toLeft" columns="3">
+										<h:outputText id="nombreArchivoRequisito"
+											value="#{modalidadReusoController.modalidadReusoBean.modalidadReuso.documentoRequisitos.nombre}" />
+										<p:commandButton icon="ui-icon-arrowthick-1-s"
+											styleClass="button-small primary toLeft" title="Ver"
+											action="#{modalidadReusoController.descargar(1)}"
+											ajax="false"
+											rendered="#{!(modalidadReusoController.modalidadReusoBean.modalidadReuso.documentoRequisitos.id==null)}" />
+										<h:inputHidden id="nombreArchivoRequisitoHidden"
+											required="true"
+											value="#{modalidadReusoController.modalidadReusoBean.modalidadReuso.documentoRequisitos.nombre}" />
+									</h:panelGrid>
+									<h:panelGrid styleClass="w50" columns="1">
+										<p:fileUpload id="fileRequisitos"
+											fileUploadListener="#{modalidadReusoController.handleFileUpload}"
+											value="#{modalidadReusoController.file}" sizeLimit="5242880"
+											allowTypes="/(\.|\/)(zip|rar)$/" label="Seleccionar"
+											uploadLabel="Subir" auto="true"
+											update="nombreArchivoRequisito,nombreArchivoRequisitoHidden"
+											cancelLabel="Cancelar"
+											invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+											invalidSizeMessage="Debe adjuntar un archivo no mayor de 5 Mb."
+											required="true" mode="advanced">
+											<f:attribute name="indice" id="indice" value="1" />
+										</p:fileUpload>
+									</h:panelGrid>
+								</h:panelGrid>
+							</h:panelGrid>
+							<h:panelGrid styleClass="w100" columns="1" columnClasses="w100">
+								<h:outputText value="#{labels['label.reuso.requisitos']}"
+									escape="false" styleClass="w100" />
+							</h:panelGrid>
+						</p:panelGrid>
+					</h:panelGroup>
+				</p:panelGrid>
+			</p:panel>
+			<h:panelGroup id="pnl2"
+				rendered="#{modalidadReusoController.aprobacionRequisitosTecnicosBean.revisar}">
+				<p:fragment>
+					<!--<h2 class="bold">Observaciones de la modalidad de reuso.</h2>-->
+					<observaciones:tablaObservaciones aparace="true"
+						soloLectura="#{modalidadReusoController.aprobacionRequisitosTecnicosBean.revisar}"
+						mostrarSiVacio="#{!modalidadReusoController.aprobacionRequisitosTecnicosBean.revisar}"
+						idClase="#{modalidadReusoController.aprobacionRequisitosTecnicosBean.aprobacionRequisitosTecnicos.id}"
+						nombreClase="AprobacionRequisitosTecnicos"
+						seccion="#{modalidadReusoController.aprobacionRequisitosTecnicosBean.seccion}"
+						rol="sjsj" componenteActualizarEliminar="pnl2" />
+				</p:fragment>
+			</h:panelGroup>
+			<t:div styleClass="buttons main">
+				<p:commandButton value="#{labels['label.atras']}" immediate="true"
+					process="@this"
+					action="#{aprobacionRequisitosTecnicosController.recuperarPageAtras(2,false)}"
+					icon="ui-icon-arrowthick-1-w" />
+				<p:commandButton value="#{labels['label.guardar']}"
+					update=":#{p:component('form')}"
+					oncomplete="window.scrollTo(0,120);"
+					action="#{modalidadReusoController.guardarPagina()}"
+					icon="ui-icon-disk" />
+				<p:commandButton value="#{labels['label.siguiente']}"
+					immediate="true" process="@this"
+					action="#{aprobacionRequisitosTecnicosController.recuperarPageSiguiente(2,false,false)}"
+					icon="ui-icon-arrowthick-1-e" />
+			</t:div>
+		</h:form>
+		<p:dialog header="Desecho" id="editarDesecho"
+			widgetVar="editarDesechoWdgt" modal="true" resizable="false"
+			width="500" closable="false">
+			<h:form>
+				<h:panelGrid id="datosGeneralesDesecho" columns="2"
+					styleClass="w100 separatorBottom"
+					columnClasses="w50, field_mrg w50">
+					<p:outputLabel for="nombreDesecho" value="Nombre desecho" />
+					<p:inputTextarea id="nombreDesecho"
+						value="#{modalidadReusoController.modalidadReusoBean.desechoModalidadReuso.desecho.descripcion}"
+						readonly="true" />
+					<p:outputLabel for="codigo" value="Código" />
+					<p:inputText id="codigo"
+						value="#{modalidadReusoController.modalidadReusoBean.desechoModalidadReuso.desecho.clave}"
+						readonly="true" />
+					<p:outputLabel for="capacidad"
+						value="Capacidad Anual del Proceso (T)" />
+					<pe:inputNumber id="capacidad" decimalPlaces="2"
+						thousandSeparator="" widgetVar="capacidad"
+						value="#{modalidadReusoController.modalidadReusoBean.desechoModalidadReuso.capacidadAnualProceso}"
+						required="true"
+						validatorMessage="El campo 'Capacidad Anual del Proceso (T)' debe tener máximo 10 digitos y 2 decimales."
+						maxValue="9999999999.99" minValue="0" maxlength="10">
+					</pe:inputNumber>
+
+				</h:panelGrid>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton styleClass="buttonAceptar" value="Aceptar"
+						update=":#{p:component('datosGenerales')},:#{p:component('tblDesechos')},:#{p:component('datosGeneralesDesecho')}"
+						process="@this, @form"
+						oncomplete=" if (args.validationFailed) { }else { PF('editarDesechoWdgt').hide(); }" />
+					<p:commandButton value="Cancelar" styleClass="secondary"
+						immediate="true" onclick="PF('editarDesechoWdgt').hide();" />
+				</div>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="Importante" id="importanteDlg"
+			widgetVar="importanteWdgt" modal="true" resizable="false" width="300"
+			closable="false">
+			<h:outputText
+				value="No existen desechos asociados a la modalidad, por favor asocie los desechos a la modalidad en la sección" />
+			<ul class="error alLeft text-red ">
+				<li><h:outputLink class="text-red "
+						value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/gestion/eliminacionDisposicionFinal.jsf">
+						<h:outputText
+							value="Tipo de eliminación o disposición final de los desechos generados en la gestión" />
+					</h:outputLink></li>
+			</ul>
+		</p:dialog>
+	</ui:define>
+</ui:composition>

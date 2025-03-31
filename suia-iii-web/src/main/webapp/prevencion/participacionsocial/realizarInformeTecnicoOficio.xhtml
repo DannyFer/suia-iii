@@ -1,0 +1,388 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml"
+                xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+                
+    <style>
+    	.ui-radiobutton .ui-radiobutton-box {
+			height: 10px !important;
+			width: 10px !important;
+}
+
+	.ui-icon-bullet {
+	background: none;
+}
+    </style>
+
+
+                
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}" target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+
+
+        <h:outputText value="Datos"/>
+        <h:outputText value="Informe final de participacion social"/>
+
+        <h:outputLink value="#{request.contextPath}/prevencion/participacionsocial/completarInformeFinalPPS.jsf?tipo=revisarDatos" target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+
+
+    </ui:define>
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{informeTecnicoPSBean.validarTareaBpm()}"/>
+
+        <h:form id="form">
+            <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                         columnClasses="w100"
+                    >
+                <f:facet name="header">
+                    <mae:panelGridHeaderHelp value="INFORME TÉCNICO OFICIO"
+                                             conector="generalHelp"
+                                             help="Para completar el informe, por favor ingrese la información requerida en las secciones correspondientes. Para previsualizar el documento presione Guardar."/>
+
+
+                </f:facet>
+                <object id="pdf_informe" type="application/pdf"
+                        data="#{informeTecnicoPSBean.informePath}?pfdrid_c=true"
+                        width="100%" height="400px">
+                    Su navegador no soporta la visualización de pdf. Puede descargar el
+                    documento presionando el siguiente botón:
+                    <p:commandButton value="Descargar" styleClass="primary" immediate="true"
+                                     ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+                        <p:fileDownload value="#{informeTecnicoPSBean.stream}"/>
+                    </p:commandButton>
+                </object>
+
+
+                <br/>
+                <br/>
+                
+
+                <h2>Evaluación Técnica:</h2>
+                <h3>Evaluación de conformidad con la normativa vigente y disposiciones de la Autoridad Ambiental:</h3>
+                <p:dataTable id="tbl" value="#{informeTecnicoPSBean.listaEvaluacionParticipacionSocialNormativas}"
+                             var="elemento"
+                             emptyMessage="#{labels['common.table.empty']}">
+                    <f:facet name="header">
+                        Normativa y Disposiciones
+                    </f:facet>
+                    <p:column styleClass="tblUno w30" headerText="Normativa y Disposiciones">
+                        <p:outputLabel value="#{elemento.catalogoEvaluacionParticipacionSocial.descripcion}"
+                                />
+                    </p:column>
+                    <p:column styleClass="w30">                       
+                        
+                        <p:selectOneRadio value="#{elemento.valorRegistro}" required="true"
+                                          disabled="#{informeTecnicoPSBean.revisar}" 
+                                          styleClass="ui-radiobutton" requiredMessage="El campo normativa y disposiciones es requerido">
+                            <f:selectItem itemLabel="Si" itemValue="1"/>
+                            <f:selectItem itemLabel="No" itemValue="2"/>
+                            <f:selectItem itemLabel="Parcialmente" itemValue="3"/>
+                            <p:ajax update="@(.observaciones)"/>
+                        </p:selectOneRadio>
+                        
+                    </p:column>
+                    <p:column styleClass="tblUno w40" headerText="Descripción">
+                    <p:inputTextarea value="#{elemento.descripcion}" rows="3" autoResize="false"/>
+                    </p:column>
+                </p:dataTable>
+                <br/>
+                <br/>
+                <p:dataTable id="tbl2" value="#{informeTecnicoPSBean.listaEvaluacionParticipacionSocialCumplimiento}"
+                             var="elemento"
+                             emptyMessage="#{labels['common.table.empty']}">
+                    <f:facet name="header">
+                        Cumplimiento de los Objetivos del proceso
+                    </f:facet>
+                    <p:column styleClass="tblUno w30" headerText="Objetivos">
+                        <p:outputLabel value="#{elemento.catalogoEvaluacionParticipacionSocial.descripcion}"
+                                />
+                    </p:column>
+                    <p:column styleClass="w30">
+                         <p:selectOneRadio value="#{elemento.valorRegistro}" required="true"
+                                          disabled="#{informeTecnicoPSBean.revisar}" 
+                                          styleClass="ui-radiobutton" requiredMessage="El campo Objetivos es requerido">
+                            <f:selectItem itemLabel="Si" itemValue="1"/>
+                            <f:selectItem itemLabel="No" itemValue="2"/>
+                            <f:selectItem itemLabel="Parcialmente" itemValue="3"/>
+                            <p:ajax update="@(.observaciones)"/>
+                        </p:selectOneRadio>
+
+                    </p:column>
+                    <p:column styleClass="tblUno w40" headerText="Descripción">
+                    <p:inputTextarea value="#{elemento.descripcion}" rows="3" autoResize="false"/>
+                    </p:column>
+                </p:dataTable>
+                <br/>
+                <br/>
+                <p:dataTable id="tbl3" value="#{informeTecnicoPSBean.listaRegistroMedios}"
+                             var="elemento"
+                             emptyMessage="#{labels['common.table.empty']}">
+                    <f:facet name="header">
+                        Ingrese la evaluación de los Medios de Convocatoria
+                    </f:facet>
+                    <p:column styleClass="tblUno w30" headerText="Medio de Convocatoria">
+                        <p:outputLabel value="#{elemento.catalogoMedio.nombreMedio}" 
+                                />
+                    </p:column>
+                    <p:column styleClass="tblDos w70" headerText="Evaluación">
+                        <p:inputTextarea value="#{elemento.evaluacion}" rows="3" autoResize="false" maxlength="2000"/>
+
+                    </p:column>
+                </p:dataTable>
+				<br/>
+                <br/>
+
+
+                <p:panelGrid columns="1" layout="grid"  >
+
+                    <p:panelGrid columns="1"  layout="grid"   styleClass="w100 observaciones noneBorder" >
+                        <h:outputLabel value="Análisis técnico / Observaciones"
+                                       rendered="#{informeTecnicoPSBean.evaluacionNegativa()}"/>
+                        <control:imputConTextoEnriquecido rendered="#{informeTecnicoPSBean.evaluacionNegativa()}"
+                                                          valor="#{informeTecnicoPSBean.participacionSocialAmbiental.observacionGeneralfinal}"
+                                                          soloLectura="#{informeTecnicoPSBean.revisar}"
+                                                          requerido="false" />
+                    </p:panelGrid>
+                    
+                 <h:outputLabel value="Antecedentes: "/>
+                    <control:imputConTextoEnriquecido
+                            valor="#{informeTecnicoPSBean.participacionSocialAmbiental.antecedentes}"
+                            soloLectura="#{informeTecnicoPSBean.revisar}"
+                            requerido="false"/>			
+
+
+                    <h:outputLabel value="Observaciones relevantes de la Comunidad"/>
+                    <h:outputLabel value="Preguntas - Observaciones realizados en el proceso"/>
+                    <control:imputConTextoEnriquecido
+                            valor="#{informeTecnicoPSBean.participacionSocialAmbiental.observacionReporfinal}"
+                            soloLectura="#{informeTecnicoPSBean.revisar}"
+                            requerido="false"/>
+
+                   <!-- <h:outputLabel value="Observaciones adicionales del PPS" rendered="false"/>
+                    <control:imputConTextoEnriquecido rendered="false"
+                            valor="#{informeTecnicoPSBean.participacionSocialAmbiental.observacionAdicional}"
+                            soloLectura="#{informeTecnicoPSBean.revisar}"
+                            requerido="false"/>-->
+
+                    <h:outputLabel value="Conclusiones "/>
+                    <control:imputConTextoEnriquecido
+                            valor="#{informeTecnicoPSBean.participacionSocialAmbiental.conclusion}"
+                            soloLectura="#{informeTecnicoPSBean.revisar}"
+                            requerido="false"/>
+
+                    <h:outputLabel
+                            value="Determinación de la Autoridad Ambiental competente"/>
+                    <control:imputConTextoEnriquecido
+                            valor="#{informeTecnicoPSBean.participacionSocialAmbiental.determinacionDnpca}"
+                            soloLectura="#{informeTecnicoPSBean.revisar}"
+                            requerido="false"/>
+
+                    <h:outputLabel value="Recomendaciones"/>
+                    <control:imputConTextoEnriquecido
+                            valor="#{informeTecnicoPSBean.participacionSocialAmbiental.recomendaciones}"
+                            soloLectura="#{informeTecnicoPSBean.revisar}"
+                            requerido="false"/>
+
+                    <p:outputLabel value="¿El facilitador cumplió con sus labores?" for="cumplioFacilitador"/>
+                    <p:selectOneRadio id="cumplioFacilitador" required="true" disabled="#{informeTecnicoPSBean.revisar}"
+                                      value="#{informeTecnicoPSBean.participacionSocialAmbiental.cumplioFacilitador}">
+                        <f:selectItem itemLabel="SI" itemValue="true"/>
+                        <f:selectItem itemLabel="NO" itemValue="false"/>
+                        <p:ajax/>
+                    </p:selectOneRadio>
+
+
+                </p:panelGrid>
+
+            </p:panelGrid>
+            <h:panelGrid columns="1" styleClass="w100 pronunciamientoNoAprobacion" id="pronunciamiento-wrapper"
+                         columnClasses="w50, field_mrg w50">
+
+
+                <p:outputLabel for="pronunciamiento" value="Tipo de pronunciamiento"/>
+                <p:selectOneRadio id="pronunciamiento"
+                                  value="#{informeTecnicoPSBean.participacionSocialAmbiental.pronunciamientoFavorable}"
+                                  required="true" disabled="#{informeTecnicoPSBean.revisar}">
+                    <f:selectItem itemLabel="Pronunciamiento favorable"
+                                  itemValue="true"/>
+                    <f:selectItem itemLabel="Pronunciamiento no favorable"
+                                  itemValue="false"/>
+                    <p:ajax event="change" update="@(.pronunciamientoNoAprobacion)"/>
+                </p:selectOneRadio>
+                <p:outputLabel for="pronunciamientoNoAprobacion" value="Tipo de pronunciamiento no favorable"   rendered="#{informeTecnicoPSBean.participacionSocialAmbiental.pronunciamientoFavorable != null
+                                      and !informeTecnicoPSBean.participacionSocialAmbiental.pronunciamientoFavorable}"/>
+                <p:selectOneRadio id="pronunciamientoNoAprobacion" styleClass="pronunciamientoNoAprobacion"
+                                  value="#{informeTecnicoPSBean.participacionSocialAmbiental.pronunciamientoNoAprobacion}"
+                                  required="true"
+                                  disabled="#{informeTecnicoPSBean.revisar}"
+                                  rendered="#{informeTecnicoPSBean.participacionSocialAmbiental.pronunciamientoFavorable != null
+                                      and !informeTecnicoPSBean.participacionSocialAmbiental.pronunciamientoFavorable}">
+                    <f:selectItem itemLabel="Pronunciamiento de no aprobación"
+                                  itemValue="true"/>
+                    <f:selectItem itemLabel="Pronunciamiento de acciones complementarias"
+                                  itemValue="false"/>
+                </p:selectOneRadio>
+
+
+                <p:outputLabel for="requiere-modificaciones"
+                               value="¿Requiere modificaciones el informe?"
+                               rendered="#{informeTecnicoPSBean.revisar}"/>
+                <p:selectOneRadio id="requiere-modificaciones"
+                                  value="#{informeTecnicoPSBean.requiereModificaciones}"
+                                  required="#{informeTecnicoPSBean.revisar}"
+                                  rendered="#{informeTecnicoPSBean.revisar}">
+                    <f:selectItem itemLabel="Si" itemValue="true"/>
+                    <f:selectItem itemLabel="No" itemValue="false"/>
+                </p:selectOneRadio>
+
+            </h:panelGrid>
+
+            <p:fragment>
+                <h:panelGroup id="pnl2">
+
+                    <observaciones:tablaObservaciones aparace="true"
+                                                      soloLectura="#{!completarInformeVisitaPreviaPSBean.revisar}"
+                                                      mostrarSiVacio="#{completarInformeVisitaPreviaPSBean.revisar}"
+                                                      idClase="#{completarInformeVisitaPreviaPSBean.proyectosBean.proyecto.id}"
+                                                      nombreClase="ParticipacionSocial"
+                                                      seccion="informe"
+                                                      rol="admin"
+                                                      componenteActualizarEliminar="pnl2"/>
+                </h:panelGroup>
+            </p:fragment>
+
+            <div class="buttons main">
+                <p:commandButton value="Guardar" update="pronunciamiento-wrapper"
+                                 action="#{informeTecnicoPSBean.guardar()}"
+                                 styleClass="ui-confirmdialog-yes secondary" icon="ui-icon-disk"/>
+                            					
+				<p:commandButton value="Siguiente" rendered="#{informeTecnicoPSBean.soloEnviar}"
+					styleClass="primary" icon="ui-icon-arrowthick-1-e"
+					actionListener="#{informeTecnicoPSBean.guardarContinuar()}">
+				</p:commandButton>	
+				
+				<p:commandButton value="Siguiente"
+					rendered="#{!informeTecnicoPSBean.soloEnviar}"
+					onclick="PF('signDialog').show();"
+					styleClass="primary" icon="ui-icon-arrowthick-1-e">
+					<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+						header="#{msg['header.confirmacion.envio.tarea']}" />
+				</p:commandButton>
+
+            </div>
+
+        </h:form>
+        
+        <h:form id="formDialogs">
+
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600px" height="auto">
+				<p:panel>
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel value="Firmar informe" styleClass="bold" />
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold"
+							rendered="#{!informeTecnicoPSBean.ambienteProduccion}" />
+						<p:selectOneRadio id="verificaToken"
+							value="#{informeTecnicoPSBean.token}"
+							rendered="#{!informeTecnicoPSBean.ambienteProduccion}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change"
+								update=":formDialogs:pnlFirmaManual :formDialogs:pnlFirmaToken"
+								listener="#{informeTecnicoPSBean.guardarToken}" />
+						</p:selectOneRadio>
+
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{informeTecnicoPSBean.ambienteProduccion}" />
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{informeTecnicoPSBean.ambienteProduccion}" />
+
+						<h:panelGroup id="pnlFirmaToken">
+							<p:commandButton value="Firmar documento" type="button"
+								styleClass="primary" icon="ui-icon-key"
+								rendered="#{informeTecnicoPSBean.token}"
+								onclick="window.location.href='#{informeTecnicoPSBean.firmarOficio()}'" />
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!informeTecnicoPSBean.token}">
+							<p:outputLabel value="1. Descargar el Informe" styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload
+									value="#{informeTecnicoPSBean.descargarInformacion()}" />
+							</p:commandButton>
+							<p:outputLabel for="uploadRequired"
+								value="2. Adjuntar el Informe firmado"
+								styleClass="bold" />
+							<p:fileUpload id="Idfirmada"
+								fileUploadListener="#{informeTecnicoPSBean.cargarArchivo}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreDocFirmado"
+								rendered="#{!informeTecnicoPSBean.token}">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreDocFirmado"
+								value="#{informeTecnicoPSBean.nombreDocumentoFirmado}" />
+						</h:panelGrid>
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!informeTecnicoPSBean.token and !informeTecnicoPSBean.informacionSubida}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialog').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						actionListener="#{informeTecnicoPSBean.guardarContinuar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+
+			<p:separator />
+
+		</h:form>
+
+
+    </ui:define>
+</ui:composition>
+</html>

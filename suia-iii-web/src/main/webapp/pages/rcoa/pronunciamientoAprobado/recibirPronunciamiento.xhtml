@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:t="http://myfaces.apache.org/tomahawk"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+    <ui:define name="content">
+      
+        <h:form id="form">
+        	<h:panelGrid columns="1" layout="grid" rendered="#{recibirPronunciamientoPAController.showLinkSurvey()}">
+                    <p>Estimado Operador se solicita completar la siguiente encuesta, una vez realizado dicha tarea podrá obtener la documentación de su proyecto</p>
+                    <p:commandButton value="Encuesta" styleClass="primary" update="surveyDialog"
+                    	actionListener="#{recibirPronunciamientoPAController.showDialogSurvey()}" />
+             </h:panelGrid>
+                          
+             <center>
+              <h:panelGrid columns="1" layout="grid" rendered="#{!recibirPronunciamientoPAController.showLinkSurvey()}">
+              
+                    <h:outputText value="Estimado operador, atendiendo a su solicitud, se emite el pronunciamiento favorable del proyecto."/>
+                    <p:panel>
+                    	<center>
+                    	<h:outputText value="#{recibirPronunciamientoPAController.proyectoLicenciaCoa.codigoUnicoAmbiental}" styleClass="bold"/>
+                    	<br/>
+                    	<p:commandButton value="Descargar" ajax="false"	icon="ui-icon-arrowthick-1-s" styleClass="primary" immediate="true"
+                    	disabled="#{empty recibirPronunciamientoPAController.documento}">
+							<p:fileDownload value="#{recibirPronunciamientoPAController.descargarDocumento()}" />
+						</p:commandButton>
+                    	</center>
+                    </p:panel>
+                                  
+             </h:panelGrid>
+             </center>
+             
+             <p:dialog id="surveyDialog" header="Encuesta de Satisfacción de Servicios" modal="true" closable="true" resizable="false" 
+            	visible="#{recibirPronunciamientoPAController.showSurvey}">
+             <p:ajax event="close"/>
+            	<iframe frameborder="0" align="left" src="#{recibirPronunciamientoPAController.urlLinkSurvey()}"
+            		scrolling="auto" width="925" height="450" marginheight="5" marginwidth="10"></iframe>
+            </p:dialog>
+		
+		
+			<t:div styleClass="buttons main">                           
+         	              
+            <p:commandButton value="Aceptar" rendered="#{!recibirPronunciamientoPAController.showLinkSurvey()}"
+            	action="#{recibirPronunciamientoPAController.enviar()}"
+                icon="ui-icon-check" update=":#{p:component('form')}"
+                disabled="#{empty recibirPronunciamientoPAController.documento}"/>
+            </t:div>		
+        
+         </h:form>
+         
+       
+         
+        
+    </ui:define>
+</ui:composition>

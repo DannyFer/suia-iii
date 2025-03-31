@@ -1,0 +1,377 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+        >
+<ui:composition template="/WEB-INF/templates/default-task.xhtml"
+        >
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}" target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+
+    </ui:define>
+    <ui:define name="content">
+
+        <f:event type="preRenderView" listener="#{completarInformeVisitaPreviaPSBean.validarTareaBpm()}"/>
+        <h:form id="form">
+        <p:growl id="growl" showDetail="true" sticky="true" showSummary="false" />
+            <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                         columnClasses=" " rendered="#{completarInformeVisitaPreviaPSBean.revisar}">
+                <f:facet name="header">
+                    <h:outputText value="Visita previa"/>
+                </f:facet>
+                <p:outputLabel for="observaciones" value="¿Existen observaciones a la documentación?"></p:outputLabel>
+                <p:selectOneRadio id="observaciones" value="#{completarInformeVisitaPreviaPSBean.observado}"
+                                  required="true">
+                    <f:selectItem itemLabel="Si"
+                                  itemValue="true"/>
+                    <f:selectItem itemLabel="No"
+                                  itemValue="false"/>
+                     <p:ajax update=":form"></p:ajax>
+                </p:selectOneRadio>
+                
+                <!--Cris F: Cambio para descargar formatos de informe -->     
+                <h:panelGrid id="informeVP" rendered="#{completarInformeVisitaPreviaPSBean.observado != null and completarInformeVisitaPreviaPSBean.observado eq false}">
+        		<p:outputLabel styleClass="bold" value="Formato de Informe Tecnico: *"/>
+                        <p:commandButton value="Descargar" ajax="false" 
+                                         icon="ui-icon-arrowthick-1-s" id="formato" 
+                                         immediate="true"
+                                         styleClass="oculto primary" process="@this" update="@this">
+                            <p:fileDownload value="#{completarInformeVisitaPreviaPSBean.stream}"/>
+                        </p:commandButton>
+				</h:panelGrid>
+
+            </p:panelGrid>
+
+            <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                         columnClasses=" " rendered="true">
+                <f:facet name="header">
+                    <h:outputText value="Visita previa"/>
+                </f:facet>
+                <h:panelGrid columns="2" styleClass="w100" columnClasses="w50, w50 field_mrg">
+                    <h:panelGrid columns="1" styleClass="w100">
+                        <p:outputLabel value="Fecha de inicio de Visita Previa" for="fechaInicio"/>
+                        <p:calendar id="fechaInicio" required="true"  readonly="#{completarInformeVisitaPreviaPSBean.revisar}"
+                                    value="#{completarInformeVisitaPreviaPSBean.participacionSocialAmbiental.visitaPreviaFechaInicio}"
+                                    mindate="#{proyectosBean.proyecto.fechaRegistro}"
+                                >
+                            <p:ajax event="dateSelect" update="fechaFin"/>
+                        </p:calendar>
+                    </h:panelGrid><h:panelGrid columns="1" styleClass="w100">
+                    <p:outputLabel value="Fecha de Finalización de Visita Previa" for="fechaFin"/>
+                    <p:calendar id="fechaFin" required="true"  readonly="#{completarInformeVisitaPreviaPSBean.revisar}"
+                                mindate="#{completarInformeVisitaPreviaPSBean.participacionSocialAmbiental.visitaPreviaFechaInicio}"
+                                value="#{completarInformeVisitaPreviaPSBean.participacionSocialAmbiental.visitaPreviaFechaFin}"
+                            /></h:panelGrid>
+                </h:panelGrid>
+            </p:panelGrid>
+
+
+            <h:panelGrid columns="2" styleClass="w100" columnClasses="w50,w50 field_mrg">
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" id="visitaPrevia"
+                             columnClasses=" " rendered="true">
+                    <f:facet name="header">
+                        <h:outputText value="Informe de visita previa: *"/>
+                    </f:facet>
+
+
+                    <h:panelGrid columns="2" columnClasses="null, field_mrg">
+                        <p:outputLabel
+                                value="#{empty completarInformeVisitaPreviaPSBean.documentos.get('visitaPrevia') ? 'Documento(.pdf)' :
+                                completarInformeVisitaPreviaPSBean.documentos.get('visitaPrevia').nombre}"/>
+                        <p:commandButton id="downloadVisitaPrevia" icon="ui-icon-arrowthick-1-s"
+                                         ajax="false" styleClass="button-small primary" title="Ver"
+                                         immediate="true"
+                                         rendered="#{not empty completarInformeVisitaPreviaPSBean.documentos.get('visitaPrevia')}">
+                            <p:fileDownload
+                                    value="#{completarInformeVisitaPreviaPSBean.getStreamContent('visitaPrevia')}"/>
+                        </p:commandButton>
+                    </h:panelGrid>
+                    <p:fileUpload fileUploadListener="#{completarInformeVisitaPreviaPSBean.uploadListenerDocumentos}"
+                                  multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                                  label="Seleccionar" uploadLabel="Subir"
+                                  invalidFileMessage="Tipo de archivo no válido"
+                                  invalidSizeMessage="Tamaño de archivo no válido"
+                                  cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                  auto="true" update="visitaPrevia"
+                                  rendered="#{!completarInformeVisitaPreviaPSBean.revisar}"
+                            >
+                        <f:attribute name="clave" value="visitaPrevia"/>
+                    </p:fileUpload>
+                </p:panelGrid>
+
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" id="invitacionesPersonales"
+                             columnClasses=" " rendered="true">
+                    <f:facet name="header">
+                        <h:outputText value="Invitaciones Personales: *"/>
+                    </f:facet>
+                    <h:panelGrid columns="2" columnClasses="null, field_mrg"
+                            >
+                        <p:outputLabel
+                                value="#{empty completarInformeVisitaPreviaPSBean.documentos.get('invitacionesPersonales') ? 'Documento(.pdf)' :
+                                completarInformeVisitaPreviaPSBean.documentos.get('invitacionesPersonales').nombre}"/>
+                        <p:commandButton id="downloadinvitacionesPersonales" icon="ui-icon-arrowthick-1-s"
+                                         ajax="false" styleClass="button-small primary" title="Ver"
+                                         immediate="true"
+                                         rendered="#{not empty completarInformeVisitaPreviaPSBean.documentos.get('invitacionesPersonales')}">
+                            <p:fileDownload
+                                    value="#{completarInformeVisitaPreviaPSBean.getStreamContent('invitacionesPersonales')}"/>
+                        </p:commandButton>
+                    </h:panelGrid>
+                    <p:fileUpload
+                            fileUploadListener="#{completarInformeVisitaPreviaPSBean.uploadListenerDocumentos}"
+                            multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                            label="Seleccionar" uploadLabel="Subir"
+                            invalidFileMessage="Tipo de archivo no válido"
+                            invalidSizeMessage="Tamaño de archivo no válido"
+                            cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                            auto="true" update="invitacionesPersonales"
+                            rendered="#{!completarInformeVisitaPreviaPSBean.revisar}"
+                            >
+                        <f:attribute name="clave" value="invitacionesPersonales"/>
+                    </p:fileUpload>
+                </p:panelGrid>
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" id="convocatoriaPublica"
+                             columnClasses=" " rendered="true">
+                    <f:facet name="header">
+                        <h:outputText value="Convocatoria pública: *"/>
+                    </f:facet>
+                    <h:panelGrid columns="2" columnClasses="null, field_mrg"
+                            >
+                        <p:outputLabel
+                                value="#{empty completarInformeVisitaPreviaPSBean.documentos.get('convocatoriaPublica') ? 'Documento(.pdf)' :
+                                completarInformeVisitaPreviaPSBean.documentos.get('convocatoriaPublica').nombre}"/>
+                        <p:commandButton id="downloadConvocatoriaPublica" icon="ui-icon-arrowthick-1-s"
+                                         ajax="false" styleClass="button-small primary" title="Ver"
+                                         immediate="true"
+                                         rendered="#{not empty completarInformeVisitaPreviaPSBean.documentos.get('convocatoriaPublica')}">
+                            <p:fileDownload
+                                    value="#{completarInformeVisitaPreviaPSBean.getStreamContent('convocatoriaPublica')}"/>
+                        </p:commandButton>
+                    </h:panelGrid>
+                    <p:fileUpload
+                            fileUploadListener="#{completarInformeVisitaPreviaPSBean.uploadListenerDocumentos}"
+                            multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                            label="Seleccionar" uploadLabel="Subir"
+                            invalidFileMessage="Tipo de archivo no válido"
+                            invalidSizeMessage="Tamaño de archivo no válido"
+                            cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                            auto="true" update="convocatoriaPublica"
+                            rendered="#{!completarInformeVisitaPreviaPSBean.revisar}"
+                            >
+                        <f:attribute name="clave" value="convocatoriaPublica"/>
+                    </p:fileUpload>
+                </p:panelGrid>
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" id="actaAperturaCierre"
+                             columnClasses=" " rendered="true">
+                    <f:facet name="header">
+                        <h:outputText value="Acta Apertura y Cierre CIP: *"/>
+                    </f:facet>
+                    <h:panelGrid columns="2" columnClasses="null, field_mrg"
+                            >
+                        <p:outputLabel
+                                value="#{empty completarInformeVisitaPreviaPSBean.documentos.get('actaAperturaCierre') ? 'Documento(.pdf)' :
+                                completarInformeVisitaPreviaPSBean.documentos.get('actaAperturaCierre').nombre}"/>
+                        <p:commandButton id="downloadActaAperturaCierre" icon="ui-icon-arrowthick-1-s"
+                                         ajax="false" styleClass="button-small primary" title="Ver"
+                                         immediate="true"
+                                         rendered="#{not empty completarInformeVisitaPreviaPSBean.documentos.get('actaAperturaCierre')}">
+                            <p:fileDownload
+                                    value="#{completarInformeVisitaPreviaPSBean.getStreamContent('actaAperturaCierre')}"/>
+                        </p:commandButton>
+                    </h:panelGrid>
+                    <p:fileUpload
+                            fileUploadListener="#{completarInformeVisitaPreviaPSBean.uploadListenerDocumentos}"
+                            multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                            label="Seleccionar" uploadLabel="Subir"
+                            invalidFileMessage="Tipo de archivo no válido"
+                            invalidSizeMessage="Tamaño de archivo no válido"
+                            cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                            auto="true" update="actaAperturaCierre"
+                            rendered="#{!completarInformeVisitaPreviaPSBean.revisar}"
+                            >
+                        <f:attribute name="clave" value="actaAperturaCierre"/>
+                    </p:fileUpload>
+                </p:panelGrid>
+
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" id="actaAsamblea"
+                             columnClasses=" " rendered="true">
+                    <f:facet name="header">
+                        <h:outputText value="Acta de la Asamblea: *"/>
+                    </f:facet>
+                    <h:panelGrid columns="2" columnClasses="null, field_mrg"
+                            >
+                        <p:outputLabel
+                                value="#{empty completarInformeVisitaPreviaPSBean.documentos.get('actaAsamblea') ? 'Documento(.pdf)' :
+                                completarInformeVisitaPreviaPSBean.documentos.get('actaAsamblea').nombre}"/>
+                        <p:commandButton id="downloadActaAsamblea" icon="ui-icon-arrowthick-1-s"
+                                         ajax="false" styleClass="button-small primary" title="Ver"
+                                         immediate="true"
+                                         rendered="#{not empty completarInformeVisitaPreviaPSBean.documentos.get('actaAsamblea')}">
+                            <p:fileDownload
+                                    value="#{completarInformeVisitaPreviaPSBean.getStreamContent('actaAsamblea')}"/>
+                        </p:commandButton>
+                    </h:panelGrid>
+                    <p:fileUpload
+                            fileUploadListener="#{completarInformeVisitaPreviaPSBean.uploadListenerDocumentos}"
+                            multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                            label="Seleccionar" uploadLabel="Subir"
+                            invalidFileMessage="Tipo de archivo no válido"
+                            invalidSizeMessage="Tamaño de archivo no válido"
+                            cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                            auto="true" update="actaAsamblea"
+                            rendered="#{!completarInformeVisitaPreviaPSBean.revisar}"
+                            >
+                        <f:attribute name="clave" value="actaAsamblea"/>
+                    </p:fileUpload>
+                </p:panelGrid>
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" id="registroCip"
+                             columnClasses=" " rendered="true">
+                    <f:facet name="header">
+                        <h:outputText value="Registro CIP: *"/>
+                    </f:facet>
+                    <h:panelGrid columns="2" columnClasses="null, field_mrg"
+                            >
+                        <p:outputLabel
+                                value="#{empty completarInformeVisitaPreviaPSBean.documentos.get('registroCip') ? 'Documento(.pdf)' :
+                                completarInformeVisitaPreviaPSBean.documentos.get('registroCip').nombre}"/>
+                        <p:commandButton id="downloadregistroCip" icon="ui-icon-arrowthick-1-s"
+                                         ajax="false" styleClass="button-small primary" title="Ver"
+                                         immediate="true"
+                                         rendered="#{not empty completarInformeVisitaPreviaPSBean.documentos.get('registroCip')}">
+                            <p:fileDownload
+                                    value="#{completarInformeVisitaPreviaPSBean.getStreamContent('registroCip')}"/>
+                        </p:commandButton>
+                    </h:panelGrid>
+                    <p:fileUpload
+                            fileUploadListener="#{completarInformeVisitaPreviaPSBean.uploadListenerDocumentos}"
+                            multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                            label="Seleccionar" uploadLabel="Subir"
+                            invalidFileMessage="Tipo de archivo no válido"
+                            invalidSizeMessage="Tamaño de archivo no válido"
+                            cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                            auto="true" update="registroCip"
+                            rendered="#{!completarInformeVisitaPreviaPSBean.revisar}"
+                            >
+                        <f:attribute name="clave" value="registroCip"/>
+                    </p:fileUpload>
+                </p:panelGrid>
+
+            </h:panelGrid>
+
+
+            <p:panelGrid columns="1" layout="grid" styleClass="w100" id="registroAsistencia"
+                         columnClasses=" " rendered="true">
+                <f:facet name="header">
+                    <h:outputText value="Registro de Asistencia: *"/>
+                </f:facet>
+                <h:panelGrid columns="2" columnClasses="null, field_mrg"
+                        >
+                    <p:outputLabel
+                            value="#{empty completarInformeVisitaPreviaPSBean.documentos.get('registroAsistencia') ? 'Documento(.pdf)' :
+                                completarInformeVisitaPreviaPSBean.documentos.get('registroAsistencia').nombre}"/>
+                    <p:commandButton id="downloadRegistroAsistencia" icon="ui-icon-arrowthick-1-s"
+                                     ajax="false" styleClass="button-small primary" title="Ver"
+                                     immediate="true"
+                                     rendered="#{not empty completarInformeVisitaPreviaPSBean.documentos.get('registroAsistencia')}">
+                        <p:fileDownload
+                                value="#{completarInformeVisitaPreviaPSBean.getStreamContent('registroAsistencia')}"/>
+                    </p:commandButton>
+                </h:panelGrid>
+                <p:fileUpload
+                        fileUploadListener="#{completarInformeVisitaPreviaPSBean.uploadListenerDocumentos}"
+                        multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                        label="Seleccionar" uploadLabel="Subir"
+                        invalidFileMessage="Tipo de archivo no válido"
+                        invalidSizeMessage="Tamaño de archivo no válido"
+                        cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                        auto="true" update="registroAsistencia"
+                        rendered="#{!completarInformeVisitaPreviaPSBean.revisar}"
+                        >
+                    <f:attribute name="clave" value="registroAsistencia"/>
+                </p:fileUpload>
+            </p:panelGrid>
+            
+            <!--Cris F: aumento de fecha para publicación de estudio ambiental-->
+				<p:panelGrid id="panelFecha" columns="1" layout="grid" styleClass="w100" rendered="#{completarInformeVisitaPreviaPSBean.observado != null and completarInformeVisitaPreviaPSBean.observado eq false}">
+                    <h:panelGrid layout="grid">
+                    <p:outputLabel value="Favor seleccionar las fechas de inicio y fin de la publicación del Estudio Ambiental en el SUIA"/>
+                        <h:panelGrid columns="2">				
+				 <p:outputLabel for="fecInicioPublicacion" value="Fecha de inicio de Publicación"/>
+                            <p:calendar id="fecInicioPublicacion" required="true"
+                                        value="#{completarInformeVisitaPreviaPSBean.participacionSocialAmbiental.fechaInicioPublicacion}">
+                                <p:ajax event="dateSelect" update="fecFinPublicacion"/>
+                            </p:calendar>
+                            <p:outputLabel for="fecFinPublicacion"
+                                           value="Fecha de fin de Publicación"/>
+                            <p:calendar id="fecFinPublicacion" required="true" 
+                                        mindate="#{completarInformeVisitaPreviaPSBean.participacionSocialAmbiental.fechaInicioPublicacion}"
+                                        value="#{completarInformeVisitaPreviaPSBean.participacionSocialAmbiental.fechaFinPublicacion}"/>
+				</h:panelGrid>
+				</h:panelGrid>
+				</p:panelGrid>
+            
+            
+            <p:panelGrid columns="1" layout="grid" styleClass="w100" id="informe"
+                             columnClasses=" " rendered="#{completarInformeVisitaPreviaPSBean.observado != null and completarInformeVisitaPreviaPSBean.observado eq false}">
+                    <f:facet name="header">
+                        <h:outputText value="Subir Informe Técnico: *"/>
+                    </f:facet>
+                    <p:outputLabel value="Subir Informe Técnico Firmado: *"></p:outputLabel> 
+                    
+                    <h:outputText id="informePPS"
+                                value="#{empty completarInformeVisitaPreviaPSBean.documentosInforme.get('informeTecnicoVisitaPreviaPPS') ? 'Documento(.pdf)' :
+                                completarInformeVisitaPreviaPSBean.documentosInforme.get('informeTecnicoVisitaPreviaPPS').nombre}"/>
+                                
+                    <p:fileUpload fileUploadListener="#{completarInformeVisitaPreviaPSBean.uploadListenerDocumentosInforme}"
+                                  multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                                  label="Seleccionar" uploadLabel="Subir"
+                                  invalidFileMessage="Tipo de archivo no válido"
+                                  invalidSizeMessage="Tamaño de archivo no válido"
+                                  cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                  auto="true" update="informe informePPS">
+                        <f:attribute name="clave" value="informeTecnicoVisitaPreviaPPS"/>
+                    </p:fileUpload>
+                    
+                </p:panelGrid>
+
+            <p:fragment>
+                <h:panelGroup id="pnl2">
+
+                <observaciones:tablaObservaciones aparace="true"
+                                                  soloLectura="#{!completarInformeVisitaPreviaPSBean.revisar}"
+                                                  mostrarSiVacio="#{completarInformeVisitaPreviaPSBean.revisar}"
+                                                  idClase="#{completarInformeVisitaPreviaPSBean.proyectosBean.proyecto.id}"
+                                                  nombreClase="ParticipacionSocial"
+                                                  seccion="visitaPrevia"
+                                                  rol="admin"
+                                                  componenteActualizarEliminar="pnl2"/>
+            </h:panelGroup>
+            </p:fragment>
+
+            <div class="buttons main">
+                <p:commandButton value="Enviar" title="Completar tarea" styleClass="primary" update=":form"
+
+                                 action="#{completarInformeVisitaPreviaPSController.enviarDatos}"
+                                 icon="ui-icon-check">
+                </p:commandButton>
+            </div>
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

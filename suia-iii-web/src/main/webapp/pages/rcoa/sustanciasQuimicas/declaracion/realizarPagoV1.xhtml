@@ -1,0 +1,130 @@
+<ui:composition template="/WEB-INF/templates/default-task-drsq.xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+	<ui:define name="context-extra">
+		<h:outputText value="Código RSQ" />
+		<h:outputText value="#{declaracionPagoRSQV1Controller.rsq.numeroAplicacion}" />
+		<h:outputLink value="../ingresarInformacionRSQ.jsf" target="_blank">
+			<p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search" />
+		</h:outputLink>	
+		<h:outputText value="Trámite" />
+		<h:outputText value="#{declaracionPagoRSQV1Controller.tramite}" />		
+	</ui:define>
+	
+		<ui:define name="content">
+			<h:form id="formTransaction">
+				<p:panel>
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="Pago de Tasa" />
+						</f:facet>
+
+						<h:outputText value="El pago corresponde a la tasa por concepto de declaración mensual, se lo debe realizar por medio de la opción de Pago en Línea del Ministerio del Ambiente, Agua y Transición Ecológica." />
+							
+					</p:panelGrid>
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<h:panelGrid styleClass="panel_data w50" columns="2"
+				columnClasses="header w50, bold w50" rowClasses="null, alt">
+					
+					<h:outputText value="Valor total a pagar por la sustancia #{declaracionPagoRSQV1Controller.ultimaDeclaracion.sustanciaQuimica.descripcion}" />	
+					<h:outputText id="valorPagar" value="#{declaracionPagoRSQV1Controller.valorTotalAPagar}">
+						<f:convertNumber pattern="#0.00" />
+					</h:outputText>	
+																		
+					</h:panelGrid>
+
+						<p:dataTable  id="tblDeclaraciones"
+							value="#{declaracionPagoRSQV1Controller.listaMeses}"
+							var="item" emptyMessage="#{labels['common.table.empty']}"
+							lazy="true" styleClass="w50" >
+												
+							<p:column headerText="Meses de Atraso" styleClass="alCenter w75">
+								<h:outputText value="#{item.nombre}" />
+							</p:column>
+												
+						</p:dataTable>
+					</p:panelGrid>
+			
+				<ui:remove>
+					<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w25, bold w75">									
+						<h:outputText value="Valor total a pagar" />
+						<h:panelGroup>
+  							<h:outputText value="#{declaracionPagoRSQV1Controller.valorTotalAPagar}">
+								<f:convertNumber pattern="#0.00" />
+							</h:outputText>
+							<h:outputText value=" USD" />
+						</h:panelGroup>
+					</h:panelGrid>				
+				</ui:remove>
+					<br />
+					<p:panelGrid id="pnl_transacciones" columns="3" layout="grid"
+						styleClass="w100"
+						columnClasses="w50, field_mrg w30, field_mrg w20">
+						<f:facet name="header">
+							<mae:panelGridHeaderHelp value="Ingreso de transacciones"
+								conector="generalHelp"								
+								help="El número de comprobante que debe ingresar para realizar el pago es el número de referencia que se encuentra detallado en la factura emitida por el área financiera del Ministerio del Ambiente y Agua."/>
+						</f:facet>
+						<p:outputLabel for="institucionBancaria" value="Institución bancaria" />
+						<p:outputLabel for="numeroTransaccion" value="Número de comprobante" />
+						<h:outputText />
+						<p:inputText id="institucionBancaria" disabled="true" value="#{declaracionPagoRSQV1Controller.transaccionFinanciera.institucionFinanciera.nombreInstitucion}" />
+
+							<p:inputText id="numeroTransaccion" placeholder="Ej: 584777"
+								disabled="#{declaracionPagoRSQV1Controller.cumpleValorTotal}"
+								required="true"
+								value="#{declaracionPagoRSQV1Controller.transaccionFinanciera.numeroTransaccion}"
+								maxlength="50" />
+							<p:commandButton value="Adicionar" icon="ui-icon-plusthick"
+								disabled="#{declaracionPagoRSQV1Controller.cumpleValorTotal}"
+								action="#{declaracionPagoRSQV1Controller.guardarTransaccion()}"
+								styleClass="primary"
+								update=":#{p:component('tbl_transacciones')}, :#{p:component('pnl_transacciones')}"
+								process="@this institucionBancaria numeroTransaccion" />
+					</p:panelGrid>
+
+					<br />
+					<h:form id="formTransactionList">
+						<p:dataTable id="tbl_transacciones"
+							value="#{declaracionPagoRSQV1Controller.transaccionesFinancieras}"
+							var="transaccionFinanciera"
+							emptyMessage="#{labels['common.table.empty']}">
+							<p:column headerText="Institución financiera">
+								<h:outputText
+									value="#{transaccionFinanciera.institucionFinanciera.nombreInstitucion}" />
+							</p:column>
+							<p:column headerText="Número de comprobante"
+								styleClass="w33 alCenter">
+								<h:outputText value="#{transaccionFinanciera.numeroTransaccion}" />
+							</p:column>
+							<p:column headerText="Monto" styleClass="w15 alCenter">
+								<h:outputText value="#{transaccionFinanciera.montoTransaccion}">
+									<f:convertNumber pattern="#0.00" />
+								</h:outputText>
+							</p:column>
+							<p:column styleClass="w20px alCenter">
+								<p:commandButton icon="ui-icon-trash"
+									styleClass="primary button-small"
+									action="#{declaracionPagoRSQV1Controller.eliminarTransacion(transaccionFinanciera)}"
+									update=":#{p:component('tbl_transacciones')}, :#{p:component('pnl_transacciones')}" />
+							</p:column>
+						</p:dataTable>
+					</h:form>
+
+					<p:outputPanel id="pnlFinalizarBtn">
+						<div class="buttons main">
+							<p:commandButton value="Enviar" id="btnEnviar"
+								icon="ui-icon-check" process="@this"
+								action="#{declaracionPagoRSQV1Controller.completarTarea}" />
+						</div>
+					</p:outputPanel>
+				</p:panel>
+			</h:form>
+		</ui:define>	
+</ui:composition>

@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+	<ui:define name="context-extra">
+		<h:outputText value="Documento" />
+		<h:outputText value="Formulario promotor (Anexo 1)" />
+
+		<p:commandButton icon="ui-icon-arrowthick-1-s"
+			styleClass="primary button-small" title="Ver" ajax="false"
+			immediate="true">
+			<p:fileDownload
+				value="#{registrarSnapController.descargarFormulario()}" />
+		</p:commandButton>
+	</ui:define>
+
+	<ui:define name="content">
+
+		<style type="text/css">
+.ui-panelgrid-header .ui-widget-header td {
+	background: #008A8A !important;
+}
+
+.ui-state-error {
+	color: #cd0a0a !important;
+}
+</style>
+
+		<f:event type="preRenderView"
+			listener="#{registrarSnapController.validarTareaRevisionBpm()}" />
+
+
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				id="pnlDatos">
+				<f:facet name="header">
+					<h:outputText
+						value="INFORMACIÓN COMPLEMENTARIA DEL PROPONENTE PARA EL ANÁLISIS DE LA VIABILIDAD AMBIENTAL DE UN PROYECTO, OBRA O ACTIVIDAD EN EL SISTEMA NACIONAL DE ÁREAS PROTEGIDAS" />
+				</f:facet>
+
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<h:outputText styleClass="bold text-red alJustify"
+						value="Recuerde usted, que una vez que el operador ha ingresado la información para el proceso de Regularización Ambiental, el Administrador del Área Protegida y el responsable asignado del Parque Nacional Galápagos, emitirá en el término de 10 días el informe de viabilidad que determinará la factibilidad de la realización del proyecto, obra o actividad." />
+				</p:panelGrid>
+				<br />
+
+				<h:panelGroup rendered="#{registrarSnapController.verGeneral}">
+					<p:dataGrid var="cabecera"
+						value="#{registrarSnapController.preguntasForm1}" columns="1"
+						layout="grid">
+						<p:dataGrid var="pregunta" value="#{cabecera.listaPreguntas}"
+							columns="1" layout="grid" id="pnlCabeceras"
+							styleClass="pnlHeaders">
+							<f:facet name="header">
+								<h:outputText value="#{cabecera.descripcion}" />
+							</f:facet>
+
+							<p:panelGrid columns="2" styleClass="panel_data w100"
+								columnClasses="header w25, null">
+								<p:outputLabel value="#{pregunta.descripcion}"
+									style="color: white" />
+								<h:outputText value="#{pregunta.respuesta.respText}" style="display: block; max-height: 200px; overflow: auto;"/>
+							</p:panelGrid>
+
+						</p:dataGrid>
+					</p:dataGrid>
+				</h:panelGroup>
+
+				<h:panelGroup rendered="#{!registrarSnapController.verGeneral}">
+					<p:dataGrid var="cabecera"
+						value="#{registrarSnapController.preguntasForm2}" columns="1"
+						layout="grid">
+						<p:dataGrid var="pregunta" value="#{cabecera.listaPreguntas}"
+							columns="1" layout="grid" id="pnlCabeceras"
+							styleClass="pnlHeaders">
+							<f:facet name="header">
+								<h:outputText value="#{cabecera.descripcion}" />
+							</f:facet>
+
+							<p:panelGrid columns="2" styleClass="panel_data w100"
+								columnClasses="header w25, null">
+								<p:outputLabel value="#{pregunta.descripcion}"
+									style="color: white" />
+								<h:outputText value="#{pregunta.respuesta.respText}" style="display: block; max-height: 200px; overflow: auto;"/>
+							</p:panelGrid>
+
+						</p:dataGrid>
+					</p:dataGrid>
+					<p:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25, null">
+						<f:facet name="header">
+							<h:outputText value="Documentación que sustente su pedido" />
+						</f:facet>
+						<p:outputLabel value="Descargar" style="color: white" />
+						<p:outputPanel id="pnlDocSustento">
+							<p:commandButton icon="ui-icon-arrowthick-1-s"
+								styleClass="button-small primary toLeft" title="Ver"
+								ajax="false" immediate="true"
+								rendered="#{registrarSnapController.documentoSustento.nombre ne null}">
+								<p:fileDownload
+									value="#{registrarSnapController.descargar(registrarSnapController.documentoSustento)}" />
+							</p:commandButton>
+							<h:outputText
+								value="#{registrarSnapController.documentoSustento.nombre}"
+								rendered="#{registrarSnapController.documentoSustento.nombre ne null}" />
+						</p:outputPanel>
+					</p:panelGrid>
+					<br />
+					<br />
+					<p:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25, null" id="pnlExisteConflicto">
+						<p:outputLabel value="¿Existe conflicto legal?"
+							for="existeConflicto" style="color: white" />
+						<p:selectOneRadio id="existeConflicto"
+							value="#{registrarSnapController.viabilidadProyecto.existeConflictoLegal}"
+							required="true">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change" process="@this" update="pnlConflictos"
+								listener="#{registrarSnapController.actualizarExisteConflicto()}" />
+						</p:selectOneRadio>
+					</p:panelGrid>
+					<h:panelGroup id="pnlConflictos">
+						<p:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="header w25, null"
+							rendered="#{registrarSnapController.viabilidadProyecto.existeConflictoLegal}">
+							<p:outputLabel for="txtDetalleConflicto"
+								value="Detalle del problema legal identificado"
+								style="color: white" />
+							<p:inputTextarea id="txtDetalleConflicto" maxlength="6000"
+								rows="3" required="true" style="resize: none;"
+								autoResize="false"
+								value="#{registrarSnapController.viabilidadProyecto.detalleConflictoLegal}" />
+
+							<p:outputLabel
+								value="Adjuntar documentos de análisis para jurídico *"
+								style="color: white" />
+							<p:outputPanel id="pnlDocRespaldo">
+								<p:fileUpload id="docRespaldo" multiple="false"
+									fileUploadListener="#{registrarSnapController.uploadFileJuridico}"
+									sizeLimit="10485760" allowTypes="/(\.|\/)(pdf)$/"
+									label="Seleccionar (pdf 10Mb)" uploadLabel="Subir"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Debe adjuntar un archivo no mayor de 10 Mb."
+									cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+									auto="true" required="true" update="pnlDocRespaldo" />
+								<p:commandButton icon="ui-icon-arrowthick-1-s"
+									styleClass="button-small primary toLeft" title="Ver"
+									ajax="false" immediate="true"
+									rendered="#{registrarSnapController.documentoJuridico.nombre ne null}">
+									<p:fileDownload
+										value="#{registrarSnapController.descargar(registrarSnapController.documentoJuridico)}" />
+								</p:commandButton>
+								<h:outputText
+									value="#{registrarSnapController.documentoJuridico.nombre}"
+									rendered="#{registrarSnapController.documentoJuridico.nombre ne null}" />
+							</p:outputPanel>
+						</p:panelGrid>
+					</h:panelGroup>
+					<h:inputHidden
+						validator="#{registrarSnapController.validateDatosRevision}" />
+				</h:panelGroup>
+
+			</p:panelGrid>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Siguiente" immediate="true"
+						styleClass="secondary"
+						action="#{registrarSnapController.siguiente(false)}"
+						rendered="#{registrarSnapController.verGeneral}"
+						update="pnlDatos pnlButtons" icon="ui-icon-arrowthick-1-e" />
+
+					<p:commandButton value="Regresar" immediate="true"
+						styleClass="secondary"
+						action="#{registrarSnapController.siguiente(true)}"
+						rendered="#{!registrarSnapController.verGeneral}"
+						update="pnlDatos pnlButtons" icon="ui-icon-arrowthick-1-w" />
+					<p:commandButton value="Guardar" process="@this form"
+						actionListener="#{registrarSnapController.guardarRevision()}"
+						rendered="#{!registrarSnapController.verGeneral}"
+						update="pnlButtons" icon="ui-icon-disk" />
+					<p:commandButton value="Finalizar" immediate="true"
+						action="#{registrarSnapController.finalizarRevision()}"
+						rendered="#{!registrarSnapController.verGeneral}"
+						disabled="#{!registrarSnapController.isGuardado}"
+						update="pnlDatos pnlButtons" icon="ui-icon-check" />
+				</div>
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+</ui:composition>

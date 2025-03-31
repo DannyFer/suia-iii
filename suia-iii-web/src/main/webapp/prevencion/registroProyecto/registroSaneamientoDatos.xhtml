@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<h:panelGroup rendered="#{registroProyectoSaneamientoController.mostrarSaneamiento}">
+	<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="">
+		<f:facet name="header">
+			<h:outputText value="Saneamiento" />
+		</f:facet>
+		<h:panelGrid columns="2" styleClass="w100" columnClasses="w50 alTop, field_mrg w50 alTop">
+			<h:panelGroup id="residuosSolidosContainer">
+				<h:panelGroup id="viabilidadContainer">
+					<h:panelGrid columns="2" styleClass="field_mrg">
+						<p:outputLabel for="viabilidad" value="¿Cuenta con oficio de viabilidad del proyecto?" styleClass="bold" />
+						<h:panelGrid columns="2">
+							<p:selectOneRadio id="viabilidad" value="#{registroProyectoBean.viabilidad}" required="true">
+								<f:selectItem itemLabel="Sí" itemValue="true" />
+								<f:selectItem itemLabel="No" itemValue="false" />
+								<p:ajax process="@this" update="viabilidadContainer" oncomplete="showModalNoViabilidad(xhr, status, args)" />
+							</p:selectOneRadio>
+						</h:panelGrid>
+					</h:panelGrid>
+					<h:panelGrid styleClass="field_mrg w70" columns="2" columnClasses="w50, field_mrg" rendered="#{registroProyectoSaneamientoController.gestionaOGeneraResiduosSolidos and registroProyectoBean.viabilidad and empty registroProyectoBean.proyecto.oficioViabilidad}">
+						<p:outputLabel for="oficio" value="Número de oficio de viabilidad del proyecto" styleClass="bold" />
+						<h:outputText />
+						<p:inputText id="oficio" value="#{registroProyectoBean.numeroOficioViabilidad}" required="true" styleClass="w100" />
+						<h:panelGroup>
+							<div class="buttons-inline">
+								<p:commandButton icon="ui-icon-check" styleClass="primary" process="@this oficio" update="viabilidadContainer" actionListener="#{registroProyectoSaneamientoController.verificarOficioViabilidad()}" title="Validar número de oficio" />
+							</div>
+						</h:panelGroup>
+					</h:panelGrid>
+					<h:panelGrid styleClass="field_mrg w100 panel_data" columns="2" columnClasses="header, null" rowClasses="null, alt" rendered="#{registroProyectoSaneamientoController.gestionaOGeneraResiduosSolidos and registroProyectoBean.viabilidad and !empty registroProyectoBean.proyecto.oficioViabilidad}">
+						<h:outputText value="Número de oficio de viabilidad técnica" />
+						<h:outputText value="#{registroProyectoBean.proyecto.oficioViabilidad}" />
+						<h:outputText value="Eliminar" />
+						<p:commandLink value="Eliminar" process="@this" update="viabilidadContainer" actionListener="#{registroProyectoSaneamientoController.eliminarOficioViabilidad()}" />
+					</h:panelGrid>
+				</h:panelGroup>
+			</h:panelGroup>
+		</h:panelGrid>
+	</p:panelGrid>
+
+	<p:dialog header="Información" id="mostrarMensajeNoContinuar" widgetVar="mostrarMensajeNoContinuar" modal="true" resizable="false" width="400">
+		<h:panelGrid columns="1" styleClass="w100">
+			<h:outputText value="Estimado usuario:" styleClass="text-red bold" />
+			<h:outputText value="Si su proyecto, obra o actividad gestiona/genera desechos sólidos y no cuenta con un oficio de viabilidad técnica, el registro del proyecto no puede continuar." styleClass="text-red bold" />
+			<p:separator />
+			<h:outputText value="Obtenga un oficio de viabilidad técnica, o si cuenta con uno y no puede validarlo en el sistema, comuníquese con Mesa de Ayuda del Ministerio del Ambiente y Agua" styleClass="bold" />
+		</h:panelGrid>
+		<p:separator />
+		<div class="buttons">
+			<p:commandButton type="button" value="Cerrar" onclick="PF('mostrarMensajeNoContinuar').hide()" />
+		</div>
+	</p:dialog>
+</h:panelGroup>
+
+
+<h:panelGroup rendered="#{registroProyectoSaneamientoController.financiadoEstado}">
+<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{registroProyectoSaneamientoController.financiadoEstado}">
+				<f:facet name="header">
+					<h:outputText value="¿Recibe algún tipo de financiamiento por parte del BEDE? *" />
+				</f:facet>				
+				<p:selectOneRadio id="tipoFinanciamiento" label="Financiados por el Banco del Estado" value="#{registroProyectoBean.proyecto.financiadoEstado}" required="true">					
+					<f:selectItem itemLabel="SI" itemValue="SI" />
+					<f:selectItem itemLabel="NO" itemValue="NO" />								
+					<p:ajax process="tipoFinanciamiento" immediate="true" />
+				</p:selectOneRadio>
+			</p:panelGrid>
+</h:panelGroup>
+
+<script type="text/javascript">
+	function showModalNoViabilidad(xhr, status, args) {
+		if (args.showNoViabilidad) {
+        	PF('mostrarMensajeNoContinuar').show();
+    	}                    
+	}
+</script>
+
+</html>

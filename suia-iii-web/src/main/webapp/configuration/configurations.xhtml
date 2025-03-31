@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" template="/WEB-INF/templates/default.xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:control="http://java.sun.com/jsf/composite/controles-prime" xmlns:t="http://myfaces.apache.org/tomahawk">
+	<ui:define name="content">
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<p:commandButton styleClass="button-small toRight field_mrg" icon="ui-icon-circle-plus" oncomplete="PF('adicionarEntry').show()" actionListener="#{configuracionesBean.clear()}" process="@this" update=":formEntries:adicionarEntry" title="Adicionar" />
+					<p:commandButton icon="ui-icon-circle-arrow-s" ajax="false" styleClass="button-small toRight field_mrg" title="Descargar Configuracion" immediate="true">
+						<p:fileDownload value="#{configuracionesController.stream}" />
+					</p:commandButton>
+					<p:commandButton onclick="PF('adjuntarConfiguracion').show()" styleClass="button-small toRight field_mrg" icon="ui-icon-circle-arrow-n" type="button" title="Importar Configuración" />
+					<h:outputText id="mainHeader" value="Todas las entradas (#{configuracionesBean.entries.size()})" />
+				</f:facet>
+				
+				<div class="buttons">
+					<p:commandButton icon="ui-icon-refresh" style="width: 290px;" process="@this" update="@form" actionListener="#{configuracionesController.resetSystemConfigurations}" styleClass="primary extraLargePlus" value="Recargar configuraciones en el sistema" />
+				</div>
+				
+				<p:dataTable id="listAllConfigEntries" value="#{configuracionesBean.entries}" var="entry" emptyMessage="#{labels['common.table.empty']}" paginatorPosition="bottom" paginatorAlwaysVisible="false" paginator="true" rows="25">
+					<p:column headerText="Clave" styleClass="w33">
+						<h:outputText value="#{entry.key}" />
+					</p:column>
+					<p:column headerText="Valor">
+						<h:outputText value="#{entry.value}" />
+					</p:column>
+					<p:column styleClass="w40px alCenter">
+						<p:commandButton styleClass="primary button-small" process="@this" icon="ui-icon-pencil" title="Editar" oncomplete="PF('adicionarEntry').show()" actionListener="#{configuracionesController.edit(entry)}" update=":formEntries:adicionarEntry" />
+						<p:commandButton styleClass="primary button-small" process="@this" icon="ui-icon-circle-close" title="Eliminar" actionListener="#{configuracionesController.deleteConfigEntry(entry)}" update=":form">
+							<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar esta entrada?" icon="ui-icon-alert" />
+						</p:commandButton>
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+
+			<p:dialog header="Adjuntar configuración" widgetVar="adjuntarConfiguracion" resizable="false">
+				<p:panelGrid columns="1" columnClasses="label, value">
+					<h:outputText value="Seleccione el archivo de configuración (.properties)" />
+					<p:fileUpload uploadLabel="Subir" auto="true" cancelLabel="Cancelar" label="Seleccionar" fileUploadListener="#{configuracionesController.importConfiguration}" mode="advanced" dragDropSupport="false" update=":form" multiple="false" allowTypes="/(\.|\/)(properties)$/" oncomplete="PF('adjuntarConfiguracion').hide();" />
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton type="button" value="Cerrar" onclick="PF('adjuntarConfiguracion').hide()" />
+				</div>
+			</p:dialog>
+		</h:form>
+
+		<ui:include src="/configuration/utiles/registroModalEntries.xhtml" />
+	</ui:define>
+</ui:composition>

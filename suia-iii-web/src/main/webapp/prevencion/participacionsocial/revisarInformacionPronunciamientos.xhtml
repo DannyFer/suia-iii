@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml"
+                xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+                xmlns:f="http://java.sun.com/jsf/core">
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}" target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+
+    </ui:define>
+    <ui:define name="content">
+
+        <f:event type="preRenderView" listener="#{ingresarDocumentacionController.validarTareaBpmR()}"/>
+        <h:form id="form">
+            <p:panel>
+                <f:facet name="header">
+                    <h:outputText value="Informacion del promotor"/>
+                </f:facet>
+
+                <p:outputLabel for="requiere-modificaciones"
+                               value="¿Requiere correcciones la información del promotor?"
+                                />
+                <p:selectOneRadio id="requiere-modificaciones"
+                                  value="#{ingresarDocumentacionController.requiereModificaciones}"
+                                  required="true"
+                                  rendered="true" >
+                    <f:selectItem itemLabel="Si" itemValue="true"/>
+                    <f:selectItem itemLabel="No" itemValue="false"/>
+                </p:selectOneRadio>
+
+
+
+
+
+                <p:separator/>
+
+
+                <p:panelGrid columns="1" styleClass="w100">
+                    <f:facet name="header">
+                        <h:outputText value="Documentación o información complementaria del PPS"/>
+                    </f:facet>
+                    <h:outputText value="Respuestas  y aclaraciones del promotor a las observaciones y comentrios recogidos durante el PPS"/>
+
+                    <p:dataTable id="tblPreguntasObservaciones" widgetVar="tblPreguntasObservaciones" rows="10"
+                                 paginator="true" paginatorAlwaysVisible="false" rowIndexVar="index"
+                                 var="pregunta" value="#{ingresarDocumentacionBean.listaPreguntas}" rendered="#{bandejaTareasBean.tarea.getVariable('requiereFacilitador')!=null and bandejaTareasBean.tarea.getVariable('requiereFacilitador').toString().equals('true') }">
+
+                        <f:facet name="header">
+                            <h:outputText value="Preguntas - observaciones realizados en el proceso"/>
+                        </f:facet>
+
+                        <p:column headerText="No" styleClass="alCenter w5">
+                            <h:outputText value="#{index + 1}"/>
+                        </p:column>
+
+                        <p:column headerText="Observaciones del proceso de participación social *"
+                                  filterMatchMode="contains" styleClass="alCenter w20"
+                                  filterValue="#{pregunta.pregunta}">
+                            <p:inputTextarea maxlength="2200" scrollHeight="10" required="true" id="preguntas"
+                                             style="height: 60px;overflow: auto"
+                                             requiredMessage="El campo 'Observaciones del proceso de participación social' es requerido."
+                                             disabled="true"
+                                             value="#{pregunta.pregunta}"
+                                             autoResize="true" styleClass="w100"><p:ajax/></p:inputTextarea>
+
+
+                        </p:column>
+
+                        <p:column headerText="Respuestas dadas durante el PPS"
+                                  filterMatchMode="contains" styleClass="alCenter w30"
+                                  filterValue="#{pregunta.respuestaFacilitador}">
+                            <p:inputTextarea maxlength="2200" scrollHeight="10" required="false"
+                                             id="respuestaFacilitador" style="height: 60px;overflow: auto"
+                                             disabled="true"
+                                             value="#{pregunta.respuestaFacilitador}"
+                                             autoResize="true" styleClass="w100"><p:ajax/></p:inputTextarea>
+
+
+                        </p:column>
+                        <p:column headerText="Detalle de la inclusión de las observaciones en el estudio ambiental o justificación de su no inclusión"
+                                  filterMatchMode="contains" styleClass="alCenter w30"
+                                  filterValue="#{pregunta.respuestaPromotor}">
+                            <p:inputTextarea maxlength="2200" scrollHeight="10" required="false"
+                                             id="respuestaPromotor" style="height: 60px;overflow: auto"
+                                             disabled="true"
+                                             value="#{pregunta.respuestaPromotor}"
+                                             autoResize="true" styleClass="w100"><p:ajax/></p:inputTextarea>
+
+
+                        </p:column>
+                    </p:dataTable>
+
+                    <h:panelGroup>
+                        <h:panelGrid columns="2" columnClasses="null, field_mrg" id="wwww">
+                            <p:outputLabel
+                                    value="#{empty ingresarDocumentacionController.ingresarDocumentacionBean.documentos.get('correccionDocumentacionPPS') ? 'Documento(.pdf)' :
+                                ingresarDocumentacionController.ingresarDocumentacionBean.documentos.get('correccionDocumentacionPPS').nombre}"/>
+                            <p:commandButton id="downloadInformeSistematizacionPPS" icon="ui-icon-arrowthick-1-s"
+                                             ajax="false" styleClass="button-small primary" title="Ver"
+                                             immediate="true"
+                                             rendered="#{not empty ingresarDocumentacionController.ingresarDocumentacionBean.documentos.get('correccionDocumentacionPPS')}">
+                                <p:fileDownload
+                                        value="#{ingresarDocumentacionController.getStreamContent('correccionDocumentacionPPS')}"/>
+                            </p:commandButton>
+                        </h:panelGrid>
+
+
+                    </h:panelGroup>
+
+
+                    <p:fragment>
+                        <h:panelGroup id="pnl22">
+
+                            <observaciones:tablaObservaciones aparace="true"
+                                                              soloLectura="true"
+                                                              mostrarSiVacio="false"
+                                                              idClase="#{proyectosBean.proyecto.id}"
+                                                              nombreClase="ParticipacionSocial"
+                                                              seccion="ingresarDocumentacion"
+                                                              rol="admin"
+                                                              respuestaActiva="true"
+                                                              idComponent="asasas"
+                                                              responder="false"
+                                                              componenteActualizarEliminar="pnl22"/>
+                        </h:panelGroup>
+                    </p:fragment>
+
+
+
+                </p:panelGrid>
+
+                <p:fragment>
+                    <h:panelGroup id="pnl2">
+
+                        <observaciones:tablaObservaciones aparace="true"
+                                                          soloLectura="false"
+                                                          mostrarSiVacio="true"
+                                                          idClase="#{proyectosBean.proyecto.id}"
+                                                          nombreClase="ParticipacionSocial"
+                                                          seccion="ingresarDocumentacion"
+                                                          rol="admin"
+                                                          componenteActualizarEliminar="pnl2"/>
+                    </h:panelGroup>
+                </p:fragment>
+
+
+                <div class="buttons main">
+
+                    <p:commandButton value="Enviar" process=":form" update=":form"
+                                     action="#{ingresarDocumentacionController.finalizarR}"
+                                     title="Enviar datos" icon="ui-icon-check" styleClass="primary">
+                        <p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+                                   header="#{msg['header.confirmacion.envio.tarea']}"/>
+                    </p:commandButton>
+
+                </div>
+            </p:panel>
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

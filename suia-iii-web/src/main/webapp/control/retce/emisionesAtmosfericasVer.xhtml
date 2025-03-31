@@ -1,0 +1,549 @@
+<ui:composition template="/WEB-INF/templates/default.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+	<ui:define name="content">
+	
+		<link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/plugin/wizard.css" />
+		<link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/plugin/tabview.css" />
+	
+	
+	<link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/plugin/wizard.css" />
+	
+		<h:form id="formTable" prependId="false"
+			onkeypress="if (event.keyCode == 13) {return false; }" rendered="#{!emisionesAtmosfericasVerController.verFormulario}">
+		<p:panel style="text-align:center;">
+			<f:facet name="header">
+					<h:outputText value="REGISTRO DE EMISIONES Y TRANSFERENCIA DE CONTAMINANTES EN EL ECUADOR-RETCE" styleClass="uppercase"/>
+				</f:facet>
+			</p:panel>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Información del operador"/>
+				</f:facet>
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25,null w75">
+					<h:outputText value="RUC / Cédula:"/>
+					<h:outputText value="#{emisionesAtmosfericasVerController.rucCedula}"/>					
+					<h:outputText value="Nombre:"/>
+					<h:outputText value="#{emisionesAtmosfericasVerController.nombreUsuario}"/>					
+					<h:outputText value="Representante legal:" rendered="#{not empty emisionesAtmosfericasVerController.representanteLegal}"/>
+					<h:outputText value="#{emisionesAtmosfericasVerController.representanteLegal}" rendered="#{not empty emisionesAtmosfericasVerController.representanteLegal}"/>						
+				</p:panelGrid>				
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Información del proyecto"/>
+				</f:facet>
+				<p:panelGrid columns="2" styleClass="panel_data w1000"
+					columnClasses="header w25,null w75">
+					<h:outputText value="Nombre Proyecto:"/>
+					<h:outputText value="#{emisionesAtmosfericasVerController.informacionProyecto.nombreProyecto}"/>					
+					<h:outputText value="#{emisionesAtmosfericasVerController.informacionProyecto.esEmisionFisica?'Nombre Proceso':'Tipo de Trámite'}"/>
+					<h:outputText value="#{emisionesAtmosfericasVerController.informacionProyecto.nombreProceso}"/>
+					<h:outputText value="Código Proyecto:"/>
+					<h:outputText value="#{emisionesAtmosfericasVerController.emisionesAtmosfericas.codigo}"/>
+				</p:panelGrid>				
+			</p:panelGrid>
+			
+			
+
+			<p:panel id="detalleEmisionPanel">		
+			<p:dataTable id="detalleDescargasTable" value="#{emisionesAtmosfericasVerController.listaDetalleEmisionesAtmosfericas}" var="item"
+			paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rows="5"
+			rendered="#{not empty emisionesAtmosfericasVerController.listaDetalleEmisionesAtmosfericas}">	
+				<p:column headerText="Código Trámite">
+				<h:outputText value="#{item.emisionesAtmosfericas.codigo}"/>
+				</p:column>
+				<p:column headerText="Código Fuente">
+				<h:outputText value="#{item.codigoFuente}"/>
+				</p:column>
+				<p:column headerText="Fuente Fija de Combustión">
+				<h:outputText value="#{item.fuenteFijaCombustion.fuente}"/>
+				</p:column>
+				<p:column headerText="Estado de la fuente">
+				<h:outputText value="#{item.estadoFuenteDetalleCatalogo.descripcion}"/>
+				</p:column>
+				<p:column headerText="Número de la serie">
+				<h:outputText value="#{item.numeroSerie}"/>
+				</p:column>
+				<p:column headerText="Locación">
+				<h:outputText value="#{item.lugarPuntoMuestreo}"/>
+				</p:column>
+				<p:column headerText="Frecuencia de Monitoreo">
+				<h:outputText value="#{item.frecuenciaMonitoreo.descripcion}"/>
+				</p:column>
+				
+				<p:column styleClass="w15" headerText="Acciones">
+					<center>
+							<p:commandButton icon="ui-icon-search" title="Ver"
+								styleClass="primary" process="@this"
+								action="#{emisionesAtmosfericasVerController.editarDetalle(item)}"								
+								update=":#{p:component('content')}"
+								rendered="#{!item.registroModificado}"/>	
+								
+								<p:commandButton icon="ui-icon-search" title="Ver"
+								styleClass="orange" process="@this"
+								action="#{emisionesAtmosfericasVerController.editarDetalle(item)}"								
+								update=":#{p:component('content')}"
+								rendered="#{item.registroModificado}"/>
+								
+							<h:outputText value="Nuevo" rendered="#{item.numeroObservacion eq null ? false : 
+							item.numeroObservacion eq emisionesAtmosfericasVerController.numeroObservacion ? true : false}" styleClass="text-orange"/>
+													  
+						</center>												
+				</p:column>
+							
+			</p:dataTable>
+			
+			
+			<h:panelGrid styleClass="panel_data" columns="2" rendered="#{not empty emisionesAtmosfericasVerController.listaDetalleEmisionesAtmosfericasEliminadas}"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt">
+							<h:outputText id="fuentes_eliminadas" value="Fuentes eliminadas" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('detallesEliminados').show()" 
+								/>
+				</h:panelGrid>
+						
+			</p:panel>
+			
+			
+			</h:form>
+			<h:form id="form" rendered="#{emisionesAtmosfericasVerController.verFormulario}">
+			
+			<p:panelGrid columns="4" styleClass="panel_data w100" columnClasses="header w25, null w25, header w25, null w25" rowClasses="null, alt">
+					<h:outputText value="Código Proyecto"/>
+					<h:outputText value="#{emisionesAtmosfericasVerController.informacionProyecto.codigo}"/>			
+					<h:outputText value="Código fuente"/>
+					<h:outputText value="#{emisionesAtmosfericasVerController.detalleEmision.codigoFuente}"/>	
+					<h:outputText value="Sector"/>
+					<h:outputText value="#{emisionesAtmosfericasVerController.informacionProyecto.tipoSector.nombre}"/>					
+					<h:outputText value="Fase" rendered="#{emisionesAtmosfericasVerController.informacionProyecto.faseRetce eq null ? false : true}"/>
+					<h:outputText value="#{emisionesAtmosfericasVerController.informacionProyecto.faseRetce.descripcion}"
+					rendered="#{emisionesAtmosfericasVerController.informacionProyecto.faseRetce eq null ? false : true}"/>								
+			</p:panelGrid>			
+			
+			<p:tabView >
+				<p:tab title="1" id="paso1" titletip="CARACTERÍSTICAS DE MEDICIÓN">
+					<ui:include src="/control/retce/emisionesAtmosfericas/caracteristicasMedicionVer.xhtml"/>	
+					
+					<h:panelGroup id="paso1Caracteristicas">
+						<observaciones:tablaObservaciones idComponent="obsCaracteristicas"
+							seccion="Caracteristicas de la medición"
+							componenteActualizarEliminar="paso1Caracteristicas"
+							aparace="#{emisionesAtmosfericasVerController.habilitarObservaciones}"
+							mostrarSiVacio="#{!emisionesAtmosfericasVerController.observacionesSoloLectura}"
+							idClase="#{emisionesAtmosfericasVerController.emisionesAtmosfericas.id}"
+							nombreClase="#{emisionesAtmosfericasVerController.className}"
+							soloLectura="#{emisionesAtmosfericasVerController.observacionesSoloLectura}" />
+					</h:panelGroup>
+									
+				</p:tab>
+				<p:tab title="2" id="paso2" titletip="REGISTRO DE MEDICIONES">
+					<ui:include src="/control/retce/emisionesAtmosfericas/registroMedicionesVer.xhtml"/>	
+					
+					<h:panelGroup id="paso2RegistroMediciones">
+						<observaciones:tablaObservaciones idComponent="obsMediciones"
+							seccion="Registro de Mediciones"
+							componenteActualizarEliminar="paso1Caracteristicas"
+							aparace="#{emisionesAtmosfericasVerController.habilitarObservaciones}"
+							mostrarSiVacio="#{!emisionesAtmosfericasVerController.observacionesSoloLectura}"
+							idClase="#{emisionesAtmosfericasVerController.emisionesAtmosfericas.id}"
+							nombreClase="#{emisionesAtmosfericasVerController.className}"
+							soloLectura="#{emisionesAtmosfericasVerController.observacionesSoloLectura}" />
+					</h:panelGroup>
+									
+				</p:tab>
+				<p:tab title="3" id="paso3" titletip="NORMATIVA VIGENTE" rendered="#{emisionesAtmosfericasVerController.mostrarEstadoFuente}">
+					<ui:include src="/control/retce/emisionesAtmosfericas/normativaVigenteVer.xhtml"/>		
+					
+					<h:panelGroup id="paso3NormativaVigente">
+						<observaciones:tablaObservaciones idComponent="obsNormativa"
+							seccion="Normativa Vigente"
+							componenteActualizarEliminar="paso1Caracteristicas"
+							aparace="#{emisionesAtmosfericasVerController.habilitarObservaciones}"
+							mostrarSiVacio="#{!emisionesAtmosfericasVerController.observacionesSoloLectura}"
+							idClase="#{emisionesAtmosfericasVerController.emisionesAtmosfericas.id}"
+							nombreClase="#{emisionesAtmosfericasVerController.className}"
+							soloLectura="#{emisionesAtmosfericasVerController.observacionesSoloLectura}" />
+					</h:panelGroup>
+								
+				</p:tab>
+				<p:tab title="4" id="paso4" titletip="DATOS DE LABORATORIO" rendered="#{emisionesAtmosfericasVerController.mostrarEstadoFuente}">
+					<ui:include src="/control/retce/emisionesAtmosfericas/datosLaboratorioVer.xhtml"/>		
+					
+					<h:panelGroup id="paso4DatosLaboratorio">
+						<observaciones:tablaObservaciones idComponent="obsLaboratorio"
+							seccion="Datos de Laboratorio"
+							componenteActualizarEliminar="paso1Caracteristicas"
+							aparace="#{emisionesAtmosfericasVerController.habilitarObservaciones}"
+							mostrarSiVacio="#{!emisionesAtmosfericasVerController.observacionesSoloLectura}"
+							idClase="#{emisionesAtmosfericasVerController.emisionesAtmosfericas.id}"
+							nombreClase="#{emisionesAtmosfericasVerController.className}"
+							soloLectura="#{emisionesAtmosfericasVerController.observacionesSoloLectura}" />
+					</h:panelGroup>
+								
+				</p:tab>
+				<p:tab  title="5" id="paso5" titletip="SUSTANCIAS RETCE" rendered="#{emisionesAtmosfericasVerController.mostrarEstadoFuente and false}">
+					<ui:include src="/control/retce/emisionesAtmosfericas/sustanciasRetceVer.xhtml"/>
+					
+					<h:panelGroup id="paso5SustanciasRetce">
+						<observaciones:tablaObservaciones idComponent="obsSustanciasRetce"
+							seccion="Sustancias Retce"
+							componenteActualizarEliminar="paso1Caracteristicas"
+							aparace="#{emisionesAtmosfericasVerController.habilitarObservaciones}"
+							mostrarSiVacio="#{!emisionesAtmosfericasVerController.observacionesSoloLectura}"
+							idClase="#{emisionesAtmosfericasVerController.emisionesAtmosfericas.id}"
+							nombreClase="#{emisionesAtmosfericasVerController.className}"
+							soloLectura="#{emisionesAtmosfericasVerController.observacionesSoloLectura}" />
+					</h:panelGroup>
+										
+				</p:tab>
+				<p:tab title="#{emisionesAtmosfericasVerController.mostrarEstadoFuente eq true ? '5' : '3'}" id="paso6" titletip="INFORMACIÓN DEL TÉCNICO QUE REPORTA">
+					<ui:include src="/control/retce/emisionesAtmosfericas/informacionTecnicoVer.xhtml" />	
+				</p:tab>
+				<p:tab title="#{emisionesAtmosfericasVerController.mostrarEstadoFuente eq true ? '6' : '4'}" id="paso7" titletip="DOCUMENTO DE ACCIÓN CORRECTIVA">
+					<ui:include src="/control/retce/emisionesAtmosfericas/documentoJustificativoVer.xhtml" />		
+					
+					<h:panelGroup id="paso7Documento">
+						<observaciones:tablaObservaciones idComponent="obsDocumentoAC"
+							seccion="Documento de acción correctiva"
+							componenteActualizarEliminar="paso1Caracteristicas"
+							aparace="#{emisionesAtmosfericasVerController.habilitarObservaciones}"
+							mostrarSiVacio="#{!emisionesAtmosfericasVerController.observacionesSoloLectura}"
+							idClase="#{emisionesAtmosfericasVerController.emisionesAtmosfericas.id}"
+							nombreClase="#{emisionesAtmosfericasVerController.className}"
+							soloLectura="#{emisionesAtmosfericasVerController.observacionesSoloLectura}" />
+					</h:panelGroup>
+								
+				</p:tab>
+			
+			</p:tabView>
+			
+			<div class="buttons main">
+				<p:commandButton value="Cerrar" icon="ui-icon-close" oncomplete=""
+								 styleClass="wizard-custom-btn-back" process="@this" update=":#{p:component('content')}"
+								 action="#{emisionesAtmosfericasVerController.cerrar()}"/>		
+				
+			</div>
+			
+			</h:form>
+			
+		<h:form id="dialogform">                 
+               
+               <p:dialog header="Documentos"
+				id="documentosLab" widgetVar="documentosLab" modal="true"
+				width="300" resizable="false" draggable="true" closable="false">
+				<p:dataTable value="#{emisionesAtmosfericasVerController.listaDocumentosLaboratorioEliminados}"
+					var="doc" emptyMessage="#{labels['common.table.empty']}">					
+					<p:column headerText="Nombre documento" style="text-align:center;">
+						<h:outputText value="#{doc.nombre}"/>
+					</p:column>
+					<p:column headerText="Descarga" style="text-align:center;">
+						<p:commandButton id="fileDownload"
+							icon="ui-icon-arrowthickstop-1-s" styleClass="primary"
+							ajax="false" process="@this" title="Descargar">
+							<p:fileDownload value="#{emisionesAtmosfericasVerController.getDocumentoRespaldoLaboratorio(doc)}" />
+						</p:commandButton>												
+					</p:column>
+					
+				</p:dataTable>
+                 <div class="buttons">       
+                    
+                     <p:commandButton value="Cerrar" styleClass="primary" process="@this" onclick="PF('documentosLab').hide()"/>
+                    
+                </div>	
+                      
+         </p:dialog>
+         
+         <p:dialog header="Fuentes Eliminadas"
+				id="detallesEliminados" widgetVar="detallesEliminados" modal="true"
+				width="900" resizable="false" draggable="true" closable="false">
+
+				<p:panel id="detalleEmisionEliminadosPanel">		
+			<p:dataTable id="detalleDescargasEliminadasTable" value="#{emisionesAtmosfericasVerController.listaDetalleEmisionesAtmosfericasEliminadas}" var="item"
+			paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rows="5">	
+				<p:column headerText="Código Trámite">
+				<h:outputText value="#{item.emisionesAtmosfericas.codigo}"/>
+				</p:column>
+				<p:column headerText="Código Fuente">
+				<h:outputText value="#{item.codigoFuente}"/>
+				</p:column>
+				<p:column headerText="Fuente Fija de Combustión">
+				<h:outputText value="#{item.fuenteFijaCombustion.fuente}"/>
+				</p:column>
+				<p:column headerText="Estado de la fuente">
+				<h:outputText value="#{item.estadoFuenteDetalleCatalogo.descripcion}"/>
+				</p:column>
+				<p:column headerText="Número de la serie">
+				<h:outputText value="#{item.numeroSerie}"/>
+				</p:column>
+				<p:column headerText="Locación">
+				<h:outputText value="#{item.lugarPuntoMuestreo}"/>
+				</p:column>
+				<!-- <p:column headerText="Frecuencia de Monitoreo">
+				<h:outputText value="#{item.emisionesAtmosfericas.frecuenciaMonitoreo.descripcion}"/>
+				</p:column>		-->		
+			</p:dataTable>
+						
+			</p:panel>
+                 <div class="buttons">  
+                    
+                     <p:commandButton value="Cerrar" styleClass="primary" process="@this" onclick="PF('detallesEliminados').hide()"/>
+                    
+                </div>	
+                      
+         </p:dialog>
+         
+         <p:dialog header="Datos Obtenidos"
+				id="datosHDiag" widgetVar="datosHDiag" modal="true"
+				width="900" resizable="false" draggable="true" closable="true">
+
+		<p:panel id="datosHPanel">		
+		
+		<p:dataTable
+					value="#{emisionesAtmosfericasVerController.listaIndividualHistorial}"
+					var="limite" emptyMessage="#{labels['common.table.empty']}">
+										
+					<p:columnGroup type="header">					
+					<p:row>
+						<p:column rowspan="2" headerText="Fecha Modificación"/>
+						<p:column rowspan="2" headerText="Parámetro"/>
+						<p:column rowspan="2" headerText="Unidad"/>
+						<p:column rowspan="2" headerText="Límite máximo permisible"/>
+						<p:column colspan="2" headerText="Resultados"/>
+					</p:row>
+					<p:row>						
+						<p:column headerText="Resultado"/>
+						<p:column headerText="Estado"/>
+					</p:row>					
+					</p:columnGroup>
+					
+					<p:column>
+						<h:outputText value="#{limite.fechaCreacion}" />
+					</p:column>
+					<p:column>
+						<h:outputText value="#{limite.limiteMaximoPermitido.parametro.descripcion}" />
+					</p:column>
+					<p:column>
+						<h:outputText value="#{limite.limiteMaximoPermitido.parametro.unidad}" />
+					</p:column>
+					<p:column headerText="Límite máximo permisible">
+						<h:outputText value="#{limite.limiteMaximoPermitido.valor}" />
+					</p:column>
+					<p:column headerText="Resultado">
+						<h:outputText value="#{limite.valorCorregido}" />
+					</p:column>
+					<p:column headerText="Estado">
+						<h:outputText value="#{limite.cumple}" />
+					</p:column>					
+				</p:dataTable>
+		
+		</p:panel>
+		</p:dialog>
+		
+		<p:dialog header="Registro de laboratorios"
+				id="laboratoriosHDiag" widgetVar="laboratoriosHDiag" modal="true"
+				width="900" resizable="false" draggable="true" closable="true">
+
+		<p:panel id="laboratoriosHPanel">		
+		
+		<p:dataTable value="#{emisionesAtmosfericasVerController.listaLaboratoriosHistorial}"
+					var="lab" emptyMessage="#{labels['common.table.empty']}">
+					
+					<p:column headerText="Fecha Modificación" style="text-align:center;" styleClass="w10">
+						<h:outputText value="#{lab.fechaCreacion}" />
+					</p:column>
+					<p:column headerText="RUC" style="text-align:center;" styleClass="w10">
+						<h:outputText value="#{lab.ruc}" />
+					</p:column>
+					<p:column headerText="Nombre o Razón Social" style="text-align:center;" styleClass="w15">
+						<h:outputText value="#{lab.nombre}" />
+					</p:column>
+					<p:column headerText="N° de Registro de SAE" style="text-align:center;" styleClass="w15">
+						<h:outputText value="#{lab.numeroRegistroSAE}" />
+					</p:column>
+					<p:column headerText="Vigencia del Registro" style="text-align:center;" styleClass="w10">
+						<h:outputText value="#{lab.fechaVigenciaRegistro}" />
+					</p:column>
+			</p:dataTable>
+		</p:panel>
+		</p:dialog>
+		
+		<p:dialog header="Sustancias Retce"
+				id="sustanciaRetceHDiag" widgetVar="sustanciaRetceHDiag" modal="true"
+				width="900" resizable="false" draggable="true" closable="true">
+
+		<p:panel id="sustanciaHPanel">		
+		
+			<p:dataTable value="#{emisionesAtmosfericasVerController.listaSustanciasRetceHistorial}"
+					var="sustancia" emptyMessage="#{labels['common.table.empty']}">
+					
+					<p:column headerText="Fecha Modificación" style="text-align:center;" styleClass="w10">
+						<h:outputText value="#{sustancia.fechaCreacion}" />
+					</p:column>					
+					<p:column headerText="Nombre del contaminante" style="text-align:center;">
+						<h:outputText value="#{sustancia.catologSustanciasRetce.descripcionProductoQuimico}" />
+					</p:column>
+					<p:column headerText="Reporte (ton/año)" style="text-align:center;">
+						<h:outputText value="#{sustancia.reporteToneladaAnio}" />
+					</p:column>
+					<p:column headerText="Método de estimación" style="text-align:center;">
+						<h:outputText value="#{sustancia.catalogoMetodoEstimacion.descripcion}" />
+					</p:column>
+					<p:column headerText="Laboratorio" style="text-align:center;">
+						<h:outputText value="#{sustancia.datosLaboratorio.nombre}" />
+					</p:column>
+					<p:column headerText="Documento de Respaldo" style="text-align:center;">
+					
+					<p:commandLink id="fileDownloadDocR" ajax="false" value="#{sustancia.documento.nombre}" 
+								rendered="#{sustancia.documento eq null ? false : true}" style="word-wrap: break-word;">
+					<p:fileDownload
+								value="#{emisionesAtmosfericasVerController.getDocumentoRespaldoLaboratorio(sustancia.documento)}" />
+					</p:commandLink>
+					</p:column>
+					
+			</p:dataTable>
+		</p:panel>
+	</p:dialog>
+	          <p:dialog header=""
+				id="adicionarLaboratorio" widgetVar="adicionarLaboratorio" modal="true"
+				width="900" resizable="false" draggable="true" closable="false">
+
+				
+				<p:panelGrid id="ingresoDatosLaboratorio" columns="2" styleClass="panel_data w100"
+				columnClasses="header w25, null w75">
+				<h:outputText value="RUC: *" />
+				<p:inputText
+					value="#{emisionesAtmosfericasVerController.datoLaboratorio.ruc}"
+					maxlength="13">
+					<pe:keyFilter regEx="/[0-9]/i " />
+					<p:ajax event="change"
+							listener="#{emisionesAtmosfericasVerController.validarLaboratorioListener}"
+							update="razonSocial" process="@this" />
+				</p:inputText>									
+									
+				<h:outputText value="Nombre o Razón Social: *" />
+				<p:inputText id="razonSocial"
+					value="#{emisionesAtmosfericasVerController.datoLaboratorio.nombre}"
+					readonly="true"/>
+					
+				<h:outputText value="N° de Registro de SAE: *" />
+				<p:inputText id="numeroSae"
+					value="#{emisionesAtmosVerfericasController.datoLaboratorio.numeroRegistroSAE}"
+					maxlength="30"/>
+				
+				<h:outputText value="Vigencia del registro: *" />
+				<p:calendar id="fechaVigencia"
+							value="#{emisionesAtmosfericasVerController.datoLaboratorio.fechaVigenciaRegistro}"
+							locale="es" navigator="true" pattern="dd-MM-yyyy" readonlyInput="true">
+						</p:calendar>
+
+				<h:outputText value="Metodología *" for="labMetodologia"/>
+					<p:inputTextarea id="labMetodologia"
+						value="#{emisionesAtmosfericasVerController.datoLaboratorio.metodologia}"
+						required="true"
+						requiredMessage="El campo Metodología es requerido" cols="12"
+						rows="5" maxlength="2000" autoResize="false" />
+
+
+					<h:outputText value="Documentos *" />
+				
+				<p:outputPanel id="subirDocLaboratorio">
+					<p:panelGrid styleClass="panel_data w100">
+								<p:row>
+									<p:column style="text-align: center; background-color: #00aac3; color: #FFF; font-weight: bold; width: 75%">Nombre documento</p:column>
+									<p:column style="text-align: center; background-color: #00aac3; color: #FFF; font-weight: bold; width: 25%">Adjuntar</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<p:outputLabel value="Informe de monitoreo del Laboratorio" />
+									</p:column>
+									<p:column>
+									 <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar" >
+										<p:fileDownload value="#{emisionesAtmosfericasVerController.documentoInformeLaboratorio}"/>
+									 </p:commandButton>
+										<h:outputText id="lblDocumentoTipo1"
+									value="#{emisionesAtmosfericasVerController.documentoTipo1}" />
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<p:outputLabel value="Registro de SAE del Laboratorio" />
+									</p:column>
+									<p:column>
+									 <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar" >
+										<p:fileDownload value="#{emisionesAtmosfericasVerController.documentoRegistroLaboratorio}"/>
+									 </p:commandButton>
+									 <h:outputText id="lblDocumentoTipo2"
+									value="#{emisionesAtmosfericasVerController.documentoTipo2}" />
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<p:outputLabel value="Cadena de custodia" />
+									</p:column>
+									<p:column>
+									 <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar" >
+										<p:fileDownload value="#{emisionesAtmosfericasVerController.documentoCadenaCustodia}"/>
+									 </p:commandButton>										
+										<h:outputText id="lblDocumentoTipo3"
+									value="#{emisionesAtmosfericasVerController.documentoTipo3}" />
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<p:outputLabel value="Protocolo de muestreo" />
+									</p:column>
+									<p:column>
+									 <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar"  >
+										<p:fileDownload value="#{emisionesAtmosfericasVerController.documentoProtocoloMuestro}"/>
+									 </p:commandButton>
+										<h:outputText id="lblDocumentoTipo4"
+									value="#{emisionesAtmosfericasVerController.documentoTipo4}" />
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<p:outputLabel value="Documento adicional (opcional)" />
+									</p:column>
+									<p:column>
+									 <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar" value="Descargar" disabled="#{!emisionesAtmosfericasVerController.documentoAdicionalLabora}" >
+										<p:fileDownload value="#{emisionesAtmosfericasVerController.documentoAdicional}"/>
+									 </p:commandButton>
+										<h:outputText id="lblDocumentoTipo5"
+									value="#{emisionesAtmosfericasVerController.documentoTipo5}" />
+									</p:column>
+								</p:row>
+							</p:panelGrid>
+
+				</p:outputPanel>
+			</p:panelGrid>
+			
+			<h:panelGrid columns="1" layout="grid" styleClass="w100">
+			<h:panelGroup>
+				<div class="buttons">
+					<p:commandButton 
+						value="Cancelar" immediate="true"
+						styleClass="secondary"
+						onclick="PF('adicionarLaboratorio').hide()">
+					</p:commandButton>
+					
+				</div>
+				</h:panelGroup>
+			</h:panelGrid>             
+         </p:dialog>	
+		
+	</h:form>
+			
+	</ui:define>
+</ui:composition>

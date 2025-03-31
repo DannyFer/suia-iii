@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="content">
+		<f:event type="preRenderView"
+			listener="#{revisarInformeAreasSnapController.validarTareaBpm()}" />
+
+		<h:form id="form">
+			<h:panelGroup id="pnlDatos">
+				<h:panelGrid styleClass="w100" id="pnlDocumentos">
+
+					<object type="application/pdf"
+						data="#{revisarInformeAreasSnapController.urlInforme}?pfdrid_c=true"
+						width="100%" height="500px">
+						Su navegador no soporta la visualización de pdf. Puede descargar
+						el documento presionando el siguiente botón:
+						<p:commandButton value="Descargar" styleClass="primary"
+							ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+							<p:fileDownload
+								value="#{revisarInformeAreasSnapController.getStream(revisarInformeAreasSnapController.nombreInforme, revisarInformeAreasSnapController.archivoInforme)}" />
+						</p:commandButton>
+					</object>
+
+					<ui:include
+						src="/pages/rcoa/viabilidadAmbientalSnap/viewFormElaborarInforme.xhtml" />
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						id="pnlObsInformeTecnico">
+						<f:facet name="header">
+							<h:outputText value="Observaciones al informe" />
+						</f:facet>
+						<f:event type="preRenderView"
+							listener="#{revisarInformeAreasSnapController.validarExisteObservacionesInforme()}" />
+						<h:panelGrid columns="2" layout="grid" styleClass="w100"
+							columnClasses="w66, null">
+							<h:outputLabel
+								value="¿Es necesario realizar correcciones al Informe Técnico?"
+								styleClass="bold" />
+							<p:selectOneRadio id="observacionesInformeOficio" disabled="true"
+								styleClass="cssRadioDisabled"
+								value="#{revisarInformeAreasSnapController.requiereCorrecciones}">
+								<f:selectItem itemValue="true" itemLabel="Si" />
+								<f:selectItem itemValue="false" itemLabel="No" />
+							</p:selectOneRadio>
+						</h:panelGrid>
+
+						<h:outputText styleClass="bold text-red alJustify"
+							value="Si es necesario realizar correcciones, el informe regresará al administrador que lo elaboró" />
+
+						<observaciones:tablaObservacionesViabilidad
+							idComponent="obsInforme" seccion="Revision Informe Jefes de Area"
+							idActualizar=":form:pnlObsInformeTecnico :form:pnlButtons"
+							aparace="true" mostrarSiVacio="true"
+							idClase="#{revisarInformeAreasSnapController.viabilidadProyecto.id}"
+							nombreClase="revisionJefesOtrasAreas_#{revisarInformeAreasSnapController.numeroRevision}"
+							soloLectura="false" />
+					</p:panelGrid>
+				</h:panelGrid>
+			</h:panelGroup>
+
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Regresar" immediate="true"
+						styleClass="secondary" action="/bandeja/bandejaTareas.jsf"
+						icon="ui-icon-arrowthick-1-w" />
+					<p:commandButton value="Enviar" icon="ui-icon-check"
+						process="@this form"
+						action="#{revisarInformeAreasSnapController.enviar}"
+						rendered="#{revisarInformeAreasSnapController.requiereCorrecciones}">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+					<p:commandButton value="Firmar documento" type="button"
+						styleClass="buttonLarge" icon="ui-icon-key"
+						rendered="#{!revisarInformeAreasSnapController.requiereCorrecciones}"
+						onclick="PF('btnFinalizar').enable(); window.location.href='#{revisarInformeAreasSnapController.urlAlfresco}'"
+						update="pnlButtons" />
+					<p:commandButton value="Enviar" process="@this"
+						update="pnlDatos pnlButtons" widgetVar="btnFinalizar"
+						rendered="#{!revisarInformeAreasSnapController.requiereCorrecciones}"
+						actionListener="#{revisarInformeAreasSnapController.completarTarea()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+		</h:form>
+
+		<h:form id="pnlObservaciones">
+			<h:panelGroup id="pnlObsInformeTecnico">
+				<observaciones:tablaObservacionesViabilidad
+					idComponent="obsInformeFinal" seccion="Revision final informe SNAP"
+					componenteActualizarEliminar="pnlObsInformeTecnico" aparace="true"
+					mostrarSiVacio="false"
+					idClase="#{revisarInformeAreasSnapController.viabilidadProyecto.id}"
+					nombreClase="revisionFinalInformeSnap" soloLectura="true" />
+			</h:panelGroup>
+		</h:form>
+
+	</ui:define>
+</ui:composition>

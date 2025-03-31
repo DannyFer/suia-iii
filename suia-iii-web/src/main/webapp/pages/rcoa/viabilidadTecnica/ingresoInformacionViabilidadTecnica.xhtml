@@ -1,0 +1,264 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:controles-prime="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+	<ui:define name="content">
+
+
+
+		<style>
+.ui-state-highlight label {
+	color: #fff;
+}
+
+.col1 {
+	width: 30%;
+}
+
+.col2 {
+	width: 70%;
+}
+
+.colAlign {
+	vertical-align: top;
+	width: 30%;
+}
+
+.w47 {
+	width: 47%;
+}
+
+.w27 {
+	width: 27.4%;
+}
+
+.w44 {
+	width: 43.7%;
+}
+</style>
+		<h:form id="formIngresoInformacionVialidadTecnica">
+			<p:growl autoUpdate="true" id="msgs" showDetail="false"
+				showSummary="true" rendered="true" />
+
+			<p:panel id="panelInformacionVialidadTecnica"
+				header="Datos de la Viabilidad Técnica">
+
+				<h:panelGrid id="pnlDatosVialidadTecnica" columns="2" width="100%"
+					columnClasses="col1,col2">
+					<h:outputLabel value="RUC:*" />
+					<h:panelGroup>
+
+						<p:inputText
+							value="#{ingresoInformacionViabilidadTecnicaController.viabilidadTecnica.ruc}"
+							styleClass="w47" maxlength="250" />
+						<h:outputText value="...." style="color:white;" />
+
+						<p:commandButton value="Validar"
+							action="#{ingresoInformacionViabilidadTecnicaController.validarRuc()}"
+							update="formIngresoInformacionVialidadTecnica,
+							formIngresoInformacionVialidadTecnica:panelInformacionVialidadTecnica,formIngresoInformacionVialidadTecnica:pnlUbicacion,formIngresoInformacionVialidadTecnica:pnlDatos"
+							styleClass="primary" />
+
+
+					</h:panelGroup>
+					<h:outputLabel value="Razón social"
+						rendered="#{ingresoInformacionViabilidadTecnicaController.verificacionRuc}" />
+					<p:inputText
+						rendered="#{ingresoInformacionViabilidadTecnicaController.verificacionRuc}"
+						value="#{ingresoInformacionViabilidadTecnicaController.razonSocial}"
+						style="text-transform: uppercase;" styleClass="w47"
+						readonly="true" maxlength="250" />
+				</h:panelGrid>
+			</p:panel>
+			<p:panel id="pnlUbicacion" 
+				rendered="#{ingresoInformacionViabilidadTecnicaController.verificacionRuc}">
+				<h:panelGrid columns="1" width="100%" columnClasses="col1">
+						
+			<h:panelGrid id="pnlUbicacionGeografica" columns="2" width="100%" columnClasses="col1,col2">
+            <h:outputLabel value="Provincia *" />
+            <p:selectOneMenu value="#{ingresoInformacionViabilidadTecnicaController.idProvincia}" 
+                             style="width: 252px">
+                <f:selectItem itemValue="" itemLabel="Seleccione" />
+                <f:selectItems value="#{ingresoInformacionViabilidadTecnicaController.listaProvincia}" 
+                               var="provincia" itemLabel="#{provincia.nombre}" itemValue="#{provincia.id}"/>
+                <p:ajax listener="#{ingresoInformacionViabilidadTecnicaController.cargarCanton}" 
+                        event="change" update="pnlUbicacionGeografica"/>
+            </p:selectOneMenu>
+
+            <h:outputLabel value="Cantón *" />
+            <p:selectOneMenu value="#{ingresoInformacionViabilidadTecnicaController.idCanton}"
+                             style="width: 252px">
+                <f:selectItem itemValue="" itemLabel="Seleccione" />
+                <f:selectItems value="#{ingresoInformacionViabilidadTecnicaController.listaCanton}" 
+                               var="canton" itemLabel="#{canton.nombre}" itemValue="#{canton.id}"/>
+                <p:ajax process="@this"/>
+            </p:selectOneMenu>            
+        </h:panelGrid>
+						
+				</h:panelGrid>
+			</p:panel>
+			<p:panel id="pnlDatos"
+				rendered="#{ingresoInformacionViabilidadTecnicaController.verificacionRuc}">
+				<h:panelGrid id="pnlDatosO" columns="2" width="100%" columnClasses="col1,col2">
+					<h:outputLabel value="Número de oficio:*" />
+					<p:inputText
+						value="#{ingresoInformacionViabilidadTecnicaController.viabilidadTecnica.numeroOficio}"
+						styleClass="w47" maxlength="200">
+					<p:ajax process="@this"/>
+					</p:inputText>
+
+					<p:outputLabel value="Fecha:*" />
+					<p:calendar id="fechaVT" styleClass="calendarClass"
+						value="#{ingresoInformacionViabilidadTecnicaController.viabilidadTecnica.fecha}"
+						pattern="dd/MM/yyyy" readonlyInput="true" navigator="true"
+						maxdate="#{ingresoInformacionViabilidadTecnicaController.fechaActual}">
+					<p:ajax process="@this" immediate="true"/>
+					</p:calendar>
+
+					<h:outputLabel for="idTipoViabilidad"
+						value="Tipo de Viabilidad Técnica:*" />
+
+					<p:selectOneRadio id="idTipoViabilidad"
+						value="#{ingresoInformacionViabilidadTecnicaController.idTipoViabilidad}"
+						unselectable="true">
+						<f:selectItem itemLabel="Cierres técnicos" itemValue="1" />
+						<f:selectItem itemLabel="Celda emergente" itemValue="2" />
+						<f:selectItem itemLabel="Escombrera" itemValue="4" />
+						<f:selectItem itemLabel="GIRS" itemValue="3" />
+						<p:ajax update="pnlDatosFases lblFases idComboFases"/>
+					</p:selectOneRadio>
+					</h:panelGrid>
+					<h:panelGrid id="pnlDatosFases" columns="2" width="100%" columnClasses="col1,col2">
+					<h:outputLabel id="lblFases" value="Fases:*" rendered="#{ingresoInformacionViabilidadTecnicaController.idTipoViabilidad eq 3 ? true : false}"/>
+					<p:selectOneMenu id="idComboFases"
+						value="#{ingresoInformacionViabilidadTecnicaController.idFases}"
+						style="width: 270px;text-transform: uppercase;" styleClass="w44"
+						filter="true" filterMatchMode="startsWith"
+						rendered="#{ingresoInformacionViabilidadTecnicaController.idTipoViabilidad eq 3 ? true : false}">
+						<f:selectItem itemValue="" itemLabel="Seleccione" />
+						<f:selectItems
+							value="#{ingresoInformacionViabilidadTecnicaController.listaFasesViabilidad}"
+							var="fase" itemLabel="#{fase.descripcion.toUpperCase()}"
+							itemValue="#{fase.id}" />
+						<p:ajax event="change" update=":#{p:component('idComboFases')}" />
+					</p:selectOneMenu>
+					
+
+
+					<h:outputLabel value="Observaciones" />
+					<h:panelGroup>
+						<p:inputTextarea id="idObservaciones" styleClass="w47"
+							value="#{ingresoInformacionViabilidadTecnicaController.viabilidadTecnica.observacion}"
+							maxlength="5000" rows="6" cols="33" counter="display"
+							counterTemplate="{0} caracteres restantes." label="Observaciones:">
+							<p:ajax event="change" update="idObservaciones" />
+						</p:inputTextarea>
+						<br />
+						<h:outputText id="display" />
+					</h:panelGroup>
+
+				</h:panelGrid>
+				
+
+
+				<h:panelGroup>
+					<div class="buttons main">
+						<p:commandButton icon="ui-icon-cancel" styleClass="secondary"
+							action="#{ingresoInformacionViabilidadTecnicaController.init()}"
+							value="Cancelar"
+							oncomplete="PF('tblVialidadTecnica').clearFilters()"
+							update=":formIngresoInformacionVialidadTecnica, pnlUbicacion
+							:formIngresoInformacionVialidadTecnica:panelInformacionVialidadTecnica,:formIngresoInformacionVialidadTecnica:pnlUbicacion,:formIngresoInformacionVialidadTecnica:pnlDatos" />
+						<p:commandButton icon="ui-icon-check" id="btnAceptar"
+							value="Guardar"
+							action="#{ingresoInformacionViabilidadTecnicaController.guardarVialbilidadTecnica(ingresoInformacionViabilidadTecnicaController.viabilidadTecnica)}"
+							process="@this @form"
+							update=":#{p:component('formIngresoInformacionVialidadTecnica')},:#{p:component('panelInformacionVialidadTecnica')},
+							:#{p:component('pnlUbicacion')},:#{p:component('pnlDatos')},:#{p:component('pnlDatos')}" />
+
+					</div>
+				</h:panelGroup>
+				<br />
+				<br />
+				<br />
+
+				<p:dataTable id="tblVialidadTecnica" widgetVar="tblVialidadTecnica"
+					emptyMessage="#{labels['common.table.empty']}"
+					rowIndexVar="rowIndex" var="viabilidad"
+					value="#{ingresoInformacionViabilidadTecnicaController.listaViabilidadTecnica}"
+					paginator="true" rows="10"
+					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					rowsPerPageTemplate="10,20,30" paginatorPosition="bottom">
+
+					<p:column headerText="#{msg['label.ruc']}"
+						filterBy="#{viabilidad.ruc}" filterMatchMode="contains">
+						<h:outputText value="#{viabilidad.ruc}" />
+					</p:column>
+					<p:column headerText="#{msg['label.razonSocial']}"
+						filterBy="#{viabilidad.razonSocial}"
+						filterMatchMode="contains" style="word-wrap: break-word;">
+						<h:outputText
+							value="#{viabilidad.razonSocial}" />
+					</p:column>
+					<p:column headerText="Provincia">
+						<h:outputText value="#{viabilidad.ubicacionGeografica.ubicacionesGeografica.nombre}" />
+					</p:column>
+					<p:column headerText="Cantón">
+						<h:outputText value="#{viabilidad.ubicacionGeografica.nombre}" />
+					</p:column>
+					<p:column headerText="Número de oficio"
+						filterBy="#{viabilidad.numeroOficio}" filterMatchMode="contains" style="word-wrap: break-word;">
+						<h:outputText value="#{viabilidad.numeroOficio}" />
+					</p:column>
+					<p:column headerText="#{msg['label.fecha']}">
+						<h:outputText value="#{viabilidad.fecha}">
+							<f:convertDateTime pattern="dd-MM-yyyy" />
+						</h:outputText>
+					</p:column>
+
+					<p:column headerText="Tipo de Viabilidad Técnica"
+						filterBy="#{viabilidad.tipoViabilidad}" filterMatchMode="contains">
+						<h:outputText value="#{viabilidad.tipoViabilidad==1? 'Cierres técnicos':viabilidad.tipoViabilidad==2?'Celda emergente':viabilidad.tipoViabilidad==3?'GIRS':'Escombrera'}" />
+					</p:column>
+					
+					<p:column headerText="Fases" style="word-wrap: break-word;">
+						<h:outputText value="#{viabilidad.tipoViabilidad==1? 'N/A':viabilidad.tipoViabilidad==2?'N/A':viabilidad.tipoViabilidad==4?'N/A':viabilidad.catalogoGeneralFases.nombre}" />
+					</p:column>
+					
+					<p:column headerText="#{msg['label.observaciones']}" style="word-wrap: break-word;">
+						<h:outputText value="#{viabilidad.observacion}" />
+					</p:column>
+
+					<p:column headerText="Acción">
+						<p:commandButton icon="ui-icon-pencil"
+						styleClass="button-small primary"
+							action="#{ingresoInformacionViabilidadTecnicaController.editarViabilidadTecnica(viabilidad)}"
+							title="Editar Registro Viabilidad Técnica" 
+							update=":#{p:component('formIngresoInformacionVialidadTecnica')},:#{p:component('tblVialidadTecnica')}" />
+
+
+						<p:commandButton icon="ui-icon-circle-close"
+							styleClass="button-small primary"
+							action="#{ingresoInformacionViabilidadTecnicaController.eliminarViabilidadTecnica(viabilidad)}"
+							update=":#{p:component('formIngresoInformacionVialidadTecnica')},:#{p:component('tblVialidadTecnica')}" 
+							process="@this">
+							<p:confirm header="Confirmación"
+								message="¿Está seguro que desea eliminar la Viabilidad Técnica?"
+								icon="ui-icon-alert" />
+						</p:commandButton>
+
+
+					</p:column>
+
+				</p:dataTable>
+
+			</p:panel>
+		</h:form>
+	</ui:define>
+
+</ui:composition>

@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition
+	template="/control/aprobacionRequisitosTecnicos/templates/verArt.xhtml">
+	<ui:define name="content-art">
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="#{labels['label.modalidad.reciclaje']}" />
+				</f:facet>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Capacidad anual del proceso" />
+					</f:facet>
+					<p:dataTable
+						value="#{modalidadReciclajeController.modalidadReciclajeBean.modalidadReciclaje.listaDesechos}"
+						var="desechoReciclaje" rows="10" paginator="true"
+						paginatorAlwaysVisible="false" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						style="table-layout=auto">
+						<p:column headerText="Nombre desecho">
+							<h:outputText value="#{desechoReciclaje.desecho.descripcion}" />
+						</p:column>
+						<p:column headerText="Código">
+							<h:outputText value="#{desechoReciclaje.desecho.clave}" />
+						</p:column>
+						<p:column headerText="Cantidad anual de proceso (T)">
+							<h:outputText value="#{desechoReciclaje.capacidadAnualProceso}">
+								<f:convertNumber minFractionDigits="2" />
+							</h:outputText>
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+				<p:panelGrid styleClass="w100 separatorBottom" columns="1"
+					columnClasses="w50, field_mrg w50" layout="grid">
+					<f:facet name="header">
+						<h:outputText value="#{labels['label.manejo.desechos']}" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data mw100" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText
+							value="Plano de la Planta o del área donde se realiza el reciclaje" />
+						<p:commandButton icon="ui-icon-search"
+							styleClass="button-small primary toLeft" title="Ver"
+							action="#{modalidadReciclajeController.descargar(0)}"
+							ajax="false"
+							rendered="#{!(modalidadReciclajeController.modalidadReciclajeBean.modalidadReciclaje.documentoPlano.id==null)}" />
+					</h:panelGrid>
+				</p:panelGrid>
+				<p:panelGrid styleClass="w100 separatorBottom" columns="1"
+					columnClasses="w50, field_mrg w50" layout="grid">
+					<f:facet name="header">
+						<h:outputText value="#{labels['label.recoleccion.desechos']}" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="Tipo transporte" />
+						<h:outputText value="Propio"
+							rendered="#{modalidadReciclajeController.modalidadReciclajeBean.modalidadReciclaje.transportePropio}" />
+						<h:outputText value="Contratado"
+							rendered="#{modalidadReciclajeController.modalidadReciclajeBean.modalidadReciclaje.transporteContratado}" />
+					</h:panelGrid>
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+						columnClasses="header, null" rowClasses="null, alt"
+						rendered="#{modalidadReciclajeController.modalidadReciclajeBean.modalidadReciclaje.transporteContratado}">
+						<h:outputText id="labelNombreEmpresa"
+							rendered="#{modalidadReciclajeController.modalidadReciclajeBean.modalidadReciclaje.transporteContratado}"
+							value="#{labels['label.empresa.autorizada']}" />
+						<h:outputText id="nombreEmpresa"
+							rendered="#{modalidadReciclajeController.modalidadReciclajeBean.modalidadReciclaje.transporteContratado}"
+							value="#{modalidadReciclajeController.modalidadReciclajeBean.modalidadReciclaje.nombreEmpresaAutorizada}" />
+					</h:panelGrid>
+				</p:panelGrid>
+				<p:panelGrid styleClass="w100 separatorBottom" columns="1"
+					columnClasses="w100 field_mrg" layout="grid">
+					<f:facet name="header">
+						<h:outputText value="#{labels['label.reciclaje.desechos']}" />
+					</f:facet>
+					<h:panelGroup layout="grid">
+						<h:panelGrid styleClass="panel_data w100" columns="2"
+							columnClasses="header, null" rowClasses="null, alt">
+							<h:outputText value="Tipo de manejo que se otorga a los desechos"
+								styleClass="bold" />
+							<h:outputText
+								value="#{modalidadReciclajeController.modalidadReciclajeBean.tiposManejoDesechosSeleccionadas}"
+								converter="listToStringConverter" />
+						</h:panelGrid>
+					</h:panelGroup>
+					<h:panelGroup>
+						<p:panelGrid styleClass="w100" columns="1">
+							<h:panelGrid styleClass="w100" columns="2"
+								columnClasses="w50, field_mrg w50">
+								<p:outputLabel value="Descripción de los siguientes requisitos"
+									styleClass="bold" />
+								<h:panelGrid styleClass="w100 separatorBottom" columns="1"
+									columnClasses="w50, field_mrg">
+									<h:panelGrid styleClass="w50 toLeft" columns="3">
+										<p:commandButton icon="ui-icon-search"
+											styleClass="button-small primary toLeft" title="Ver"
+											action="#{modalidadReciclajeController.descargar(1)}"
+											ajax="false"
+											rendered="#{!(modalidadReciclajeController.modalidadReciclajeBean.modalidadReciclaje.documentoRequisitos.id==null)}" />
+									</h:panelGrid>
+								</h:panelGrid>
+							</h:panelGrid>
+							<h:panelGrid styleClass="w100" columns="1" columnClasses="w100">
+								<h:outputText value="#{labels['label.reciclaje.requisitos']}"
+									escape="false" styleClass="w100" />
+							</h:panelGrid>
+						</p:panelGrid>
+					</h:panelGroup>
+				</p:panelGrid>
+			</p:panelGrid>
+			<t:div styleClass="buttons main">
+				<p:commandButton value="#{labels['label.atras']}" immediate="true"
+					process="@this"
+					action="/control/aprobacionRequisitosTecnicos/gestion/eliminacionDisposicionFinalVer.jsf?faces-redirect=true"
+					icon="ui-icon-arrowthick-1-w" />
+				<p:commandButton value="#{labels['label.siguiente']}"
+					immediate="true" process="@this"
+					action="#{aprobacionRequisitosTecnicosController.recuperarPageSiguiente(1,false,true)}"
+					rendered="#{aprobacionRequisitosTecnicosController.isVisibleOpcionNavegarSiguienteEnMenuModoVer(1,false,true)}"
+					icon="ui-icon-arrowthick-1-e" />
+			</t:div>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

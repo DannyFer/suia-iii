@@ -1,0 +1,621 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+<style type="text/css">
+.btnCenter {
+	text-align: center !important;
+}
+
+.headerSinBorde .ui-widget-header {
+	border: none !important;
+}
+</style>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100"
+	style="margin-top: 15px !important;">
+	<f:facet name="header">
+		<h:outputText value="TRANSPORTE FUERA DE LA INSTALACIÓN" />
+	</f:facet>
+</p:panelGrid>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="MEDIOS PROPIOS" width="600px" />
+	</f:facet>
+
+	<h:panelGroup
+		rendered="#{!transporteDesechosBean.panelMedioPropioVisible}">
+		<h:panelGrid styleClass="panel_data" columns="2"
+			rendered="#{transporteDesechosBean.listaMediosPropiosHistorialEliminado ne null}"
+			columnClasses="header background-orange, null" rowClasses="null, alt">
+			<h:outputText value="Medios propios eliminados" />
+			<p:commandButton styleClass="button-small orange"
+				icon="ui-icon-search" process="@this"
+				oncomplete="PF('verHistorialMedioPropioEliminado').show()"
+				immediate="true" title="Ver Historial" />
+		</h:panelGrid>
+	</h:panelGroup>
+
+	<h:panelGroup
+		rendered="#{transporteDesechosBean.panelMedioPropioVisible}">
+		<h:panelGrid columns="2" styleClass="panel_data w100"
+			rendered="#{(transporteDesechosBean.transporteMediosPropios.listaHistorial eq null or transporteDesechosBean.transporteMediosPropios.listaHistorial.size() eq 0) and (transporteDesechosBean.listaDocumentosAutorizacionHistorial eq null or transporteDesechosBean.listaDocumentosAutorizacionHistorial.size() eq 0)}"
+			columnClasses="header w33, null" rowClasses="null, alt">
+			<h:outputText
+				value="#{transporteDesechosBean.transporteMediosPropios.tipoResolucion.descripcion}" />
+			<h:outputText
+				value="#{transporteDesechosBean.transporteMediosPropios.nroResolucion}" />
+
+			<h:outputText value="Anexo" />
+			<p:commandButton icon="ui-icon-arrowthick-1-s"
+				styleClass="button-small primary toLeft" title="Ver" ajax="false"
+				immediate="true"
+				rendered="#{transporteDesechosBean.documentoAutorizacion.id ne null}">
+				<p:fileDownload
+					value="#{transporteDesechosBean.descargar(transporteDesechosBean.documentoAutorizacion)}" />
+			</p:commandButton>
+		</h:panelGrid>
+
+		<h:panelGrid columns="3" styleClass="panel_data w100"
+			rendered="#{(transporteDesechosBean.transporteMediosPropios.listaHistorial ne null and transporteDesechosBean.transporteMediosPropios.listaHistorial.size() > 0) or (transporteDesechosBean.listaDocumentosAutorizacionHistorial ne null and transporteDesechosBean.listaDocumentosAutorizacionHistorial.size() > 0)}"
+			columnClasses="header w33, null, null w5 btnCenter"
+			rowClasses="null, alt">
+			<h:outputText
+				value="#{transporteDesechosBean.transporteMediosPropios.tipoResolucion.descripcion}" />
+			<h:outputText
+				value="#{transporteDesechosBean.transporteMediosPropios.nroResolucion}" />
+			<p:commandButton icon="ui-icon-search"
+				styleClass="button-small orange"
+				oncomplete="PF('verHistorialMedioPropio').show()"
+				update=":form:tabGenerador:tblHistorialMedioPropio"
+				rendered="#{transporteDesechosBean.transporteMediosPropios.listaHistorial ne null and transporteDesechosBean.transporteMediosPropios.listaHistorial.size() > 0}"
+				title="Ver Historial" />
+
+			<h:outputText value="Anexo" />
+			<p:commandButton icon="ui-icon-arrowthick-1-s"
+				styleClass="button-small primary toLeft" title="Ver" ajax="false"
+				immediate="true"
+				rendered="#{transporteDesechosBean.documentoAutorizacion.id ne null}">
+				<p:fileDownload
+					value="#{transporteDesechosBean.descargar(transporteDesechosBean.documentoAutorizacion)}" />
+			</p:commandButton>
+			<p:commandButton icon="ui-icon-search"
+				styleClass="button-small orange alCenter"
+				oncomplete="PF('verHistorialDocumentos').show()"
+				action="#{transporteDesechosBean.verHistorialDocumentos()}"
+				update=":frmDialogs:tblVerHistorialDocumentos"
+				rendered="#{transporteDesechosBean.listaDocumentosAutorizacionHistorial ne null and transporteDesechosBean.listaDocumentosAutorizacionHistorial.size() > 0}"
+				title="Ver Historial" />
+		</h:panelGrid>
+
+		<p:dataTable value="#{transporteDesechosBean.listaManifiestos}"
+			var="item" emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<h:outputText value="Detalle Manifiestos" />
+			</f:facet>
+
+			<p:column headerText="N° de manifiesto">
+				<h:outputText value="#{item.numeroManifiesto}" />
+			</p:column>
+			<p:column headerText="Fecha de embarque">
+				<h:outputText value="#{item.fechaEmbarque}" />
+			</p:column>
+			<ui:remove>
+			<p:column headerText="Manifiesto único" styleClass="w15 alCenter">
+				<p:commandButton icon="ui-icon-arrowthick-1-s"
+					styleClass="button-small primary" title="Ver" ajax="false"
+					immediate="true" rendered="#{item.manifiestoUnico.id ne null}">
+					<p:fileDownload
+						value="#{transporteDesechosBean.descargar(item.manifiestoUnico)}" />
+				</p:commandButton>
+			</p:column>
+			</ui:remove>
+			<p:column headerText="Desechos" styleClass="w10 alCenter">
+				<p:commandButton icon="ui-icon-search" title="ver" process="@this"
+					update=":frmDialogs:verDesechosManifiesto"
+					styleClass="button-small secondary"
+					oncomplete="PF('verDesechosManifiesto').show()"
+					actionListener="#{transporteDesechosBean.verDesechosManifiesto(item)}" />
+			</p:column>
+			<p:column style="text-align: center; width: 33px;"
+				rendered="#{transporteDesechosBean.mostrarHistorialManifiestoMP}">
+				<p:commandButton icon="ui-icon-search"
+					styleClass="button-small orange"
+					action="#{transporteDesechosBean.verHistorialManifiesto(item)}"
+					oncomplete="PF('verHistorialManifiesto').show()"
+					update=":form:tabGenerador:pnlHistorialManifiesto"
+					rendered="#{item.listaHistorial.size() > 0 or item.listaHistorialDetalle.size() > 0 or item.listaHistorialDocumentos.size() > 0 or item.listaDetallesEliminados.size() > 0}"
+					title="Ver Historial" />
+				<h:outputText styleClass="text-orange"
+					rendered="#{item.nuevoEnModificacion}" value="Nuevo" />
+			</p:column>
+		</p:dataTable>
+		<br />
+		<br />
+		<p:dataTable styleClass="headerSinBorde"
+			value="#{transporteDesechosBean.resumenManifiestoMedioPropio}"
+			var="item" emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<h:outputText value="Sumatoria" />
+			</f:facet>
+
+			<p:column
+				headerText="Nombre del residuo o desecho peligroso o especial"
+				styleClass="w50">
+				<h:outputText value="#{item.desechoPeligroso.descripcion}" />
+			</p:column>
+			<p:column headerText="Código">
+				<h:outputText value="#{item.desechoPeligroso.clave}" />
+			</p:column>
+			<p:column headerText="Total (t)" styleClass="alCenter">
+				<h:outputText value="#{item.totalDesecho}">
+					<f:convertNumber pattern="#0.00" />
+				</h:outputText>
+			</p:column>
+		</p:dataTable>
+		<br />
+		<br />
+		<p:dataTable 
+				value="#{transporteDesechosBean.listaDocsManifiestosMediosPropios}"
+				var="documento" emptyMessage="#{labels['common.table.empty']}">
+				<f:facet name="header">
+					<h:outputText value="Manifiestos Únicos" />
+				</f:facet>
+				<p:column headerText="Documento">
+					<h:outputText value="#{documento.nombre}" />
+				</p:column>
+				<p:column headerText="Acciones" styleClass="w15 alCenter"
+					style="text-align:center !important">
+					<p:commandButton icon="ui-icon-arrowthick-1-s" styleClass="primary"
+						title="Ver" ajax="false" immediate="true">
+						<p:fileDownload
+							value="#{transporteDesechosBean.descargar(documento)}" />
+					</p:commandButton>
+				</p:column>
+			</p:dataTable>
+		<br />
+		<h:panelGrid styleClass="panel_data" columns="2"
+			rendered="#{transporteDesechosBean.historialManifiestosMPEliminados != null}"
+			columnClasses="header background-orange, null" rowClasses="null, alt">
+			<h:outputText value="Manifiestos eliminados" />
+			<p:commandButton styleClass="button-small orange"
+				icon="ui-icon-search" process="@this"
+				update=":form:tabGenerador:pnlManifiestosEliminados"
+				action="#{transporteDesechosBean.verManifiestosEliminados(1)}"
+				oncomplete="PF('verManifiestosEliminados').show()" immediate="true"
+				title="Ver Historial" />
+		</h:panelGrid>
+	</h:panelGroup>
+
+	<h:panelGroup id="paso3MediosPropios">
+			<observaciones:tablaObservaciones
+				idComponent="obsTransporteMediosPropios"
+				seccion="GeneradorRETCE_Transporte Medios propios"
+				componenteActualizarEliminar="paso3MediosPropios"
+				aparace="#{generadorDesechosPeligrososVerController.habilitarObservaciones}"
+				mostrarSiVacio="#{!generadorDesechosPeligrososVerController.observacionesSoloLectura}"
+				idClase="#{generadorDesechosPeligrososVerController.generadorDesechosRetce.id}"
+				nombreClase="#{generadorDesechosPeligrososVerController.className}"
+				soloLectura="#{generadorDesechosPeligrososVerController.observacionesSoloLectura}" />
+		</h:panelGroup>
+</p:panelGrid>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="GESTOR AMBIENTAL" />
+	</f:facet>
+
+	<h:panelGroup
+		rendered="#{!transporteDesechosBean.panelGestorVisible}">
+		<h:panelGrid styleClass="panel_data" columns="2"
+			rendered="#{transporteDesechosBean.listaGestorHistorialEliminado ne null}"
+			columnClasses="header background-orange, null" rowClasses="null, alt">
+			<h:outputText value="Gestor Ambiental eliminado" />
+			<p:commandButton styleClass="button-small orange"
+				icon="ui-icon-search" process="@this"
+				oncomplete="PF('verHistorialGestorEliminado').show()"
+				immediate="true" title="Ver Historial" />
+		</h:panelGrid>
+	</h:panelGroup>
+
+	<h:panelGroup rendered="#{transporteDesechosBean.panelGestorVisible}">
+		<p:dataTable value="#{transporteDesechosBean.listaEmpresasGestoras}"
+			var="item" emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<h:outputText value="Empresas Gestoras" />
+			</f:facet>
+
+			<p:column headerText="Empresa gestora" styleClass="w50">
+				<h:outputText
+						value="#{(item.empresaGestora.prestadorServiciosDesechos.nombre eq 'OTRA') ? item.otraEmpresa : item.empresaGestora.prestadorServiciosDesechos}" />
+			</p:column>
+			<p:column headerText="Número de autorización">
+				<h:outputText value="#{item.empresaGestora.prestadorServiciosDesechos.nombre ne 'OTRA' ? item.empresaGestora.codigoPermisoAmbiental : 'N/A'}" />
+			</p:column>
+			<p:column headerText="Fecha de autorización">
+				<h:outputText value="#{item.empresaGestora.prestadorServiciosDesechos.nombre ne 'OTRA' ? item.empresaGestora.fechaPermisoAmbiental : 'N/A'}" />
+			</p:column>
+			<p:column style="text-align: center; width: 33px;"
+				rendered="#{transporteDesechosBean.mostrarHistorialEmpresaGestora}">
+				<h:outputText styleClass="text-orange"
+					rendered="#{item.nuevoEnModificacion}" value="Nuevo" />
+			</p:column>
+		</p:dataTable>
+		<br />
+		<h:panelGrid styleClass="panel_data" columns="2"
+			rendered="#{transporteDesechosBean.historialEmpresasEliminadas != null}"
+			columnClasses="header background-orange, null" rowClasses="null, alt">
+			<h:outputText value="Empresas eliminadas" />
+			<p:commandButton styleClass="button-small orange"
+				icon="ui-icon-search" process="@this"
+				oncomplete="PF('verHistorialEmpresas').show()" immediate="true"
+				title="Ver Historial" />
+		</h:panelGrid>
+		<br />
+		<br />
+		<p:dataTable
+			value="#{transporteDesechosBean.listaManifiestosGestores}" var="item"
+			emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<h:outputText value="Detalle Manifiestos" />
+			</f:facet>
+
+			<p:column headerText="N° de manifiesto">
+				<h:outputText value="#{item.numeroManifiesto}" />
+			</p:column>
+			<p:column headerText="Fecha de embarque">
+				<h:outputText value="#{item.fechaEmbarque}" />
+			</p:column>
+			<ui:remove>
+			<p:column headerText="Manifiestos únicos" styleClass="w15 alCenter">
+				<p:commandButton icon="ui-icon-arrowthick-1-s"
+					styleClass="button-small primary" title="Ver" ajax="false"
+					immediate="true" rendered="#{item.manifiestoUnico.id ne null}">
+					<p:fileDownload
+						value="#{transporteDesechosBean.descargar(item.manifiestoUnico)}" />
+				</p:commandButton>
+			</p:column>
+			</ui:remove>
+			<p:column headerText="Desechos" styleClass="w10 alCenter">
+				<p:commandButton icon="ui-icon-search" title="ver" process="@this"
+					update=":frmDialogs:verDesechosManifiesto"
+					styleClass="button-small secondary"
+					oncomplete="PF('verDesechosManifiesto').show()"
+					actionListener="#{transporteDesechosBean.verDesechosManifiesto(item)}" />
+			</p:column>
+			<p:column style="text-align: center; width: 33px;"
+				rendered="#{transporteDesechosBean.mostrarHistorialManifiestoGA}">
+				<p:commandButton icon="ui-icon-search"
+					styleClass="button-small orange"
+					action="#{transporteDesechosBean.verHistorialManifiesto(item)}"
+					oncomplete="PF('verHistorialManifiesto').show()"
+					update=":form:tabGenerador:pnlHistorialManifiesto"
+					rendered="#{item.listaHistorial.size() > 0 or item.listaHistorialDetalle.size() > 0 or item.listaHistorialDocumentos.size() > 0 or item.listaDetallesEliminados.size() > 0}"
+					title="Ver Historial" />
+				<h:outputText styleClass="text-orange"
+					rendered="#{item.nuevoEnModificacion}" value="Nuevo" />
+			</p:column>
+		</p:dataTable>
+
+		<br />
+		<br />
+		<p:dataTable styleClass="headerSinBorde"
+			value="#{transporteDesechosBean.resumenManifiestoGestores}"
+			var="item" emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<h:outputText value="Sumatoria" />
+			</f:facet>
+
+			<p:column
+				headerText="Nombre del residuo o desecho peligroso o especial"
+				styleClass="w50">
+				<h:outputText value="#{item.desechoPeligroso.descripcion}" />
+			</p:column>
+			<p:column headerText="Código">
+				<h:outputText value="#{item.desechoPeligroso.clave}" />
+			</p:column>
+			<p:column headerText="Total (t)" styleClass="alCenter">
+				<h:outputText value="#{item.totalDesecho}">
+					<f:convertNumber pattern="#0.00" />
+				</h:outputText>
+			</p:column>
+		</p:dataTable>
+		<br />
+		<br />
+		<p:dataTable 
+				value="#{transporteDesechosBean.listaDocsManifiestosGestor}"
+				var="documento" emptyMessage="#{labels['common.table.empty']}">
+				<f:facet name="header">
+					<h:outputText value="Manifiestos Únicos" />
+				</f:facet>
+				<p:column headerText="Documento">
+					<h:outputText value="#{documento.nombre}" />
+				</p:column>
+				<p:column headerText="Acciones" styleClass="w15 alCenter"
+					style="text-align:center !important">
+					<p:commandButton icon="ui-icon-arrowthick-1-s" styleClass="primary"
+						title="Ver" ajax="false" immediate="true">
+						<p:fileDownload
+							value="#{transporteDesechosBean.descargar(documento)}" />
+					</p:commandButton>
+				</p:column>
+			</p:dataTable>
+		<br />
+		<h:panelGrid styleClass="panel_data" columns="2"
+			rendered="#{transporteDesechosBean.historialManifiestosGAEliminados != null}"
+			columnClasses="header background-orange, null" rowClasses="null, alt">
+			<h:outputText value="Manifiestos eliminados" />
+			<p:commandButton styleClass="button-small orange"
+				icon="ui-icon-search" process="@this"
+				update=":form:tabGenerador:pnlManifiestosEliminados"
+				action="#{transporteDesechosBean.verManifiestosEliminados(2)}"
+				oncomplete="PF('verManifiestosEliminados').show()" immediate="true"
+				title="Ver Historial" />
+		</h:panelGrid>
+	</h:panelGroup>
+
+	<h:panelGroup id="paso3GestorAmbiental">
+			<observaciones:tablaObservaciones
+				idComponent="obsTransporteGestorAmbiental"
+				seccion="GeneradorRETCE_Transporte Gestor ambiental"
+				componenteActualizarEliminar="paso3GestorAmbiental"
+				aparace="#{generadorDesechosPeligrososVerController.habilitarObservaciones}"
+				mostrarSiVacio="#{!generadorDesechosPeligrososVerController.observacionesSoloLectura}"
+				idClase="#{generadorDesechosPeligrososVerController.generadorDesechosRetce.id}"
+				nombreClase="#{generadorDesechosPeligrososVerController.className}"
+				soloLectura="#{generadorDesechosPeligrososVerController.observacionesSoloLectura}" />
+		</h:panelGroup>
+</p:panelGrid>
+
+<p:dialog id="verHistorialMedioPropio"
+	widgetVar="verHistorialMedioPropio" modal="true" resizable="false"
+	width="600" header="Historial Medio Propio">
+	<p:dataTable id="tblHistorialMedioPropio"
+		value="#{transporteDesechosBean.transporteMediosPropios.listaHistorial}"
+		var="item" emptyMessage="#{labels['common.table.empty']}">
+		<p:column headerText="Fecha modificación" style="width: 80px;">
+			<h:outputText value="#{item.fechaCreacion}" />
+		</p:column>
+		<p:column headerText="Tipo de autorización">
+			<h:outputText value="#{item.tipoResolucion.descripcion}" />
+		</p:column>
+		<p:column headerText="Número de autorización">
+			<h:outputText value="#{item.nroResolucion}" />
+		</p:column>
+	</p:dataTable>
+	<br />
+	<br />
+</p:dialog>
+
+<p:dialog id="verHistorialManifiesto" widgetVar="verHistorialManifiesto"
+	modal="true" resizable="false" width="800"
+	header="Historial Manifiesto">
+	<h:panelGroup id="pnlHistorialManifiesto">
+
+		<p:dataTable
+			rendered="#{transporteDesechosBean.manifiestoSeleccionado.listaHistorial.size() > 0}"
+			value="#{transporteDesechosBean.manifiestoSeleccionado.listaHistorial}"
+			var="item" emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<h:outputText value="Detalle Manifiestos" />
+			</f:facet>
+
+			<p:column headerText="N° de manifiesto">
+				<h:outputText value="#{item.numeroManifiesto}" />
+			</p:column>
+			<p:column headerText="Fecha de embarque">
+				<h:outputText value="#{item.fechaEmbarque}" />
+			</p:column>
+			<ui:remove>
+			<p:column headerText="Manifiesto único" styleClass="w15 alCenter">
+				<p:commandButton icon="ui-icon-arrowthick-1-s"
+					styleClass="button-small primary" title="Ver" ajax="false"
+					immediate="true" rendered="#{item.manifiestoUnico.id ne null}">
+					<p:fileDownload
+						value="#{transporteDesechosBean.descargar(item.manifiestoUnico)}" />
+				</p:commandButton>
+			</p:column>
+			</ui:remove>
+		</p:dataTable>
+		<h:panelGroup
+			rendered="#{transporteDesechosBean.manifiestoSeleccionado.listaHistorial.size() > 0}">
+			<br />
+			<br />
+		</h:panelGroup>
+
+		<p:dataTable
+			rendered="#{transporteDesechosBean.manifiestoSeleccionado.listaHistorialDetalle.size() > 0}"
+			value="#{transporteDesechosBean.manifiestoSeleccionado.listaHistorialDetalle}"
+			var="desecho" emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<h:outputText value="Desechos Asociados" />
+			</f:facet>
+			<p:column headerText="Fecha modificación" style="width: 80px;">
+				<h:outputText value="#{desecho.fechaCreacion}" />
+			</p:column>
+			<p:column
+				headerText="Nombre del residuo o desecho peligroso o especial">
+				<h:outputText value="#{desecho.desechoPeligroso.descripcion}" />
+			</p:column>
+			<p:column headerText="Código">
+				<h:outputText value="#{desecho.desechoPeligroso.clave}" />
+			</p:column>
+			<p:column headerText="Unidad">
+				<h:outputText value="#{desecho.tipoUnidad.descripcion}" />
+			</p:column>
+			<p:column headerText="Cantidad" styleClass="alCenter">
+				<h:outputText value="#{desecho.cantidad}" />
+			</p:column>
+			<p:column rendered="#{transporteDesechosBean.existeReporteUnidades}"
+				styleClass="alCenter"
+				headerText="Reporte en unidades para los desechos ES-04 y ES-06 (únicamente para registros de generador por REP)">
+				<h:outputText
+					value="#{desecho.cantidadEnUnidades ne null ? desecho.cantidadEnUnidades : 'N/A'}" />
+			</p:column>
+			<p:column style="width: 60px;">
+				<h:outputText styleClass="text-orange"
+					value="#{desecho.nuevoEnModificacion ? 'Nuevo' : 'Modificado'}" />
+			</p:column>
+		</p:dataTable>
+		<h:panelGroup
+			rendered="#{transporteDesechosBean.manifiestoSeleccionado.listaHistorialDetalle.size() > 0}">
+			<br />
+			<br />
+		</h:panelGroup>
+
+		<p:dataTable
+			rendered="#{transporteDesechosBean.manifiestoSeleccionado.listaDetallesEliminados.size() > 0}"
+			value="#{transporteDesechosBean.manifiestoSeleccionado.listaDetallesEliminados}"
+			var="desecho" emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<h:outputText value="Desechos Eliminados" />
+			</f:facet>
+			<p:column headerText="Fecha modificación" style="width: 80px;">
+				<h:outputText value="#{desecho.fechaCreacion}" />
+			</p:column>
+			<p:column
+				headerText="Nombre del residuo o desecho peligroso o especial">
+				<h:outputText value="#{desecho.desechoPeligroso.descripcion}" />
+			</p:column>
+			<p:column headerText="Código">
+				<h:outputText value="#{desecho.desechoPeligroso.clave}" />
+			</p:column>
+			<p:column headerText="Unidad">
+				<h:outputText value="#{desecho.tipoUnidad.descripcion}" />
+			</p:column>
+			<p:column headerText="Cantidad" styleClass="alCenter">
+				<h:outputText value="#{desecho.cantidad}" />
+			</p:column>
+			<p:column styleClass="alCenter"
+				headerText="Reporte en unidades para los desechos ES-04 y ES-06 (únicamente para registros de generador por REP)">
+				<h:outputText
+					value="#{desecho.cantidadEnUnidades ne null ? desecho.cantidadEnUnidades : 'N/A'}" />
+			</p:column>
+		</p:dataTable>
+		<h:panelGroup
+			rendered="#{transporteDesechosBean.manifiestoSeleccionado.listaDetallesEliminados.size() > 0}">
+			<br />
+			<br />
+		</h:panelGroup>
+
+		<p:dataTable id="tblVerHistorialDocumentos"
+			rendered="#{transporteDesechosBean.manifiestoSeleccionado.listaHistorialDocumentos.size() > 0}"
+			value="#{transporteDesechosBean.manifiestoSeleccionado.listaHistorialDocumentos}"
+			var="documento" emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<h:outputText value="Manifiestos Únicos" />
+			</f:facet>
+			<p:column headerText="Fecha modificación" styleClass="w15">
+				<h:outputText value="#{documento.fechaModificacion}" />
+			</p:column>
+			<p:column headerText="Documento">
+				<h:outputText value="#{documento.nombre}" />
+			</p:column>
+			<p:column headerText="Descargar" styleClass="w15 alCenter">
+				<p:commandButton icon="ui-icon-arrowthick-1-s"
+					styleClass="button-small primary" title="Ver" ajax="false"
+					immediate="true">
+					<p:fileDownload
+						value="#{transporteDesechosBean.descargar(documento)}" />
+				</p:commandButton>
+			</p:column>
+		</p:dataTable>
+		<br />
+		<br />
+	</h:panelGroup>
+</p:dialog>
+
+<p:dialog id="verHistorialEmpresas" widgetVar="verHistorialEmpresas"
+	modal="true" resizable="false" width="700"
+	header="Historial Empresas Gestoras Eliminadas">
+	<p:dataTable id="tblHistorialEmpresasGestoras"
+		value="#{transporteDesechosBean.historialEmpresasEliminadas}"
+		var="item" emptyMessage="#{labels['common.table.empty']}">
+		<p:column headerText="Fecha modificación" style="width: 80px;">
+			<h:outputText value="#{item.fechaCreacion}" />
+		</p:column>
+		<p:column headerText="Empresa gestora" styleClass="w50">
+			<h:outputText
+				value="#{item.empresaGestora.prestadorServiciosDesechos}" />
+		</p:column>
+		<p:column headerText="Número de autorización">
+			<h:outputText value="#{item.empresaGestora.codigoPermisoAmbiental}" />
+		</p:column>
+		<p:column headerText="Fecha de autorización">
+			<h:outputText value="#{item.empresaGestora.fechaPermisoAmbiental}" />
+		</p:column>
+	</p:dataTable>
+	<br />
+	<br />
+</p:dialog>
+
+<p:dialog id="verManifiestosEliminados"
+	widgetVar="verManifiestosEliminados" modal="true" resizable="false"
+	width="700" header="Historial Manifiestos Eliminados">
+	<h:panelGroup id="pnlManifiestosEliminados">
+		<p:dataTable
+			value="#{transporteDesechosBean.historialManifiestosEliminados}"
+			var="item" emptyMessage="#{labels['common.table.empty']}">
+			<p:column headerText="N° de manifiesto">
+				<h:outputText value="#{item.numeroManifiesto}" />
+			</p:column>
+			<p:column headerText="Fecha de embarque" styleClass="w20">
+				<h:outputText value="#{item.fechaEmbarque}" />
+			</p:column>
+			<ui:remove>
+			<p:column headerText="Manifiesto único" styleClass="w15 alCenter">
+				<p:commandButton icon="ui-icon-arrowthick-1-s"
+					styleClass="button-small primary" title="Ver" ajax="false"
+					immediate="true" rendered="#{item.manifiestoUnico.id ne null}">
+					<p:fileDownload
+						value="#{transporteDesechosBean.descargar(item.manifiestoUnico)}" />
+				</p:commandButton>
+			</p:column>
+			</ui:remove>
+			<p:column headerText="Desechos" styleClass="w10 alCenter">
+				<p:commandButton icon="ui-icon-search" title="ver" process="@this"
+					update=":frmDialogs:verDesechosManifiesto"
+					styleClass="button-small secondary"
+					oncomplete="PF('verDesechosManifiesto').show()"
+					actionListener="#{transporteDesechosBean.verDesechosManifiesto(item)}" />
+			</p:column>
+		</p:dataTable>
+		<br />
+		<br />
+	</h:panelGroup>
+</p:dialog>
+
+<p:dialog id="verHistorialMedioPropioEliminado"
+	widgetVar="verHistorialMedioPropioEliminado" modal="true"
+	resizable="false" width="400" header="Historial Medio Propio">
+	<p:dataTable id="tblHistorialMedioPropioEliminado"
+		value="#{transporteDesechosBean.listaMediosPropiosHistorialEliminado}"
+		var="item" emptyMessage="#{labels['common.table.empty']}">
+		<p:column headerText="Fecha modificación" style="width: 80px;">
+			<h:outputText value="#{item.fechaCreacion}" />
+		</p:column>
+	</p:dataTable>
+</p:dialog>
+
+<p:dialog id="verHistorialGestorEliminado"
+	widgetVar="verHistorialGestorEliminado" modal="true"
+	resizable="false" width="400" header="Historial Gestor Ambiental">
+	<p:dataTable 
+		value="#{transporteDesechosBean.listaGestorHistorialEliminado}"
+		var="item" emptyMessage="#{labels['common.table.empty']}">
+		<p:column headerText="Fecha modificación" style="width: 80px;">
+			<h:outputText value="#{item.fechaCreacion}" />
+		</p:column>
+	</p:dataTable>
+</p:dialog>
+
+</html>

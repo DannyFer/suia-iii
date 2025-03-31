@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+	<ui:define name="content">
+		<ui:include src="../contenido/menu.xhtml" />
+		<div class="content">
+		
+		<f:loadBundle var="labels" basename="ec.gob.ambiente.core.resources.labels_es" />
+      <h:form id="frmQuimicaSuelo" enctype="multipart/form-data">
+       	<p:growl id="msgs" globalOnly="true" />         
+             <p:panel>
+             <p:panelGrid columns="1" layout="grid" styleClass="w100">
+             <f:facet name="header">
+				<p:commandButton value="Adicionar" action="#{quimicaSueloController.agregarQuimica()}" immediate="true" update=":#{p:component('frmQuimica')}"
+						 onclick="PF('dlgQuimica').show()" id="btnAgregarQuimicaSuelo"  icon="ui-icon-plusthick" styleClass="button-small-text toRight field_mrg" >
+						<p:tooltip id="ttQuimicaSuelo" for="btnAgregarQuimicaSuelo"
+							value="Agregar Característica Química de los suelos"/>
+					</p:commandButton>
+					<mae:panelGridHeaderHelp value="Químicas de los suelos" conector="quimicaSueloHelp"  help="#{helps['no.help.yet']}" />
+			</f:facet>
+				
+				<p:dataTable id="tblQuimica" paginator="true" rows="10" value="#{quimicaSueloController.medioFisicoBean.listaQuimica}"
+					 rowStyleClass="rojo" var="quimica" paginatorPosition="bottom" scrollable="true" scrollWidth="720" emptyMessage="#{labels['common.table.empty']}"
+						>
+					<p:columnGroup type="header">
+						<p:row>
+							<p:column colspan="11" 	headerText="Características Químicas de los suelos" width="1100"/>
+						</p:row>
+						<p:row>
+							<p:column rowspan="2" headerText="Acciones" width="100"/>
+							<p:column rowspan="2" headerText="Normativa" width="80" />
+							<p:column rowspan="2" headerText="Parámetro/Ensayo" width="500" />
+							<p:column rowspan="2" headerText="Límite" width="50"/>
+							<p:column rowspan="2" headerText="Uso" width="60"/>
+							<p:column rowspan="2" headerText="Laboratorio" width="100"/>
+							<p:column rowspan="2" headerText="Código" width="60"/>
+							<p:column rowspan="2" headerText="Lugar" width="60"/>
+							<p:column colspan="2" headerText="Coordenadas UTM (WGS 84)" width="150"/>
+							<p:column rowspan="2" headerText="Resultados" width="60"/>
+						</p:row>
+						<p:row>
+							<p:column headerText="X" width="75"/>
+							<p:column headerText="Y" width="75"/>
+						</p:row>
+						</p:columnGroup>
+						<p:column>
+					 <p:commandButton icon="ui-icon-pencil" action="#{quimicaSueloController.seleccionarQuimica(quimica)}"
+                                 title="Editar"
+                                 oncomplete="PF('dlgQuimica').show();" update=":#{p:component('frmQuimica')}"/>
+                	<p:commandButton icon="ui-icon-trash" action="#{quimicaSueloController.eliminarQuimicaSuelo(quimica)}"
+                                 title="Remover"
+                                 update=":#{p:component('tblQuimica')}"/>
+					</p:column>
+					<p:column styleClass="#{quimica.color}" >
+						<h:outputText value="#{quimica.normativa.descripcion}"  />
+					</p:column>
+					<p:column styleClass="#{quimica.color}">
+						<h:outputText value="#{quimica.parametro}" />
+					</p:column>
+					<p:column styleClass="#{quimica.color}">
+						<h:outputText value="#{quimica.parametro.valor}  #{quimica.unidad}" />
+					</p:column>
+					<p:column styleClass="#{quimica.color}">
+						<h:outputText value="#{quimica.usoSuelo.descripcion}" />
+					</p:column>
+					<p:column styleClass="#{quimica.color}">
+						<h:outputText value="#{quimica.laboratorio.descripcion}" />
+					</p:column>
+					<p:column styleClass="#{quimica.color}">
+						<h:outputText value="#{quimica.codigo}" />
+					</p:column>
+					<p:column  styleClass="#{quimica.color}">
+						<h:outputText value="#{quimica.lugar}"/>
+					</p:column>
+					<p:column  styleClass="#{quimica.color}">
+						<h:outputText value="#{quimica.coordenadaGeneral.x}" >
+						<f:convertNumber pattern="##########.##"/>
+						</h:outputText>
+					</p:column>
+					<p:column styleClass="#{quimica.color}">
+						<h:outputText value="#{quimica.coordenadaGeneral.y}" >
+						<f:convertNumber pattern="##########.##"/>
+						</h:outputText>
+					</p:column>
+					<p:column styleClass="#{quimica.color}">
+						<h:outputText value="#{quimica.resultado} #{quimica.unidad}" styleClass="#{quimica.color}"/>
+					</p:column>
+					
+				</p:dataTable>
+				</p:panelGrid>
+				</p:panel>
+			<div class="buttons main">
+				<p:commandButton id="btnGuardar" value="Guardar" icon="ui-icon-check" action="#{quimicaSueloController.guardar()}" 
+								update=":#{p:component('tblQuimica')}"/>
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel" action="#{quimicaSueloController.cancelar()}" process="@this">
+					<p:confirm header="Confirmación" message="¿Está seguro de cancelar?" icon="ui-icon-alert" />
+				</p:commandButton>
+			</div>	
+	</h:form>
+	
+	<p:dialog id="agregarQuimica" header="Características Químicas de los suelos" widgetVar="dlgQuimica" modal="true" 
+				width="400" resizable="false">
+	<h:form id="frmQuimica" >
+	<p:panel id="pnlQuimica">
+	<h:panelGrid columns="2" styleClass="w100 alCenter" columnClasses="alRight, field_mrg w66 alLeft">
+		<p:outputLabel value="Normativa" for="cmbNormativa"/>
+		<p:selectOneMenu
+					value="#{quimicaSueloController.medioFisicoBean.quimicaSuelo.normativa}"
+					required="true" id="cmbNormativa" 
+					converter="selectItemConverter2" style="width:100%" requiredMessage="El campo normativa es requerido.">
+					<f:selectItems value="#{quimicaSueloController.medioFisicoBean.normativas}" />
+					<p:ajax event="change" listener="#{quimicaSueloController.cargarParametro()}" update=":#{p:component('pnlQuimica')}"/>
+		</p:selectOneMenu>
+		
+		<p:outputLabel id="outUso" value="Uso"  rendered="#{quimicaSueloController.medioFisicoBean.quimicaSuelo.normativa.id==1}" for="cmbUso"/>
+		<p:selectOneMenu value="#{quimicaSueloController.medioFisicoBean.quimicaSuelo.usoSuelo}" required="true"
+					 id="cmbUso"  rendered="#{quimicaSueloController.medioFisicoBean.quimicaSuelo.normativa.id==1}"
+					converter="selectItemConverter2" style="width:100%" requiredMessage="El campo uso es requerido.">
+					<f:selectItems value="#{quimicaSueloController.medioFisicoBean.usosSuelo}" />
+					<p:ajax listener="#{quimicaSueloController.cargarParametro()}" update=":#{p:component('cmbParametro')}"/>
+		</p:selectOneMenu>
+		
+		<p:outputLabel value="Parámetro" for="cmbParametro" />
+		<p:selectOneMenu
+					value="#{quimicaSueloController.medioFisicoBean.quimicaSuelo.parametro}"
+					required="true" id="cmbParametro"
+					converter="selectItemGroupConverter" style="width:100%" requiredMessage="El campo parámetro es requerido.">
+					<f:selectItems value="#{quimicaSueloController.medioFisicoBean.parametrosCalidad}" />
+					<p:ajax  listener="#{quimicaSueloController.cargarUnidad()}" update="outLimite"/>
+		</p:selectOneMenu>
+		
+		<p:outputLabel value="Límite" for="outLimite"/>
+		<p:inputText id="outLimite"  value="#{quimicaSueloController.medioFisicoBean.quimicaSuelo.parametro.valor} #{quimicaSueloController.medioFisicoBean.quimicaSuelo.unidad}" readonly="true"/>
+		
+		<p:outputLabel value="Laboratorio" for="cmbLaboratorio"/>
+		<p:selectOneMenu
+					value="#{quimicaSueloController.medioFisicoBean.quimicaSuelo.laboratorio}"
+					required="true" id="cmbLaboratorio"
+					converter="selectItemConverter2" style="width:100%" requiredMessage="El campo laboratorio es requerido.">
+					<f:selectItems value="#{quimicaSueloController.medioFisicoBean.laboratorios}" />
+		</p:selectOneMenu>
+		<p:outputLabel value="Código" for="txtCodigo"/>
+		<p:inputText id="txtCodigo" value="#{quimicaSueloController.medioFisicoBean.quimicaSuelo.codigo}" required="true" requiredMessage="El campo código es requerido."/>
+		<p:outputLabel value="Lugar" for="txtLugar"/>
+		<p:inputText id="txtLugar" value="#{quimicaSueloController.medioFisicoBean.quimicaSuelo.lugar}" required="true" requiredMessage="El campo lugar es requerido."/>
+		<p:outputLabel value="Coordenada X" for="txtX"/>
+		<p:inputText id="txtX" required="true" value="#{quimicaSueloController.medioFisicoBean.quimicaSuelo.coordenadaGeneral.x}"
+					 onkeypress="return NumCheckDouble(event,this);" requiredMessage="El campo coordenada x es requerido.">
+		</p:inputText>
+		<p:outputLabel value="Coordenada Y" for="txtY"/>
+		<p:inputText id="txtY" required="true" value="#{quimicaSueloController.medioFisicoBean.quimicaSuelo.coordenadaGeneral.y}"
+					 onkeypress="return NumCheckDouble(event,this);" requiredMessage="El campo coordenada y es requerido.">
+		</p:inputText>
+		<p:outputLabel value="Resultado #{quimicaSueloController.medioFisicoBean.quimicaSuelo.unidad}" for="txtResultado"/>
+		<p:inputText id="txtResultado" value="#{quimicaSueloController.medioFisicoBean.quimicaSuelo.resultado}" required="true"
+					 onkeypress="return NumCheckDouble(event,this);" requiredMessage="El campo resultado es requerido."/>
+	</h:panelGrid>
+	</p:panel>
+	<p:separator />
+	<div class="buttons">
+		<p:commandButton action="#{quimicaSueloController.agregarAListaQuimica()}"  value="Agregar" update=":#{p:component('msgs')}, :#{p:component('tblQuimica')}"  
+				oncomplete="handlQuimicaRequest(xhr, status, args)" />
+	</div>
+	</h:form>
+</p:dialog>
+<script type="text/javascript">
+        function handlQuimicaRequest(xhr, status, args) {
+            if (args.validationFailed || !args.quimicaIn) {
+                PF('dlgQuimica').jq.effect("shake", {times: 5}, 100);
+            }
+            else {
+                PF('dlgQuimica').hide();
+                $('#loginLink').fadeOut();
+            }
+        }
+    </script>
+
+    </div>
+    </ui:define>
+    </ui:composition>

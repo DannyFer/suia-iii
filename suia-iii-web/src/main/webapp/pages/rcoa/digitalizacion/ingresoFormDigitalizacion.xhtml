@@ -1,0 +1,187 @@
+<ui:composition template="/WEB-INF/templates/default.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+
+	<ui:define name="content">
+		<script type="text/javascript">
+			$(document).ready(function() {
+				$('.wizard-custom-btn-back').hide();
+				$('.wizard-custom-btn-only-end').hide();
+			});
+		</script>
+		<link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/plugin/wizard.css" />
+		
+		<h:form id="form" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{ingresoDigitalizacionProyectosController.habilitarEditar and ingresoDigitalizacionProyectosController.autorizacionAdministrativa.finalizado}">
+				<f:facet name="header">
+					<h:outputText value="Datos del técnico responsable de la actualización." />
+				</f:facet>
+				<h:panelGrid id="pnltecnico" layout="grid" styleClass="panel_data w100" columnClasses="header w25,null w25, header w25,null w25" columns="4">
+					<h:outputText value="Técnico:" />
+					<h:outputText value="#{ingresoDigitalizacionProyectosController.usuarioTecnico.persona.nombre}"/>
+					<h:outputText value="Fecha actualización:" />
+					<h:outputText value="#{ingresoDigitalizacionProyectosController.fechaActual}">
+					 	<f:convertDateTime pattern="yyyy-MM-dd HH:mm" />
+					</h:outputText>
+				</h:panelGrid>
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"  rendered="#{ingresoDigitalizacionProyectosController.autorizacionPrincipal eq null ? false : true}">
+				<f:facet name="header">
+					<p:outputLabel value="Proyecto Principal" />
+				</f:facet>
+				<h:panelGrid id="pnlAutorizacionPrincipal" layout="grid" styleClass="panel_data w100" columnClasses="header w25,null w25, header w25,null w25" columns="4">
+					<h:outputText value="N° Resolución Administrativa Ambiental Principal*" />					
+					<h:outputText value="#{ingresoDigitalizacionProyectosController.autorizacionPrincipal.resolucion}"/>
+					<h:outputText value="N° Fecha emisión de la Autorización Administrativa Ambiental (AAA): *" />
+					<h:outputText value="#{ingresoDigitalizacionProyectosController.autorizacionPrincipal.fechaResolucion}"/>
+					<h:outputText value="Cédula / RUC operador: *" />
+					<h:outputText value="#{ingresoDigitalizacionProyectosController.autorizacionPrincipal.identificacionUsuario}"/>
+					<h:outputText value="Nombre del operador: *" />
+					<h:outputText value="#{ingresoDigitalizacionProyectosController.autorizacionPrincipal.nombreUsuario}" />
+				</h:panelGrid>
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100 allCenter">
+				<f:facet name="header">
+					<h:outputText value="Digitalizar Autorizaciones Administrativas Ambientales (AAA)" />
+				</f:facet>
+				<p:wizard widgetVar="wizard" flowListener="#{ingresoDigitalizacionProyectosController.onFlowProcess}" showNavBar="false"
+						nextLabel="Siguiente" backLabel="Atrás" id="wizardDigitalizacion">
+					<p:tab id="paso1" titletip="Datos AAA" title="Datos AAA">
+						<ui:include src="/pages/rcoa/digitalizacion/formulario/formDatosDigitalizacion.xhtml" />	
+					</p:tab>		
+					<p:tab id="paso2" titletip="Ubicación geográfica" title="Ubicación geográfica">
+						<ui:include src="/pages/rcoa/digitalizacion/formulario/formDatosUbicacionDigitalizacion.xhtml" />
+					</p:tab>
+					<p:tab id="paso3" titletip="Documentos del proyecto" title="Documentos del proyecto">
+						<ui:include src="/pages/rcoa/digitalizacion/formulario/formDatosDocumentosDigitalizacion.xhtml" />
+					</p:tab>
+				</p:wizard>
+			</p:panelGrid>
+		
+			<p:panel id="pnlButtons" styleClass="buttons main">
+				<p:commandButton  value="Regresar" actionListener="#{ingresoDigitalizacionProyectosController.redireccionarBandeja()}" process="@this" />
+				<p:commandButton id="btnAtras" value="Atrás" icon="ui-icon-arrowthick-1-w" oncomplete="PF('wizard').back();reloadWizard();" styleClass="wizard-custom-btn-back" process="@this" update="@form wizardDigitalizacion pnlButtons btnFinalizar" />
+				<p:commandButton value="Guardar" process="@this" actionListener="#{ingresoDigitalizacionProyectosController.guardar()}" update="btnFinalizar txtCodigoProyecto"/>
+				<p:commandButton value="Finalizar" id="btnFinalizar" process="@this" rendered="#{ingresoDigitalizacionProyectosController.btnFinalizar and !ingresoDigitalizacionProyectosController.autorizacionAdministrativa.finalizado}"
+					actionListener="#{ingresoDigitalizacionProyectosController.finalizarTarea()}">
+					<p:confirm header="Confirmación" message="Desea guardar la información?" icon="ui-icon-alert" />
+				</p:commandButton>
+				<p:commandButton value="Finalizar " id="btnFinalizarActualizacion" immediate="true" process="@this" rendered="#{ingresoDigitalizacionProyectosController.btnFinalizar and ingresoDigitalizacionProyectosController.habilitarEditar and ingresoDigitalizacionProyectosController.autorizacionAdministrativa.finalizado}"
+					actionListener="#{ingresoDigitalizacionProyectosController.finalizarActualizacion()}">
+					<p:confirm header="Confirmación" message="Desea finalizar la actualización de la información?" icon="ui-icon-alert" />
+				</p:commandButton>
+				<p:commandButton id="btnSiguiente" value="Siguiente" process="@this" icon="ui-icon-arrowthick-1-e" oncomplete="PF('wizard').next();reloadWizard();" styleClass="wizard-custom-btn-next" />
+			</p:panel>
+			<h:outputScript name="/plugin/wizard.js" library="js" />
+	
+		<p:dialog header="Consulta" widgetVar="idDialogConsulta" modal="true" resizable="false" width="600px">
+			<h:outputText value="¿Realizó actualización del Certificado de Intersección?" />
+			<div class="buttons">
+				<p:commandButton value="NO" process="@this" oncomplete="if(wizard.) PF('idDialogConsulta').hide()" 
+						actionListener="#{ingresoDigitalizacionProyectosController.tieneActualizacion(false)}" update="pnlDocumentosList pnlDocumentosActualizacionList"/>
+				<p:commandButton value="SI" process="@this" oncomplete="if(wizard.) PF('idDialogConsulta').hide()" 
+						actionListener="#{ingresoDigitalizacionProyectosController.tieneActualizacion(true)}" update="pnlDocumentosList pnlDocumentosActualizacionList"/>
+			</div>
+		</p:dialog>
+		
+		<p:dialog modal="true" id="fileDialog" widgetVar="fileDialog" header="#{ingresoDigitalizacionProyectosController.tipoDocumentoSelected}" width="700px" closable="false">
+			<p:fileUpload id="fileCINA" update="pnlDocumentos"
+				oncomplete="PF('fileDialog').hide()"
+				fileUploadListener="#{ingresoDigitalizacionProyectosController.documentoCreacionListener}"
+				mode="advanced" auto="true" sizeLimit="20971520" fileLimit="1"
+				label="Seleccionar archivo a adjuntar"
+				invalidFileMessage="El tipo de archivo no es pdf."
+				invalidSizeMessage="Tamaño de archivo incorrecto"
+				allowTypes="/(\.|\/)(pdf|rar|zip)$/">
+				<c:if test="#{ingresoDigitalizacionProyectosController.tipoDocumentoSelected == labels['label.proceso.digitalizacion.documento.certificado.interseccion']}">
+					<f:attribute name="documentId" value="#{ingresoDigitalizacionProyectosController.certificadoInterseccion}" />
+				</c:if>
+				<c:if test="#{ingresoDigitalizacionProyectosController.tipoDocumentoSelected == labels['label.proceso.digitalizacion.documento.mapa.certificado']}">
+					<f:attribute name="documentId" value="#{ingresoDigitalizacionProyectosController.documentoMapa}" />
+				</c:if>
+				<c:if test="#{ingresoDigitalizacionProyectosController.tipoDocumentoSelected == labels['label.proceso.digitalizacion.documento.certificado.ambiental']}">
+					<f:attribute name="documentId" value="#{ingresoDigitalizacionProyectosController.documentoFichaAmbiental}" />
+				</c:if>
+				<c:if test="#{ingresoDigitalizacionProyectosController.tipoDocumentoSelected == labels['label.proceso.digitalizacion.documento.registro.ambiental']}">
+					<f:attribute name="documentId" value="#{ingresoDigitalizacionProyectosController.documentoResolucion}" />
+				</c:if>
+			</p:fileUpload>
+			<t:div styleClass="buttons">
+				<p:commandButton icon="ui-icon-cancel" value="Cerrar" process="@this" oncomplete="PF('fileDialog').hide()" styleClass="secondary" />
+			</t:div>
+		</p:dialog>
+			
+		<p:dialog modal="true" id="fileDialogList" widgetVar="fileDialogList" header="#{ingresoDigitalizacionProyectosController.tipoDocumentoSelected}" width="700px" closable="false">
+			<p:fileUpload id="fileList" update="idDocumentosIngreso"
+				fileUploadListener="#{ingresoDigitalizacionProyectosController.documentoCreacionListListener}"
+				mode="advanced" auto="true" sizeLimit="20971520" fileLimit="20"
+				label="Seleccionar archivo a adjuntar"
+				invalidFileMessage="El tipo de archivo no es pdf."
+				invalidSizeMessage="Tamaño de archivo incorrecto"
+				allowTypes="/(\.|\/)(pdf|rar|zip)$/">
+			</p:fileUpload>
+			<p:dataTable id="idDocumentosIngreso" var="item" emptyMessage="#{labels['common.table.empty']}" paginatorPosition="bottom" 
+					value="#{ingresoDigitalizacionProyectosController.listaDocumentosIngreso}" paginator="true" rows="10" scrollable="true" scrollHeight="300"
+					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" style="width:660px;">				    
+		    	<p:column style="width:25px;" headerText="Documento">
+					<h:outputText value="#{item.nombre}" />
+				</p:column>
+				<p:column style="width:50px;" headerText="Acción">
+					<p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" immediate="true" 
+							ajax="false" process="idDocumentosIngreso" title="Descargar" disabled="#{item.contenidoDocumento==null}">
+						<p:fileDownload value="#{ingresoDigitalizacionProyectosController.getDocumentoDownload(item)}" />
+					</p:commandButton>
+					<p:commandButton styleClass="primary" icon="ui-icon-trash"
+							actionListener="#{ingresoDigitalizacionProyectosController.eliminarDocumentoListaGeneral(ingresoDigitalizacionProyectosController.tipoDocumentoSelected, item)}"
+							process="idDocumentosIngreso" update="idDocumentosIngreso">
+						<p:confirm header="Confirmación" message="¿Está seguro de eliminar el documento?" icon="ui-icon-alert" />
+					</p:commandButton>
+				</p:column>						
+			</p:dataTable>
+			<t:div styleClass="buttons">
+				<p:commandButton icon="ui-icon-cancel" value="Cerrar" process="@this" oncomplete="PF('fileDialogList').hide()" styleClass="secondary" update="pnlDocumentosList pnlDocumentosActualizacionList"/>
+				<p:commandButton icon="ui-icon-aceptar" value="Aceptar" process="@this" oncomplete="PF('fileDialogList').hide()" styleClass="secondary"
+						actionListener="#{ingresoDigitalizacionProyectosController.cargarlistaDocumento(ingresoDigitalizacionProyectosController.tipoDocumentoSelected)}"
+						update="pnlDocumentosList pnlDocumentosActualizacionList"/>
+			</t:div>
+		</p:dialog>
+
+		<p:dialog modal="true" id="siguienteDlgDigitalizacion" widgetVar="siguienteDlgDigitalizacion" width="350px" closable="false">
+			<div class="alCenter">
+				<h:outputText value="¿Está seguro de proceder con la digitalización y asociación  del(os) presente(s) proyecto(s) a su proyecto principal?" />
+			<br />
+			<br />
+			</div>
+			<div class="buttons main">
+				<p:commandButton id="btnCancelarD" value="Cancelar" actionListener="#{ingresoDigitalizacionProyectosController.cancelarSiguiente()}"
+					process="@this" styleClass="primary" />
+					<p:commandButton value="Aceptar" process="@this" update="@this" oncomplete="PF('siguienteDlgDigitalizacion').hide()"
+					actionListener="#{ingresoDigitalizacionProyectosController.continuar()}" styleClass="primary"/>
+			</div>
+		</p:dialog>
+			<p:dialog modal="true" id="mdlFinalizacion" widgetVar="mdlFinalizacion" width="350px" closable="false">
+				<div class="alCenter">
+					<h:outputLabel value="“Estimado usuario, usted ha completado el proceso de digitalización y asociación" />
+					<br/><br/>
+					<h:outputText value="¿Desea realizar la digitalización de más Autorizaciones Administrativas Ambientales?" />
+				<br />
+				<br />
+				</div>
+				<div class="buttons main">
+					<p:commandButton value="No" actionListener="#{ingresoDigitalizacionProyectosController.redireccionarBandeja()}"
+						oncomplete="PF('mdlFinalizacion').hide()" process="@this" styleClass="primary" />
+						<p:commandButton value="Si" process="@this" update="@this" oncomplete="PF('mdlFinalizacion').hide()"
+						actionListener="#{ingresoDigitalizacionProyectosController.redireccionarProyectos()}" styleClass="primary"/>
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

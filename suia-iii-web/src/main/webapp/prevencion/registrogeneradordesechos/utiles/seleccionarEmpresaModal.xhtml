@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<p:dialog header="Seleccionar empresa prestadora de servicio" id="#{empresaPrestadoraServiciosAliasBean.dialogseleccionarEmpresa}" widgetVar="#{empresaPrestadoraServiciosAliasBean.dialogseleccionarEmpresa}" modal="true" resizable="false" width="800">
+	<h:panelGrid styleClass="w100 separatorBottom" columns="2" columnClasses="w50, field_mrg" rendered="false">
+		<p:outputLabel for="#{empresaPrestadoraServiciosAliasBean.filtroEmpresa}" value="Filtro" styleClass="bold" />
+		<h:outputText />
+		<h:panelGroup>
+			<p:inputText id="#{empresaPrestadoraServiciosAliasBean.filtroEmpresa}" value="#{empresaPrestadoraServiciosAliasBean.filter}" styleClass="w100" />
+			<p:tooltip for="#{empresaPrestadoraServiciosAliasBean.filtroEmpresa}" styleClass="maxw400px" escape="false" showDelay="1200" trackMouse="true" value="#{helps['generadorDesecho.puntoGeneracion.filtro']}" />
+		</h:panelGroup>
+		<h:panelGroup>
+			<div class="buttons-inline">
+				<p:commandButton icon="ui-icon-check" styleClass="primary" process="@this #{empresaPrestadoraServiciosAliasBean.filtroEmpresa}" actionListener="#{empresaPrestadoraServiciosAliasBean.init()}" update="#{empresaPrestadoraServiciosAliasBean.dialogseleccionarEmpresa}" oncomplete="PF('#{empresaPrestadoraServiciosAliasBean.dialogseleccionarEmpresa}').show()" />
+				<p:commandButton icon="ui-icon-refresh" styleClass="secondary" process="@this" actionListener="#{empresaPrestadoraServiciosAliasBean.reset()}" update="#{empresaPrestadoraServiciosAliasBean.dialogseleccionarEmpresa}" oncomplete="PF('#{empresaPrestadoraServiciosAliasBean.dialogseleccionarEmpresa}').show()" />
+			</div>
+		</h:panelGroup>
+	</h:panelGrid>
+
+	<h:panelGroup rendered="#{empty empresaPrestadoraServiciosAliasBean.sedePrestadorServiciosDesechos}">
+		<p:outputLabel value="Estimado Usuario: De acuerdo con la base de datos del Ministerio del Ambiente y Agua, al momento no existe un gestor que dé el tipo de eliminación o disposición final escogido para el desecho peligroso o especial seleccionado, por lo tanto usted debe proseguir el trámite considerando las siguientes opciones:" styleClass="bold text-red alJustify" escape="false" />
+		<br />
+		<p:outputLabel value="1. Favor seleccione otro tipo de eliminación o disposición final y seleccione otro prestador de servicio y continúe con el trámite. Recuerde que el gestor o prestador servicio seleccionado y con cuya información se otorgue el Registro de Generador, no implica que en lo posterior, el generador pueda realizar indistintamente la gestión con otros prestadores autorizados para el mismo tipo de desecho, lo cuál será verificado a través de los manifiestos únicos en la presentación de la Declaración de Gestión correspondiente, y por lo tanto no amerita una actualización del Registro en este aspecto; ó" styleClass="bold text-red alJustify" />
+		<br />
+		<p:outputLabel value="2. Si usted conoce que el gestor posee un permiso ambiental, por favor cierre el cuadro “Seleccionar permiso ambiental”, guarde la información ingresada hasta el momento, e indique del particular al gestor con el fin de que éste notifique a Mesa de Ayuda del SUIA para que incorpore su permiso ambiental a la base de datos. Hasta entonces por favor, notifique de este particular a la respectiva dependencia del Ministerio del Ambiente y Agua donde debe realizar el trámite, y espere a las instrucciones  correspondientes." styleClass="bold text-red alJustify" escape="false" />
+		<br/>
+		<div class="buttons">
+			<p:commandButton value="Otra Empresa" update=":form:#{empresaPrestadoraServiciosAliasBean.tbl_empresas}" oncomplete="PF('#{empresaPrestadoraServiciosAliasBean.dialogseleccionarEmpresa}').hide()" actionListener="#{empresaPrestadoraServiciosAliasBean.activarOtraEmpresaEliminacion()}" immediate="true" rendered="#{empresaPrestadoraServiciosAliasBean.esResponsabilidadExtendida}"/>
+			<p:commandButton value="Cerrar" process="@this #{empresaPrestadoraServiciosAliasBean.tableEmpresas}" update=":form:#{empresaPrestadoraServiciosAliasBean.tbl_empresas}" oncomplete="PF('#{empresaPrestadoraServiciosAliasBean.dialogseleccionarEmpresa}').hide()" />
+		</div>
+	</h:panelGroup>
+
+
+	<p:dataTable styleClass="#{empty empresaPrestadoraServiciosAliasBean.sedePrestadorServiciosDesechos ? 'noShow' :''}" value="#{empresaPrestadoraServiciosAliasBean.sedePrestadorServiciosDesechos}" id="#{empresaPrestadoraServiciosAliasBean.tableEmpresas}" var="empresa" emptyMessage="#{labels['common.table.empty']}" sortBy="#{empresa.prestadorServiciosDesechos.nombre}" sortOrder="ASCENDING" rows="5" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom">
+		<p:column styleClass="w20px alCenter" rendered="#{empresaPrestadoraServiciosAliasBean.seleccionMultiple}">
+			<p:selectBooleanCheckbox value="#{empresa.seleccionado}">
+			</p:selectBooleanCheckbox>
+		</p:column>
+		<p:column headerText="Nombre" sortBy="#{empresa.prestadorServiciosDesechos}">
+			<h:outputText value="#{empresa.prestadorServiciosDesechos}" />
+		</p:column>
+		<p:column headerText="Ruc" sortBy="#{empresa.prestadorServiciosDesechos.ruc}">
+			<h:outputText value="#{empresa.prestadorServiciosDesechos.ruc}" />
+		</p:column>
+		<p:column headerText="Provincia" sortBy="#{empresa.ubicacionesGeografica.ubicacionesGeografica}">
+			<h:outputText value="#{not empty empresa.ubicacionesGeografica.ubicacionesGeografica ? empresa.ubicacionesGeografica.ubicacionesGeografica : 'Nivel nacional'}" />
+		</p:column>
+		<p:column headerText="Permiso ambiental" sortBy="#{empresa.codigoPermisoAmbiental}">
+			<h:outputText value="#{empresa.codigoPermisoAmbiental}" />
+		</p:column>
+		<p:column headerText="Representante legal" sortBy="#{empresa.representanteLegal}">
+			<h:outputText value="#{empresa.representanteLegal}" />
+		</p:column>
+		<p:column styleClass="alCenter w20px" rendered="#{!empresaPrestadoraServiciosAliasBean.seleccionMultiple}">
+			<p:commandButton styleClass="primary button-small" icon="ui-icon-check" process="@this #{empresaPrestadoraServiciosAliasBean.tableEmpresas}" update=":form:#{empresaPrestadoraServiciosAliasBean.tbl_empresas}" actionListener="#{empresaPrestadoraServiciosAliasBean.seleccionarSede(empresa)}" oncomplete="PF('#{empresaPrestadoraServiciosAliasBean.dialogseleccionarEmpresa}').hide()" />
+		</p:column>
+	</p:dataTable>
+	<p:separator />
+	
+	<div class="buttons">
+		<p:commandButton value="Otra Empresa" process="@this #{empresaPrestadoraServiciosAliasBean1.tableEmpresas}"  update=":form:#{empresaPrestadoraServiciosAliasBean1.tbl_empresas}, :form:#{empresaPrestadoraServiciosAliasBean.tbl_empresas}" oncomplete="PF('#{empresaPrestadoraServiciosAliasBean.dialogseleccionarEmpresa}').hide()" actionListener="#{empresaPrestadoraServiciosAliasBean.activarOtraEmpresaEliminacion()}" rendered="#{empresaPrestadoraServiciosAliasBean.esResponsabilidadExtendida and empresaPrestadoraServiciosAliasBean.tableEmpresas eq 'tableEmpresas' and !empty empresaPrestadoraServiciosAliasBean.sedePrestadorServiciosDesechos}" />
+		<p:commandButton value="Otra Empresa" process="@this #{empresaPrestadoraServiciosAliasBean1.tableEmpresas}"  update=":form:#{empresaPrestadoraServiciosAliasBean1.tbl_empresas}, :form:#{empresaPrestadoraServiciosAliasBean.tbl_empresas}" oncomplete="PF('#{empresaPrestadoraServiciosAliasBean.dialogseleccionarEmpresa}').hide()" actionListener="#{empresaPrestadoraServiciosBean1.activarOtraEmpresaEliminacion()}" rendered="#{empresaPrestadoraServiciosAliasBean.esResponsabilidadExtendida and empresaPrestadoraServiciosAliasBean.tableEmpresas eq 'tableEmpresas1' and !empty empresaPrestadoraServiciosAliasBean.sedePrestadorServiciosDesechos}" />
+		<p:commandButton value="Cerrar" process="@this #{empresaPrestadoraServiciosAliasBean.tableEmpresas}" update=":form:#{empresaPrestadoraServiciosAliasBean.tbl_empresas}" oncomplete="PF('#{empresaPrestadoraServiciosAliasBean.dialogseleccionarEmpresa}').hide()" rendered="#{ not empty empresaPrestadoraServiciosAliasBean.sedePrestadorServiciosDesechos}" />
+	</div> 
+</p:dialog>
+
+</html>

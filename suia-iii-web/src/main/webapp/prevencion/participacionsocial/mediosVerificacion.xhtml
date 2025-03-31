@@ -1,0 +1,239 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+        >
+<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}" target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+    </ui:define>
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{mediosVerificacionController.validarTareaBpm()}"/>
+        <h:form id="form">
+            <p:panel>
+                <f:facet name="header">
+                    <p:outputLabel
+                            value="Medios de Verificación de la Convocatoria"/>
+
+                </f:facet>
+                <p:outputLabel for="requiere-modificaciones"
+                               value="¿La información de los Medios de Verificación está completa?"
+                               rendered="#{mediosVerificacionBean.revisar}"/>
+                <p:selectOneRadio id="requiere-modificaciones"
+                                  value="#{mediosVerificacionBean.informacionCompleta}"
+                                  required="#{mediosVerificacionBean.revisar}"
+                                  rendered="#{mediosVerificacionBean.revisar}">
+                    <f:selectItem itemLabel="Si" itemValue="true"/>
+                    <f:selectItem itemLabel="No" itemValue="false"/>
+                </p:selectOneRadio>
+
+                <p:panelGrid columns="1" styleClass="w100">
+                    <p:outputLabel value="#{bandejaTareasBean.tarea.taskName}" for="ingresarDatos"/>
+                    <h:inputHidden id="ingresarDatos"
+                                   required="#{mediosVerificacionController.mediosVerificacionBean.registrosMediosParticipacionSocial.size()==0
+                                    and !mediosVerificacionController.mediosVerificacionBean.revisar}"/>
+
+
+                    <p:dataTable id="tableVerificar" widgetVar="tableVerificar"
+                                 rows="20" paginator="true" paginatorAlwaysVisible="true"
+                                 paginatorPosition="bottom"
+                                 currentPageReportTemplate="{currentPage} de {totalPages}"
+                                 rowsPerPageTemplate="5,10,15"
+                                 emptyMessage="#{labels['common.table.empty']}"
+                                 value="#{mediosVerificacionController.mediosVerificacionBean.registrosMediosParticipacionSocial}"
+                                 var="record">
+
+                        <f:facet name="header">
+                            <div class="buttons important alRight ">
+                                <p:commandButton title="Adicionar" value="Adicionar" immediate="true"
+                                                 rendered="#{!mediosVerificacionController.mediosVerificacionBean.revisar}"
+                                                 styleClass="primary"
+                                                 actionListener="#{mediosVerificacionController.limpiarMedioVerificacion()}"
+                                                 oncomplete="PF('medios_verificacion').show();"
+                                                 update=":form_medios_verificacion:medios_verificacion"/></div>
+                        </f:facet>
+                        <p:column headerText="Tipo de Medio"
+                                  filterMatchMode="contains" styleClass="alCenter w15"
+                                  sortBy="#{record.catalogoMedio.nombreMedio}">
+                            <p:outputLabel value="#{record.catalogoMedio.nombreMedio}"/>
+                        </p:column>
+                        <p:column headerText="Descripcion"
+                                  filterMatchMode="contains" styleClass="alCenter w15"
+                                  sortBy="#{record.descripcion}">
+                            <p:outputLabel value="#{record.descripcion}"/>
+                        </p:column>
+                        <p:column headerText="Respaldo"
+                                  filterMatchMode="contains" styleClass="alCenter w15"
+                                  sortBy="#{record.nombreDocumentoResplado}">
+                            <p:outputLabel value="#{record.nombreDocumentoResplado}"/>
+                        </p:column>
+                        <p:column headerText="Acciones"
+                                  rendered="#{!mediosVerificacionController.mediosVerificacionBean.revisar}"
+                                  styleClass="alCenter w10">
+                            <p:commandButton
+                                    actionListener="#{mediosVerificacionController.editarMedioVerificacion(record)}"
+                                    process="@this" update=":form_medios_verificacion:medios_verificacion"
+                                    icon="ui-icon-pencil" styleClass="button-small primary"
+                                    oncomplete="PF('medios_verificacion').show()"/>
+                            <p:commandButton
+                                    actionListener="#{mediosVerificacionController.eliminarMedioVerificacion(record)}"
+                                    process="@this" update=":form:tableVerificar"
+                                    icon="ui-icon-trash" styleClass="button-small primary">
+                                <p:confirm header="Confirmación" message="¿Está seguro de eliminar?"
+                                           icon="ui-icon-alert"/>
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+
+
+                </p:panelGrid>
+                <h:panelGrid layout="grid" styleClass="w100">
+                    <p:outputLabel value="Medios de Verificación:" for="adjuntarDocumento"/>
+                    <h:inputHidden id="adjuntarDocumento"
+                                   required="#{empty mediosVerificacionController.mediosVerificacionBean.documentos.get('respaldoMediosVerificacionPPS')
+                                    and !mediosVerificacionController.mediosVerificacionBean.revisar}"/>
+
+                    <h:panelGroup>
+                        <h:panelGrid columns="2" columnClasses="null, field_mrg" id="wwww">
+                            <p:outputLabel
+                                    value="#{empty mediosVerificacionController.mediosVerificacionBean.documentos.get('respaldoMediosVerificacionPPS') ? 'Documento(.rar|.zip|.pdf)' :
+                                mediosVerificacionController.mediosVerificacionBean.documentos.get('respaldoMediosVerificacionPPS').nombre}"/>
+                            <p:commandButton id="downloadInformeSistematizacionPPS" icon="ui-icon-arrowthick-1-s"
+                                             ajax="false" styleClass="button-small primary" title="Ver"
+                                             immediate="true"
+                                             rendered="#{not empty mediosVerificacionController.mediosVerificacionBean.documentos.get('respaldoMediosVerificacionPPS')}">
+                                <p:fileDownload
+                                        value="#{mediosVerificacionController.getStreamContent('respaldoMediosVerificacionPPS')}"/>
+                            </p:commandButton>
+                        </h:panelGrid>
+                        <p:fileUpload
+                                fileUploadListener="#{mediosVerificacionController.uploadListenerDocumentos}"
+                                multiple="false" sizeLimit="2097152" allowTypes="/(\.|\/)(zip|rar|pdf)$/i"
+                                label="Seleccionar" uploadLabel="Subir"
+                                invalidFileMessage="Tipo de archivo no válido"
+                                invalidSizeMessage="Tamaño de archivo no válido"
+                                cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                auto="true" update="wwww"
+                                rendered="#{!mediosVerificacionController.mediosVerificacionBean.revisar}"
+                                >
+                            <f:attribute name="clave" value="respaldoMediosVerificacionPPS"/>
+                        </p:fileUpload>
+
+                    </h:panelGroup>
+                </h:panelGrid>
+
+                <p:fragment>
+                    <h:panelGroup id="pnl2">
+
+                        <observaciones:tablaObservaciones aparace="true"
+                                                          soloLectura="#{!mediosVerificacionController.mediosVerificacionBean.revisar}"
+                                                          mostrarSiVacio="#{mediosVerificacionController.mediosVerificacionBean.revisar}"
+                                                          idClase="#{mediosVerificacionController.mediosVerificacionBean.proyectosBean.proyecto.id}"
+                                                          nombreClase="ParticipacionSocial"
+                                                          seccion="mediosVerificacion"
+                                                          rol="admin"
+                                                          componenteActualizarEliminar="pnl2"/>
+                    </h:panelGroup>
+                </p:fragment>
+
+                <div class="buttons main">
+                    <p:commandButton value="Guardar"
+                                     action="#{mediosVerificacionController.guardar()}"
+                                     styleClass="ui-confirmdialog-yes secondary" icon="ui-icon-disk"/>
+                    <p:commandButton value="Enviar" action="#{mediosVerificacionController.finalizar}" update=":form"
+                                     icon="ui-icon-check"
+                                     styleClass="primary"> <p:confirm
+                            message="#{msg['message.confirmacion.envio.tarea']}"
+                            header="#{msg['header.confirmacion.envio.tarea']}"/>
+                    </p:commandButton>
+                </div>
+
+
+            </p:panel>
+
+
+        </h:form>
+        <h:form id="form_medios_verificacion">
+            <p:dialog header="Medios de Verificación" id="medios_verificacion"
+                      widgetVar="medios_verificacion" modal="true" resizable="false" width="600">
+                <p:panelGrid columns="2" styleClass="w100">
+                    <h:outputLabel value="Tipo de Medio *"/>
+
+                    <p:selectOneMenu converter="selectItemConverter"
+                                     value="#{mediosVerificacionBean.catalogoMedio}"
+                                     id="cmb_tipo_medios" required="true"
+                                     requiredMessage="El tipo de Medio es requerido">
+                        <f:selectItem itemLabel="Seleccione" noSelectionOption="false"/>
+                        <f:selectItems
+                                value="#{mediosVerificacionController.mediosVerificacionBean.catalogoMediosParticipacionSociales}"
+                                />
+                        <f:converter converterId="selectItemConverter"/>
+
+                    </p:selectOneMenu>
+
+
+                    <h:outputLabel value="Descripción *"/>
+                    <p:inputTextarea maxlength="255"
+                                     value="#{mediosVerificacionController.mediosVerificacionBean.registroMediosParticipacionSocial.descripcion}"
+                                     styleClass="w100" required="true" requiredMessage="Descripción es requerido"  style="height: 100px;overflow: auto"/>
+                    <h:outputLabel value="Respaldo *"/>
+                    <h:inputText maxlength="255"
+                            value="#{mediosVerificacionController.mediosVerificacionBean.registroMediosParticipacionSocial.nombreDocumentoResplado}"
+                            required="true" requiredMessage="Respaldo es requerido"
+                            styleClass="w100"/>
+
+                </p:panelGrid>
+
+
+                <div class="buttons">
+                    <p:commandButton value="Aceptar"
+                                     actionListener="#{mediosVerificacionController.guardarMedioVerificacion()}"
+                                     update=":form:tableVerificar,:form_medios_verificacion"
+                                     oncomplete="PF('medios_verificacion').hide();">
+                    </p:commandButton>
+                    <p:commandButton type="button" value="Cancelar"
+                                     onclick="PF('medios_verificacion').hide()" update="@all"
+                                     listener="#{mediosVerificacionController.limpiarMedioVerificacion()}"/>
+                </div>
+            </p:dialog>
+            
+            <p:dialog header="Estimado Proponente" widgetVar="dlgPPS" visible="#{mediosVerificacionBean.verDiag and loginBean.isUserInRole('sujeto de control')}" modal="true" resizable="false" width="500" closable="false">
+				<h:panelGroup rendered="true">
+					<h:outputText styleClass="alJustify"
+						value="Estimado proponente, Usted no puede ingresar información en la Evaluación Social del Sistema Único de Información Ambiental, sin 
+						contar con el oficio de aprobación de los Términos de Referencia para su Estudio de Impacto Ambiental, en cumplimiento del Art.21 de 
+						Reglamento Ambiental de Actividades Mineras. En tal razón, Usted debe elaborar los Términos de Referencia función de su proyecto en 
+						particular, los mismos, que deben ser presentados ante la Autoridad Ambiental Competente en forma física a través de un oficio, para ser 
+						sometidos a evaluación y aprobación ya sea del Ministerio del Ambiente y Agua o de la Autoridad Ambiental de Aplicación Responsable" />						
+					<div class="buttons">
+						<p:commandButton value="Aceptar" immediate="true" process="@this"
+                                    action="#{mediosVerificacionBean.cancelarActividadesMineria()}"/>
+					</div>
+				</h:panelGroup>
+			</p:dialog> 
+            
+        </h:form>
+
+        <script type="text/javascript">
+            function showModalEliminarProyecto(xhr, status, args) {
+                PF('comentarios').show();
+                if (args.eliminarProyecto) {
+                    PF('comentarios').hide();
+                }
+            }
+
+
+        </script>
+
+    </ui:define>
+</ui:composition>
+</html>

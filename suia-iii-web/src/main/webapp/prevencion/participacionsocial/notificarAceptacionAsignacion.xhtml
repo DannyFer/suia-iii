@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+        >
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml"
+        >
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}"
+                      target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small"
+                             icon="ui-icon-search"/>
+        </h:outputLink>
+
+        <h:outputText value="Número de facilitadores"/>
+        <p:outputLabel>#{notificarAceptacionAsignacionPagoParticipacionSocialBean.numeroFacilitadores}</p:outputLabel>
+
+        <p:commandButton styleClass="primary button-small"
+                         icon="ui-icon-search" oncomplete="PF('dlg2').show();"
+                         update="modal"  />
+
+        <p:dialog header="Facilitadores" widgetVar="dlg2" modal="true" id="modal" styleClass="alLeft"
+                  height="400" width="400"  >
+            <h:outputText escape="false" value="#{notificarAceptacionAsignacionPagoParticipacionSocialBean.facilitadores}"/>
+        </p:dialog>
+        
+        
+
+    </ui:define>
+    <ui:define name="content">
+	<!--Cris F: boton descargar factura -->
+    <h:form>
+     <h:panelGrid columns="2">
+         <p:outputLabel value="Factura pago de Facilitadores  "></p:outputLabel>        
+        	<p:commandButton value="Descargar" ajax="false" process="@this" update="@this"
+                                         icon="ui-icon-arrowthick-1-s" id="factura"
+                                         styleClass="oculto primary">
+                 <p:fileDownload value="#{notificarAceptacionAsignacionPagoParticipacionSocialBean.streamFactura}"/>
+            </p:commandButton>
+         </h:panelGrid>    
+    </h:form>
+        <h:form id="form">
+         
+            	
+        
+            <h3>#{msg['label.participacionsocial.notificarAceptacionAsignacion']}</h3>
+            <p:outputLabel for="correcto"
+                           value="#{notificarAceptacionAsignacionPagoParticipacionSocialBean.mensajeUsuario}"/>
+            <p:selectOneRadio id="correcto"
+                              value="#{notificarAceptacionAsignacionPagoParticipacionSocialBean.correcto}"
+                              required="true">
+                <f:selectItem itemLabel="Aceptar" itemValue="true"/>
+                <f:selectItem itemLabel="Rechazar" itemValue="false"/>
+                <p:ajax update=":form"/>
+            </p:selectOneRadio>
+
+
+            <p:dialog id="aceptarDialog" widgetVar="aceptarDialog"
+                      header="Documentos necesarios para el proceso de Participación Social" modal="true"
+                      closable="true" width="500px"
+                      resizable="false">
+                <p:panel>
+                    <h:panelGrid columns="1" styleClass="w100"
+                            >
+                        <p:outputLabel styleClass="bold text-red alJustify"
+
+                                       value="#{notificarAceptacionAsignacionPagoParticipacionSocialBean.mensajeAprobacion}"/>
+
+                        <p:outputLabel styleClass="bold"
+                                       value="Formatos para el proceso de Participación Social: *"/>
+                        <p:commandButton value="Descargar" ajax="false" onclick="PF('aceptarDialog').hide();"
+                                         icon="ui-icon-arrowthick-1-s" id="certificado"
+                                         styleClass="oculto primary">
+                            <p:fileDownload value="#{notificarAceptacionAsignacionPagoParticipacionSocialBean.stream}"/>
+                        </p:commandButton>
+
+
+                    </h:panelGrid>
+                </p:panel>
+            </p:dialog>
+
+
+            <p:dialog id="rechazarDialog" widgetVar="rechazarDialog" width="500px"
+                      header="Información" modal="true"
+                      closable="true"
+                      resizable="false">
+                <p:panel>
+                    <h:panelGrid columns="1" styleClass="w100">
+                        <p:outputLabel styleClass="bold text-red alJustify"
+                                       rendered="#{!notificarAceptacionAsignacionPagoParticipacionSocialBean.mensajeRechazo.isEmpty()}"
+                                       value="#{notificarAceptacionAsignacionPagoParticipacionSocialBean.mensajeRechazo}"/>
+
+                        <p:outputLabel styleClass="bold" for="observacion"
+                                       rendered="#{!notificarAceptacionAsignacionPagoParticipacionSocialBean.correcto}"
+                                       value="#{msg['label.prevencion.tdr.justifique']}"/>
+
+                        <p:inputTextarea id="observacion"  maxlength="255" value="#{notificarAceptacionAsignacionPagoParticipacionSocialBean.observacionCorreccion}"                                                          
+                                         required="#{notificarAceptacionAsignacionPagoParticipacionSocialBean.correcto!=null and !notificarAceptacionAsignacionPagoParticipacionSocialBean.correcto}" />
+                        
+                        <p:outputLabel styleClass="bold text-red alJustify"
+                                       value="Adjuntar documento de justificación *"/>
+                        
+                        
+                       <p:fileUpload
+                                fileUploadListener="#{notificarAceptacionAsignacionPagoParticipacionSocialBean.uploadListenerDocumentos}"
+                                multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                                label="Seleccionar" uploadLabel="Subir"
+                                invalidFileMessage="Tipo de archivo no válido"
+                                invalidSizeMessage="Tamaño de archivo no válido"
+                                cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                auto="true" required="true" update="documentoRechazo">
+                                <f:attribute name="clave" value="documentoJustificacion"/>
+                        </p:fileUpload>
+                        
+                         <p:outputLabel id="documentoRechazo" value="#{notificarAceptacionAsignacionPagoParticipacionSocialBean.documentoRechazo.nombre}"/>
+                        
+                        <div class="buttons main">
+                            <p:commandButton value="Enviar" styleClass="primary"
+                                             action="#{notificarAceptacionAsignacionPagoParticipacionSocialController.iniciarTarea}"
+                                             title="#{msg['label.enviarDatos']}" icon="ui-icon-check">
+                            </p:commandButton>
+                        </div>
+
+                    </h:panelGrid>
+                </p:panel>
+            </p:dialog>
+
+            <h:panelGrid rendered="#{notificarAceptacionAsignacionPagoParticipacionSocialBean.correcto != null}">
+                <p:remoteCommand process="@this" update="rechazarDialog"
+                                 rendered="#{!notificarAceptacionAsignacionPagoParticipacionSocialBean.correcto}"
+                                 autoRun="true"
+                                 oncomplete="PF('rechazarDialog').show()"/>
+                <p:remoteCommand process="@this" update="aceptarDialog"
+                                 rendered="#{notificarAceptacionAsignacionPagoParticipacionSocialBean.correcto}"
+                                 autoRun="true"
+                                 oncomplete="PF('aceptarDialog').show()"/></h:panelGrid>
+
+            <div class="buttons main">
+                <p:commandButton value="Enviar" styleClass="primary"  update=":form"
+                                 action="#{notificarAceptacionAsignacionPagoParticipacionSocialController.iniciarTarea}"
+                                 title="#{msg['label.enviarDatos']}" icon="ui-icon-check">
+                </p:commandButton>
+            </div>
+
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>

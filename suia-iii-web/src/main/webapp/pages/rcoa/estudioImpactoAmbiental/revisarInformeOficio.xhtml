@@ -1,0 +1,235 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="context-extra">
+		<h:outputText value="Datos" />
+		<h:outputText value="Estudio de Impacto Ambiental" />
+
+		<h:outputLink target="_blank"
+			value="#{request.contextPath}/pages/rcoa/estudioImpactoAmbiental/verProyectoEIAResumen.jsf">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+	</ui:define>
+	<ui:define name="content">
+
+		<f:event type="preRenderView"
+			listener="#{revisarInformeConsolidadoOficioController.validarTareaBpm()}" />
+		<h:form id="form">
+
+			<p:tabView id="tab">
+				<p:tab title="Informe técnico">
+					<h:panelGrid styleClass="w100" id="pnlInforme">
+						<object type="application/pdf"
+							data="#{informeTecnicoConsolidadoEIABean.urlReporte}?pfdrid_c=true"
+							width="100%" height="500px">
+							Su navegador no soporta la visualización de pdf. Puede descargar
+							el documento presionando el siguiente botón:
+							<p:commandButton value="Descargar" styleClass="primary"
+								ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+								<p:fileDownload
+									value="#{informeTecnicoConsolidadoEIABean.descargarInforme()}" />
+							</p:commandButton>
+						</object>
+					</h:panelGrid>
+				</p:tab>
+				<p:tab title="Oficio">
+					<h:panelGrid styleClass="w100">
+						<object type="application/pdf"
+							data="#{pronunciamientoBean.urlReporte}?pfdrid_c=true"
+							width="100%" height="500px">
+							Su navegador no soporta la visualización de pdf. Puede descargar
+							el documento presionando el siguiente botón:
+							<p:commandButton value="Descargar" styleClass="primary"
+								ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+								<p:fileDownload
+									value="#{pronunciamientoBean.getStream(pronunciamientoBean.nombreReporte, pronunciamientoBean.archivoReporte)}" />
+							</p:commandButton>
+						</object>
+					</h:panelGrid>
+				</p:tab>
+			</p:tabView>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<h:panelGrid columns="2" layout="grid" styleClass="w100"
+					columnClasses="w66, null">
+					<f:event type="preRenderView"
+						listener="#{revisarInformeConsolidadoOficioController.validarExisteObservacionesInformeOficio()}" />
+					<h:outputLabel
+						value="¿Es necesario realizar correcciones sobre el Informe Técnico o al Oficio de pronunciamiento?"
+						styleClass="bold" />
+					<p:selectOneRadio id="observacionesInformeOficio" required="true"
+						disabled="true" styleClass="cssRadioDisabled"
+						value="#{revisarInformeConsolidadoOficioController.requiereCorrecciones}"
+						requiredMessage="El campo '¿Es necesario realizar correcciones sobre el Informe Técnico o al Oficio de pronunciamiento? *' es requerido">
+						<f:selectItem itemValue="true" itemLabel="Si" />
+						<f:selectItem itemValue="false" itemLabel="No" />
+						<p:ajax process="observacionesInformeOficio" immediate="true" />
+					</p:selectOneRadio>
+				</h:panelGrid>
+
+				<h:outputText styleClass="bold text-red alJustify"
+					value="Si es necesario realizar correcciones, el trámite regresará al Técnico responsable" />
+			</p:panelGrid>
+
+			<h:panelGrid styleClass="w100" columns="1">
+				<h:panelGroup id="pnlObsAlInformeOficio">
+					<observaciones:tablaObservacionesEsIA
+						idComponent="obsInformeOficioConsolidado"
+						seccion="Observaciones Informe Oficio Consolidado" aparace="true"
+						mostrarSiVacio="true"
+						idActualizar=":form:observacionesInformeOficio :form:pnlButtons"
+						idClase="#{revisarInformeConsolidadoOficioController.idInformePrincipal}"
+						nombreClase="InfomeOficioConsolidado" soloLectura="false" />
+				</h:panelGroup>
+			</h:panelGrid>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Guardar" update="@form"
+						actionListener="#{revisarInformeConsolidadoOficioController.guardarInformeOficio()}"
+						icon="ui-icon-disk" process="@this" />
+					<p:commandButton value="Enviar"
+						action="#{revisarInformeConsolidadoOficioController.enviar()}"
+						rendered="#{revisarInformeConsolidadoOficioController.requiereCorrecciones}"
+						disabled="#{!revisarInformeConsolidadoOficioController.documentosAceptados}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+					<p:commandButton value="Enviar"
+						action="#{revisarInformeConsolidadoOficioController.finalizarAprobacionDirector()}"
+						rendered="#{!revisarInformeConsolidadoOficioController.requiereCorrecciones and revisarInformeConsolidadoOficioController.proyectoPlantaCentralAprobacion}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+					<p:commandButton value="Firmar documento" styleClass="large buttonLarge"
+						icon="ui-icon-key"
+						rendered="#{!revisarInformeConsolidadoOficioController.requiereCorrecciones and !revisarInformeConsolidadoOficioController.proyectoPlantaCentralAprobacion}"
+						disabled="#{!revisarInformeConsolidadoOficioController.documentosAceptados}"
+						update=":formDialogFirma:pnlFirmaManual :formDialogFirma:pnlFirmaToken"
+						actionListener="#{revisarInformeConsolidadoOficioController.guardarDocumentos()}" />
+				</div>
+			</h:panelGroup>
+		</h:form>
+
+		<h:form id="formDialogFirma">
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600" height="auto" position="center top">
+
+				<p:panel>
+
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel
+							value="Informe técnico  Nro: #{revisarInformeConsolidadoOficioController.informeTecnicoConsolidadoEIABean.informeTecnico.codigoInforme}"
+							rendered="#{revisarInformeConsolidadoOficioController.esCoordinador}"
+							styleClass="bold" />
+						<h:outputLabel
+							value="#{revisarInformeConsolidadoOficioController.pronunciamientoBean.tipoOficio eq 1 ? 'Memorando' : 'Oficio'} Nro: #{revisarInformeConsolidadoOficioController.pronunciamientoBean.oficioPronunciamiento.codigoOficio}"
+							rendered="#{!revisarInformeConsolidadoOficioController.esCoordinador}"
+							styleClass="bold" />
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<h:outputText value="¿Cuenta con token?" styleClass="encabezado" rendered="#{!revisarInformeConsolidadoOficioController.firmaSoloToken}"/>
+						<p:selectOneRadio id="verificaToken"
+							rendered="#{!revisarInformeConsolidadoOficioController.firmaSoloToken}"
+							value="#{revisarInformeConsolidadoOficioController.token}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change" update="pnlFirmaManual pnlFirmaToken"
+								listener="#{revisarInformeConsolidadoOficioController.guardarToken}" />
+						</p:selectOneRadio>
+						<h:outputText value="" styleClass="encabezado" rendered="#{revisarInformeConsolidadoOficioController.firmaSoloToken}" />
+						<h:outputText value="" styleClass="encabezado" rendered="#{revisarInformeConsolidadoOficioController.firmaSoloToken}" />
+						
+						<h:panelGroup id="pnlFirmaToken">
+							<p:commandButton value="Firmar documento" type="button"
+								styleClass="primary buttonLarge" icon="ui-icon-key"
+								rendered="#{revisarInformeConsolidadoOficioController.token}"
+								onclick="window.location.href='#{revisarInformeConsolidadoOficioController.urlAlfresco}'" />
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+						<h:panelGroup>
+							<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+								style="text-align:right !important"
+								columnClasses="w66, toCenter"
+								rendered="#{!revisarInformeConsolidadoOficioController.token}">
+								<h:outputLabel value="1. Descargue el Informe Técnico"
+									styleClass="bold" rendered="#{revisarInformeConsolidadoOficioController.esCoordinador}"/>
+								<h:outputLabel value="1. Descargue el Oficio de pronunciamiento"
+									styleClass="bold" rendered="#{!revisarInformeConsolidadoOficioController.esCoordinador}"/>
+								<p:commandButton value="Descargar" ajax="false"
+									icon="ui-icon-arrowthick-1-s" styleClass="primary"
+									immediate="true" rendered="#{revisarInformeConsolidadoOficioController.esCoordinador}">
+									<p:fileDownload
+										value="#{revisarInformeConsolidadoOficioController.descargar(1)}" />
+								</p:commandButton>
+								<p:commandButton value="Descargar" ajax="false"
+									icon="ui-icon-arrowthick-1-s" styleClass="primary"
+									immediate="true" rendered="#{!revisarInformeConsolidadoOficioController.esCoordinador}">
+									<p:fileDownload
+										value="#{revisarInformeConsolidadoOficioController.descargar(2)}" />
+								</p:commandButton>
+
+								<p:outputLabel for="uploadRequired"
+									value="2. Adjunte el Informe Técnico firmado" styleClass="bold" rendered="#{revisarInformeConsolidadoOficioController.esCoordinador}" />
+								<p:outputLabel for="uploadRequired"
+									value="2. Adjunte el Oficio de pronunciamiento firmado" styleClass="bold" rendered="#{!revisarInformeConsolidadoOficioController.esCoordinador}" />
+								<p:fileUpload
+									fileUploadListener="#{revisarInformeConsolidadoOficioController.uploadListenerDocumentos}"
+									multiple="false" sizeLimit="5242880"
+									allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+									uploadLabel="Subir"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Tamaño de archivo no válido"
+									cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+									auto="true" update="lblNombreDocFirmado"
+									rendered="#{!revisarInformeConsolidadoOficioController.token}">
+									<f:attribute name="clave" value=":form" />
+								</p:fileUpload>
+								<p:outputLabel value="" />
+								<h:outputText id="lblNombreDocFirmado"
+									value="#{revisarInformeConsolidadoOficioController.documentoManual.nombre}" />
+							</h:panelGrid>
+						</h:panelGroup>
+						
+
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!revisarInformeConsolidadoOficioController.token and !revisarInformeConsolidadoOficioController.subido}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialog').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						action="#{revisarInformeConsolidadoOficioController.finalizar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

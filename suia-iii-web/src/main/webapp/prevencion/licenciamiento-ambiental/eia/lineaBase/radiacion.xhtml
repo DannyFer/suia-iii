@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+		<ui:define name="content">
+		<ui:include src="../contenido/menu.xhtml" />
+		<div class="content">
+		<f:loadBundle var="labels" basename="ec.gob.ambiente.core.resources.labels_es" />
+      <h:form id="frmRadiacion" enctype="multipart/form-data">
+       	<p:growl id="msgs" globalOnly="true" />         
+          <p:panel>
+			 <p:panelGrid columns="1" layout="grid" styleClass="w100">
+             <f:facet name="header">
+					<p:commandButton value="Adicionar" action="#{radiacionController.agregarRadiacion()}" immediate="true" update=":#{p:component('frmRadiaciones')}"
+						 onclick="PF('dlgRadiacion').show()" id="btnRadiacion"  icon="ui-icon-plusthick" styleClass="button-small-text toRight field_mrg" >
+						<p:tooltip id="ttRadiacion" for="btnRadiacion"
+							value="Agregar Radiación no ionizantes"/>
+					</p:commandButton>
+						<mae:panelGridHeaderHelp value="Radiaciones no ionizantes" conector="radiacionHelp"  help="#{helps['no.help.yet']}" />
+				</f:facet>
+				<p:dataTable id="tblRadiacion" paginator="true" rows="10" value="#{radiacionController.medioFisicoBean.listaRadiaciones}"
+							var="radiacion" paginatorPosition="bottom" scrollable="true" scrollWidth="720" emptyMessage="#{labels['common.table.empty']}">
+					<p:columnGroup type="header">
+					<p:row>
+					<p:column colspan="6" headerText="Radiaciones no ionizantes" width="600"/>
+					
+					</p:row>
+						<p:row>
+							<p:column rowspan="3" headerText="Acciones" width="120" />
+							<p:column rowspan="3" headerText="Código" width="100"/>
+							<p:column colspan="2" headerText="Ubicación de puntos de muestreo" width="150"/>
+							<p:column rowspan="3" headerText="Fecha" width="80"/>
+							<p:column rowspan="3" headerText="Descripción sitio de muestreo" width="150"/>
+						</p:row>
+						<p:row>
+						<p:column colspan="2" headerText="Coordenadas" width="150"/>
+						</p:row>
+						<p:row>
+							<p:column headerText="X" width="75"/>
+							<p:column headerText="Y" width="75"/>
+							
+						</p:row>
+					</p:columnGroup>
+					<p:column>
+					 <p:commandButton icon="ui-icon-pencil" action="#{radiacionController.seleccionarRadiacion(radiacion)}"
+                                 title="Editar"
+                                 oncomplete="PF('dlgRadiacion').show();" update=":#{p:component('frmRadiaciones')}"/>
+                	<p:commandButton icon="ui-icon-trash" action="#{radiacionController.eliminarRadiacion(radiacion)}"
+                                 title="Remover"
+                                 update=":#{p:component('tblRadiacion')}"/>
+					</p:column>
+					<p:column>
+						<h:outputText value="#{radiacion.codigo}" />
+					</p:column>
+					<p:column>
+						<h:outputText value="#{radiacion.coordenadaGeneral.x}" >
+						<f:convertNumber pattern="##########.##"/>
+						</h:outputText>
+					</p:column>
+					<p:column>
+						<h:outputText value="#{radiacion.coordenadaGeneral.y}" >
+						<f:convertNumber pattern="##########.##"/>
+						</h:outputText>
+					</p:column>
+					<p:column>
+						<h:outputText value="#{radiacion.fechaMuestreo}" >
+						<f:convertDateTime pattern="dd-MM-yyyy"/>
+						</h:outputText>
+					</p:column>
+					<p:column>
+						<h:outputText value="#{radiacion.descripcion}" />
+					</p:column>
+				</p:dataTable>
+				</p:panelGrid>
+			</p:panel>
+		
+			<div class="buttons main">
+				<p:commandButton id="btnGuardar" value="Guardar" icon="ui-icon-check" action="#{radiacionController.guardar()}" 
+								update=":#{p:component('tblRadiacion')}"/>
+				<p:commandButton value="Cancelar" icon="ui-icon-cancel" action="#{radiacionController.cancelar()}" process="@this">
+					<p:confirm header="Confirmación" message="¿Está seguro de cancelar?" icon="ui-icon-alert" />
+				</p:commandButton>
+			</div>	
+	</h:form>
+	
+	<p:dialog id="agregarRadiacion" header="Radiaciones no ionizantes" widgetVar="dlgRadiacion" modal="true" width="350" resizable="false">
+	<h:form id="frmRadiaciones">
+	<p:panel id="pnlRadiacion">
+	<h:panelGrid columns="2" styleClass="w100 alCenter" columnClasses="alRight, field_mrg w66 alLeft">
+		<p:outputLabel value="Código" for="txtCodigo"/>
+		<p:inputText id="txtCodigo" value="#{radiacionController.medioFisicoBean.radiacion.codigo}" required="true" requiredMessage="El campo código es requerido."/>
+		<p:outputLabel value="Coordenada X" for="txtX"/>
+		<p:inputText id="txtX" required="true" value="#{radiacionController.medioFisicoBean.radiacion.coordenadaGeneral.x}"
+					 onkeypress="return NumCheckDouble(event,this);" requiredMessage="El campo coordenada x es requerido.">
+		</p:inputText>
+		<p:outputLabel value="Coordenada Y" for="txtY"/>
+		<p:inputText id="txtY" required="true" value="#{radiacionController.medioFisicoBean.radiacion.coordenadaGeneral.y}"
+					 onkeypress="return NumCheckDouble(event,this);" requiredMessage="El campo coordenada y es requerido.">
+		</p:inputText>
+		<p:outputLabel value="Fecha" for="fecha"/>
+		<p:calendar id="fecha" value="#{radiacionController.medioFisicoBean.radiacion.fechaMuestreo}" 
+					required="true" pattern="dd-MM-yyyy" mask="true" requiredMessage="El campo fecha es requerido."/>
+		<p:outputLabel value="Descripción" for="txtDescripcion"/>
+		<p:inputText id="txtDescripcion" required="true" value="#{radiacionController.medioFisicoBean.radiacion.descripcion}" requiredMessage="El campo descripción es requerido."/>
+	</h:panelGrid>
+	</p:panel>
+	<p:separator />
+	<div class="buttons">
+		<p:commandButton action="#{radiacionController.agregarAListaRadiacion()}"  value="Agregar" update=":#{p:component('msgs')}, :#{p:component('tblRadiacion')}"  
+				oncomplete="handlRadiacionRequest(xhr, status, args)" />
+	</div>
+	</h:form>
+</p:dialog>
+<script type="text/javascript">
+        function handlRadiacionRequest(xhr, status, args) {
+            if (args.validationFailed || !args.radiacionIn) {
+                PF('dlgRadiacion').jq.effect("shake", {times: 5}, 100);
+            }
+            else {
+                PF('dlgRadiacion').hide();
+                $('#loginLink').fadeOut();
+            }
+        }
+    </script>
+    </div>
+    </ui:define>
+    </ui:composition>

@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100"
+	id="pnlActualizacionEtiqueta">
+	<f:facet name="header">
+		<h:outputText value="Actualización del etiquetado con SGA" />
+	</f:facet>
+
+	<p:panelGrid columns="2" styleClass="panel_data w100"
+		columnClasses="header w30,null">
+		<p:outputLabel style="color: white" value="Tipo de producto:"
+			for="cmbTipoProducto" />
+		<p:selectOneMenu id="cmbTipoProducto" required="true"
+			value="#{actualizarInformacionEtiquetaController.proyectoPlaguicidas.productoPqua.tipoProducto}"
+			converter="selectItemConverter" filter="true"
+			filterMatchMode="startsWith">
+			<f:selectItem itemLabel="#{labels['common.item.choose']}"
+				itemValue="#{null}" noSelectionOption="true" />
+			<f:selectItems
+				value="#{actualizarInformacionEtiquetaController.listaTipoProducto}"
+				var="item" itemLabel="#{item.nombre}" itemValue="#{item}" />
+			<p:ajax process="@this" update="pnlOtros" />
+		</p:selectOneMenu>
+	</p:panelGrid>
+
+	<h:panelGroup id="pnlOtros">
+		<p:panelGrid columns="2" styleClass="panel_data w100"
+			columnClasses="header w30,null"
+			rendered="#{actualizarInformacionEtiquetaController.proyectoPlaguicidas.productoPqua.tipoProducto.valor eq '1'}">
+			<p:outputLabel style="color: white" value="Especifique:"
+				for="txtOtro" />
+			<p:inputText id="txtOtro" maxlength="100" autocomplete="off"
+				required="true"
+				value="#{actualizarInformacionEtiquetaController.proyectoPlaguicidas.productoPqua.otroTipoProducto}" />
+		</p:panelGrid>
+	</h:panelGroup>
+
+	<p:panelGrid columns="2" styleClass="panel_data w100"
+		columnClasses="header w30,null">
+		<p:outputLabel style="color: white" value="Tipo de recipiente:"
+			for="cmbTipoRecipiente" />
+		<p:selectOneMenu id="cmbTipoRecipiente"
+			value="#{actualizarInformacionEtiquetaController.proyectoPlaguicidas.productoPqua.tipoRecipiente}"
+			converter="selectItemConverter" filter="true"
+			filterMatchMode="startsWith" required="true">
+			<f:selectItem itemLabel="#{labels['common.item.choose']}"
+				itemValue="#{null}" noSelectionOption="true" />
+			<f:selectItems
+				value="#{actualizarInformacionEtiquetaController.listaTipoRecipiente}"
+				var="item" itemLabel="#{item.nombre}" itemValue="#{item}" />
+			<p:ajax process="@this" />
+		</p:selectOneMenu>
+
+		<p:outputLabel style="color: white"
+			value="Categoría Toxicológica (nueva etiqueta):"
+			for="cmbCategoriaTox" />
+		<p:selectOneMenu id="cmbCategoriaTox"
+			value="#{actualizarInformacionEtiquetaController.proyectoPlaguicidas.productoPqua.categoriaFinal}"
+			converter="selectItemConverter" filter="true"
+			filterMatchMode="startsWith" required="true">
+			<f:selectItem itemLabel="#{labels['common.item.choose']}"
+				itemValue="#{null}" noSelectionOption="true" />
+			<f:selectItems
+				value="#{actualizarInformacionEtiquetaController.listaTipoCategoria}"
+				var="item" itemLabel="#{item.nombre}" itemValue="#{item}" />
+			<p:ajax process="@this" update="lblColor"
+				listener="#{actualizarInformacionEtiquetaController.validarColorEtiqueta()}" />
+		</p:selectOneMenu>
+
+		<h:outputText value="Color de franja (nueva etiqueta)" />
+		<h:outputText id="lblColor" styleClass="bold"
+			value="#{actualizarInformacionEtiquetaController.proyectoPlaguicidas.productoPqua.colorFranjaFinal.nombre}"
+			style="color:#{actualizarInformacionEtiquetaController.proyectoPlaguicidas.productoPqua.colorFranjaFinal.valor}" />
+
+	</p:panelGrid>
+
+	<h:inputHidden
+		validator="#{actualizarInformacionEtiquetaController.validateActualizacionEtiqueta}" />
+</p:panelGrid>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100"
+	id="pnlProductosEtiqueta">
+	<f:facet name="header">
+		<h:outputText value="Detalle del producto" />
+	</f:facet>
+
+	<p:dataTable id="dtProductos" var="producto"
+		styleClass="table table-hover"
+		value="#{actualizarInformacionEtiquetaController.listaDetalleProyectoPlaguicidas}"
+		paginator="true" paginatorAlwaysVisible="false"
+		paginatorPosition="bottom" rowIndexVar="index"
+		emptyMessage="#{labels['common.table.empty']}"
+		currentPageReportTemplate="{currentPage} de {totalPages}" rows="5"
+		rowsPerPageTemplate="5,10,15">
+
+		<p:column headerText="N° del cultivo" styleClass="alCenter w5">
+			<h:outputText value="#{index + 1}" />
+		</p:column>
+		<p:column headerText="Nombre del cultivo">
+			<h:outputText value="#{producto.cultivo.nombreComun}" />
+			<h:outputText value=" (#{producto.nombreCientificoCultivo})"
+				styleClass="italic" />
+		</p:column>
+		<p:column headerText="Plaga">
+			<h:outputText value="#{producto.getDetallePlagas()}" escape="false" />
+		</p:column>
+		<p:column headerText="Dosis aprobada en la etiqueta" styleClass="w20">
+			<h:outputText value="#{producto.getDetalleDosis()}" escape="false" />
+		</p:column>
+		<p:column styleClass="w10 alCenter">
+			<f:facet name="header">
+				<center>
+					<p:commandButton value="Adicionar" title="Adicionar"
+						styleClass="secondary" icon="ui-icon-plus"
+						update=":formDialog:dlgAgregarProducto"
+						actionListener="#{actualizarInformacionEtiquetaController.agregarDetalle()}"
+						oncomplete="PF('dlgAgregarProducto').show();" process="@this">
+					</p:commandButton>
+				</center>
+			</f:facet>
+			<p:commandButton styleClass="button-small primary" process="@this"
+				icon="ui-icon-pencil"
+				actionListener="#{actualizarInformacionEtiquetaController.editarDetalle(producto)}"
+				update=":formDialog:dlgAgregarProducto"
+				oncomplete="PF('dlgAgregarProducto').show();" immediate="true" />
+
+			<p:commandButton update="dtProductos"
+				styleClass="button-small primary" process="@this"
+				icon="ui-icon-trash"
+				actionListener="#{actualizarInformacionEtiquetaController.eliminarDetalle(producto)}"
+				immediate="true">
+				<p:confirm icon="ui-icon-alert" header="Confirmación"
+					message="¿Está seguro de eliminar el registro?" />
+			</p:commandButton>
+		</p:column>
+	</p:dataTable>
+
+
+
+</p:panelGrid>
+
+<h:panelGroup
+	rendered="#{actualizarInformacionEtiquetaController.esSubsanacion}">
+	<br />
+	<br />
+	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+		<observaciones:tablaObservacionesPqua
+			idComponent="observacionesEtiquetado"
+			componenteActualizarEliminar="observacionesEtiquetado"
+			seccion="ActualizacionEtiquetado"
+			nombreClase="ActualizacionEtiquetaPqua"
+			idClase="#{actualizarInformacionEtiquetaController.proyectoPlaguicidas.id}"
+			aparace="#{actualizarInformacionEtiquetaController.esSubsanacion}"
+			mostrarSiVacio="#{actualizarInformacionEtiquetaController.esSubsanacion}"
+			soloLectura="true" />
+	</p:panelGrid>
+</h:panelGroup>
+
+
+<h:panelGroup id="pnlButtonsEtiqueta">
+	<div class="buttons main">
+		<p:commandButton id="btnAtrasEtiqueta" value="Atrás"
+			icon="ui-icon-arrowthick-1-w"
+			oncomplete="PF('wizard').back();reloadWizard();"
+			styleClass="wizard-custom-btn-back" process="@this"
+			update="wizardInformacion btnSiguiente"
+			action="#{actualizarInformacionEtiquetaController.btnAtras}" />
+		<p:commandButton id="btnGuardarEtiqueta" value="Guardar"
+			title="Guardar" icon="ui-icon-disk" update="btnSiguienteEtiqueta"
+			process="@this txtOtro"
+			actionListener="#{actualizarInformacionEtiquetaController.guardarActualizacionEtiqueta()}" />
+		<p:commandButton id="btnSiguienteEtiqueta" value="Siguiente"
+			icon="ui-icon-arrowthick-1-e"
+			oncomplete="PF('wizard').next();reloadWizard();"
+			styleClass="wizard-custom-btn-next"
+			update="wizardInformacion pnlActualizacionEtiqueta pnlProductosEtiqueta"
+			actionListener="#{actualizarInformacionEtiquetaController.btnSiguiente}"
+			disabled="#{!actualizarInformacionEtiquetaController.guardado}" />
+	</div>
+</h:panelGroup>
+
+</html>

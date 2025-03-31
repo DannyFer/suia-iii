@@ -1,0 +1,268 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<ui:composition template="/WEB-INF/templates/default-task-projectRGD.xhtml">
+ <ui:define name="context-extra">
+		<h:outputText value="Trámite" />
+		<h:outputText value="#{pagosRGDV1Controller.registroGenerador.codigo}" />
+		<p:button href="#{pagosRGDV1Controller.urlVerTramite}" target="_blank" icon="ui-icon-search"
+		styleClass="primary button-small"/>
+		<h:outputText value="Operador"/>
+		<h:outputText value="#{pagosRGDV1Controller.datosOperadorRgdBean.datosOperador.nombre}"/>
+		<p:commandButton type="button" icon="ui-icon-search" onclick="PF('dlgProponente').show()"
+			styleClass="primary button-small" />
+	</ui:define>
+
+	<ui:define name="content">
+		<style type="text/css">
+.noHeader tr td {
+	padding-left: 0px;
+	padding-right: 0px;
+}
+</style>
+
+		<ui:remove>
+			<f:event type="preRenderView"
+				listener="#{pagosRGDV1Controller.validarTareaBpm()}" />
+		</ui:remove>
+
+		<h:form id="formPagoInformacion">
+		<h:panelGrid columns="1" styleClass="w100">
+					<h:outputText value="#{pagosRGDV1Controller.mensaje}" escape="false" styleClass="alJustify"/>					
+				</h:panelGrid>
+				
+			<h:panelGrid styleClass="panel_data w100" columns="2" rendered="#{pagosRGDV1Controller.valorAdicional}"
+				columnClasses="header w25, bold w75" rowClasses="null, alt">
+				
+				<h:outputText value="Tasa por registro generados incluye una actividad" />
+				<h:panelGroup>
+					<h:outputText value="#{pagosRGDV1Controller.montounico}">
+						<f:convertNumber pattern="#0.00" />
+					</h:outputText>
+					<h:outputText value=" USD" />
+				</h:panelGroup>
+				
+				<h:outputText value="Actividades adicionales" />
+				<h:panelGroup>
+					<h:outputText value="#{pagosRGDV1Controller.adicional}">						
+					</h:outputText>
+				</h:panelGroup>				
+				
+				<h:outputText value="Valor total a pagar" />
+				<h:panelGroup>
+					<h:outputText value="#{pagosRGDV1Controller.montoTotaladicional}">
+						<f:convertNumber pattern="#0.00" />
+					</h:outputText>
+					<h:outputText value=" USD" />
+				</h:panelGroup>				
+			</h:panelGrid>
+			<ui:remove>
+			<h:panelGrid styleClass="panel_data w100" columns="2"
+				columnClasses="header w25, bold w75" rowClasses="null, alt">
+						
+				<h:outputText value="Valor total a pagar" />
+				<h:panelGroup>
+					<h:outputText value="#{pagosRGDV1Controller.montoTotal}">
+						<f:convertNumber pattern="#0.00" />
+					</h:outputText>
+					<h:outputText value=" USD" />
+				</h:panelGroup>				
+			</h:panelGrid>
+			</ui:remove>
+			
+			<h:panelGrid styleClass="panel_data w100" columns="2"
+				columnClasses="header w25, bold w75" rowClasses="null, alt">							
+				
+				<h:outputText value="Valor total a pagar" />
+				<h:panelGroup>
+					<h:outputText value="#{pagosRGDV1Controller.montoTotal}">
+						<f:convertNumber pattern="#0.00" />
+					</h:outputText>
+					<h:outputText value=" USD" />
+				</h:panelGroup>
+			</h:panelGrid>
+			
+			<ui:remove>
+			<h:panelGrid styleClass="panel_data w100" columns="2"
+				columnClasses="header w25, bold w75" rowClasses="null, alt">
+				<h:outputText value="Generar NUT"
+					rendered="#{pagosRGDV1Controller.generarNUT and pagosRGDV1Controller.documentosRgdRcoasNUT.size() == 0}" />
+				<h:panelGroup
+					rendered="#{pagosRGDV1Controller.generarNUT and pagosRGDV1Controller.documentosRgdRcoasNUT.size() == 0}">
+					<p:commandButton icon="	ui-icon-document"
+						styleClass="primary button-small"
+						action="#{pagosRGDV1Controller.generarNUT()}" process="@this"
+						rendered="#{pagosRGDV1Controller.generarNUT}">
+						<p:confirm header="Aviso"
+							message="Usted debe generar el NUT si aún no ha realizado el pago en la institución bancaria"
+							icon="ui-icon-alert" />
+					</p:commandButton>
+					<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+						<p:commandButton value="Cancelar" type="button"
+							styleClass="ui-confirmdialog-no primary toRight"
+							icon="ui-icon-closethick" />
+						<p:commandButton value="Generar" type="button"
+							styleClass="ui-confirmdialog-yes primary toRight"
+							icon="ui-icon-check" />
+					</p:confirmDialog>
+				</h:panelGroup>
+				<h:outputText value="Descargar NUT"
+					rendered="#{pagosRGDV1Controller.documentosRgdRcoasNUT.size() > 0}" />
+				<h:panelGroup
+					rendered="#{pagosRGDV1Controller.documentosRgdRcoasNUT.size() > 0}">
+					<p:dataTable styleClass="noHeader borderless"
+						value="#{pagosRGDV1Controller.documentosRgdRcoasNUT}" var="documento">
+						<p:column style="text-align: left; background-color: #f5f5f5;">
+							<h:outputText value="#{documento.nombre}" />
+							<p:commandButton icon="ui-icon-arrowthick-1-s"
+								styleClass="button-small primary" title="Ver"
+								style="margin-left: 10px" ajax="false" immediate="true">
+								<p:fileDownload
+									value="#{pagosRGDV1Controller.descargar(documento)}" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</h:panelGrid>
+			</ui:remove>
+			
+			<p:panelGrid id="pnl_transacciones" rendered="#{pagosRGDV1Controller.montoTotalProyecto>0}" columns="3" layout="grid" styleClass="w100" columnClasses="w33, field_mrg w33, field_mrg w33">
+				<f:facet name="header">
+					<mae:panelGridHeaderHelp value="Ingreso de transacciones" conector="generalHelp" render="false" image="#{request.contextPath}/resources/images/help-how.png" help="#{helps['no.help.yet']}" />
+				</f:facet>
+				<p:outputLabel for="institucionBancaria" value="Instituci&oacute;n bancaria" />
+				<p:outputLabel for="numeroTransaccion" value="N&uacute;mero de comprobante" />
+				<h:outputText />
+				<p:selectOneMenu id="institucionBancaria"
+					disabled="true"
+					converter="selectItemConverter" required="true"
+					value="#{pagosRGDV1Controller.transaccionFinanciera.institucionFinanciera}"
+					styleClass="w100">
+
+					<f:selectItems
+						value="#{pagosRGDV1Controller.institucionesFinancieras}"
+						var="institucion" itemLabel="#{institucion.nombreInstitucion}"
+						itemValue="#{institucion}" />
+					<p:ajax update=":formPagoInformacion:pnl_transacciones"
+						listener="#{pagosRGDV1Controller.obtenerEntesAcreditados()}"
+						event="change" process="@this"/>
+				</p:selectOneMenu>
+				<p:inputText id="numeroTransaccion" placeholder="Ej: 584777" required="true" disabled="#{pagosRGDV1Controller.cumpleMontoProyecto}" value="#{pagosRGDV1Controller.transaccionFinanciera.numeroTransaccion}" maxlength="50" />
+				<p:commandButton value="Adicionar" icon="ui-icon-plusthick" disabled="#{pagosRGDV1Controller.cumpleMontoProyecto}" action="#{pagosRGDV1Controller.guardarTransaccion(1)}" 
+				styleClass="primary" update=":#{p:component('pnl_transacciones')} :formTransactionList:tbl_transacciones" process="@this numeroTransaccion"/>
+				
+				<p:outputLabel for="entidadBancaria" value="Entidad bancaria" rendered="#{pagosRGDV1Controller.eligioEnte}" />
+				<h:outputText rendered="#{pagosRGDV1Controller.eligioEnte}" />
+				<h:outputText rendered="#{pagosRGDV1Controller.eligioEnte}" />
+				<p:selectOneMenu id="entidadBancaria" converter="selectItemConverter" required="true" value="#{pagosRGDV1Controller.transaccionFinanciera.institucionFinanciera}" styleClass="w100" rendered="#{pagosRGDV1Controller.eligioEnte}">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+					<f:selectItems value="#{pagosRGDV1Controller.entesAcreditados}" var="institucion" itemLabel="#{institucion.nombreInstitucion}" itemValue="#{institucion}" />
+				</p:selectOneMenu>
+			</p:panelGrid>						
+		</h:form>
+		
+		<h:form id="formTransactionList">
+			<p:dataTable id="tbl_transacciones" rendered="#{pagosRGDV1Controller.datoFormaspago}"  value="#{pagosRGDV1Controller.transaccionesFinancieras}" var="transaccionFinanciera" emptyMessage="#{labels['common.table.empty']}">
+				<p:column headerText="Instituci&oacute;n financiera">
+					<h:outputText value="#{transaccionFinanciera.institucionFinanciera.nombreInstitucion}" />
+				</p:column>				
+				<p:column headerText="N&uacute;mero de comprobante" styleClass="w33 alCenter">
+					<h:outputText value="#{transaccionFinanciera.numeroTransaccion}" />
+				</p:column>
+				<p:column headerText="Monto" styleClass="w15 alCenter">
+					<h:outputText value="#{transaccionFinanciera.montoTransaccion}">
+						<f:convertNumber pattern="#0.00" />
+					</h:outputText>
+				</p:column>
+				<p:column styleClass="w20px alCenter">
+					<p:commandButton icon="ui-icon-trash"
+						styleClass="primary button-small"
+						actionListener="#{pagosRGDV1Controller.eliminarTransacion(transaccionFinanciera)}" 
+						update="tbl_transacciones :formPagoInformacion:pnl_transacciones"/>
+				</p:column>
+			</p:dataTable>
+		</h:form>
+		
+		<h:form id="formSubmit">		
+			<div class="buttons main">
+				<p:commandButton value="Enviar"
+					action="#{pagosRGDV1Controller.completarTarea()}" title="Enviar"
+					icon="ui-icon-check" widgetVar="send"
+					update=":formSubmitV2:continuarDialog" />
+			</div>
+		</h:form>
+		
+		<h:form id="formSubmitV2">
+			<p:dialog id="continuarDialog" widgetVar="continuarDialog"
+				header="Información" modal="true" closable="false" resizable="false"
+				width="500">
+				<p:panel>
+					<h:panelGrid columns="1" styleClass="w100"
+						columnClasses="alJustify">
+						<p:outputLabel value="#{pagosRGDV1Controller.mensajeFinalizar}" />
+
+						<h:panelGrid columns="2" style="margin-bottom:10px"
+							cellpadding="5">
+							<h:outputLabel for="condiciones" style="font-weight: bold;"
+								value="He leído y comprendo las condiciones" />
+
+							<p:selectBooleanCheckbox id="condiciones"
+								value="#{pagosRGDV1Controller.condiciones}">
+								<p:ajax update=":formSubmitV2:idBtnAceptar" />
+							</p:selectBooleanCheckbox>
+						</h:panelGrid>
+						<f:facet name="footer">
+							<div style="text-align: right;">
+								<p:commandButton id="idBtnAceptar" value="Aceptar" ajax="false"
+									styleClass="primary"
+									disabled="#{!pagosRGDV1Controller.condiciones}"
+									widgetVar="btnAceptar"
+									actionListener="#{pagosRGDV1Controller.executeBusinessLogic()}"
+									onclick="PF('dlg1V2').hide(); PF('continuarDialog').hide();PF('statusDialog').show();" />
+								<p:commandButton value="Cerrar" ajax="false"
+									styleClass="primary"
+									onclick="PF('dlg1V2').hide();PF('continuarDialog').hide()" />
+							</div>
+							
+						</f:facet>
+					</h:panelGrid>
+				</p:panel>
+			</p:dialog>
+		</h:form>
+		
+		<p:dialog header="Pago de servicios" id="dlgPagoServiciosV2" widgetVar="dlg1V2" modal="true" width="400" resizable="false" draggable="false">
+			<h:form id="formConfirmationV2">
+				<h:panelGrid columns="1" styleClass="w100" columnClasses="alJustify">
+					<h:outputText value="Estimado usuario, el pago realizado sobrepasa la cantidad establecida. El monto restante podrá ser utilizado por usted en próximas transacciones." />
+				</h:panelGrid>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Aceptar" styleClass="primary" actionListener="#{pagosRGDV1Controller.executeBusinessLogic()}" widgetVar="sendMore" update=":formSubmitV2:continuarDialog" />
+					<p:commandButton value="Cancelar" onclick="PF('dlg1V2').hide();" styleClass="secondary" widgetVar="sendCancel" />
+				</div>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog header="Pago de servicios" id="dlgPagoServicios" widgetVar="dlg1" modal="true" width="400" resizable="false" draggable="false">
+			<h:form id="formConfirmation">
+				<h:panelGrid columns="1" styleClass="w100" columnClasses="alJustify">
+					<h:outputText value="Estimado usuario, el pago realizado sobrepasa la cantidad establecida. El monto restante podrá ser utilizado por usted en próximas transacciones." />
+				</h:panelGrid>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Aceptar" styleClass="primary" widgetVar="sendMore" />
+					<p:commandButton value="Cancelar" onclick="PF('dlg1').hide();" styleClass="secondary" widgetVar="sendCancel" />
+				</div>
+			</h:form>
+		</p:dialog>
+		
+		<ui:include src="/pages/rcoa/generadorDesechos/datosOperador.xhtml" />
+	</ui:define>
+</ui:composition>
+</html>

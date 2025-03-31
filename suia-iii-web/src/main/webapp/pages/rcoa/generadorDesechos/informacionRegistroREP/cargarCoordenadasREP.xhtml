@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<p:dataTable id="tbl_coordenadas" rowIndexVar="index" value="#{cargarCoordenadasREPRcoaBean.coordinatesWrappers}" var="item" emptyMessage="#{labels['common.table.empty']}">
+	<p:subTable value="#{item.coordenadas}" var="coordenada">
+		<p:columnGroup type="header">
+			<p:row>
+				<p:column headerText="Grupo de coordenadas #{index + 1} (#{item.tipoForma})" styleClass="alCenter w100 table-column-header" colspan="3" />
+			</p:row>
+			<p:row>
+				<p:column headerText="Shape" styleClass="alCenter table-column-header" />
+				<p:column headerText="X" styleClass="alCenter table-column-header" />
+				<p:column headerText="Y" styleClass="alCenter table-column-header" />				
+			</p:row>
+		</p:columnGroup>
+		<p:column headerText="Shape" styleClass="alCenter">
+			<h:outputText value="#{coordenada.orden}" />
+		</p:column>
+		<p:column headerText="X" styleClass="alCenter">
+			<h:outputText value="#{coordenada.x.intValue()}" />
+		</p:column>
+		<p:column headerText="Y" styleClass="alCenter">
+			<h:outputText value="#{coordenada.y.intValue()}" />
+		</p:column>		
+	</p:subTable>
+</p:dataTable>
+
+<p:dialog header="Adjuntar coordenadas" widgetVar="adjuntarCoordenadas" modal="#{cargarCoordenadasREPRcoaBean.modalLoadFile}" resizable="false">
+	<p:panelGrid columns="1" columnClasses="label, value">
+		<h:outputText value="Seleccione el archivo excel (.xls)" />
+		<p:fileUpload uploadLabel="Subir" auto="true" cancelLabel="Cancelar" label="Seleccionar" fileUploadListener="#{cargarCoordenadasREPRcoaBean.handleFileUpload}" mode="advanced" dragDropSupport="false" update="#{cargarCoordenadasREPRcoaBean.updateComponentRoute}, :form:tablaUbicaciones, :form:containerCoordenadas" multiple="false" allowTypes="/(\.|\/)(xls)$/" 
+					oncomplete="showModalTransformation()" invalidFileMessage="El archivo es inválido." invalidSizeMessage="El archivo es demasiado grande." />
+	</p:panelGrid>
+	<div class="buttons">
+		<p:commandButton type="button" value="Cerrar" onclick="PF('adjuntarCoordenadas').hide()" />
+	</div>
+</p:dialog>
+
+
+			
+<p:dialog header="Información de intersección" id="certificadoIntercepcionRcoa1" widgetVar="certificadoIntercepcionRcoa1" modal="true" width="400" resizable="false" closable="false" draggable="false" >
+	<h:panelGroup>
+		<h:panelGrid columns="1" styleClass="alJustify w100">
+			<h:outputText value="#{cargarCoordenadasREPRcoaBean.zonasInterccionDetalle}" styleClass="bold" escape="false" />
+		</h:panelGrid>
+		<br />			
+		<div class="buttons">
+			<p:commandButton value="Aceptar" styleClass="primary" onclick="PF('certificadoIntercepcionRcoa1').hide()" 
+			update=":#{p:component('content')}"/>
+		</div>
+	</h:panelGroup>
+</p:dialog>
+			
+			
+<script type="text/javascript">
+	function showModalTransformation() {
+		PF('adjuntarCoordenadas').hide();
+		var showTransformation = #{empty libreEleccionAlias or !libreEleccionAlias};
+		if(showTransformation)
+			PF('transformadorCoordenadas').show();
+	}
+</script>
+
+</html>

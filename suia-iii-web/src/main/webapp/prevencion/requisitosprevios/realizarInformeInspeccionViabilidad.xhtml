@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+        >
+
+<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="content">
+    <script type="text/javascript">
+		 function removeDisabled()
+		    {
+		        $('.ui-state-disabled').removeClass('ui-state-disabled');
+		    }
+	</script>
+        <f:event type="preRenderView" listener="#{realizarInformeInspeccionViabilidadBean.validarTareaBpm()}"/>
+        <h:form>
+            <f:viewParam name="pronunciamiento" value="#{realizarInformeInspeccionViabilidadBean.tipoPronunciamiento}"/>
+            <p:panelGrid columns="1" layout="grid" styleClass="w50 alLeft"
+                         columnClasses="w100">
+                <f:facet name="header">
+                    <h:outputText value="Documentos del proyecto"/>
+                </f:facet>
+                <h:panelGrid styleClass="panel_data" columns="2"
+                             columnClasses="header, w20px alCenter" rowClasses="null, alt">
+                    <h:outputText value="Oficio del certificado de intersección"/>
+                    <p:commandButton icon="ui-icon-search"
+                                     styleClass="button-small primary"
+                                     action="#{revisarViabilidadController.descargarOficio()}"
+                                     ajax="false"/>
+                    <h:outputText value="Mapa del certificado de intersección"/>
+                    <p:commandButton icon="ui-icon-search"
+                                     styleClass="button-small primary"
+                                     action="#{revisarViabilidadController.descargarMapa()}"
+                                     ajax="false"/>
+                    <h:outputText value="Coordenadas del proyecto"/>
+                    <p:commandButton icon="ui-icon-search"
+                                     styleClass="button-small primary"
+                                     action="#{revisarViabilidadController.descargarCoordenadas()}"
+                                     ajax="false"/>
+                    <h:outputText value="Respuestas del proponente"/>
+                    <p:commandButton ajax="false" icon="ui-icon-search" styleClass="button-small primary">
+                        <p:fileDownload value="#{realizarInformeInspeccionViabilidadBean.fileStreamPreguntasProponente()}"/>
+                    </p:commandButton>
+                </h:panelGrid>
+
+            </p:panelGrid>
+        </h:form>
+
+        <br/>
+
+        <h:form id="form">
+            <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                <f:facet name="header">
+                    <mae:panelGridHeaderHelp value="Informe de Inspección"
+                                             conector="generalHelp"
+                                             image="#{request.contextPath}/resources/images/help-how.png"
+                                             help="#{helps['no.help.yet']}"/>
+                </f:facet>
+
+                <h:panelGrid cellpadding="2" styleClass="w50" id="botonFirmarPanel">
+
+                    <h:panelGrid id="labelInforme">
+
+                        <p:outputLabel rendered="#{realizarInformeInspeccionViabilidadBean.adjuntoInformeInspeccion != null}"
+                                       value="#{realizarInformeInspeccionViabilidadBean.adjuntoInformeInspeccion.name}"/>
+
+                        <p:outputLabel rendered="#{realizarInformeInspeccionViabilidadBean.adjuntoInformeInspeccion == null}"
+                                       value="Informe Inspeción(.pdf)"/>
+
+                    </h:panelGrid>
+
+                    <p:fileUpload id="informeFile" width="100%" required="true"
+                                  value="#{realizarInformeInspeccionViabilidadBean.adjuntoInformeInspeccion}"
+                                  sizeLimit="3145728" allowTypes="/(\.|\/)(pdf)$/"
+                                  fileUploadListener="#{realizarInformeInspeccionViabilidadController.cargarInformacion}"
+                                  label="Seleccionar" cancelLabel="Cancelar" uploadLabel="Adjuntar" auto="true"
+                                  update=":#{p:component('marchInforme')}, :#{p:component('labelInforme')}"
+                                  invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo pdf."
+                                  invalidSizeMessage="Debe adjuntar un archivo no mayor de 3 Mb."/>
+
+                    <p:growl id="marchInforme" showDetail="true"/>
+
+                </h:panelGrid>
+            </p:panelGrid>
+
+            <div class="buttons main" id="idGrupo">
+            
+                <p:commandButton value="Firmar" process="@this"
+					icon="ui-icon-key"
+					rendered="#{realizarInformeInspeccionViabilidadBean.mostrarBotonFirmar}"
+					actionListener="#{realizarInformeInspeccionViabilidadController.abrirFirma()}"
+					update=":formDialogs:pnlFirmaToken">
+
+				</p:commandButton>
+				<p:commandButton id="finalizarButton" value="Finalizar"
+					action="#{realizarInformeInspeccionViabilidadController.completarTarea()}"
+					disabled="#{!realizarInformeInspeccionViabilidadBean.habilitarBotonFinalizar}"
+					styleClass="primary" />
+            </div>
+        </h:form>
+        
+        <h:form id="formDialogs">
+
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600px" height="auto">
+				<p:panel>
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel value="Firmar informe de inspeccion BP"
+							styleClass="bold" />
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold"
+							rendered="#{!realizarInformeInspeccionViabilidadController.ambienteProduccion}" />
+						<p:selectOneRadio id="verificaToken"
+							value="#{realizarInformeInspeccionViabilidadController.token}"
+							rendered="#{!realizarInformeInspeccionViabilidadController.ambienteProduccion}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change" update=":formDialogs:pnlFirmaManual :formDialogs:pnlFirmaToken"
+								listener="#{realizarInformeInspeccionViabilidadController.guardarToken}" />
+						</p:selectOneRadio>
+
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{realizarInformeInspeccionViabilidadController.ambienteProduccion}" />
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{realizarInformeInspeccionViabilidadController.ambienteProduccion}" />
+
+						<h:panelGroup id="pnlFirmaToken">
+							<p:commandButton value="Firmar documento" type="button" 
+								styleClass="primary" icon="ui-icon-key"
+								rendered="#{realizarInformeInspeccionViabilidadController.token}"
+								onclick="window.location.href='#{realizarInformeInspeccionViabilidadController.firmarOficio()}'"  
+								process="@this"/>
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!realizarInformeInspeccionViabilidadController.token}">
+							<p:outputLabel value="1. Descargar el Informe" styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload
+									value="#{realizarInformeInspeccionViabilidadController.descargarInformacion()}" />
+							</p:commandButton>
+							<p:outputLabel for="uploadRequired"
+								value="2. Adjuntar el Informe firmado"
+								styleClass="bold" />
+							<p:fileUpload
+								id="Idfirmada"
+								fileUploadListener="#{realizarInformeInspeccionViabilidadController.uploadListenerInformacionFirmada}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreDocFirmado"
+								rendered="#{!realizarInformeInspeccionViabilidadController.token}">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreDocFirmado"
+								value="#{realizarInformeInspeccionViabilidadController.nombreDocumentoFirmado}" />
+						</h:panelGrid>
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!realizarInformeInspeccionViabilidadController.token and !realizarInformeInspeccionViabilidadController.informacionSubida}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+            <div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialog').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+                                 action="#{realizarInformeInspeccionViabilidadController.completarTarea()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+            </div>
+			</p:dialog>
+
+			<p:separator />
+
+
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

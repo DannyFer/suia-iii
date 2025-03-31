@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+		
+		<script type="text/javascript">
+			$(document).ready(function() {
+				$('.wizard-custom-btn-back').hide();
+				$('.wizard-custom-btn-only-end').hide();
+			});
+		</script>
+		<link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/plugin/wizard.css" />
+		<f:event type="preRenderView" listener="#{fichaAmbientalVerController.validarTareaBpm()}" />		
+		<p:dialog header="Ficha Ambiental" id="dlgFechaAmbiental" widgetVar="dlgFechaAmbiental" modal="true" resizable="false"
+			           width="950" height="615" closable="false">
+			<h:form id="formPagina">
+				<p:wizard widgetVar="wizard" showNavBar="false" nextLabel="Siguiente" backLabel="Atrás" id="wizardPMA">
+					<p:tab title="Marco legal referencial" id="marco" titletip="Responsabilidad extendida">
+						<ui:include src="/pages/rcoa/registroAmbientalPPC/fichaAmbiental/marcoLegalVer.xhtml" />
+					</p:tab>
+					<p:tab title="Descripción del proyecto" id="descripcion" titletip="Descripción del proyecto">
+						<ui:include src="/pages/rcoa/registroAmbientalPPC/fichaAmbiental/descripcionProyectoVer.xhtml" />
+					</p:tab>
+					<p:tab title="Plan de Manejo Ambiental - Construcción" id="pmaConstruccion" titletip="Descripción del proyecto" rendered="#{datosFichaRegistroAmbientalBean.existeConstruccion}">
+						<p:scrollPanel style="height:450px" mode="native">
+							<ui:include src="/pages/rcoa/registroAmbientalPPC/fichaAmbiental/planManejoAmbientalConstruccionVer.xhtml" />
+						</p:scrollPanel>
+					</p:tab>
+					<p:tab title="Plan de Manejo Ambiental - Operación" id="pmaOperacion" titletip="Descripción del proyecto">
+						<p:scrollPanel style="height:450px" mode="native">
+							<ui:include src="/pages/rcoa/registroAmbientalPPC/fichaAmbiental/planManejoAmbientalOperacionVer.xhtml" />
+						</p:scrollPanel>
+					</p:tab>
+				</p:wizard>
+				<p:outputPanel id="pnlButtons" styleClass="buttons main">
+					<p:commandButton value="Cancelar" styleClass="primary" action="#{fichaAmbientalVerController.revisarFicha()}" oncomplete="PF('dlgFechaAmbiental').hide();">
+					</p:commandButton>
+					<p:commandButton id="btnAtras" type="button" value="Atrás" icon="ui-icon-arrowthick-1-w" onclick="PF('wizard').back();reloadWizard();"
+						styleClass="wizard-custom-btn-back" process="@this" update="pnlButtons" />
+					<p:commandButton id="btnSiguiente" value="Siguiente" process="@this" icon="ui-icon-arrowthick-1-e"
+						oncomplete="PF('wizard').next();reloadWizard();" styleClass="wizard-custom-btn-next" update="pnlButtons"/>
+				</p:outputPanel>
+				<h:outputScript name="/plugin/wizard.js" library="js" />
+			</h:form>
+		</p:dialog>
+	</html>

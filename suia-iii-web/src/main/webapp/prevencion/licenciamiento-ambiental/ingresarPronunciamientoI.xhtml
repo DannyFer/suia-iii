@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:t="http://myfaces.apache.org/tomahawk"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+                xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}"
+                      target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small"
+                             icon="ui-icon-search"/>
+        </h:outputLink>
+    </ui:define>
+    <ui:define name="content">
+        <f:event type="preRenderView"
+                 listener="#{ingresarPronunciamientoBean.validarTareaBpm()}"/>
+        <h:form>
+            <br/>
+            <p:panelGrid columns="2" layout="grid" styleClass="w100"
+                         columnClasses="w50, field_mrg w50">
+                <p:outputLabel value="Número de oficio: " for="numeroOficio"/>
+                <p:outputLabel value="Fecha de envío del oficio: " for="fechaEnvio"/>
+
+                <p:inputText id="numeroOficio"
+                             value="#{ingresarPronunciamientoBean.pronunciamiento.idClase}"
+                             required="true"/>
+                <p:calendar id="fechaEnvio" value="#{ingresarPronunciamientoBean.pronunciamiento.fecha}"
+                            required="true"/>
+            </p:panelGrid>
+
+            <h3>Adjuntar oficio</h3>
+            <p:outputLabel value="Oficio de aprobaci&oacute;n (Archivo PDF): *"/>
+            <p:fileUpload id="archOficioAprobacion" width="100%" required="true"
+                          value="#{ingresarPronunciamientoBean.oficioPdf}"
+                          sizeLimit="3145728" allowTypes="/(\.|\/)(pdf)$/"
+                          label="Seleccionar" cancelLabel="Cancelar" uploadLabel="Adjuntar" auto="true"
+                          invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo pdf."
+                          invalidSizeMessage="Debe adjuntar un archivo no mayor de 3 Mb."/>
+
+            <h:panelGrid columns="2" style="margin-bottom:10px"
+                         cellpadding="5">
+                <p:outputLabel for="radioButtomPronunciamiento"
+                               value="¿Fue favorable el pronunciamiento?"/>
+                <p:selectOneRadio id="radioButtomPronunciamiento" required="true"
+                                  value="#{ingresarPronunciamientoBean.pronunciamiento.estado}">
+                    <f:selectItem itemLabel="Sí" itemValue="true"/>
+                    <f:selectItem itemLabel="No" itemValue="false"/>
+                    <p:ajax process="@this"/>
+                </p:selectOneRadio>
+            </h:panelGrid>
+
+            <div class="buttons main">
+                <p:commandButton value="Guardar"
+                                 action="#{ingresarPronunciamientoBean.guardar()}"
+                                 styleClass="ui-confirmdialog-yes" icon="ui-icon-check"/>
+                <p:commandButton value="Enviar"
+                                 action="#{ingresarPronunciamientoBean.completarTarea}"
+                                 title="Enviar datos" icon="ui-icon-check" styleClass="primary">
+                    <p:confirmDialog
+                            message="¿Estás seguro que desea enviar la información?"
+                            header="Confirmación de envío"></p:confirmDialog>
+                </p:commandButton>
+            </div>
+
+        </h:form>
+    </ui:define>
+</ui:composition>

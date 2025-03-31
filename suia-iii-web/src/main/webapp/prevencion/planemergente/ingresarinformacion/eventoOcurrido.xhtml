@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="content">
+        <ui:include src="../common/menu.xhtml"/>
+        <div class="content">
+            <f:event type="preRenderView" listener="#{eventoOcurridoController.validarTareaBpm()}"/>
+            <p:panel>
+                <f:facet name="header">Evento ocurrido</f:facet>
+                <h:form id="datosProyecto">
+                    <p:panelGrid columns="3" layout="grid" rendered="#{!planEmergenteController.regularizacion}">
+                        <f:facet name="header">Datos del proyecto</f:facet>
+
+                        <p:outputLabel for="nombre" value="Proyecto/Concesión/Actividad Económica"/>
+                        <p:inputText id="nombre" value="#{planEmergenteController.planEmergente.nombre}" required="true" maxlength="10485760" style="width: 100%"/>
+                        <p:outputLabel value=""/>
+
+                        <p:outputLabel value="Tipo de Sector"/>
+                        <p:selectOneMenu value="#{planEmergenteController.planEmergente.tipoSector.id}" style="width: 100%" >
+                            <p:ajax event="valueChange" update=":datosProyecto" listener="#{planEmergenteController.cambiarSector}" />
+                            <f:selectItems value="#{planEmergenteController.sectores}" var="sector" itemLabel="#{sector.nombre}" itemValue="#{sector.id}"/>
+                        </p:selectOneMenu>
+                        <p:outputLabel value=""/>
+
+                        <p:outputLabel value="Descripcion Actividades"/>
+                        <p:selectOneMenu value="#{planEmergenteController.planEmergente.catalogoCategoria.id}" style="width: 100%" >
+                            <f:selectItems value="#{planEmergenteController.categorias}" var="categoria" itemLabel="#{categoria.descripcion}" itemValue="#{categoria.id}"/>
+                        </p:selectOneMenu>
+                        <p:outputLabel value=""/>
+
+                        <p:outputLabel value="Tipo de representante"/>
+                        <p:selectOneMenu value="#{planEmergenteController.tipoRepresentante}" style="width: 100%">
+                            <p:ajax event="valueChange" update=":datosProyecto" />
+                            <f:selectItem itemLabel="Persona juridica" itemValue="PJ"/>
+                            <f:selectItem itemLabel="Persona natural" itemValue="PN"/>
+                        </p:selectOneMenu>
+                        <p:outputLabel value=""/>
+
+                        <p:outputLabel for="ci" value="RUC" rendered="#{planEmergenteController.tipoRepresentante eq 'PJ'}"/>
+                        <p:outputLabel for="ci" value="Cédula" rendered="#{planEmergenteController.tipoRepresentante ne 'PJ'}"/>
+                        <p:inputText id="ci" value="#{planEmergenteController.planEmergente.ciRepresentante}" maxlength="13" style="width: 100%" required="true"  />
+                        <p:outputLabel value=""/>
+
+                        <p:outputLabel for="representante" value="Nombre Representante Legal" rendered="#{planEmergenteController.tipoRepresentante eq 'PJ'}"/>
+                        <p:outputLabel for="representante" value="Nombre" rendered="#{planEmergenteController.tipoRepresentante ne 'PJ'}"/>
+                        <p:inputText id="representante" value="#{planEmergenteController.planEmergente.nombreRepresentante}" maxlength="500" style="width: 100%" required="true" />
+                        <t:div styleClass="buttons">
+                            <p:commandButton update=":eventos, :datosProyecto" actionListener="#{planEmergenteController.createPlan}"
+                                             value="Aceptar" icon="ui-icon-check" rendered="#{!planEmergenteController.regularizacion}" />
+                        </t:div>
+                    </p:panelGrid>
+                    <h:panelGrid columns="3" styleClass="mw50 panel_data" columnClasses="header w25, null, alCenter w20px" rowClasses="null, alt" rendered="#{planEmergenteController.regularizacion}">
+                        <f:facet name="header">Datos del proyecto</f:facet>
+
+                        <h:outputText value="Proyecto/Concesión/Actividad Económica"/>
+                        <h:outputText value="#{planEmergenteController.proyectoLicenciamientoAmbiental.nombre}" style="width: 100%"/>
+                        <h:outputText value=""/>
+
+                        <h:outputText value="Tipo de Sector"/>
+                        <h:outputText value="#{planEmergenteController.proyectoLicenciamientoAmbiental.tipoSector.nombre}" style="width: 100%" />
+                        <h:outputText value=""/>
+
+                        <h:outputText value="Descripcion Actividades"/>
+                        <h:outputText value="#{planEmergenteController.proyectoLicenciamientoAmbiental.catalogoCategoria.descripcion}" style="width: 100%" />
+                        <h:outputText value=""/>
+
+                        <h:outputText value="Tipo de representante"/>
+                        <h:outputText value="Persona jurídica" rendered="#{planEmergenteController.tipoRepresentante eq 'PJ'}"/>
+                        <h:outputText value="Persona natural" rendered="#{planEmergenteController.tipoRepresentante ne 'PJ'}"/>
+                        <h:outputText value=""/>
+
+                        <h:outputText value="RUC" rendered="#{planEmergenteController.tipoRepresentante eq 'PJ'}"/>
+                        <h:outputText value="Cédula" rendered="#{planEmergenteController.tipoRepresentante ne 'PJ'}"/>
+                        <h:outputText value="#{planEmergenteController.proyectoLicenciamientoAmbiental.usuario.pin}" style="width: 100%"/>
+                        <h:outputText value=""/>
+
+                        <h:outputText value="Representante Legal" rendered="#{planEmergenteController.tipoRepresentante eq 'PJ'}"/>
+                        <h:outputText value="Nombre" rendered="#{planEmergenteController.tipoRepresentante ne 'PJ'}"/>
+                        <h:outputText value="#{planEmergenteController.proponente}" style="width: 100%" />
+                        <h:outputText value=""/>
+                    </h:panelGrid>
+                </h:form><br/><br/>
+                <h:form id="eventos">
+                    <p:panelGrid columns="1" layout="grid">
+                        <f:facet name="header">Evento Ocurrido</f:facet>
+                        <f:facet name="header">
+                            <p:commandButton
+                                    styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg"  update=":eventoOcurridoDialog"
+                                    value="Adicionar" icon="ui-icon-plus" actionListener="#{eventoOcurridoController.nuevo}"
+                                    disabled="#{!planEmergenteController.regularizacion and !(planEmergenteController.creado)}"/>
+                        </f:facet>
+                        <p:dataTable value="#{eventoOcurridoController.eventosOcurridos}" var="evento" emptyMessage="Sin resultados" rowIndexVar="i">
+                            <p:columnGroup type="header">
+                                <p:row>
+                                    <p:column rowspan="2" headerText="Descripción"/>
+                                    <p:column rowspan="2" headerText="Fecha" style="width: 10%"/>
+                                    <p:column rowspan="2" headerText="Hora" style="width: 10%"/>
+                                    <p:column colspan="3" headerText="Ubicación"/>
+                                    <p:column rowspan="2" headerText="Acciones" style="width: 10%"/>
+                                </p:row>
+                                <p:row>
+                                    <p:column headerText="Provincia"/>
+                                    <p:column headerText="Cantón"/>
+                                    <p:column headerText="Parroquia"/>
+                                </p:row>
+                            </p:columnGroup>
+
+                            <p:column>
+                                <h:outputText value="#{evento.descripcion}"/>
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{evento.fecha}"/>
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{evento.tiempo}"/>
+                                <h:outputText value=" AM" rendered="#{evento.meridiano eq 'a'}"/>
+                                <h:outputText value=" PM" rendered="#{evento.meridiano eq 'p'}"/>
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{evento.parroquia.ubicacionesGeografica.ubicacionesGeografica.nombre}"/>
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{evento.parroquia.ubicacionesGeografica.nombre}"/>
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{evento.parroquia.nombre}"/>
+                            </p:column>
+                            <p:column style="width: 70px">
+                                <p:commandButton icon="ui-icon-pencil" update=":eventoOcurridoDialog" styleClass="button-small primary" title="Editar"
+                                                 actionListener="#{eventoOcurridoController.editarEvento(i)}" />
+                                <p:commandButton icon="ui-icon-trash" update=":eventos" styleClass="button-small primary" title="Eliminar"
+                                                 actionListener="#{eventoOcurridoController.eliminarEvento(i)}">
+                                    <p:confirm message="¿Estás seguro que desea eliminar este evento?" header="Confirmación" icon="ui-icon-alert" />
+                                </p:commandButton>
+                                <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                                    <p:commandButton value="Si" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                                    <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+                                </p:confirmDialog>
+                            </p:column>
+                        </p:dataTable>
+                    </p:panelGrid>
+                </h:form>
+            </p:panel>
+            <br/><br/>
+            <h:form>
+                <t:div styleClass="buttons main">
+                    <p:commandButton id="btnGuardar" actionListener="#{eventoOcurridoController.guardar}" value="Guardar" icon="ui-icon-disk"/>
+                    <p:commandButton value="Siguiente" immediate="true" process="@this" icon="ui-icon-arrowthick-1-e"
+                                     action="/prevencion/planemergente/ingresarinformacion/accionesImplementadas.jsf?faces-redirect=true" />
+                </t:div>
+            </h:form>
+            <br/><br/>
+            <ui:include src="../common/evento.xhtml"/>
+        </div>
+        <div class="clear"></div>
+    </ui:define>
+</ui:composition>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="content">
+
+		<style type="text/css">
+.cssRadioDisabled .ui-radiobutton .ui-state-active {
+	background: #008a8a !important;
+}
+
+.ui-datepicker-unselectable span {
+	background: #b9b5b5 !important;
+}
+
+.pnlSinBorde .ui-panelgrid-content {
+	border: none !important;
+	padding: 0px !important;
+}
+</style>
+		<ui:remove>
+			<f:event type="preRenderView"
+				listener="#{revisarDiagnosticoPlanAccionController.validarTareaBpm()}" />
+		</ui:remove>
+
+		<h:form id="form">
+			<p:tabView id="tabDocumentos"
+				activeIndex="#{revisarDiagnosticoPlanAccionController.activeIndex}">
+				<p:ajax event="tabChange" update="tabDocumentos :form:pnlButtons" />
+				<p:tab id="informe" title="Informe técnico">
+					<p:panelGrid columns="1" layout="grid" id="pnlDataInforme"
+						styleClass="w100 pnlSinBorde" columnClasses="w100">
+						<h:panelGrid styleClass="w100" id="pnlDocumentoInforme">
+							<object type="application/pdf"
+								data="#{informeOficioDiagnosticoAmbientalBean.informeTecnico.pathReporte}?pfdrid_c=true"
+								width="100%" height="500px">
+								Su navegador no soporta la visualización de pdf. Puede descargar
+								el documento presionando el siguiente botón:
+								<p:commandButton value="Descargar" styleClass="primary"
+									immediate="true" ajax="false" icon="ui-icon-arrowthick-1-s"
+									action="#">
+									<p:fileDownload
+										value="#{informeOficioDiagnosticoAmbientalBean.streamInforme}" />
+								</p:commandButton>
+							</object>
+						</h:panelGrid>
+						<br />
+						<h:panelGrid columns="1" styleClass="w100">
+							<p:outputLabel value="Pronunciamiento" />
+							<control:imputConTextoEnriquecido
+								valor="#{informeOficioDiagnosticoAmbientalBean.informeTecnico.pronunciamiento}"
+								soloLectura="false" />
+						</h:panelGrid>
+					</p:panelGrid>
+				</p:tab>
+				<p:tab id="oficio" title="Oficio de pronunciamiento">
+					<p:panelGrid columns="1" layout="grid" id="pnlDataOficio"
+						styleClass="w100 pnlSinBorde" columnClasses="w100">
+						<h:panelGrid styleClass="w100" id="pnlDocumentoOficio">
+							<object type="application/pdf"
+								data="#{informeOficioDiagnosticoAmbientalBean.oficioPronunciamiento.pathReporte}?pfdrid_c=true"
+								width="100%" height="500px">
+								Su navegador no soporta la visualización de pdf. Puede descargar
+								el documento presionando el siguiente botón:
+								<p:commandButton value="Descargar" styleClass="primary"
+									immediate="true" ajax="false" icon="ui-icon-arrowthick-1-s"
+									action="#">
+									<p:fileDownload
+										value="#{informeOficioDiagnosticoAmbientalBean.streamOficio}" />
+								</p:commandButton>
+							</object>
+						</h:panelGrid>
+						<br />
+						<h:panelGrid columns="1" styleClass="w100">
+							<p:outputLabel for="asuntoOficio" value="Asunto" />
+							<p:inputText id="asuntoOficio" maxlength="200"
+								value="#{informeOficioDiagnosticoAmbientalBean.oficioPronunciamiento.asunto}" />
+							<br />
+
+							<p:outputLabel value="Pronunciamiento" />
+							<control:imputConTextoEnriquecido
+								valor="#{informeOficioDiagnosticoAmbientalBean.oficioPronunciamiento.pronunciamiento}"
+								soloLectura="false" />
+						</h:panelGrid>
+					</p:panelGrid>
+				</p:tab>
+			</p:tabView>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText
+						value="Detalles de la revisión del diagnòstico ambiental" />
+				</f:facet>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100 pnlSinBorde">
+					<h:panelGrid columns="1" styleClass="w100">
+						<h:outputLabel value="Documentos de Diagnóstico Ambiental"
+							styleClass="bold" />
+						<p:dataTable id="tblDiagnosticos" styleClass="w50"
+							value="#{revisarDiagnosticoPlanAccionController.listaDocumentosDiagnostico}"
+							var="documento">
+							<p:column headerText="Documento">
+								<h:outputText value="#{documento.nombreDocumento}" />
+							</p:column>
+							<p:column headerText="Acciones" styleClass="w70px alCenter">
+								<p:commandButton icon="ui-icon-arrowthick-1-s"
+									styleClass="primary" title="Descargar" ajax="false"
+									immediate="true">
+									<p:fileDownload
+										value="#{revisarDiagnosticoPlanAccionController.descargarDocumento(documento)}" />
+								</p:commandButton>
+							</p:column>
+						</p:dataTable>
+						<br />
+					</h:panelGrid>
+
+					<h:panelGroup
+						rendered="#{!revisarDiagnosticoPlanAccionController.esProyectoNuevo and revisarDiagnosticoPlanAccionController.listaPlanAccion.size() > 0}">
+						<h:outputLabel value="Documentos del Plan de Acción"
+							styleClass="bold" />
+						<p:dataTable id="tblPlanAccion" styleClass="w50"
+							value="#{revisarDiagnosticoPlanAccionController.listaPlanAccion}"
+							var="documento">
+							<p:column headerText="Documento">
+								<h:outputText value="#{documento.nombreDocumento}" />
+							</p:column>
+							<p:column headerText="Acciones" styleClass="w70px alCenter">
+								<p:commandButton icon="ui-icon-arrowthick-1-s"
+									styleClass="primary" title="Descargar" ajax="false"
+									immediate="true">
+									<p:fileDownload
+										value="#{revisarDiagnosticoPlanAccionController.descargarDocumento(documento)}" />
+								</p:commandButton>
+							</p:column>
+						</p:dataTable>
+						<br />
+					</h:panelGroup>
+
+					<f:event type="preRenderView"
+						listener="#{revisarDiagnosticoPlanAccionController.validarExisteObservacionesDiagnostico()}" />
+					<h:outputLabel for="obsDiagnostico"
+						value="¿Tiene observaciones por Diagnóstico Ambiental? *"
+						styleClass="bold" />
+					<p:selectOneRadio id="obsDiagnostico" required="true"
+						disabled="true"
+						value="#{revisarDiagnosticoPlanAccionController.existeObservacionDiagnostico}"
+						requiredMessage="El campo '¿Tiene observaciones por Diagnóstico Ambiental?' es requerido"
+						styleClass="cssRadioDisabled">
+						<f:selectItem itemValue="true" itemLabel="Si" />
+						<f:selectItem itemValue="false" itemLabel="No" />
+						<p:ajax process="obsDiagnostico" immediate="true" />
+					</p:selectOneRadio>
+
+					<h:panelGroup id="pnlObsDiagnostico"
+						rendered="#{!revisarDiagnosticoPlanAccionController.esProyectoEnEjecucion}">
+						<observaciones:tablaObservacionesPreliminar
+							idComponent="obsDiagnosticoAmbiental"
+							seccion="Observaciones diagnostico ambiental" aparace="true"
+							mostrarSiVacio="true"
+							idActualizar=":form:tabDocumentos :form:obsDiagnostico :form:pnlButtons"
+							idClase="#{revisarDiagnosticoPlanAccionController.proyecto.id}"
+							nombreClase="observacionesDiagnosticoAmbiental"
+							soloLectura="false" />
+					</h:panelGroup>
+				</p:panelGrid>
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				rendered="#{revisarDiagnosticoPlanAccionController.observacionesOficio.size() >0}">
+				<f:facet name="header">
+					<h:outputText value="Observaciones Pronunciamiento" />
+				</f:facet>
+				<observaciones:tablaObservacionesPreliminar idComponent="obsOficio"
+					seccion="Pronunciamiento diagnostico ambiental"
+					componenteActualizarEliminar="pnlObsOficio" aparace="true"
+					mostrarSiVacio="false"
+					idClase="#{informeOficioDiagnosticoAmbientalBean.idInformePrincipal}"
+					nombreClase="pronunciamientoDiagnosticoAmbiental"
+					soloLectura="true" />
+			</p:panelGrid>
+
+			<br />
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Guardar"
+						styleClass="ui-confirmdialog-yes secondary" icon="ui-icon-disk"
+						update=":form:tabDocumentos pnlButtons"
+						process="@this :form:tabDocumentos:pnlDataInforme"
+						rendered="#{revisarDiagnosticoPlanAccionController.activeIndex eq 0}"
+						actionListener="#{informeOficioDiagnosticoAmbientalBean.guardarInforme()}" />
+					<p:commandButton value="Siguiente" styleClass="primary"
+						icon="ui-icon-arrowthick-1-e"
+						rendered="#{revisarDiagnosticoPlanAccionController.activeIndex eq 0}"
+						action="#{revisarDiagnosticoPlanAccionController.irTabOficio}"
+						update="tabDocumentos pnlButtons" />
+					<p:commandButton value="Atras" styleClass="primary"
+						icon="ui-icon-arrowthick-1-w"
+						rendered="#{revisarDiagnosticoPlanAccionController.activeIndex eq 1}"
+						action="#{revisarDiagnosticoPlanAccionController.irTabInforme}"
+						update="tabDocumentos pnlButtons" />
+					<p:commandButton value="Guardar"
+						styleClass="ui-confirmdialog-yes secondary" icon="ui-icon-disk"
+						update=":form:tabDocumentos pnlButtons"
+						process="@this :form:tabDocumentos:pnlDataOficio"
+						rendered="#{revisarDiagnosticoPlanAccionController.activeIndex eq 1}"
+						actionListener="#{informeOficioDiagnosticoAmbientalBean.guardarOficio()}" />
+					<p:commandButton value="Firmar Documento" icon="ui-icon-key"
+						styleClass="large" update="signDialogFirmar"
+						action="#{revisarDiagnosticoPlanAccionController.firmar()}"
+						rendered="#{revisarDiagnosticoPlanAccionController.activeIndex eq 1}" 
+						disabled="#{!informeOficioDiagnosticoAmbientalBean.datosGuardados}"/>
+				</div>
+			</h:panelGroup>
+
+			<p:dialog header="Firmar Documento" id="signDialogFirmar"
+				widgetVar="signDialogFirmar" closeOnEscape="false" modal="true"
+				resizable="false" width="600" height="auto" position="center top">
+
+				<p:panel>
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel
+							value="Informe técnico Nro: #{informeOficioDiagnosticoAmbientalBean.informeTecnico.codigo}"
+							styleClass="bold" />
+					</h:panelGrid>
+					<br />
+
+					<h:panelGrid columns="3" cellpadding="10" styleClass="w100"
+						style="text-align:right !important">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold" rendered="#{!revisarDiagnosticoPlanAccionController.firmaSoloToken}" />
+						<p:selectOneRadio id="verificaToken" rendered="#{!revisarDiagnosticoPlanAccionController.firmaSoloToken}"
+							value="#{revisarDiagnosticoPlanAccionController.token}"
+							style="alCenter">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change" update="panelFirma pnlFirmaToken" />
+						</p:selectOneRadio>
+						<h:panelGroup id="pnlFirmaToken">
+							<p:commandButton value="Firmar" type="button"
+								styleClass="primary large" icon="ui-icon-key"
+								rendered="#{revisarDiagnosticoPlanAccionController.token}"
+								onclick="window.location.href='#{revisarDiagnosticoPlanAccionController.firmaElectronica()}'" />
+						</h:panelGroup>
+					</h:panelGrid>
+					<h:panelGroup id="panelFirma">
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important"
+							rendered="#{!revisarDiagnosticoPlanAccionController.token}">
+							<p:outputLabel value="1. Descargue el documento"
+								styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload
+									value="#{revisarDiagnosticoPlanAccionController.getStreamInforme()}" />
+							</p:commandButton>
+
+							<p:outputLabel value="2. Adjunte el documento firmado "
+								styleClass="bold" />
+							<p:fileUpload
+								fileUploadListener="#{revisarDiagnosticoPlanAccionController.uploadListenerDocumentos}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="panelFirma">
+							</p:fileUpload>
+
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreDocFirmado"
+								value="#{revisarDiagnosticoPlanAccionController.documentoFirmaManual.nombreDocumento}" />
+						</h:panelGrid>
+
+					</h:panelGroup>
+				</p:panel>
+
+				<p:separator />
+				<t:div styleClass="buttons main">
+					<p:commandButton icon="ui-icon-close" styleClass="primary"
+						value="#{msg['button.cerrar']}" process="@this"
+						oncomplete="PF('signDialogFirmar').hide()" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						action="#{revisarDiagnosticoPlanAccionController.finalizar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</t:div>
+			</p:dialog>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

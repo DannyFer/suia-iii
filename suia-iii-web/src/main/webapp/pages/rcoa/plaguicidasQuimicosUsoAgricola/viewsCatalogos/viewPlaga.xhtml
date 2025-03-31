@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+
+<div style="padding-bottom: 12px; padding-left: 4px;">
+	<h:outputText value="Registro de plagas" styleClass="bold" />
+</div>
+
+<h:panelGrid styleClass="w100">
+
+	<p:dataTable id="dtPlagas" var="plaga" styleClass="table table-hover"
+		value="#{administracionCatalogosPquaController.listaPlagas}"
+		paginator="true" paginatorAlwaysVisible="false"
+		paginatorPosition="bottom"
+		emptyMessage="#{labels['common.table.empty']}"
+		currentPageReportTemplate="{currentPage} de {totalPages}" rows="20"
+		rowsPerPageTemplate="20,40,60">
+
+		<p:column headerText="Nombre científico de Plaga"
+			filterBy="#{plaga.nombreCientifico}" filterMatchMode="contains">
+			<h:outputText value="#{plaga.nombreCientifico}"
+				style="font-style: italic;" />
+		</p:column>
+		<p:column headerText="Nombre común de Plaga"
+			filterBy="#{plaga.nombreComunSplit}" filterMatchMode="contains">
+			<h:outputText value="#{plaga.nombreComunSplit}" escape="false" />
+		</p:column>
+		<p:column headerText="Agregar" styleClass="alCenter w10">
+			<f:facet name="header">
+				<p:commandButton value="Agregar" title="Agregar" styleClass="secondary" process="@this"
+					icon="ui-icon-plus"
+					actionListener="#{administracionCatalogosPquaController.agregarPlaga()}"
+					update=":form:tab:dlgAgregarPlaga"
+					oncomplete="PF('dlgAgregarPlaga').show();" immediate="true" />
+			</f:facet>
+			<p:commandButton styleClass="button-small primary" process="@this"
+				icon="ui-icon-pencil"
+				actionListener="#{administracionCatalogosPquaController.editarPlaga(plaga)}"
+				update=":form:tab:dlgAgregarPlaga"
+				oncomplete="PF('dlgAgregarPlaga').show();" immediate="true" />
+
+			<p:commandButton update="dtPlagas" styleClass="button-small primary"
+				process="@this" icon="ui-icon-trash"
+				actionListener="#{administracionCatalogosPquaController.eliminarPlaga(plaga)}"
+				immediate="true">
+				<p:confirm icon="ui-icon-alert" header="Confirmación"
+					message="¿Está seguro de eliminar el registro?" />
+			</p:commandButton>
+
+		</p:column>
+
+	</p:dataTable>
+</h:panelGrid>
+
+<p:dialog header="#{administracionCatalogosPquaController.headerPlaga}" id="dlgAgregarPlaga"
+	widgetVar="dlgAgregarPlaga" modal="true" resizable="false" width="600"
+	closable="false">
+
+	<h:outputText
+		value="Debe ingresar solo un nombre científico de plaga y sus nombres comunes separados por punto y coma." />
+	<br />
+	<br />
+	<p:panelGrid id="pnlPlagaAdd" columns="2" styleClass="panel_data w100"
+		columnClasses="header w40, w60">
+
+		<p:outputLabel value="Nombre científico de Plaga:"
+			style="color: white" for="txtNomPlaga" />
+		<p:inputText id="txtNomPlaga"
+			value="#{administracionCatalogosPquaController.plaga.nombreCientifico}"
+			maxlength="100" required="true" autocomplete="off"
+			requiredMessage="Nombre científico de Plaga es requerido"
+			placeholder="Lepidium bipinnatifidum" style="font-style: italic;" />
+		<p:outputLabel value="Nombre común de Plaga:" style="color: white"
+			for="txtNomComunPlaga" />
+		<p:inputText id="txtNomComunPlaga"
+			value="#{administracionCatalogosPquaController.plaga.nombreComun}"
+			maxlength="200" required="true" autocomplete="off"
+			requiredMessage="Nombre común de Plaga es requerido"
+			placeholder="TSE-TZERA;CHICHICARA" />
+
+	</p:panelGrid>
+	<br />
+	<p:outputPanel>
+		<div class="buttons">
+			<p:commandButton value="Cancelar" styleClass="wizard-custom-btn-back"
+				immediate="true" oncomplete="PF('dlgAgregarPlaga').hide();"
+				resetValues="true"
+				actionListener="#{administracionCatalogosPquaController.limpiarPlaga()}" />
+			<p:commandButton value="Aceptar"
+				actionListener="#{administracionCatalogosPquaController.aceptarPlaga()}"
+				oncomplete="if(!args.validationFailed) PF('dlgAgregarPlaga').hide();"
+				update="dtPlagas" process="dlgAgregarPlaga" />
+		</div>
+	</p:outputPanel>
+</p:dialog>
+
+
+</html>

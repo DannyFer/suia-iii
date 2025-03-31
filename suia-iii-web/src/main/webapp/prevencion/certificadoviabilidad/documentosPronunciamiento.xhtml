@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="context-extra">
+
+    </ui:define>
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{descargarDocumentoPronunciamientoBean.validarTareaBpm()}"/>
+        <h:form id="form">
+
+            <!--Cuestionario de Intersección del Proyecto. Una vez descargado y respondido las preguntas adjunte el cuestionario con las respuestas correspondientes.-->
+
+            <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                <f:facet name="header">
+                    <mae:panelGridHeaderHelp value="Cuestionario de Intersección"
+                                             conector="generalHelp"
+                                             image="#{request.contextPath}/resources/images/help-how.png"
+                                             help="#{helps['no.help.yet']}"/>
+                </f:facet>
+
+                <h:panelGrid cellpadding="2" styleClass="w50">
+
+                    <h:panelGrid cellpadding="2" columns="2">
+
+                        <p:outputLabel value="Cuestionario de Intersección"/>
+
+                        <p:commandButton ajax="false"
+                                         icon="ui-icon-arrowthick-1-s" id="certificado"
+                                         styleClass="oculto primary">
+                            <p:fileDownload value="#{descargarDocumentoPronunciamientoBean.stream}"/>
+                        </p:commandButton>
+
+                    </h:panelGrid>
+
+
+                    <h:panelGrid id="labelDocumento">
+
+                        <p:outputLabel rendered="#{descargarDocumentoPronunciamientoBean.cuestionario != null}"
+                                       value="#{descargarDocumentoPronunciamientoBean.cuestionario.name}"/>
+
+                        <p:outputLabel rendered="#{descargarDocumentoPronunciamientoBean.cuestionario == null}"
+                                       value="Cuestionario con respuestas(.doc, .docx, .pdf)"/>
+
+                    </h:panelGrid>
+
+                    <p:fileUpload id="archCuestionario" width="100%" required="true"
+                                  value="#{descargarDocumentoPronunciamientoBean.cuestionario}"
+                                  sizeLimit="3145728" allowTypes="/(\.|\/)(doc|docx|pdf)$/"
+                                  fileUploadListener="#{descargarDocumentoPronunciamientoBean.uploadListener}"
+                                  label="Seleccionar" cancelLabel="Cancelar" uploadLabel="Adjuntar" auto="true"
+                                  update=":#{p:component('marchCuestionario')}, :#{p:component('labelDocumento')}"
+                                  invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo doc, docx o pdf."
+                                  invalidSizeMessage="Debe adjuntar un archivo no mayor de 3 Mb."/>
+
+                    <p:growl id="marchCuestionario" showDetail="true"/>
+
+                </h:panelGrid>
+            </p:panelGrid>
+
+            <div class="buttons main">
+                <p:commandButton value="Enviar"
+                                 action="#{descargarDocumentoPronunciamientoController.iniciarTarea}"
+                                 title="Enviar datos" icon="ui-icon-check">
+                </p:commandButton>
+            </div>
+
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

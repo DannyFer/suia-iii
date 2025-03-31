@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+<ui:composition>
+	<center>
+		<script type="text/javascript"> 
+				
+				function handleSaveUserRequest(xhr, status, args) {  
+			        if(args.validationFailed || !args.sucess) {  		        	
+			            PF('technicalTeamDialog').jq.effect("", { times:5 }, 100);
+			        } 
+			        else { 		        		
+			            PF('technicalTeamDialog').hide();
+			        }		
+			    }
+	
+				function up(e){
+					e.preventDefault();				
+					$('html, body', window.parent.document).animate({scrollTop:0}, 'slow');				
+				}
+	
+				function searchTypeBlock(value) {
+					
+					if(value == 1)
+					{					
+						$('#tdrEiaForm\\:typeSearchBlock').text('N° de Bloque:');
+					}
+					if(value == 2)
+					{				
+						$('#tdrEiaForm\\:typeSearchBlock').text('Denominación del Área:');	
+					}
+				}		 
+				</script>
+
+		<f:loadBundle var="msg"
+			basename="ec.gob.ambiente.core.resources.messages_es" />
+		<f:loadBundle var="helps"
+			basename="ec.gob.ambiente.core.resources.helps_es" />
+		<ui:param name="pageTitle" value="#{msg['title.auditoria']}" />
+		<h:panelGrid columns="1" id="procesar" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="#{msg['label.generalDataTdrEia']}"
+					styleClass="encabezado1_4em alLeft" />
+			</f:facet>
+			<p:fragment>
+				<p:dataTable id="blocksDatatable"
+					emptyMessage="#{labels['common.table.empty']}" rowIndexVar="rowIndex"
+					var="block" value="#{ingresarTDRBean.listaBloques}"
+					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					rowsPerPageTemplate="5,10,15" paginator="true"
+					paginatorAlwaysVisible="false" paginatorPosition="bottom" rows="7">
+					<p:column headerText="#{msg['label.numero']}" width="5%">
+												#{rowIndex+1}
+											</p:column>
+					<p:column headerText="#{msg['label.blockNumber']}">
+						<h:outputText value="#{block.nombre}" />
+					</p:column>
+					<p:column headerText="#{msg['label.denominationArea']}">
+						<h:outputText value="#{block.denominacionArea}" />
+					</p:column>
+
+				</p:dataTable>
+
+				<p:spacer height="15px"></p:spacer>
+
+				<h:panelGrid columns="2" styleClass="w100">
+
+					<p:outputLabel value="#{msg['label.surfaceArea']}"
+						for="surfaceArea"></p:outputLabel>
+					<p:outputLabel id="surfaceArea"
+						value="#{ingresarTDRBean.proyectoActivo.area} #{ingresarTDRBean.proyectoActivo.unidad}"
+						readonly="true" />
+
+					<p:outputLabel value="#{msg['label.referentialArea']}"
+						for="referenceArea"></p:outputLabel>
+					<p:inputText id="referenceArea"
+						readonly="#{ingresarTDRBean.procesoIniciado}"
+						value="#{ingresarTDRBean.tdrEia.tdelReferentialInfluenceArea}"
+						maxlength="50" style="width:100px;" required="true"
+						requiredMessage="#{msg['required.tdrLicensing.referentialInfluenceArea']}">
+						<!-- 				<pe:keyFilter regEx="/[a-z0-9Ññ\s-._]/i " /> -->
+					</p:inputText>
+					<p:outputLabel value="#{msg['label.executionTime']}"
+						for="executionTime"></p:outputLabel>
+					<p:inputText id="executionTime"
+						readonly="#{ingresarTDRBean.procesoIniciado}"
+						value="#{ingresarTDRBean.tdrEia.tdelExecutionTime}" maxlength="3"
+						style="width:100px;" required="true"
+						requiredMessage="#{msg['required.tdrLicensing.executionTime']}">
+						<!-- 				<pe:keyFilter regEx="/[\d\-]/" /> -->
+					</p:inputText>
+					<p:outputLabel value="#{msg['label.codeConsultant']}"
+						for="codeConsultant"></p:outputLabel>
+					<p:selectOneMenu id="codeConsultant" required="false"
+						disabled="#{ingresarTDRBean.procesoIniciado}"
+						value="#{ingresarTDRBean.tdrEia.consId}" style="width:500px;">
+						<f:selectItem itemLabel="Seleccione un consultor" />
+						<f:selectItems value="#{ingresarTDRBean.listaConsultores}"
+							var="consultant" itemLabel="#{consultant.nombre}"
+							itemValue="#{consultant.id}" />
+					</p:selectOneMenu>
+
+
+
+				</h:panelGrid>
+				<h:panelGrid columns="2" styleClass="w100"
+					columnClasses="w50,w50 alRight">
+					<p:outputLabel value="#{msg['label.technicalGroup']}"
+						styleClass="bold"></p:outputLabel>
+					<p:commandButton value="#{msg['button.addTechnicalTeam']}"
+						rendered="#{!ingresarTDRBean.procesoIniciado}" process="@this"
+						immediate="true" icon="ui-icon-plus"
+						actionListener="#{ingresarTDRBean.limpiarEquipoTecnico()}"
+						oncomplete="PF('technicalTeamDialog').show()"
+						update="@(.technicalDlg)"></p:commandButton>
+				</h:panelGrid>
+
+				<p:dataTable id="technicalGroupDatatable"
+					styleClass="technicalGroupDatatable"
+					value="#{ingresarTDRBean.equipoTecnicoLista}"
+					emptyMessage="#{labels['common.table.empty']}" rowIndexVar="rowIndex"
+					var="technicalTeam" paginator="true" rows="5"
+					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					rowsPerPageTemplate="5,10,15" paginatorPosition="bottom">
+
+					<p:column headerText="#{msg['label.numero']}"
+						style="text-align: center" width="25px">
+										#{rowIndex+1}
+									</p:column>
+					<p:column headerText="#{msg['label.especialidad']}">
+						<h:outputText value="#{technicalTeam.especialidad}" />
+					</p:column>
+					<p:column headerText="#{msg['label.tareasDesarrollar']}">
+						<h:outputText value="#{technicalTeam.tareasDesarrollar}" />
+					</p:column>
+					<p:column headerText="Acciones" style="text-align: center"
+						rendered="#{!ingresarTDRBean.procesoIniciado}">
+						<p:fragment>
+							<p:commandButton title="#{msg['button.editar']}"
+								actionListener="#{ingresarTDRBean.editarEquipoTecnico(technicalTeam)}"
+								icon="ui-icon-pencil" update="@(.technicalDlg)" process="@this"
+								oncomplete="PF('technicalTeamDialog').show()"></p:commandButton>
+							<p:commandButton title="#{msg['button.eliminar']}"
+								update="@(.technicalGroupDatatable)" process="@this"
+								actionListener="#{ingresarTDRBean.eliminarEquipoTecnico(technicalTeam)}"
+								icon="ui-icon-trash"></p:commandButton>
+						</p:fragment>
+					</p:column>
+				</p:dataTable>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100 coordenadas"
+					columnClasses="">
+					<f:facet name="header">
+						<p:commandButton value="Adjuntar"
+							onclick="PF('adjuntarCoordenadas').show()"
+							styleClass="button-small-text toRight field_mrg" type="button"
+							icon="ui-icon-document" />
+						<mae:panelGridHeaderHelp
+							value="Sistema de referencias (Formato: sistema WGS84, zona 17S)"
+							conector="coordenadasHelp"
+							image="#{request.contextPath}/resources/images/coordenadas.png"
+							help="#{helps['registro.coordenadas']}">
+						</mae:panelGridHeaderHelp>
+					</f:facet>
+					<ui:include src="/comun/cargarCoordenadas.xhtml" />
+
+
+				</p:panelGrid>
+
+				<p:fragment>
+					<h:panelGrid columns="2"
+						rendered="#{ingresarTDRBean.procesoIniciado}">
+						<p:outputLabel for="commentRadio"
+							value="#{msg['label.prevencion.tdr.observacionLabel']}"
+							styleClass="bold" />
+						<p:selectOneRadio required="true" id="commentRadio"
+							value="#{ingresarTDRBean.observacionTdrEiaLiciencia.obs_fichaTecnica}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax process="@this" update="commentValue"></p:ajax>
+						</p:selectOneRadio>
+					</h:panelGrid>
+				</p:fragment>
+				<h:panelGroup id="commentValue"
+					rendered="#{ingresarTDRBean.procesoIniciado}">
+					<p:outputLabel value="#{msg['label.prevencion.tdr.justifique']} *"
+						rendered="#{ingresarTDRBean.observacionTdrEiaLiciencia.obs_fichaTecnica}" />
+					<control:imputConTextoEnriquecido
+						requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.justifique']} #{msg['label.prevencion.tdr.requerido']}."
+						valor="#{ingresarTDRBean.observacionTdrEiaLiciencia.fichaTecnica}"
+						soloLectura="false"
+						requerido="#{ingresarTDRBean.observacionTdrEiaLiciencia.obs_fichaTecnica}"
+						rendered="#{ingresarTDRBean.observacionTdrEiaLiciencia.obs_fichaTecnica}" />
+				</h:panelGroup>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton id="saveComment"
+						rendered="#{ingresarTDRBean.procesoIniciado}"
+						process=":formularioTDR:procesar" value="#{msg['button.guardar']}"
+						actionListener="#{ingresarObservacionesTDRController.guardarObservacion(1)}"
+						update=":formularioTDR" icon="ui-icon-disk"></p:commandButton>
+
+
+					<p:commandButton id="saveAll"
+						rendered="#{ingresarTDRBean.procesoIniciado==false}"
+						value="#{msg['button.guardar']}" process=":formularioTDR:procesar"
+						actionListener="#{ingresarTDRBean.adicionarFichaTecnica()}"
+						update=":formularioTDR" icon="ui-icon-disk"></p:commandButton>
+
+					<p:commandButton
+						rendered="#{ingresarTDRBean.procesoIniciado==false}"
+						styleClass="secondary" value="#{msg['button.limpiar']}"
+						icon="ui-icon-document"
+						actionListener="#{ingresarTDRBean.limpiarFormulario(1)}"
+						update=":formularioTDR" process="@this">
+						<p:resetInput target=":formularioTDR" />
+					</p:commandButton>
+				</div>
+			</p:fragment>
+		</h:panelGrid>
+	</center>
+	<p:dialog header="#{msg['label.registerTechnicalTeam']}"
+		widgetVar="technicalTeamDialog" resizable="false" id="technicalDlg"
+		styleClass="technicalDlg" modal="false" appendTo="@(.panelInterno)">
+		<p:fragment>
+			<p:messages id="messagesTechnical"></p:messages>
+			<p:panel>
+				<h:panelGrid columns="2">
+					<p:outputLabel value="#{msg['label.especialidad']}:"></p:outputLabel>
+					<p:inputText id="specialty"
+						value="#{ingresarTDRBean.tecnicoActivo.especialidad}"
+						style="width:300px" maxlength="50" required="true"
+						requiredMessage="#{msg['required.tdrLicensing.speciality']}">
+					</p:inputText>
+					<p:outputLabel value="#{msg['label.tareasDesarrollar']}:"></p:outputLabel>
+					<p:inputText id="taskDevelop"
+						value="#{ingresarTDRBean.tecnicoActivo.tareasDesarrollar}"
+						style="width:300px" maxlength="50" required="true"
+						requiredMessage="#{msg['required.tdrLicensing.taskDevelop']}">
+
+					</p:inputText>
+				</h:panelGrid>
+				<f:facet name="footer">
+					<div style="display: block; width: 100%; text-align: right;">
+						<p:commandButton id="saveTechnical"
+							oncomplete="handleSaveUserRequest(xhr, status, args)"
+							value="#{msg['button.guardar']}"
+							actionListener="#{ingresarTDRBean.adicionarEquipoTecnico()}"
+							update="@(.technicalGroupDatatable)" icon="ui-icon-disk"></p:commandButton>
+						<p:commandButton value="#{msg['button.cancelar']}" process="@this"
+							immediate="true" onclick="PF('technicalTeamDialog').hide()"
+							icon="ui-icon-close"></p:commandButton>
+					</div>
+				</f:facet>
+			</p:panel>
+		</p:fragment>
+	</p:dialog>
+</ui:composition>
+</html>

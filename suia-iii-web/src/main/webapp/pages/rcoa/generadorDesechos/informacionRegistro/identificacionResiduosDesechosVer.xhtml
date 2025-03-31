@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+
+<h:panelGroup id="desechosContainerGeneral">
+	<p:panelGrid columns="1" layout="grid"
+		styleClass="buttonAddDesecho-comunPageContainer w100 alCenter">
+		<f:facet name="header">
+			<h:outputText
+				value="Identificación de residuo o desecho peligroso y/o especial conforme al CIIU" />
+		</f:facet>
+
+		<p:panelGrid  rendered="false">
+		<div align="justify">De manera general, con base al Código
+			Internacional Industrial Uniforme CIIU y los Listados Nacionales de
+			Residuos o Desechos Peligrosos o Especiales, el Ministerio del
+			Ambiente ha predeterminado la lista de residuos y desechos peligrosos
+			o especiales que genera su proyecto, obra o actividad. En el caso, en
+			que no se muestre un listado predeterminado, sírvase seleccionar los
+			residuos o desechos que genera su actividad a través del botón “+
+			Adicionar".</div>
+
+		<br />
+		<br />
+
+		<div align="justify">Si, del listado preestablecido, usted
+			considera que uno o varios residuos o desechos aquí listados, NO son
+			generados por su proyecto obra o actividad, deberá seleccionarlos, en
+			el campo “Residuo o desecho NO generado”, y adjuntar por cada uno de
+			ellos un archivo que justifique de manera técnica la no generación
+			del residuo o desecho seleccionado, con base en la plantilla que
+			puede ser descargada del botón “Descargar plantilla”. La
+			justificación será verificada por los diferentes mecanismos de
+			control establecidos en la normativa ambiental vigente (inspecciones,
+			auditorías, informes ambientales, etc.)</div>
+
+		<br />
+		<br />
+
+		<div align="justify">Si usted considera que su proyecto, obra o
+			actividad genera otros residuos o desechos adicionales a los
+			mostrados en el listado preestablecido, sírvase seleccionar los
+			residuos o desechos adicionales que genera su actividad a través del
+			botón “+ Adicionar"</div>
+
+		</p:panelGrid>
+
+		<h:panelGroup id="desechoContainer">
+			<p:dataTable
+				value="#{informacionRegistroGeneradorVerController.desechosRcoaSeleccionados}"
+				id="tableDesechos" var="desecho"
+				sortBy="#{desecho.desechoPeligroso.descripcion}"
+				sortOrder="ASCENDING" rows="10" paginator="true"
+				paginatorAlwaysVisible="false" paginatorPosition="bottom"
+				emptyMessage="#{labels['common.table.empty']}">
+				<p:column headerText="Código del residuo o desecho"
+					style="width: 8%;">
+					<h:outputText value="#{desecho.desechoPeligroso.clave}" />
+				</p:column>
+				<p:column
+					headerText="Nombre del residuo o desecho peligroso o especial"
+					style="width: 12%;">
+					<h:outputText value="#{desecho.desechoPeligroso.descripcion}" />
+				</p:column>
+
+				<p:column headerText="Descripción del residuo o desecho (opcional)"
+					styleClass="w15" style="text-align: center;">					
+					<h:outputText value="#{desecho.descripcionDesecho}" />					
+				</p:column>
+
+				<p:column headerText="CRTIB" style="text-align: center; width:6%;">
+					<h:outputText value="#{desecho.desechoPeligroso.critb}" />
+				</p:column>
+				<p:column headerText="Residuo o Desechos NO Generado"
+					style="text-align: center; width:9%">
+					<p:selectBooleanCheckbox value="#{desecho.generaDesecho}"
+						required="true"
+						requiredMessage="Seleccionar (No genera) es requerido"
+						disabled="true">
+					</p:selectBooleanCheckbox>
+
+				</p:column>
+				<p:column headerText="Generación anual" styleClass="w25" style="text-align: center;">
+							
+						<h:outputText value="#{informacionRegistroGeneradorVerController.valorDoubleToneladas(desecho.cantidadKilos)} kg" 
+						rendered="#{desecho.generaDesecho eq null ? true : !desecho.generaDesecho}"/>
+						<br/><br />
+						<h:outputText value="#{informacionRegistroGeneradorVerController.valorDoubleToneladas(desecho.cantidadToneladas)} t" 
+						rendered="#{desecho.generaDesecho eq null ? true : !desecho.generaDesecho}"/>
+
+
+						<p:commandButton value="Descargar"
+							styleClass="button-small-text field_mrg primary"
+							icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true"
+							rendered="#{desecho.generaDesecho eq null ? false : desecho.generaDesecho}">
+							<p:fileDownload
+								value="#{informacionRegistroGeneradorVerController.getDocumentoDownload(desecho.documentoGenera)}" />
+						</p:commandButton>
+						<br/>
+						<p:outputLabel id="txtNombreDocGen"
+							value="#{desecho.documentoGenera.nombre}" />						
+						</p:column>
+				<p:column headerText="Origen de la generación"
+					style="text-align:center; width:13%;">
+					
+					<h:outputText value="#{desecho.nombresGeneracion}" escape="false" />					
+
+				</p:column>
+				<p:column headerText="Gestión Propia" style="text-align: center; width:10%;">
+					<p:selectBooleanCheckbox value="#{desecho.gestionInterna}"
+						id="chkGestionInterna" required="true"
+						requiredMessage="Gestión Propia es requerido"
+						disabled="true">						
+					</p:selectBooleanCheckbox>
+
+					<h:panelGrid id="gestionInternaAdjunto" columns="1" styleClass="noBorders w100">
+						<p:commandButton value="Adjuntos" id="DocumentosBtn" oncomplete="PF('listaMostrarDocumentosGestion').show()"
+							styleClass="field_mrg primary" actionListener="#{adicionarDesechosAliasRcoaBean.mostrarDocumentosGestionPropia(desecho)}"
+							rendered="#{desecho.gestionInterna eq null ? false : desecho.gestionInterna and adicionarDesechosAliasRcoaBean.tipoPermisoRGD eq 'RGDAAA' }"
+							process="@this" update=":form:tabViewRgd:listaMostrarDocumentosGestion">
+							<f:setPropertyActionListener value="#{desecho}" target="#{adicionarDesechosAliasRcoaBean.objetoSeleccionado}" />
+						</p:commandButton>
+					</h:panelGrid>
+					
+					<ui:remove>
+					<br/>
+					<p:commandButton value="Descargar"
+							styleClass="button-small-text field_mrg primary"
+							icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true"
+							rendered="#{desecho.gestionInterna eq null ? false : desecho.gestionInterna}">
+							<p:fileDownload
+								value="#{informacionRegistroGeneradorVerController.getDocumentoDownload(desecho.documentoGestion)}" />
+						</p:commandButton>
+						<br/>
+						<p:outputLabel value="#{desecho.documentoGestion.nombre}" />
+
+
+					<h:panelGrid id="gestionInternaAdjunto" columns="1"
+						styleClass="noBorders w100">
+						<p:commandButton value="Adjuntar" id="adjuntarArchivoGestionBtn"
+							oncomplete="PF('adjuntarDocumentoGestion').show()"
+							styleClass="field_mrg primary"
+							rendered="#{desecho.gestionInterna eq null ? false : desecho.gestionInterna}"
+							immediate="true">
+						</p:commandButton>
+						<p:outputLabel value="#{desecho.documentoGestion.nombre}" />
+					</h:panelGrid>
+</ui:remove>
+				</p:column>				
+			</p:dataTable>
+
+		</h:panelGroup>
+
+	</p:panelGrid>
+</h:panelGroup>
+
+
+		<p:dialog width="500" id="listaMostrarDocumentosGestion" widgetVar="listaMostrarDocumentosGestion"
+			header="Lista documentos gestión propia" modal="true" resizable="false">
+			<p:outputPanel id="pnlDocumentosGestion">
+			<p:dataTable value="#{adicionarDesechosAliasRcoaBean.listaDocumentosGestion}" id="tblDocumentos" var="documento" rows="10" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" emptyMessage="#{labels['common.table.empty']}">
+				<p:column headerText="Documento" styleClass="w75">
+					<h:outputText value="#{documento.nombre}"/>	
+				</p:column>
+				<p:column headerText="Acción" styleClass="w25">
+					<p:commandButton icon="ui-icon-arrowthick-1-s" styleClass="secondary" title="Ver" ajax="false"
+							immediate="true" rendered="#{documento.nombre ne null}">
+							<p:fileDownload value="#{adicionarDesechosAliasRcoaBean.descargarDocumento(documento)}" />
+					</p:commandButton>
+				</p:column>
+			</p:dataTable>	
+			</p:outputPanel>
+			<br/>
+			<div class="buttons">
+				<p:commandButton icon="ui-icon-cancel" value="Cerrar" process="@this"
+						oncomplete="PF('listaMostrarDocumentosGestion').hide()" styleClass="secondary" />
+			</div>
+		</p:dialog>
+</html>

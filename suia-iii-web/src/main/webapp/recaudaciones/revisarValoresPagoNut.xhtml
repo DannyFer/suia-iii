@@ -1,0 +1,87 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+	<ui:define name="content">
+		<h:form id="form">		
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" id="panelGeneral">
+	              <f:facet name="header">
+	              	NUT Generados para el Pago
+	              </f:facet>
+	              <p:outputLabel for="requiere-modificaciones" styleClass="bold"
+                           value="¿Existen observaciones?"/>
+		            <p:selectOneRadio id="requiere-modificaciones" styleClass="bold"
+		                              value="#{revisarNUTController.nutCorrecto}"
+		                              required="true">
+		                <f:selectItem itemLabel="Si" itemValue="false"/>
+		                <f:selectItem itemLabel="No" itemValue="true"/>
+		            </p:selectOneRadio>
+	              
+	              <h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w15, value" rowClasses="null, alt">
+					<h:outputText value="Usuario:"/>
+					<h:outputText value="#{generarPagoNUTController.nombreUsuarioSolicitud}" />
+					<h:outputText value="Código Solicitud:"/>
+					<h:outputText value="#{generarPagoNUTController.solicitudUsuario.solicitudCodigo}" />
+					<h:outputText value="Solicitud:" />
+					<h:outputText value="#{generarPagoNUTController.solicitudUsuario.solicitudDescripcion}" />
+				</h:panelGrid>
+				
+				<ui:repeat value="#{generarPagoNUTController.listNut}" var="listNut" >
+					<p:dataTable rowIndexVar="index" id="tableTN"
+									value="#{listNut.listTarifasNUT}" var="item"
+									emptyMessage="#{labels['common.table.empty']}">
+						<f:facet name="header">
+							<h:outputText value="Código NUT: #{listNut.nutCodigo}" rendered="#{listNut.nutCodigo != null}"/>
+						</f:facet>
+						<p:column headerText="Item" styleClass="alCenter w5">
+							<h:outputText value="#{index + 1}" />
+						</p:column>
+						<p:column headerText="Código" styleClass="alCenter w10">
+							<h:outputText value="#{item.tarifas.tasasCodigo}" />
+						</p:column>
+						<p:column headerText="Nombre" styleClass="alLeft w15">
+							<h:outputText value="#{item.tarifas.tasasNombre}" styleClass="alJustify"/>
+						</p:column>
+						<p:column headerText="Descripción" styleClass="alLeft w30">
+							<h:outputText value="#{item.tarifas.tasasDescripcion}" styleClass="alJustify"/>
+						</p:column>
+						<p:column headerText="N° Cuenta" styleClass="alCenter w10">
+							<h:outputText value="#{item.tarifas.cuentas.cuentaNumero}" />
+						</p:column>
+						<p:column headerText="Valor Unitario" styleClass="alCenter w10">
+							<h:outputText value="#{item.valorUnitario} $" />
+						</p:column>
+						<p:column headerText="Cantidad" styleClass="alCenter w10">
+							<h:outputText value="#{item.cantidad}" />
+						</p:column>
+						<p:column headerText="Subtotal" styleClass="alCenter w10">
+							<h:outputText value="#{item.valorUnitario * item.cantidad} $" />
+						</p:column>
+						<p:columnGroup id="total" type="footer">
+		                    <p:row>
+		                        <p:column colspan="7" styleClass="alRight" footerText="Total a Pagar:" />
+		                        <p:column footerText="#{listNut.nutValor} $" />
+		                        <p:column/>
+		                    </p:row>
+		                </p:columnGroup>
+					</p:dataTable><br/>
+				</ui:repeat>
+	        </p:panelGrid>
+	        <h:panelGroup id="revisarNutObservaciones">
+				<observaciones:tablaObservaciones idComponent="nut" seccion="Revisar NUT" componenteActualizarEliminar="revisarNutObservaciones" 
+				aparace="#{revisarNUTController.habilitarObservaciones}" mostrarSiVacio="#{revisarNUTController.observacionesSoloLectura}" 
+				idClase="#{revisarNUTController.solicitudUsuario.id}" nombreClase="Recaudaciones" 
+				soloLectura="#{!revisarNUTController.observacionesSoloLectura}" />
+			</h:panelGroup>
+	        <t:div styleClass="buttons main">
+				<p:commandButton value="Enviar" icon="ui-icon-check" actionListener="#{revisarNUTController.completarTarea()}" 
+								 process="@form"/>
+			</t:div>  
+		</h:form>
+	</ui:define>
+</ui:composition>

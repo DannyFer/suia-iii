@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml"
+        >
+    <ui:define name="context-extra">
+        <h:outputText value="Datos" rendered="#{empty elaborarPronunciamientoAreaLABean.tipo}"/>
+        <h:outputText value="Estudio de Impacto Ambiental" rendered="#{empty elaborarPronunciamientoAreaLABean.tipo}"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}" target="_blank"
+                      rendered="#{empty elaborarPronunciamientoAreaLABean.tipo}">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+
+
+        <h:outputText value="TDR" rendered="#{not empty elaborarPronunciamientoAreaLABean.tipo}"/>
+        <h:outputText value="Documento de TDR" rendered="#{not empty elaborarPronunciamientoAreaLABean.tipo}"/>
+
+
+        <p:commandButton id="downloadadjuntoTDR" icon="ui-icon-arrowthick-1-s"
+                         ajax="false" styleClass="button-small primary" title="Ver"
+                         immediate="true"
+                         rendered="#{not empty elaborarPronunciamientoAreaLABean.tipo}">
+            <p:fileDownload
+                    value="#{elaborarPronunciamientoAreaLABean.stream}"/>
+        </p:commandButton>
+
+    </ui:define>
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{analizarEstudioLAController.validarTareaBpm()}"/>
+        <h:form>
+            <h3>Analizar Informe</h3>
+
+            <h:outputLabel value="Requiere equipo multidisciplinario"/>
+            <p:selectOneRadio id="opcion"
+                              value="#{analizarEstudioLABean.equipoMultidiciplinario}" required="true">
+                <f:selectItem itemLabel="Si" itemValue="true"/>
+                <f:selectItem itemLabel="No" itemValue="false"/>
+            </p:selectOneRadio>
+
+            <div class="buttons main">
+                <p:commandButton value="Enviar" styleClass="primary"
+                                 action="#{analizarEstudioLAController.iniciarTarea}"
+                                 title="Enviar datos" icon="ui-icon-check">
+                </p:commandButton>
+            </div>
+
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>

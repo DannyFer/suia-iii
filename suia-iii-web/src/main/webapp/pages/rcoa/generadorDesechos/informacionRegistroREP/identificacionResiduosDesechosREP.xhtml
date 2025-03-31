@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+
+<h:panelGroup id="desechosContainerGeneral">
+	<p:panelGrid columns="1" layout="grid"
+		styleClass="buttonAddDesecho-comunPageContainer w100 alCenter">
+		<f:facet name="header">
+			<h:outputText value="Información de residuo o desecho sujeto a REP *" />
+		</f:facet>
+
+		<h:panelGroup id="desechoContainer">
+			<p:dataTable
+				value="#{adicionarDesechosAliasRcoaBean.desechosRcoaSeleccionados}"
+				id="tableDesechos" var="desecho" rows="10" paginator="true"
+				paginatorAlwaysVisible="false" paginatorPosition="bottom"
+				emptyMessage="#{labels['common.table.empty']}">
+
+				<p:column headerText="Política REP" style="width: 8%;">
+					<h:outputText
+						value="#{informacionRegistroGeneradorREPController.registroGeneradorDesechos.politicaDesechoRgdRcoa.nombre}" />
+				</p:column>
+
+				<p:column headerText="Nombre del residuo o desecho"
+					style="width: 15%;">
+					<h:outputText value="#{desecho.desechoPeligroso.descripcion}" />
+				</p:column>
+
+				<p:column headerText="Código" style="width: 8%;">
+					<h:outputText value="#{desecho.desechoPeligroso.clave}" />
+					<br />
+					<p:selectBooleanCheckbox value="#{desecho.seleccionarDesecho}"
+						rendered="#{informacionRegistroGeneradorREPController.esLamparas}">
+						<p:ajax event="change" update="@form :form:desechoContainer"
+							listener="#{adicionarDesechosAliasRcoaBean.eliminarCamposNoGenera(desecho)}"
+							process="@this">
+						</p:ajax>
+					</p:selectBooleanCheckbox>
+				</p:column>
+
+				<p:column headerText="Origen" style="width: 8%;"
+					rendered="#{!informacionRegistroGeneradorREPController.medicamento !='' }">
+					<h:outputText rendered="#{!informacionRegistroGeneradorREPController.medicamento !='' }"
+						value="#{desecho.desechoPeligroso.origen}" />
+					<br />
+					<p:selectBooleanCheckbox value="#{desecho.seleccionarDesecho}"
+						rendered="#{informacionRegistroGeneradorREPController.esLamparas}">
+						<p:ajax event="change" update="@form :form:desechoContainer"
+							listener="#{adicionarDesechosAliasRcoaBean.eliminarCamposNoGenera(desecho)}"
+							process="@this">
+						</p:ajax>
+					</p:selectBooleanCheckbox>
+				</p:column>
+
+				<p:column headerText="Generación anual" style="width:30%;">
+					<h:panelGrid columns="2" styleClass="noBorders w100"
+						columnClasses="w70, w30" id="panelCantidad">
+						<pe:inputNumber required="true" id="kilogramos"
+							requiredMessage="Generación anual es Requerido"
+							maxValue="999999999999999.9999"
+							validatorMessage="Potencia no debe ser Cero"
+							disabled="#{desecho.desechoPeligroso.esLampara ? !desecho.seleccionarDesecho : !informacionRegistroGeneradorREPController.habilitarEdicion}"
+							value="#{desecho.cantidadKilos}" decimalPlaces="4"
+							rendered="#{desecho.generaDesecho eq null ? true : !desecho.generaDesecho}">
+							<f:validateDoubleRange minimum="0.1" />
+							<p:tooltip id="kilogramosTip" for="kilogramos"
+								value="Puede ingresar 15 enteros y 4 decimales"
+								trackMouse="true" />
+							<p:ajax event="change"
+								listener="#{adicionarDesechosAliasRcoaBean.cambiarAToneladas(desecho)}"
+								update="toneladas"></p:ajax>
+						</pe:inputNumber>
+						<h:outputText value="kg"
+							rendered="#{desecho.generaDesecho eq null ? true : !desecho.generaDesecho}" />
+						<pe:inputNumber required="true" id="toneladas"
+							requiredMessage="Generación anual es Requerido"
+							maxValue="999999999999999.9999"
+							validatorMessage="Potencia no debe ser Cero"
+							value="#{desecho.cantidadToneladas}" decimalPlaces="4"
+							disabled="true"
+							rendered="#{desecho.generaDesecho eq null ? true : !desecho.generaDesecho}">
+						</pe:inputNumber>
+						<h:outputText value="t"
+							rendered="#{desecho.generaDesecho eq null ? true : !desecho.generaDesecho}" />
+						<pe:inputNumber required="true" id="cantidadUnidades"
+							rendered="#{desecho.desechoPeligroso.desechoES_04 or desecho.desechoPeligroso.desechoES_07 or desecho.desechoPeligroso.desechoES_06 or desecho.desechoPeligroso.desechoNE_40}"
+							validatorMessage="La cantidad de unidades no puede ser cero"
+							maxValue="999999999999999" maxlength="15"
+							disabled="#{desecho.desechoPeligroso.esLampara ? !desecho.seleccionarDesecho : !informacionRegistroGeneradorREPController.habilitarEdicion}"
+							value="#{desecho.cantidadUnidades}" decimalPlaces="0">
+							<p:ajax process="@this" />
+							<f:validateDoubleRange minimum="1" />
+						</pe:inputNumber>
+						<p:outputLabel value="Unidades" for="cantidadUnidades"
+							rendered="#{desecho.desechoPeligroso.desechoES_04 or desecho.desechoPeligroso.desechoES_07 or desecho.desechoPeligroso.desechoES_06 or desecho.desechoPeligroso.desechoNE_40}" />
+					</h:panelGrid>
+				</p:column>
+
+				<p:column headerText="Sistema de Gestión REP">
+					<p:outputLabel value="Nombre del sistema colectivo"
+						for="sistemaColectivo" />
+					<p:selectOneMenu value="#{desecho.sistemaGestionIndividual}"
+						styleClass="w100" required="true" id="sistemaColectivo"
+						disabled="#{desecho.desechoPeligroso.esLampara ? !desecho.seleccionarDesecho : !informacionRegistroGeneradorREPController.habilitarEdicion}">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}"
+							itemValue="#{null}" noSelectionOption="true" />
+						<f:selectItem itemLabel="Gestión individual" itemValue="true" />
+						<f:selectItem itemLabel="Gestión colectiva" itemValue="false" />
+						<p:ajax update="tableDesechos" />
+					</p:selectOneMenu>
+					<h:panelGrid styleClass="noBorder" columns="2"
+						columnClasses="w25, field_mrg w75" style="border: 0px;"
+						rendered="#{!desecho.sistemaGestionIndividual and desecho.sistemaGestionIndividual ne null}">
+						<p:outputLabel value="Nombre del sistema colectivo"
+							for="nombreGestion" />
+						<p:inputText value="#{desecho.sistemaGestionNombre}"
+							id="nombreGestion" styleClass="w100" required="true"
+							maxlength="256"
+							readonly="#{!informacionRegistroGeneradorREPController.habilitarEdicion}" />
+						<p:outputLabel value="Fecha de adhesión al sistema colectivo"
+							for="fechaGestion" />
+						<p:calendar id="fechaGestion" style="width: 100px !important"
+							value="#{desecho.sistemaGestionFecha}" pattern="dd/MM/yyyy"
+							readonlyInput="true"
+							disabled="#{!informacionRegistroGeneradorREPController.habilitarEdicion}"
+							required="true" navigator="true">
+						</p:calendar>
+					</h:panelGrid>
+				</p:column>
+			</p:dataTable>
+		</h:panelGroup>
+
+	</p:panelGrid>
+</h:panelGroup>
+</html>

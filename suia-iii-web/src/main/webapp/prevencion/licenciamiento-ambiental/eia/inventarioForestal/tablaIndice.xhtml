@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+    <h:form id="frmDatosIndice">
+        <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="">
+            <f:facet name="header">
+                <p:commandButton value="Adicionar"  styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick" 
+                                 action="#{inventarioForestalController.agregarIndice()}" update=":#{p:component('frmIndice')}" 
+                                 oncomplete="PF('dlgIndice').show();"                />
+                <mae:panelGridHeaderHelp value="Tabla de índice" conector="ubicacionHelp" image="#{request.contextPath}/resources/images/proyecto-mapa.png" help="" />
+
+            </f:facet>
+            <p:dataTable id="tblClIndice" value="#{inventarioForestalController.inventarioForestalBean.listaInventarioForestalIndice}"
+                         var="indice" paginator="true" rows="10" paginatorPosition="bottom" scrollable="true" scrollWidth="750"
+                         emptyMessage="#{labels['common.table.empty']}">
+                <p:column headerText="Acciones" width="60">
+                    <div class="buttons-inline">
+                        <p:commandButton icon="ui-icon-pencil" action="#{inventarioForestalController.seleccionarIndice(indice)}"
+                                         title="Editar" styleClass="primary"
+                                         oncomplete="PF('dlgIndice').show();" update=":#{p:component('frmIndice')}"/>
+                        <p:commandButton icon="ui-icon-trash" action="#{inventarioForestalController.removerIndice(indice)}"
+                                         title="Remover" styleClass="secondary"
+                                         update="tblClIndice"/>
+                    </div>
+                </p:column>
+                <p:column headerText="Número / código de parcela" width="50">
+                    <center>
+                        <h:outputText value="#{indice.codigo}"/>
+                    </center>
+                </p:column>
+                <p:column headerText="Familia" width="240">
+                    <center>
+                        <h:outputText value="#{indice.familia}" />
+                    </center>
+                </p:column>
+                <p:column headerText="Nombre Científico" width="240">
+                    <center>
+                        <h:outputText value="#{indice.nombreCientifico}"/>
+                    </center>
+                </p:column>
+                <p:column headerText="Nombre común" width="240">
+                    <center>
+                        <h:outputText value="#{indice.nombreComun}" />
+                    </center>
+                </p:column>
+                <p:column headerText="Frecuencia" width="80">
+                    <center>
+                        <h:outputText value="#{indice.frecuencia}" />
+                    </center>
+                </p:column>
+                <p:column headerText="Densidad Relativa" width="80">
+                    <center>
+                        <h:outputText value="#{indice.densidadRelativa}" />
+                    </center>
+                </p:column>
+                <p:column headerText="Dominancia Relativa" width="80">
+                    <center>
+                        <h:outputText value="#{indice.dominanciaRelativa}" />
+                    </center>
+                </p:column>
+                <p:column headerText="Indice de Valor de Importancia" width="80">
+                    <center>
+                        <h:outputText value="#{indice.indiceValorImportancia}" />
+                    </center>
+                </p:column>
+
+            </p:dataTable>
+        </p:panelGrid>
+    </h:form>
+
+    <p:dialog header="Indice" widgetVar="dlgIndice" modal="true" resizable="false" draggable="false"
+              style="overflow: auto;" width="868" height="200">  
+        <h:form id="frmIndice">
+            <p:panel>
+                <h:panelGrid columns="4">
+                    <h:outputLabel value="*Número / código de parcela:"/>
+                    <control:combo identificador="cmbPunto" lista="#{inventarioForestalController.inventarioForestalBean.listaCodigoPunto}" valor="#{inventarioForestalController.inventarioForestalBean.forestalIndice.codigo}" requerido="true"/>
+                    <h:outputLabel value="*Familia:"/>
+                    <control:todoTextoComoIngrese valor="#{inventarioForestalController.inventarioForestalBean.forestalIndice.familia}" identificador="txtFamilia" tamanio="30" longitud="100" requerido="true"/>
+                    <h:outputLabel value="*Nombre Científico:"/>
+                    <control:todoTextoComoIngrese valor="#{inventarioForestalController.inventarioForestalBean.forestalIndice.nombreCientifico}" identificador="txtNombreCientifico" tamanio="30" longitud="100" requerido="true"/>
+                    <h:outputLabel value="*Nombre común:"/>
+                    <control:todoTextoComoIngrese valor="#{inventarioForestalController.inventarioForestalBean.forestalIndice.nombreComun}" identificador="txtNombreComun" tamanio="30" longitud="100" requerido="true"/>
+
+                    <h:outputLabel value="*Frecuencia" />
+                    <control:soloTextoNumerosDecimales identificador="txtDapDlg" 
+                                                       valor="#{inventarioForestalController.inventarioForestalBean.forestalIndice.frecuencia}"
+                                                       requerido="true" tamanio="10"
+                                                       longitud="6"/>
+
+                    <h:outputLabel value="*Densidad Relativa" />
+                    <control:soloTextoNumerosDecimales identificador="txtAlturaTotalDlg" 
+                                                       valor="#{inventarioForestalController.inventarioForestalBean.forestalIndice.densidadRelativa}"
+                                                       requerido="true" tamanio="10"
+                                                       longitud="6"/>
+
+                    <h:outputLabel value="*Dominancia Relativa" />
+                    <control:soloTextoNumerosDecimales identificador="txtAlturaComercialDlg" 
+                                                       valor="#{inventarioForestalController.inventarioForestalBean.forestalIndice.dominanciaRelativa}"
+                                                       requerido="true" tamanio="10"
+                                                       longitud="6"/>
+
+
+                </h:panelGrid>
+                <br/>
+                <center>
+                    <p:commandButton action="#{inventarioForestalController.guardarIndice()}" value="Agregar" 
+                                     oncomplete="handleIndividuoRequest(xhr, status, args)" styleClass="primary"
+                                     update="frmIndice, :#{p:component('msgs')}, :#{p:component('tblClIndice')}"/>
+                </center>
+            </p:panel>
+        </h:form>
+    </p:dialog>
+    <script type="text/javascript">
+        function handleIndividuoRequest(xhr, status, args) {
+            if (args.validationFailed || !args.puntoIndice) {
+                PF('dlgIndice').jq.effect("shake", {times: 5}, 100);
+            }
+            else {
+                PF('dlgIndice').hide();
+                $('#loginLink').fadeOut();
+            }
+        }
+    </script>
+
+</ui:composition>

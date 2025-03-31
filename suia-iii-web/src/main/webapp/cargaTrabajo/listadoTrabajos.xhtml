@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" 
+xmlns:ui="http://java.sun.com/jsf/facelets" 
+xmlns:h="http://java.sun.com/jsf/html" 
+xmlns:p="http://primefaces.org/ui" 
+template="/WEB-INF/templates/default.xhtml" 
+xmlns:f="http://java.sun.com/jsf/core" 
+xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+    <ui:define name="content">
+        <style>
+            .col1 {
+                width: 30%;
+            }
+            .col2 {
+                width: 70%;
+            }
+            .col11 {
+                width: 20%;
+            }
+            .anchoTexto1 {
+                width: 650px;
+            }
+            .anchoTexto2 {
+			    width: 270px !important
+            }
+            .calendarClass input {
+			    width: 270px !important
+			}
+            .error {
+                width: 30%;
+                background-color: #def;
+                color: red;
+            }
+        </style>        
+        <!-- <p:messages globalOnly="true"
+                    showDetail="true"
+                    showSummary="false"
+                    autoUpdate="true">
+        </p:messages>  -->   	
+	<h:form id="frmDatos">
+        <p:outputPanel id="pnlDatos">
+            <p:dataTable id="dtbTrabajos" widgetVar="dtbTrabajos" rendered="#{!cargaTrabajoController.mostrarFormulario and cargaTrabajoController.editarFormulario}"
+                         value="#{cargaTrabajoController.listaCargarTrabajo}" emptyMessage="#{labels['common.table.empty']}"
+                         var="carga" paginator="true" rows="10" style="text-transform: uppercase;">
+                <p:column headerText="Fecha de registro" width="10%" filterBy="#{carga.fechaRegistro}" 
+                          filterMatchMode="contains">
+                    <h:outputText value="#{carga.fechaRegistro}">
+                    	<f:convertDateTime pattern="dd-MM-yyyy"/>
+                    </h:outputText>
+                </p:column>
+                 <p:column headerText="Código Trámite" filterBy="#{carga.codigoTramite}" filterMatchMode="contains" width="15%">
+                    <h:outputText value="#{carga.codigoTramite}"/>
+                </p:column>
+                <p:column headerText="Proyecto/Concesión" filterBy="#{carga.nombre}"
+                          filterMatchMode="contains">
+                    <h:outputText value="#{carga.nombre}"/>
+                </p:column>
+                <p:column headerText="Provincia" filterBy="#{carga.provincia}" width="15%"
+                          filterMatchMode="contains">
+                    <h:outputText value="#{(carga.nivelNacional)?'Nivel Nacional':carga.provincia}"/>
+                </p:column>
+				<p:column headerText="Estado trámite" filterBy="#{carga.estadoTramite}" filterMatchMode="contains" width="10%">
+					<f:facet name="filter">
+						<p:selectOneMenu onchange="PF('dtbTrabajos').filter()" widgetVar="categorias">
+							<f:selectItem itemLabel="" itemValue="" />
+							<f:selectItem itemLabel="Pendiente" itemValue="P" />
+							<f:selectItem itemLabel="Tramitado" itemValue="T" />
+						</p:selectOneMenu>
+					</f:facet>
+                    <h:outputText value="#{carga.estadoTramite eq 'T'?'Tramitado':carga.estadoTramite eq 'A'?'Aprobado':carga.estadoTramite eq 'O'?'Observado':'Pendiente'}"  />
+                </p:column>
+				<p:column headerText="Acción" width="10%">
+                    <p:commandButton title="Editar" icon="ui-icon-pencil" styleClass="primary button-small" action="#{cargaTrabajoController.seleccionarCargaTrabajo(carga, 'editar')}" update=":#{p:component('frmDatos')}" rendered="#{carga.estadoTramite ne 'A'}">
+							<f:setPropertyActionListener value="#{carga}" target="#{cargaTrabajoController.cargaTrabajo}" />
+                    </p:commandButton>
+                    <p:commandButton title="Ver" icon="ui-icon-search" styleClass="primary button-small" action="#{cargaTrabajoController.seleccionarCargaTrabajo(carga, 'ver')}" update=":#{p:component('frmDatos')}" >
+							<f:setPropertyActionListener value="#{carga}" target="#{cargaTrabajoController.cargaTrabajo}" />
+                    </p:commandButton>
+                 </p:column>
+            </p:dataTable>
+ 
+            
+            </p:outputPanel>
+           <ui:include src="formularioIngresoVer.xhtml" />
+			<div class="buttons" style="width:10%;">
+				<p:commandButton value="Nuevo"
+					action="#{cargaTrabajoController.nuevo()}" 
+					rendered="#{!cargaTrabajoController.mostrarFormulario and cargaTrabajoController.editarFormulario}"
+					update="@form" process="@form" 
+					icon="ui-icon-cancel" >
+					 <p:resetInput target="pnlDatos1" />
+					</p:commandButton>
+				<p:commandButton value="Regresar"
+					action="#{cargaTrabajoController.regresar()}" 
+					rendered="#{!cargaTrabajoController.mostrarFormulario and !cargaTrabajoController.editarFormulario}"
+					update=":#{p:component('frmDatos')}"
+					icon="ui-icon-cancel" immediate="true" />
+			</div>
+			<br/>
+           <ui:include src="formularioIngreso.xhtml" />
+			<br/>
+			<div class="buttons">
+				<p:commandButton id="btnAceptar" value="Aceptar" onclick="#{cargaTrabajoController.prueba()}"
+					rendered="#{cargaTrabajoController.mostrarFormulario and cargaTrabajoController.editarFormulario}"
+					action="#{cargaTrabajoController.guardar()}" icon="ui-icon-check"
+					update=":#{p:component('frmDatos')}" />					
+				<p:commandButton process="@this" value="Agregar Revisión"
+					rendered="#{cargaTrabajoController.mostrarFormulario and cargaTrabajoController.editarFormulario and cargaTrabajoController.cargaTrabajo ne null and cargaTrabajoController.mostrarBtnAgragar}"
+					update=":#{p:component('pnlRevision')}, :#{p:component('listadoRevisiones')}" 
+					action="#{cargaTrabajoController.nuevaRevision()}" icon="ui-icon-pencil" immediate="true" />
+				<p:commandButton value="Cancelar"
+					actionListener="#{cargaTrabajoController.limpiarForm()}" onclick="PF('statusDialog').show();" ajax="false"    
+					rendered="#{cargaTrabajoController.mostrarFormulario and cargaTrabajoController.editarFormulario}"
+					update=":#{p:component('pnlDatos1')}" process="@this"
+					icon="ui-icon-cancel" immediate="true" >
+					</p:commandButton>
+				<p:commandButton value="Limpiar" 
+					actionListener="#{cargaTrabajoController.limpiar()}" onclick="PF('statusDialog').show();" ajax="false"    
+					rendered="false"
+					update=":#{p:component('pnlDatos1')}" process="@this"
+					icon="ui-icon-cancel" immediate="true" >
+					 <p:resetInput target="pnlDatos1" />
+					</p:commandButton>
+			</div>
+	</h:form>
+	<br/><br/>
+	
+	
+	<p:dialog header="Trámites no respondidos" id="modalPendientes" widgetVar="modalPendientes" modal="true" draggable="false" closable="false" resizable="false" width="800" style="text-transform: uppercase;">
+		<p:dataTable id="tableNorespondidos" widgetVar="wv_noRespondidos" value="#{cargaTrabajoController.listaCargarTrabajoRevisionAtrazadas}" var="revision" rows="5" paginator="true" rendered="#{cargaTrabajoController.listaCargarTrabajoRevisionAtrazadas.size() gt 0}"
+										 paginatorAlwaysVisible="false" paginatorPosition="bottom" emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<h:outputText value="Se informa que los siguientes trámites, no se han ingresado la información de respuesta de las observaciones." styleClass="encabezado" />		
+			</f:facet>
+			<p:column headerText="Código" styleClass="alCenter w20" >
+				<h:outputText value="#{revision.cargaTrabajo.codigoTramite}" />
+			</p:column>
+			<p:column headerText="Nombre" >
+				<h:outputText value="#{revision.cargaTrabajo.nombre}" />
+			</p:column>
+			<p:column headerText="Fecha" styleClass="alCenter w15" width="10%">
+				<h:outputText value="#{revision.fechaSalida}" >
+                    	<f:convertDateTime pattern="dd-MM-yyyy"/>
+				</h:outputText>
+			</p:column>
+			<p:column headerText="Plazo" styleClass="alCenter w15" width="8%">
+				<h:outputText value="#{revision.plazo}" />
+			</p:column>
+			<p:column headerText="Observación" styleClass="alCenter w15">
+				<h:outputText value="#{revision.observacion}" />
+			</p:column>
+			<p:column headerText="Acción" styleClass="alCenter w15" width="8%">
+                <p:commandButton title="Editar" icon="ui-icon-pencil" styleClass="primary button-small" action="#{cargaTrabajoController.seleccionarCargaTrabajo(revision.cargaTrabajo, 'editar')}" update=":#{p:component('frmDatos')}" oncomplete="PF('modalPendientes').hide()" rendered="#{carga.estadoTramite ne 'A'}">
+					<f:setPropertyActionListener value="#{revision.cargaTrabajo}" target="#{cargaTrabajoController.cargaTrabajo}" />
+                </p:commandButton>
+                <p:commandButton title="Ver" icon="ui-icon-search" styleClass="primary button-small" action="#{cargaTrabajoController.seleccionarCargaTrabajo(revision.cargaTrabajo, 'ver')}" update=":#{p:component('frmDatos')}" oncomplete="PF('modalPendientes').hide()" >
+					<f:setPropertyActionListener value="#{revision.cargaTrabajo}" target="#{cargaTrabajoController.cargaTrabajo}" />
+                </p:commandButton>
+			</p:column>
+		</p:dataTable>
+		<br/><br/>
+		<p:separator />
+		
+			<p:dataTable id="tableNorespondidosObligaciones" widgetVar="wv_noRespondidosObligaciones" value="#{cargaTrabajoController.listaCargarTrabajoObligacionesAtrazadas}" var="revision" rows="5" paginator="true" rendered="#{cargaTrabajoController.listaCargarTrabajoObligacionesAtrazadas.size() gt 0}"
+										paginatorAlwaysVisible="false" paginatorPosition="bottom" emptyMessage="#{labels['common.table.empty']}">
+			<f:facet name="header">
+				<h:outputText value="Se informa que los siguientes trámites, caducó la fecha de obligaciones." styleClass="encabezado" />		
+			</f:facet>
+			<p:column headerText="Código" styleClass="alCenter w20" >
+				<h:outputText value="#{revision.codigoTramite}" />
+			</p:column>
+			<p:column headerText="Nombre" >
+				<h:outputText value="#{revision.nombre}" />
+			</p:column>
+			<p:column headerText="Obligaciones" >
+				<h:outputText value="AUDITORIA" rendered="#{revision.auditoria and cargaTrabajoController.fechaActual gt revision.fechaAuditoria}"/>
+				<p rendered="#{revision.auditoria and cargaTrabajoController.fechaActual gt revision.fechaAuditoria}"/>
+				<h:outputText value="Informes ambientales de cumplimiento" rendered="#{revision.informe and cargaTrabajoController.fechaActual gt revision.fechaInforme}"/>
+				<p rendered="#{revision.informe and cargaTrabajoController.fechaActual gt revision.fechaInforme}"/>
+				<h:outputText value="MONITOREO" rendered="#{revision.monitoreo and cargaTrabajoController.fechaActual gt revision.fechaMonitoreo}"/>
+				<p rendered="#{revision.monitoreo and cargaTrabajoController.fechaActual gt revision.fechaMonitoreo}"/>
+				<h:outputText value="TDR" rendered="#{revision.tdr and cargaTrabajoController.fechaActual gt revision.fechaTdr}"/>
+			</p:column>
+			<p:column headerText="Fecha" styleClass="alCenter w15" width="10%">
+				<h:outputText value="#{revision.fechaAuditoria}" rendered="#{revision.auditoria and cargaTrabajoController.fechaActual gt revision.fechaAuditoria}">
+                    	<f:convertDateTime pattern="dd-MM-yyyy"/>
+				</h:outputText>
+				<p rendered="#{revision.auditoria and cargaTrabajoController.fechaActual gt revision.fechaAuditoria}"/>
+				<h:outputText value="#{revision.fechaInforme}" rendered="#{revision.informe and cargaTrabajoController.fechaActual gt revision.fechaInforme}">
+                    	<f:convertDateTime pattern="dd-MM-yyyy"/>
+				</h:outputText>
+				<p rendered="#{revision.informe and cargaTrabajoController.fechaActual gt revision.fechaInforme}"/>
+				<h:outputText value="#{revision.fechaMonitoreo}" rendered="#{revision.monitoreo and cargaTrabajoController.fechaActual gt revision.fechaMonitoreo}">
+                    	<f:convertDateTime pattern="dd-MM-yyyy"/>
+				</h:outputText>
+				<p rendered="#{revision.monitoreo and cargaTrabajoController.fechaActual gt revision.fechaMonitoreo}"/>
+				<h:outputText value="#{revision.fechaTdr}" rendered="#{revision.tdr and cargaTrabajoController.fechaActual gt revision.fechaTdr}">
+                    	<f:convertDateTime pattern="dd-MM-yyyy"/>
+				</h:outputText>
+			</p:column>
+			<p:column headerText="Acción" styleClass="alCenter w15" width="8%">
+                <p:commandButton title="Editar" icon="ui-icon-pencil" styleClass="primary button-small" action="#{cargaTrabajoController.seleccionarCargaTrabajo(revision, 'editar')}" update=":#{p:component('frmDatos')}" oncomplete="PF('modalPendientes').hide()" rendered="#{carga.estadoTramite ne 'A'}">
+					<f:setPropertyActionListener value="#{revision}" target="#{cargaTrabajoController.cargaTrabajo}" />
+                </p:commandButton>
+                <p:commandButton title="Ver" icon="ui-icon-search" styleClass="primary button-small" action="#{cargaTrabajoController.seleccionarCargaTrabajo(revision, 'ver')}" update=":#{p:component('frmDatos')}" oncomplete="PF('modalPendientes').hide()" >
+					<f:setPropertyActionListener value="#{revision}" target="#{cargaTrabajoController.cargaTrabajo}" />
+                </p:commandButton>
+			</p:column>
+		</p:dataTable>
+		
+		
+		<div class="buttons">
+			<p:commandButton type="button" value="Cerrar" onclick="PF('modalPendientes').hide()">
+			</p:commandButton>
+		</div>	
+	</p:dialog>
+    </ui:define>
+</ui:composition>

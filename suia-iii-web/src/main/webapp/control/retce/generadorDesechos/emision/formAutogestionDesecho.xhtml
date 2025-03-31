@@ -1,0 +1,566 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<p:panel id="adicionarAutogestionDesecho"
+	widgetVar="adicionarAutogestionDesecho" toggleable="true"
+	toggleOrientation="vertical" styleClass="colapsablePanel"
+	collapsed="true">
+	<p:ajax event="toggle"
+		listener="#{autogestionDesechosBean.toggleHandle}"
+		update=":form:adicionarAutogestionDesecho" process="@this" />
+	<h:panelGroup id="datosAutogestionDesecho">
+		<h:panelGroup
+			rendered="#{autogestionDesechosBean.panelAdicionarVisible}">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Autogestión Desecho" />
+				</f:facet>
+
+				<h:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null" rowClasses="null, alt">
+					<p:outputLabel value="Seleccionar desecho"
+						for="desechoPeligrosoAutogestion" styleClass="ui-label-form" />
+					<p:selectOneMenu id="desechoPeligrosoAutogestion"
+						disabled="#{autogestionDesechosBean.editar || autogestionDesechosBean.pnlTipoEliminacionVisible || autogestionDesechosBean.pnlSustanciaVisible}"
+						value="#{autogestionDesechosBean.desechoSeleccionado}"
+						styleClass="w100" converter="selectItemConverter" required="true">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}"
+							itemValue="" noSelectionOption="true" />
+						<f:selectItems
+							value="#{autogestionDesechosBean.getDesechosPendientes()}" />
+						<p:ajax process="@this"
+							listener="#{autogestionDesechosBean.limpiarInfoDesecho()}"
+							update="tblTipoEliminacion" />
+					</p:selectOneMenu>
+
+					<p:outputLabel value="Eliminación o disposición final"
+						styleClass="ui-label-form" />
+					<p:dataTable id="tblTipoEliminacion"
+						value="#{autogestionDesechosBean.listaDesechosEliminacionAutogestion}"
+						var="tipo" emptyMessage="#{labels['common.table.empty']}">
+						<f:facet name="header">
+							<p:commandButton value="Adicionar tipo eliminación"
+								oncomplete="PF('#{tipoEliminacionDesechoBean.dialogSeleccionarTipoEliminacionDesecho}').show()"
+								actionListener="#{autogestionDesechosBean.nuevoTipoEliminacion()}"
+								styleClass="button-small-text toRight field_mrg" process="@this"
+								update=":form:#{tipoEliminacionDesechoBean.dialogSeleccionarTipoEliminacionDesecho}"
+								icon="ui-icon-plusthick"
+								rendered="#{autogestionDesechosBean.desechoSeleccionado != null}" >
+								<f:param name="desechoDescripcion" value="#{autogestionDesechosBean.desechoSeleccionado}"/>
+								</p:commandButton>
+						</f:facet>
+
+						<p:column headerText="Tipo">
+							<h:outputText
+								value="#{tipo.tipoEliminacion.tipoEliminacionDesecho.tipoEliminacionDesecho eq null ?
+								tipo.tipoEliminacion.tipoEliminacionDesecho.nombre :
+								tipo.tipoEliminacion.tipoEliminacionDesecho.tipoEliminacionDesecho.nombre}" />
+						</p:column>
+						<p:column headerText="Operación">
+							<h:outputText value="#{tipo.tipoEliminacion.nombre}" />
+						</p:column>
+						<p:column headerText="Clave">
+							<h:outputText value="#{tipo.tipoEliminacion.clave}" />
+						</p:column>
+						<p:column headerText="Unidad">
+							<h:outputText value="#{tipo.tipoUnidad.descripcion}" />
+						</p:column>
+						<p:column headerText="Cantidad autogestionada/año" styleClass="alCenter">
+							<h:outputText value="#{tipo.cantidad}" />
+						</p:column>
+						<p:column headerText="Desechos Generados" style="text-align:center !important">
+							<p:commandButton icon="ui-icon-search" title="ver"
+								rendered="#{tipo.generaDesecho}" process="@this"
+								update=":form:frmDialogVerDesechos:verDesechosGenerados :form:frmDialogVerDesechos:pnlVerDesechosGenerados :form:frmDialogVerDesechos:tblDesechosGeneradosVer"
+								styleClass="button-small secondary"
+								oncomplete="PF('verDesechosGenerados').show()"
+								actionListener="#{autogestionDesechosBean.verDesechosGenerados(tipo)}" />
+							<h:outputText value="N/A" rendered="#{!tipo.generaDesecho}" />
+						</p:column>
+						<p:column styleClass="w70px alCenter">
+							<p:commandButton icon="ui-icon-pencil" title="Editar"
+								process="@this"
+								update=":form:frmDialog:datosTipoEliminacionDesecho"
+								styleClass="primary"
+								oncomplete="PF('adicionarTipoEliminacionDesecho').show()"
+								actionListener="#{autogestionDesechosBean.editarTipo(tipo)}" />
+							<p:commandButton icon="ui-icon-trash" title="Eliminar"
+								process="@this" styleClass="primary"
+								actionListener="#{autogestionDesechosBean.eliminarTipo(tipo)}"
+								update="tblTipoEliminacion" />
+						</p:column>
+					</p:dataTable>
+
+					<ui:remove>
+					<p:outputLabel
+						value="Sustancias RETCE (voluntario hasta la expedición de norma)"
+						styleClass="ui-label-form" />
+					<p:dataTable id="tblSustanciasRetce"
+						value="#{autogestionDesechosBean.listaSustanciasDesecho}"
+						var="item" emptyMessage="#{labels['common.table.empty']}"
+						sortBy="#{item.catologSustanciasRetce.descripcionProductoQuimico}">
+						<f:facet name="header">
+							<p:commandButton value="Adicionar sustancia"
+								action="#{autogestionDesechosBean.nuevaSustancia()}"
+								oncomplete="PF('adicionarSustanciaDesecho').show()"
+								styleClass="button-small-text toRight field_mrg" process="@this"
+								update=":frmDialogs:datosSustanciasDesecho"
+								icon="ui-icon-plusthick"
+								rendered="#{autogestionDesechosBean.desechoSeleccionado != null}" />
+						</f:facet>
+
+						<p:column headerText="Sustancia">
+							<h:outputText
+								value="#{item.catologSustanciasRetce.descripcionProductoQuimico}" />
+						</p:column>
+						<p:column headerText="Cantidad (t/año)" styleClass="alCenter">
+							<h:outputText value="#{item.reporteToneladaAnio}" />
+						</p:column>
+						<p:column headerText="Método de estimación">
+							<h:outputText
+								value="#{item.catalogoMetodoEstimacion.descripcion}" />
+						</p:column>
+						<p:column styleClass="w70px alCenter">
+							<p:commandButton icon="ui-icon-pencil" title="Editar"
+								process="@this" update=":frmDialogs:datosSustanciasDesecho"
+								styleClass="primary"
+								oncomplete="PF('adicionarSustanciaDesecho').show()"
+								actionListener="#{autogestionDesechosBean.editarSustancia(item)}" />
+							<p:commandButton icon="ui-icon-trash" title="Eliminar"
+								process="@this" styleClass="primary"
+								actionListener="#{autogestionDesechosBean.eliminarSustancia(item)}"
+								update="tblSustanciasRetce" />
+						</p:column>
+					</p:dataTable>
+					</ui:remove>
+				</h:panelGrid>
+
+				<br />
+
+
+				<!-- panel toggle para ingreso del tipo de eliminacion del desecho seleccionado -->
+
+
+				<!-- panel toggle para ingreso de sustancias retce -->
+
+
+				<!-- botones para agregar o cancelar ingreso del desecho eliminado por autogestion -->
+				<h:panelGroup id="pnlBtnsAutogestionDesecho">
+					<div class="buttons">
+						<p:commandButton
+							value="#{autogestionDesechosBean.editar ? 'Actualizar' : 'Aceptar'}"
+							actionListener="#{autogestionDesechosBean.agregarEliminacionAutogestion()}"
+							oncomplete="toggleAutogestion(xhr, status, args)"
+							process="@this datosAutogestionDesecho"
+							disabled="#{autogestionDesechosBean.pnlTipoEliminacionVisible}"
+							update="panelAutogestion datosAutogestionDesecho dtGridAutogestion" />
+						<p:commandButton value="Cancelar" styleClass="secondary"
+							actionListener="#{autogestionDesechosBean.cancelar()}"
+							oncomplete="PF('adicionarAutogestionDesecho').toggle()"
+							disabled="#{autogestionDesechosBean.pnlTipoEliminacionVisible}"
+							process="@this"
+							update="panelAutogestion datosAutogestionDesecho dtGridAutogestion">
+							<p:resetInput target="@form" />
+						</p:commandButton>
+					</div>
+				</h:panelGroup>
+
+			</p:panelGrid>
+		</h:panelGroup>
+	</h:panelGroup>
+
+</p:panel>
+
+<p:dialog header="Seleccionar tipo de eliminación del desecho"
+	id="#{tipoEliminacionDesechoBean.dialogSeleccionarTipoEliminacionDesecho}"
+	widgetVar="#{tipoEliminacionDesechoBean.dialogSeleccionarTipoEliminacionDesecho}"
+	modal="true" resizable="false" width="600">
+	<h:panelGrid styleClass="w100 separatorBottom" columns="2"
+		columnClasses="w50, field_mrg">
+		<p:outputLabel
+			for="#{tipoEliminacionDesechoBean.filtroTipoEliminacionDesecho}"
+			value="Filtro" styleClass="bold" />
+		<h:outputText />
+		<h:panelGroup>
+			<p:inputText
+				id="#{tipoEliminacionDesechoBean.filtroTipoEliminacionDesecho}"
+				value="#{tipoEliminacionDesechoBean.filter}" styleClass="w100" />
+			<p:tooltip
+				for="#{tipoEliminacionDesechoBean.filtroTipoEliminacionDesecho}"
+				escape="false" styleClass="maxw400px" showDelay="1200"
+				trackMouse="true"
+				value="#{helps['generadorDesecho.categoria.filtro']}" />
+		</h:panelGroup>
+		<h:panelGroup>
+			<div class="buttons-inline">
+				<p:commandButton
+					id="#{tipoEliminacionDesechoBean.filterButtonTipoEliminacion}"
+					icon="ui-icon-check" styleClass="primary"
+					process="@this #{tipoEliminacionDesechoBean.filtroTipoEliminacionDesecho}"
+					actionListener="#{tipoEliminacionDesechoBean.init()}"
+					update="#{tipoEliminacionDesechoBean.dialogSeleccionarTipoEliminacionDesecho}"
+					oncomplete="PF('#{tipoEliminacionDesechoBean.dialogSeleccionarTipoEliminacionDesecho}').show()" >
+					<f:param name="desechoDescripcion" value="#{autogestionDesechosBean.desechoSeleccionado}"/>
+				</p:commandButton>
+				<p:commandButton icon="ui-icon-refresh" styleClass="secondary"
+					process="@this"
+					actionListener="#{tipoEliminacionDesechoBean.reset()}"
+					update="#{tipoEliminacionDesechoBean.dialogSeleccionarTipoEliminacionDesecho}"
+					oncomplete="PF('#{tipoEliminacionDesechoBean.dialogSeleccionarTipoEliminacionDesecho}').show()" >
+					<f:param name="desechoDescripcion" value="#{autogestionDesechosBean.desechoSeleccionado}"/>
+				</p:commandButton>
+			</div>
+		</h:panelGroup>
+	</h:panelGrid>
+
+	<p:tree value="#{tipoEliminacionDesechoBean.catalogo}"
+		id="#{tipoEliminacionDesechoBean.arbolCatalogoTipoEliminacionDesecho}"
+		var="catalogo" dynamic="true" selectionMode="multiple"
+		styleClass="w100 h200px"
+		rendered="#{!tipoEliminacionDesechoBean.catalogo.leaf}">
+		<p:treeNode expandedIcon="ui-icon-folder-open"
+			collapsedIcon="ui-icon-folder-collapsed" type="folder">
+			<h:outputText value="#{catalogo}" />
+		</p:treeNode>
+		<p:treeNode icon="ui-icon-document" type="document">
+			<h:outputText value="#{catalogo}" />
+		</p:treeNode>
+		<p:ajax event="expand"
+			update="#{tipoEliminacionDesechoBean.arbolCatalogoTipoEliminacionDesecho}"
+			listener="#{tipoEliminacionDesechoBean.onNodeExpand}" />
+		<p:ajax event="select"
+			oncomplete="PF('#{tipoEliminacionDesechoBean.dialogSeleccionarTipoEliminacionDesecho}').hide(); PF('adicionarTipoEliminacionDesecho').show()"
+			update=":form:frmDialog:datosTipoEliminacionDesecho"
+			listener="#{tipoEliminacionDesechoBean.onNodeSelect}" />
+	</p:tree>
+	<p:panel rendered="#{tipoEliminacionDesechoBean.catalogo.leaf}"
+		styleClass="h200px alCenter">
+		<h:outputText value="No se encontraron resultados" styleClass="bold" />
+	</p:panel>
+	<p:separator />
+	<div class="buttons">
+		<p:commandButton type="button" value="Aceptar"
+			onclick="PF('#{tipoEliminacionDesechoBean.dialogSeleccionarTipoEliminacionDesecho}').hide()" />
+	</div>
+	<p:defaultCommand
+		target=":form:#{tipoEliminacionDesechoBean.filterButtonTipoEliminacion}"
+		scope=":form:#{tipoEliminacionDesechoBean.dialogSeleccionarTipoEliminacionDesecho}" />
+</p:dialog>
+
+<h:form id="frmDialog">
+	<p:dialog id="adicionarTipoEliminacionDesecho"
+		header="Eliminación o disposición final"
+		widgetVar="adicionarTipoEliminacionDesecho" modal="true"
+		resizable="false" width="800">
+		<h:panelGroup id="datosTipoEliminacionDesecho">
+			<h:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25, null" rowClasses="null, alt"
+				rendered="#{not empty tipoEliminacionDesechoBean.tipoEliminacionDesechoSeleccionada}">
+				<h:outputText value="Tipo de eliminación o disposición final" />
+				<h:outputText
+					value="#{tipoEliminacionDesechoBean.tipoEliminacionDesechoSeleccionada.tipoEliminacionDesecho.tipoEliminacionDesecho eq null ?
+											tipoEliminacionDesechoBean.tipoEliminacionDesechoSeleccionada.tipoEliminacionDesecho.nombre :
+											tipoEliminacionDesechoBean.tipoEliminacionDesechoSeleccionada.tipoEliminacionDesecho.tipoEliminacionDesecho.nombre}" />
+				<h:outputText value="Operación" />
+				<h:outputText
+					value="#{tipoEliminacionDesechoBean.tipoEliminacionDesechoSeleccionada}" />
+				<h:outputText value="Clave" />
+				<h:outputText
+					value="#{tipoEliminacionDesechoBean.tipoEliminacionDesechoSeleccionada.clave}" />
+
+				<p:outputLabel for="unidadTipoEliminacion" value="Unidad"
+					styleClass="ui-label-form" />
+				<p:selectOneMenu
+					value="#{autogestionDesechosBean.desechoEliminadoPorAutogestion.tipoUnidad}"
+					id="unidadTipoEliminacion" styleClass="w25" required="true"
+					disabled="#{!autogestionDesechosBean.habilitarUnidad}"
+					converter="selectItemConverter">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="" noSelectionOption="true" />
+					<f:selectItems itemLabel="#{tipo.descripcion}" itemValue="#{tipo}"
+						var="tipo" value="#{autogestionDesechosBean.listaTipoUnidad}" />
+					<p:ajax process="@this" event="change"
+						listener="#{autogestionDesechosBean.validarCantidadEliminada()}"
+						update="cantidadEliminacion" />
+				</p:selectOneMenu>
+
+				<p:outputLabel value="Cantidad autogestionada/año" for="cantidadEliminacion"
+					styleClass="ui-label-form" />
+				<pe:inputNumber required="true" id="cantidadEliminacion"
+					thousandSeparator="" maxValue="9999999999.99" minValue="0"
+					value="#{autogestionDesechosBean.desechoEliminadoPorAutogestion.cantidad}">
+					<f:validateDoubleRange minimum="0" />
+					<p:ajax event="blur" process="@this"
+						listener="#{autogestionDesechosBean.validarCantidadEliminada()}"
+						update="cantidadEliminacion" />
+				</pe:inputNumber>
+
+				<p:outputLabel for="generaDesecho" styleClass="ui-label-form"
+					value="¿Genera un residuo o desecho posterior al tratamiento realizado?" />
+				<p:selectOneRadio
+					value="#{autogestionDesechosBean.desechoEliminadoPorAutogestion.generaDesecho}"
+					required="true" id="generaDesecho">
+					<f:selectItem itemLabel="Sí" itemValue="true" />
+					<f:selectItem itemLabel="No" itemValue="false" />
+					<p:ajax process="@this" update="pnlDesechosGeneradosPorEliminacion" />
+				</p:selectOneRadio>
+			</h:panelGrid>
+
+			<h:panelGroup id="pnlDesechosGeneradosPorEliminacion">
+				<!-- panel desecho peligroso -->
+				<h:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null" rowClasses="null, alt"
+					rendered="#{autogestionDesechosBean.desechoEliminadoPorAutogestion.generaDesecho}">
+					<h:outputText value="Desechos generados" />
+					<p:dataTable id="tblDesechosGenerados"
+						value="#{autogestionDesechosBean.listaDesechosGeneradosPorEliminacion}"
+						var="desecho" emptyMessage="#{labels['common.table.empty']}">
+						<f:facet name="header">
+							<p:commandButton value="Añadir"
+								update=":form:frmDialog:adicionarDesechoGenerado"
+								oncomplete="PF('adicionarDesechoGenerado').show()"
+								styleClass="button-small-text toRight field_mrg" process="@this"
+								icon="ui-icon-plusthick"
+								action="#{autogestionDesechosBean.nuevoDesechoGenerado}"
+								style="float:right;" />
+						</f:facet>
+						<p:column headerText="Tipo de residuo/desecho generado">
+							<h:outputText value="#{desecho.tipoDesechoGenerado.descripcion}" />
+						</p:column>
+						<p:column headerText="Nombre del residuo o desecho generado">
+							<h:outputText
+								value="#{desecho.tipoDesechoGenerado.codigo.equals(autogestionDesechosBean.tipoDesechoPeligroso) ? desecho.desechoPeligroso.descripcion : desecho.descripcion}" />
+						</p:column>
+						<p:column headerText="Código">
+							<h:outputText
+								value="#{desecho.tipoDesechoGenerado.codigo.equals(autogestionDesechosBean.tipoDesechoPeligroso) ? desecho.desechoPeligroso.clave : 'N/A'}" />
+						</p:column>
+						<p:column headerText="Unidad">
+							<h:outputText value="#{desecho.tipoUnidad.descripcion}" />
+						</p:column>
+						<p:column headerText="Cantidad">
+							<h:outputText value="#{desecho.cantidad}" />
+						</p:column>
+						<p:column headerText="Acciones">
+							<p:commandButton icon="ui-icon-pencil" title="Editar"
+								process="@this"
+								update=":form:frmDialog:adicionarDesechoGenerado tblDesechosGenerados"
+								styleClass="primary"
+								oncomplete="PF('adicionarDesechoGenerado').show()"
+								actionListener="#{autogestionDesechosBean.editarDesechoGenerado(desecho)}" />
+							<p:commandButton icon="ui-icon-trash" title="Eliminar"
+								process="@this" styleClass="primary"
+								actionListener="#{autogestionDesechosBean.eliminarDesechoGenerado(desecho)}"
+								update="tblDesechosGenerados" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+			</h:panelGroup>
+			<br />
+			<div class="buttons">
+				<p:commandButton styleClass="primary"
+					value="#{autogestionDesechosBean.editarTipoEliminacion ? 'Actualizar' : 'Aceptar'}"
+					actionListener="#{autogestionDesechosBean.agregarTipoEliminacion()}"
+					oncomplete="handleDlgTipoEliminacion(xhr, status, args)"
+					process="@this datosTipoEliminacionDesecho"
+					update=":form:frmDialog:datosTipoEliminacionDesecho :form:tblTipoEliminacion" />
+				<p:commandButton value="Cancelar" styleClass="secondary"
+					actionListener="#{autogestionDesechosBean.cancelarTipoEliminacion()}"
+					oncomplete="PF('adicionarTipoEliminacionDesecho').hide()"
+					process="@this"
+					update="datosTipoEliminacionDesecho :form:tblTipoEliminacion">
+					<p:resetInput target="@form" />
+				</p:commandButton>
+			</div>
+		</h:panelGroup>
+	</p:dialog>
+
+	<p:dialog id="adicionarDesechoGenerado" header="Desecho generado"
+		widgetVar="adicionarDesechoGenerado" modal="true" resizable="false"
+		width="800">
+
+		<h:panelGroup id="pnlTipoDesechosGenerados">
+			<h:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25, null" rowClasses="null, alt"
+				rendered="#{autogestionDesechosBean.desechoEliminadoPorAutogestion.generaDesecho}">
+				<p:outputLabel value="Tipo de residuo/desecho generado"
+					for="tipoDesecho" styleClass="ui-label-form" />
+				<p:selectOneMenu
+					value="#{autogestionDesechosBean.desechoGeneradoPorEliminacion.tipoDesechoGenerado}"
+					id="tipoDesecho" styleClass="w100" required="true"
+					converter="selectItemConverter">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="" noSelectionOption="true" />
+					<f:selectItems itemLabel="#{tipo.descripcion}" itemValue="#{tipo}"
+						var="tipo"
+						value="#{autogestionDesechosBean.listaTipoDesechoGenerado}" />
+					<p:ajax process="@this" update="pnlDesechoGeneradoContainer" />
+				</p:selectOneMenu>
+			</h:panelGrid>
+		</h:panelGroup>
+
+		<h:panelGroup id="pnlDesechoGeneradoContainer">
+			<p:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25, null w75" id="datosDesechoPeligroso"
+				rendered="#{autogestionDesechosBean.desechoEliminadoPorAutogestion ne null and autogestionDesechosBean.desechoGeneradoPorEliminacion.tipoDesechoGenerado ne null and autogestionDesechosBean.desechoGeneradoPorEliminacion.tipoDesechoGenerado.codigo.equals(autogestionDesechosBean.tipoDesechoPeligroso)}">
+
+				<p:outputLabel value="Desecho" for="desechoPeligrosoEliminacion"
+					styleClass="ui-label-form" />
+				<p:selectOneMenu id="desechoPeligrosoEliminacion"
+					value="#{autogestionDesechosBean.desechoGeneradoPorEliminacion.desechoPeligroso}"
+					styleClass="w100" converter="selectItemConverter" required="true">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="" noSelectionOption="true" />
+					<f:selectItems value="#{autogestionDesechosBean.getDesechosRgd()}" />
+					<p:ajax process="@this" update="desechoCode" />
+				</p:selectOneMenu>
+
+				<h:outputText value="Código" />
+				<p:inputText id="desechoCode" readonly="true" required="true"
+					value="#{autogestionDesechosBean.desechoGeneradoPorEliminacion.desechoPeligroso.clave}"
+					style="width: 100%;" maxlength="25" />
+
+				<p:outputLabel for="unidadPeligroso" value="Unidad"
+					styleClass="ui-label-form" />
+				<p:selectOneMenu
+					value="#{autogestionDesechosBean.desechoGeneradoPorEliminacion.tipoUnidad}"
+					id="unidadPeligroso" styleClass="w25" required="true"
+					converter="selectItemConverter">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="" noSelectionOption="true" />
+					<f:selectItems itemLabel="#{tipo.descripcion}" itemValue="#{tipo}"
+						var="tipo" value="#{autogestionDesechosBean.listaTipoUnidad}" />
+					<p:ajax process="@this" />
+				</p:selectOneMenu>
+
+				<p:outputLabel for="cantidadPeligroso" value="Cantidad"
+					styleClass="ui-label-form" />
+				<pe:inputNumber required="true" id="cantidadPeligroso"
+					thousandSeparator="" maxValue="9999999999.99" minValue="0"
+					value="#{autogestionDesechosBean.desechoGeneradoPorEliminacion.cantidad}">
+					<f:validateDoubleRange minimum="0.1" />
+				</pe:inputNumber>
+
+			</p:panelGrid>
+
+			<h:panelGrid columns="2" styleClass="panel_data w100"
+				id="datosDesechoNoPeligroso" columnClasses="header w25, null"
+				rowClasses="null, alt"
+				rendered="#{autogestionDesechosBean.desechoEliminadoPorAutogestion ne null and autogestionDesechosBean.desechoGeneradoPorEliminacion.tipoDesechoGenerado ne null and !autogestionDesechosBean.desechoGeneradoPorEliminacion.tipoDesechoGenerado.codigo.equals(autogestionDesechosBean.tipoDesechoPeligroso)}">
+				<p:outputLabel value="Nombre del desecho/residuo generado"
+					for="nombreTipoDesecho" styleClass="ui-label-form" />
+				<p:inputText id="nombreTipoDesecho" maxlength="200" required="true"
+					value="#{autogestionDesechosBean.desechoGeneradoPorEliminacion.descripcion}" />
+				<p:outputLabel value="Unidad" for="unidadNoPeligroso"
+					styleClass="ui-label-form" />
+				<p:selectOneMenu
+					value="#{autogestionDesechosBean.desechoGeneradoPorEliminacion.tipoUnidad}"
+					id="unidadNoPeligroso" styleClass="w100" required="true"
+					converter="selectItemConverter">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="" noSelectionOption="true" />
+					<f:selectItems itemLabel="#{tipo.descripcion}" itemValue="#{tipo}"
+						var="tipo" value="#{autogestionDesechosBean.listaTipoUnidad}" />
+					<p:ajax process="@this" />
+				</p:selectOneMenu>
+				<p:outputLabel value="Cantidad" for="cantidadNoPeligroso"
+					styleClass="ui-label-form" />
+				<pe:inputNumber required="true" id="cantidadNoPeligroso"
+					thousandSeparator="" maxValue="9999999999.99" minValue="0"
+					value="#{autogestionDesechosBean.desechoGeneradoPorEliminacion.cantidad}">
+					<f:validateDoubleRange minimum="0.1" />
+				</pe:inputNumber>
+			</h:panelGrid>
+
+			<br />
+			<div class="buttons">
+				<p:commandButton value="Adicionar"
+					rendered="#{autogestionDesechosBean.desechoEliminadoPorAutogestion ne null and autogestionDesechosBean.desechoGeneradoPorEliminacion.tipoDesechoGenerado.codigo.equals(autogestionDesechosBean.tipoDesechoPeligroso)}"
+					action="#{autogestionDesechosBean.agregarDesechoGenerado}"
+					styleClass="primary alLeft"
+					process="@this :form:frmDialog:datosDesechoPeligroso"
+					update=":form:frmDialog:tblDesechosGenerados :form:frmDialog:datosDesechoPeligroso"
+					oncomplete="handleDlgAdicionarDesechoGenerado(xhr, status, args)" />
+
+				<p:commandButton value="Adicionar"
+					rendered="#{autogestionDesechosBean.desechoEliminadoPorAutogestion ne null and !autogestionDesechosBean.desechoGeneradoPorEliminacion.tipoDesechoGenerado.codigo.equals(autogestionDesechosBean.tipoDesechoPeligroso)}"
+					action="#{autogestionDesechosBean.agregarDesechoGenerado}"
+					styleClass="primary alLeft"
+					process="@this :form:frmDialog:datosDesechoNoPeligroso"
+					update=":form:frmDialog:tblDesechosGenerados :form:frmDialog:datosDesechoNoPeligroso"
+					oncomplete="handleDlgAdicionarDesechoGenerado(xhr, status, args)" />
+			</div>
+		</h:panelGroup>
+	</p:dialog>
+
+	
+</h:form>
+
+<h:form id="frmDialogVerDesechos">
+	<p:dialog id="verDesechosGenerados" widgetVar="verDesechosGenerados"
+		header="Desechos generados posterior al tratamiento" width="600"
+		modal="true" resizable="false">
+		<h:panelGrid id="pnlVerDesechosGenerados" styleClass="w100">
+			<p:dataTable id="tblDesechosGeneradosVer"
+				value="#{autogestionDesechosBean.listaDesechosGeneradosPorEliminacion}"
+				var="desecho" emptyMessage="#{labels['common.table.empty']}">
+				<p:column headerText="Nombre del residuo o desecho ">
+					<h:outputText
+						value="#{desecho.tipoDesechoGenerado.codigo.equals(autogestionDesechosBean.tipoDesechoPeligroso) ? desecho.desechoPeligroso.descripcion : desecho.descripcion}" />
+				</p:column>
+				<p:column headerText="Código">
+					<h:outputText
+						value="#{desecho.tipoDesechoGenerado.codigo.equals(autogestionDesechosBean.tipoDesechoPeligroso) ? desecho.desechoPeligroso.clave : 'N/A'}" />
+				</p:column>
+				<p:column headerText="Unidad">
+					<h:outputText value="#{desecho.tipoUnidad.descripcion}" />
+				</p:column>
+				<p:column headerText="Cantidad">
+					<h:outputText value="#{desecho.cantidad}" />
+				</p:column>
+			</p:dataTable>
+		</h:panelGrid>
+	</p:dialog>
+</h:form>
+
+
+<script type="text/javascript">
+	function toggleAutogestion(xhr, status, args) {
+		if(args.addAutogestion) {
+			PF('adicionarAutogestionDesecho').toggle();
+		}
+	}
+	function handleDlgTipoEliminacion(xhr, status, args) {
+		if (args.validationFailed || !args.addTipoEliminacion) {
+			PF('adicionarTipoEliminacionDesecho').show();
+		}
+		else {
+			PF('adicionarTipoEliminacionDesecho').hide();
+		}
+	}
+	function handleDlgAdicionarDesechoGenerado(xhr, status, args) {
+		if (args.validationFailed || !args.addDesechoGenerado) {
+			PF('adicionarDesechoGenerado').show();
+		}
+		else {
+			PF('adicionarDesechoGenerado').hide();
+		}
+	}
+	function handleDlgSustanciaRetce(xhr, status, args) {
+		if (args.validationFailed || !args.addSustancia) {
+			PF('adicionarSustanciaDesecho').show();
+		}
+		else {
+			PF('adicionarSustanciaDesecho').hide();
+		}
+	}
+</script>
+</html>

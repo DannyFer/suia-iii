@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+	<ui:define name="content">
+
+		<style type="text/css">
+.ui-panelgrid-header .ui-widget-header td {
+	background: #008A8A !important;
+}
+
+.ui-state-error {
+	color: #cd0a0a !important;
+}
+</style>
+
+		<f:event type="preRenderView"
+			listener="#{corregirObservacionesJuridicoController.validarTareaBpm()}" />
+
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				id="pnlDatos">
+				<f:facet name="header">
+					<h:outputText value="OBSERVACIÓN JURÍDICA" />
+				</f:facet>
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null">
+					<p:outputLabel value="Observaciones Jurídico" style="color: white" />
+					<h:outputText style="display: block; max-height: 200px; overflow: auto;"
+						value="#{corregirObservacionesJuridicoController.informacionViabilidadLegal.descripcionJuridico}" />
+
+					<p:outputLabel value="¿Ha solucionado el conflicto legal?"
+						for="legal2" style="color: white" />
+					<p:selectOneRadio id="legal2"
+						value="#{corregirObservacionesJuridicoController.informacionViabilidadLegal.conflictoResuelto}"
+						required="true">
+						<f:selectItem itemLabel="SI" itemValue="true" />
+						<f:selectItem itemLabel="NO" itemValue="false" />
+						<p:ajax process="@this" update="pnlConflictos pnlButtons" />
+					</p:selectOneRadio>
+				</p:panelGrid>
+
+				<h:panelGroup id="pnlConflictos">
+					<p:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25, null"
+						rendered="#{corregirObservacionesJuridicoController.informacionViabilidadLegal.conflictoResuelto}">
+						<p:outputLabel value="Razón" style="color: white"
+							for="txtRazonPaso" />
+						<p:inputTextarea id="txtRazonPaso" maxlength="3000" rows="10"
+							required="true" style="resize: none;" autoResize="false"
+							value="#{corregirObservacionesJuridicoController.informacionViabilidadLegal.descripcionOperador}" />
+
+						<p:outputLabel value="Documentos de respaldo *"
+							style="color: white" />
+						<p:outputPanel id="pnlDocRespaldo">
+							<p:fileUpload id="docRespaldo" multiple="false"
+								fileUploadListener="#{corregirObservacionesJuridicoController.uploadFile}"
+								sizeLimit="10485760" allowTypes="/(\.|\/)(pdf)$/"
+								label="Seleccionar (pdf 10Mb)" uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Debe adjuntar un archivo no mayor de 10 Mb."
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" required="true" update="pnlDocRespaldo" />
+							<p:commandButton icon="ui-icon-arrowthick-1-s"
+								styleClass="button-small primary toLeft" title="Ver"
+								ajax="false" immediate="true"
+								rendered="#{corregirObservacionesJuridicoController.documentoJuridico.nombre ne null}">
+								<p:fileDownload
+									value="#{corregirObservacionesJuridicoController.descargar()}" />
+							</p:commandButton>
+							<h:outputText
+								value="#{corregirObservacionesJuridicoController.documentoJuridico.nombre}"
+								rendered="#{corregirObservacionesJuridicoController.documentoJuridico.nombre ne null}" />
+						</p:outputPanel>
+					</p:panelGrid>
+				</h:panelGroup>
+				<h:inputHidden
+					validator="#{corregirObservacionesJuridicoController.validateDatos}" />
+
+				<br />
+			</p:panelGrid>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Guardar" process="@this :form"
+						rendered="#{corregirObservacionesJuridicoController.informacionViabilidadLegal.conflictoResuelto}"
+						styleClass="secondary"
+						actionListener="#{corregirObservacionesJuridicoController.guardarInforme()}"
+						update="pnlDatos pnlButtons" icon="ui-icon-check" />
+					<p:commandButton value="Finalizar"
+						rendered="#{corregirObservacionesJuridicoController.informacionViabilidadLegal.conflictoResuelto}"
+						disabled="#{!corregirObservacionesJuridicoController.datosGuardados}"
+						action="#{corregirObservacionesJuridicoController.finalizar()}"
+						update="pnlDatos pnlButtons" icon="ui-icon-check" />
+				</div>
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+</ui:composition>

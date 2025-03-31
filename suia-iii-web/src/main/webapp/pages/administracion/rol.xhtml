@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" template="/WEB-INF/templates/default.xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+	<ui:define name="content">
+		<h:form id="frmDatos">
+		
+		<p:panelGrid id="actividadContainer" columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<p:commandButton value="Adicionar" rendered="#{rolController.rolBean.apareceTabla}" action="#{rolController.nuevo()}" update="@form" styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick" />
+				<h:outputText value="Roles del sistema" />
+			</f:facet>
+		
+			<p:growl id="msgs" globalOnly="true" />
+			<p:outputPanel id="pnlDatos">
+				<p:dataTable value="#{rolController.rolBean.listaRoles}" var="rol" paginator="true" rows="20" paginatorPosition="bottom" rendered="#{rolController.rolBean.apareceTabla}">					
+					<p:column headerText="Nombre" filterBy="#{rol.nombre}" filterMatchMode="contains" styleClass="w40">
+						<h:outputText value="#{rol.nombre}" />
+					</p:column>
+					<p:column headerText="Descripción">
+						<h:outputText value="#{rol.descripcion}" />
+					</p:column>
+					<p:column styleClass="w40px alCenter">
+						<p:commandButton title="Ver" icon="ui-icon-search" styleClass="primary button-small" action="#{rolController.seleccionarVer()}" update=":#{p:component('frmDatos')}">
+							<f:setPropertyActionListener value="#{rol}" target="#{rolController.rolBean.rolSeleccionado}" />
+						</p:commandButton>
+						<p:commandButton title="Editar" styleClass="secondary button-small" icon="ui-icon-pencil" action="#{rolController.seleccionarEditar()}" update=":#{p:component('frmDatos')}">
+							<f:setPropertyActionListener value="#{rol}" target="#{rolController.rolBean.rolSeleccionado}" />
+						</p:commandButton>
+					</p:column>
+				</p:dataTable>			
+			</p:outputPanel>
+			<p:outputPanel id="pnlDatos1">
+				<p:panel header="Editar Rol" rendered="#{!rolController.rolBean.apareceTabla}">
+					<p:panelGrid columns="2">
+						<h:outputLabel value="*Nombre:" />
+						<control:todoTextoComoIngrese identificador="txtNombre" valor="#{rolController.rolBean.rolSeleccionado.nombre}" requerido="true" longitud="255" tamanio="90" soloLectura="#{rolController.rolBean.soloLectura}" />
+						<h:outputLabel value="Descripción:" />
+						<control:todoAreaTextoMayuscula identificador="txtNombre" valor="#{rolController.rolBean.rolSeleccionado.descripcion}" longitud="255" tamanio="90" soloLectura="#{rolController.rolBean.soloLectura}" />
+						<h:outputLabel value="Es único por provincia:" />
+						<h:selectBooleanCheckbox value="#{rolController.rolBean.rolSeleccionado.unicoPorProvincia}" disabled="#{rolController.rolBean.soloLectura}" />
+					</p:panelGrid>
+				</p:panel>
+				<p:panel header="Permisos" rendered="#{!rolController.rolBean.apareceTabla}">
+					<p:tree value="#{rolController.rolBean.root}" var="menu" selectionMode="checkbox" selection="#{rolController.rolBean.selectedNodes}" style="width: 500px;font-size: 10px">
+						<p:treeNode expandedIcon="ui-icon-folder-open" collapsedIcon="ui-icon-folder-collapsed">
+							<h:outputLabel value="#{menu.nombre}" />
+						</p:treeNode>
+					</p:tree>
+					<br />
+					<div class="buttons main">
+						<p:commandButton icon="ui-icon-check" styleClass="primary" value="Aceptar" action="#{rolController.guardar()}" update=":#{p:component('frmDatos')}" disabled="#{rolController.rolBean.soloLectura}" />
+						<p:commandButton icon="ui-icon-cancel" value="Cancelar" styleClass="secondary" action="#{rolController.cancelar()}" ajax="false" immediate="true" />
+					</div>
+				</p:panel>
+			</p:outputPanel>
+			
+			</p:panelGrid>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

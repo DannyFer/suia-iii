@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+        >
+
+<ui:composition template="/prevencion/licenciamiento-ambiental/eia/default.xhtml">
+    <ui:define name="content-eia">
+        <h:form id="frmDatos">
+            <p:panel header="Hidrología">
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" id="panelGridHidrologia">
+                    <f:facet name="header">
+                        <p:outputLabel value="Cuerpo hídrico" for="compHid"/>
+                        <h:inputHidden id="compHid" required="#{hidrologiaController.cuerpoHidricoBean.listaCuerposHidricos.isEmpty() or hidrologiaController.cuerpoHidricoBean.listaCuerposHidricos.size()==0 }"/>
+
+                    </f:facet>
+                    <f:facet name="header">
+                        <p:commandButton styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg"
+                                         icon="ui-icon-plusthick" value="Adicionar" update="panelCuerpoHidrico"
+                                         process="@this" actionListener="#{hidrologiaController.agregarCuerpoHidrico}"
+                                         oncomplete="PF('adicionarCuerpoHidrico').show();"/>
+                    </f:facet>
+                    <p:dataTable id="tableCuerpoHidrico"
+                                 value="#{hidrologiaController.cuerpoHidricoBean.listaCuerposHidricos}"
+                                 paginator="true" rows="10" paginatorPosition="bottom" rowIndexVar="index"
+                                 var="cuerpoHidrico"
+                                 emptyMessage="#{labels['common.table.empty']}" paginatorAlwaysVisible="false">
+
+                        <p:column headerText="Nombre del cuerpo hídrico">
+                            <h:outputText value="#{cuerpoHidrico.nombreCuerpo}"/>
+                        </p:column>
+                        <p:column headerText="Tipo">
+                            <h:outputText
+                                    value="#{hidrologiaController.cargarTipoCategoriaCuerpoHidrico(cuerpoHidrico.tipo)}"/>
+                        </p:column>
+                        <p:column headerText="Ancho (M) de sección">
+                            <h:outputText value="#{cuerpoHidrico.anchoSeccion}"/>
+                        </p:column>
+                        <p:column headerText="Profundidad (M) media">
+                            <h:outputText value="#{cuerpoHidrico.profundidadMedia}"/>
+                        </p:column>
+                        <p:column headerText="Velocidad (M/S) Media">
+                            <h:outputText value="#{cuerpoHidrico.velocidadMedia}"/>
+                        </p:column>
+                        <p:column headerText="Caudal (M3/S)medio">
+                            <h:outputText value="#{cuerpoHidrico.cudalMedio}"/>
+                        </p:column>
+
+                        <p:column styleClass="w40px alCenter">
+                            <p:commandButton icon="ui-icon-pencil" styleClass="button-small primary"
+                                             update=":#{p:component('panelCuerpoHidrico')}" process="@this"
+                                             oncomplete="PF('adicionarCuerpoHidrico').show()"
+                                             actionListener="#{hidrologiaController.seleccionarCuerpoHidrico(cuerpoHidrico)}"/>
+                            <p:commandButton icon="ui-icon-circle-close" styleClass="button-small primary"
+                                             update=":#{p:component('tableCuerpoHidrico')}" process="@this"
+                                             actionListener="#{hidrologiaController.removerCuerpoHidrico(cuerpoHidrico)}">
+                                <p:confirm header="Confirmación"
+                                           message="¿Está seguro que desea eliminar este elemento?"
+                                           icon="ui-icon-alert"/>
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+                </p:panelGrid>
+                <br/> <ui:include
+                    src="/prevencion/licenciamiento-ambiental/eia/medioFisico/formularios/cuerpoHidricoModal.xhtml"/>
+
+                <div class="buttons main">
+                    <p:commandButton value="Atrás" immediate="true" process="@this"
+                                     action="/prevencion/licenciamiento-ambiental/eia/medioFisico/clima.jsf?id=12&amp;faces-redirect=true"
+                                     icon="ui-icon-arrowthick-1-w" />
+
+                    <p:commandButton value="Guardar" icon="ui-icon-check" process="@this,:frmDatos:compHid"
+                                     actionListener="#{hidrologiaController.guardar}" update="@form"/>
+                    <p:commandButton value="Siguiente" immediate="true" process="@this"
+                                     action="/prevencion/licenciamiento-ambiental/eia/medioFisico/fisicoMecanicaSuelo.jsf?id=12&amp;faces-redirect=true"
+                                     icon="ui-icon-arrowthick-1-e" />
+                </div>
+
+            </p:panel>
+        </h:form>
+        <style>
+            .ui-panelgrid-header label {
+                color: white;
+            }
+        </style>
+    </ui:define>
+</ui:composition>
+</html>

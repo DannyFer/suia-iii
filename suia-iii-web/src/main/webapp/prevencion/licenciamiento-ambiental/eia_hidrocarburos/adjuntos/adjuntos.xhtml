@@ -1,0 +1,199 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:controles="http://java.sun.com/jsf/composite/controles-prime"
+	  xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	  xmlns:mae-components="http://ec.gob.ambiente/mae-components">
+<ui:composition
+		template="/prevencion/licenciamiento-ambiental/eia/default.xhtml">
+	<ui:define name="content-eia">
+		<h:form id="frmDatos">
+			<p:panel
+					header="#{adjuntosEiaController.adjuntosEiaBean.nombrePanel}">
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+							 rendered="#{adjuntosEiaController.necesitaDocGeneral}">
+					<f:facet name="header">
+						<mae:panelGridHeaderHelp value="Documento general"
+												 conector="areaInfluencia"
+												 help="#{adjuntosEiaController.mensajeInformativoAdjuntosGenerales}" />
+					</f:facet>
+
+					<h:panelGrid columns="2" columnClasses="null, field_mrg"
+								 id="etiquetaGeneral">
+
+						<h:outputText
+								value="#{empty adjuntosEiaController.documentoGeneral.nombre? 'Documento:(.pdf)': adjuntosEiaController.documentoGeneral.nombre}" />
+
+						<p:commandButton id="downloadGeneral"
+										 rendered="#{not empty adjuntosEiaController.documentoGeneral.nombre}"
+										 icon="ui-icon-arrowthick-1-s" ajax="false"
+										 styleClass="button-small primary" title="Ver" immediate="true">
+							<p:fileDownload
+									value="#{adjuntosEiaController.getStreamContent('General')}" />
+						</p:commandButton>
+					</h:panelGrid>
+					<h:outputText />
+
+
+					<p:fileUpload
+							fileUploadListener="#{adjuntosEiaController.uploadListenerDocumentosEIAGenerales}"
+							multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/"
+							label="Seleccionar" uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Debe adjuntar un archivo no mayor de 5 Mb."
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update="etiquetaGeneral, downloadGeneral" />
+
+					<br />
+				</p:panelGrid>
+
+				<p:separator />
+				<h:outputText styleClass="w100 text-red"
+							  value="#{adjuntosEiaController.mensajeInformativo}" />
+				<p:separator />
+				<p:panelGrid columns="2" layout="grid" styleClass="w100" rendered="#{adjuntosEiaController.renderPanelDescarga}">
+					<f:facet name="header">
+						<h:outputText value="Plantilla" />
+					</f:facet>
+
+
+					<p:outputLabel id="etiquetaDescargar" value="Descargar" />
+
+					<p:commandButton id="downloadPlantilla" rendered="true"
+									 icon="ui-icon-arrowthick-1-s" ajax="false"
+									 styleClass="button-small primary" title="Ver" immediate="true">
+						<p:fileDownload
+								value="#{adjuntosEiaController.descargarPlantilla()}" />
+					</p:commandButton>
+				</p:panelGrid>
+
+				<br />
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+							 id="documentoAdjuntoRequerido" rendered="#{adjuntosEiaController.esZip}">
+					<f:facet name="header">
+						<h:outputText value="Documento requerido" />
+					</f:facet>
+
+
+					<h:panelGrid columns="2" columnClasses="null, field_mrg"
+								 id="etiqueta">
+
+						<h:outputText
+								value="#{empty adjuntosEiaController.documento.nombre? 'Documento:(.zip|.rar|.xls|.xlsx)': adjuntosEiaController.documento.nombre}" />
+
+						<p:commandButton id="download"
+										 disabled="#{!adjuntosEiaController.existeDocumentoAdjunto}"
+										 icon="ui-icon-arrowthick-1-s" ajax="false"
+										 styleClass="button-small primary" title="Ver" immediate="true"
+										 rendered="#{not empty adjuntosEiaController.documento.nombre}">
+							<p:fileDownload
+									value="#{adjuntosEiaController.getStreamContent('Adjunto')}" />
+						</p:commandButton>
+					</h:panelGrid>
+					<h:outputText />
+
+					<p:fileUpload
+							fileUploadListener="#{adjuntosEiaController.uploadListenerDocumentosEIA}"
+							multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(zip|rar|xls|xlsx)$/"
+							label="Seleccionar" uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Debe adjuntar un archivo no mayor de 5 Mb."
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update="etiqueta, download" />
+					<br />
+
+				</p:panelGrid>
+
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+							 id="documentoAdjuntoRequeridoZip" rendered="#{adjuntosEiaController.esXls}">
+					<f:facet name="header">
+						<h:outputText value="Documento requerido" />
+					</f:facet>
+
+					<h:panelGrid columns="2" columnClasses="null, field_mrg"
+								 id="etiquetaZip">
+
+						<h:outputText
+								value="#{empty adjuntosEiaController.documento.nombre? 'Documento:(.xls | xlsx)': adjuntosEiaController.documento.nombre}" />
+
+						<p:commandButton id="downloadZip"
+										 disabled="#{!adjuntosEiaController.existeDocumentoAdjunto}"
+										 icon="ui-icon-arrowthick-1-s" ajax="false"
+										 styleClass="button-small primary" title="Ver" immediate="true"
+										 rendered="#{not empty adjuntosEiaController.documento.nombre}">
+							<p:fileDownload
+									value="#{adjuntosEiaController.getStreamContent('Adjunto')}" />
+						</p:commandButton>
+					</h:panelGrid>
+					<h:outputText />
+
+					<p:fileUpload
+							fileUploadListener="#{adjuntosEiaController.uploadListenerDocumentosEIA}"
+							multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(xls|xlsx)$/"
+							label="Seleccionar" uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Debe adjuntar un archivo no mayor de 5 Mb."
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update="etiquetaZip, downloadZip" />
+					<br />
+
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+							 id="documentoAdjuntoRequeridoPdf" rendered="#{adjuntosEiaController.esPdf}">
+					<f:facet name="header">
+						<h:outputText value="Documento requerido" />
+					</f:facet>
+
+					<h:panelGrid columns="2" columnClasses="null, field_mrg"
+								 id="etiquetaPdf">
+
+						<h:outputText
+								value="#{empty adjuntosEiaController.documento.nombre? 'Documento:(.pdf)': adjuntosEiaController.documento.nombre}" />
+
+						<p:commandButton id="downloadPdf"
+										 disabled="#{!adjuntosEiaController.existeDocumentoAdjunto}"
+										 icon="ui-icon-arrowthick-1-s" ajax="false"
+										 styleClass="button-small primary" title="Ver" immediate="true"
+										 rendered="#{not empty adjuntosEiaController.documento.nombre}">
+							<p:fileDownload
+									value="#{adjuntosEiaController.getStreamContent('Adjunto')}" />
+						</p:commandButton>
+					</h:panelGrid>
+					<h:outputText />
+
+					<p:fileUpload
+							fileUploadListener="#{adjuntosEiaController.uploadListenerDocumentosEIA}"
+							multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/"
+							label="Seleccionar" uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Debe adjuntar un archivo no mayor de 5 Mb."
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update="etiquetaPdf, downloadPdf" />
+					<br />
+
+				</p:panelGrid>
+
+				<br />
+				<div class="buttons main">
+					<p:commandButton value="Atrás" immediate="true" process="@this"
+									 action="#{adjuntosEiaController.linkPrevVal}"
+									 icon="ui-icon-arrowthick-1-w"/>
+
+					<p:commandButton value="Guardar" icon="ui-icon-check"
+									 action="#{adjuntosEiaController.salvarDocumento()}" update="@form" />
+
+					<p:commandButton value="Siguiente" immediate="true" process="@this"
+									 action="#{adjuntosEiaController.linkNextVal}"
+									 icon="ui-icon-arrowthick-1-e"/>
+				</div>
+			</p:panel>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

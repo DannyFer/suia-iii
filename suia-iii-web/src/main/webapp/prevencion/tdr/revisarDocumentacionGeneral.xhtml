@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components">
+	<ui:define name="context-extra">
+		<p:outputLabel>Informe</p:outputLabel>
+
+		<p:outputLabel>Informe técnico</p:outputLabel>
+		<p:commandButton icon="ui-icon-search" onclick="PF('dlg2').show();" />
+ 
+
+		<p:outputLabel>Oficio</p:outputLabel>
+
+		<p:outputLabel>#{revisarDocumentacionGeneralBean.cumpleCriterios? "Oficio de Aprobación TRDs" : "Oficio de Observaciones TRDs"}</p:outputLabel>
+		<p:commandButton icon="ui-icon-search" onclick="PF('dlg3').show();" />
+
+		<p:dialog header="Informe Técnico" widgetVar="dlg2" modal="true"
+			height="400">
+			<mae-components:readOnly>
+				<ui:include src="tdrVistaPrevia.xhtml" />
+			</mae-components:readOnly>
+		</p:dialog>
+
+		<p:dialog
+			header='#{revisarDocumentacionGeneralBean.cumpleCriterios? "Oficio de Aprobación TRDs" : "Oficio de Observaciones TRDs"}'
+			widgetVar="dlg3" modal="true" height="400">
+			<mae-components:readOnly>
+				<ui:include src="tdrVistaPreviaArea.xhtml">
+				</ui:include>
+			</mae-components:readOnly>
+		</p:dialog>
+
+
+
+	</ui:define>
+	<ui:define name="content">
+		<h:form id="form-observaciones">
+			<h3>Revisar informe técnico y oficio</h3>
+			<p:panelGrid columns="2" styleClass="w100" columnClasses="w10, w90">
+				<h:outputLabel value="¿Requiere modificaciones?" for="opcion" />
+				<p:selectOneRadio id="opcion"
+					value="#{revisarDocumentacionGeneralBean.requiereModificacion}"
+					required="true">
+					<f:selectItem itemLabel="Sí" itemValue="true" />
+					<f:selectItem itemLabel="No" itemValue="false" />
+					<p:ajax update="form-observaciones" process="@this" />
+				</p:selectOneRadio>
+				<h:outputLabel value="Observación"
+					rendered="#{revisarDocumentacionGeneralBean.requiereModificacion}" />
+				<p:inputTextarea rows="10" cols="50"
+					rendered="#{revisarDocumentacionGeneralBean.requiereModificacion}"
+					required="#{revisarDocumentacionGeneralBean.requiereModificacion}"
+					value="#{revisarDocumentacionGeneralBean.criteriosModificacion}" />
+			</p:panelGrid>
+			<div class="buttons main">
+				<p:commandButton value="Enviar"
+					action="#{revisarDocumentacionGeneralController.enviarDatosGeneral()}"
+					title="Enviar" icon="ui-icon-check">
+				</p:commandButton>
+			</div>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

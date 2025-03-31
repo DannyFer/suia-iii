@@ -1,0 +1,106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+      xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+
+<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{adjuntarPronunciamientoController.validarTareaBpm()}"/>
+        <h:form>
+            <p:panelGrid columns="1" layout="grid" styleClass="w50 alLeft"
+                         columnClasses="w100">
+                <f:facet name="header">
+                    <h:outputText value="Documentos del proyecto" />
+                </f:facet>
+                <h:panelGrid styleClass="panel_data" columns="2"
+                             columnClasses="header, w20px alCenter" rowClasses="null, alt">
+                    <h:outputText value="Oficio del certificado de intersección" />
+                    <p:commandButton icon="ui-icon-search"
+                                     styleClass="button-small primary"
+                                     action="#{adjuntarPronunciamientoController.descargarOficio()}"
+                                     ajax="false" />
+                    <h:outputText value="Mapa del certificado de intersección" />
+                    <p:commandButton icon="ui-icon-search"
+                                     styleClass="button-small primary"
+                                     action="#{adjuntarPronunciamientoController.descargarMapa()}"
+                                     ajax="false" />
+                    <h:outputText value="Coordenadas del proyecto" />
+                    <p:commandButton icon="ui-icon-search"
+                                     styleClass="button-small primary"
+                                     action="#{adjuntarPronunciamientoController.descargarCoordenadas()}"
+                                     ajax="false" />
+                </h:panelGrid>
+
+            </p:panelGrid>
+        </h:form>
+
+        <br/>
+
+        <h:form id="form">
+            <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                <f:facet name="header">
+                    <mae:panelGridHeaderHelp value="Pronunciamiento de Certificado de Viabilidad"
+                                             conector="generalHelp"
+                                             image="#{request.contextPath}/resources/images/help-how.png"
+                                             help="#{helps['no.help.yet']}" />
+                </f:facet>
+
+                <h:panelGrid cellpadding="2" columns="2" rendered="#{adjuntarPronunciamientoBean.respuestasProponente != null}">
+
+                    <p:outputLabel value="#{adjuntarPronunciamientoBean.respuestasProponente.name}"/>
+
+                    <p:commandButton ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="oculto primary">
+                        <p:fileDownload value="#{adjuntarPronunciamientoBean.fileStreamPreguntasProponente()}"/>
+                    </p:commandButton>
+
+                </h:panelGrid>
+
+                <h:panelGrid cellpadding="2" styleClass="w50">
+
+                    <h:panelGrid id="labelPronunciamiento">
+
+                        <p:outputLabel rendered="#{adjuntarPronunciamientoBean.adjuntoPronunciamiento != null}"
+                                       value="#{adjuntarPronunciamientoBean.adjuntoPronunciamiento.name}"/>
+
+                        <p:outputLabel rendered="#{adjuntarPronunciamientoBean.adjuntoPronunciamiento == null}"
+                                       value="Pronunciamiento(.pdf)"/>
+
+                    </h:panelGrid>
+
+                    <p:fileUpload id="pronunciamientoFile" width="100%" required="true"
+                                  value="#{adjuntarPronunciamientoBean.adjuntoPronunciamiento}"
+                                  sizeLimit="3145728" allowTypes="/(\.|\/)(pdf)$/"
+                                  fileUploadListener="#{adjuntarPronunciamientoBean.uploadListener}"
+                                  label="Seleccionar" cancelLabel="Cancelar" uploadLabel="Adjuntar" auto="true"
+                                  update=":#{p:component('marchPronunciamiento')}, :#{p:component('labelPronunciamiento')}"
+                                  invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo pdf."
+                                  invalidSizeMessage="Debe adjuntar un archivo no mayor de 3 Mb."/>
+
+                    <p:growl id="marchPronunciamiento" showDetail="true"/>
+
+                    <p:selectOneRadio id="pronunciamientoValor"
+                                      value="#{adjuntarPronunciamientoBean.esPronunciamientoFavorable}"
+                                      required="true"
+                                      requiredMessage="El campo Pronunciamiento es requerido">
+                        <f:selectItem itemLabel="Favorable" itemValue="true" />
+                        <f:selectItem itemLabel="No favorable" itemValue="false" />
+                    </p:selectOneRadio>
+
+                </h:panelGrid>
+            </p:panelGrid>
+
+            <div class="buttons main">
+                <p:commandButton value="Finalizar"
+                                 action="#{adjuntarPronunciamientoController.completarTarea()}"
+                                 styleClass="primary" />
+            </div>
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

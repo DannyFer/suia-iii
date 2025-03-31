@@ -1,0 +1,373 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:controles="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:hh="http://java.sun.com/jsf/html"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition
+	template="/prevencion/licenciamiento-ambiental/eia/verEIA.xhtml">
+	<ui:define name="content-eia">
+		<h:form id="frmDatos">
+
+			<p:panel header="Plan Monitoreo">
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					id="panelGridMonitoreo" rendered="#{!planMonitoreoEIAController.esMineriaNoMetalicos}">
+					<f:facet name="header">
+						<h:outputText value="Plan Monitoreo" />
+					</f:facet>
+					<f:facet name="header"/>
+
+					<p:dataTable id="tablaPlanMonitoreo"
+						value="#{planMonitoreoEIAController.listaPlanMonitoreoEia}"
+						var="ide" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Componente ambiental">
+							<h:outputText value="#{ide.componente}" />
+						</p:column>
+						<p:column headerText="Tipo de componente">
+							<h:outputText value="#{ide.tipoComponente}" />
+						</p:column>
+						<p:column headerText="Normativa">
+							<h:outputText value="#{ide.normativas.descripcion}" />
+						</p:column>
+						<p:column headerText="Coordenada X" rendered="#{planMonitoreoEIAController.exPost}">
+							<h:outputText value="#{ide.coordenadaX}" />
+						</p:column>
+						<p:column headerText="Coordenada Y" rendered="#{planMonitoreoEIAController.exPost}">
+							<h:outputText value="#{ide.coordenadaY}" />
+						</p:column>
+						<p:column headerText="Frecuencia de muestreo">
+							<h:outputText value="#{ide.frecuencia}" />
+						</p:column>
+						<p:column headerText="Periodicidad de presentación de informe">
+							<h:outputText value="#{ide.periodicidad}" />
+						</p:column>
+						<!-- MarielaG para mostrar historico PLANES MODIFICADOS-->
+						<p:column styleClass="w40px alCenter" rendered="#{planMonitoreoEIAController.listaPlanMonitoreoOriginales.size() > 0}">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{ide.registroModificado or ide.nuevoEnModificacion or ide.tablasModificadas}"
+								styleClass="button-small orange"
+								action="#{planMonitoreoEIAController.mostrarOriginal(ide)}"
+								update=":frmDlg3:dlg3" process="@this"
+								oncomplete="PF('dlg3').show()" />
+							<!-- REGISTROS NUEVO -->
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{!ide.registroModificado and !ide.nuevoEnModificacion and !ide.tablasModificadas}"
+								styleClass="button-small primary"
+								action="#{planMonitoreoEIAController.mostrarOriginal(ide)}"
+								update=":frmDlg3:dlg3" process="@this"
+								oncomplete="PF('dlg3').show()" />
+						</p:column>
+						<!-- fin historico -->
+					</p:dataTable>
+
+					<!--MarielaG para mostrar historico PUNTOS ELIMINADOS-->
+					<h:panelGrid columns="1" styleClass="w100 uppercase"
+						columnClasses="w100"
+						rendered="#{planMonitoreoEIAController.listaPlanMonitoreoEliminadosBdd.size() > 0}">
+						<p:outputLabel value="Planes eliminados"
+							styleClass="bold text-orange" />
+					</h:panelGrid>
+
+					<p:dataTable id="tablaPlanMonitoreoEliminado"
+						rendered="#{planMonitoreoEIAController.listaPlanMonitoreoEliminadosBdd.size() > 0}"
+						value="#{planMonitoreoEIAController.listaPlanMonitoreoEliminadosBdd}"
+						var="ide" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Componenete ambiental">
+							<h:outputText value="#{ide.componente}" />
+						</p:column>
+						<p:column headerText="Tipo de componente">
+							<h:outputText value="#{ide.tipoComponente}" />
+						</p:column>
+						<p:column headerText="Normativa">
+							<h:outputText value="#{ide.normativas.descripcion}" />
+						</p:column>
+						<p:column headerText="Coordenada X" rendered="#{planMonitoreoEIAController.exPost}">
+							<h:outputText value="#{ide.coordenadaX}" />
+						</p:column>
+						<p:column headerText="Coordenada Y" rendered="#{planMonitoreoEIAController.exPost}">
+							<h:outputText value="#{ide.coordenadaY}" />
+						</p:column>
+						<p:column headerText="Frecuencia de muestreo">
+							<h:outputText value="#{ide.frecuencia}" />
+						</p:column>
+						<p:column headerText="Periodicidad de presentación de informe">
+							<h:outputText value="#{ide.periodicidad}" />
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton icon="ui-icon-search"
+								styleClass="button-small primary"
+								action="#{planMonitoreoEIAController.mostrarOriginal(ide)}"
+								update=":frmDlg3:dlg3" process="@this"
+								oncomplete="PF('dlg3').show()" />
+						</p:column>
+					</p:dataTable>
+					<!--fin historico -->
+				</p:panelGrid>
+				
+				<p:panelGrid columns="2" layout="grid" styleClass="w100"
+                             columnClasses="w50, w50" rendered="#{planMonitoreoEIAController.esMineriaNoMetalicos}">
+                    <f:facet name="header">
+                        <h:outputText value="Adjuntar Plan de Monitoreo *" />                        
+                    </f:facet>
+                    <h:panelGrid columns="2" columnClasses="null, field_mrg"
+                                 id="etiqueta">
+                        <p:outputLabel
+                                value="#{empty planMonitoreoEIAController.documento.nombre ? 'Documento(.pdf)' : planMonitoreoEIAController.documento.nombre}" />
+                        <p:commandButton id="download" icon="ui-icon-arrowthick-1-s"
+                                         ajax="false" styleClass="button-small primary" title="Ver"
+                                         immediate="true"
+                                         rendered="#{not empty planMonitoreoEIAController.documento.nombre}">
+                            <p:fileDownload
+                                    value="#{planMonitoreoEIAController.getStreamContent()}" />
+                        </p:commandButton>
+                    </h:panelGrid>
+
+					<!-- MarielaG para mostrar historico DOCUMENTOS HISTORICO-->
+						<h:panelGrid styleClass="panel_data" columns="2"
+							rendered="#{planMonitoreoEIAController.listaDocumentoHistorico.size() > 0}"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt">
+							<h:outputText value="Historial de documentos" />
+							<p:commandButton styleClass="button-small primary"
+								process="@this" icon="ui-icon-search"
+								update=":formDocumentosOriginal:documentosOriginalesDlg"
+								oncomplete="PF('documentosOriginalesDlg').show()" />
+						</h:panelGrid>
+						<!-- fin historico -->
+				</p:panelGrid>
+			</p:panel>
+
+
+		</h:form>
+
+		<h:form id="frmDlg3">
+			<p:dialog id="dlg3" header="Plan de monitoreo" widgetVar="dlg3"
+				modal="true" width="600" resizable="false" draggable="false">
+
+				<h:panelGrid id="panelDatosHDialogo" columns="1"
+					styleClass="w100 separatorBottom"
+					columnClasses="w50, field_mrg w50">
+					
+					<!--MarielaG para mostrar historico -->
+					<!-- cuando es un registro nuevo que se ingreso en la modificacion -->
+					<h:panelGrid columns="1" styleClass="w100 uppercase"
+						columnClasses="w100"
+						rendered="#{planMonitoreoEIAController.planMonitoreoEia.nuevoEnModificacion}">
+						<p:outputLabel value="Registro Nuevo" styleClass="bold text-orange" />
+					</h:panelGrid>
+					<!--fin historico -->
+
+					<p:outputLabel for="componente" value="Componente ambiental" />
+					<p:inputText id="componente" required="true" readonly="true"
+						value="#{planMonitoreoEIAController.planMonitoreoEia.componente}"
+						styleClass="w100" />
+
+					<p:outputLabel for="tipoComponente" value="Tipo componente" />
+					<p:inputText id="tipoComponente" required="true" readonly="true"
+						value="#{planMonitoreoEIAController.planMonitoreoEia.tipoComponente}"
+						styleClass="w100" />
+
+					<p:outputLabel for="normativa" value="Normativa" />
+					<p:inputText id="normativa" required="true" readonly="true"
+						value="#{planMonitoreoEIAController.planMonitoreoEia.normativas}"
+						styleClass="w100" />
+
+					<p:outputLabel for="coordenadaX" value="Coordenada X"
+						rendered="#{planMonitoreoEIAController.exPost}" />
+					<p:inputText id="coordenadaX" required="true"
+						rendered="#{planMonitoreoEIAController.exPost}"
+						value="#{planMonitoreoEIAController.planMonitoreoEia.coordenadaX}"
+						styleClass="w100" readonly="true">
+						<pe:keyFilter regEx="/[\d]/" />
+					</p:inputText>
+
+					<p:outputLabel for="coordenadaY" value="Coordenada Y"
+						rendered="#{planMonitoreoEIAController.exPost}" />
+					<p:inputText id="coordenadaY" required="true"
+						rendered="#{planMonitoreoEIAController.exPost}" readonly="true"
+						value="#{planMonitoreoEIAController.planMonitoreoEia.coordenadaY}"
+						styleClass="w100">
+						<pe:keyFilter regEx="/[\d]/" />
+					</p:inputText>
+
+					<p:outputLabel for="frecuencia" value="Frecuencia de muestreo" />
+					<p:inputText id="frecuencia" required="true" readonly="true"
+						value="#{planMonitoreoEIAController.planMonitoreoEia.frecuencia}"
+						styleClass="w100">
+						<pe:keyFilter regEx="/[\d]/" />
+					</p:inputText>
+
+					<p:outputLabel for="periodicidad"
+						value="Periodicidad de presentación de informe" />
+					<p:inputText id="periodicidad" required="true" readonly="true"
+						value="#{planMonitoreoEIAController.planMonitoreoEia.periodicidad}"
+						styleClass="w100">
+						<pe:keyFilter regEx="/[\d]/" />
+					</p:inputText>
+					
+					<!-- MarielaG para mostrar historico INFO GENERAL-->
+					<h:panelGrid styleClass="panel_data separatorBottom" columns="2"
+						rendered="#{planMonitoreoEIAController.listaPlanHistorial.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText value="Historial información general" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-search" 
+							update=":frmDlgOrig:dlgOrig"
+							oncomplete="PF('dlgOrig').show()" />
+					</h:panelGrid>
+					<!-- fin historico -->
+
+					<p:dataTable id="tablaTablas"
+						value="#{planMonitoreoEIAController.planMonitoreoEia.tablasPlanMonitoreo}"
+						var="tab" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Tabla">
+							<h:outputText value="#{tab.descripcion}" />
+						</p:column>
+						<p:column headerText="Parámetros">
+							<h:outputText value="#{tab.parametros}" />
+						</p:column>
+						<!-- MarielaG para mostrar historico -->
+						<p:column styleClass="w40px alCenter" 
+						rendered="#{planMonitoreoEIAController.planMonitoreoEia.tablasModificadas}">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{tab.registroModificado}"
+								styleClass="button-small orange"
+								action="#{planMonitoreoEIAController.mostrarTablasOriginales(tab)}"
+								update=":formTablasOriginal:tablasOriginalesDlg" process="@this"
+								oncomplete="PF('tablasOriginalesDlg').show()" />
+ 								<!-- HALLAZGOS NUEVO -->
+							<h:outputText value="Nuevo" styleClass="bold text-orange" rendered="#{tab.nuevoEnModificacion}"/>
+						</p:column>
+						<!-- fin historico -->
+					</p:dataTable>
+				</h:panelGrid>
+
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Cerrar" type="button"
+						onclick="PF('dlg3').hide()" styleClass="secondary" />
+				</div>
+			</p:dialog>
+		</h:form>
+
+		<!-- MarielaG para mostrar historico INFO--> 
+		<h:form id="frmDlgOrig">
+			<p:dialog id="dlgOrig" header="Historial plan de monitoreo"
+				widgetVar="dlgOrig" modal="true" width="600" resizable="false">
+
+				<h:panelGrid id="panelDatosOrig" columns="1"
+					styleClass="w100 separatorBottom"
+					columnClasses="w50, field_mrg w50">
+
+					<p:dataTable 
+						value="#{planMonitoreoEIAController.listaPlanHistorial}"
+						var="ide" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Observación" styleClass="w15 alCenter">
+							<h:outputText
+								value="#{ide.numeroNotificacion == 1 ? 'Original' : ide.numeroNotificacion - 1}" />
+						</p:column>
+						<p:column headerText="Componenete ambiental">
+							<h:outputText value="#{ide.componente}" />
+						</p:column>
+						<p:column headerText="Tipo de componente">
+							<h:outputText value="#{ide.tipoComponente}" />
+						</p:column>
+						<p:column headerText="Normativa">
+							<h:outputText value="#{ide.normativas.descripcion}" />
+						</p:column>
+						<p:column headerText="Coordenada X"
+							rendered="#{planMonitoreoEIAController.exPost}">
+							<h:outputText value="#{ide.coordenadaX}" />
+						</p:column>
+						<p:column headerText="Coordenada Y"
+							rendered="#{planMonitoreoEIAController.exPost}">
+							<h:outputText value="#{ide.coordenadaY}" />
+						</p:column>
+						<p:column headerText="Frecuencia de muestreo">
+							<h:outputText value="#{ide.frecuencia}" />
+						</p:column>
+						<p:column headerText="Periodicidad de presentación de informe">
+							<h:outputText value="#{ide.periodicidad}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+
+		<!-- MarielaG para mostrar historico TABLAS-->
+		<h:form id="formTablasOriginal">
+			<p:dialog id="tablasOriginalesDlg" header="Historial de tablas"
+				widgetVar="tablasOriginalesDlg" modal="true" width="600" resizable="false">
+				<h:panelGrid id="panelTablasOrig" columns="1"
+					styleClass="w100 separatorBottom"
+					columnClasses="w50, field_mrg w50">
+					<p:dataTable 
+						value="#{planMonitoreoEIAController.listaTablasHistorico}"
+						var="tab" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText
+								value="#{tab.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Tabla">
+							<h:outputText value="#{tab.descripcion}" />
+						</p:column>
+						<p:column headerText="Parámetros">
+							<h:outputText value="#{tab.parametros}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+		<!-- MarielaG para mostrar historico DOCUMENTOS-->
+		<h:form id="formDocumentosOriginal">
+			<p:dialog header="Historial de documentos"
+				id="documentosOriginalesDlg" widgetVar="documentosOriginalesDlg"
+				modal="true" resizable="false" width="600">
+				<h:panelGroup id="datosDocumentosOriginal">
+					<p:dataTable
+						value="#{planMonitoreoEIAController.listaDocumentoHistorico}"
+						var="doc" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Observación" styleClass="w15 alCenter">
+							<h:outputText
+								value="#{doc.numeroNotificacion == 1 ? 'Original' : doc.numeroNotificacion - 1}" />
+						</p:column>
+						<p:column headerText="Documento">
+							<h:outputText value="#{doc.nombre}" />
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton id="download_historico" rendered="true"
+								icon="ui-icon-search" ajax="false"
+								styleClass="button-small background-orange" title="Ver"
+								immediate="true">
+								<p:fileDownload
+									value="#{planMonitoreoEIAController.getStreamContentOriginal(doc)}" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+	</ui:define>
+</ui:composition>
+</html>

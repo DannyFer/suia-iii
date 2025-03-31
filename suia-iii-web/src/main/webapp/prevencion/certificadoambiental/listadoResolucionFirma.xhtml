@@ -1,0 +1,313 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<f:loadBundle var="labels"
+			basename="ec.gob.ambiente.core.resources.labels_es" />
+
+		<h:form id="form">
+			<p:panel header="Firma electrónica Registros Ambientales"
+				id="pnlFirma">
+				<p:dataTable id="tableProyectos" var="proyecto"
+					value="#{firmarMasivaResolucionAmbientalController.listaProyectos}"
+					selection="#{firmarMasivaResolucionAmbientalController.listaSelectProyectos}"
+					rowKey="#{proyecto.value.codigo}" style="margin-bottom:0"
+					paginator="true" rows="10" 
+					filterDelay="700" lazy="false"
+					paginatorPosition="bottom" emptyMessage="#{labels['common.table.empty']}"
+					filteredValue="#{firmarMasivaResolucionAmbientalController.listaProyectosFilter}">							
+
+					<p:column headerText="Código" filterBy="#{proyecto.value.codigo}"
+						filterMatchMode="contains" styleClass="alCenter w15">
+						<p:commandLink
+							action="#{firmarMasivaResolucionAmbientalController.seleccionar(proyecto.value)}">
+							<h:outputText value="#{proyecto.value.codigo}" />
+						</p:commandLink>
+					</p:column>
+
+					<p:column headerText="Nombre" filterBy="#{proyecto.value.nombre}"
+						filterMatchMode="contains" styleClass="w25">
+						<h:outputText value="#{proyecto.value.nombre}"
+							title="#{proyecto.value.nombre}" />
+					</p:column>
+					<p:column headerText="Registro" styleClass="alCenter w15">
+						<h:outputText value="#{proyecto.value.fechaCreacion}" />
+					</p:column>
+					<p:column headerText="Sector" filterBy="#{proyecto.value.sector}"
+						filterMatchMode="contains" styleClass="alCenter w15">
+						<h:outputText value="#{proyecto.value.tipoSector.nombre}" />
+					</p:column>
+					<p:column headerText="Responsable"
+						filterBy="#{proyecto.value.areaResponsable.areaAbbreviation}"
+						filterMatchMode="contains" styleClass="alCenter w15">
+						<h:outputText
+							value="#{proyecto.value.areaResponsable.areaAbbreviation}"
+							title="Responsable" />
+					</p:column>
+					<p:column styleClass="alCenter w10" headerText="Permiso ambiental">
+						<h:outputText
+							value="#{proyecto.value.catalogoCategoria.categoria.nombrePublico}" />
+					</p:column>
+					<p:column styleClass="alCenter w10" headerText="Acción">
+						<p:commandButton styleClass="primary" icon="ui-icon-play"
+							process="@this"
+							actionListener="#{firmarMasivaResolucionAmbientalController.cargarDatosBandeja(proyecto.value, true)}"
+							update="@form"
+							immediate="true">
+						</p:commandButton>
+					</p:column>
+					<p:column selectionMode="multiple" width="15"
+						style="text-align:center"/>
+					<p:ajax event="toggleSelect" update="pnlButtons" />
+					<p:ajax event="rowSelectCheckbox" update="pnlButtons" />
+					<p:ajax event="rowUnselectCheckbox" update="pnlButtons" />
+					<p:ajax event="rowSelect" update="pnlButtons" />
+
+					<f:facet name="footer">
+						<h:panelGroup id="pnlButtons">
+							<div class="buttons main">
+								<p:commandButton id="btnEnviarFirma" 
+									value="Generar" styleClass="secondary cssBoton"
+									style="background: #006A77 !important;"
+									action="#{firmarMasivaResolucionAmbientalController.enviarParaFirma()}"
+									rendered="#{firmarMasivaResolucionAmbientalController.mostrarBotonFirma and not empty firmarMasivaResolucionAmbientalController.listaSelectProyectos}"
+									update="pnlButtons :formFirma:dlgProyecto" process="@this">
+								</p:commandButton>
+
+								<ui:remove>
+								<p:commandButton id="btnFirmar" icon="ui-icon-check"
+									value="Firmar" styleClass="secondary cssBoton"
+									style="background: #006A77 !important;"
+									rendered="#{!firmarMasivaResolucionAmbientalController.mostrarBotonFirma and not empty firmarMasivaResolucionAmbientalController.listaSelectProyectos}"
+									onclick="window.location.href='#{firmarMasivaResolucionAmbientalController.firmarDocumento()}'"
+									update=":form" process="@this">
+
+								</p:commandButton>
+								</ui:remove>
+							</div>
+
+						</h:panelGroup>
+					</f:facet>
+				</p:dataTable>
+			</p:panel>
+
+			<h:panelGrid id="pnlVisualizador" columns="1" styleClass="w100">
+				<h:panelGrid id="pnlDocumento" columns="1" styleClass="w100"
+					rendered="#{firmarMasivaResolucionAmbientalController.mostrarDocumento}">
+
+					<object id="objectPdf" type="application/pdf"
+						data="#{firmarMasivaResolucionAmbientalController.pathTotal}?pfdrid_c=true"
+						width="100%" height="500px">
+						Su navegador no soporta la visualización de pdf. Puede descargar
+						el documento presionando el siguiente botón:
+
+						<p:commandButton value="Descargar" styleClass="primary"
+							icon="ui-icon-arrowthick-1-s" immediate="true" ajax="false">
+							<p:fileDownload
+								value="#{firmarMasivaResolucionAmbientalController.descargarPdf()}" />
+						</p:commandButton>
+
+					</object>
+
+					<p:outputPanel id="pnlButton">
+						<div class="buttons main">
+							<p:commandButton styleClass="large" value="Firmar Documento"
+								icon="ui-icon-key" oncomplete="PF('signDialog').show()"
+								update=":formDialogs:signDialog">
+							</p:commandButton>
+
+							<p:commandButton styleClass="large" value="Cerrar"
+								icon="ui-icon-close" update="@form"
+								actionListener="#{firmarMasivaResolucionAmbientalController.cerrar()}">
+							</p:commandButton>
+
+						</div>
+					</p:outputPanel>
+
+				</h:panelGrid>				
+				
+			</h:panelGrid>
+		</h:form>
+
+		<ui:remove>
+		<h:form id="formVisualizador">
+			<p:dialog header="Firma Electrónica" id="visualizadorDialog"
+				widgetVar="visualizadorDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600px" height="auto">
+				<p:panel id="pnlDocumento" styleClass="noBorder">
+					<div class="buttons main">
+						<p:commandButton styleClass="large" value="Firmar Documento"
+							icon="ui-icon-key" oncomplete="PF('signDialog').show()">
+						</p:commandButton>
+						<object id="objectPdf" type="application/pdf"
+							data="#{firmarMasivaResolucionAmbientalController.pathTotal}?pfdrid_c=true"
+							width="100%" height="390px">
+							Su navegador no soporta la visualización de pdf. Puede descargar
+							el documento presionando el siguiente botón:
+							<p:commandButton value="Descargar" styleClass="primary"
+								icon="ui-icon-arrowthick-1-s"
+								action="#{firmarMasivaResolucionAmbientalController.descargarPdf()}"
+								immediate="true" ajax="false" />
+						</object>
+					</div>
+				</p:panel>
+			</p:dialog>
+		</h:form>
+		</ui:remove>
+
+		<h:form id="formDialogs">
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600px" height="auto">
+				<p:panel>
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel value="Firmar Resolución Ambiental"
+							styleClass="bold" />
+							
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold"
+							rendered="#{!firmarMasivaResolucionAmbientalController.ambienteProduccion}" />
+						<p:selectOneRadio id="verificaToken"
+							value="#{firmarMasivaResolucionAmbientalController.token}"
+							rendered="#{!firmarMasivaResolucionAmbientalController.ambienteProduccion}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change"
+								update=":formDialogs:pnlFirmaManual :formDialogs:pnlFirmaToken"
+								listener="#{firmarMasivaResolucionAmbientalController.guardarToken}" />
+						</p:selectOneRadio>
+
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{firmarMasivaResolucionAmbientalController.ambienteProduccion}" />
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{firmarMasivaResolucionAmbientalController.ambienteProduccion}" />
+
+						<h:panelGroup id="pnlFirmaToken">								
+							<p:commandButton value="Firmar documento" type="button"
+								styleClass="primary" icon="ui-icon-key"
+								rendered="#{firmarMasivaResolucionAmbientalController.token}"
+								onclick="window.location.href='#{firmarMasivaResolucionAmbientalController.firmarOficio()}'" 
+								process="@this"/>
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!firmarMasivaResolucionAmbientalController.token}">
+							<p:outputLabel value="1. Descargar el Informe" styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload
+									value="#{firmarMasivaResolucionAmbientalController.descargarInformacion()}" />
+							</p:commandButton>
+							<p:outputLabel for="uploadRequired"
+								value="2. Adjuntar la Resolución firmada"
+								styleClass="bold" />
+							<p:fileUpload id="Idfirmada"
+								fileUploadListener="#{firmarMasivaResolucionAmbientalController.uploadListenerInformacionFirmada}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreDocFirmado"
+								rendered="#{!firmarMasivaResolucionAmbientalController.token}">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreDocFirmado"
+								value="#{firmarMasivaResolucionAmbientalController.nombreDocumentoFirmado}" />
+						</h:panelGrid>
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!firmarMasivaResolucionAmbientalController.token and !firmarMasivaResolucionAmbientalController.informacionSubida}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Enviar" styleClass="primary"
+						onclick="PF('signDialog').hide()" 
+						actionListener="#{firmarMasivaResolucionAmbientalController.enviar()}"
+						update="@form"/>
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialog').hide()" icon="ui-icon-close" 
+						update="@form"/>
+				</div>
+			</p:dialog>
+
+			<p:separator />
+		</h:form>
+		
+		<h:form id="formFirma">
+		<p:dialog id="dlgProyecto" widgetVar="dlgProyecto" modal="true"
+		resizable="false" width="1000px" closable="false">
+			<h:panelGroup>
+				<h:panelGrid styleClass="alCenter w100" columns="1">
+					<h:outputText value="Firma masiva" styleClass="encabezado1_4em" />
+					<p:dataTable style="margin: auto;" styleClass="w80"
+						value="#{firmarMasivaResolucionAmbientalController.listaRegistrosSeleccionados}"
+						var="item" emptyMessage="#{labels['common.table.empty']}">
+
+						<p:column headerText="Trámite" styleClass="alCenter singleLine">
+							<h:outputText value="#{item.codigo}" />
+						</p:column>						
+						<p:column headerText="Nombre">
+							<h:outputText value="#{item.nombre}" />
+						</p:column>
+						<p:column styleClass="alCenter w10">
+							<p:commandButton ajax="false" icon="ui-icon-search"
+								styleClass="primary button-small" immediate="true">
+								<p:fileDownload
+									value="#{firmarMasivaResolucionAmbientalController.descargarDocumento(item.resolucion)}" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+			</h:panelGroup>
+			<br />
+			<h:panelGroup id="pnlFirmaButtons">
+				<div class="buttons main">
+					<p:commandButton value="Firmar documento" type="button"
+						styleClass="large" icon="ui-icon-key"
+						disabled="#{!firmarMasivaResolucionAmbientalController.habilitarForm}"
+						onclick="window.location.href='#{firmarMasivaResolucionAmbientalController.firmarDocumento()}'" />
+
+						<p:commandButton value="Enviar" styleClass="primary"
+							onclick="PF('dlgProyecto').hide()"
+							actionListener="#{firmarMasivaResolucionAmbientalController.enviar()}"
+							update="@form" />
+
+						<p:commandButton value="Cancelar" immediate="true"
+						icon="ui-icon-cancel" styleClass="secondary"
+						action="/prevencion/certificadoambiental/listadoResolucionFirma.jsf?faces-redirect=true">
+						<p:confirm
+							message="#{msg['message.confirmacion.cancelacion.tarea']}"
+							header="#{msg['header.confirmacion.cancelacion.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+			</p:dialog>
+		</h:form>	
+		
+	</ui:define>
+</ui:composition>
+</html>

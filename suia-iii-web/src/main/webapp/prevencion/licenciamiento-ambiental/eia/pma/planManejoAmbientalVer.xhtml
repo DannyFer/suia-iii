@@ -1,0 +1,704 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:controles="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:hh="http://java.sun.com/jsf/html"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition template="/prevencion/licenciamiento-ambiental/eia/verEIA.xhtml">
+	<ui:define name="content-eia">
+		<h:form id="frmDatos">
+
+			<p:panel header="Plan Manejo Ambiental" rendered="#{!planManejoAmbientalEIAController.esMineriaNoMetalicos}">
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					id="panelGridPrevencion">
+					<f:facet name="header">
+						<h:outputText value="Plan de prevención y mitigación de impactos" />
+					</f:facet>
+					<f:facet name="header">
+
+	
+					</f:facet>
+
+					<p:dataTable id="tablaPrevencion"
+						value="#{planManejoAmbientalEIAController.listaPlanManejoAmbientalEIADetallePrevencion}"
+						var="ide" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Aspecto ambiental">
+							<h:outputText
+								value="#{ide.detalleEvaluacionLista.aspectoAmbiental.nombre}" />
+						</p:column>
+						<p:column headerText="Impacto ambiental">
+							<h:outputText
+								value="#{ide.detalleEvaluacionLista.impactosIdentificados}" />
+						</p:column>
+						<p:column headerText="Medida propuesta">
+							<h:outputText value="#{ide.medidaPropuesta}" />
+						</p:column>
+						<p:column headerText="Indicadores">
+							<h:outputText value="#{ide.indicador}" />
+						</p:column>
+						<p:column headerText="Medio de verificación">
+							<h:outputText value="#{ide.medioVerificacion}" />
+						</p:column>
+						<p:column headerText="Responsable">
+							<h:outputText value="#{ide.responsable}" />
+						</p:column>
+						<p:column headerText="Frecuencia">
+							<h:outputText value="#{ide.frecuencia}" />
+						</p:column>
+						<p:column headerText="Periodo">
+							<h:outputText value="#{ide.periodo}" />
+						</p:column>
+						<!-- MarielaG para mostrar historico-->
+						<p:column styleClass="w40px alCenter" rendered="#{planManejoAmbientalEIAController.listaPmaPrevencionOriginal.size() > 0}">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{ide.registroModificado}"
+								styleClass="button-small orange"
+								action="#{planManejoAmbientalEIAController.mostrarRegistroOriginal('11',ide)}"
+								update=":formPlanesOriginales:planesOriginalesDlg" process="@this"
+								oncomplete="PF('planesOriginalesDlg').show()" />
+							<!-- REGISTROS NUEVO -->
+							<h:outputText value="Nuevo" styleClass="bold text-orange"
+								rendered="#{ide.nuevoEnModificacion}" />
+						</p:column>
+						<!-- fin historico -->
+					</p:dataTable>
+					
+					<!-- MarielaG para mostrar historico REGISTROS ELIMINADOS-->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{planManejoAmbientalEIAController.listaPmaPrevencionEliminadosBdd.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText  value="Planes de prevención eliminados" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-search"
+							action="#{planManejoAmbientalEIAController.fillPlanesEliminados('11')}"
+							update=":formPlanesOriginales:planesOriginalesDlg" 
+							oncomplete="PF('planesOriginalesDlg').show()" />
+					</h:panelGrid>
+					<!-- fin historico -->
+				</p:panelGrid>
+			</p:panel>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				id="panelGridContingencias" rendered="#{!planManejoAmbientalEIAController.esMineriaNoMetalicos}">
+				<f:facet name="header">
+					<h:outputText value="Plan de contingencias" />
+				</f:facet>
+				<f:facet name="header">
+
+
+				</f:facet>
+
+				<p:dataTable id="tablaContingencias"
+					value="#{planManejoAmbientalEIAController.listaPlanManejoAmbientalEIADetalleContingencias}"
+					var="ide" paginator="true" rows="10" paginatorPosition="bottom"
+					emptyMessage="#{labels['common.table.empty']}"
+					paginatorAlwaysVisible="false">
+					<p:column headerText="Riesgo">
+						<h:outputText value="#{ide.riesgo}" />
+					</p:column>
+					<p:column headerText="Aspecto ambiental">
+						<h:outputText value="#{ide.componenteAmbiental}" />
+					</p:column>
+					<p:column headerText="Medida propuesta">
+						<h:outputText value="#{ide.medidaPropuesta}" />
+					</p:column>
+					<p:column headerText="Indicadores">
+						<h:outputText value="#{ide.indicador}" />
+					</p:column>
+					<p:column headerText="Medio de verificación">
+						<h:outputText value="#{ide.medioVerificacion}" />
+					</p:column>
+					<p:column headerText="Responsable">
+						<h:outputText value="#{ide.responsable}" />
+					</p:column>
+					<p:column headerText="Frecuencia">
+						<h:outputText value="#{ide.frecuencia}" />
+					</p:column>
+					<p:column headerText="Periodo">
+						<h:outputText value="#{ide.periodo}" />
+					</p:column>
+					<!-- MarielaG para mostrar historico-->
+						<p:column styleClass="w40px alCenter" rendered="#{planManejoAmbientalEIAController.listaPmaContingenciasOriginal.size() > 0}">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{ide.registroModificado}"
+								styleClass="button-small orange"
+								action="#{planManejoAmbientalEIAController.mostrarRegistroOriginal('12',ide)}"
+								update=":formPlanesOriginales:planesOriginalesDlg" process="@this"
+								oncomplete="PF('planesOriginalesDlg').show()" />
+							<!-- REGISTROS NUEVO -->
+							<h:outputText value="Nuevo" styleClass="bold text-orange"
+								rendered="#{ide.nuevoEnModificacion}" />
+						</p:column>
+						<!-- fin historico -->
+				</p:dataTable>
+				<!-- MarielaG para mostrar historico REGISTROS ELIMINADOS-->
+				<h:panelGrid styleClass="panel_data" columns="2"
+					rendered="#{planManejoAmbientalEIAController.listaPmaContingenciasEliminadosBdd.size() > 0}"
+					columnClasses="header background-orange, null"
+					rowClasses="null, alt">
+					<h:outputText  value="Planes de contingencia eliminados" />
+					<p:commandButton styleClass="button-small primary" process="@this"
+						icon="ui-icon-search"
+						action="#{planManejoAmbientalEIAController.fillPlanesEliminados('12')}"
+						update=":formPlanesOriginales:planesOriginalesDlg"
+						oncomplete="PF('planesOriginalesDlg').show()" />
+				</h:panelGrid>
+				<!-- fin historico -->
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				id="panelGridComunicacion" rendered="#{!planManejoAmbientalEIAController.esMineriaNoMetalicos}">
+				<f:facet name="header">
+					<h:outputText
+						value="Plan de comunicación, capacitación y educación" />
+				</f:facet>
+
+				<p:dataTable id="tablaComunicacion"
+					value="#{planManejoAmbientalEIAController.listaPlanManejoAmbientalEIADetalleComunicacion}"
+					var="ide" paginator="true" rows="10" paginatorPosition="bottom"
+					emptyMessage="#{labels['common.table.empty']}"
+					paginatorAlwaysVisible="false">
+					<p:column headerText="Aspecto ambiental">
+						<h:outputText
+							value="#{ide.detalleEvaluacionLista.aspectoAmbiental.nombre}" />
+					</p:column>
+					<p:column headerText="Impacto ambiental">
+						<h:outputText
+							value="#{ide.detalleEvaluacionLista.impactosIdentificados}" />
+					</p:column>
+					<p:column headerText="Medida propuesta">
+						<h:outputText value="#{ide.medidaPropuesta}" />
+					</p:column>
+					<p:column headerText="Indicadores">
+						<h:outputText value="#{ide.indicador}" />
+					</p:column>
+					<p:column headerText="Medio de verificación">
+						<h:outputText value="#{ide.medioVerificacion}" />
+					</p:column>
+					<p:column headerText="Responsable">
+						<h:outputText value="#{ide.responsable}" />
+					</p:column>
+					<p:column headerText="Frecuencia">
+						<h:outputText value="#{ide.frecuencia}" />
+					</p:column>
+					<p:column headerText="Periodo">
+						<h:outputText value="#{ide.periodo}" />
+					</p:column>
+					<!-- MarielaG para mostrar historico-->
+						<p:column styleClass="w40px alCenter" rendered="#{planManejoAmbientalEIAController.listaPmaComunicacionOriginal.size() > 0}">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{ide.registroModificado}"
+								styleClass="button-small orange"
+								action="#{planManejoAmbientalEIAController.mostrarRegistroOriginal('13',ide)}"
+								update=":formPlanesOriginales:planesOriginalesDlg" process="@this"
+								oncomplete="PF('planesOriginalesDlg').show()" />
+							<!-- REGISTROS NUEVO -->
+							<h:outputText value="Nuevo" styleClass="bold text-orange"
+								rendered="#{ide.nuevoEnModificacion}" />
+						</p:column>
+						<!-- fin historico -->
+				</p:dataTable>
+
+				<!-- MarielaG para mostrar historico REGISTROS ELIMINADOS-->
+				<h:panelGrid styleClass="panel_data" columns="2"
+					rendered="#{planManejoAmbientalEIAController.listaPmaComunicacionEliminadosBdd.size() > 0}"
+					columnClasses="header background-orange, null"
+					rowClasses="null, alt">
+					<h:outputText  value="Planes de comunicación eliminados" />
+					<p:commandButton styleClass="button-small primary" process="@this"
+						icon="ui-icon-search"
+						action="#{planManejoAmbientalEIAController.fillPlanesEliminados('13')}"
+						update=":formPlanesOriginales:planesOriginalesDlg"
+						oncomplete="PF('planesOriginalesDlg').show()" />
+				</h:panelGrid>
+				<!-- fin historico -->
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				id="panelGridSeguridad" rendered="#{!planManejoAmbientalEIAController.esMineriaNoMetalicos}">
+				<f:facet name="header">
+					<h:outputText
+						value="Plan de seguridad ocupacional y seguridad industrial" />
+				</f:facet>
+				<f:facet name="header">
+
+				</f:facet>
+
+				<p:dataTable id="tablaSeguridad"
+					value="#{planManejoAmbientalEIAController.listaPlanManejoAmbientalEIADetalleSeguridad}"
+					var="ide" paginator="true" rows="10" paginatorPosition="bottom"
+					emptyMessage="#{labels['common.table.empty']}"
+					paginatorAlwaysVisible="false">
+					<p:column headerText="Aspecto ambiental">
+						<h:outputText
+							value="#{ide.detalleEvaluacionLista.aspectoAmbiental.nombre}" />
+					</p:column>
+					<p:column headerText="Impacto ambiental">
+						<h:outputText
+							value="#{ide.detalleEvaluacionLista.impactosIdentificados}" />
+					</p:column>
+					<p:column headerText="Medida propuesta">
+						<h:outputText value="#{ide.medidaPropuesta}" />
+					</p:column>
+					<p:column headerText="Indicadores">
+						<h:outputText value="#{ide.indicador}" />
+					</p:column>
+					<p:column headerText="Medio de verificación">
+						<h:outputText value="#{ide.medioVerificacion}" />
+					</p:column>
+					<p:column headerText="Responsable">
+						<h:outputText value="#{ide.responsable}" />
+					</p:column>
+					<p:column headerText="Frecuencia">
+						<h:outputText value="#{ide.frecuencia}" />
+					</p:column>
+					<p:column headerText="Periodo">
+						<h:outputText value="#{ide.periodo}" />
+					</p:column>
+					<!-- MarielaG para mostrar historico-->
+						<p:column styleClass="w40px alCenter" rendered="#{planManejoAmbientalEIAController.listaPmaSeguridadOriginal.size() > 0}">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{ide.registroModificado}"
+								styleClass="button-small orange"
+								action="#{planManejoAmbientalEIAController.mostrarRegistroOriginal('14',ide)}"
+								update=":formPlanesOriginales:planesOriginalesDlg" process="@this"
+								oncomplete="PF('planesOriginalesDlg').show()" />
+							<!-- REGISTROS NUEVO -->
+							<h:outputText value="Nuevo" styleClass="bold text-orange"
+								rendered="#{ide.nuevoEnModificacion}" />
+						</p:column>
+						<!-- fin historico -->
+				</p:dataTable>
+				
+				<!-- MarielaG para mostrar historico REGISTROS ELIMINADOS-->
+				<h:panelGrid styleClass="panel_data" columns="2"
+					rendered="#{planManejoAmbientalEIAController.listaPmaSeguridadEliminadosBdd.size() > 0}"
+					columnClasses="header background-orange, null"
+					rowClasses="null, alt">
+					<h:outputText  value="Planes de seguridad eliminados" />
+					<p:commandButton styleClass="button-small primary" process="@this"
+						icon="ui-icon-search"
+						action="#{planManejoAmbientalEIAController.fillPlanesEliminados('14')}"
+						update=":formPlanesOriginales:planesOriginalesDlg"
+						oncomplete="PF('planesOriginalesDlg').show()" />
+				</h:panelGrid>
+				<!-- fin historico -->
+
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				id="panelGridManejo" rendered="#{!planManejoAmbientalEIAController.esMineriaNoMetalicos}">
+				<f:facet name="header">
+					<h:outputText value="Plan de manejo de desechos" />
+				</f:facet>
+				<f:facet name="header">
+
+
+				</f:facet>
+
+				<p:dataTable id="tablaManejo"
+					value="#{planManejoAmbientalEIAController.listaPlanManejoAmbientalEIADetalleManejo}"
+					var="ide" paginator="true" rows="10" paginatorPosition="bottom"
+					emptyMessage="#{labels['common.table.empty']}"
+					paginatorAlwaysVisible="false">
+					<p:column headerText="Aspecto ambiental">
+						<h:outputText
+							value="#{ide.detalleEvaluacionLista.aspectoAmbiental.nombre}" />
+					</p:column>
+					<p:column headerText="Impacto ambiental">
+						<h:outputText
+							value="#{ide.detalleEvaluacionLista.impactosIdentificados}" />
+					</p:column>
+					<p:column headerText="Medida propuesta">
+						<h:outputText value="#{ide.medidaPropuesta}" />
+					</p:column>
+					<p:column headerText="Indicadores">
+						<h:outputText value="#{ide.indicador}" />
+					</p:column>
+					<p:column headerText="Medio de verificación">
+						<h:outputText value="#{ide.medioVerificacion}" />
+					</p:column>
+					<p:column headerText="Responsable">
+						<h:outputText value="#{ide.responsable}" />
+					</p:column>
+					<p:column headerText="Frecuencia">
+						<h:outputText value="#{ide.frecuencia}" />
+					</p:column>
+					<p:column headerText="Periodo">
+						<h:outputText value="#{ide.periodo}" />
+					</p:column>
+					<!-- MarielaG para mostrar historico-->
+						<p:column styleClass="w40px alCenter" rendered="#{planManejoAmbientalEIAController.listaPmaManejoOriginal.size() > 0}">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{ide.registroModificado}"
+								styleClass="button-small orange"
+								action="#{planManejoAmbientalEIAController.mostrarRegistroOriginal('15',ide)}"
+								update=":formPlanesOriginales:planesOriginalesDlg" process="@this"
+								oncomplete="PF('planesOriginalesDlg').show()" />
+							<!-- REGISTROS NUEVO -->
+							<h:outputText value="Nuevo" styleClass="bold text-orange"
+								rendered="#{ide.nuevoEnModificacion}" />
+						</p:column>
+						<!-- fin historico -->
+				</p:dataTable>
+				
+				<!-- MarielaG para mostrar historico REGISTROS ELIMINADOS-->
+				<h:panelGrid styleClass="panel_data" columns="2"
+					rendered="#{planManejoAmbientalEIAController.listaPmaManejoEliminadosBdd.size() > 0}"
+					columnClasses="header background-orange, null"
+					rowClasses="null, alt">
+					<h:outputText  value="Planes de manejo eliminados" />
+					<p:commandButton styleClass="button-small primary" process="@this"
+						icon="ui-icon-search"
+						action="#{planManejoAmbientalEIAController.fillPlanesEliminados('15')}"
+						update=":formPlanesOriginales:planesOriginalesDlg"
+						oncomplete="PF('planesOriginalesDlg').show()" />
+				</h:panelGrid>
+				<!-- fin historico -->
+
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				id="panelGridRelaciones" rendered="#{!planManejoAmbientalEIAController.esMineriaNoMetalicos}">
+				<f:facet name="header">
+					<h:outputText value="Plan de relaciones comunitarias" />
+				</f:facet>
+				<f:facet name="header">
+
+
+				</f:facet>
+
+				<p:dataTable id="tablaRelaciones"
+					value="#{planManejoAmbientalEIAController.listaPlanManejoAmbientalEIADetalleRelaciones}"
+					var="ide" paginator="true" rows="10" paginatorPosition="bottom"
+					emptyMessage="#{labels['common.table.empty']}"
+					paginatorAlwaysVisible="false">
+					<p:column headerText="Aspecto ambiental">
+						<h:outputText
+							value="#{ide.detalleEvaluacionLista.aspectoAmbiental.nombre}" />
+					</p:column>
+					<p:column headerText="Impacto ambiental">
+						<h:outputText
+							value="#{ide.detalleEvaluacionLista.impactosIdentificados}" />
+					</p:column>
+					<p:column headerText="Medida propuesta">
+						<h:outputText value="#{ide.medidaPropuesta}" />
+					</p:column>
+					<p:column headerText="Indicadores">
+						<h:outputText value="#{ide.indicador}" />
+					</p:column>
+					<p:column headerText="Medio de verificación">
+						<h:outputText value="#{ide.medioVerificacion}" />
+					</p:column>
+					<p:column headerText="Responsable">
+						<h:outputText value="#{ide.responsable}" />
+					</p:column>
+					<p:column headerText="Frecuencia">
+						<h:outputText value="#{ide.frecuencia}" />
+					</p:column>
+					<p:column headerText="Periodo">
+						<h:outputText value="#{ide.periodo}" />
+					</p:column>
+					<!-- MarielaG para mostrar historico-->
+						<p:column styleClass="w40px alCenter" rendered="#{planManejoAmbientalEIAController.listaPmaRelacionesOriginal.size() > 0}">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{ide.registroModificado}"
+								styleClass="button-small orange"
+								action="#{planManejoAmbientalEIAController.mostrarRegistroOriginal('16',ide)}"
+								update=":formPlanesOriginales:planesOriginalesDlg" process="@this"
+								oncomplete="PF('planesOriginalesDlg').show()" />
+							<!-- REGISTROS NUEVO -->
+							<h:outputText value="Nuevo" styleClass="bold text-orange"
+								rendered="#{ide.nuevoEnModificacion}" />
+						</p:column>
+						<!-- fin historico -->
+				</p:dataTable>
+				
+				<!-- MarielaG para mostrar historico REGISTROS ELIMINADOS-->
+				<h:panelGrid styleClass="panel_data" columns="2"
+					rendered="#{planManejoAmbientalEIAController.listaPmaRelacionesEliminadosBdd.size() > 0}"
+					columnClasses="header background-orange, null"
+					rowClasses="null, alt">
+					<h:outputText value="Planes de relación eliminados" />
+					<p:commandButton styleClass="button-small primary" process="@this"
+						icon="ui-icon-search"
+						action="#{planManejoAmbientalEIAController.fillPlanesEliminados('16')}"
+						update=":formPlanesOriginales:planesOriginalesDlg"
+						oncomplete="PF('planesOriginalesDlg').show()" />
+				</h:panelGrid>
+				<!-- fin historico -->
+
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				id="panelGridRehabilitacion" rendered="#{!planManejoAmbientalEIAController.esMineriaNoMetalicos}">
+				<f:facet name="header">
+					<h:outputText value="Plan de rehabilitación de áreas afectadas" />
+				</f:facet>
+				<f:facet name="header">
+
+				</f:facet>
+
+				<p:dataTable id="tablaRehabilitacion"
+					value="#{planManejoAmbientalEIAController.listaPlanManejoAmbientalEIADetalleRehabilitacion}"
+					var="ide" paginator="true" rows="10" paginatorPosition="bottom"
+					emptyMessage="#{labels['common.table.empty']}"
+					paginatorAlwaysVisible="false">
+					<p:column headerText="Aspecto ambiental">
+						<h:outputText
+							value="#{ide.detalleEvaluacionLista.aspectoAmbiental.nombre}" />
+					</p:column>
+					<p:column headerText="Impacto ambiental">
+						<h:outputText
+							value="#{ide.detalleEvaluacionLista.impactosIdentificados}" />
+					</p:column>
+					<p:column headerText="Medida propuesta">
+						<h:outputText value="#{ide.medidaPropuesta}" />
+					</p:column>
+					<p:column headerText="Indicadores">
+						<h:outputText value="#{ide.indicador}" />
+					</p:column>
+					<p:column headerText="Medio de verificación">
+						<h:outputText value="#{ide.medioVerificacion}" />
+					</p:column>
+					<p:column headerText="Responsable">
+						<h:outputText value="#{ide.responsable}" />
+					</p:column>
+					<p:column headerText="Frecuencia">
+						<h:outputText value="#{ide.frecuencia}" />
+					</p:column>
+					<p:column headerText="Periodo">
+						<h:outputText value="#{ide.periodo}" />
+					</p:column>
+					<!-- MarielaG para mostrar historico-->
+						<p:column styleClass="w40px alCenter" rendered="#{planManejoAmbientalEIAController.listaPmaRehabilitacionOriginal.size() > 0}">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{ide.registroModificado}"
+								styleClass="button-small orange"
+								action="#{planManejoAmbientalEIAController.mostrarRegistroOriginal('17',ide)}"
+								update=":formPlanesOriginales:planesOriginalesDlg" process="@this"
+								oncomplete="PF('planesOriginalesDlg').show()" />
+							<!-- REGISTROS NUEVO -->
+							<h:outputText value="Nuevo" styleClass="bold text-orange"
+								rendered="#{ide.nuevoEnModificacion}" />
+						</p:column>
+						<!-- fin historico -->
+				</p:dataTable>
+				
+				<!-- MarielaG para mostrar historico REGISTROS ELIMINADOS-->
+				<h:panelGrid styleClass="panel_data" columns="2"
+					rendered="#{planManejoAmbientalEIAController.listaPmaRehabilitacionEliminadosBdd.size() > 0}"
+					columnClasses="header background-orange, null"
+					rowClasses="null, alt">
+					<h:outputText value="Planes de rehabilitación eliminados" />
+					<p:commandButton styleClass="button-small primary" process="@this"
+						icon="ui-icon-search"
+						action="#{planManejoAmbientalEIAController.fillPlanesEliminados('17')}"
+						update=":formPlanesOriginales:planesOriginalesDlg"
+						oncomplete="PF('planesOriginalesDlg').show()" />
+				</h:panelGrid>
+				<!-- fin historico -->
+
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				id="panelGridAbandono" rendered="#{!planManejoAmbientalEIAController.esMineriaNoMetalicos}">
+				<f:facet name="header">
+					<h:outputText value="Plan de abandono y entrega del área" />
+				</f:facet>
+				<f:facet name="header">
+
+
+				</f:facet>
+
+				<p:dataTable id="tablaAbandono"
+					value="#{planManejoAmbientalEIAController.listaPlanManejoAmbientalEIADetalleAbandono}"
+					var="ide" paginator="true" rows="10" paginatorPosition="bottom"
+					emptyMessage="#{labels['common.table.empty']}"
+					paginatorAlwaysVisible="false">
+					<p:column headerText="Aspecto ambiental">
+						<h:outputText
+							value="#{ide.detalleEvaluacionLista.aspectoAmbiental.nombre}" />
+					</p:column>
+					<p:column headerText="Impacto ambiental">
+						<h:outputText
+							value="#{ide.detalleEvaluacionLista.impactosIdentificados}" />
+					</p:column>
+					<p:column headerText="Medida propuesta">
+						<h:outputText value="#{ide.medidaPropuesta}" />
+					</p:column>
+					<p:column headerText="Indicadores">
+						<h:outputText value="#{ide.indicador}" />
+					</p:column>
+					<p:column headerText="Medio de verificación">
+						<h:outputText value="#{ide.medioVerificacion}" />
+					</p:column>
+					<p:column headerText="Responsable">
+						<h:outputText value="#{ide.responsable}" />
+					</p:column>
+					<p:column headerText="Frecuencia">
+						<h:outputText value="#{ide.frecuencia}" />
+					</p:column>
+					<p:column headerText="Periodo">
+						<h:outputText value="#{ide.periodo}" />
+					</p:column>
+					<!-- MarielaG para mostrar historico-->
+						<p:column styleClass="w40px alCenter" rendered="#{planManejoAmbientalEIAController.listaPmaAbandonoOriginal.size() > 0}">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{ide.registroModificado}"
+								styleClass="button-small orange"
+								action="#{planManejoAmbientalEIAController.mostrarRegistroOriginal('18',ide)}"
+								update=":formPlanesOriginales:planesOriginalesDlg" process="@this"
+								oncomplete="PF('planesOriginalesDlg').show()" />
+							<!-- REGISTROS NUEVO -->
+							<h:outputText value="Nuevo" styleClass="bold text-orange"
+								rendered="#{ide.nuevoEnModificacion}" />
+						</p:column>
+						<!-- fin historico -->
+				</p:dataTable>
+				
+				<!-- MarielaG para mostrar historico REGISTROS ELIMINADOS-->
+				<h:panelGrid styleClass="panel_data" columns="2"
+					rendered="#{planManejoAmbientalEIAController.listaPmaAbandonoEliminadosBdd.size() > 0}"
+					columnClasses="header background-orange, null"
+					rowClasses="null, alt">
+					<h:outputText value="Planes de abandono eliminados" />
+					<p:commandButton styleClass="button-small primary" process="@this"
+						icon="ui-icon-search"
+						action="#{planManejoAmbientalEIAController.fillPlanesEliminados('18')}"
+						update=":formPlanesOriginales:planesOriginalesDlg"
+						oncomplete="PF('planesOriginalesDlg').show()" />
+				</h:panelGrid>
+				<!-- fin historico -->
+
+			</p:panelGrid>
+			
+			<p:panelGrid columns="2" layout="grid" styleClass="w100"
+                             columnClasses="w50, w50" rendered="#{planManejoAmbientalEIAController.esMineriaNoMetalicos}">
+                    <f:facet name="header">
+                        <h:outputText value="Adjuntar Plan Manejo Ambiental *" />                        
+                    </f:facet>
+                    <h:panelGrid columns="2" columnClasses="null, field_mrg"
+                                 id="etiqueta">
+                        <p:outputLabel
+                                value="#{empty planManejoAmbientalEIAController.documento.nombre ? 'Documento(.pdf)' : planManejoAmbientalEIAController.documento.nombre}" />
+                        <p:commandButton id="download" icon="ui-icon-arrowthick-1-s"
+                                         ajax="false" styleClass="button-small primary" title="Ver"
+                                         immediate="true"
+                                         rendered="#{not empty planManejoAmbientalEIAController.documento.nombre}">
+                            <p:fileDownload
+                                    value="#{planManejoAmbientalEIAController.getStreamContent()}" />
+                        </p:commandButton>
+                    </h:panelGrid>
+
+				<!-- MarielaG para mostrar historico DOCUMENTOS HISTORICO-->
+				<h:panelGrid styleClass="panel_data" columns="2"
+					rendered="#{planManejoAmbientalEIAController.listaDocumentoHistorico.size() > 0}"
+					columnClasses="header background-orange, null"
+					rowClasses="null, alt">
+					<h:outputText value="Historial de documentos" />
+					<p:commandButton styleClass="button-small primary" process="@this"
+						icon="ui-icon-search"
+						update=":formDocumentosOriginal:documentosOriginalesDlg"
+						oncomplete="PF('documentosOriginalesDlg').show()" />
+				</h:panelGrid>
+				<!-- fin historico -->
+			</p:panelGrid>
+
+		</h:form>
+
+		<!-- MarielaG para mostrar historico registros--> 
+		<h:form id="formPlanesOriginales">
+			<p:dialog header="Historial de planes"
+				id="planesOriginalesDlg"
+				widgetVar="planesOriginalesDlg" modal="true"
+				resizable="false" width="900">
+				<h:panelGroup id="datosOriginales">
+					<p:dataTable 
+						value="#{planManejoAmbientalEIAController.listaPmaHistorico}"
+						var="ide" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText value="#{ide.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Riesgo" rendered="#{planManejoAmbientalEIAController.opcion2}">
+							<h:outputText value="#{ide.riesgo}" />
+						</p:column>
+						<p:column headerText="Aspecto ambiental" rendered="#{planManejoAmbientalEIAController.opcion2}">
+							<h:outputText value="#{ide.componenteAmbiental}" />
+						</p:column>
+						<p:column headerText="Aspecto ambiental" rendered="#{!planManejoAmbientalEIAController.opcion2}">
+							<h:outputText
+								value="#{ide.detalleEvaluacionLista.aspectoAmbiental.nombre}" />
+						</p:column>
+						<p:column headerText="Impacto ambiental" rendered="#{!planManejoAmbientalEIAController.opcion2}">
+							<h:outputText
+								value="#{ide.detalleEvaluacionLista.impactosIdentificados}" />
+						</p:column>
+						<p:column headerText="Medida propuesta">
+							<h:outputText value="#{ide.medidaPropuesta}" />
+						</p:column>
+						<p:column headerText="Indicadores">
+							<h:outputText value="#{ide.indicador}" />
+						</p:column>
+						<p:column headerText="Medio de verificación">
+							<h:outputText value="#{ide.medioVerificacion}" />
+						</p:column>
+						<p:column headerText="Responsable">
+							<h:outputText value="#{ide.responsable}" />
+						</p:column>
+						<p:column headerText="Frecuencia">
+							<h:outputText value="#{ide.frecuencia}" />
+						</p:column>
+						<p:column headerText="Periodo">
+							<h:outputText value="#{ide.periodo}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+		<!-- MarielaG para mostrar historico DOCUMENTOS-->
+		<h:form id="formDocumentosOriginal">
+			<p:dialog header="Historial de documentos"
+				id="documentosOriginalesDlg" widgetVar="documentosOriginalesDlg"
+				modal="true" resizable="false" width="600">
+				<h:panelGroup id="datosDocumentosOriginal">
+					<p:dataTable
+						value="#{planManejoAmbientalEIAController.listaDocumentoHistorico}"
+						var="doc" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText
+								value="#{doc.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Documento">
+							<h:outputText value="#{doc.nombre}" />
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton id="download_historico" rendered="true"
+								icon="ui-icon-search" ajax="false"
+								styleClass="button-small background-orange" title="Ver"
+								immediate="true">
+								<p:fileDownload
+									value="#{planManejoAmbientalEIAController.getStreamContentOriginal(doc)}" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+	</ui:define>
+</ui:composition>
+</html>

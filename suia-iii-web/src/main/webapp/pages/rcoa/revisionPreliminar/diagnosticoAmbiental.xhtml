@@ -1,0 +1,251 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="content">
+
+		<style type="text/css">
+.ui-fileupload-content {
+	border: none !important;
+	padding: 0px;
+}
+
+.ui-fileupload-buttonbar {
+	text-align: right !important;
+}
+</style>
+
+<f:event type="preRenderView"
+			listener="#{cargarDiagnosticoAmbientalController.validarTareaBpm()}" />
+
+		<h:form id="form">
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Diagnóstico Ambiental *" />
+				</f:facet>
+
+				<h:panelGrid columns="1" layout="grid" styleClass="w100"  style="text-align: justify !important">
+					<h:outputText value="#{cargarDiagnosticoAmbientalController.mensaje}" escape="false" styleClass="alJustify"/>	
+					<br />
+				</h:panelGrid>
+
+				<h:panelGrid columns="2" rendered="#{cargarDiagnosticoAmbientalController.existeNormativaGuias}">
+				<h:outputLabel value="Documento referencial para elaboración del Diagnóstico Ambiental" />	
+				<p:commandButton icon="ui-icon-arrowthick-1-s" value="Descargar"
+							styleClass="primary" ajax="false" immediate="true" process="@this">
+							<p:fileDownload value="#{cargarDiagnosticoAmbientalController.guias}"/>							
+				</p:commandButton>
+				</h:panelGrid>
+				
+				<h:outputText value="Adjuntar el documento de Diagnóstico Ambiental (Adjuntar archivos .pdf de hasta 20MB)" />
+
+				<p:fileUpload id="fileDiagnosticoObservado" multiple="false"
+					fileUploadListener="#{cargarDiagnosticoAmbientalController.uploadDiagnostico}"
+					sizeLimit="20971520" allowTypes="/(\.|\/)(pdf)$/" label="Añadir"
+					uploadLabel="Subir" invalidFileMessage="Tipo de archivo no válido"
+					invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+					cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+					auto="true" required="true" styleClass="w50 toCenter"
+					update="tblDiagnosticos" />
+				<p:dataTable id="tblDiagnosticos" styleClass="w50"
+					value="#{cargarDiagnosticoAmbientalController.listaDocumentosDiagnostico}"
+					var="documento" emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Documento">
+						<h:outputText value="#{documento.nombreDocumento}" />
+					</p:column>
+					<p:column headerText="Acciones" styleClass="w70px alCenter">
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="primary" title="Descargar" ajax="false"
+							immediate="true">
+							<p:fileDownload
+								value="#{cargarDiagnosticoAmbientalController.descargarDocumento(documento)}" />
+						</p:commandButton>
+						<p:commandButton icon="ui-icon-trash" title="Eliminar"
+							process="@this" styleClass="primary"
+							actionListener="#{cargarDiagnosticoAmbientalController.eliminarDocumento(1, documento)}"
+							update="tblDiagnosticos" />
+					</p:column>
+
+				</p:dataTable>
+
+				<br />
+
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				rendered="#{cargarDiagnosticoAmbientalController.tieneObservacionesDiagnostico}">
+				<f:facet name="header">
+					<h:outputText value="Plan de acción *" />
+				</f:facet>
+
+				<h:outputText value="Adjuntar el documento de Plan de acción (Adjuntar archivos .pdf de hasta 20MB)" />
+				<ui:remove>				
+				<p:fileUpload id="fileDiagnostico" multiple="false"
+					fileUploadListener="#{cargarDiagnosticoAmbientalController.uploadDiagnostico}"
+					sizeLimit="20971520" allowTypes="/(\.|\/)(pdf)$/" label="Añadir"
+					uploadLabel="Subir" invalidFileMessage="Tipo de archivo no válido" />
+					</ui:remove>
+				<p:fileUpload id="filePlanAccion" multiple="false"
+					fileUploadListener="#{cargarDiagnosticoAmbientalController.uploadPlanAccion}"
+					sizeLimit="20971520" allowTypes="/(\.|\/)(pdf)$/" label="Añadir"
+					uploadLabel="Subir" invalidFileMessage="Tipo de archivo no válido"
+					invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+					cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+					auto="true" required="true" styleClass="w50" update="tblPlanAccion" />
+				<p:dataTable id="tblPlanAccion" styleClass="w50"
+					value="#{cargarDiagnosticoAmbientalController.listaPlanAccion}"
+					var="documento" emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Documento">
+						<h:outputText value="#{documento.nombreDocumento}" />
+					</p:column>
+					<p:column headerText="Acciones" styleClass="w70px alCenter">
+						<p:commandButton icon="ui-icon-arrowthick-1-s"
+							styleClass="primary" title="Descargar" ajax="false"
+							immediate="true">
+							<p:fileDownload
+								value="#{cargarDiagnosticoAmbientalController.descargarDocumento(documento)}" />
+						</p:commandButton>
+						<p:commandButton icon="ui-icon-trash" title="Eliminar"
+							process="@this" styleClass="primary"
+							actionListener="#{cargarDiagnosticoAmbientalController.eliminarDocumento(2, documento)}"
+							update="tblPlanAccion" />
+					</p:column>
+
+				</p:dataTable>
+
+				<br />
+
+			</p:panelGrid>
+
+			<h:panelGroup id="pnlObsDiagnostico">
+				<observaciones:tablaObservacionesPreliminar
+					idComponent="obsDiagnostico"
+					seccion="Observaciones diagnostico ambiental"
+					componenteActualizarEliminar="pnlObsDiagnostico" aparace="true"
+					mostrarSiVacio="false"
+					idClase="#{cargarDiagnosticoAmbientalController.proyecto.id}"
+					nombreClase="observacionesDiagnosticoAmbiental" soloLectura="true" />
+			</h:panelGroup>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Cancelar" immediate="true"
+						action="#{cargarDiagnosticoAmbientalController.cancelar()}"
+						icon="ui-icon-cancel" styleClass="secondary">
+					</p:commandButton>
+
+					<ui:remove>
+					<p:commandButton value="Firmar" styleClass="large"
+						icon="ui-icon-key"
+						process="@this form"
+						update=":formDialogs:pnlFirmaManual :formDialogs:pnlFirmaToken"
+						actionListener="#{cargarDiagnosticoAmbientalController.generarDocumentoFirma()}" />
+					</ui:remove>
+					
+					<p:commandButton value="Enviar" styleClass="primary"
+						action="#{cargarDiagnosticoAmbientalController.finalizar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+		</h:form>
+
+		<h:form id="formDialogs">
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="700" height="auto" position="center top">
+
+				<p:panel>
+
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel
+							value="Ingreso de Diagnóstico Ambiental" styleClass="bold" />
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<h:outputText value="¿Cuenta con token?" styleClass="encabezado" />
+						<p:selectOneRadio id="verificaToken"
+							value="#{cargarDiagnosticoAmbientalController.token}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change" update="pnlFirmaManual pnlFirmaToken"
+								listener="#{cargarDiagnosticoAmbientalController.guardarToken}" />
+						</p:selectOneRadio>
+						<h:panelGroup id="pnlFirmaToken">
+							<p:commandButton value="Firmar documento" type="button"
+								styleClass="primary" icon="ui-icon-key"
+								rendered="#{cargarDiagnosticoAmbientalController.token}"
+								onclick="window.location.href='#{cargarDiagnosticoAmbientalController.urlAlfresco}'" />
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!cargarDiagnosticoAmbientalController.token}">
+							<h:outputLabel value="1. Descargue el Ingreso de Diagnóstico Ambiental"
+								styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload
+									value="#{cargarDiagnosticoAmbientalController.descargar()}" />
+							</p:commandButton>
+
+							<p:outputLabel for="uploadRequired"
+								value="2. Adjunte el Ingreso de Diagnóstico Ambiental firmado"
+								styleClass="bold" />
+							<p:fileUpload
+								fileUploadListener="#{cargarDiagnosticoAmbientalController.uploadListenerDocumentos}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreOficioFirmado"
+								rendered="#{!cargarDiagnosticoAmbientalController.token}">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreOficioFirmado"
+								value="#{cargarDiagnosticoAmbientalController.documentoManual.nombreDocumento}" />
+						</h:panelGrid>
+
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!cargarDiagnosticoAmbientalController.token and !cargarDiagnosticoAmbientalController.subido}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialogOficio').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						action="#{cargarDiagnosticoAmbientalController.finalizar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

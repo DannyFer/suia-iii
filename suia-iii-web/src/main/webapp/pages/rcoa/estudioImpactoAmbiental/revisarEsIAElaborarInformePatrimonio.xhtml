@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="context-extra">
+		<h:outputText value="Datos" />
+		<h:outputText value="Estudio de Impacto Ambiental" />
+		<ui:remove>
+			<h:outputLink 
+				value="#{request.contextPath}/pages/rcoa/estudioImpactoAmbiental/default.jsf">
+				<p:commandButton type="button" styleClass="primary button-small"
+					icon="ui-icon-search" />
+			</h:outputLink>
+		
+		<p:commandButton icon="ui-icon-search"  actionListener="#{elaborarInformePatrimonioController.abrirEstudio()}"
+			styleClass="primary button-small" immediate="true"/>
+			</ui:remove>
+		<p:commandButton action="#{elaborarInformePatrimonioController.abrirEstudio()}" icon="ui-icon-search" styleClass="primary button-small" 
+								 />
+		
+	</ui:define>
+
+	<ui:define name="content">
+
+		<f:event type="preRenderView"
+			listener="#{elaborarInformePatrimonioController.validarTareaBpm()}" />
+		<h:form id="form">
+			<p:tabView id="tab">
+				<p:tab title="Informe técnico" id="tbInforme">
+					<ui:include
+						src="/pages/rcoa/estudioImpactoAmbiental/viewInformeTecnico.xhtml" />
+				</p:tab>
+				<p:tab id="tbOficio"
+					rendered="#{elaborarInformePatrimonioController.generarMemoOficio}"
+					title="#{elaborarInformePatrimonioController.memoOficioPatrimonioBean.tipoOficio eq 1 ? 'Memorando' : 'Oficio'}">
+					<ui:include
+						src="/pages/rcoa/estudioImpactoAmbiental/viewOficioPatrimonio.xhtml" />
+				</p:tab>
+				
+			</p:tabView>
+			
+			<h:inputHidden
+						validator="#{elaborarInformePatrimonioController.validateDatosIngreso}"/>
+
+			<h:panelGroup id="pnlObsAlInformeOficio">
+				<observaciones:tablaObservacionesEsIA
+					idComponent="obsInformeOficioPatrimonio"
+					seccion="Observaciones Informe Oficio Patrimonio"
+					componenteActualizarEliminar="pnlObsAlInformeOficio" aparace="true"
+					mostrarSiVacio="false"
+					idClase="#{elaborarInformePatrimonioController.informeTecnicoEsIABean.informeTecnico.idInformePrincipal}"
+					nombreClase="InfomeOficioPatrimonio" soloLectura="true" />
+			</h:panelGroup>
+
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Guardar"
+						update=":form:pnlButtons :form:tab:pnlDocumentoInforme :form:tab:pnlDocumentoOficio"
+						actionListener="#{elaborarInformePatrimonioController.guardarInformeOficio()}"
+						icon="ui-icon-disk"
+						process="@this :form:tab:informeTecnicoData :form:tab:oficioPronunciamientoData" 
+						disabled="#{!elaborarInformePatrimonioController.habilitarGuardar()}"/>
+					<p:commandButton icon="ui-icon-key" value="Firmar documento" style="width: 170px;"
+						onclick="PF('dlgConfirmar').show();"
+						disabled="#{!elaborarInformePatrimonioController.habilitarFirma}"
+						actionListener="#{elaborarInformePatrimonioController.esRequerido(true)}">
+					</p:commandButton>
+					<ui:remove>
+					<p:commandButton value="Firmar documento" styleClass="large buttonLarge"
+						icon="ui-icon-key"
+						disabled="#{!elaborarInformePatrimonioController.habilitarFirma}"
+						update=":formDialogFirma:pnlDocCodigo :formDialogFirma:pnlFirmaManual :formDialogFirma:pnlFirmaToken"
+						actionListener="#{elaborarInformePatrimonioController.guardarDocumentos()}" />
+					</ui:remove>
+				</div>
+
+				<p:dialog modal="true" id="dlgConfirmar" widgetVar="dlgConfirmar"
+				header="Confirmación" resizable="false" width="400px">
+				<p align="justify">¿Está seguro de firmar la información?</p>
+				<br />
+				<p:separator />
+				<t:div styleClass="buttons">
+					<p:commandButton icon="ui-icon-check" value="Aceptar"
+						actionListener="#{elaborarInformePatrimonioController.guardarDocumentos()}"
+						update=":form:pnlButtons"
+						/>
+					<p:commandButton icon="ui-icon-cancel"
+						value="Cerrar" onclick="PF('dlgConfirmar').hide();"
+						actionListener="#{elaborarInformePatrimonioController.esRequerido(false)}"
+						process="@this" styleClass="secondary" update=":form" />
+
+				</t:div>
+			</p:dialog>
+			</h:panelGroup>
+
+		</h:form>
+
+		<h:form id="formDialogFirma">
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600" height="auto" position="center top">
+
+				<p:panel>
+
+					<h:panelGrid styleClass="w100" columns="1" id="pnlDocCodigo">
+						<h:outputLabel
+							value="Informe técnico  Nro: #{elaborarInformePatrimonioController.informeTecnicoEsIABean.informeTecnico.codigoInforme}"
+							styleClass="bold" />
+						<ui:remove>
+							<h:outputLabel
+								value="#{elaborarInformePatrimonioController.memoOficioPatrimonioBean.tipoOficio eq 1 ? 'Memorando' : 'Oficio'} Nro: #{elaborarInformePatrimonioController.memoOficioPatrimonioBean.oficioPronunciamiento.codigoOficio}"
+								styleClass="bold" />
+						</ui:remove>
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<h:outputText value="¿Cuenta con token?" styleClass="encabezado" rendered="#{!elaborarInformePatrimonioController.firmaSoloToken}" />
+						<p:selectOneRadio id="verificaToken"
+							value="#{elaborarInformePatrimonioController.token}" rendered="#{!elaborarInformePatrimonioController.firmaSoloToken}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change" update="pnlFirmaManual pnlFirmaToken"
+								listener="#{elaborarInformePatrimonioController.guardarToken}" />
+						</p:selectOneRadio>
+
+						<h:outputText value="" styleClass="encabezado" rendered="#{elaborarInformePatrimonioController.firmaSoloToken}" />
+						<h:outputText value="" styleClass="encabezado" rendered="#{elaborarInformePatrimonioController.firmaSoloToken}" />
+						
+						<h:panelGroup id="pnlFirmaToken">
+							<p:commandButton value="Firmar documento" type="button"
+								styleClass="primary" icon="ui-icon-key"
+								rendered="#{elaborarInformePatrimonioController.token}"
+								onclick="window.location.href='#{elaborarInformePatrimonioController.urlAlfresco}'" />
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!elaborarInformePatrimonioController.token}">
+							<h:outputLabel value="1. Descargue el Informe Técnico"
+								styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload
+									value="#{elaborarInformePatrimonioController.descargar()}" />
+							</p:commandButton>
+
+							<p:outputLabel for="uploadRequired"
+								value="2. Adjunte el Informe Técnico firmado" styleClass="bold" />
+							<p:fileUpload
+								fileUploadListener="#{elaborarInformePatrimonioController.uploadListenerDocumentos}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreDocFirmado :formDialogFirma:btnEnviar"
+								rendered="#{!elaborarInformePatrimonioController.token}"
+								onclick="PF('btnEnviar').enable()">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreDocFirmado"
+								value="#{elaborarInformePatrimonioController.documentoManual.nombre}" />
+						</h:panelGrid>
+
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!elaborarInformePatrimonioController.token and !elaborarInformePatrimonioController.subido}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary" widgetVar="btnCerrar" id="btnCerrar"
+						onclick="PF('signDialog').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary" id="btnEnviar"
+						widgetVar="btnEnviar" onclick="PF('btnEnviar').disable();"
+						action="#{elaborarInformePatrimonioController.finalizar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+		</h:form>
+
+	</ui:define>
+</ui:composition>

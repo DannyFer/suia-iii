@@ -1,0 +1,221 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	template="/control/aprobacionRequisitosTecnicos/templates/defaultTemplate.xhtml"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+	<ui:define name="content-art">
+		<h:form id="form">
+			<p:panel id="parte2" header="#{labels['label.recepcion.desechos']}">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Desechos peligrosos" />
+					</f:facet>
+					<f:facet name="header">
+						<p:commandButton value="Adicionar"
+							oncomplete="PF('agregarRecepcionDesechoWdgt').show()"
+							process="@this"
+							styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg"
+							icon="ui-icon-plusthick"
+							update=":#{p:component('desechoContainer')}"
+							actionListener="#{recepcionDesechosPeligrososControllers.prepararNuevo}" />
+					</f:facet>
+					<p:dataTable
+						value="#{recepcionDesechosPeligrososControllers.recepcionDesechosPeligrososBean.listaRecepcionDesechoPeligroso}"
+						var="recepcion" id="tablaRecepcionDesecho"
+						emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="Nombre" styleClass="w30">
+							<h:outputText value="#{recepcion.desecho.descripcion}" />
+						</p:column>
+						<p:column headerText="Código">
+							<h:outputText value="#{recepcion.desecho.clave}" />
+						</p:column>
+						<p:column headerText="#{labels['label.caracteristicas']}">
+							<h:outputText value="#{recepcion.desecho.nombresCRITB}" />
+						</p:column>
+						<p:column headerText="#{labels['label.estado.fisico']}">
+							<h:outputText value="#{recepcion.estadoFisico}" />
+						</p:column>
+						<p:column headerText="#{labels['label.observaciones']}">
+							<h:outputText value="#{recepcion.observaciones}" />
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton icon="ui-icon-pencil"
+								action="#{recepcionDesechosPeligrososControllers.seleccionarDesechoRegistrado(recepcion)}"
+								title="Editar" styleClass="button-small primary"
+								oncomplete="PF('agregarRecepcionDesechoWdgt').show();"
+								update=":#{p:component('desechoContainer')}" process="@this" />
+							<p:commandButton icon="ui-icon-trash" process="@this"
+								action="#{recepcionDesechosPeligrososControllers.seleccionarDesechoRegistrado(recepcion)}"
+								title="Remover" styleClass="button-small primary"
+								oncomplete="PF('deleteRegistroDesechoWdgt').show();" />
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+			</p:panel>
+			<h:panelGroup id="pnl2"
+				rendered="#{recepcionDesechosPeligrososControllers.aprobacionRequisitosTecnicosBean.revisar}">
+				<p:fragment>
+					<!--<h2 class="bold">Observaciones de la recepción.</h2>-->
+
+					<observaciones:tablaObservaciones aparace="true"
+						soloLectura="#{recepcionDesechosPeligrososControllers.aprobacionRequisitosTecnicosBean.revisar}"
+						mostrarSiVacio="#{!recepcionDesechosPeligrososControllers.aprobacionRequisitosTecnicosBean.revisar}"
+						idClase="#{recepcionDesechosPeligrososControllers.aprobacionRequisitosTecnicosBean.aprobacionRequisitosTecnicos.id}"
+						nombreClase="AprobacionRequisitosTecnicos"
+						seccion="#{recepcionDesechosPeligrososControllers.aprobacionRequisitosTecnicosBean.seccion}"
+						rol="sjsj" componenteActualizarEliminar="pnl2" />
+
+				</p:fragment>
+			</h:panelGroup>
+			<t:div styleClass="buttons main">
+				<p:commandButton value="Atrás" immediate="true" process="@this"
+					action="#{recepcionDesechosPeligrososControllers.recuperarPageAtras(false)}"
+					icon="ui-icon-arrowthick-1-w" />
+
+				<p:commandButton value="#{labels['label.guardar']}"
+					update=":#{p:component('form')}" process="@this"
+					oncomplete="handleEliminarRegistroRequest(xhr, status, args);window.scrollTo(0,120);"
+					action="#{recepcionDesechosPeligrososControllers.validarPaginas()}"
+					icon="ui-icon-disk" />
+				<p:commandButton value="Siguiente" immediate="true" process="@this"
+					action="/control/aprobacionRequisitosTecnicos/gestion/almacenamientoTemporal.jsf?faces-redirect=true"
+					icon="ui-icon-arrowthick-1-e" />
+			</t:div>
+			<p:dialog header="#{labels['label.recepcion.desechos']}"
+				id="agregarRecepcionDesechoDlg"
+				widgetVar="agregarRecepcionDesechoWdgt" modal="true"
+				resizable="false" width="600" closable="false">
+				<p:panelGrid id="desechoContainer" columns="1" layout="grid"
+					styleClass="w100">
+					<f:facet name="header">
+						<p:commandButton value="Seleccionar"
+							oncomplete="PF('seleccionarDesecho').show()"
+							styleClass="button-small-text toRight field_mrg"
+							icon="ui-icon-check"
+							actionListener="#{agregarDesechoPeligroso.reset()}"
+							process="@this"
+							update=":#{p:component('seleccionarDesecho')},codigoDesechoHidden" />
+						<mae:panelGridHeaderHelp value="Desecho *"
+							conector="actividadHelp" help="#{helps['desecho.ayuda']}"
+							width="500px" />
+					</f:facet>
+					<h:panelGroup>
+						<h:panelGrid styleClass="panel_data w100" columns="2"
+							columnClasses="header w25, null" rowClasses="null, alt"
+							rendered="#{!empty agregarDesechoPeligroso.desechoSeleccionado.descripcion}">
+							<h:outputText value="Desecho" />
+							<h:outputText
+								value="#{!empty agregarDesechoPeligroso.desechoSeleccionado ? agregarDesechoPeligroso.desechoSeleccionado.descripcion : '(Seleccione)'}" />
+							<h:outputText value="Código" />
+							<h:panelGroup>
+
+								<h:outputText
+									value="#{!empty agregarDesechoPeligroso.desechoSeleccionado ? agregarDesechoPeligroso.desechoSeleccionado.clave : '(Seleccione)'}" />
+							</h:panelGroup>
+						</h:panelGrid>
+						<h:inputHidden id="codigoDesechoHidden"
+							value="#{agregarDesechoPeligroso.desechoSeleccionado.clave}"
+							validator="#{recepcionDesechosPeligrososControllers.validarSeleccionDesecho}" />
+						<h:panelGrid styleClass="w50" columns="1">
+							<p:outputLabel for="estadoFisico"
+								value="#{labels['label.estado.fisico']}" />
+							<p:selectOneMenu
+								value="#{recepcionDesechosPeligrososControllers.recepcionDesechosPeligrososBean.recepcionDesechoPeligroso.estadoFisico}"
+								converter="selectItemConverter" id="estadoFisico"
+								styleClass="w100" required="true">
+								<f:selectItem itemLabel="#{labels['common.item.choose']}"
+									itemValue="" noSelectionOption="true" />
+								<f:selectItems
+									value="#{recepcionDesechosPeligrososControllers.recepcionDesechosPeligrososBean.listaEstados}" />
+							</p:selectOneMenu>
+						</h:panelGrid>
+						<h:panelGrid styleClass="w100" columns="1" columnClasses="w100">
+							<p:outputLabel for="lugarDescarga"
+								value="#{labels['label.observaciones']}: (En caso de ser necesario, especifique el nombre de su desecho en base al nombre general establecido en el listado nacional)" />
+							<p:inputTextarea id="lugarDescarga"
+								value="#{recepcionDesechosPeligrososControllers.recepcionDesechosPeligrososBean.recepcionDesechoPeligroso.observaciones}"
+								styleClass="w100" rows="2" autoResize="false" addLine="false"
+								maxlength="250" />
+						</h:panelGrid>
+					</h:panelGroup>
+				</p:panelGrid>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Aceptar"
+						update=":form:tablaRecepcionDesecho, desechoContainer"
+						process="@this :form:desechoContainer"
+						action="#{recepcionDesechosPeligrososControllers.agregarDesechoPeligroso()}"
+						oncomplete=" if (args.validationFailed) { }else { PF('agregarRecepcionDesechoWdgt').hide(); }"
+						styleClass="buttonAceptar" />
+					<p:commandButton value="Cancelar" styleClass="secondary"
+						type="button" onclick="PF('agregarRecepcionDesechoWdgt').hide();" />
+				</div>
+			</p:dialog>
+			<p:dialog id="deleteRegistroDesechoDlg" header="Confirmación"
+				widgetVar="deleteRegistroDesechoWdgt" modal="true" dynamic="true"
+				resizable="false" width="500px">
+				<h:panelGrid id="deletePanel" layout="block" style="margin:10px;"
+					columns="1">
+					<h:outputText value="¿Está usted seguro de eliminar este registro?" />
+					<h:outputText
+						value="Al eliminar un desecho perderá la información agregada en Almacenamiento temporal, Tipo de eliminación y las modalidades asociadas al mismo." />
+				</h:panelGrid>
+
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Eliminar"
+						process="deleteRegistroDesechoDlg"
+						update=":#{p:component('tablaRecepcionDesecho')}"
+						action="#{recepcionDesechosPeligrososControllers.remover()}"
+						oncomplete="PF('deleteRegistroDesechoWdgt').hide()" />
+					<p:commandButton type="button" value="Cerrar"
+						onclick="PF('deleteRegistroDesechoWdgt').hide()" />
+				</div>
+			</p:dialog>
+
+		</h:form>
+		<p:dialog header="Seleccionar desecho" id="seleccionarDesecho"
+			widgetVar="seleccionarDesecho" modal="true" resizable="false"
+			width="600">
+			<h:form>
+				<ui:include
+					src="/prevencion/registroProyecto/utiles/registroModalDesechoPeligroso.xhtml" />
+			</h:form>
+		</p:dialog>
+		<p:dialog id="deleteRecepcionDesechoDlg" header="Confirmación"
+			widgetVar="deleteRecepcionDesechoWdgt" modal="true" dynamic="true"
+			resizable="false">
+			<h:panelGroup id="deleteRecepcionPanel" layout="block"
+				style="margin:10px;">
+				<h:outputText
+					value="Existen desechos en los otros formularios que se eliminarán, ¿está de acuerdo?" />
+			</h:panelGroup>
+
+			<p:separator />
+			<div class="buttons">
+				<p:commandButton value="Eliminar"
+					process="deleteRecepcionDesechoDlg"
+					update=":#{p:component('tablaRecepcionDesecho')}"
+					action="#{recepcionDesechosPeligrososControllers.guardarPagina()}"
+					oncomplete="PF('deleteRecepcionDesechoWdgt').hide()" />
+				<p:commandButton type="button" value="Cerrar"
+					onclick="PF('deleteRecepcionDesechoWdgt').hide()" />
+			</div>
+		</p:dialog>
+		<script type="text/javascript">
+			function handleEliminarRegistroRequest(xhr, status, args) {
+                if (args.eliminarRegistro) {
+                    PF('deleteRecepcionDesechoWdgt').show();
+                }
+            }
+        </script>
+	</ui:define>
+</ui:composition>

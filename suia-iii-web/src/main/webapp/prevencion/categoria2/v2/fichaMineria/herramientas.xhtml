@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+    <!--Herramientas Mineras-->
+    <h:form id="frmHerramientas">
+        <p:panelGrid id="pnlHerramientas" columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+            <f:facet name="header">
+                <mae:panelGridHeaderHelp value="Maquinaria, herramientas y equipos" conector="generalHelp" 
+                	image="#{request.contextPath}/resources/images/help-how.png" 
+                	help="#{helps['registroMineria.equiposHerramientas']}" />
+            </f:facet>
+
+			<h:panelGrid columns="2">
+				<p:outputLabel value="Tipo material: " />
+				<h:outputText value="#{caracteristicasGeneralesController.caracteristicasGeneralesBean.fichaAmbientalMineria.tipoMaterial.nombre}" />
+			</h:panelGrid>
+
+			<h:panelGrid columns="5" layout="grid" cellpadding="0" cellspacing="3">
+                <p:outputLabel value="Tipo de Obtención *" for="obtencion"/>
+                <p:outputLabel value="Proceso *" for="proceso"/>
+                <p:outputLabel value="Herramienta *" for="herramienta" />
+                <p:outputLabel value="Cantidad *"/>
+                <p:outputLabel/>
+                
+                <p:selectOneMenu converter="selectItemConverter" style="width:170px" id="obtencion"
+                	value="#{descripcionActividadMineraController.descripcionActividadMineraBean.herramientaMinera.tipoObtencion}">
+                    <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+                    <f:selectItems
+                        value="#{descripcionActividadMineraController.descripcionActividadMineraBean.catalogoTipoObtencion}"
+                        var="tipoObtencion" itemLabel="#{tipoObtencion.nombre}" itemValue="#{tipoObtencion}" />
+                    <p:ajax listener="#{descripcionActividadMineraController.cargarProcesos}" event="change" update="pnlHerramientas" />
+                </p:selectOneMenu>
+
+                <p:selectOneMenu
+                    value="#{descripcionActividadMineraController.descripcionActividadMineraBean.herramientaMinera.procesoMinero}"
+                    converter="selectItemConverter" style="width:170px" id="proceso">
+                    <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+                    <f:selectItems
+                        value="#{descripcionActividadMineraController.descripcionActividadMineraBean.catalogoProcesosMineros}"
+                        var="procesoMinero" itemLabel="#{procesoMinero.nombre}" itemValue="#{procesoMinero}" />
+                    <p:ajax listener="#{descripcionActividadMineraController.cargarHerramientas}" event="change" update="pnlHerramientas" />
+                </p:selectOneMenu>
+
+                <p:selectOneMenu
+                    value="#{descripcionActividadMineraController.descripcionActividadMineraBean.herramientaMinera.catalogoHerramienta}"
+                    converter="selectItemConverter" style="width:170px" id="herramienta">
+                    <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+                    <f:selectItems
+                        value="#{descripcionActividadMineraController.descripcionActividadMineraBean.catalogoHerramientas}"
+                        var="herramienta" itemLabel="#{herramienta.nombre}" itemValue="#{herramienta}" />
+                    <f:ajax event="change" render="otros"/> 
+                </p:selectOneMenu>
+                
+                <p:inputText maxlength="3" id="dias" size="20" 
+                	value="#{descripcionActividadMineraController.descripcionActividadMineraBean.herramientaMinera.cantidadHerramientas}">
+                    <pe:keyFilter mask="num" />
+                </p:inputText>
+
+                <p:commandButton value="Adicionar" styleClass="primary" 
+                	action="#{descripcionActividadMineraController.agregarHerramientaMinera()}" 
+                	update=":#{p:component('pnlHerramientas')}" />               	
+               
+            </h:panelGrid>
+            <h:panelGrid columns="2" id="otros">
+				<p:outputLabel value="Otro *" rendered="#{descripcionActividadMineraController.descripcionActividadMineraBean.herramientaMinera.catalogoHerramienta.nombre eq 'Otros'}"/>
+				 <p:inputText maxlength="20" size="20" rendered="#{descripcionActividadMineraController.descripcionActividadMineraBean.herramientaMinera.catalogoHerramienta.nombre eq 'Otros'}"
+                	value="#{descripcionActividadMineraController.descripcionActividadMineraBean.herramientaMinera.descripcion}">                    
+                </p:inputText>	
+			</h:panelGrid>
+            <br/>
+			<p:dataTable id="tblHerramienta" emptyMessage="#{labels['common.table.empty']}" var="herramientaMinera" 
+				paginator="true" paginatorPosition="bottom" rows="5"
+				value="#{descripcionActividadMineraController.descripcionActividadMineraBean.listaHerramientas}">
+				<p:column headerText="#{msg['label.numero']}" width="5%">
+					<h:outputText
+						value="#{herramientaMinera.indice+1}" />
+				</p:column>
+				
+				<p:column width="18%" headerText="Tipo de Obtención" >
+					<h:outputText
+						value="#{herramientaMinera.tipoObtencion.nombre}" />
+				</p:column>
+				
+				<p:column width="20%" headerText="Proceso">
+					<h:outputText
+						value="#{herramientaMinera.procesoMinero.descripcion}" />
+				</p:column>
+				
+				<p:column width="25%" headerText="Herramienta">
+					<h:outputText
+						value="Otro: #{herramientaMinera.descripcion}" rendered="#{herramientaMinera.descripcion ne null}"/>
+					<h:outputText
+						value="#{herramientaMinera.catalogoHerramienta.descripcion}" rendered="#{herramientaMinera.descripcion eq null}"/>
+				</p:column>
+				
+				<p:column width="15%" headerText="Cantidad">
+					<h:outputText value="#{herramientaMinera.cantidadHerramientas}" />
+				</p:column>
+				
+				<p:column width="17%" headerText="Acciones" style="text-align: center">
+					<p:fragment>
+						<p:commandButton icon="ui-icon-pencil" styleClass="primary"
+							action="#{descripcionActividadMineraController.editarHerramienta(herramientaMinera,2)}"
+							update=":#{p:component('pnlHerramientas')}" />
+						<p:commandButton icon="ui-icon-trash" styleClass="primary"
+							action="#{descripcionActividadMineraController.eliminarHerramienta(herramientaMinera)}"
+							update=":#{p:component('tblHerramienta')}, :#{p:component('pnlHerramientas')}" />
+
+						<p:commandButton icon="ui-icon-search" styleClass="button orange"
+							action="#{descripcionActividadMineraController.obtenerHistoricoHerramienta(herramientaMinera)}"
+							update=":#{p:component('tblHerramientaHistorial')}"
+							rendered="#{herramientaMinera.registroModificado}" 
+							title="Ver Historial"/>
+						<p:outputLabel styleClass="text-orange"
+							rendered="#{herramientaMinera.registroModificado eq true ? false : herramientaMinera.nuevoEnModificacion}" value="Nuevo" />
+					</p:fragment>
+				</p:column>
+			</p:dataTable>
+			<h:panelGrid styleClass="panel_data" columns="2"
+				rendered="#{not empty descripcionActividadMineraController.listaHerramientaMineraEliminados}"
+				columnClasses="header background-orange, null"
+				rowClasses="null, alt">
+				<h:outputText id="herrramientas_eliminadas"
+					value="Maquinaria, herramientas y equipos eliminados" />
+				<p:commandButton styleClass="button-small orange"
+					icon="ui-icon-search" process="@this"
+					oncomplete="PF('herramientasDlg').show()"
+					action="#{descripcionActividadMineraController.obtenerListaHerramientasMineras()}"
+					update=":#{p:component('tblHerramientaHistorial')}" 
+					title="Ver Historial"/>
+			</h:panelGrid>
+		</p:panelGrid>
+    </h:form>
+    
+    <p:dialog widgetVar="herramientasDlg" modal="true" draggable="false" resizable="false" width="800px" 
+    			header="Historial maquinaria, herramientas y equipos">
+    <h:form id="herramientasForm">
+    <p:dataTable id="tblHerramientaHistorial" emptyMessage="#{labels['common.table.empty']}" var="herramientaMinera" 				
+				value="#{descripcionActividadMineraController.listaHerramientaMineraHistorial}">
+								
+				<p:column width="20%" headerText="Tipo de Obtención" >
+					<h:outputText
+						value="#{herramientaMinera.tipoObtencion.nombre}" />
+				</p:column>
+				
+				<p:column width="20%" headerText="Proceso">
+					<h:outputText
+						value="#{herramientaMinera.procesoMinero.descripcion}" />
+				</p:column>
+				
+				<p:column width="25%" headerText="Herramienta">
+					<h:outputText
+						value="Otro: #{herramientaMinera.descripcion}" rendered="#{herramientaMinera.descripcion ne null}"/>
+					<h:outputText
+						value="#{herramientaMinera.catalogoHerramienta.descripcion}" rendered="#{herramientaMinera.descripcion eq null}"/>
+				</p:column>
+				
+				<p:column width="15%" headerText="Cantidad">
+					<h:outputText value="#{herramientaMinera.cantidadHerramientas}" />
+				</p:column>
+				<p:column styleClass="w20 alCenter" headerText="Fecha Modificación">
+					<h:outputText value="#{herramientaMinera.fechaHistorico}">
+						<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+					</h:outputText>
+				</p:column>
+			</p:dataTable>
+    
+    </h:form>
+    </p:dialog>
+</ui:composition>

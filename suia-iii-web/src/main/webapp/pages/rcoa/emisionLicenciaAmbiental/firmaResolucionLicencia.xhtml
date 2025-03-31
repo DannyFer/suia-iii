@@ -1,0 +1,144 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+	<ui:define name="context-extra">
+		<h:outputText value="Datos" />
+		<h:outputText value="Estudio de Impacto Ambiental" />
+		<h:outputLink target="_blank"
+			value="#{request.contextPath}/pages/rcoa/estudioImpactoAmbiental/verProyectoEIAResumen.jsf">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+	</ui:define>
+
+	<ui:define name="content">
+		<f:event type="preRenderView" listener="#" />
+
+		<h:form id="form">
+			<p:tabView id="tab">
+				<p:tab title="Resolución">
+					<h:panelGrid styleClass="w100" id="resolucionData">
+						<object id="pdf_resolucion" type="application/pdf"
+							data="#{emisionLicenciaAmbientalAutoridadAmbientalController.documentoResolucion.informePath}?pfdrid_c=true"
+							width="100%" height="500px">
+							Su navegador no soporta la visualización de pdf. Puede descargar
+							el documento presionando el siguiente botón:
+							<p:commandButton value="Descargar" styleClass="primary"
+								ajax="false" icon="ui-icon-arrowthick-1-s">
+								<p:fileDownload
+									value="#{emisionLicenciaAmbientalAutoridadAmbientalController.getStream(emisionLicenciaAmbientalAutoridadAmbientalController.documentoResolucion.nombreFichero, emisionLicenciaAmbientalAutoridadAmbientalController.documentoResolucion.archivoInforme)}" />
+							</p:commandButton>
+						</object>
+					</h:panelGrid>
+					<br />
+					<br />
+				</p:tab>
+			</p:tabView>
+			<br />
+			<br />
+
+			<div class="buttons main">
+				<p:commandButton value="Firmar" styleClass="large"
+					icon="ui-icon-key" update=":formDialog"
+					actionListener="#{emisionLicenciaAmbientalAutoridadAmbientalController.prepararParaFirma}" />
+			</div>
+		</h:form>
+
+		<h:form id="formDialog">
+			<p:dialog id="signDialog" widgetVar="signDialog"
+				header="Firma de Autorizaciones Administrativas Ambientales"
+				modal="true" resizable="false" width="600px" closable="false">
+				<p:panel>
+					<br />
+					<h:panelGrid styleClass="w100" columns="2"
+						rendered="#{!emisionLicenciaAmbientalAutoridadAmbientalController.firmaSoloToken}"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold" />
+						<p:selectOneRadio id="verificaToken"
+							value="#{emisionLicenciaAmbientalAutoridadAmbientalController.token}"
+							rendered="#{!emisionLicenciaAmbientalAutoridadAmbientalController.firmaSoloToken}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change" update="pnlFirmaE"
+								listener="#{emisionLicenciaAmbientalAutoridadAmbientalController.guardarToken}" />
+						</p:selectOneRadio>
+						<br />
+					</h:panelGrid>
+					<h:panelGroup id="pnlFirmaE">
+						<h:panelGroup id="pnlFirmaManual"
+							rendered="#{!emisionLicenciaAmbientalAutoridadAmbientalController.token}">
+							<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+								columnClasses="w70, w30 alCenter"
+								style="text-align:right !important">
+								<p:outputLabel
+									value="Descargar la Resolución de Licencia Ambiental"
+									styleClass="bold" />
+								<p:commandButton value="Descargar" ajax="false"
+									icon="ui-icon-arrowthick-1-s" styleClass="primary"
+									immediate="true">
+									<p:fileDownload
+										value="#{emisionLicenciaAmbientalAutoridadAmbientalController.descargar()}" />
+								</p:commandButton>
+								<p:outputLabel for="uploadRequired1"
+									value="Adjuntar la Resolución de Licencia Ambiental firmado"
+									styleClass="bold" />
+								<p:fileUpload
+									fileUploadListener="#{emisionLicenciaAmbientalAutoridadAmbientalController.uploadListenerDocumentos}"
+									multiple="false" sizeLimit="5242880"
+									allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+									uploadLabel="Subir"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Tamaño de archivo no válido"
+									cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+									auto="true" update="lblNombreDocFirmado1">
+									<f:attribute name="tipoDocumento" value="1" />
+								</p:fileUpload>
+								<p:outputLabel value="" />
+								<h:outputText id="lblNombreDocFirmado1"
+									value="#{emisionLicenciaAmbientalAutoridadAmbientalController.documentoFirmado.nombre}" />
+
+								<h:inputHidden id="uploadRequired1"
+									required="#{!emisionLicenciaAmbientalAutoridadAmbientalController.subido}" />
+							</h:panelGrid>
+						</h:panelGroup>
+						<h:panelGroup id="pnlFirmaToken"
+							rendered="#{emisionLicenciaAmbientalAutoridadAmbientalController.token}">
+							<h:panelGrid styleClass="w100" columns="2"
+								columnClasses="w75, w25 toCenter">
+								<h:outputLabel value="Firma de Resolución de Licencia Ambiental"
+									styleClass="bold" />
+								<p:commandButton value="Firmar" type="button"
+									styleClass="primary" icon="ui-icon-key"
+									rendered="#{emisionLicenciaAmbientalAutoridadAmbientalController.token}"
+									onclick="window.location.href='#{emisionLicenciaAmbientalAutoridadAmbientalController.urlAlfresco}'" />
+							</h:panelGrid>
+						</h:panelGroup>
+					</h:panelGroup>
+
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialogOficio').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						action="#{emisionLicenciaAmbientalAutoridadAmbientalController.finalizar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

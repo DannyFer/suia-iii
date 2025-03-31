@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+	<ui:define name="content">
+
+		<style type="text/css">
+.ui-panelgrid-header .ui-widget-header td {
+	background: #008A8A !important;
+}
+
+.ui-state-error {
+	color: #cd0a0a !important;
+}
+</style>
+
+<f:event type="preRenderView"
+			listener="#{revisionTecnicoJuridicoController.validarTareaBpm()}" />
+
+		<h:form id="form2">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				id="pnlDatos2">
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null"
+					rendered="#{revisionTecnicoJuridicoController.esTecnico}">
+					<p:outputLabel value="Información del técnico" style="color: white" />
+					<h:outputText style="display: block; max-height: 200px; overflow: auto;"
+						value="#{revisionTecnicoJuridicoController.viabilidadProyecto.detalleConflictoLegal}" />
+
+					<p:outputLabel value="Documentación de respaldo"
+						style="color: white" />
+					<p:commandButton icon="ui-icon-arrowthick-1-s" value="Descargar"
+						styleClass="primary toLeft" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{revisionTecnicoJuridicoController.descargarInformacionRespaldo()}" />
+					</p:commandButton>
+
+					<p:outputLabel value="¿Se da paso legal?"  for="legal2"
+						style="color: white" />
+					<p:selectOneRadio id="legal2"
+						value="#{revisionTecnicoJuridicoController.informacionViabilidadLegal.pasoLegal}"
+						required="true" >
+						<f:selectItem itemLabel="SI" itemValue="true" />
+						<f:selectItem itemLabel="NO" itemValue="false" />
+						<p:ajax process="@this" />
+					</p:selectOneRadio>
+
+					<p:outputLabel value="Razón" style="color: white"
+						for="txtRazonPaso" />
+					<p:inputTextarea id="txtRazonPaso" maxlength="3000"
+												rows="10" required="true"
+												style="resize: none;" autoResize="false"
+												value="#{revisionTecnicoJuridicoController.informacionViabilidadLegal.descripcionJuridico}" />
+
+				</p:panelGrid>
+
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null"
+					rendered="#{!revisionTecnicoJuridicoController.esTecnico}">
+					<p:outputLabel value="Información del técnico" style="color: white" />
+					<h:outputText style="display: block; max-height: 200px; overflow: auto;"
+						value="#{revisionTecnicoJuridicoController.viabilidadProyecto.detalleConflictoLegal}" />
+						
+					<p:outputLabel value="Información del operador"
+						style="color: white" />
+					<h:outputText style="display: block; max-height: 200px; overflow: auto;"
+						value="#{revisionTecnicoJuridicoController.respuestaViabilidadLegal.descripcionOperador}" />
+
+					<p:outputLabel value="Documentación de respaldo"
+						style="color: white" />
+					<p:commandButton icon="ui-icon-arrowthick-1-s" value="Descargar"
+						styleClass="primary toLeft" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{revisionTecnicoJuridicoController.descargarInformacionRespaldoOperador()}" />
+					</p:commandButton>
+
+					<p:outputLabel value="¿Se da paso legal?" for="legal1"
+						style="color: white" />
+					<p:selectOneRadio id="legal1"
+						value="#{revisionTecnicoJuridicoController.informacionViabilidadLegal.pasoLegal}"
+						required="true">
+						<f:selectItem itemLabel="SI" itemValue="true" />
+						<f:selectItem itemLabel="NO" itemValue="false" />
+						<p:ajax process="@this" />
+					</p:selectOneRadio>
+
+					<p:outputLabel value="Razón" style="color: white"
+						for="txtRazonPaso1" />
+					<p:inputTextarea id="txtRazonPaso1" maxlength="3000"
+												rows="10" required="true"
+												style="resize: none;" autoResize="false"
+												value="#{revisionTecnicoJuridicoController.informacionViabilidadLegal.descripcionJuridico}"  />
+
+				</p:panelGrid>
+
+				<br />
+			</p:panelGrid>
+			<h:panelGroup id="pnlButtons2">
+				<div class="buttons main">
+					<p:commandButton value="Guardar" process="@this :form2"
+						styleClass="secondary"
+						actionListener="#{revisionTecnicoJuridicoController.guardarInforme()}"
+						update="pnlDatos2 pnlButtons2" icon="ui-icon-check" />
+					<p:commandButton value="Finalizar" process="@this :form2"
+						actionListener="#{revisionTecnicoJuridicoController.finalizar()}"
+						disabled="#{!revisionTecnicoJuridicoController.datosGuardados}"
+						update="pnlDatos2 pnlButtons2" icon="ui-icon-check" />
+				</div>
+			</h:panelGroup>
+		</h:form>
+
+	</ui:define>
+</ui:composition>

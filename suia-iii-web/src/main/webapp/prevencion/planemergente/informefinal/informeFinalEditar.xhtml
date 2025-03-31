@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<ui:composition>
+    <h:form id="informeFinalEditarDialog">
+        <p:dialog resizable="false" modal="true" widgetVar="informeFinalEditarDialog" width="750" height="500">
+            <p:panelGrid id="panel" columns="4" layout="grid">
+                <f:facet name="header">Informe Final de Cumplimiento</f:facet>
+                <p:outputLabel for="descripcion" value="Descripción del evento"/>
+                <p:inputText id="descripcion" required="true" value="#{informeFinalContoller.accion.eventoOcurrido.descripcion}" style="width: 200%" />
+                <p:outputLabel value=""/><p:outputLabel value=""/>
+
+                <p:outputLabel value="Medidas correctivas"/>
+                <p:inputText id="medida" value="#{informeFinalContoller.medida}" maxlength="200" style="width: 100%"/>
+                <t:div styleClass="buttons" style="padding-top: 0px; text-align: left;">
+                    <p:commandButton actionListener="#{informeFinalContoller.adicionarMedida}" value="Adicionar" icon="ui-icon-plus" process="@this,medida"
+                                     update=":informeFinalEditarDialog:medidas, :informeFinalEditarDialog:medida" />
+                </t:div>
+                <p:outputLabel value=""/>
+
+                <p:dataTable id="medidas" value="#{informeFinalContoller.accion.medidaCorrectivas}"
+                             var="medida" emptyMessage="Sin resultados" rowIndexVar="i" rows="3" style="width: 400%"
+                             paginator="true" paginatorAlwaysVisible="false" pageLinks="3" paginatorPosition="bottom">
+                    <p:column headerText="Número">
+                        <h:outputText value="#{i + 1}"/>
+                    </p:column>
+                    <p:column headerText="Medida">
+                        <h:outputText value="#{medida.descripcion}"/>
+                    </p:column>
+                    <p:column headerText="Indicadores">
+                        <h:outputText value="#{medida.indicadores.size()} indicadores" />
+                    </p:column>
+                    <p:column headerText="Acciones">
+                        <p:commandButton icon="ui-icon-pencil" update=":informeFinalEditarMedidaDialog" styleClass="button-small primary" process="@this"
+                                         title="Editar" actionListener="#{informeFinalContoller.mostrarMedida(i)}" />
+                        <p:commandButton icon="ui-icon-trash" update=":informeFinalEditarDialog:panel, :informeFinal" styleClass="button-small primary" process="@this"
+                                         title="Eliminar" actionListener="#{informeFinalContoller.eliminarMedida(i)}" />
+                    </p:column>
+                </p:dataTable>
+                <p:outputLabel value=""/><p:outputLabel value=""/><p:outputLabel value=""/>
+
+                <p:outputLabel for="afectada" value="Área/Volumen afectado"/>
+                <p:inputText id="afectada" required="true" value="#{informeFinalContoller.accion.areaAfectada}" style="width: 100%"/>
+                <p:outputLabel value="Unidad de medida"/>
+                <p:selectOneMenu value="#{informeFinalContoller.accion.unidadAreaAfectada}" style="width: 60%">
+                    <p:ajax event="valueChange" update="justificacion, justificacionLabel" listener="#{informeFinalContoller.cambiarUnidadMedida}" />
+                    <f:selectItem itemLabel="m2" itemValue="m2" />
+                    <f:selectItem itemLabel="m3" itemValue="m3" />
+                    <f:selectItem itemLabel="Número" itemValue="Número" />
+                    <f:selectItem itemLabel="Unidades" itemValue="Unidades" />
+                    <f:selectItem itemLabel="No cuantificable" itemValue="No cuantificable" />
+                </p:selectOneMenu>
+
+                <p:outputLabel for="recuperada" value="Área/Volumen Recuperada"/>
+                <p:inputText id="recuperada" required="true" value="#{informeFinalContoller.accion.areaRecuperada}" style="width: 100%"/>
+                <p:outputLabel value="Unidad de medida"/>
+                <p:selectOneMenu value="#{informeFinalContoller.accion.unidadAreaRecuperada}" style="width: 60%">
+                    <p:ajax event="valueChange" update="justificacion, justificacionLabel" listener="#{accionEmergenteImplementadaController.cambiarUnidadMedida}" />
+                    <f:selectItem itemLabel="m2" itemValue="m2" />
+                    <f:selectItem itemLabel="m3" itemValue="m3" />
+                    <f:selectItem itemLabel="Número" itemValue="Número" />
+                    <f:selectItem itemLabel="Unidades" itemValue="Unidades" />
+                    <f:selectItem itemLabel="No cuantificable" itemValue="No cuantificable" />
+                </p:selectOneMenu>
+
+                <p:outputLabel id="justificacionLabel" for="justificacion" value="Justificación por qué no es cuantificable"/>
+                <p:inputText id="justificacion" value="#{informeFinalContoller.accion.justificacion}" style="width: 200%"
+                             required="#{informeFinalContoller.accion.unidadAreaRecuperada eq 'No cuantificable' or
+                                        informeFinalContoller.accion.unidadAreaAfectada eq 'No cuantificable'}"
+                             disabled="#{informeFinalContoller.accion.unidadAreaRecuperada ne 'No cuantificable' and
+                                        informeFinalContoller.accion.unidadAreaAfectada ne 'No cuantificable'}"/>
+                <p:outputLabel value=""/><p:outputLabel value=""/>
+
+                <p:outputLabel for="medio" value="Medio de verificación"/>
+                <p:inputText id="medio" required="true" maxlength="150" value="#{informeFinalContoller.accion.medioVerificacion}" style="width: 200%"/>
+                <p:outputLabel value=""/><p:outputLabel value=""/>
+
+                <p:outputLabel for="responsabe" value="Responsable"/>
+                <p:inputText id="responsabe" required="true" maxlength="150" value="#{informeFinalContoller.accion.responsable}" style="width: 200%"/>
+                <p:outputLabel value=""/><p:outputLabel value=""/>
+
+                <p:outputLabel for="inicio" value="Fecha de Inicio"/>
+                <p:calendar id="inicio" mindate="#{accionEmergenteImplementadaController.minFechaInicio}" maxdate="#{accionEmergenteImplementadaController.maxFechaInicio}"
+                            rendered="true" pattern="dd/MM/yyyy" value="#{informeFinalContoller.accion.fechaInicio}" size="21" required="true">
+                    <p:ajax event="dateSelect" listener="#{accionEmergenteImplementadaController.onDateSelect}" update="fin" />
+                </p:calendar>
+                <p:outputLabel value=""/><p:outputLabel value=""/>
+
+                <p:outputLabel for="fin" value="Fecha de Fin"/>
+                <p:calendar id="fin" mindate="#{accionEmergenteImplementadaController.minFechaFin}" rendered="true" pattern="dd/MM/yyyy"
+                            value="#{informeFinalContoller.accion.fechaFin}" size="21" required="true" />
+                <p:outputLabel value=""/><p:outputLabel value=""/>
+
+                <p:outputLabel for="presupuesto" value="Presupuesto proyectado de la medida"/>
+                <p:inputText id="presupuesto" required="true" value="#{informeFinalContoller.accion.presupuesto}" style="width: 100%"/>
+                <p:outputLabel value=""/><p:outputLabel value=""/>
+
+                <p:outputLabel for="zona" value="Zona de implementación"/>
+                <p:inputText id="zona" required="true" value="#{informeFinalContoller.accion.zona}" style="width: 100%"/>
+                <p:outputLabel value=""/><p:outputLabel value=""/>
+
+                <p:outputLabel value="Coordenadas de la acción correctiva"/>
+                <p:panelGrid id="coordenadas" columns="1" layout="grid" style="width: 200%">
+                    <f:facet name="header">
+                        <p:commandButton value="Adjuntar" onclick="PF('adjuntarCoordenadas').show()" styleClass="buttonAdjuntarCoordenadas button-small-text toRight field_mrg" type="button" icon="ui-icon-document" />
+                        <p:commandButton value="Descargar plantilla" styleClass="button-small-text toRight field_mrg" icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true">
+                            <p:fileDownload value="#{informeFinalContoller.cargarCoordenadasBean.plantillaCoordenadas}" />
+                        </p:commandButton>
+                        <p:commandButton styleClass="button-small toRight field_mrg" ajax="false" immediate="true" icon="ui-icon-help">
+                            <p:fileDownload value="#{informeFinalContoller.cargarCoordenadasBean.ayudaCoordenadas}" />
+                        </p:commandButton>
+                        <h:outputText value="." />
+                    </f:facet>
+                    <p:row>
+                        <p:column>
+                            <p:dataTable value="#{informeFinalContoller.accion.coordenadas}" var="coodenada" emptyMessage="Sin resultados"
+                                         paginator="true" paginatorAlwaysVisible="false" pageLinks="3" paginatorPosition="bottom" rows="5">
+                                <p:column headerText="X">
+                                    <h:outputText value="#{coodenada.x}"/>
+                                </p:column>
+                                <p:column headerText="Y">
+                                    <h:outputText value="#{coodenada.y}"/>
+                                </p:column>
+                            </p:dataTable>
+                        </p:column>
+                    </p:row>
+                </p:panelGrid>
+                <p:outputLabel value=""/><p:outputLabel value=""/>
+
+                <p:outputLabel for="factor" value="Factor ambiental"/>
+                <p:selectOneMenu id="factor" required="true" value="#{informeFinalContoller.accion.factorAmbiental}" style="width: 100%">
+                    <f:selectItem itemLabel="Composición del Agua" itemValue="Composición del Agua" itemDisabled="#{!planEmergenteController.planEmergente.composicionAgua}" />
+                    <f:selectItem itemLabel="Composición del Suelo" itemValue="Composición del Suelo" itemDisabled="#{!planEmergenteController.planEmergente.composicionSuelo}" />
+                    <f:selectItem itemLabel="Composición del Aire" itemValue="Composición del Aire" itemDisabled="#{!planEmergenteController.planEmergente.composicionAire}" />
+                    <f:selectItem itemLabel="Flora" itemValue="Flora" itemDisabled="#{!planEmergenteController.planEmergente.flora}" />
+                    <f:selectItem itemLabel="Fauna" itemValue="Fauna" itemDisabled="#{!planEmergenteController.planEmergente.fauna}" />
+                    <f:selectItem itemLabel="Socio Económico" itemValue="Socio Económico" itemDisabled="#{!planEmergenteController.planEmergente.socioEconomico}" />
+                    <f:selectItem itemLabel="Socio Cultutal" itemValue="Socio Cultutal" itemDisabled="#{!planEmergenteController.planEmergente.socioCultural}" />
+                    <f:selectItem itemLabel="Arqueológico" itemValue="Arqueológico" itemDisabled="#{!planEmergenteController.planEmergente.arqueologico}" />
+                    <f:selectItem itemLabel="#{planEmergenteController.planEmergente.descripcionOtroFactor}"
+                                  itemValue="#{planEmergenteController.planEmergente.descripcionOtroFactor}"
+                                  itemDisabled="#{planEmergenteController.planEmergente.descripcionOtroFactor eq ''}" />
+                </p:selectOneMenu>
+                <p:outputLabel value=""/><p:outputLabel value=""/>
+
+                <p:outputLabel for="especificacion" value="Especificación del Factor Ambiental"/>
+                <p:inputText id="especificacion" required="true" value="#{informeFinalContoller.accion.especificacionFactorAmbiental}" style="width: 100%"/>
+                <p:outputLabel value=""/><p:outputLabel value=""/>
+            </p:panelGrid><br/>
+
+            <div class="buttons">
+                <p:commandButton actionListener="#{informeFinalContoller.editar}" value="Aceptar" icon="ui-icon-check"
+                                 update=":informeFinalEditarDialog:panel, :informeFinal"/>
+                <p:commandButton immediate="true" process="@this" value="Cancelar" onclick="PF('informeFinalEditarDialog').hide();"/>
+            </div>
+            <br/><br/>
+        </p:dialog>
+    </h:form>
+
+    <h:form id="informeFinalEditarMedidaDialog">
+        <p:dialog resizable="false" modal="true" widgetVar="informeFinalEditarMedidaDialog" width="550" height="300">
+            <f:facet name="header">Editar medida</f:facet>
+            <p:panelGrid columns="3" layout="grid" id="panel">
+                <p:outputLabel for="medida1" value="Medida" />
+                <p:inputText id="medida1" rendered="true" value="#{informeFinalContoller.medidaCorrectiva.descripcion}" maxlength="200" style="width: 100%" />
+                <p:outputLabel value=""/>
+
+                <p:outputLabel value="Indicadores"/>
+                <p:inputText id="indi" value="#{informeFinalContoller.indi}" maxlength="100" style="width: 100%"/>
+                <t:div styleClass="buttons" style="padding-top: 0px; text-align: left;">
+                    <p:commandButton actionListener="#{informeFinalContoller.adicionarIndicador}" value="Adicionar" icon="ui-icon-plus" update="panel" />
+                </t:div>
+
+                <p:dataTable id="indicadores" value="#{informeFinalContoller.medidaCorrectiva.indicadores}"
+                             var="indicador" emptyMessage="Sin resultados" rowIndexVar="i" rows="3" style="width: 300%"
+                             paginator="true" paginatorAlwaysVisible="false" pageLinks="3" paginatorPosition="bottom">
+                    <p:column headerText="Número">
+                        <h:outputText value="#{i + 1}"/>
+                    </p:column>
+                    <p:column headerText="Indicador">
+                        <h:outputText value="#{indicador.descripcion}"/>
+                    </p:column>
+                    <p:column headerText="Medida">
+                        <h:outputText value="#{informeFinalContoller.medidaCorrectiva.descripcion}"/>
+                    </p:column>
+                    <p:column headerText="Acciones">
+                        <p:commandButton icon="ui-icon-pencil" update=":informeFinalEditarIndicadorDialog" styleClass="button-small primary"
+                                         title="Editar" actionListener="#{informeFinalContoller.mostrarIndicador(i)}" />
+                        <p:commandButton icon="ui-icon-trash" update=":informeFinalEditarMedidaDialog:panel" styleClass="button-small primary"
+                                         title="Eliminar" actionListener="#{informeFinalContoller.eliminarIndicador(i)}" />
+                    </p:column>
+                </p:dataTable>
+                <p:outputLabel value=""/>
+                <p:outputLabel value=""/>
+            </p:panelGrid><br/><br/>
+            <div class="buttons">
+                <p:commandButton actionListener="#{informeFinalContoller.editarMedida}" value="Aceptar" icon="ui-icon-check" update=":informeFinalEditarDialog:medidas" />
+            </div>
+        </p:dialog>
+    </h:form>
+
+    <h:form id="informeFinalEditarIndicadorDialog">
+        <p:dialog resizable="false" modal="true" widgetVar="informeFinalEditarIndicadorDialog" width="500" height="100">
+            <f:facet name="header">Editar indicador</f:facet>
+            <p:panelGrid columns="3" layout="grid">
+                <p:outputLabel for="indicador" value="Indicador" />
+                <p:inputText id="indicador" required="true" value="#{informeFinalContoller.indicador.descripcion}" maxlength="100" style="width: 100%" />
+                <t:div styleClass="buttons" style="padding-top: 0px; text-align: left;">
+                    <p:commandButton actionListener="#{informeFinalContoller.editarIndicador}" value="Aceptar" icon="ui-icon-check"
+                                     update=":informeFinalEditarMedidaDialog:panel"/>
+                </t:div>
+            </p:panelGrid>
+        </p:dialog>
+    </h:form>
+
+    <h:form>
+        <p:dialog header="Adjuntar coordenadas" widgetVar="adjuntarCoordenadas" modal="#{informeFinalContoller.cargarCoordenadasBean.modalLoadFile}" resizable="false">
+            <p:panelGrid columns="1" columnClasses="label, value">
+                <h:outputText value="Seleccione el archivo excel (.xls)" />
+                <p:fileUpload uploadLabel="Subir" auto="true" cancelLabel="Cancelar" label="Seleccionar" fileUploadListener="#{informeFinalContoller.handleFileUpload}" mode="advanced" dragDropSupport="false" update=":informeFinalEditarDialog:coordenadas" multiple="false" allowTypes="/(\.|\/)(xls)$/" oncomplete="showModalTransformation()" invalidFileMessage="El archivo es inválido." invalidSizeMessage="El archivo es demasiado grande." />
+            </p:panelGrid>
+            <div class="buttons">
+                <p:commandButton type="button" value="Cerrar" onclick="PF('adjuntarCoordenadas').hide()" />
+            </div>
+        </p:dialog>
+    </h:form>
+</ui:composition>
+</html>

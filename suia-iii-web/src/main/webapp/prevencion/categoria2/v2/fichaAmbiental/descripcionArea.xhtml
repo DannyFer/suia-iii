@@ -1,0 +1,1442 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:t="http://myfaces.apache.org/tomahawk"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{descripcionProyectoPmaBean.validarTareaBpmV2()}"/>
+        <ui:include src="contenido/menu.xhtml" />
+        <div class="content">
+            <h:form id="form"
+                    rendered="#{!descripcionAreaImplantacionPmaBean.sectorHidrocarburos}">
+                <p:panel id="parte5"
+                         header="5. DESCRIPCIÓN DEL ÁREA DE IMPLANTACIÓN">
+
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                 columnClasses="w25, field_mrg w25"
+                                 rendered="#{!descripcionAreaImplantacionPmaBean.sectorPesca}">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp value="#{msg['label.clima']}"
+                                                     conector="generalHelp"
+                                                     help="Seleccione la opción del clima local en base a la altitud y ubicación de su proyecto." />
+
+
+                        </f:facet>
+
+                        <h:panelGrid columns="3" layout="grid" styleClass="w100"
+                                     columnClasses="w30 alTop, w30 alTop, w30 alTop">
+
+                            <p:outputLabel value="#{msg['label.clima']}" for="clima" />
+                            <h:panelGroup>
+                                <p:selectOneMenu id="clima" required="true"  rendered="#{!descripcionAreaImplantacionPmaBean.selectSimple(descripcionAreaImplantacionPmaBean.clima)}"
+                                                 requiredMessage="#{msg['label.prevencion.tdr.campo']} '#{msg['label.clima']}' #{msg['label.prevencion.tdr.requerido']}."
+                                                 value="#{descripcionAreaImplantacionPmaBean.climaActivo}"
+                                                 style="width:250px" converter="selectItemConverter">
+                                    <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                                  itemValue="" noSelectionOption="true" />
+                                    <f:selectItems itemDescription="#{catalogo.ayuda}"
+                                                   var="catalogo"
+                                                   value="#{descripcionAreaImplantacionPmaBean.clima}" />
+                                    <p:ajax event="change" process="@this"
+                                            update="@(.descipcion-clima)"></p:ajax>
+                                </p:selectOneMenu>
+
+                                <h:outputText value="#{descripcionAreaImplantacionPmaBean.climaActivo}" rendered="#{descripcionAreaImplantacionPmaBean.selectSimple(descripcionAreaImplantacionPmaBean.clima)}"/>
+
+                            </h:panelGroup>
+                            <p:outputLabel styleClass="descipcion-clima"
+                                           value="#{descripcionAreaImplantacionPmaBean.climaActivo.ayuda}" />
+
+
+                        </h:panelGrid>
+                        
+                          <!-- Cris F: Boton de Historico -->
+						<h:panelGrid styleClass="panel_data" columns="2" 
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt" rendered="#{not empty descripcionAreaImplantacionPmaBean.listaClimaHistorico}">
+							<h:outputText id="clima_historico" value="Historial Clima" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('historicoClimadlg').show()" 
+								/>
+						</h:panelGrid>
+						<!-- Fin Historico -->
+						 <!--Cris F: Nuevo codigo para historial -->
+			
+			<p:dialog header="Historial clima" widgetVar="historicoClimadlg" modal="true" draggable="false" resizable="false">
+				<h:form id="historicoClimaform">
+					
+					<p:dataTable id="tblClimaHistorico" rowIndexVar="index"
+						value="#{descripcionAreaImplantacionPmaBean.listaClimaHistorico}"
+						var="historico" emptyMessage="#{labels['common.table.empty']}"						
+						style="overflow: auto; display:block; width: 500px">						
+						<p:column headerText="Clima">
+							<h:outputText styleClass="alJustify" value="#{historico.catalogo.descripcion}" />
+						</p:column>
+						<p:column styleClass="w20 alCenter" headerText="Fecha Modificación">
+							<h:outputText value="#{historico.fechaHistorico}" >
+								<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+							</h:outputText>
+						</p:column>
+					</p:dataTable>
+				</h:form>
+			</p:dialog>
+						<!-- Fin Historico -->
+
+                    </p:panelGrid>
+                    <br />
+
+
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                 columnClasses="w25, field_mrg w25"
+                                 rendered="#{!descripcionAreaImplantacionPmaBean.sectorPesca}">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp value="#{msg['label.tiposSuelo']}"
+                                                     conector="generalHelp"
+                                                     help="Seleccione del listado el tipo de suelo del área de implantación del proyecto (uno o varios)." />
+
+
+                        </f:facet>
+
+                        <h:panelGrid columns="2" layout="grid" styleClass="w100"
+                                     columnClasses="w30, w60">
+
+                            <p:outputLabel value="#{msg['label.tiposSuelo']}"
+                                           for="tiposSuelo" />
+                            <h:panelGroup id="tipoSuelo">
+                                <p:selectManyCheckbox id="tiposSuelo" required="true"
+                                                      value="#{descripcionAreaImplantacionPmaBean.tipoSueloSeleccionado}"
+                                                      layout="grid" columns="1" styleClass="tb_w50 w100"
+                                                      requiredMessage="#{msg['label.prevencion.tdr.campo']} '#{msg['label.tiposSuelo']}' #{msg['label.prevencion.tdr.requerido']}."
+                                                      converter="selectItemConverter">
+                                    <f:selectItems itemDescription="#{catalogo.ayuda}"
+                                                   var="catalogo"
+                                                   value="#{descripcionAreaImplantacionPmaBean.tipoSuelo}" />
+
+                                    <p:ajax update=":form:tipoSuelo" process="@this"></p:ajax>
+                                </p:selectManyCheckbox>
+
+                                <h:panelGrid columns="2" layout="grid" styleClass="w100"
+                                             columnClasses="w50, w50">
+
+                                    <h:outputText />
+
+                                    <p:inputText maxlength="50"
+                                            requiredMessage="Debe especificar el valor del campo Otros en  #{msg['label.tiposSuelo']}."
+                                            required="#{descripcionAreaImplantacionPmaController.campoOtrosVisibleFisico(descripcionAreaImplantacionPmaBean.tipoSueloSeleccionado,descripcionAreaImplantacionPmaBean.tipoSueloOtros.catalogo )}"
+                                            value="#{descripcionAreaImplantacionPmaBean.tipoSueloOtros.valor}"
+                                            rendered="#{descripcionAreaImplantacionPmaController.campoOtrosVisibleFisico(descripcionAreaImplantacionPmaBean.tipoSueloSeleccionado,descripcionAreaImplantacionPmaBean.tipoSueloOtros.catalogo )}">
+                                        <p:ajax update="@this" process="@this"></p:ajax>
+                                    </p:inputText>
+                                </h:panelGrid>
+                            </h:panelGroup>
+                        </h:panelGrid>
+                        
+                         <!-- Cris F: Boton de Historico -->
+						<h:panelGrid styleClass="panel_data" columns="2" 
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt" rendered="#{not empty descripcionAreaImplantacionPmaBean.listaTipoSueloHistorico}">
+							<h:outputText id="tipoSuelo_historico" value="Historial Tipo Suelo" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('historicoTipoSuelodlg').show()" 
+								/>
+						</h:panelGrid>
+						<!-- Fin Historico -->
+						 <!--Cris F: Nuevo codigo para historial -->
+			
+			<p:dialog header="Historial tipo suelo" widgetVar="historicoTipoSuelodlg" modal="true" draggable="false" resizable="false">
+				<h:form id="historicoTipoSueloform">
+					
+					<p:dataTable id="tblTipoSueloHistorico" rowIndexVar="index"
+						value="#{descripcionAreaImplantacionPmaBean.listaTipoSueloHistorico}"
+						var="historico" emptyMessage="#{labels['common.table.empty']}"						
+						style="overflow: auto; display:block; width: 500px">						
+						<p:column headerText="Tipo de Suelo">
+							<h:outputText value="Otros - " rendered="#{historico.catalogo.descripcion eq 'Otros' ? true : false}"/>
+							<h:outputText value="#{historico.catalogo.descripcion eq 'Otros' ? historico.valor :  historico.catalogo.descripcion }" />
+						</p:column>
+						<p:column styleClass="w20 alCenter" headerText="Fecha Modificación">
+							<h:outputText value="#{historico.fechaHistorico}" >
+								<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+							</h:outputText>
+						</p:column>
+						<p:column styleClass="w20 alCenter" headerText="">
+							<h:outputText styleClass="text-orange" value="#{historico.idRegistroOriginal == null ? 'Nuevo' : ''}" />
+						</p:column>
+					</p:dataTable>
+				</h:form>
+			</p:dialog>
+						<!-- Fin Historico -->
+                        
+                        
+                    </p:panelGrid>
+
+                    <br />
+
+
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                 columnClasses="w25, field_mrg w25"
+                                 rendered="#{!descripcionAreaImplantacionPmaBean.sectorPesca}">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp value="#{msg['label.pendienteSuelo']}"
+                                                     conector="generalHelp"
+                                                     help="Seleccione del listado la categoría de pendiente del suelo del área de implantación del proyecto (uno o varios)." />
+
+                        </f:facet>
+
+                        <h:panelGrid columns="2" layout="grid" styleClass="w100"
+                                     columnClasses="w30, w60">
+
+                            <p:outputLabel value="#{msg['label.pendienteSuelo']}"
+                                           for="pendienteSuelo" />
+                            <h:panelGroup>
+                                <p:selectManyCheckbox id="pendienteSuelo"
+                                                      required="#{!descripcionAreaImplantacionPmaBean.sectorPesca}"
+                                                      requiredMessage="#{msg['label.prevencion.tdr.campo']} '#{msg['label.pendienteSuelo']}' #{msg['label.prevencion.tdr.requerido']}."
+                                                      value="#{descripcionAreaImplantacionPmaBean.pendienteSueloSeleccionado}"
+                                                      layout="grid" columns="1" styleClass="tb_w50 w100"
+                                                      converter="selectItemConverter">
+                                    <f:selectItems itemDescription="#{catalogo.ayuda}"
+                                                   var="catalogo"
+                                                   value="#{descripcionAreaImplantacionPmaBean.pendienteSuelo}" />
+                                </p:selectManyCheckbox>
+                            </h:panelGroup>
+                        </h:panelGrid>
+                        
+                        
+                         <!-- Cris F: Boton de Historico -->
+						<h:panelGrid styleClass="panel_data" columns="2" 
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt" rendered="#{not empty descripcionAreaImplantacionPmaBean.listaPendienteSueloHistorico}">
+							<h:outputText id="pendienteSuelo_historico" value="Historial Pendiente Suelo" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('historicoPendienteSuelodlg').show()" 
+								/>
+						</h:panelGrid>
+						<!-- Fin Historico -->
+						 <!--Cris F: Nuevo codigo para historial -->
+			
+			<p:dialog header="Historial pendiente suelo" widgetVar="historicoPendienteSuelodlg" modal="true" draggable="false" resizable="false">
+				<h:form id="historicoPendienteSueloform">
+					
+					<p:dataTable id="tblPendienteSueloHistorico" rowIndexVar="index"
+						value="#{descripcionAreaImplantacionPmaBean.listaPendienteSueloHistorico}"
+						var="historico" emptyMessage="#{labels['common.table.empty']}"						
+						style="overflow: auto; display:block; width: 500px">						
+						<p:column headerText="Pendiente del Suelo">
+							<h:outputText styleClass="alJustify" value="#{historico.catalogo.descripcion}" />
+						</p:column>
+						<p:column styleClass="w20 alCenter" headerText="Fecha Modificación">
+							<h:outputText value="#{historico.fechaHistorico}" >
+								<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+							</h:outputText>
+						</p:column>
+						<p:column styleClass="w20 alCenter" headerText="">
+							<h:outputText styleClass="text-orange" value="#{historico.idRegistroOriginal == null ? 'Nuevo' : ''}" />
+						</p:column>
+					</p:dataTable>
+				</h:form>
+			</p:dialog>
+						<!-- Fin Historico -->
+
+                    </p:panelGrid>
+                    <br />
+
+
+
+
+
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                 columnClasses="w25, field_mrg w25"
+                                 rendered="#{false and !descripcionAreaImplantacionPmaBean.sectorPesca}">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp value="#{msg['label.condicionesDrenaje']}"
+                                                     conector="generalHelp"
+                                                     help="Seleccione del listado las condiciones de drenaje del área de implantacion del proyecto." />
+
+
+                        </f:facet>
+
+                        <h:panelGrid columns="3" layout="grid" styleClass="w100"
+                                     columnClasses="w30 alTop, w30 alTop, w30 alTop">
+
+                            <p:outputLabel value="#{msg['label.condicionesDrenaje']}"
+                                           for="condicionesDrenaje" />
+                            <h:panelGroup>
+                                <p:selectOneMenu id="condicionesDrenaje" required="true"
+                                                 requiredMessage="#{msg['label.prevencion.tdr.campo']} '#{msg['label.condicionesDrenaje']}' #{msg['label.prevencion.tdr.requerido']}."
+                                                 value="#{descripcionAreaImplantacionPmaBean.condicionesDrenajeActivo}"
+                                                 style="width:250px" converter="selectItemConverter">
+                                    <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                                  itemValue="" noSelectionOption="true" />
+                                    <f:selectItems itemDescription="#{catalogo.ayuda}"
+                                                   var="catalogo"
+                                                   value="#{descripcionAreaImplantacionPmaBean.condicionesDrenaje}" />
+                                    <p:ajax event="change" process="@this"
+                                            update="@(.descipcion-condicionesDrenaje)"></p:ajax>
+                                </p:selectOneMenu>
+
+
+                            </h:panelGroup>
+                            <p:outputLabel styleClass="descipcion-condicionesDrenaje"
+                                           value="#{descripcionAreaImplantacionPmaBean.condicionesDrenajeActivo.ayuda}" />
+
+
+                        </h:panelGrid>
+                        
+                        
+                         <!-- Cris F: Boton de Historico -->
+						<h:panelGrid styleClass="panel_data" columns="2" 
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt" rendered="#{not empty descripcionAreaImplantacionPmaBean.listaCondicionesDrenajeHistorico}">
+							<h:outputText id="condicionesDrenaje_historico" value="Historial Condiciones de Drenaje" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('historicoCondicionesDrenajedlg').show()" 
+								/>
+						</h:panelGrid>
+						<!-- Fin Historico -->
+						 <!--Cris F: Nuevo codigo para historial -->
+			
+			<p:dialog header="Historial condiciones de drenaje" widgetVar="historicocondicionesDrenajedlg" modal="true" draggable="false" resizable="false">
+				<h:form id="historicoCondicionesDrenajeform">
+					
+					<p:dataTable id="tblCondicionesDrenajeHistorico" rowIndexVar="index"
+						value="#{descripcionAreaImplantacionPmaBean.listaCondicionesDrenajeHistorico}"
+						var="historico" emptyMessage="#{labels['common.table.empty']}"						
+						style="overflow: auto; display:block; width: 500px">						
+						<p:column headerText="Condiciones de Drenaje">
+							<h:outputText styleClass="alJustify" value="#{historico.catalogo.descripcion}" />
+						</p:column>
+						<p:column styleClass="w20 alCenter" headerText="Fecha Modificación">
+							<h:outputText value="#{historico.fechaHistorico}" >
+								<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+							</h:outputText>
+						</p:column>
+						<p:column styleClass="w20 alCenter" headerText="">
+							<h:outputText styleClass="text-orange" value="#{historico.idRegistroOriginal == null ? 'Nuevo' : ''}" />
+						</p:column>
+					</p:dataTable>
+				</h:form>
+			</p:dialog>
+						<!-- Fin Historico -->
+                        
+
+                    </p:panelGrid>
+                    <br />
+
+
+
+
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                 columnClasses="w25, field_mrg w25">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp value="#{msg['label.demografia']}"
+                                                     conector="generalHelp"
+                                                     help="Seleccione la población de los asentamientos humanos mas cercanos al área de implantacion del proyecto (uno o varios)." />
+
+                        </f:facet>
+
+                        <h:panelGrid columns="2" layout="grid" styleClass="w100"
+                                     columnClasses="w30, w60">
+
+                            <p:outputLabel value="#{msg['label.demografia']}"
+                                           for="demografia" />
+                            <h:panelGroup>
+                                <p:selectManyCheckbox id="demografia"
+                                                      required="#{!descripcionAreaImplantacionPmaBean.sectorPesca}"
+                                                      requiredMessage="#{msg['label.prevencion.tdr.campo']} '#{msg['label.demografia']}' #{msg['label.prevencion.tdr.requerido']}."
+                                                      value="#{descripcionAreaImplantacionPmaBean.demografiaSeleccionado}"
+                                                      layout="grid" columns="1" styleClass="tb_w50 w100"
+                                                      converter="selectItemConverter">
+                                    <f:selectItems itemDescription="#{catalogo.ayuda}"
+                                                   var="catalogo"
+                                                   value="#{descripcionAreaImplantacionPmaBean.demografia}" />
+                                </p:selectManyCheckbox>
+
+                            </h:panelGroup>
+
+                            <p:outputLabel styleClass="descipcion-demografia"
+                                           value="#{descripcionAreaImplantacionPmaBean.demografiaActivo.ayuda}" />
+
+                        </h:panelGrid>
+                        
+                        <!-- Cris F: Boton de Historico -->
+						<h:panelGrid styleClass="panel_data" columns="2" 
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt" rendered="#{not empty descripcionAreaImplantacionPmaBean.listaDemografiaHistorico}">
+							<h:outputText id="demografia_historico" value="Historial Demografía" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('historicoDemografiadlg').show()" 
+								/>
+						</h:panelGrid>
+						<!-- Fin Historico -->
+						 <!--Cris F: Nuevo codigo para historial -->
+			
+			<p:dialog header="Historial demografía" widgetVar="historicoDemografiadlg" modal="true" draggable="false" resizable="false">
+				<h:form id="historicoDemografiaform">
+					
+					<p:dataTable id="tblDemografiaHistorico" rowIndexVar="index"
+						value="#{descripcionAreaImplantacionPmaBean.listaDemografiaHistorico}"
+						var="historico" emptyMessage="#{labels['common.table.empty']}"						
+						style="overflow: auto; display:block; width: 500px">						
+						<p:column headerText="Demografía">
+							<h:outputText styleClass="alJustify" value="#{historico.catalogo.descripcion}" />
+						</p:column>
+						<p:column styleClass="w20 alCenter" headerText="Fecha Modificación">
+							<h:outputText value="#{historico.fechaHistorico}" >
+								<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+							</h:outputText>
+						</p:column>
+						<p:column styleClass="w20 alCenter" headerText="">
+							<h:outputText styleClass="text-orange" value="#{historico.idRegistroOriginal == null ? 'Nuevo' : ''}" />
+						</p:column>
+					</p:dataTable>
+				</h:form>
+			</p:dialog>
+						<!-- Fin Historico -->
+
+                    </p:panelGrid>
+                    <br />
+
+
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                 columnClasses="w25, field_mrg w25">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp value="#{msg['label.abastecimientoAguaPoblacion']}"
+                                                     conector="generalHelp"
+                                                     help="Seleccione las fuentes de agua para los asentamientos humanos más cercanos al área de implantación del proyecto (uno o varios)." />
+
+
+                        </f:facet>
+
+                        <h:panelGrid columns="2" layout="grid" styleClass="w100"
+                                     columnClasses="w30, w60">
+
+                            <p:outputLabel
+                                    value="#{msg['label.abastecimientoAguaPoblacion']}"
+                                    for="abastecimientoAguaPoblacion" />
+                            <h:panelGroup>
+                                <p:selectManyCheckbox id="abastecimientoAguaPoblacion"
+                                                      required="true"
+                                                      requiredMessage="#{msg['label.prevencion.tdr.campo']} '#{msg['label.abastecimientoAguaPoblacion']}' #{msg['label.prevencion.tdr.requerido']}."
+                                                      value="#{descripcionAreaImplantacionPmaBean.abastecimientoAguaPoblacionSeleccionado}"
+                                                      layout="grid" columns="1" styleClass="tb_w50 w100"
+                                                      converter="selectItemConverter">
+                                    <f:selectItems itemDescription="#{catalogo.ayuda}"
+                                                   var="catalogo"
+                                                   value="#{descripcionAreaImplantacionPmaBean.abastecimientoAguaPoblacion}" />
+                                </p:selectManyCheckbox>
+                            </h:panelGroup>
+                        </h:panelGrid>
+                        
+                        <!-- Cris F: Boton de Historico -->
+						<h:panelGrid styleClass="panel_data" columns="2" 
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt" rendered="#{not empty descripcionAreaImplantacionPmaBean.listaAbastecimientoAguaHistorico}">
+							<h:outputText id="abastecimiento_historico" value="Historial Abastecimiento de Agua Población" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('historicoAbastecimientodlg').show()" 
+								/>
+						</h:panelGrid>
+						<!-- Fin Historico -->
+						 <!--Cris F: Nuevo codigo para historial -->
+			
+			<p:dialog header="Historial abastecimiento de agua población" widgetVar="historicoAbastecimientodlg" modal="true" draggable="false" resizable="false">
+				<h:form id="historicoAbastecimientoform">
+					
+					<p:dataTable id="tblAbastecimientoHistorico" rowIndexVar="index"
+						value="#{descripcionAreaImplantacionPmaBean.listaAbastecimientoAguaHistorico}"
+						var="historico" emptyMessage="#{labels['common.table.empty']}"						
+						style="overflow: auto; display:block; width: 500px">						
+						<p:column headerText="Abastecimiento de agua población">
+							<h:outputText styleClass="alJustify" value="#{historico.catalogo.descripcion}" />
+						</p:column>
+						<p:column styleClass="w20 alCenter" headerText="Fecha Modificación">
+							<h:outputText value="#{historico.fechaHistorico}" >
+								<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+							</h:outputText>
+						</p:column>
+						<p:column styleClass="w20 alCenter" headerText="">
+							<h:outputText styleClass="text-orange" value="#{historico.idRegistroOriginal == null ? 'Nuevo' : ''}" />
+						</p:column>
+					</p:dataTable>
+				</h:form>
+			</p:dialog>
+						<!-- Fin Historico -->
+                        
+
+                    </p:panelGrid>
+                    <br />
+
+
+
+
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                 columnClasses="w25, field_mrg w25">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp value="#{msg['label.evacuacionAguasServidasPonlacion']}"
+                                                     conector="generalHelp"
+                                                     help="Seleccione el/los tipo(s) de evacuación de aguas servidas para los asentamientos humanos más cercanos al área de implantación del proyecto (uno o varios)." />
+
+
+                        </f:facet>
+
+                        <h:panelGrid columns="2" layout="grid" styleClass="w100"
+                                     columnClasses="w30, w60">
+
+                            <p:outputLabel
+                                    value="#{msg['label.evacuacionAguasServidasPonlacion']}"
+                                    for="evacuacionAguasServidasPonlacion" />
+                            <h:panelGroup>
+                                <p:selectManyCheckbox id="evacuacionAguasServidasPonlacion"
+                                                      required="true"
+                                                      requiredMessage="#{msg['label.prevencion.tdr.campo']} '#{msg['label.evacuacionAguasServidasPonlacion']}' #{msg['label.prevencion.tdr.requerido']}."
+                                                      value="#{descripcionAreaImplantacionPmaBean.evacuacionAguasServidasPonlacionSeleccionado}"
+                                                      layout="grid" columns="1" styleClass="tb_w50 w100"
+                                                      converter="selectItemConverter">
+                                    <f:selectItems itemDescription="#{catalogo.ayuda}"
+                                                   var="catalogo"
+                                                   value="#{descripcionAreaImplantacionPmaBean.evacuacionAguasServidasPonlacion}" />
+                                </p:selectManyCheckbox>
+                            </h:panelGroup>
+                        </h:panelGrid>
+                        
+                        <!-- Cris F: Boton de Historico -->
+						<h:panelGrid styleClass="panel_data" columns="2" 
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt" rendered="#{not empty descripcionAreaImplantacionPmaBean.listaEvacuacionAguasHistorico}">
+							<h:outputText id="evacuacion_historico" value="Historial Evacuación de Aguas Servidas Población" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('historicoEvacuaciondlg').show()" 
+								/>
+						</h:panelGrid>
+						<!-- Fin Historico -->
+						 <!--Cris F: Nuevo codigo para historial -->
+			
+			<p:dialog header="Historial evacuación de aguas servidas población" widgetVar="historicoEvacuaciondlg" modal="true" draggable="false" resizable="false">
+				<h:form id="historicoEvacuacionform">
+					
+					<p:dataTable id="tblEvacuacionHistorico" rowIndexVar="index"
+						value="#{descripcionAreaImplantacionPmaBean.listaEvacuacionAguasHistorico}"
+						var="historico" emptyMessage="#{labels['common.table.empty']}"						
+						style="overflow: auto; display:block; width: 500px">						
+						<p:column headerText="Evacuación de aguas servidas población">
+							<h:outputText styleClass="alJustify" value="#{historico.catalogo.descripcion}" />
+						</p:column>
+						<p:column styleClass="w20 alCenter" headerText="Fecha Modificación">
+							<h:outputText value="#{historico.fechaHistorico}" >
+								<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+							</h:outputText>
+						</p:column>
+						<p:column styleClass="w20 alCenter" headerText="">
+							<h:outputText styleClass="text-orange" value="#{historico.idRegistroOriginal == null ? 'Nuevo' : ''}" />
+						</p:column>
+					</p:dataTable>
+				</h:form>
+			</p:dialog>
+						<!-- Fin Historico -->
+
+                    </p:panelGrid>
+                    <br />
+
+
+
+
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                 columnClasses="w25, field_mrg w25">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp value="#{msg['label.electrificacion']}"
+                                                     conector="generalHelp"
+                                                     help="Seleccione el/los tipo(s) de electrificación para los asentamientos humanos más cercanos al área de implantación del proyecto (uno o varios)." />
+
+                        </f:facet>
+
+                        <h:panelGrid columns="2" layout="grid" styleClass="w100"
+                                     columnClasses="w30, w60">
+
+                            <p:outputLabel value="#{msg['label.electrificacion']}"
+                                           for="electrificacion" />
+                            <h:panelGroup>
+                                <p:selectManyCheckbox id="electrificacion" required="true"
+                                                      requiredMessage="#{msg['label.prevencion.tdr.campo']} '#{msg['label.electrificacion']}' #{msg['label.prevencion.tdr.requerido']}."
+                                                      value="#{descripcionAreaImplantacionPmaBean.electrificacionSeleccionado}"
+                                                      layout="grid" columns="1" styleClass="tb_w50 w100"
+                                                      converter="selectItemConverter">
+                                    <f:selectItems itemDescription="#{catalogo.ayuda}"
+                                                   var="catalogo"
+                                                   value="#{descripcionAreaImplantacionPmaBean.electrificacion}" />
+                                    <p:ajax update=":form:electrificacionOtros" process="@this"></p:ajax>
+
+                                </p:selectManyCheckbox>
+                                <h:panelGrid columns="2" layout="grid" styleClass="w100"
+                                             columnClasses="w50, w50" id="electrificacionOtros">
+
+                                    <p:inputText  maxlength="50"
+                                            requiredMessage="Debe especificar el valor del campo Otros en  #{msg['label.electrificacion']}."
+                                            required="#{descripcionAreaImplantacionPmaController.campoOtrosVisibleSocial(descripcionAreaImplantacionPmaBean.electrificacionSeleccionado,descripcionAreaImplantacionPmaBean.electrificacionOtros.catalogo)}"
+                                            value="#{descripcionAreaImplantacionPmaBean.electrificacionOtros.valor}"
+                                            rendered="#{descripcionAreaImplantacionPmaController.campoOtrosVisibleSocial(descripcionAreaImplantacionPmaBean.electrificacionSeleccionado,descripcionAreaImplantacionPmaBean.electrificacionOtros.catalogo)}">
+                                        <p:ajax update="@this" process="@this"></p:ajax>
+                                    </p:inputText>
+                                    <h:outputText />
+                                </h:panelGrid>
+                            </h:panelGroup>
+                        </h:panelGrid>
+                        
+                         <!-- Cris F: Boton de Historico -->
+						<h:panelGrid styleClass="panel_data" columns="2" 
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt" rendered="#{not empty descripcionAreaImplantacionPmaBean.listaElectrificacionHistorico}">
+							<h:outputText id="electrificacion_historico" value="Historial Electrificación" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('historicoElectrificaciondlg').show()" 
+								/>
+						</h:panelGrid>
+						<!-- Fin Historico -->
+						 <!--Cris F: Nuevo codigo para historial -->
+			
+			<p:dialog header="Historial electrificación" widgetVar="historicoElectrificaciondlg" modal="true" draggable="false" resizable="false">
+				<h:form id="historicoElectrificacionform">
+					
+					<p:dataTable id="tblElectrificacionHistorico" rowIndexVar="index"
+						value="#{descripcionAreaImplantacionPmaBean.listaElectrificacionHistorico}"
+						var="historico" emptyMessage="#{labels['common.table.empty']}"						
+						style="overflow: auto; display:block; width: 500px">						
+						<p:column headerText="Electrificación">
+							<h:outputText value="Otra - " rendered="#{historico.catalogo.descripcion eq 'Otra' ? true : false}" />	
+							<h:outputText value="#{historico.catalogo.descripcion eq 'Otra' ? historico.valor : historico.catalogo.descripcion}" />
+						</p:column>
+						<p:column styleClass="w20 alCenter" headerText="Fecha Modificación">
+							<h:outputText value="#{historico.fechaHistorico}" >
+								<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+							</h:outputText>
+						</p:column>
+						<p:column styleClass="w20 alCenter" headerText="">
+							<h:outputText styleClass="text-orange" value="#{historico.idRegistroOriginal == null ? 'Nuevo' : ''}" />
+						</p:column>
+					</p:dataTable>
+				</h:form>
+			</p:dialog>
+						<!-- Fin Historico -->
+
+                    </p:panelGrid>
+
+                    <br />
+
+
+
+
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                 columnClasses="w25, field_mrg w25">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp value="#{msg['label.vialidadAccesoPoblacion']}"
+                                                     conector="generalHelp"
+                                                     help="Seleccione el/los tipo(s) de vialidad y acceso para los asentamientos humanos más cercanos al área de implantación del proyecto (uno o varios)." />
+
+                        </f:facet>
+
+                        <h:panelGrid columns="2" layout="grid" styleClass="w100"
+                                     columnClasses="w30, w60">
+
+                            <p:outputLabel value="#{msg['label.vialidadAccesoPoblacion']}"
+                                           for="vialidadAccesoPoblacion" />
+                            <h:panelGroup>
+                                <p:selectManyCheckbox id="vialidadAccesoPoblacion"
+                                                      required="true"
+                                                      requiredMessage="#{msg['label.prevencion.tdr.campo']} '#{msg['label.vialidadAccesoPoblacion']}' #{msg['label.prevencion.tdr.requerido']}."
+                                                      value="#{descripcionAreaImplantacionPmaBean.vialidadAccesoPoblacionSeleccionado}"
+                                                      layout="grid" columns="1" styleClass="tb_w50 w100"
+                                                      converter="selectItemConverter">
+                                    <f:selectItems itemDescription="#{catalogo.ayuda}"
+                                                   var="catalogo"
+                                                   value="#{descripcionAreaImplantacionPmaBean.vialidadAccesoPoblacion}" />
+                                    <p:ajax update=":form:vialidadAccesoPoblacionOtros"
+                                            process="@this"></p:ajax>
+
+                                </p:selectManyCheckbox>
+                                <h:panelGrid columns="2" layout="grid" styleClass="w100"
+                                             columnClasses="w50, w50" id="vialidadAccesoPoblacionOtros">
+
+                                    <h:outputText />
+                                    <p:inputText  maxlength="50"
+                                            requiredMessage="Debe especificar el valor del campo Otros en  #{msg['label.vialidadAccesoPoblacion']}."
+                                            required="#{descripcionAreaImplantacionPmaController.campoOtrosVisibleSocial(descripcionAreaImplantacionPmaBean.vialidadAccesoPoblacionSeleccionado,descripcionAreaImplantacionPmaBean.vialidadAccesoPoblacionOtros.catalogo)}"
+                                            value="#{descripcionAreaImplantacionPmaBean.vialidadAccesoPoblacionOtros.valor}"
+                                            rendered="#{descripcionAreaImplantacionPmaController.campoOtrosVisibleSocial(descripcionAreaImplantacionPmaBean.vialidadAccesoPoblacionSeleccionado,descripcionAreaImplantacionPmaBean.vialidadAccesoPoblacionOtros.catalogo)}">
+                                        <p:ajax update="@this" process="@this"></p:ajax>
+                                    </p:inputText>
+                                </h:panelGrid>
+                            </h:panelGroup>
+                        </h:panelGrid>
+                        
+                        <!-- Cris F: Boton de Historico -->
+						<h:panelGrid styleClass="panel_data" columns="2" 
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt" rendered="#{not empty descripcionAreaImplantacionPmaBean.listaVialidadAccesoPoblacionHistorico}">
+							<h:outputText id="vialidad_historico" value="Historial Vialidad y Acceso a la Población" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('historicoVialidaddlg').show()" 
+								/>
+						</h:panelGrid>
+						<!-- Fin Historico -->
+						 <!--Cris F: Nuevo codigo para historial -->
+			
+			<p:dialog header="Historial vialidad y acceso a la población" widgetVar="historicoVialidaddlg" modal="true" draggable="false" resizable="false">
+				<h:form id="historicoVialidadform">
+					
+					<p:dataTable id="tblVialidadHistorico" rowIndexVar="index"
+						value="#{descripcionAreaImplantacionPmaBean.listaVialidadAccesoPoblacionHistorico}"
+						var="historico" emptyMessage="#{labels['common.table.empty']}"						
+						style="overflow: auto; display:block; width: 500px">						
+						<p:column headerText="Vialidad y acceso a la población">
+							<h:outputText value="Otras - " rendered="#{historico.catalogo.descripcion eq 'Otras' ? true : false}" />
+							<h:outputText value="#{historico.catalogo.descripcion eq 'Otras' ? historico.valor : historico.catalogo.descripcion}" />
+						</p:column>
+						<p:column styleClass="w20 alCenter" headerText="Fecha Modificación">
+							<h:outputText value="#{historico.fechaHistorico}" >
+								<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+							</h:outputText>
+						</p:column>
+						<p:column styleClass="w20 alCenter" headerText="">
+							<h:outputText styleClass="text-orange" value="#{historico.idRegistroOriginal == null ? 'Nuevo' : ''}" />
+						</p:column>
+					</p:dataTable>
+				</h:form>
+			</p:dialog>
+						<!-- Fin Historico -->
+
+                    </p:panelGrid>
+
+
+                    <br />
+
+
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                 columnClasses="w25, field_mrg w25">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp value="#{msg['label.organizacionSocial']}"
+                                                     conector="generalHelp"
+                                                     help="Seleccione el/los tipo(s) de organización social para los asentamientos humanos más cercanos al área de implantación del proyecto (uno o varios)." />
+
+                        </f:facet>
+
+                        <h:panelGrid columns="2" layout="grid" styleClass="w100"
+                                     columnClasses="w30, w60">
+
+                            <p:outputLabel value="#{msg['label.organizacionSocial']}"
+                                           for="organizacionSocial" />
+                            <h:panelGroup>
+                                <p:selectManyCheckbox id="organizacionSocial" required="true"
+                                                      requiredMessage="#{msg['label.prevencion.tdr.campo']} '#{msg['label.organizacionSocial']}' #{msg['label.prevencion.tdr.requerido']}."
+                                                      value="#{descripcionAreaImplantacionPmaBean.organizacionSocialSeleccionado}"
+                                                      layout="grid" columns="1" styleClass="tb_w50 w100"
+                                                      converter="selectItemConverter">
+                                    <f:selectItems itemDescription="#{catalogo.ayuda}"
+                                                   var="catalogo"
+                                                   value="#{descripcionAreaImplantacionPmaBean.organizacionSocial}" />
+                                </p:selectManyCheckbox>
+                            </h:panelGroup>
+                        </h:panelGrid>
+                        
+                        <!-- Cris F: Boton de Historico -->
+						<h:panelGrid styleClass="panel_data" columns="2" 
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt" rendered="#{not empty descripcionAreaImplantacionPmaBean.listaOrganizacionSocialHistorico}">
+							<h:outputText id="organizacion_historico" value="Historial Organización Social" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('historicoOrganizaciondlg').show()" 
+								/>
+						</h:panelGrid>
+						<!-- Fin Historico -->
+						 <!--Cris F: Nuevo codigo para historial -->
+			
+			<p:dialog header="Historial organización social" widgetVar="historicoOrganizaciondlg" modal="true" draggable="false" resizable="false">
+				<h:form id="historicoOrganizacionform">
+					
+					<p:dataTable id="tblOrganizacionHistorico" rowIndexVar="index"
+						value="#{descripcionAreaImplantacionPmaBean.listaOrganizacionSocialHistorico}"
+						var="historico" emptyMessage="#{labels['common.table.empty']}"						
+						style="overflow: auto; display:block; width: 500px">						
+						<p:column headerText="Organización social">
+							<h:outputText styleClass="alJustify" value="#{historico.catalogo.descripcion}" />
+						</p:column>
+						<p:column styleClass="w20 alCenter" headerText="Fecha Modificación">
+							<h:outputText value="#{historico.fechaHistorico}" >
+								<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+							</h:outputText>
+						</p:column>
+						<p:column styleClass="w20 alCenter" headerText="">
+							<h:outputText styleClass="text-orange" value="#{historico.idRegistroOriginal == null ? 'Nuevo' : ''}" />
+						</p:column>
+					</p:dataTable>
+				</h:form>
+			</p:dialog>
+						<!-- Fin Historico -->
+
+                    </p:panelGrid>
+                    <br />
+
+
+
+
+
+
+
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                 columnClasses="w25, field_mrg w25"
+                                 rendered="#{false and !descripcionAreaImplantacionPmaBean.electTelecomunicaciones and !descripcionAreaImplantacionPmaBean.saneamientoUrbano and  !descripcionAreaImplantacionPmaBean.agroindustria and  !descripcionAreaImplantacionPmaBean.otrosSectores}">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp value="#{msg['label.componenteFlora']}"
+                                                     conector="generalHelp" render="false"
+                                                     help="" />
+
+                        </f:facet>
+
+                        <h:panelGrid columns="3" layout="grid" styleClass="w100"
+                                     columnClasses="w30, w60"
+                                     rendered="#{false and !descripcionAreaImplantacionPmaBean.otrosSectores and !descripcionAreaImplantacionPmaBean.agroindustria and !descripcionAreaImplantacionPmaBean.mineriaLibreAprovechamiento}">
+
+                            <p:outputLabel value="#{msg['label.formacionVegetal']}"
+                                           for="formacionVegetal" />
+                            <h:panelGroup>
+                                <p:selectManyCheckbox id="formacionVegetal"
+                                                      required="#{false  and !descripcionAreaImplantacionPmaBean.otrosSectores and !descripcionAreaImplantacionPmaBean.agroindustria and !descripcionAreaImplantacionPmaBean.mineriaLibreAprovechamiento}"
+                                                      requiredMessage="#{msg['label.prevencion.tdr.campo']} '#{msg['label.formacionVegetal']}' #{msg['label.prevencion.tdr.requerido']}."
+                                                      value="#{descripcionAreaImplantacionPmaBean.formacionVegetalSeleccionado}"
+                                                      layout="grid" columns="1" styleClass="tb_w50 w100"
+                                                      converter="selectItemConverter">
+                                    <f:selectItems itemDescription="#{catalogo.ayuda}"
+                                                   var="catalogo"
+                                                   value="#{descripcionAreaImplantacionPmaBean.formacionVegetal}" />
+                                </p:selectManyCheckbox>
+                            </h:panelGroup>
+
+							<!-- Cris F: Boton de Historico -->
+							<h:panelGrid styleClass="panel_data" columns="2"
+								columnClasses="header background-orange, null"
+								rowClasses="null, alt"
+								rendered="#{not empty descripcionAreaImplantacionPmaBean.listaFormacionVegetalHistorico}">
+								<h:outputText id="formacionVegetal_historico"
+									value="Historial Formación Vegetal" />
+								<p:commandButton styleClass="button-small orange"
+									icon="ui-icon-search" process="@this"
+									oncomplete="PF('historicoFormacionVegetaldlg').show()" />
+							</h:panelGrid>
+							<!-- Fin Historico -->
+							<!--Cris F: Nuevo codigo para historial -->
+
+							<p:dialog header="Historial formación vegetal" widgetVar="historicoFormacionVegetaldlg" modal="true"
+								 draggable="false" resizable="false">
+								<h:form id="historicoFormacionVegetalform">
+
+									<p:dataTable id="tblFormacionVegetalHistorico" rowIndexVar="index"
+										value="#{descripcionAreaImplantacionPmaBean.listaFormacionVegetalHistorico}"
+										var="historico" emptyMessage="#{labels['common.table.empty']}"
+										style="overflow: auto; display:block; width: 500px">
+										<p:column headerText="Formación Vegetal">
+											<h:outputText styleClass="alJustify"
+												value="#{historico.catalogo.descripcion}" />
+										</p:column>
+										<p:column styleClass="w20 alCenter"
+											headerText="Fecha Modificación">
+											<h:outputText value="#{historico.fechaHistorico}" >
+												<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+											</h:outputText>
+										</p:column>
+										<p:column styleClass="w20 alCenter" headerText="">
+											<h:outputText styleClass="text-orange"
+												value="#{historico.idRegistroOriginal == null ? 'Nuevo' : ''}" />
+										</p:column>
+									</p:dataTable>
+								</h:form>
+							</p:dialog>
+							<!-- Fin Historico -->
+
+						</h:panelGrid>
+
+                        <p:separator
+                                rendered="#{descripcionAreaImplantacionPmaBean.otrosSectores==descripcionAreaImplantacionPmaBean.agroindustria}"></p:separator>
+                        <h:panelGrid columns="3" layout="grid" styleClass="w100"
+                                     columnClasses="w30, w60"
+                                     rendered="#{false and !descripcionAreaImplantacionPmaBean.otrosSectores and !descripcionAreaImplantacionPmaBean.agroindustria}">
+
+                            <p:outputLabel value="#{msg['label.habitat']}" for="habitat" />
+                            <h:panelGroup>
+                                <p:selectManyCheckbox id="habitat"
+                                                      required="#{false and !descripcionAreaImplantacionPmaBean.otrosSectores and !descripcionAreaImplantacionPmaBean.agroindustria}"
+                                                      requiredMessage="#{msg['label.prevencion.tdr.campo']} '#{msg['label.habitat']}' #{msg['label.prevencion.tdr.requerido']}."
+                                                      value="#{descripcionAreaImplantacionPmaBean.habitatSeleccionado}"
+                                                      layout="grid" columns="1" styleClass="tb_w50 w100"
+                                                      converter="selectItemConverter">
+                                    <f:selectItems itemDescription="#{catalogo.ayuda}"
+                                                   var="catalogo"
+                                                   value="#{descripcionAreaImplantacionPmaBean.habitat}" />
+                                </p:selectManyCheckbox>
+                            </h:panelGroup>
+                            
+                            <!-- Cris F: Boton de Historico -->
+							<h:panelGrid styleClass="panel_data" columns="2"
+								columnClasses="header background-orange, null"
+								rowClasses="null, alt"
+								rendered="#{not empty descripcionAreaImplantacionPmaBean.listaHabitatHistorico}">
+								<h:outputText id="habitat_historico"
+									value="Historial Hábitat" />
+								<p:commandButton styleClass="button-small orange"
+									icon="ui-icon-search" process="@this"
+									oncomplete="PF('historicoHabitatdlg').show()" />
+							</h:panelGrid>
+							<!-- Fin Historico -->
+							<!--Cris F: Nuevo codigo para historial -->
+
+							<p:dialog header="Historial hábitat" widgetVar="historicoHabitatdlg" modal="true"
+								 draggable="false" resizable="false">
+								<h:form id="historicoHabitatform">
+
+									<p:dataTable id="tblHabitatHistorico" rowIndexVar="index"
+										value="#{descripcionAreaImplantacionPmaBean.listaHabitatHistorico}"
+										var="historico" emptyMessage="#{labels['common.table.empty']}"
+										style="overflow: auto; display:block; width: 500px">
+										<p:column headerText="Hábitat">
+											<h:outputText styleClass="alJustify"
+												value="#{historico.catalogo.descripcion}" />
+										</p:column>
+										<p:column styleClass="w20 alCenter"
+											headerText="Fecha Modificación">
+											<h:outputText value="#{historico.fechaHistorico}" >
+												<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+											</h:outputText>
+										</p:column>
+										<p:column styleClass="w20 alCenter" headerText="">
+											<h:outputText styleClass="text-orange"
+												value="#{historico.idRegistroOriginal == null ? 'Nuevo' : ''}" />
+										</p:column>
+									</p:dataTable>
+								</h:form>
+							</p:dialog>
+							<!-- Fin Historico -->
+                            
+                            
+                        </h:panelGrid>
+
+
+
+                        <p:separator
+                                rendered="#{false and !descripcionAreaImplantacionPmaBean.otrosSectores and !descripcionAreaImplantacionPmaBean.agroindustria}"></p:separator>
+                        <h:panelGrid columns="4" layout="grid" styleClass="w100"
+                                     columnClasses="w30 alTop, w30 alTop, w30 alTop"
+                                     rendered="#{false and !descripcionAreaImplantacionPmaBean.otrosSectores and !descripcionAreaImplantacionPmaBean.agroindustria}">
+
+                            <p:outputLabel value="#{msg['label.tiposBosques']}"
+                                           for="tiposBosques" />
+                            <h:panelGroup>
+                                <p:selectOneMenu id="tiposBosques" required="true"
+                                                 requiredMessage="#{msg['label.prevencion.tdr.campo']} '#{msg['label.tiposBosques']}' #{msg['label.prevencion.tdr.requerido']}."
+                                                 value="#{descripcionAreaImplantacionPmaBean.tiposBosquesActivo}"
+                                                 style="width:250px" converter="selectItemConverter">
+                                    <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                                  itemValue="" noSelectionOption="true" />
+
+                                    <f:selectItems itemDescription="#{catalogo.ayuda}"
+                                                   var="catalogo"
+                                                   value="#{descripcionAreaImplantacionPmaBean.tiposBosques}" />
+                                    <p:ajax event="change" process="@this"
+                                            update="@(.descipcion-tiposBosques)"></p:ajax>
+                                </p:selectOneMenu>
+                            </h:panelGroup>
+
+                            <p:outputLabel styleClass="descipcion-tiposBosques"
+                                           value="#{descripcionAreaImplantacionPmaBean.tiposBosquesActivo.ayuda}" />
+
+							<!-- Cris F: Boton de Historico -->
+							<h:panelGrid styleClass="panel_data" columns="2"
+								columnClasses="header background-orange, null"
+								rowClasses="null, alt"
+								rendered="#{not empty descripcionAreaImplantacionPmaBean.listaTiposBosquesHistorico}">
+								<h:outputText id="tipoBosque_historico"
+									value="Historial Tipo de Bosques" />
+								<p:commandButton styleClass="button-small orange"
+									icon="ui-icon-search" process="@this"
+									oncomplete="PF('historicoTipoBosquedlg').show()" />
+							</h:panelGrid>
+							<!-- Fin Historico -->
+							<!--Cris F: Nuevo codigo para historial -->
+
+							<p:dialog header="Historial tipo de bosques" widgetVar="historicoTipoBosquedlg" modal="true"
+								draggable="false" resizable="false">
+								<h:form id="historicoTipoBosqueform">
+
+									<p:dataTable id="tblTipoBosqueHistorico" rowIndexVar="index"
+										value="#{descripcionAreaImplantacionPmaBean.listaTiposBosquesHistorico}"
+										var="historico" emptyMessage="#{labels['common.table.empty']}"
+										style="overflow: auto; display:block; width: 500px">
+										<p:column headerText="Tipo de Bosque">
+											<h:outputText styleClass="alJustify"
+												value="#{historico.catalogo.descripcion}" />
+										</p:column>
+										<p:column styleClass="w20 alCenter"
+											headerText="Fecha Modificación">
+											<h:outputText value="#{historico.fechaHistorico}" >
+												<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+											</h:outputText>
+										</p:column>
+									</p:dataTable>
+								</h:form>
+							</p:dialog>
+							<!-- Fin Historico -->
+                        </h:panelGrid>
+
+
+
+                        <p:separator
+                                rendered="#{false and !descripcionAreaImplantacionPmaBean.otrosSectores and !descripcionAreaImplantacionPmaBean.agroindustria}"></p:separator>
+                        <h:panelGrid columns="4" layout="grid" styleClass="w100"
+                                     columnClasses="w30 alTop, w30 alTop, w30 alTop"
+                                     rendered="#{false and !descripcionAreaImplantacionPmaBean.otrosSectores and descripcionAreaImplantacionPmaBean.agroindustria}">
+
+                            <p:outputLabel
+                                    value="#{msg['label.gradoIntervencionCoberturaVegetal']}"
+                                    for="gradoIntervencionCoberturaVegetal" />
+                            <h:panelGroup>
+                                <p:selectOneMenu id="gradoIntervencionCoberturaVegetal"
+                                                 required="true"
+                                                 requiredMessage="#{msg['label.prevencion.tdr.campo']} '#{msg['label.gradoIntervencionCoberturaVegetal']}' #{msg['label.prevencion.tdr.requerido']}."
+                                                 value="#{descripcionAreaImplantacionPmaBean.gradoIntervencionCoberturaVegetalActivo}"
+                                                 style="width:250px" converter="selectItemConverter">
+                                    <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                                  itemValue="" noSelectionOption="true" />
+                                    <f:selectItems itemDescription="#{catalogo.ayuda}"
+                                                   var="catalogo"
+                                                   value="#{descripcionAreaImplantacionPmaBean.gradoIntervencionCoberturaVegetal}" />
+                                    <p:ajax event="change" process="@this"
+                                            update="@(.descipcion-gradoIntervencionCoberturaVegetal)"></p:ajax>
+                                </p:selectOneMenu>
+                            </h:panelGroup>
+                            <p:outputLabel
+                                    styleClass="descipcion-gradoIntervencionCoberturaVegetal"
+                                    value="#{descripcionAreaImplantacionPmaBean.gradoIntervencionCoberturaVegetalActivo.ayuda}" />
+                                    
+                            
+                            <!-- Cris F: Boton de Historico -->
+							<h:panelGrid styleClass="panel_data" columns="2"
+								columnClasses="header background-orange, null"
+								rowClasses="null, alt"
+								rendered="#{not empty descripcionAreaImplantacionPmaBean.listaGradoIntervencionHistorico}">
+								<h:outputText id="gradoIntervencionCoberturaVegetal_historico"
+									value="Historial Grado de Intervención de la Cobertura Vegetal" />
+								<p:commandButton styleClass="button-small orange"
+									icon="ui-icon-search" process="@this"
+									oncomplete="PF('historicoGradoIntervencionCoberturaVegetaldlg').show()" />
+							</h:panelGrid>
+							<!-- Fin Historico -->
+							<!--Cris F: Nuevo codigo para historial -->
+
+							<p:dialog header="Historial grado de intervención de la cobertura vegetal" widgetVar="historicoGradoIntervencionCoberturaVegetaldlg" modal="true"
+								draggable="false" resizable="false">
+								<h:form id="historicoGradoIntervencionCoberturaVegetalform">
+
+									<p:dataTable id="tblGradoIntervencionCoberturaVegetalHistorico" rowIndexVar="index"
+										value="#{descripcionAreaImplantacionPmaBean.listaGradoIntervencionHistorico}"
+										var="historico" emptyMessage="#{labels['common.table.empty']}"
+										style="overflow: auto; display:block; width: 500px">
+										<p:column headerText="Grado de intervención de la cobertura vegetal">
+											<h:outputText styleClass="alJustify"
+												value="#{historico.catalogo.descripcion}" />
+										</p:column>
+										<p:column styleClass="w20 alCenter"
+											headerText="Fecha Modificación">
+											<h:outputText value="#{historico.fechaHistorico}" >
+												<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+											</h:outputText>
+										</p:column>
+									</p:dataTable>
+								</h:form>
+							</p:dialog>
+							<!-- Fin Historico -->
+
+
+
+                        </h:panelGrid>
+
+
+                        <p:separator
+                                rendered="#{false and !descripcionAreaImplantacionPmaBean.otrosSectores and !descripcionAreaImplantacionPmaBean.agroindustria}"></p:separator>
+                        <h:panelGrid columns="3" layout="grid" styleClass="w100"
+                                     columnClasses="w30, w60"
+                                     rendered="#{false and !descripcionAreaImplantacionPmaBean.otrosSectores and !descripcionAreaImplantacionPmaBean.agroindustria}">
+
+                            <p:outputLabel value="#{msg['label.aspectosEcologicos']}"
+                                           for="aspectosEcologicos" />
+                            <h:panelGroup>
+                                <p:selectManyCheckbox id="aspectosEcologicos"
+                                                      required="#{!descripcionAreaImplantacionPmaBean.otrosSectores}"
+                                                      requiredMessage="#{msg['label.prevencion.tdr.campo']} '#{msg['label.aspectosEcologicos']}' #{msg['label.prevencion.tdr.requerido']}."
+                                                      value="#{descripcionAreaImplantacionPmaBean.aspectosEcologicosSeleccionado}"
+                                                      layout="grid" columns="1" styleClass="tb_w50 w100"
+                                                      converter="selectItemConverter">
+                                    <f:selectItems itemDescription="#{catalogo.ayuda}"
+                                                   var="catalogo"
+                                                   value="#{descripcionAreaImplantacionPmaBean.aspectosEcologicos}" />
+                                </p:selectManyCheckbox>
+                            </h:panelGroup>
+                            
+                            <!-- Cris F: Boton de Historico -->
+							<h:panelGrid styleClass="panel_data" columns="2"
+								columnClasses="header background-orange, null"
+								rowClasses="null, alt"
+								rendered="#{not empty descripcionAreaImplantacionPmaBean.listaAspectosEcologicosHistorico}">
+								<h:outputText id="aspectosEcologicos_historico"
+									value="Historial Aspectos Ecológicos" />
+								<p:commandButton styleClass="button-small orange"
+									icon="ui-icon-search" process="@this"
+									oncomplete="PF('historicoAspectosEcologicosdlg').show()" />
+							</h:panelGrid>
+							<!-- Fin Historico -->
+							<!--Cris F: Nuevo codigo para historial -->
+
+							<p:dialog header="Historial aspectos ecológicos" widgetVar="historicoAspectosEcologicosdlg" modal="true"
+								draggable="false" resizable="false">
+								<h:form id="historicoAspectosEcologicosform">
+
+									<p:dataTable id="tblAspectosEcologicosHistorico" rowIndexVar="index"
+										value="#{descripcionAreaImplantacionPmaBean.listaAspectosEcologicosHistorico}"
+										var="historico" emptyMessage="#{labels['common.table.empty']}"
+										style="overflow: auto; display:block; width: 500px">
+										<p:column headerText="Aspectos Ecológicos">
+											<h:outputText styleClass="alJustify"
+												value="#{historico.catalogo.descripcion}" />
+										</p:column>
+										<p:column styleClass="w20 alCenter"
+											headerText="Fecha Modificación">
+											<h:outputText value="#{historico.fechaHistorico}" >
+												<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+											</h:outputText>
+										</p:column>
+										<p:column styleClass="w20 alCenter" headerText="">
+											<h:outputText styleClass="text-orange"
+												value="#{historico.idRegistroOriginal == null ? 'Nuevo' : ''}" />
+										</p:column>
+									</p:dataTable>
+								</h:form>
+							</p:dialog>
+							<!-- Fin Historico -->
+                            
+                            
+                            
+                        </h:panelGrid>
+                    </p:panelGrid>
+
+
+                    <br />
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                 columnClasses="w25, field_mrg w25">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp value="#{msg['label.componenteFauna']}"
+                                                     conector="generalHelp"
+                                                     help="Seleccione la opción del piso zoogeográfico en base a la altitud y ubicación de su proyecto." />
+
+                        </f:facet>
+
+                        <h:panelGrid columns="4" layout="grid" styleClass="w100"
+                                     columnClasses="w30 alTop, w30 alTop, w30 alTop">
+
+                            <p:outputLabel value="#{msg['label.pisoZoogeografico']}"
+                                           for="pisoZoogeografico" />
+                            <h:panelGroup>
+                                <p:selectOneMenu id="pisoZoogeografico" required="true"  rendered="#{!descripcionAreaImplantacionPmaBean.selectSimple(descripcionAreaImplantacionPmaBean.pisoZoogeografico)}"
+                                                 requiredMessage="#{msg['label.prevencion.tdr.campo']} '#{msg['label.pisoZoogeografico']}' #{msg['label.prevencion.tdr.requerido']}."
+                                                 value="#{descripcionAreaImplantacionPmaBean.pisoZoogeograficoActivo}"
+                                                 style="width:250px" converter="selectItemConverter">
+                                    <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                                  itemValue="" noSelectionOption="true" />
+                                    <f:selectItems itemDescription="#{catalogo.ayuda}"
+                                                   var="catalogo"
+                                                   value="#{descripcionAreaImplantacionPmaBean.pisoZoogeografico}" />
+                                    <p:ajax event="change" process="@this"
+                                            update="@(.descipcion-pisoZoogeografico)"></p:ajax>
+                                </p:selectOneMenu>
+
+                                <h:outputText value="#{descripcionAreaImplantacionPmaBean.pisoZoogeograficoActivo}" title="#{descripcionAreaImplantacionPmaBean.pisoZoogeograficoActivo.ayuda}" rendered="#{descripcionAreaImplantacionPmaBean.selectSimple(descripcionAreaImplantacionPmaBean.pisoZoogeografico)}"/>
+
+
+                            </h:panelGroup>
+                            <p:outputLabel styleClass="descipcion-pisoZoogeografico"
+                                           value="#{descripcionAreaImplantacionPmaBean.pisoZoogeograficoActivo.ayuda}" />
+                                           
+                                           
+                           <!-- Cris F: Boton de Historico -->
+							<h:panelGrid styleClass="panel_data" columns="2"
+								columnClasses="header background-orange, null"
+								rowClasses="null, alt"
+								rendered="#{not empty descripcionAreaImplantacionPmaBean.listaPisoZoogeologicoHistorico}">
+								<h:outputText id="pisoZoogeografico_historico"
+									value="Historial Piso Zoogeográfico" />
+								<p:commandButton styleClass="button-small orange"
+									icon="ui-icon-search" process="@this"
+									oncomplete="PF('historicoPisoZoogeograficodlg').show()" />
+							</h:panelGrid>
+							<!-- Fin Historico -->
+							<!--Cris F: Nuevo codigo para historial -->
+
+							<p:dialog header="Historial piso zoogeográfico" widgetVar="historicoPisoZoogeograficodlg" modal="true"
+								draggable="false" resizable="false">
+								<h:form id="historicoPisoZoogeograficoform">
+
+									<p:dataTable id="tblPisoZoogeograficoHistorico" rowIndexVar="index"
+										value="#{descripcionAreaImplantacionPmaBean.listaPisoZoogeologicoHistorico}"
+										var="historico" emptyMessage="#{labels['common.table.empty']}"
+										style="overflow: auto; display:block; width: 500px">
+										<p:column headerText="Piso zoogeográfico ">
+											<h:outputText styleClass="alJustify"
+												value="#{historico.catalogo.descripcion}" />
+										</p:column>
+										<p:column styleClass="w20 alCenter"
+											headerText="Fecha Modificación">
+											<h:outputText value="#{historico.fechaHistorico}" >
+												<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+											</h:outputText>
+										</p:column>
+									</p:dataTable>
+								</h:form>
+							</p:dialog>
+							<!-- Fin Historico -->
+
+                        </h:panelGrid>
+
+                        <p:separator></p:separator>
+                        <h:panelGrid columns="3" layout="grid" styleClass="w100"
+                                     columnClasses="w30, w60">
+
+                            <p:outputLabel value="#{msg['label.gruposFaunistico']}"
+                                           for="gruposFaunistico" />
+                            <h:panelGroup>
+                                <p:selectManyCheckbox id="gruposFaunistico" required="true"
+                                                      requiredMessage="#{msg['label.prevencion.tdr.campo']} '#{msg['label.gruposFaunistico']}' #{msg['label.prevencion.tdr.requerido']}."
+                                                      value="#{descripcionAreaImplantacionPmaBean.gruposFaunisticoSeleccionado}"
+                                                      layout="grid" columns="1" styleClass="tb_w50 w100 gruposFaunistico"
+                                                      converter="selectItemConverter">
+                                    <f:selectItems itemDescription="#{catalogo.ayuda}"
+                                                   var="catalogo"
+                                                   value="#{descripcionAreaImplantacionPmaBean.gruposFaunistico}" />
+                                    <p:ajax event="change" process="@this" listener="#{descripcionAreaImplantacionPmaBean.validarGruposFaunisticoSeleccionado}"
+                                            update="@(.gruposFaunistico)"></p:ajax>
+                                </p:selectManyCheckbox>
+                            </h:panelGroup>
+                            
+                             <!-- Cris F: Boton de Historico -->
+							<h:panelGrid styleClass="panel_data" columns="2"
+								columnClasses="header background-orange, null"
+								rowClasses="null, alt"
+								rendered="#{not empty descripcionAreaImplantacionPmaBean.listaGrupoFaunisticoHistorico}">
+								<h:outputText id="grupoFaunistico_historico"
+									value="Historial Grupos Faunísticos" />
+								<p:commandButton styleClass="button-small orange"
+									icon="ui-icon-search" process="@this"
+									oncomplete="PF('historicoGrupoFaunisticodlg').show()" />
+							</h:panelGrid>
+							<!-- Fin Historico -->
+							<!--Cris F: Nuevo codigo para historial --> 
+
+							<p:dialog header="Historial grupos faunísticos" widgetVar="historicoGrupoFaunisticodlg" modal="true"
+								draggable="false" resizable="false">
+								<h:form id="historicoGrupoFaunisticoform">
+
+									<p:dataTable id="tblGrupoFaunisticoHistorico" rowIndexVar="index"
+										value="#{descripcionAreaImplantacionPmaBean.listaGrupoFaunisticoHistorico}"
+										var="historico" emptyMessage="#{labels['common.table.empty']}"
+										style="overflow: auto; display:block; width: 500px">
+										<p:column headerText="Grupos faunísticos">
+											<h:outputText styleClass="alJustify"
+												value="#{historico.catalogo.descripcion}" />
+										</p:column>
+										<p:column styleClass="w20 alCenter"
+											headerText="Fecha Modificación">
+											<h:outputText value="#{historico.fechaHistorico}" >
+												<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+											</h:outputText>
+										</p:column>
+										<p:column styleClass="w20 alCenter" headerText="">
+											<h:outputText styleClass="text-orange"
+												value="#{historico.idRegistroOriginal == null ? 'Nuevo' : ''}" />
+										</p:column>
+									</p:dataTable>
+								</h:form>
+							</p:dialog>
+							<!-- Fin Historico -->
+                            
+                        </h:panelGrid>
+
+                        <p:separator  rendered="#{false and !descripcionAreaImplantacionPmaBean.otrosSectores and !descripcionAreaImplantacionPmaBean.electTelecomunicaciones and !descripcionAreaImplantacionPmaBean.saneamiento and !descripcionAreaImplantacionPmaBean.agricola and !descripcionAreaImplantacionPmaBean.pecuario and !descripcionAreaImplantacionPmaBean.agroindustria}"></p:separator>
+                        <h:panelGrid columns="3" layout="grid" styleClass="w100"
+                                     columnClasses="w30, w60"
+                                     rendered="#{false and !descripcionAreaImplantacionPmaBean.otrosSectores and !descripcionAreaImplantacionPmaBean.electTelecomunicaciones and !descripcionAreaImplantacionPmaBean.saneamiento and !descripcionAreaImplantacionPmaBean.agricola and !descripcionAreaImplantacionPmaBean.pecuario and !descripcionAreaImplantacionPmaBean.agroindustria}">
+
+                            <p:outputLabel value="#{msg['label.sensibilidadPresentadaArea']}"
+                                           for="sensibilidadPresentadaArea" />
+                            <h:panelGroup>
+                                <p:selectManyCheckbox id="sensibilidadPresentadaArea"
+                                                      required="#{!descripcionAreaImplantacionPmaBean.otrosSectores}"
+                                                      requiredMessage="#{msg['label.prevencion.tdr.campo']} '#{msg['label.sensibilidadPresentadaArea']}' #{msg['label.prevencion.tdr.requerido']}."
+                                                      value="#{descripcionAreaImplantacionPmaBean.sensibilidadPresentadaAreaSeleccionado}"
+                                                      layout="grid" columns="1" styleClass="tb_w50 w100"
+                                                      converter="selectItemConverter">
+                                    <f:selectItems itemDescription="#{catalogo.ayuda}"
+                                                   var="catalogo"
+                                                   value="#{descripcionAreaImplantacionPmaBean.sensibilidadPresentadaArea}" />
+                                </p:selectManyCheckbox>
+                            </h:panelGroup>
+                            
+                             <!-- Cris F: Boton de Historico -->
+							<h:panelGrid styleClass="panel_data" columns="2"
+								columnClasses="header background-orange, null"
+								rowClasses="null, alt"
+								rendered="#{not empty descripcionAreaImplantacionPmaBean.listaSensibilidadPresentadaAreaHistorico}">
+								<h:outputText id="sensibilidadPresentadaArea_historico"
+									value="Historial Sensibilidad Presentada el Área" />
+								<p:commandButton styleClass="button-small orange"
+									icon="ui-icon-search" process="@this"
+									oncomplete="PF('historicoSensibilidadPresentadaAreadlg').show()" />
+							</h:panelGrid>
+							<!-- Fin Historico -->
+							<!--Cris F: Nuevo codigo para historial -->  
+
+							<p:dialog header="Historial sensibilidad presentada el área" widgetVar="historicoSensibilidadPresentadaAreadlg" modal="true"
+								draggable="false" resizable="false">
+								<h:form id="historicoSensibilidadPresentadaAreaform">
+
+									<p:dataTable id="tblSensibilidadPresentadaAreaHistorico" rowIndexVar="index"
+										value="#{descripcionAreaImplantacionPmaBean.listaSensibilidadPresentadaAreaHistorico}"
+										var="historico" emptyMessage="#{labels['common.table.empty']}"
+										style="overflow: auto; display:block; width: 500px">
+										<p:column headerText="Sensibilidad presentada el Área">
+											<h:outputText styleClass="alJustify"
+												value="#{historico.catalogo.descripcion}" />
+										</p:column>
+										<p:column styleClass="w20 alCenter"
+											headerText="Fecha Modificación">
+											<h:outputText value="#{historico.fechaHistorico}" >
+												<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+											</h:outputText>
+										</p:column>
+										<p:column styleClass="w20 alCenter" headerText="">
+											<h:outputText styleClass="text-orange"
+												value="#{historico.idRegistroOriginal == null ? 'Nuevo' : ''}" />
+										</p:column>
+									</p:dataTable>
+								</h:form>
+							</p:dialog>
+							<!-- Fin Historico -->
+                            
+                        </h:panelGrid>
+
+
+
+                        <p:separator rendered="#{!descripcionAreaImplantacionPmaBean.otrosSectores and !descripcionAreaImplantacionPmaBean.electTelecomunicaciones
+						and !descripcionAreaImplantacionPmaBean.saneamientoUrbano and !descripcionAreaImplantacionPmaBean.urbano}"></p:separator>
+
+                        <h:panelGrid columns="3" layout="grid" styleClass="w100"
+                                     columnClasses="w30, w60" rendered="#{false and !descripcionAreaImplantacionPmaBean.otrosSectores and !descripcionAreaImplantacionPmaBean.electTelecomunicaciones
+						and !descripcionAreaImplantacionPmaBean.saneamientoUrbano and !descripcionAreaImplantacionPmaBean.urbano}">
+
+                            <p:outputLabel value="#{msg['label.datosEcologicosPresentes']}"
+                                           for="datosEcologicosPresentes" />
+                            <h:panelGroup>
+                                <p:selectManyCheckbox id="datosEcologicosPresentes"
+                                                      required="true"
+                                                      requiredMessage="#{msg['label.prevencion.tdr.campo']} '#{msg['label.datosEcologicosPresentes']}' #{msg['label.prevencion.tdr.requerido']}."
+                                                      value="#{descripcionAreaImplantacionPmaBean.datosEcologicosPresentesSeleccionado}"
+                                                      layout="grid" columns="1" styleClass="tb_w50 w100"
+                                                      converter="selectItemConverter">
+                                    <f:selectItems itemDescription="#{catalogo.ayuda}"
+                                                   var="catalogo"
+                                                   value="#{descripcionAreaImplantacionPmaBean.datosEcologicosPresentes}" />
+                                </p:selectManyCheckbox>
+                            </h:panelGroup>
+                            
+                            <!-- Cris F: Boton de Historico -->
+							<h:panelGrid styleClass="panel_data" columns="2"
+								columnClasses="header background-orange, null"
+								rowClasses="null, alt"
+								rendered="#{not empty descripcionAreaImplantacionPmaBean.listaDatosEcologicosPresentesHistorico}">
+								<h:outputText id="datosEcologicosPresentes_historico"
+									value="Historial Datos Ecológicos Presentes" />
+								<p:commandButton styleClass="button-small orange"
+									icon="ui-icon-search" process="@this"
+									oncomplete="PF('historicoDatosEcologicosPresentesdlg').show()" />
+							</h:panelGrid>
+							<!-- Fin Historico -->
+							<!--Cris F: Nuevo codigo para historial -->
+
+							<p:dialog header="Historial datos ecológicos presentes" widgetVar="historicoDatosEcologicosPresentesdlg" modal="true"
+								draggable="false" resizable="false">
+								<h:form id="historicoDatosEcologicosPresentesform">
+
+									<p:dataTable id="tblDatosEcologicosPresentesHistorico" rowIndexVar="index"
+										value="#{descripcionAreaImplantacionPmaBean.listaDatosEcologicosPresentesHistorico}"
+										var="historico" emptyMessage="#{labels['common.table.empty']}"
+										style="overflow: auto; display:block; width: 500px">
+										<p:column headerText="Datos ecológicos presentes">
+											<h:outputText styleClass="alJustify"
+												value="#{historico.catalogo.descripcion}" />
+										</p:column>
+										<p:column styleClass="w20 alCenter"
+											headerText="Fecha Modificación">
+											<h:outputText value="#{historico.fechaHistorico}" >
+												<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+											</h:outputText>
+										</p:column>
+										<p:column styleClass="w20 alCenter" headerText="">
+											<h:outputText styleClass="text-orange"
+												value="#{historico.idRegistroOriginal == null ? 'Nuevo' : ''}" />
+										</p:column>
+									</p:dataTable>
+								</h:form>
+							</p:dialog>
+							<!-- Fin Historico -->
+                                                        
+                        </h:panelGrid>
+
+                    </p:panelGrid>
+
+                    <br />
+
+
+                    <f:facet name="footer">
+                        <t:div styleClass="buttons main">
+                            <p:commandButton  value="Atrás"  immediate="true" process="@this" action="/prevencion/categoria2/v2/fichaAmbiental/descripcionProceso.jsf?faces-redirect=true"  icon="ui-icon-arrowthick-1-w" />
+
+                            <p:commandButton value="Guardar" update=":form"
+                                             action="#{descripcionAreaImplantacionPmaController.guardarDatos()}"
+                                             icon="ui-icon-disk" />
+ <p:commandButton  value="Siguiente"  immediate="true" process="@this" action="/prevencion/categoria2/v2/fichaAmbiental/impactoAmbientales.jsf?faces-redirect=true"  icon="ui-icon-arrowthick-1-e" />
+                        </t:div>
+                    </f:facet>
+                </p:panel>
+            </h:form>
+
+            <p:panel
+                    rendered="#{descripcionAreaImplantacionPmaBean.sectorHidrocarburos}">
+                <h2>#{msg['label.noAplica']}</h2>
+
+
+
+
+            </p:panel>
+        </div>
+
+    </ui:define>
+</ui:composition>

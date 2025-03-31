@@ -1,0 +1,136 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:controles="http://java.sun.com/jsf/composite/controles-prime"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+
+    <ui:define name="content">
+        <ui:include src="../contenido/menu.xhtml" />
+        <div class="content">
+            <h:form id="frmDatos">
+                <p:panel header="Descripción del proyecto, obra o actividad">
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="*Adjuntar Documento:"/>
+                        <p:fileUpload fileUploadListener="#{proyectoDescripcionTrabajoActividadController.handleFileUpload}" mode="advanced"
+                                      label="Seleccione" update="txtNombreAnexo"
+                                      auto="true" sizeLimit="100000" allowTypes="/(\.|\/)(pdf)$/" />                        
+                        <h:outputLabel value="Documento:" />
+                        <p:commandLink id="txtNombreAnexo"/>
+                    </h:panelGrid>
+
+                    <p:dataTable value="#{proyectoDescripcionTrabajoActividadController.proyectoDescripcionTrabajoActividadBean.listaProyectoDescripcionTrabajoActividad}" var="det">
+                        <p:column headerText="Tiene actividades">
+                            <center>
+                                <p:selectBooleanCheckbox value="#{det.determinacion!=null}" disabled="true"/>
+                            </center>
+                        </p:column>
+                        <p:column headerText="Tiene cronograma">
+                            <center>
+                                <p:selectBooleanCheckbox value="#{det.tieneCronograma}" disabled="true"/>
+                            </center>
+                        </p:column>
+                        <p:column headerText="Descripción">
+                            <center>
+                                <h:outputText value="#{det.catalogoTipoActividad.descripcion}"/>
+                            </center>
+                        </p:column>
+                        <p:column headerText="Cargar actividades">
+                            <center>
+                                <p:commandButton value="Cargar actividades" update=":#{p:component('detalle')},:#{p:component('cronograma')}" action="#{proyectoDescripcionTrabajoActividadController.cargarDetalleActividades(false)}">
+                                    <f:setPropertyActionListener value="#{det}" target="#{proyectoDescripcionTrabajoActividadController.proyectoDescripcionTrabajoActividadBean.proyectoDescripcionTrabajoActividad}"/>
+                                </p:commandButton>
+                            </center>
+                        </p:column>
+                        <p:column headerText="Cargar cronograma">
+                            <center>
+                                <p:commandButton value="Cargar cronograma" disabled="#{det.determinacion==null}" action="#{proyectoDescripcionTrabajoActividadController.cargarDetalleActividades(true)}" update=":#{p:component('cronograma')}, :#{p:component('detalle')}">
+                                    <f:setPropertyActionListener value="#{det}" target="#{proyectoDescripcionTrabajoActividadController.proyectoDescripcionTrabajoActividadBean.proyectoDescripcionTrabajoActividad}"/>
+                                </p:commandButton>
+                            </center>
+                        </p:column>
+                    </p:dataTable>
+                </p:panel>
+            </h:form>
+            <h:form>
+                <p:outputPanel id="detalle">
+                    <p:panel header="Detalle actividades" rendered="#{proyectoDescripcionTrabajoActividadController.proyectoDescripcionTrabajoActividadBean.proyectoDescripcionTrabajoActividad!=null and proyectoDescripcionTrabajoActividadController.proyectoDescripcionTrabajoActividadBean.apareceCronograma == false}">
+                        <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="" rendered="#{registroProyectoBean.mostrarUbicacionGeografica}">
+                            <f:facet name="header">
+                                <p:commandButton value="Adicionar"  styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick" action="#{proyectoDescripcionTrabajoActividadController.aniadirActividad()}" update=":#{p:component('detalle')}" rendered="#{proyectoDescripcionTrabajoActividadController.proyectoDescripcionTrabajoActividadBean.proyectoDescripcionTrabajoActividad!=null}"/>
+                                <mae:panelGridHeaderHelp value="Actividad" conector="ubicacionHelp" image="#{request.contextPath}/resources/images/proyecto-mapa.png" help="" />
+
+                            </f:facet>
+                            <h:panelGrid columns="2">
+                                <h:outputLabel value="Determinación"/>
+                                <controles:todoTextoComoIngrese identificador="txtDeterminacion" valor="#{proyectoDescripcionTrabajoActividadController.proyectoDescripcionTrabajoActividadBean.proyectoDescripcionTrabajoActividad.determinacion}" longitud="500" tamanio="30" requerido="true"/>
+                            </h:panelGrid>
+                            <br/>
+                            <p:dataTable
+                                paginator="true" rows="20" value="#{proyectoDescripcionTrabajoActividadController.proyectoDescripcionTrabajoActividadBean.listaDetalleProyectoDescripcionTrabajoActividad}"
+                                var="detalle" paginatorPosition="bottom" emptyMessage="-">
+                                <f:facet name="header">
+                                    <h:outputText value="Actividades: #{proyectoDescripcionTrabajoActividadController.proyectoDescripcionTrabajoActividadBean.proyectoDescripcionTrabajoActividad.catalogoTipoActividad.descripcion}"/>
+                                </f:facet>
+                                <p:column headerText="Acciones">
+                                    <center>
+                                        <p:commandButton icon="ui-icon-trash" title="Eliminar" action="#{proyectoDescripcionTrabajoActividadController.eliminarDetalle(detalle)}" update=":#{p:component('detalle')}"/>
+                                    </center>
+                                </p:column>
+
+                                <p:column headerText="Actividad">
+                                    <center>
+                                        <controles:todoAreaTexto identificador="txtArea" valor="#{detalle.actividad}" longitud="500" tamanio="50" requerido="true"/>
+                                    </center>
+                                </p:column>
+                            </p:dataTable>
+                        </p:panelGrid>                        
+
+                        <br/>
+                        <div class="buttons main">
+                            <p:commandButton value="Aceptar" icon="ui-icon-check" action="#{proyectoDescripcionTrabajoActividadController.guardar()}" update=":#{p:component('detalle')},:#{p:component('frmDatos')}"/>
+                            <p:commandButton value="Cancelar" styleClass="secondary" icon="ui-icon-cancel" immediate="true" action="#{proyectoDescripcionTrabajoActividadController.cancelar()}"/>
+                        </div>
+
+                    </p:panel>
+                </p:outputPanel>
+            </h:form>
+            <h:form>
+                <p:outputPanel id="cronograma">
+                    <p:panel header="Cronograma actividades" rendered="#{proyectoDescripcionTrabajoActividadController.proyectoDescripcionTrabajoActividadBean.apareceCronograma}">
+                        <p:dataTable
+                            paginator="true" rows="20" value="#{proyectoDescripcionTrabajoActividadController.proyectoDescripcionTrabajoActividadBean.listaDetalleProyectoDescripcionTrabajoActividad}"
+                            var="detalleCronograma" paginatorPosition="bottom" emptyMessage="-">
+                            <f:facet name="header">
+                                <h:outputText value="Actividades: #{proyectoDescripcionTrabajoActividadController.proyectoDescripcionTrabajoActividadBean.proyectoDescripcionTrabajoActividad.catalogoTipoActividad.descripcion}"/>
+                            </f:facet>
+                            <p:column headerText="Actividad">
+                                <center>
+                                    <h:outputText value="#{detalleCronograma.actividad}"/>
+                                </center>
+                            </p:column>
+                            <p:column headerText="Fecha inicio (mes-anio)">
+                                <center>
+                                    <controles:calendario identificador="txtFechaDesde" valor="#{detalleCronograma.fechaDesde}" patron="MM-yyyy" requerido="true"/>
+                                </center>
+                            </p:column>
+                            <p:column headerText="Fecha finalización (mes-anio)">
+                                <center>
+                                    <controles:calendario identificador="txtFechaDesde" valor="#{detalleCronograma.fechaHasta}" patron="MM-yyyy" requerido="true"/>
+                                </center>
+                            </p:column>
+                        </p:dataTable>
+                        <br/>
+                        <div class="buttons main">
+                            <p:commandButton value="Aceptar" icon="ui-icon-check" action="#{proyectoDescripcionTrabajoActividadController.guardar()}" update=":#{p:component('cronograma')},:#{p:component('frmDatos')}"/>
+                            <p:commandButton value="Cancelar" styleClass="secondary" icon="ui-icon-cancel" immediate="true" action="#{proyectoDescripcionTrabajoActividadController.cancelar()}"/>
+                        </div>
+                    </p:panel>
+                </p:outputPanel>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>

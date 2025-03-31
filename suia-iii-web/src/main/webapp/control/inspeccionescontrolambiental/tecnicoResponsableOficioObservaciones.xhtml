@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" template="/WEB-INF/templates/default-task.xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:control="http://java.sun.com/jsf/composite/controles-prime" xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+	<ui:define name="content">
+		<f:event type="preRenderView" listener="#{oficioObservacionICAController.validarTareaBpm()}" />
+		<h:form id="form">
+
+			<mae:sendFileCopy autoSave="false" entityId="#{oficioObservacionICAController.documentoICABean.oficioObservaciones.id}" className="OficioObservacionInspeccionesControlAmbiental" discriminator="tecnico" onlySystemEmail="false" />
+
+			<object id="pdf_informe" type="application/pdf" data="#{oficioObservacionICAController.documentoICABean.oficioObservaciones.oficioPath}?pfdrid_c=true" width="100%" height="500px">
+				Su navegador no soporta la visualización de pdf. Puede descargar el documento presionando el siguiente botón:
+				<p:commandButton value="Descargar" styleClass="primary" ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+					<p:fileDownload value="#{oficioObservacionICAController.documentoICABean.stream(oficioObservacionICAController.documentoICABean.oficioObservaciones.nombreReporte, oficioObservacionICAController.documentoICABean.oficioObservaciones.archivoOficio)}" />
+				</p:commandButton>
+			</object>
+
+			<br />
+			<br />
+
+			<p:fieldset legend="CUMPLIMIENTO *" toggleable="true" toggleSpeed="500" collapsed="true">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<p:inputTextarea value="#{oficioObservacionICAController.documentoICABean.oficioObservaciones.cumplimiento}" rows="4" styleClass="w100" addLine="false" autoResize="false" />
+				</p:panelGrid>
+			</p:fieldset>
+
+			<br />
+
+			<p:fieldset legend="ESTABLECIDO *" toggleable="true" toggleSpeed="500" collapsed="true">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<p:inputTextarea value="#{oficioObservacionICAController.documentoICABean.oficioObservaciones.establecido}" rows="4" styleClass="w100" addLine="false" autoResize="false" />
+				</p:panelGrid>
+			</p:fieldset>
+
+			<br />
+
+			<p:fieldset legend="OBSERVACIONES *" toggleable="true" toggleSpeed="500" collapsed="true">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<control:imputConTextoEnriquecido valor="#{oficioObservacionICAController.documentoICABean.oficioObservaciones.observaciones}" soloLectura="false" requerido="false" />
+				</p:panelGrid>
+			</p:fieldset>
+
+			<br />
+
+			<p:fieldset legend="RECOMENDACIONES" toggleable="true" toggleSpeed="500" collapsed="true">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<control:imputConTextoEnriquecido valor="#{oficioObservacionICAController.documentoICABean.oficioObservaciones.recomendaciones}" soloLectura="false" requerido="false" />
+				</p:panelGrid>
+			</p:fieldset>
+
+			<h:panelGroup id="tabOficioObservaciones">
+				<observaciones:tablaObservaciones idComponent="top" seccion="Oficio" componenteActualizarEliminar="tabOficioObservaciones" aparace="true" mostrarSiVacio="false" idClase="#{documentoICABean.solicitud.id}" nombreClase="SolicitudInspeccionControlAmbiental" soloLectura="true" />
+			</h:panelGroup>
+
+			<div class="buttons main">
+				<p:commandButton value="Atrás" update="@form" action="#{oficioObservacionICAController.guardarRegresar()}" icon="ui-icon-arrowthick-1-w" />
+				<p:commandButton value="Guardar" update="@form" actionListener="#{oficioObservacionICAController.guardar()}" icon="ui-icon-disk" />
+				<p:commandButton value="Enviar" update="@form" process="@form" action="#{oficioObservacionICAController.aceptar()}" icon="ui-icon-check">
+					<p:confirm message="#{msg['message.confirmacion.envio.tarea']}" header="#{msg['header.confirmacion.envio.tarea']}" />
+				</p:commandButton>
+				<p:commandButton value="Cancelar" action="#{oficioObservacionICAController.cancelar()}" icon="ui-icon-cancel" styleClass="secondary" process="@this">
+					<p:confirm message="#{msg['message.confirmacion.cancelacion.tarea']}" header="#{msg['header.confirmacion.cancelacion.tarea']}" />
+				</p:commandButton>
+			</div>
+
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

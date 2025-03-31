@@ -1,0 +1,221 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition
+	template="/control/aprobacionRequisitosTecnicos/templates/verArt.xhtml">
+	<ui:define name="content-art">
+		<h:form>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Sustancias químicas peligrosas" />
+				</f:facet>
+				<p:dataTable
+					value="#{sustanciaQuimicaPeligrosaController.sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteLazy}"
+					var="sustQuim" id="tablaSustanciasQuimicasPeligrosasTransporte"
+					emptyMessage="#{labels['common.table.empty']}" filterDelay="700"
+					lazy="true" rows="10" paginator="true"
+					paginatorAlwaysVisible="false" paginatorPosition="bottom">
+					<p:column
+						headerText="#{labels['label.nombre.sustancia.quimica.peligrosa']}">
+						<h:outputText
+							value="#{sustQuim.sustanciaQuimicaPeligrosa.descripcion}" />
+					</p:column>
+					<p:column headerText="#{labels['label.placa.vehiculo']}">
+						<h:outputText
+							rendered="#{empty sustQuim.requisitosVehiculo.numeroPlaca}"
+							value="N/A" />
+						<h:outputText
+							rendered="#{!empty sustQuim.requisitosVehiculo.numeroPlaca}"
+							value="#{sustQuim.requisitosVehiculo.numeroPlaca}" />
+					</p:column>
+					<p:column headerText="#{labels['label.tipo.embalaje.envases']}">
+						<h:outputText value="#{sustQuim.tipoEmbalajeEnvase}" />
+					</p:column>
+					<p:column
+						headerText="#{labels['label.clave.sustancias.quimicas.peligrosas']}">
+						<h:outputText
+							value="#{(empty sustQuim.sustanciaQuimicaPeligrosa.codigoOnu or sustQuim.sustanciaQuimicaPeligrosa.codigoOnu== '0') ? sustQuim.sustanciaQuimicaPeligrosa.numeroCas:sustQuim.sustanciaQuimicaPeligrosa.codigoOnu}" />
+					</p:column>
+					<p:column headerText="#{labels['label.provincia.origen']}">
+						<h:outputText value="#{sustQuim.provinciaOrigen.nombre}" />
+					</p:column>
+					<p:column headerText="#{labels['label.destino']}">
+						<h:outputText rendered="#{sustQuim.destinoNivelNacional}"
+							value="Nivel nacional" />
+						<p:commandButton rendered="#{!sustQuim.destinoNivelNacional}"
+							icon="ui-icon-search" title="Ver Destinos" immediate="true"
+							action="#{sustanciaQuimicaPeligrosaController.seleccionarSustanciaQuimica(sustQuim)}"
+							styleClass="button-small primary"
+							oncomplete="PF('datosDestino').show();"
+							update=":#{p:component('pngDestino')}" />
+						<h:outputText rendered="#{sustQuim.otroPais}" value="N/A" />
+
+					</p:column>
+					<p:column headerText="#{labels['label.otro.pais']}">
+						<h:outputText
+							value="#{!empty sustQuim.pais ? sustQuim.pais : 'N/A'}" />
+					</p:column>
+					<p:column styleClass="w40px alCenter">
+						<p:commandButton icon="ui-icon-search"
+							action="#{sustanciaQuimicaPeligrosaController.seleccionarSustanciaQuimicaVer(sustQuim)}"
+							title="Ver" styleClass="button-small primary"
+							oncomplete="PF('agregarSustQuimPeligTrans').show();"
+							update=":#{p:component('agregarSustQuimPeligTrans')}" />
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+			<div class="buttons main">
+				<p:commandButton value="Atrás" immediate="true" process="@this"
+					action="/control/aprobacionRequisitosTecnicos/requisitosConductorVer.jsf?faces-redirect=true"
+					icon="ui-icon-arrowthick-1-w" />
+				<p:commandButton value="Siguiente" immediate="true" process="@this"
+					action="#{sustanciaQuimicaPeligrosaController.recuparPaginaSiguiente(true)}"
+					rendered="#{sustanciaQuimicaPeligrosaController.isVisibleOpcionNavegarSiguienteEnMenuModoVer(true)}"
+					icon="ui-icon-arrowthick-1-e" />
+			</div>
+		</h:form>
+		<p:dialog header="#{labels['label.sustancias.quimicas.peligrosas']}"
+			id="agregarSustQuimPeligTrans" widgetVar="agregarSustQuimPeligTrans"
+			modal="true" resizable="false" height="auto" width="700">
+			<h:form id="form">
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					columnClasses="w50, field_mrg w50">
+					<f:facet name="header">
+						<h:outputText value="Detalles de la sustancia" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText
+							value="#{labels['label.nombre.sustancia.quimica.peligrosa']}" />
+						<h:outputText
+							value="#{sustanciaQuimicaPeligrosaController.sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.sustanciaQuimicaPeligrosa.descripcion}" />
+						<h:outputText value="#{labels['label.tipo.embalaje.envases']}" />
+						<h:outputText
+							value="#{sustanciaQuimicaPeligrosaController.sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.tipoEmbalajeEnvase}" />
+						<h:outputText
+							value="#{labels['label.clave.sustancias.quimicas.peligrosas']}" />
+						<h:outputText
+							value="#{(empty sustanciaQuimicaPeligrosaController.sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.sustanciaQuimicaPeligrosa.codigoOnu or sustanciaQuimicaPeligrosaController.sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.sustanciaQuimicaPeligrosa.codigoOnu== '0') ? sustanciaQuimicaPeligrosaController.sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.sustanciaQuimicaPeligrosa.numeroCas:sustanciaQuimicaPeligrosaController.sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.sustanciaQuimicaPeligrosa.codigoOnu}" />
+						<h:outputText value="#{labels['label.provincia.origen']}" />
+						<h:outputText
+							value="#{sustanciaQuimicaPeligrosaController.sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.provinciaOrigen.nombre}" />
+					</h:panelGrid>
+				</p:panelGrid>
+				<p:panelGrid columns="2" layout="grid" styleClass="w100"
+					rendered="#{!empty sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.requisitosVehiculo.numeroPlaca}"
+					columnClasses="w50, field_mrg w50">
+					<f:facet name="header">
+						<h:outputText value="Datos del vehiculo" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+						id="datosVehiculo" columnClasses="header, null"
+						rowClasses="null, alt">
+						<h:outputText value="#{labels['label.numero.placa']}" />
+						<h:outputText
+							value="#{sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.requisitosVehiculo.numeroPlaca}" />
+						<h:outputText value="#{labels['label.numero.motor']}" />
+						<h:outputText
+							value="#{sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.requisitosVehiculo.numeroMotor}" />
+						<h:outputText value="#{labels['label.numero.chasis']}" />
+						<h:outputText
+							value="#{sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.requisitosVehiculo.numeroChasis}" />
+						<h:outputText value="#{labels['label.clase.vehiculo']}" />
+						<h:outputText
+							value="#{sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.requisitosVehiculo.clase}"
+							styleClass="w100" />
+						<h:outputText value="#{labels['label.tipo.vehiculo']}" />
+						<h:outputText
+							value="#{sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.requisitosVehiculo.tipo}" />
+					</h:panelGrid>
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="#{labels['label.anio.fabricacion']}" />
+						<h:outputText
+							value="#{sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.requisitosVehiculo.anioFabriacacion}" />
+						<h:outputText value="#{labels['label.cilindraje']}" />
+						<h:outputText
+							value="#{sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.requisitosVehiculo.cilindraje}" />
+						<h:outputText value="#{labels['label.capacidad.transporte']}" />
+						<h:outputText
+							value="#{sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.requisitosVehiculo.capacidadTransporte}" />
+						<h:outputText value="#{labels['label.peso.bruto.vehicular']}" />
+						<h:outputText
+							value="#{sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.requisitosVehiculo.pesoBrutoVehicular}" />
+					</h:panelGrid>
+				</p:panelGrid>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					rendered="#{!empty sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.sustanciasUbicacion}"
+					columnClasses="w50, field_mrg w50">
+					<f:facet name="header">
+						<h:outputText value="Destino de sustancia" />
+					</f:facet>
+					<h:panelGrid
+						rendered="#{sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.otroPais}"
+						styleClass="panel_data w100" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="#{labels['label.destino']}" />
+						<p:inputText id="otroPais"
+							value="#{sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.pais}"
+							styleClass="w100" style="width: 252px" />
+					</h:panelGrid>
+					<p:panelGrid id="pnlAgregarDesecho" columns="1" layout="grid"
+						styleClass="w100"
+						rendered="#{!sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.otroPais}">
+						<p:dataTable id="tblDestinos"
+							emptyMessage="#{labels['common.table.empty']}"
+							value="#{sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporteVer.sustanciasUbicacion}"
+							var="varDestinos">
+							<p:column headerText="#{labels['label.provincia.destino']}">
+								<h:outputText
+									value="#{varDestinos.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+							</p:column>
+							<p:column headerText="#{labels['label.canton.destino']}">
+								<h:outputText
+									value="#{varDestinos.ubicacionesGeografica.nombre}" />
+							</p:column>
+						</p:dataTable>
+					</p:panelGrid>
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton value="Cerrar"
+						onclick="PF('agregarDesPelTrans').hide()" />
+				</div>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="#{labels['label.destino']}" id="dlDestino"
+			widgetVar="datosDestino" modal="true" resizable="false" width="600">
+			<h:form>
+				<p:panel>
+					<h:panelGroup id="pngDestino">
+
+						<p:dataTable id="tblDestino"
+							emptyMessage="#{labels['common.table.empty']}"
+							value="#{sustanciaQuimicaPeligrosaBean.sustanciaQuimicaPeligrosaTransporte.sustanciasUbicacion}"
+							var="destinos">
+							<p:column headerText="#{labels['label.provincia.destino']}">
+								<h:outputText
+									value="#{destinos.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+							</p:column>
+							<p:column headerText="#{labels['label.canton.destino']}">
+								<h:outputText value="#{destinos.ubicacionesGeografica.nombre}" />
+							</p:column>
+						</p:dataTable>
+					</h:panelGroup>
+				</p:panel>
+				<div class="buttons">
+					<p:commandButton value="Cerrar" onclick="PF('datosDestino').hide()" />
+				</div>
+			</h:form>
+		</p:dialog>
+	</ui:define>
+</ui:composition>
+</html>

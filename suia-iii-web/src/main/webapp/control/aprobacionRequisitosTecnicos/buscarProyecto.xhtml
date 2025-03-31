@@ -1,0 +1,104 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+	<ui:define name="content">
+		<h:form id="form">
+
+			<p:panel id="panelBuscar"
+				rendered="#{buscarProyectoController.habilitarPanelBusqueda}">
+				<f:facet name="header">
+					<h:outputText value="#{labels['label.buscar.proyecto']}" />
+					<p:separator />
+						<h:outputText styleClass="w100 text-red bold" value="#{labels['msg.informacion.informativoProcesoVoluntario']}"/>
+					<p:separator />
+				</f:facet>
+				
+				<h:panelGrid styleClass="w100" columns="2"
+					columnClasses="w50, field_mrg" id="filtroContainer">
+					<p:outputLabel for="filtro" value="Código de proyecto"
+						styleClass="bold" />
+					<h:outputText />
+					<p:inputText id="filtro"
+						value="#{buscarProyectoController.codigoTramite}"
+						styleClass="w100" />
+					<h:panelGroup>
+						<div class="buttons-inline">
+							<p:commandButton id="filterButton" value="Validar"
+								icon="ui-icon-check" styleClass="primary" process="@this filtro"
+								actionListener="#{buscarProyectoController.validarCodigo}"
+								update=":#{p:component('form')}" />
+						</div>
+					</h:panelGroup>
+				</h:panelGrid>
+			</p:panel>
+
+			<mae-components:readOnly>
+				<p:panel columns="1" layout="grid" styleClass="mw100"
+					columnClasses="w100, field_mrg w100"
+					rendered="#{buscarProyectoController.habilitaPanelProyectoEncontrado}">
+					<h:panelGrid styleClass="panel_data w100" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="Nombre proyecto" />
+						<h:outputText id="itproy"
+							value="#{buscarProyectoController.proyecto.nombre}" />
+						<h:outputText value="Fecha registro proyecto" />
+						<h:outputText id="itfec"
+							value="#{buscarProyectoController.proyecto.registro}">
+							<f:convertDateTime pattern="dd/MM/yyyy" />
+						</h:outputText>
+						<h:outputText value="Tipo permiso ambiental" />
+						<h:outputText id="itsec" 
+    					value="#{(buscarProyectoController.proyecto.categoria == '3' || buscarProyectoController.proyecto.categoria == '4' ? 'Licencia Ambiental' : 'Sin registro')}" />
+						<h:outputText value="Finalizado" />
+						<h:outputText id="itfinal" 
+    						value="#{buscarProyectoController.proyecto.finalizado == 'true' ? 'Finalizado' : 'En curso'}" />
+						<h:outputText value="Estado del proyecto" />
+						<h:outputText id="itestado" 
+    						value="#{buscarProyectoController.proyecto.estado == 'true' ? 'Activo' : 'Desactivado'}" />
+					</h:panelGrid>
+				</p:panel>
+			</mae-components:readOnly>
+			<div class="buttons main">
+				<p:commandButton value="#{labels['label.iniciar.proceso']}"
+					id="btn_iniciarProceso" update=":#{p:component('form')}"
+					action="#{buscarProyectoController.iniciarProceso}"
+					icon="ui-icon-triangle-1-e"
+					disabled="#{!buscarProyectoController.habilitarInicioProceso}"
+					rendered="#{buscarProyectoController.habilitaPanelProyectoEncontrado}" />
+			</div>
+			
+			<p:dialog id="dlContinuar" widgetVar="continuarDialog" modal="true"
+				closable="false" showEffect="fade" hideEffect="fade"
+				resizable="false">
+				<f:facet name="header">Informaci&oacute;n</f:facet>
+				<p:panel>
+					<h:panelGrid columns="1" styleClass="w100">
+						<p:outputLabel value="#{buscarProyectoController.mensaje}" />
+						<p:panelGrid
+							rendered="#{buscarProyectoController.pathImagen !=null }">
+							<img id="mensaje_img"
+								style="display: block; margin: 0 auto 0 auto;"
+								src="#{request.contextPath}#{buscarProyectoController.pathImagen}"  alt=""/>
+						</p:panelGrid>
+					</h:panelGrid>
+					<p:spacer />
+					<div class="buttons">
+						<p:commandButton value="Aceptar" styleClass="primary"
+							action="#{buscarProyectoController.continuar()}"
+							oncomplete="PF('continuarDialog').hide();" />
+					</div>
+				</p:panel>
+			</p:dialog>
+			
+			</h:form>
+	</ui:define>
+</ui:composition>

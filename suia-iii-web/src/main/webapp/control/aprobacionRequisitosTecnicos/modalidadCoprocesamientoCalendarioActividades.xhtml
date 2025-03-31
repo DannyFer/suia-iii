@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	template="/control/aprobacionRequisitosTecnicos/templates/defaultTemplate.xhtml">
+	<ui:define name="content-art">
+		<h:form id="form">
+			<p:panel header="#{labels['label.calendario.actividades']}">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Actividades" />
+						<p:commandButton value="Adicionar"
+							styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg"
+							icon="ui-icon-plusthick"
+							oncomplete="PF('agregarActividadCalendarioWdgt').show();"
+							update=":#{p:component('datosGenerales')}" />
+					</f:facet>
+					<p:dataTable
+						value="#{calendarioModalidadCoprocesamientoController.modalidadCoprocesamientoBean.calendario}"
+						var="actividadCal" id="tablaCalendario"
+						emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="Actividad" styleClass="w60">
+							<h:outputText value="#{actividadCal.actividad.actividad}" />
+						</p:column>
+						<p:column headerText="Inicio" styleClass="w15 alCenter">
+							<h:outputText value="#{actividadCal.fechaInicio}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+						</p:column>
+						<p:column headerText="Fin" styleClass="w15 alCenter">
+							<h:outputText value="#{actividadCal.fechaFin}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton icon="ui-icon-pencil"
+								action="#{calendarioModalidadCoprocesamientoController.seleccionarActividadCalendario(actividadCal)}"
+								styleClass="button-small primary"
+								update=":#{p:component('tablaCalendario')}, :#{p:component('formDlg')}"
+								oncomplete="PF('agregarActividadCalendarioWdgt').show();" />
+							<p:commandButton icon="ui-icon-trash"
+								styleClass="button-small primary"
+								action="#{calendarioModalidadCoprocesamientoController.eliminarActividadCalendario(actividadCal)}"
+								update=":#{p:component('tablaCalendario')}" />
+						</p:column>
+					</p:dataTable>
+					<p:panelGrid styleClass="w100" columns="1" layout="grid"
+						columnClasses="w100, field_mrg">
+						<f:facet name="header">
+							<h:outputText value="#{labels['label.nota.informativa']}" />
+							<p:commandButton
+								value="Descargar plantilla Modalidad cooprocesamiento"
+								styleClass="button-small-text toRight field_mrg"
+								icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true">
+								<p:fileDownload
+									value="#{calendarioModalidadCoprocesamientoController.plantillaModalidad}" />
+							</p:commandButton>
+						</f:facet>
+						<h:outputText value="#{helps['art.coprocesamiento.calendario']}"
+							escape="false" styleClass="alJustify" />
+					</p:panelGrid>
+				</p:panelGrid>
+			</p:panel>
+			<t:div styleClass="buttons main">
+				<p:commandButton value="#{labels['label.atras']}" immediate="true"
+					process="@this"
+					action="/control/aprobacionRequisitosTecnicos/modalidadCoprocesamiento.jsf?faces-redirect=true"
+					icon="ui-icon-arrowthick-1-w" />
+				<p:commandButton value="#{labels['label.guardar']}"
+					oncomplete="window.scrollTo(0,120);"
+					action="#{calendarioModalidadCoprocesamientoController.guardarPagina()}"
+					icon="ui-icon-disk" update="@form" />
+				<p:commandButton value="#{labels['label.siguiente']}"
+					immediate="true" process="@this"
+					action="#{aprobacionRequisitosTecnicosController.recuperarPageSiguiente(5,false,false)}"
+					icon="ui-icon-arrowthick-1-e" />
+			</t:div>
+		</h:form>
+		<p:dialog header="Agregar actividad"
+			id="agregarActividadCalendarioDlg"
+			widgetVar="agregarActividadCalendarioWdgt" modal="true"
+			resizable="false" width="450">
+			<h:form id="formDlg">
+				<h:panelGroup id="datosGenerales">
+					<h:panelGrid id="pnlActividad" columns="1" styleClass="w100">
+						<p:outputLabel for="activityCb" value="Actividad" />
+						<p:selectOneMenu id="activityCb" converter="selectItemConverter"
+							required="true"
+							value="#{calendarioModalidadCoprocesamientoController.modalidadCoprocesamientoBean.actividadSeleccionada}"
+							styleClass="w100">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}"
+								itemValue="" noSelectionOption="true" />
+							<f:selectItems
+								value="#{calendarioModalidadCoprocesamientoController.modalidadCoprocesamientoBean.actividadesProtocolo}"
+								var="actividad" itemLabel="#{actividad.actividad}"
+								itemValue="#{actividad}" />
+						</p:selectOneMenu>
+						<h:panelGrid columns="2" styleClass="w100"
+							columnClasses="w50, field_mrg w50">
+							<p:outputLabel for="startDate"
+								value="#{labels['label.fecha.inicio']}" />
+							<p:outputLabel for="endtDate"
+								value="#{labels['label.fecha.fin']}" />
+							<p:calendar id="startDate" required="true"
+								value="#{calendarioModalidadCoprocesamientoController.modalidadCoprocesamientoBean.fechaInicio}"
+								styleClass="w15">
+								<p:ajax event="dateSelect" update="endtDate" />
+							</p:calendar>
+							<p:calendar id="endtDate" required="true"
+								value="#{calendarioModalidadCoprocesamientoController.modalidadCoprocesamientoBean.fechaFin}"
+								styleClass="w15">
+								<f:attribute name="startDate"
+									value="#{calendarioModalidadCoprocesamientoController.modalidadCoprocesamientoBean.fechaInicio}" />
+								<f:validator validatorId="dateRangeValidator" />
+							</p:calendar>
+						</h:panelGrid>
+					</h:panelGrid>
+				</h:panelGroup>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton styleClass="buttonAceptar" value="Aceptar"
+						update=":form:tablaCalendario,:formDlg:datosGenerales"
+						process="@this :formDlg:datosGenerales"
+						action="#{calendarioModalidadCoprocesamientoController.guardarActividadCalendario()}"
+						oncomplete=" if (args.validationFailed || !args.actividadIn) { }else { PF('agregarActividadCalendarioWdgt').hide(); }" />
+				</div>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog header="Importante" id="importanteDlg"
+				  widgetVar="importantWdgt" modal="true" resizable="false" width="300"
+				  closable="false">
+			<h:outputText
+					value="Usted debe llenar antes la sección" />
+			<ul class="error alLeft text-red ">
+				<li><h:outputLink class="text-red "
+								  value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/modalidadCoprocesamiento.jsf">
+					<h:outputText
+							value="Modalidad coprocesamiento" />
+				</h:outputLink></li>
+			</ul>
+		</p:dialog>
+	</ui:define>
+</ui:composition>

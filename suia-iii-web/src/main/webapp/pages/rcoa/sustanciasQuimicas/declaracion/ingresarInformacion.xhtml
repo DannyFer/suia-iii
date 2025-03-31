@@ -1,0 +1,360 @@
+<ui:composition template="/WEB-INF/templates/default-task-drsq.xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+	<ui:define name="context-extra">
+		<h:outputText value="Código RSQ" />
+		<h:outputText value="#{declaracionIngresarInfoRSQController.declaracionSustanciaQuimica.registroSustanciaQuimica.numeroAplicacion}"  />
+		<h:outputLink value="../ingresarInformacionRSQ.jsf" target="_blank">
+			<p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search" rendered="#{!declaracionIngresarInfoRSQController.habilitarDescargar}"/>
+			
+			<p:commandButton ajax="false"
+							icon="ui-icon-arrowthick-1-s" styleClass="button-small primary"
+							immediate="true" rendered="#{declaracionIngresarInfoRSQController.habilitarDescargar}">
+							<p:fileDownload
+								value="#{declaracionIngresarInfoRSQController.descargarDocumento()}"/>
+						</p:commandButton>		
+		</h:outputLink>	
+		<h:outputText value="Trámite" />
+		<h:outputText value="#{declaracionIngresarInfoRSQController.declaracionSustanciaQuimica.tramite}"  />
+	</ui:define>
+	<ui:define name="content">
+
+	<style type="text/css">
+.ui-col-top {
+	vertical-align: top;
+}
+
+.btnsHelp .ui-button .ui-icon {
+	background-image: url("/suia-iii/javax.faces.resource/images/ui-icons_222222_256x240.png.jsf?ln=primefaces-suia");
+}
+
+.btnsHelp .ui-button {
+	margin-left: 8px !important;
+}
+</style>
+
+		<h:form id="form" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }">
+		
+		<p:panel styleClass="separatorTop colapsablePanelStandard"  toggleable="false" rendered="false">
+			<f:facet name="header">
+				<h:outputText value="Contexto de la Actividad" />
+			</f:facet>
+			<p:ajax global="false" event="toggle" />
+
+			<h:panelGrid id="pnlContextoMainDefaulTask" columns="3" styleClass="mw50 panel_data" columnClasses="header w25, null, alCenter w20px" rowClasses="null, alt">
+				<h:outputText value="Actividad" />
+				<h:outputText value="Ingresar Información" styleClass="bold" />
+				<h:outputText />
+				<h:outputText value="Flujo" />
+				<h:outputText value="Declaración de Sustancias Químicas" />
+				<h:outputText />
+				
+				<h:outputText value="Operador" />
+				<h:outputText value="#{declaracionIngresarInfoRSQController.nombreRazonSocial}"  />
+				<h:outputText />
+				<h:outputText value="Código RSQ" />
+				<h:outputText value="#{declaracionIngresarInfoRSQController.declaracionSustanciaQuimica.registroSustanciaQuimica.numeroAplicacion}"  />
+				<h:outputText />							
+			</h:panelGrid>
+		</p:panel>
+			
+			<p:panelGrid columns="1" layout="grid" styleClass="w100 alCenter">
+				<f:facet name="header">
+					<h:outputText value="Datos de la Declaración de Movimientos de Sustancias Químicas"/>		
+				</f:facet>
+
+				<h:panelGrid id="pnlDecl" columns="2" layout="grid" styleClass="w100 alCenter"  columnClasses="w50,w50 ui-col-top">
+					<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null">
+						<h:outputText value="Operador *" />
+						<p:outputLabel id="operador" value="#{declaracionIngresarInfoRSQController.nombreRazonSocial}" maxlength="1"
+							required="true" requiredMessage="Operador es requerido" 						
+							disabled="#{true}" />
+						
+						<h:outputText value="Año *" />
+						<p:outputLabel id="anio"
+							value="#{declaracionIngresarInfoRSQController.declaracionSustanciaQuimica.anioDeclaracion}"
+							maxlength="1" required="true" requiredMessage="Año es requerido" />
+
+						<h:outputText value="Mes *" />
+						<p:outputLabel id="mes" value="#{declaracionIngresarInfoRSQController.mesNombre}" maxlength="1"
+							required="true" requiredMessage="Mes es requerido" />
+															
+						<h:outputText value="Sustancias *" />
+						<p:selectOneMenu id="sustancias"
+							styleClass="w100" required="true" requiredMessage="Sustancias es requerido" converter="selectItemConverter"
+							value="#{declaracionIngresarInfoRSQController.declaracionSustanciaQuimica.sustanciaQuimica}"
+							disabled="#{declaracionIngresarInfoRSQController.desHabilitarSustancias}">
+							<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+							<f:selectItems value="#{declaracionIngresarInfoRSQController.sustanciasRsq}" var="item" itemLabel="#{descripcion}" itemValue="#{item}"/>
+							<p:ajax update="unidad pnlDecl" />								
+						</p:selectOneMenu>
+							
+						<h:outputText value="Unidad *" />
+						<p:outputLabel id="unidad" value="kg" maxlength="1"
+							required="true" requiredMessage="Unidad es requerido"/>
+
+					</p:panelGrid>
+
+					<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w30,null">
+						<h:outputText value="Cantidad de Inicio *" />
+						<p:outputLabel id="cantidadInicio" value="#{declaracionIngresarInfoRSQController.declaracionSustanciaQuimica.cantidadInicio}" />
+							
+						<h:outputText value="Cantidad de Fin *" />
+						<p:outputLabel id="cantidadFin" value="#{declaracionIngresarInfoRSQController.declaracionSustanciaQuimica.cantidadFin}" />
+
+					</p:panelGrid>
+				</h:panelGrid>
+
+			</p:panelGrid>
+			
+			<p:panelGrid columns="1" layout="grid" styleClass="w100 alCenter">
+				<f:facet name="header">
+					<h:outputText value="Movimientos"/>		
+				</f:facet>
+
+				<p:panelGrid id="pnlMovimiento" columns="4" styleClass="panel_data w100" columnClasses="header w25,w25,header w25,w25"
+				rendered="#{declaracionIngresarInfoRSQController.habilitarIngresoDatos}">
+					<h:outputText value="Tipo de transacción *" />
+					<p:selectOneMenu id="tipoTransaccion"
+						styleClass="w100" required="true" requiredMessage="Tipo de transacción es requerido" converter="selectItemConverter" 
+						value="#{declaracionIngresarInfoRSQController.movimientoDeclaracionRSQ.tipoMovimiento}" >
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{declaracionIngresarInfoRSQController.listaTipoTransaccion}" var="item" itemLabel="#{item.nombre}" itemValue="#{item}"/>
+						<p:ajax listener="#{declaracionIngresarInfoRSQController.tipoTransaccionListener()}" update="pnlMovimiento btnAgregar pnlFactura operadorTransaccion"/>								
+					</p:selectOneMenu>	
+										
+					<h:panelGroup styleClass="btnsHelp">
+						<h:outputText value="Ingresos *" />
+						<mae:panelGridHeaderHelp value="" conector="resumenHelp" 
+									help="Se puede ingresar 7 números enteros y dos decimales" width="450px" />
+					</h:panelGroup>
+					<pe:inputNumber id="txtValorIngreso" value="#{declaracionIngresarInfoRSQController.movimientoDeclaracionRSQ.valorIngreso}" 
+					thousandSeparator="" maxValue="9999999.99" required="true" requiredMessage="Ingresos es requerido"
+					disabled="#{!declaracionIngresarInfoRSQController.habilitarIngreso}" autocomplete="off"  >
+						<p:ajax process="@this" />
+					</pe:inputNumber>
+						
+					<h:panelGroup styleClass="btnsHelp" id="pnlFactura">
+						<h:outputText value="Número de Factura *" 
+						rendered="#{declaracionIngresarInfoRSQController.movimientoDeclaracionRSQ.tipoMovimiento eq null or declaracionIngresarInfoRSQController.movimientoDeclaracionRSQ.tipoMovimiento.orden ne declaracionIngresarInfoRSQController.ordenImportacion}"/>
+						
+						<h:outputText value="Número de oficio de autorización *" 
+						rendered="#{declaracionIngresarInfoRSQController.movimientoDeclaracionRSQ.tipoMovimiento.orden 
+						eq declaracionIngresarInfoRSQController.ordenImportacion}"/>
+						<mae:panelGridHeaderHelp value="" conector="resumenHelp" 
+									help="Se debe colocar el número completo de la factura incluyendo sus guiones. Ejemplo: 0001-2020-000029, 
+									Para importaciones se debe colocar el número de oficio de aprobación emitido por esta Cartera de Estado " 
+									width="450px" />
+					</h:panelGroup>
+					<p:inputText id="numeroFactura" maxlength="20"
+						required="true" requiredMessage="Número de Factura es requerido"  
+						value="#{declaracionIngresarInfoRSQController.movimientoDeclaracionRSQ.numeroFactura}" 
+						disabled="#{!declaracionIngresarInfoRSQController.habilitarRegistroMov}" onkeypress="return numbersonlyf(this, event);"
+						rendered="#{declaracionIngresarInfoRSQController.movimientoDeclaracionRSQ.tipoMovimiento eq null or declaracionIngresarInfoRSQController.movimientoDeclaracionRSQ.tipoMovimiento.orden ne declaracionIngresarInfoRSQController.ordenImportacion}">
+						<p:ajax process="@this"/>	
+						
+					</p:inputText>
+					
+					<p:selectOneMenu id="tipoImportacion"
+						styleClass="w100" required="true" requiredMessage="Número de oficio de autorización es requerido" converter="selectItemConverter" 
+						value="#{declaracionIngresarInfoRSQController.movimientoDeclaracionRSQ.solicitudImportacion}" 
+						rendered="#{declaracionIngresarInfoRSQController.movimientoDeclaracionRSQ.tipoMovimiento.orden 
+						eq declaracionIngresarInfoRSQController.ordenImportacion}">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{declaracionIngresarInfoRSQController.listaAutorizacionesImps}" var="item" itemLabel="#{item.numeroDocumentoAutorizacion}" itemValue="#{item}"/>
+						<p:ajax process="@this" listener="#{declaracionIngresarInfoRSQController.cargarInformacionImportacion()}" update="txtValorIngreso"/>								
+					</p:selectOneMenu>	
+											
+						
+					<h:panelGroup styleClass="btnsHelp">
+						<h:outputText value="Egresos *" />
+						<mae:panelGridHeaderHelp value="" conector="resumenHelp" 
+									help="Se puede ingresar 7 números enteros y dos decimales" width="450px" />
+					</h:panelGroup>
+					<pe:inputNumber value="#{declaracionIngresarInfoRSQController.movimientoDeclaracionRSQ.valorEgreso}" 
+					thousandSeparator="" maxValue="9999999.99" required="true" requiredMessage="Egresos es requerido" 
+					disabled="#{!declaracionIngresarInfoRSQController.habilitarEgreso}" autocomplete="off" >
+						<p:ajax process="@this" />
+					</pe:inputNumber>
+
+					<h:outputText
+						value="Operador con el cual se realizó la Transacción *"
+						rendered="#{declaracionIngresarInfoRSQController.mostrarOperador}" />
+					<p:selectOneMenu id="operadorTransaccion" styleClass="w100"
+						required="true"
+						requiredMessage="Operador con la que se realizó la Transacción es requerido"
+						converter="selectItemConverter"
+						rendered="#{declaracionIngresarInfoRSQController.mostrarOperador}"
+						value="#{declaracionIngresarInfoRSQController.operadorTransaccion}"
+						disabled="#{!declaracionIngresarInfoRSQController.habilitarRegistroMov}"
+						filter="true" filterMatchMode="contains" var="t">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+						<f:selectItems
+							value="#{declaracionIngresarInfoRSQController.listaRegistrosOperadores}"
+							var="item"
+							itemLabel="#{item.codigoRSQ} - #{item.nombreOperador}"
+							itemValue="#{item}" />
+						<p:column>
+							<h:outputText value="#{t.codigoRSQ}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{t.nombreOperador}" />
+						</p:column>
+
+						<p:ajax process="@this" />
+					</p:selectOneMenu>
+
+					<h:outputText value="Presentación *" />
+					<p:selectOneMenu id="presentacion"
+						styleClass="w100" required="true" requiredMessage="Presentación es requerido" converter="selectItemConverter"
+						value="#{declaracionIngresarInfoRSQController.movimientoDeclaracionRSQ.tipoPresentacion}" 
+						disabled="#{!declaracionIngresarInfoRSQController.habilitarRegistroMov}">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{declaracionIngresarInfoRSQController.listaTipoPresentacion}" var="item" itemLabel="#{item.nombre}" itemValue="#{item}"/>
+						<p:ajax update="pnlMovimiento" />								
+					</p:selectOneMenu>		
+
+					<h:outputText value="Otra Presentación *" rendered="#{declaracionIngresarInfoRSQController.movimientoDeclaracionRSQ.tipoPresentacion.orden eq declaracionIngresarInfoRSQController.ordenOtraPresentacion}" />
+					<p:inputText id="otraPresentacion" maxlength="100"
+						required="true" requiredMessage="Otra Presentación es requerido"
+						value="#{declaracionIngresarInfoRSQController.movimientoDeclaracionRSQ.opcionPresentacion}" 
+						rendered="#{declaracionIngresarInfoRSQController.movimientoDeclaracionRSQ.tipoPresentacion.orden eq declaracionIngresarInfoRSQController.ordenOtraPresentacion}" />
+						
+					<h:outputText value="Cantidad de Envases *" />
+					<pe:inputNumber id="cantidadEnvases"  thousandSeparator="" maxValue="99999" autocomplete="off"
+						required="true" requiredMessage="Cantidad de Envases es requerido"  decimalPlaces="0"
+						value="#{declaracionIngresarInfoRSQController.movimientoDeclaracionRSQ.cantidadEnvases}"
+						disabled="#{!declaracionIngresarInfoRSQController.habilitarRegistroMov}">
+						<p:ajax process="@this" />
+					</pe:inputNumber>
+						
+					<h:outputText value="Número Serie Envases" />
+					<p:inputText id="serieEnvases" maxlength="20"
+						value="#{declaracionIngresarInfoRSQController.movimientoDeclaracionRSQ.numeroSerieEnvases}" 
+						disabled="#{!declaracionIngresarInfoRSQController.habilitarRegistroMov}">
+						<p:ajax process="@this" />
+					</p:inputText>
+						
+					<h:panelGroup styleClass="btnsHelp" rendered="#{declaracionIngresarInfoRSQController.movimientoDeclaracionRSQ.tipoMovimiento.orden eq declaracionIngresarInfoRSQController.ordenConsumo}">
+						<h:outputText value="Producto Terminado *"  />
+						<mae:panelGridHeaderHelp value="" conector="resumenHelp" 
+									help="Se debe detallar brevemente el producto que se obtiene al final del proceso donde se utiliza la sustancia química. Ejemplo: oro, objetos galvanizados, joyería, etc." width="450px" />
+					</h:panelGroup>
+					<p:inputText id="producto" maxlength="20"
+						required="true" requiredMessage="Producto Termindo es requerido"
+						value="#{declaracionIngresarInfoRSQController.movimientoDeclaracionRSQ.productoTerminado}"
+						rendered="#{declaracionIngresarInfoRSQController.movimientoDeclaracionRSQ.tipoMovimiento.orden eq declaracionIngresarInfoRSQController.ordenConsumo}" >
+						<p:ajax process="@this" />
+					</p:inputText>		
+
+				</p:panelGrid>
+				
+				<div class="buttons main">				
+				
+				<p:commandButton id="btnAgregar" value="Aceptar" icon="ui-icon-check"
+					styleClass="primary"
+					action="#{declaracionIngresarInfoRSQController.agregarMovimiento}"
+					update="@form"
+					rendered="#{declaracionIngresarInfoRSQController.habilitarIngresoDatos}"
+					disabled="#{!declaracionIngresarInfoRSQController.habilitarAgregarMov}"/>				
+				<p:commandButton value="Limpiar" icon="ui-icon-trash"
+					action="#{declaracionIngresarInfoRSQController.crearMovimiento}"
+					styleClass="secondary" 					
+					process="@this" 
+					update="@form"
+					rendered="#{declaracionIngresarInfoRSQController.habilitarIngresoDatos}"
+					immediate="true"/>
+				</div>
+				
+				<p:dataTable id="movimientosTable" value="#{declaracionIngresarInfoRSQController.movimientoDeclaracionRSQLista}" var="item"
+	 				emptyMessage="#{labels['common.table.empty']}" lazy="true">
+		
+					<p:column headerText="Número" styleClass="alCenter">
+						<h:outputText value="#{1 + declaracionIngresarInfoRSQController.movimientoDeclaracionRSQLista.indexOf(item)}"/>
+					</p:column>
+					
+					<p:column headerText="Transacción" styleClass="alCenter">
+						<h:outputText value="#{item.tipoMovimiento.nombre}"/>
+					</p:column>
+					
+					<p:column headerText="Factura/Oficio de autorización" styleClass="alCenter">
+						<h:outputText value="#{item.numeroFactura eq null ? item.solicitudImportacion.numeroDocumentoAutorizacion : item.numeroFactura}"/>
+					</p:column>
+					
+					<p:column headerText="Operador Transacción" styleClass="alCenter">
+						<h:outputText value="#{declaracionIngresarInfoRSQController.operadorListener(item.operador, item)}"/> 
+					</p:column>
+					
+					<p:column headerText="Ingresos" styleClass="alCenter">
+						<h:outputText value="#{item.valorIngreso}"/>
+					</p:column>
+					
+					<p:column headerText="Egresos" styleClass="alCenter">
+						<h:outputText value="#{item.valorEgreso}"/>
+					</p:column>
+					
+					<p:column headerText="Acciones" styleClass="alCenter" rendered="#{declaracionIngresarInfoRSQController.habilitarIngresoDatos}">
+						<center>
+						
+						<p:commandButton icon="ui-icon-pencil" title="Modificar"
+							process="@this" styleClass="secondary"
+							action="#{declaracionIngresarInfoRSQController.editarMovimiento(item)}"
+							update=":form:pnlMovimiento :form:btnAgregar" 
+							rendered="#{!item.tipoMovimiento.valor.contains('SIN TRANSACCION')}"/>
+						<p:commandButton icon="ui-icon-trash" title="Eliminar"
+							process="@this" styleClass="secondary"
+							action="#{declaracionIngresarInfoRSQController.eliminarMovimiento(item)}"
+							update="movimientosTable :form:btnAgregar">
+							<p:confirm header="Confirmación"
+								message="¿Está seguro que desea eliminar?" icon="ui-icon-alert" />
+						</p:commandButton>
+					</center>
+					</p:column>
+					
+					
+				</p:dataTable>
+				
+			</p:panelGrid>
+				
+			<div class="buttons main">
+				<p:commandButton value="Regresar"
+					action="#{declaracionIngresarInfoRSQController.cancelar}"
+					styleClass="secondary" icon="ui-icon-arrowthick-1-w"					
+					process="@this" update="@all"
+					rendered="#{!declaracionIngresarInfoRSQController.habilitarIngresoDatos}">					
+				</p:commandButton>
+				<p:commandButton value="Cancelar"
+					action="#{declaracionIngresarInfoRSQController.cancelar}"
+					styleClass="secondary" icon="ui-icon-arrowthick-1-w"					
+					process="@this" update="@all"
+					rendered="#{declaracionIngresarInfoRSQController.habilitarIngresoDatos}">
+					<p:confirm header="Confirmación"
+						message="¿Está seguro que desea cancelar?" icon="ui-icon-alert" />
+				</p:commandButton>				
+				<p:commandButton value="Guardar" icon="ui-icon-disk"
+					styleClass="primary"
+					action="#{declaracionIngresarInfoRSQController.guardar(true)}"
+					update="@form"
+					process="@this"
+					rendered="#{declaracionIngresarInfoRSQController.habilitarIngresoDatos}"/>
+				<p:commandButton value="Finalizar" icon="ui-icon-check"
+					styleClass="primary"
+					actionListener="#{declaracionIngresarInfoRSQController.enviar}"
+					update="@form" 
+					process="@this"
+					resetValues="true"
+					rendered="#{declaracionIngresarInfoRSQController.habilitarIngresoDatos}">
+					<p:confirm header="Confirmación"
+						message="¿Está seguro que desea finalizar?" icon="ui-icon-alert" />
+				</p:commandButton>				
+			</div>
+		</h:form>		
+	</ui:define>
+</ui:composition>

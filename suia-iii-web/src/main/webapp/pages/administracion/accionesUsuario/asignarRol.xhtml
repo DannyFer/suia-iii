@@ -1,0 +1,213 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:f="http://java.sun.com/jsf/core">
+<style>
+.aligntop td{ 
+    vertical-align: top;
+    border:none !important;
+}
+</style>
+    <p:panel header="Editar Usuario" rendered="#{usuarioController.usuarioBean.verAsignarRol}">
+    
+        <h:panelGrid columns="2" width="100%" columnClasses="col1,col2">
+            <h:outputLabel value="Nombre de usuario:"/>
+            <h:outputLabel value="#{usuarioController.usuarioBean.usuario.nombre}"/>
+             <h:outputLabel value="Información del usuario:"/>
+             <h:outputLabel value="#{usuarioController.usuarioBean.usuario.persona.nombre}"/>
+            <h:outputLabel value="Estado del usuario" rendered="#{usuarioController.admin or usuarioController.adminInstitucional or usuarioController.adminAreas}"/>
+            <p:selectBooleanCheckbox value="#{usuarioController.usuarioBean.usuario.estado}"
+                                     rendered="#{usuarioController.admin or usuarioController.adminInstitucional or usuarioController.adminAreas}" />
+            <h:outputLabel value="Planta Central:"/>
+            <p:selectBooleanCheckbox value="#{usuarioController.usuarioBean.usuario.plantaCentral}"/>
+            <h:outputLabel value="Funcionario:"/>
+            <p:selectBooleanCheckbox value="#{usuarioController.usuarioBean.usuario.funcionario}"/>
+            <h:outputLabel value="Subrogante:"/>
+			<p:selectBooleanCheckbox id="sbcSub" value="#{usuarioController.usuarioBean.usuario.subrogante}">
+			<p:ajax event="change" listener="#{usuarioController.cambiarTipoSubrogante()}" update="sbcEnc"/>
+			</p:selectBooleanCheckbox>
+			<h:outputLabel value="Encargado/a:"/>
+			<p:selectBooleanCheckbox id="sbcEnc" value="#{usuarioController.encargado}">
+			<p:ajax event="change" listener="#{usuarioController.cambiarTipoEncargado()}" update="sbcSub"/>
+			</p:selectBooleanCheckbox>	
+			
+			<h:outputLabel value="Bloquear / Desbloquear: "
+				rendered="#{usuarioController.usuarioBean.usuario.esResponsableArea and usuarioController.verFirmas}" />
+			<p:selectBooleanCheckbox
+				value="#{usuarioController.usuarioBean.usuario.area.habilitarArea}"
+				rendered="#{usuarioController.usuarioBean.usuario.esResponsableArea and usuarioController.verFirmas}" />
+
+			<h:outputLabel value="Responsable de área: (#{usuarioController.usuarioBean.areasResponsables})"
+                           rendered="#{usuarioController.usuarioBean.mostrarOpcionesJefe}"/>
+            <p:selectBooleanCheckbox value="#{usuarioController.usuarioBean.usuario.esResponsableArea}"
+                                     rendered="#{usuarioController.usuarioBean.mostrarOpcionesJefe}"
+                                     disabled="#{usuarioController.deshabilitarCamposAP}"/>
+            <h:outputLabel value="Facilitador activo" />
+			<p:selectBooleanCheckbox value="#{usuarioController.usuarioBean.usuario.esFacilitador}"
+				disabled="#{usuarioController.deshabilitarCamposAP}" />
+
+			<h:outputLabel value="Jefe inmediato superior:" rendered="#{usuarioController.usuarioBean.mostrarOpcionesJefe}"/>
+            <p:selectOneMenu id="jefeInmediato" value="#{usuarioController.usuarioBean.usuario.jefeInmediato}"
+                             rendered="#{usuarioController.usuarioBean.mostrarOpcionesJefe}"
+                             converter="selectItemConverter" panelStyle="width:300px"
+                             effect="fade" style="width:280px" filter="true" filterMatchMode="startsWith" 
+                             disabled="#{usuarioController.deshabilitarCamposAP}">
+                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                              itemValue="" noSelectionOption="true" />
+                <f:selectItems value="#{usuarioController.usuarioBean.usuariosArea}"
+                               var="userBoss"
+                               itemLabel="#{userBoss.persona.nombre}"
+                               itemValue="#{userBoss}"/>
+            </p:selectOneMenu>
+
+            <h:outputLabel value="Coeficiente de rendimiento: *" for="inputNumberCoeficiente"
+                           rendered="#{usuarioController.usuarioBean.mostrarOpcionesJefe}"/>
+
+            <pe:inputNumber id="inputNumberCoeficiente" requiredMessage="El campo 'Coeficiente de rendimiento' es requerido."
+                            validatorMessage="El campo 'Coeficiente de rendimiento' no se encuentra entre los valores permitidos 0,1 y 20."
+                            rendered="#{usuarioController.usuarioBean.mostrarOpcionesJefe}"
+                            value="#{usuarioController.usuarioBean.usuario.coeficienteRendimiento}">
+                <p:ajax event="change" update=":#{p:component('inputNumberCoeficiente')}" />
+                <f:validateDoubleRange minimum="0.1" maximum="20" />
+                <pe:keyFilter mask="num" />
+                <p:ajax process="@this" immediate="true" />
+            </pe:inputNumber>
+
+        </h:panelGrid>
+    </p:panel>
+    <p:panel header="Roles" rendered="#{usuarioController.usuarioBean.verAsignarRol}">
+    <p:panelGrid columns="2" styleClass="aligntop" style="border-collapse: initial;">
+        <p:pickList
+                value="#{usuarioController.usuarioBean.listaDualRoles}"
+                var="rol" converter="RolConverter"
+                itemLabel="#{rol.nombre}"
+                itemValue="#{rol}"
+                addLabel="Agregar Rol"
+                addAllLabel="Agregar Todos"
+                removeLabel="Quitar Rol"
+                removeAllLabel="Quitar Todos">
+            <f:facet name="sourceCaption">
+                <h:outputText value="Lista Roles"></h:outputText>
+            </f:facet>
+            <f:facet name="targetCaption">
+                <h:outputText value="Lista Roles Asignados"></h:outputText>
+            </f:facet>
+            <p:ajax event="transfer" update="areaProtegida"/>
+        </p:pickList>
+        <p:panel id="areaProtegida" style="border:none;display:#{usuarioController.jefeArea?'true':'none'}">
+        	<f:facet name="header">
+                <h:outputText value="Ubicación del Jefe de Área:" rendered="#{usuarioController.jefeArea}"/>
+            </f:facet>        	
+        	<p:selectManyMenu value="#{usuarioController.areasProtegidasSeleccionadas}"
+                             rendered="#{usuarioController.jefeArea}"
+                             converter="selectItemConverter" 
+                             effect="fade" style="width:450px" showCheckbox="true" 
+                             filter="true" filterMatchMode="contains"
+                             required="true" requiredMessage="Seleccione al área">
+                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                              itemValue="" noSelectionOption="true" />
+                <f:selectItems value="#{usuarioController.areasProtegidas}"
+                               var="item"
+                               itemLabel="#{item}"
+                               itemValue="#{item}"/>
+        	</p:selectManyMenu>
+        </p:panel>
+        </p:panelGrid>
+    </p:panel>    
+    <p:panel id="listadoFirmas"  header="Documentos habilitantes para la Unidad: (#{usuarioController.usuarioBean.usuario.area.areaName})" rendered="#{usuarioController.usuarioBean.usuario.esResponsableArea and usuarioController.verFirmas}">
+     <h:panelGrid columns="2" width="100%" columnClasses="col1,col2" id="firmasDoc">
+    	 <p:dataTable value="#{usuarioController.resultFirmas}" var="documentosFirmas">
+    	 <p:column headerText="Nombre documento" >
+    	 	 <h:outputText value="#{documentosFirmas.name}"/>
+    	 </p:column>
+
+    	 <p:column headerText="Acciones" >
+					<p:menuButton value="Acciones">
+						<p:menuitem value="Actualizar"
+							title="Renombrar el documento: #{documentosFirmas.name}"
+							icon="ui-icon-pencil" oncomplete="PF('dialogAdmDocument').show()" update=":#{p:component('fmrAsignarRol')}"
+							actionListener="#{usuarioController.documentosSeleccionado(documentosFirmas)}" />
+					</p:menuButton>
+
+				</p:column>
+				    	 <p:column styleClass="alCenter w20px">
+								<p:commandButton disabled="#{!usuarioController.habilitarDescargaFirmas}" ajax="false" id="btnDescargar" onclick="PrimeFaces.monitorDownload(start, stop);" icon="ui-icon-search" styleClass="button-small primary"  title="#{empty documentosFirmas.name ? 'El documento no está disponible en el gestor documental' : 'Ver documento'}">
+									<p:fileDownload value="#{usuarioController.getStream(documentosFirmas)}" />
+								</p:commandButton>
+							</p:column>
+    	 </p:dataTable>
+    	 
+    </h:panelGrid>
+    </p:panel>
+
+	<p:dialog id="panDialogAdmDocument" header="Documento"
+		widgetVar="dialogAdmDocument" modal="true" resizable="false"
+		closable="false" draggable="false" width="500" height="200">
+		<ui:remove>
+		<h4>Nombre:</h4>
+		<h:outputText id="txtDocumentNameNew" autocomplete="off"
+			value="#{usuarioController.nuevaFirma}" style="width:90%;" />
+		<br />
+		</ui:remove>
+		<h:panelGroup id="pnl_remocion_vegetal">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<h:outputText value="Seleccione el archivo (.png)" />
+
+				<h:panelGrid styleClass="w25" cellpalding="2" columns="2">
+					<h:outputText id="nombreArchivoInventario"
+						value="#{usuarioController.nuevaFirma}" style="width:90%;" />
+				</h:panelGrid>
+
+				<p:fileUpload id="filePlano"
+					fileUploadListener="#{usuarioController.handleFileUpload}"
+					value="#{usuarioController.file}" sizeLimit="1048576"
+					allowTypes="/(\.|\/)(png)$/" label="Seleccionar"
+					uploadLabel="Subir" auto="true"
+					update="nombreArchivoInventario"
+					cancelLabel="Cancelar"
+					invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PNG"
+					invalidSizeMessage="Debe adjuntar un archivo no mayor de 1 Mb."
+					styleClass="w50 toLeft" mode="advanced">
+				</p:fileUpload>
+
+			</p:panelGrid>
+		</h:panelGroup>
+
+		<ui:remove>
+		<p:panelGrid columns="1" columnClasses="label, value">
+			<p:outputLabel value="*Seleccione el archivo png (.png):" for="adjunto" />
+			<p:fileUpload id="adjunto" required="true" 
+				fileUploadListener="#{usuarioController.handleFileUpload}"
+				mode="advanced" label="Seleccione" auto="true" 
+				multiple="false" allowTypes="/(\.|\/)(png)$/" update="@form"
+				requiredMessage="El campo 'Adjuntar Documento (Formato png)' es requerido."
+				invalidFileMessage="El archivo es inválido."
+				invalidSizeMessage="El archivo es demasiado grande." />
+
+		</p:panelGrid>
+		</ui:remove>
+		<div class="buttons">
+		<ui:remove>
+			<p:commandButton type="button" value="Cerrar"
+				onclick="PF('dialogAdmDocument').hide()" />
+		</ui:remove>
+			<p:commandButton id="btnSaveDocumentName" value="Guardar"  ajax="false" oncomplete="PF('dialogAdmDocument').hide()"
+				icon="ui-icon-disk"  update=":#{p:component('fmrAsignarRol')}"
+				actionListener="#{usuarioController.saveDocument()}" />
+			<p:commandButton id="btnReturnRootDocument" value="Cancelar"
+				oncomplete="PF('dialogAdmDocument').hide()" icon="ui-icon-cancel" />
+		</div>
+		
+	</p:dialog>
+
+
+	<h:panelGroup rendered="#{usuarioController.usuarioBean.verAsignarRol}">
+        <p:commandButton value="Aceptar" action="#{usuarioController.guardarAsignacionRoles()}" ajax="false"
+                         update=":#{p:component('frmListaUsuario')},:#{p:component('fmrAsignarRol')},:#{p:component('msgs')}" oncomplete="PF('usuariostbl').clearFilters()" />
+        <p:commandButton value="Cancelar" action="#{usuarioController.cancelar()}"
+                         oncomplete="PF('usuariostbl').clearFilters()"
+                         update=":#{p:component('frmListaUsuario')},:#{p:component('fmrAsignarRol')}"/>
+    </h:panelGroup>
+</ui:composition>

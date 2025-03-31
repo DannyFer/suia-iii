@@ -1,0 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+     <ui:define name="context-extra">
+		<h:outputText value="Datos" />
+		<h:outputText value="Emisiones Atmosféricas" />
+		<h:outputLink value="#{request.contextPath}/control/retce/emisionesAtmosfericasVer.jsf" onclick="window.open(this.href);return false;">
+			<p:commandButton type="button" styleClass="primary button-small" 
+				icon="ui-icon-search" />					
+		</h:outputLink>		
+	</ui:define>    
+    <ui:define name="content">
+        <h:form id="form">
+            <p:panelGrid columns="1" layout="grid" styleClass="w100" id="informeGrid"
+                         columnClasses="w100">
+                <f:facet name="header" >
+                    <mae:panelGridHeaderHelp value="Informe técnico"
+                                             conector="generalHelp"
+                                             help="Para completar el informe, por favor ingrese la información requerida en las secciones correspondientes. Para previsualizar el documento presione Guardar." />
+
+                </f:facet>
+                <object id="pdf_informe" type="application/pdf" 
+                        data="#{informeTecnicoEmisionesController.urlPdf}?pfdrid_c=true"
+                        width="100%" height="600px">
+                    Su navegador no soporta la visualización de pdf. Puede descargar el
+                    documento presionando el siguiente botón:
+                    <p:commandButton value="Descargar" styleClass="primary"
+                                     ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+                        <p:fileDownload value="#{informeTecnicoEmisionesController.stream}"/>
+                    </p:commandButton>
+                </object>
+
+                <br/>
+                <br/>
+                
+                <p:panel id="panelInforme">   
+                	<h:panelGrid columns="1" layout="grid" styleClass="w100" cellpadding="4" cellspacing="4">                      
+                		<p:outputLabel value="Tipo de pronunciamiento" for="tipoPronunciamiento"/>
+                		<p:selectOneRadio id="tipoPronunciamiento" 
+                		value="#{informeTecnicoEmisionesController.informeTecnicoRetce.esReporteAprobacion}" 
+							required="true" requiredMessage="Tipo de pronunciamiento es requerido." styleClass="w50">						
+							<f:selectItem itemLabel="Pronunciamiento Aprobación" itemValue="#{true}"/>
+							<f:selectItem itemLabel="Pronunciamiento Observación" itemValue="#{false}"/>												
+						</p:selectOneRadio>		
+						
+						
+						<p:fieldset legend="CONCLUSIONES *" toggleable="true" toggleSpeed="500" collapsed="true">
+						                    	
+                    		<control:imputConTextoEnriquecido id="conclusiones" 
+                    		valor="#{informeTecnicoEmisionesController.informeTecnicoRetce.conclusiones}"
+							soloLectura="false" requerido="true" requiredMessage="Conclusiones es requerido." 
+							longitudmáxima="2500"/> 
+						</p:fieldset>
+                        
+                        <p:fieldset legend="RECOMENDACIONES *" toggleable="true" toggleSpeed="500" collapsed="true">
+                    	<control:imputConTextoEnriquecido id="recomendaciones" valor="#{informeTecnicoEmisionesController.informeTecnicoRetce.recomendaciones}"
+							soloLectura="false" requerido="true" requiredMessage="Recomendaciones es requerido." longitudmáxima="2500"/>
+							</p:fieldset>	
+					</h:panelGrid>
+					
+					</p:panel>
+					</p:panelGrid>
+					
+					 <h:panelGroup id="pnlInforme">
+						<observaciones:tablaObservaciones idComponent="panelInformeObs"
+							componenteActualizarEliminar="pnlInforme"
+							seccion="informeEmisionesRetce"
+							nombreClase="informeEmisionesRetce"
+							idClase="#{informeTecnicoEmisionesController.informeTecnicoRetce.id}"							
+							aparace="#{informeTecnicoEmisionesController.habilitarObservaciones}"
+							mostrarSiVacio="#{!informeTecnicoEmisionesController.habilitarObservaciones}"
+							soloLectura="true" />
+					</h:panelGroup>	
+					
+            	
+
+          <div class="buttons main" id="buttons">
+				<p:commandButton value="Guardar" icon="ui-icon-disk"
+					update="@form"
+					action="#{informeTecnicoEmisionesController.guardar()}" />
+				<p:commandButton value="Siguiente" icon="ui-icon-arrowthick-1-e" 								
+					action="#{informeTecnicoEmisionesController.verOficioListener}"					
+					disabled="#{!informeTecnicoEmisionesController.habilitarSiguiente}" />				
+			</div>
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>

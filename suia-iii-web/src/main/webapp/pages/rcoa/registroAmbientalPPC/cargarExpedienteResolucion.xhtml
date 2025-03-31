@@ -1,0 +1,167 @@
+<ui:composition template="/WEB-INF/templates/default.xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+	<ui:composition template="/WEB-INF/templates/default-task-rappc.xhtml">
+		<ui:define name="content">
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="Información de la Resolución de Registro Ambiental emitida en físico" />
+			</f:facet>
+				<h:panelGrid layout="grid" styleClass="panel_data w100" columnClasses="header w25,null w25, header w25,null w25" columns="4">
+					<h:outputText value="Nro. Resolución Administrativa Ambiental:*" />
+					<p:inputText id="txtResolucion" value="#{cargarExpedienteRegistroAmbientalPPCController.registroAmbientalRcoa.resolucionAmbietalFisica}" style="text-transform: uppercase;" 
+								required="true" requiredMessage="El Nro. de Resolución Administrativa Ambiental es requerido." maxlength="50">
+						<p:ajax event="blur" process="@this"/>
+					</p:inputText>
+					<h:outputText value="Fecha emisión de la Autorización Administrativa Ambiental (AAA): *" />
+					<p:calendar id="txtFechaemision" value="#{cargarExpedienteRegistroAmbientalPPCController.registroAmbientalRcoa.fechaResolucionAmbientalFisica}"
+								timeZone="America/Guayaquil" readonlyInput="true" navigator="true"
+								required="true" requiredMessage="La Fecha emisión de la Autorización Administrativa Ambiental (AAA) es requerido."
+								pattern="dd/MM/yyyy" maxdate="today">
+						<p:ajax event="dateSelect" process="@this" />
+					</p:calendar>
+				</h:panelGrid>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Ficha Ambiental aprobada" />
+					</f:facet>
+					<p:outputLabel value="Adjuntar la Ficha Ambiental aprobada, el documento debe estar en formato pdf, se sugiere que el archivo tenga un máximo de 50MB."/>
+					<p:dataTable id="idDocFichaAmbiental" var="item" emptyMessage="#{labels['common.table.empty']}" paginatorPosition="bottom"  
+							value="#{cargarExpedienteRegistroAmbientalPPCController.listaDocumentoFicha}" paginator="true" rows="10" scrollable="true"
+							paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" style="width:100%;">
+						<f:facet name="header">							
+							<p:commandButton icon="ui-icon-plus" actionListener="#{cargarExpedienteRegistroAmbientalPPCController.seleccionaDocumento('REGISTRO')}"
+								immediate="true" value="Añadir" styleClass="button-small-text toRight field_mrg" oncomplete="PF('adjuntoDiag').show()" update=":formDialogAdjunto:adjuntoDiag"/>
+							<br />
+						</f:facet>
+				    	<p:column headerText="Documento" width="80%">
+							<h:outputText value="#{item.nombre}" />
+						</p:column>
+						<p:column headerText="Acción" width="20%">
+							<p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" immediate="true"
+									ajax="false" process="idDocFichaAmbiental" title="Descargar" disabled="#{item.contenidoDocumento==null}">
+								<p:fileDownload value="#{cargarExpedienteRegistroAmbientalPPCController.getDocumentoDownload(item)}" />
+							</p:commandButton>
+							<p:commandButton styleClass="primary" icon="ui-icon-trash"
+									actionListener="#{cargarExpedienteRegistroAmbientalPPCController.eliminarDocumentoList(item, 'REGISTRO')}"
+									process="idDocFichaAmbiental"  update=":form:idDocFichaAmbiental">
+								<p:confirm header="Confirmación" message="¿Está seguro de eliminar el documento?" icon="ui-icon-alert" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Resolución de Registro Ambiental otorgada" />
+					</f:facet>
+					<p:outputLabel value="Adjuntar la Resolución de Registro Ambiental otorgada, el documento debe estar en formato pdf, se sugiere que el archivo tenga un máximo de 50MB."/>
+					<p:dataTable id="idDocResolucionAmbiental" var="item" emptyMessage="#{labels['common.table.empty']}" paginatorPosition="bottom"  
+							value="#{cargarExpedienteRegistroAmbientalPPCController.listaDocumentoResolucion}" paginator="true" rows="10" scrollable="true"
+							paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" style="width:100%;">
+					<f:facet name="header">
+						<p:commandButton icon="ui-icon-plus" actionListener="#{cargarExpedienteRegistroAmbientalPPCController.seleccionaDocumento('RESOLUCION')}"
+							immediate="true" value="Añadir" styleClass="button-small-text toRight field_mrg" oncomplete="PF('adjuntoDiag').show()" update=":formDialogAdjunto:adjuntoDiag"/>
+						<br/>
+					</f:facet>
+				    	<p:column headerText="Documento" width="80%">
+							<h:outputText value="#{item.nombre}" />
+						</p:column>
+						<p:column headerText="Acción" width="20%">
+							<p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" immediate="true"
+									ajax="false" process="idDocResolucionAmbiental" title="Descargar" disabled="#{item.contenidoDocumento==null}">
+								<p:fileDownload value="#{cargarExpedienteRegistroAmbientalPPCController.getDocumentoDownload(item)}" />
+							</p:commandButton>
+							<p:commandButton styleClass="primary" icon="ui-icon-trash"
+									actionListener="#{cargarExpedienteRegistroAmbientalPPCController.eliminarDocumentoList(item, 'RESOLUCION')}"
+									process="idDocResolucionAmbiental"  update=":form:idDocResolucionAmbiental">
+								<p:confirm header="Confirmación" message="¿Está seguro de eliminar el documento?" icon="ui-icon-alert" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Factura por emisión de Autorización Administrativa Ambiental" />
+					</f:facet>
+					<p:outputLabel value="Adjuntar Factura por emisión de Autorización Ambiental, el documento debe estar en formato pdf, se sugiere que el archivo tenga un máximo de 50MB."/>
+					<p:dataTable id="idDocFactura" var="item" emptyMessage="#{labels['common.table.empty']}" paginatorPosition="bottom"  
+							value="#{cargarExpedienteRegistroAmbientalPPCController.listaDocumentoFactura}" paginator="true" rows="10" scrollable="true"
+							paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" style="width:100%;">
+						<f:facet name="header">
+							<p:commandButton icon="ui-icon-plus" actionListener="#{cargarExpedienteRegistroAmbientalPPCController.seleccionaDocumento('FACTURA')}"
+								immediate="true" value="Añadir" styleClass="button-small-text toRight field_mrg" oncomplete="PF('adjuntoDiag').show()" update=":formDialogAdjunto:adjuntoDiag"/>
+							<br/>
+						</f:facet>
+				    	<p:column headerText="Documento" width="80%">
+							<h:outputText value="#{item.nombre}" />
+						</p:column>
+						<p:column headerText="Acción" width="20%">
+							<p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" immediate="true"
+									ajax="false" process="idDocFactura" title="Descargar" disabled="#{item.contenidoDocumento==null}">
+								<p:fileDownload value="#{cargarExpedienteRegistroAmbientalPPCController.getDocumentoDownload(item)}" />
+							</p:commandButton>
+							<p:commandButton styleClass="primary" icon="ui-icon-trash"
+									actionListener="#{cargarExpedienteRegistroAmbientalPPCController.eliminarDocumentoList(item, 'FACTURA')}"
+									process="idDocFactura"  update=":form:idDocFactura">
+								<p:confirm header="Confirmación" message="¿Está seguro de eliminar el documento?" icon="ui-icon-alert" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+			</p:panelGrid>
+			<p:panel>
+				<p:outputPanel id="pnlFinalizarBtn">
+					<div class="buttons main">
+						<p:commandButton  value="Cancelar" actionListener="#{cargarExpedienteRegistroAmbientalPPCController.redireccionarBandeja()}" process="@this" />
+						<p:commandButton icon="ui-icon-disk" value="#{msg['button.guardar']}" process=":form" update="pnlFinalizarBtn" 
+							actionListener="#{cargarExpedienteRegistroAmbientalPPCController.guardar(true)}" />
+						<p:commandButton value="Enviar" id="btnEnviar" icon="ui-icon-check" disabled="#{!cargarExpedienteRegistroAmbientalPPCController.activarEnviar}"
+							action="#{cargarExpedienteRegistroAmbientalPPCController.completarTarea}">
+							<p:confirm header="Confirmación" message="¿Está seguro de finalizar la tarea?" icon="ui-icon-alert" />
+						</p:commandButton>
+					</div>
+				</p:outputPanel>
+			</p:panel>
+		</h:form>
+		
+		<h:form id="formDialogAdjunto">
+			<p:dialog id="adjuntoDiag" widgetVar="adjuntoDiag" header="Adjuntos" width="600px" closable="false" modal="true">
+				<p:panelGrid id="adjuntosDiagGrid" columns="3" styleClass="panel_data w100" columnClasses="header w30,null w70">
+					<h:outputText value="Adjuntar archivo " />
+					<p:panel id="pnUpload" style="border: none">
+						<p:fileUpload fileUploadListener="#{cargarExpedienteRegistroAmbientalPPCController.uploadDodumento}"
+							required="true" requiredMessage="Debe ingresar el adjunto" multiple="false" 
+							sizeLimit="#{cargarExpedienteRegistroAmbientalPPCController.tipoDocumentoSelected eq 'FACTURA' ? 5242880 : 52428800}" fileLimit="1" allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar"
+							uploadLabel="Subir" auto="true" update="adjuntosDiagGrid" cancelLabel="Cancelar"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Debe adjuntar un archivo no mayor de #{cargarExpedienteRegistroAmbientalPPCController.tipoDocumentoSelected eq 'FACTURA' ? 5 : 50} Mb."
+							mode="advanced" styleClass="w100" >
+						</p:fileUpload>
+						<p:commandButton id="downloadAdjunto" icon="ui-icon-arrowthick-1-s" rendered="#{cargarExpedienteRegistroAmbientalPPCController.documentoAdjunto.nombre != null}"
+							styleClass="button-small primary toLeft" title="Ver" ajax="false" immediate="true">
+							<p:fileDownload value="#{cargarExpedienteRegistroAmbientalPPCController.getDocumentoDownload(cargarExpedienteRegistroAmbientalPPCController.documentoAdjunto)}" />
+						</p:commandButton>
+						<p:outputLabel id="fileDocumentoAdjunto" value="#{cargarExpedienteRegistroAmbientalPPCController.documentoAdjunto.nombre}" />
+					</p:panel>
+				</p:panelGrid>
+				<br />
+
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('adjuntoDiag').hide()" styleClass="secondary" />
+					<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}" process="adjuntoDiag" oncomplete="if(!args.validationFailed) PF('adjuntoDiag').hide();"
+						update="adjuntoDiag :form" actionListener="#{cargarExpedienteRegistroAmbientalPPCController.guardarAdjunto()}" />
+				</div>
+				
+			</p:dialog>
+		</h:form>
+		
+		</ui:define>
+	</ui:composition>
+</ui:composition>

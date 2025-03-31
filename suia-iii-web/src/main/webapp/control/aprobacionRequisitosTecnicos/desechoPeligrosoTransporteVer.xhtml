@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition
+	template="/control/aprobacionRequisitosTecnicos/templates/verArt.xhtml">
+	<ui:define name="content-art">
+		<h:form>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				columnClasses="w50, field_mrg w50">
+				<f:facet name="header">
+					<h:outputText value="Desechos peligrosos" />
+				</f:facet>
+				<p:dataTable id="tblDesechos"
+					value="#{desechoPeligrosoTransporteController.desechoPeligrosoTransporteBean.desechosPeligrososTransportes}"
+					var="desecho" emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="#{labels['label.nombre.desecho.peligroso']}">
+						<h:outputText value="#{desecho.desechoPeligroso.descripcion}" />
+					</p:column>
+					<p:column headerText="#{labels['label.codigo.desecho']}">
+						<h:outputText value="#{desecho.desechoPeligroso.clave}" />
+					</p:column>
+					<p:column headerText="#{labels['label.placa.vehiculo']}">
+						<h:outputText
+							rendered="#{empty desecho.requisitosVehiculo.numeroPlaca}"
+							value="N/A" />
+						<h:outputText value="#{desecho.requisitosVehiculo.numeroPlaca}"
+							rendered="#{!empty desecho.requisitosVehiculo.numeroPlaca}" />
+					</p:column>
+					<p:column headerText="#{labels['label.tipo.embalaje.envases']}">
+						<h:outputText value="#{desecho.tipoEmbalajeEnvase}" />
+					</p:column>
+					<p:column headerText="#{labels['label.provincia.destino']}">
+						<h:outputText
+							value="#{!empty desecho.cantonDestino.ubicacionesGeografica.nombre ? desecho.cantonDestino.ubicacionesGeografica.nombre : desecho.destinoNivelNacional ? 'Nivel nacional':'N/A'}" />
+					</p:column>
+					<p:column headerText="#{labels['label.canton.destino']}">
+						<h:outputText
+							value="#{!empty desecho.cantonDestino.nombre ? desecho.cantonDestino.nombre : desecho.destinoNivelNacional ? 'Nivel nacional':'N/A'}" />
+					</p:column>
+					<p:column headerText="#{labels['label.origen']}">
+						<h:outputText rendered="#{desecho.origenNivelNacional}"
+							value="Nivel nacional" />
+						<p:commandButton rendered="#{!desecho.origenNivelNacional}"
+							icon="ui-icon-search" title="Ver Destinos" immediate="true"
+							action="#{desechoPeligrosoTransporteController.seleccionarDesechoTranporte(desecho)}"
+							styleClass="button-small primary"
+							oncomplete="PF('datosOrigen').show();"
+							update=":#{p:component('pngOrigen')}" />
+					</p:column>
+					<p:column headerText="#{labels['label.otro.pais.destino']}">
+						<h:outputText
+							value="#{!empty desecho.pais ? desecho.pais : 'N/A'}" />
+					</p:column>
+					<p:column styleClass="w40px alCenter">
+						<p:commandButton icon="ui-icon-search"
+							action="#{desechoPeligrosoTransporteController.seleccionarDesechoVer(desecho)}"
+							title="Editar" styleClass="button-small primary"
+							oncomplete="PF('agregarDesPelTrans').show();"
+							update=":#{p:component('agregarDesPelTrans')}" />
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+			<div class="buttons main">
+				<p:commandButton value="Atrás" immediate="true" process="@this"
+					action="#{desechoPeligrosoTransporteController.recuparPaginaAnterior(true)}"
+					icon="ui-icon-arrowthick-1-w" />
+				<p:commandButton value="Siguiente" immediate="true" process="@this"
+					rendered="#{desechoPeligrosoTransporteController.isVisibleOpcionNavegarSiguienteEnMenuModoVer(true)}"
+					action="#{desechoPeligrosoTransporteController.recuperarPaginaSiguiente(true)}"
+					icon="ui-icon-arrowthick-1-e" />
+			</div>
+		</h:form>
+		<p:dialog header="#{labels['label.desecho.peligroso']}"
+			id="agregarDesPelTrans" widgetVar="agregarDesPelTrans" modal="true"
+			resizable="false" height="500" width="700">
+			<h:form id="form">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					columnClasses="w50, field_mrg w50">
+					<f:facet name="header">
+						<h:outputText value="Detalles del desecho" />
+					</f:facet>
+
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="#{labels['label.nombre.desecho.peligroso']}" />
+						<h:outputText
+							value="#{desechoPeligrosoTransporteController.desechoPeligrosoTransporteBean.desechoPeligrosoTransporteVer.desechoPeligroso.descripcion}" />
+						<h:outputText value="#{labels['label.codigo.desecho']}" />
+						<h:outputText
+							value="#{desechoPeligrosoTransporteController.desechoPeligrosoTransporteBean.desechoPeligrosoTransporteVer.desechoPeligroso.clave}" />
+						<h:outputText value="#{labels['label.tipo.embalaje.envases']}" />
+						<h:outputText
+							value="#{desechoPeligrosoTransporteController.desechoPeligrosoTransporteBean.desechoPeligrosoTransporteVer.tipoEmbalajeEnvase}" />
+						<h:outputText value="#{labels['label.provincia.destino']}" />
+						<h:outputText
+							value="#{desechoPeligrosoTransporteController.desechoPeligrosoTransporteBean.desechoPeligrosoTransporteVer.cantonDestino.ubicacionesGeografica.nombre}" />
+						<h:outputText value="#{labels['label.canton.destino']}" />
+						<h:outputText
+							value="#{desechoPeligrosoTransporteController.desechoPeligrosoTransporteBean.desechoPeligrosoTransporteVer.cantonDestino.nombre}" />
+					</h:panelGrid>
+				</p:panelGrid>
+				<p:panelGrid columns="2" layout="grid" styleClass="w100"
+					rendered="#{!empty desechoPeligrosoTransporteController.desechoPeligrosoTransporteBean.desechoPeligrosoTransporteVer.requisitosVehiculo.numeroPlaca}"
+					columnClasses="w50, field_mrg w50">
+					<f:facet name="header">
+						<h:outputText value="Datos del vehiculo" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+						id="datosVehiculo" columnClasses="header, null"
+						rowClasses="null, alt">
+						<h:outputText value="#{labels['label.numero.placa']}" />
+						<h:outputText
+							value="#{desechoPeligrosoTransporteController.desechoPeligrosoTransporteBean.desechoPeligrosoTransporteVer.requisitosVehiculo.numeroPlaca}" />
+						<h:outputText value="#{labels['label.numero.motor']}" />
+						<h:outputText
+							value="#{desechoPeligrosoTransporteController.desechoPeligrosoTransporteBean.desechoPeligrosoTransporteVer.requisitosVehiculo.numeroMotor}" />
+						<h:outputText value="#{labels['label.numero.chasis']}" />
+						<h:outputText
+							value="#{desechoPeligrosoTransporteController.desechoPeligrosoTransporteBean.desechoPeligrosoTransporteVer.requisitosVehiculo.numeroChasis}" />
+						<h:outputText value="#{labels['label.clase.vehiculo']}" />
+						<h:outputText
+							value="#{desechoPeligrosoTransporteController.desechoPeligrosoTransporteBean.desechoPeligrosoTransporteVer.requisitosVehiculo.clase}" />
+						<h:outputText value="#{labels['label.tipo.vehiculo']}" />
+						<h:outputText
+							value="#{desechoPeligrosoTransporteController.desechoPeligrosoTransporteBean.desechoPeligrosoTransporteVer.requisitosVehiculo.tipo}" />
+					</h:panelGrid>
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="#{labels['label.anio.fabricacion']}" />
+						<h:outputText
+							value="#{desechoPeligrosoTransporteController.desechoPeligrosoTransporteBean.desechoPeligrosoTransporteVer.requisitosVehiculo.anioFabriacacion}" />
+						<h:outputText value="#{labels['label.cilindraje']}" />
+						<h:outputText
+							value="#{desechoPeligrosoTransporteController.desechoPeligrosoTransporteBean.desechoPeligrosoTransporteVer.requisitosVehiculo.cilindraje}" />
+						<h:outputText value="#{labels['label.capacidad.transporte']}" />
+						<h:outputText
+							value="#{desechoPeligrosoTransporteController.desechoPeligrosoTransporteBean.desechoPeligrosoTransporteVer.requisitosVehiculo.capacidadTransporte}" />
+						<h:outputText value="#{labels['label.peso.bruto.vehicular']}" />
+						<h:outputText
+							value="#{desechoPeligrosoTransporteController.desechoPeligrosoTransporteBean.desechoPeligrosoTransporteVer.requisitosVehiculo.pesoBrutoVehicular}" />
+					</h:panelGrid>
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					rendered="#{!empty desechoPeligrosoTransporteBean.desechoPeligrosoTransporteVer.desechosUbicaciones}"
+					columnClasses="w50, field_mrg w50">
+					<f:facet name="header">
+						<h:outputText value="Origen del desecho" />
+					</f:facet>
+					<h:panelGrid
+						rendered="#{desechoPeligrosoTransporteBean.desechoPeligrosoTransporteVer.otroPais}"
+						styleClass="panel_data w100" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="#{labels['label.destino']}" />
+						<p:inputText id="otroPais"
+							value="#{desechoPeligrosoTransporteBean.desechoPeligrosoTransporteVer.pais}"
+							styleClass="w100" style="width: 252px" />
+
+					</h:panelGrid>
+					<p:panelGrid id="pnlAgregarDesecho" columns="1" layout="grid"
+						styleClass="w100"
+						rendered="#{!desechoPeligrosoTransporteBean.desechoPeligrosoTransporteVer.otroPais}">
+						<p:dataTable id="tblOrigen"
+							emptyMessage="#{labels['common.table.empty']}"
+							value="#{desechoPeligrosoTransporteBean.desechoPeligrosoTransporteVer.desechosUbicaciones}"
+							var="origen">
+							<p:column headerText="#{labels['label.provincia.origen']}">
+								<h:outputText
+									value="#{origen.ubicacionGeografica.ubicacionesGeografica.nombre}" />
+							</p:column>
+							<p:column headerText="#{labels['label.canton.origen']}">
+								<h:outputText value="#{origen.ubicacionGeografica.nombre}" />
+							</p:column>
+						</p:dataTable>
+
+					</p:panelGrid>
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton value="Cerrar"
+						onclick="PF('agregarDesPelTrans').hide()" />
+				</div>
+			</h:form>
+		</p:dialog>
+
+
+		<p:dialog header="#{labels['label.origen']}" id="dlOrigen"
+			widgetVar="datosOrigen" modal="true" resizable="false" width="600">
+			<h:form>
+				<p:panel>
+					<h:panelGroup id="pngOrigen">
+
+						<p:dataTable id="tblOrigen"
+							emptyMessage="#{labels['common.table.empty']}"
+							value="#{desechoPeligrosoTransporteBean.desechoPeligrosoTransporte.desechosUbicaciones}"
+							var="origen">
+							<p:column headerText="#{labels['label.provincia.origen']}">
+								<h:outputText
+									value="#{origen.ubicacionGeografica.ubicacionesGeografica.nombre}" />
+							</p:column>
+							<p:column headerText="#{labels['label.canton.origen']}">
+								<h:outputText value="#{origen.ubicacionGeografica.nombre}" />
+							</p:column>
+
+						</p:dataTable>
+
+					</h:panelGroup>
+				</p:panel>
+				<div class="buttons">
+					<p:commandButton value="Cerrar" onclick="PF('datosOrigen').hide()" />
+				</div>
+			</h:form>
+		</p:dialog>
+
+	</ui:define>
+</ui:composition>
+</html>

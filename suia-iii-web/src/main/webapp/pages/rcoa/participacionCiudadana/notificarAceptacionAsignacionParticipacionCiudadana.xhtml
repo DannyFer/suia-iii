@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+      
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml">
+
+    <ui:define name="context-extra">
+      <h:outputText value="Datos"/>
+      <h:outputText value="Estudio de Impacto Ambiental"/>
+      <h:outputLink value="#"  target="_blank">
+          <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+      </h:outputLink>
+        
+      <h:outputText value="Número de facilitadores"/>
+      <h:outputText value="#{notificarAceptacionAsignacionPPCController.numeroFacilitadores}"/>
+      <p:outputLabel></p:outputLabel>
+
+  		<h:outputText value="Factura" />
+  		<h:outputText value="Pago Facilitadores" />  		
+  		<p:commandButton icon="ui-icon-search" styleClass="button-small primary" action="#{notificarAceptacionAsignacionPPCController.descargarFactura()}" ajax="false"/>
+  		
+  	</ui:define>
+     
+    <ui:define name="content">
+        <h:form id="form">  
+        
+            <h3>#{msg['label.participacionsocial.notificarAceptacionAsignacion']}</h3>
+            <p:outputLabel for="correcto"
+                           value="#{notificarAceptacionAsignacionPPCController.mensajeUsuario}" styleClass="bold"/>
+            <p:selectOneRadio id="correcto" value="#{notificarAceptacionAsignacionPPCController.correcto}"
+                              required="true">
+                <f:selectItem itemLabel="Aceptar" itemValue="true"/>
+                <f:selectItem itemLabel="Rechazar" itemValue="false"/>
+                <p:ajax update=":form"/>
+            </p:selectOneRadio>
+
+            <p:dialog id="aceptarDialog" widgetVar="aceptarDialog" visible="#{notificarAceptacionAsignacionPPCController.verDialogos==1}"
+                      header="Documentos necesarios para el Proceso de Participación Ciudadana" modal="true"
+                      closable="false" width="500px" 
+                      resizable="false">
+                <p:panel>
+                    <h:panelGrid columns="1" styleClass="w100">
+                        <p:outputLabel styleClass="bold text-red alJustify" rendered="#{!notificarAceptacionAsignacionPPCController.facilitadorAdicional}"
+                                       value="#{notificarAceptacionAsignacionPPCController.mensajeAprobacion}"/>
+
+                        <p:outputLabel styleClass="bold text-red alJustify" rendered="#{notificarAceptacionAsignacionPPCController.facilitadorAdicional}"
+                                       value="#{notificarAceptacionAsignacionPPCController.mensajeAprobacionFA}"/>
+
+                        <p:outputLabel styleClass="bold"
+                                       value="Formatos para el Proceso de Participación Ciudadana: *"/>
+						<p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s"  styleClass="oculto primary" >
+							<p:fileDownload value="#{notificarAceptacionAsignacionPPCController.stream}" />
+						</p:commandButton>
+					</h:panelGrid>
+                </p:panel>
+                <div class="buttons">
+                    <p:commandButton value="Aceptar" styleClass="primary" icon="ui-icon-check" action="#{notificarAceptacionAsignacionPPCController.cerrar}" update=":form" process="@this"/>
+                </div>
+            </p:dialog>
+
+
+            <p:dialog id="rechazarDialog" visible="#{notificarAceptacionAsignacionPPCController.verDialogos==2}"
+                      widgetVar="rechazarDialog" width="500px"
+                      header="Información" modal="true"
+                      closable="false"
+                      resizable="false">
+                <p:panel>
+                    <h:panelGrid columns="1" styleClass="w100">
+                        <p:outputLabel styleClass="bold text-red alJustify" value="Justificación"/>
+                        <p:inputTextarea id="observacion"  maxlength="400" value="#{notificarAceptacionAsignacionPPCController.facilitador.justificacion}"
+                        required="#{notificarAceptacionAsignacionPPCController.correcto!=null and !notificarAceptacionAsignacionPPCController.correcto}" 
+                        rows="3" autoResize="false" requiredMessage="Ingrese una observación"/>
+                        <p:outputLabel styleClass="bold text-red alJustify" value="Adjuntar documento de justificación * (.pdf) 20 MB"/>
+                       <p:fileUpload fileUploadListener="#{notificarAceptacionAsignacionPPCController.uploadDocumentoJustificativo}"
+                                multiple="false" sizeLimit="20480000" allowTypes="/(\.|\/)(pdf)$/i"
+                                label="Seleccionar" uploadLabel="Subir"
+                                invalidFileMessage="Tipo de archivo no válido"
+                                invalidSizeMessage="Tamaño de archivo no válido"
+                                cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                auto="true" required="true" update="documentoRechazo">
+                                <f:attribute name="clave" value="documentoJustificacion"/>
+                        </p:fileUpload>                        
+                        <p:outputLabel id="documentoRechazo" value="#{notificarAceptacionAsignacionPPCController.documentoJustificacion.nombreDocumento}"/>
+                    </h:panelGrid>
+                </p:panel>
+				<div class="buttons">
+					<p:commandButton value="Cerrar" styleClass="primary" icon="ui-icon-close" action="#{notificarAceptacionAsignacionPPCController.cerrar}" update=":form" process="@this" />
+					<p:commandButton value="Guardar" styleClass="primary" icon="ui-icon-disk" action="#{notificarAceptacionAsignacionPPCController.cerrar}" update=":form" process="rechazarDialog"/>
+				</div>
+			</p:dialog>
+
+           
+            <div class="buttons main">
+                <p:commandButton value="Enviar" styleClass="primary"  action="#{notificarAceptacionAsignacionPPCController.completarTarea()}"
+                                 title="#{msg['label.enviarDatos']}" icon="ui-icon-check"
+                                 widgetVar="btnEnviar" onstart="PF('btnEnviar').disable()" update="@form">
+                      <p:confirm message="#{msg['message.confirmacion.envio.tarea']}" header="#{msg['header.confirmacion.envio.tarea']}" />
+                </p:commandButton>
+            </div>
+
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>

@@ -1,0 +1,125 @@
+<ui:composition template="/WEB-INF/templates/default.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+	<ui:define name="content">
+		<style type="text/css">
+.ui-fileupload-content {
+	border: none !important;
+	padding: 0px;
+}
+</style>
+
+		<h:form id="form" prependId="false"
+			onkeypress="if (event.keyCode == 13) {return false; }">
+
+			<p:panelGrid id="proyectosGrid" columns="1" layout="grid"
+				styleClass="w100">
+				<f:facet name="header">
+							<h:outputText value="Seleccione el proyecto obra o actividad que cuenta con la Autorización Administrativa Ambiental al cual va ser 
+							vinculado el Registro Generador" />
+				</f:facet>
+				<p:dataTable id="proyectosTable"
+					value="#{emisionGeneradorConAAAController.listaProyectos}"
+					var="proyecto" selection="#{emisionGeneradorConAAAController.proyectoSelecionado}"
+					rowKey="#{proyecto.id}" sortOrder="descending" paginator="true"
+					paginatorAlwaysVisible="true" paginatorPosition="bottom"
+					currentPageReportTemplate="{currentPage} de {totalPages}" rows="5"
+					rowsPerPageTemplate="5,10,15" emptyMessage="No existen registros">
+					<p:column headerText="Código" sortBy="#{proyecto.codigo}" filterBy="#{proyecto.codigo}" filterMatchMode="contains" >
+						<h:outputText value="#{proyecto.codigo}" style="word-wrap: break-word;"/>
+					</p:column>
+					<p:column headerText="Nombre" filterBy="#{proyecto.nombre}" filterMatchMode="contains">
+						<h:outputText value="#{proyecto.nombre}" style="word-wrap: break-word;"/>
+					</p:column>
+					<p:column headerText="Sector" filterBy="#{proyecto.sector}" filterMatchMode="contains" styleClass="w12">
+						<h:outputText value="#{proyecto.sector}" />
+					</p:column>
+					<p:column headerText="Responsable" filterBy="#{proyecto.responsable}" filterMatchMode="contains" styleClass="w8">
+						<h:outputText value="#{proyecto.responsable}" />
+					</p:column>
+					<p:column headerText="Autorización Administrativa Ambiental" filterBy="#{proyecto.numeroResolucion}" filterMatchMode="contains" styleClass="w12">
+						<h:outputText value="#{proyecto.numeroResolucion}" />
+					</p:column>	
+					<p:column headerText="Fecha de emisión" filterBy="#{proyecto.fechaRegistro}" filterMatchMode="contains" styleClass="w10">
+						<h:outputText value="#{proyecto.fechaRegistro}" >
+						
+						</h:outputText>
+					</p:column>					
+					<p:column headerText="Visualizar información actividad" styleClass="allCenter w8">
+						<h:commandLink target="_blank" actionListener="#{emisionGeneradorConAAAController.seleccionar(proyecto)}">
+							<p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search" />
+						</h:commandLink>
+					</p:column>
+					<p:column headerText="Estado de digitalización" filterBy="#{proyecto.estadoProyecto}" filterMatchMode="contains" styleClass="w10">
+						<h:outputText value="#{proyecto.estadoProyecto}" />
+					</p:column>
+					<p:column headerText="sistema" filterBy="#{proyecto.sistema}" filterMatchMode="contains" rendered="false">
+						<h:outputText value="#{proyecto.sistema}" >
+						
+						</h:outputText>
+					</p:column>	
+					<p:column headerText="Selección" selectionMode="single" styleClass="w8"/>
+					<p:ajax event="rowSelectRadio" process="@this"
+						listener="#{emisionGeneradorConAAAController.validarExistenciaRGD()}"
+						update="proyectosTable :form:pnlButons" />
+				</p:dataTable>
+				<div style="font-style: italic; text-align: justify;">
+					Nota: Los proyectos, obras o actividades con certificado ambiental no deben obtener registro de generador conforme al literal c del artículo 626 del Reglamento al Código Orgánico del Ambiente.
+				</div>
+			</p:panelGrid>
+			<p:outputPanel id="pnlButons">
+			<div class="buttons main">
+				<p:commandButton value="Atras" icon="ui-icon-check"
+					immediate="true" styleClass="secondary"
+					action="/pages/rcoa/generadorDesechos/motivoEmision.jsf" />
+				<p:commandButton value="Aceptar" icon="ui-icon-check"
+					onclick="PF('statusDialog').show();" update="pnlButons"
+					disabled="#{emisionGeneradorConAAAController.proyectoSelecionado eq null ? true :false}" 
+					actionListener="#{emisionGeneradorConAAAController.enviar()}" >
+					<p:confirm header="Confirmación" message="¿Está seguro que desea iniciar el proceso?" icon="ui-icon-alert" />
+				</p:commandButton>
+				<p:commandButton value="Cancelar" icon="ui-icon-check"
+					immediate="true" styleClass="secondary"
+					action="/bandeja/bandejaTareas.jsf" />
+			</div>
+			</p:outputPanel>
+		</h:form>
+		
+		<h:form id="dialogForm">
+			<p:dialog id="existeRgdDiag" widgetVar="existeRgdDiag" header="Información" width="600px" closable="false" modal="true">
+				<div class="alJustify">
+				Estimado usuario la actividad que usted ha seleccionado ya cuenta con un Registro de Generador de 
+				residuos y desechos peligrosos y/o especiales por lo que ya no podrá emitirse otro registro para dicha actividad 
+				conforme el literal c del art. 626 de Código Orgánico de Ambiente que establece: "El Registro será 
+				emitido por proyecto, obra o actividad sujeta a regularización ambiental."
+				</div>
+				<br/>
+				<div class="buttons main">
+					<p:commandButton value="Aceptar" icon="ui-icon-check" process="@this" onclick="PF('existeRgdDiag').hide()" />
+				</div>
+			</p:dialog>
+			
+			<p:dialog id="enTramiteRgdDiag" widgetVar="enTramiteRgdDiag" header="Información" width="600px" closable="false" modal="true">
+				<br/>
+				<div style="text-align: justify;">
+				Estimado usuario la actividad que usted ha seleccionado actualmente se encuentra en trámite para la obtención de un Registro 
+				Generador de residuos y desechos peligrosos y/o especiales, por lo que, se sugiere continuar con dicho trámite en el sistema anterior, caso 
+				contrario proceda a solicitar la desactivación de ese trámite al correo mesadeayuda@ambiente.gob.ec con el fin de iniciar un 
+				nuevo trámite en el presente sistema.
+				</div>
+				<br/>
+				<div class="buttons main">
+					<p:commandButton value="Aceptar" icon="ui-icon-check" process="@this" styleClass="secundary" onclick="PF('enTramiteRgdDiag').hide()" />
+				</div>	
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

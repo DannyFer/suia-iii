@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<h:panelGroup id="eliminacionDesecho">
+	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<p:commandButton value="Adicionar" onclick="PF('adicionarPuntoEliminacion').toggle()" styleClass="button-small-text toRight field_mrg" process="@this" icon="ui-icon-plusthick">
+				<p:resetInput target=":form:adicionarPuntoEliminacion" />
+			</p:commandButton>
+			<mae:panelGridHeaderHelp value="Sistemas de eliminación o disposición final dentro de la instalación *" conector="eliminacionDesechoHelp" help="#{helps['generadorDesecho.eliminacionDesecho']}" width="600px" />
+		</f:facet>
+
+		<h:outputText value="Estimado Usuario: Recuerde que como generador de desechos peligrosos y/o especiales, Usted es responsable de la gestión de sus desechos peligrosos o especiales “desde la cuna a la tumba”, por lo que, se recomienda que para ingresar la información en esta pantalla, debe previamente consultar con gestores ambientales de transporte que cuenten con el permiso ambiental correspondiente." styleClass="bold text-red alJustify" />
+
+		<ui:include src="/prevencion/registrogeneradordesechos/utiles/eliminacionDesechosInstalacionAdd.xhtml" />
+
+		<p:dataList id="listadoPuntosEliminacion" value="#{eliminacionDesechosInstalacionBean.puntosEliminacion}" type="none" var="punto" rowIndexVar="index" emptyMessage="#{labels['common.table.empty']}">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<p:commandButton styleClass="button-small toRight field_mrg" process="@this" update=":form:listadoPuntosEliminacion :form:adicionarPuntoEliminacion" actionListener="#{eliminacionDesechosInstalacionBean.eliminar(punto)}" icon="ui-icon-trash">
+						<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar los datos asociados al punto de eliminación de desechos?" icon="ui-icon-alert" />
+					</p:commandButton>
+					<p:commandButton styleClass="button-small toRight field_mrg" process="@this" update=":form:adicionarPuntoEliminacion" actionListener="#{eliminacionDesechosInstalacionBean.editar(punto)}" icon="ui-icon-pencil" oncomplete="PF('adicionarPuntoEliminacion').toggle()" />
+					<h:outputText value="Punto de eliminación #{(index + 1)}" />
+				</f:facet>
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w25, null" rowClasses="null, alt">
+					<h:outputText value="Desecho" />
+					<h:outputText value="#{punto.desechoPeligroso.descripcion}" />
+					<h:outputText value="Código" />
+					<h:outputText value="#{punto.desechoPeligroso.clave}" />
+					<h:outputText value="CRTIB" title="#{helps['generadorDesecho.crtib']}" />
+					<h:outputText value="#{punto.desechoPeligroso.nombresCRITB}" />
+				</h:panelGrid>
+				<h:panelGrid styleClass="panel_data w50" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+					<h:outputText value="Cantidad anual (toneladas)" />
+					<h:outputText value="#{punto.cantidadAnualToneladas}" />
+					<h:outputText value="Cantidad anual (unidades)" rendered="#{punto.cantidadAnualUnidades > 0}" />
+					<h:outputText value="#{punto.cantidadAnualUnidades}" rendered="#{punto.cantidadAnualUnidades > 0}" />
+					<h:outputText value="Tipo de eliminación o disposición final" />
+					<h:outputText value="#{punto.tipoEliminacionDesecho}" />
+				</h:panelGrid>
+				<p:inputTextarea value="#{punto.textoAsociadoOpcionOtro}" readonly="true" rows="2" rendered="#{not empty punto.textoAsociadoOpcionOtro}" />
+
+				<p:dataList value="#{punto.puntoEliminacionPrestadorServicioDesechoPeligrosos}" type="none" rowIndexVar="index" var="permisoDatos" id="tablePermisosCantidades" emptyMessage="#{labels['common.table.empty']}">
+					<p:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w50 alTop, field_mrg w50 alTop">
+						<f:facet name="header">
+							<h:outputText value="Datos asociados al permiso ambiental #{(index + 1)}" />
+						</f:facet>
+						<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+							<h:outputText value="Nombre" />
+							<h:outputText value="#{permisoDatos.prestadorServiciosDesechoPeligroso.sedePrestadorServiciosDesechos.prestadorServiciosDesechos.nombre}" />
+							<h:outputText value="Provincia" />
+							<h:outputText value="#{permisoDatos.prestadorServiciosDesechoPeligroso.sedePrestadorServiciosDesechos.ubicacionesGeografica.ubicacionesGeografica}" />
+							<h:outputText value="Cantón" />
+							<h:outputText value="#{permisoDatos.prestadorServiciosDesechoPeligroso.sedePrestadorServiciosDesechos.ubicacionesGeografica}" />
+							<h:outputText value="Permiso ambiental" />
+							<h:outputText value="#{permisoDatos.prestadorServiciosDesechoPeligroso.sedePrestadorServiciosDesechos.codigoPermisoAmbiental}" />
+						</h:panelGrid>
+						<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+							<h:outputText value="Fecha emisión" />
+							<h:outputText value="#{permisoDatos.prestadorServiciosDesechoPeligroso.sedePrestadorServiciosDesechos.fechaPermisoAmbiental}">
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+							</h:outputText>
+							<h:outputText value="Tipo eliminación" />
+							<h:outputText value="#{permisoDatos.prestadorServiciosDesechoPeligroso.tipoEliminacionDesecho}" />
+							<h:outputText value="Fase gestión" />
+							<h:outputText value="#{permisoDatos.prestadorServiciosDesechoPeligroso.faseGestionDesecho}" />
+							<h:outputText value="Capacidad de gestión anual (toneladas)" />
+							<h:outputText value="#{permisoDatos.cantidadToneladas}" />
+							<h:outputText value="Capacidad de gestión anual (unidades)" rendered="#{punto.desechoPeligroso.desechoES_04 or punto.desechoPeligroso.desechoES_06}" />
+							<h:outputText value="#{permisoDatos.cantidadUnidades}" rendered="#{punto.desechoPeligroso.desechoES_04 or punto.desechoPeligroso.desechoES_06}" />
+						</h:panelGrid>
+					</p:panelGrid>
+				</p:dataList>
+
+			</p:panelGrid>
+		</p:dataList>
+	</p:panelGrid>
+</h:panelGroup>
+</html>

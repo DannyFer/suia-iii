@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+	<ui:define name="context-extra">
+		<p:outputLabel>Datos</p:outputLabel>
+		<p:outputLabel>Informe Técnico. </p:outputLabel>
+		<p:commandButton icon="ui-icon-search" onclick="PF('dlg2').show();" />
+
+		<p:outputLabel
+			rendered="#{!elaborarInformeTecnicoAreaBean.observacion.isEmpty()}">Observación</p:outputLabel>
+
+		<p:outputLabel
+			rendered="#{!elaborarInformeTecnicoAreaBean.observacion.isEmpty()}">Datos de la observación</p:outputLabel>
+
+		<p:commandButton
+			rendered="#{!elaborarInformeTecnicoAreaBean.observacion.isEmpty()}"
+			icon="ui-icon-search" onclick="PF('dlg3').show();" />
+
+		<p:dialog header="Observaciones" widgetVar="dlg3" modal="true"
+			height="400">
+			<mae-components:readOnly>
+				<mae-components:readOnly>
+					<control:imputConTextoEnriquecido
+						valor="#{elaborarInformeTecnicoAreaBean.observacion}"
+						soloLectura="true" requerido="false" />
+				</mae-components:readOnly>
+			</mae-components:readOnly>
+		</p:dialog>
+
+
+		<p:dialog header="Informe Técnico" widgetVar="dlg2" modal="true"
+			height="400">
+			<mae-components:readOnly>
+				<ui:include src="tdrVistaPrevia.xhtml" />
+			</mae-components:readOnly>
+		</p:dialog>
+	</ui:define>
+	<ui:define name="content">
+		<h:form>
+			<f:loadBundle var="helps"
+				basename="ec.gob.ambiente.core.resources.helps_es" />
+			<f:loadBundle var="msg"
+				basename="ec.gob.ambiente.core.resources.messages_es" />
+
+			<f:viewParam name="area"
+				value="#{elaborarInformeTecnicoAreaBean.area}" />
+
+			<h3>Elaborar informe técnico</h3>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				columnClasses=" contentVerticalPadding"
+				rendered="#{elaborarInformeTecnicoAreaBean.consolidado}">
+				<f:facet name="header">
+					<h:outputText value="Informes" />
+				</f:facet>
+
+				<ui:repeat value="#{elaborarInformeTecnicoAreaBean.usuarios}"
+					var="item">
+					<p:panelGrid columns="2" styleClass="w100"
+						columnClasses="w90, w10 alRight">
+						<p:outputLabel>#{msg["label.prevencion.tdr.area.".concat(item)]}</p:outputLabel>
+
+						<p:commandButton icon="ui-icon-search"
+							actionListener="#{elaborarInformeTecnicoAreaBean.cargarFichero(item)}"
+							onclick="PF('dlgdescargar').show();" process="@this" />
+					</p:panelGrid>
+				</ui:repeat>
+
+				<!-- 				<p:commandButton value="Descargar" ajax="false" process="@this" -->
+				<!-- 					icon="ui-icon-arrowthick-1-s" styleClass="primary"> -->
+				<!-- 					<p:fileDownload value="#{elaborarInformeTecnicoAreaBean.streamMJ}" /> -->
+				<!-- 				</p:commandButton> -->
+
+				<p:dialog header="Informe" widgetVar="dlgdescargar" modal="true"
+					height="400">
+					<p:commandButton value="Descargar" ajax="false" process="@this"
+						update="@this" icon="ui-icon-arrowthick-1-s" styleClass="primary">
+						<p:fileDownload value="#{elaborarInformeTecnicoAreaBean.stream}" />
+					</p:commandButton>
+				</p:dialog>
+			</p:panelGrid>
+		</h:form>
+
+		<h:form id="form">
+			<p:panelGrid columns="4" layout="grid" styleClass="w100 alCenter"
+				rendered="#{elaborarInformeTecnicoAreaBean.requiereFacilitadores}">
+				<f:facet name="header">
+					<mae:panelGridHeaderHelp value="#{msg['label.facilitadores']}"
+						conector="actividadHelp"
+						help="#{helps['registro.numeroFacilitadores']}" />
+				</f:facet>
+
+				<p:outputLabel value="#{msg['label.nroFacilitadores']}"
+					for="facilitador" />
+				<h:panelGroup>
+					<p:inputText
+						value="#{elaborarInformeTecnicoAreaBean.tdrEia.numeroFacilitadores}"
+						id="facilitador">
+						<f:validateDoubleRange minimum="1" maximum="9" />
+						<pe:keyFilter mask="num" />
+					</p:inputText>
+				</h:panelGroup>
+				<h:outputText />
+				<h:outputText />
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				columnClasses=" contentVerticalPadding"
+				rendered="#{elaborarInformeTecnicoAreaBean.consolidado}">
+				<f:facet name="header">
+					<h:outputText value="#{msg['label.prevencion.tdr.criterios']} *" />
+				</f:facet>
+
+				<p:selectOneRadio id="opcion"
+					requiredMessage="#{msg['label.prevencion.tdr.criteriosDescripcion']}"
+					value="#{elaborarInformeTecnicoAreaBean.cumpleCriterios}"
+					required="#{elaborarInformeTecnicoAreaBean.consolidado}">
+					<f:selectItem itemLabel="Si" itemValue="true" />
+					<f:selectItem itemLabel="No" itemValue="false" />
+				</p:selectOneRadio>
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				columnClasses=" contentVerticalPadding" rendered="true">
+				<f:facet name="header">
+					<h:outputText value="#{msg['label.prevencion.tdr.antecedentes']} *"
+						for="antecedentes" />
+				</f:facet>
+
+				<control:imputConTextoEnriquecido id="antecedentes"
+					requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.antecedentes']} #{msg['label.prevencion.tdr.requerido']}"
+					valor="#{elaborarInformeTecnicoAreaBean.observacionTdrEiaLiciencia.antecedentes}"
+					rendered="true" />
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				columnClasses=" contentVerticalPadding" rendered="true">
+				<f:facet name="header">
+					<h:outputText value="#{msg['label.prevencion.tdr.objetivos']} *"
+						for="objetivos" />
+				</f:facet>
+
+				<control:imputConTextoEnriquecido id="objetivos"
+					requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.objetivos']} #{msg['label.prevencion.tdr.requerido']}"
+					valor="#{elaborarInformeTecnicoAreaBean.observacionTdrEiaLiciencia.objetivos}"
+					rendered="true" />
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				columnClasses=" contentVerticalPadding" rendered="true">
+				<f:facet name="header">
+					<h:outputText
+						value="#{msg['label.prevencion.tdr.caracteristicasImportantesProyecto']} *"
+						for="caracteristicasImportantesProyecto" />
+				</f:facet>
+
+				<control:imputConTextoEnriquecido
+					id="caracteristicasImportantesProyecto"
+					requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.caracteristicasImportantesProyecto']} #{msg['label.prevencion.tdr.requerido']}"
+					valor="#{elaborarInformeTecnicoAreaBean.observacionTdrEiaLiciencia.caracteristicasImportantesProyecto}"
+					rendered="true" />
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				columnClasses=" contentVerticalPadding" rendered="true">
+				<f:facet name="header">
+					<h:outputText
+						value="#{msg['label.prevencion.tdr.evaluacionTecnicaGeneral']} *"
+						for="" />
+				</f:facet>
+
+				<control:imputConTextoEnriquecido id="evaluacionTecnicaGeneral"
+					requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.evaluacionTecnicaGeneral']} #{msg['label.prevencion.tdr.requerido']}"
+					valor="#{elaborarInformeTecnicoAreaBean.observacionTdrEiaLiciencia.evaluacionTecnicaGeneral}"
+					rendered="true" />
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				columnClasses=" contentVerticalPadding" rendered="true">
+				<f:facet name="header">
+					<h:outputText value="#{msg['label.prevencion.tdr.observacion']} *"
+						for="" />
+				</f:facet>
+
+				<control:imputConTextoEnriquecido id="observacion"
+					requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.observacion']} #{msg['label.prevencion.tdr.requerido']}"
+					valor="#{elaborarInformeTecnicoAreaBean.observacionTdrEiaLiciencia.observacion}"
+					rendered="true" />
+			</p:panelGrid>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				columnClasses=" contentVerticalPadding" rendered="true">
+				<f:facet name="header">
+					<h:outputText
+						value="#{msg['label.prevencion.tdr.conclusionesRecomendaciones']} *" />
+				</f:facet>
+
+				<control:imputConTextoEnriquecido id="conclusionesRecomendaciones"
+					requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.conclusionesRecomendaciones']} #{msg['label.prevencion.tdr.requerido']}"
+					valor="#{elaborarInformeTecnicoAreaBean.observacionTdrEiaLiciencia.conclusionesRecomendaciones}"
+					rendered="true" />
+			</p:panelGrid>
+
+			<div class="buttons main">
+				<p:commandButton value="Guardar" styleClass="secondary"
+					update=":form"
+					action="#{ingresarObservacionesGeneralTDRController.guardarObservacionesGeneral()}"
+					title="Guardar datos" icon="ui-icon-disk">
+				</p:commandButton>
+				<p:commandButton value="Enviar" id="enviar"
+					rendered="#{ingresarObservacionesGeneralTDRController.validarObservacionesGeneral()}"
+					action="#{ingresarObservacionesGeneralTDRController.enviarObservacionesGeneral()}"
+					title="Enviar datos" icon="ui-icon-check">
+				</p:commandButton>
+			</div>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

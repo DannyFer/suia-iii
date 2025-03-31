@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+
+		<mae-components:readOnly>
+			<ui:include src="/proyectos/verProyectoRcoaDatos.xhtml" />
+		</mae-components:readOnly>
+
+		<h:form id="form">
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				columnClasses="w100">
+				<f:facet name="header">
+					<h:outputText value="Documentos del proyecto" />
+				</f:facet>
+				<h:panelGrid columns="2" styleClass="w100"
+					columnClasses="w50 alTop, field_mrg w50 alTop">
+					<h:panelGrid styleClass="panel_data" columns="2"
+						columnClasses="header, w20px alCenter" rowClasses="null, alt">
+						<h:outputText value="Coordenadas del área geográficas" />
+						<p:commandButton icon="ui-icon-search"
+							styleClass="button-small primary" immediate="true"
+							action="#{asignarAreaResponsableController.descargarCoorGeo()}"
+							ajax="false" />
+
+						<h:outputText value="Coordenadas del área implantación" />
+						<p:commandButton icon="ui-icon-search"
+							styleClass="button-small primary" immediate="true"
+							action="#{asignarAreaResponsableController.descargarCoorImpl()}"
+							ajax="false" />
+					</h:panelGrid>
+				</h:panelGrid>
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				columnClasses="w100">
+				<f:facet name="header">
+					<h:outputText value="Asignar Autoridad Ambiental Competente" />
+				</f:facet>
+
+				<p:selectOneMenu
+					value="#{asignarAreaResponsableController.proyectoRcoa.areaResponsable}"
+					required="true"
+					requiredMessage="Autoridad Ambiental Competente es requerido"
+					styleClass="w100" filter="true" filterBy="#{item.areaName}"
+					filterMatchMode="contains" converter="selectItemConverter">
+					<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+					<f:selectItems
+						value="#{asignarAreaResponsableController.listaAutoridadAmbientalCompetente}"
+						var="item" itemValue="#{item}"
+						itemLabel="#{item.areaName} (#{item.areaAbbreviation})" />
+					<p:ajax event="change" process="@this" update="pnlAreaCi" />
+				</p:selectOneMenu>
+			</p:panelGrid>
+
+			<h:panelGroup id="pnlAreaCi">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					columnClasses="w100"
+					rendered="#{asignarAreaResponsableController.proyectoRcoa.areaResponsable.tipoArea.siglas eq 'EA'}">
+					<f:facet name="header">
+						<h:outputText
+							value="Asignar Autoridad que emite el Certificado de Intersección" />
+					</f:facet>
+
+					<p:selectOneMenu
+						value="#{asignarAreaResponsableController.proyectoRcoa.areaInventarioForestal}"
+						required="true"
+						requiredMessage="Autoridad que emite el Certificado de Intersección es requerido"
+						styleClass="w100" filter="true" filterBy="#{item.areaName}"
+						filterMatchMode="contains" converter="selectItemConverter">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+						<f:selectItems
+							value="#{asignarAreaResponsableController.listaAutoridadAmbientalMaae}"
+							var="item" itemValue="#{item}"
+							itemLabel="#{item.areaName} (#{item.areaAbbreviation})" />
+						<p:ajax event="change" process="@this" />
+					</p:selectOneMenu>
+				</p:panelGrid>
+			</h:panelGroup>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Guardar" icon="ui-icon-disk"
+						action="#{asignarAreaResponsableController.guardar()}"
+						styleClass="wizard-custom-btn-back" process="@this @form">
+						<p:confirm header="Confirmación"
+							message="¿Está seguro que desea asignar la Autoridad Ambiental Competente?" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

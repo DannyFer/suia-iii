@@ -1,0 +1,143 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:controles="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:hh="http://java.sun.com/jsf/html">
+<ui:composition
+	template="/prevencion/licenciamiento-ambiental/eia/verEIA.xhtml">
+	<ui:define name="content-eia">
+			<h:form id="frmDatos">
+			<p:panel header="Identificación de hallazgos">
+					<p:panelGrid columns="2" layout="grid" styleClass="w100"
+						id="panelGridAdjuntos">
+						<f:facet name="header">
+							<h:outputText value="Documento de respaldo" />
+						</f:facet>
+						
+						<h:panelGrid styleClass="panel_data mw50" columns="2" columnClasses="header, null" rowClasses="null, alt">
+						
+							<p:outputLabel id="etiqueta"
+								value="#{empty identificacionHallazgosEIAController.documentoGeneral.nombre ? 'Documento de respaldo (zip)' : identificacionHallazgosEIAController.documentoGeneral.nombre}" />
+
+
+							<p:commandButton id="download"
+								rendered="#{not empty identificacionHallazgosEIAController.documentoGeneral.nombre}"
+								icon="ui-icon-arrowthick-1-s" ajax="false"
+								styleClass="button-small primary" title="Ver" immediate="true">
+								<p:fileDownload
+									value="#{identificacionHallazgosEIAController.getStreamContent()}" />
+							</p:commandButton>
+						</h:panelGrid>
+						<br></br>
+
+					</p:panelGrid>
+					<br></br>
+			
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					id="panelGridIdentificacion">
+					<f:facet name="header">
+						<h:outputText value="Identificación de hallazgos *" />
+					</f:facet>
+					<f:facet name="header">
+
+					</f:facet>
+
+					<p:dataTable id="tableIdentificacion"
+						value="#{identificacionHallazgosEIAController.listaIdentificacionHallazgos}"
+						var="ide" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Normativa">
+							<h:outputText value="#{ide.normativa}" />
+						</p:column>
+						<p:column headerText="Articulo">
+							<h:outputText value="#{ide.articulo}" />
+						</p:column>
+						<p:column headerText="Tipo de conformidad">
+							<h:outputText value="#{ide.conformidad}" />
+						</p:column>
+						<p:column headerText="Evidencia observada">
+							<h:outputText value="#{ide.evidencia}" />
+						</p:column>
+						<p:column headerText="Nombre documento">
+							<h:outputText value="#{ide.documento}" />
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton icon="ui-icon-pencil"
+								styleClass="button-small primary"
+								action="#{identificacionHallazgosEIAController.editarHallazgo(ide)}"
+								update=":frmDlg3:dlg3" process="@this"
+								oncomplete="PF('dlg3').show()" />
+						</p:column>
+					</p:dataTable>
+
+				</p:panelGrid>
+			</p:panel>
+
+		</h:form>
+
+		<h:form id="frmDlg3">
+			<p:dialog id="dlg3" header="Identificación de hallazgos"
+				widgetVar="dlg3" modal="true" width="600" resizable="false"
+				draggable="false">
+
+				<h:panelGrid id="panelDatosHDialogo" columns="1"
+					styleClass="w100 separatorBottom"
+					columnClasses="w50, field_mrg w50">
+
+					<p:outputLabel for="normativa" value="Normativa" />
+
+					<p:inputText id="normativa" required="true" readonly="true"
+						value="#{identificacionHallazgosEIAController.identificacionHallazgosEia.normativa}"
+						styleClass="w100" />
+
+					<p:outputLabel id="labelArticulo" for="articulo" value="Articulo" />
+					<p:inputTextarea id="articulo" required="true" cols="100" rows="7"
+						autoResize="false" readonly="true"
+						value="#{identificacionHallazgosEIAController.identificacionHallazgosEia.articulo}" />
+
+					<p:outputLabel for="conformidad" value="Conformidad" />
+					<p:inputText id="conformidad" required="true" readonly="true"
+						value="#{identificacionHallazgosEIAController.identificacionHallazgosEia.conformidad}"
+						styleClass="w100" />
+
+					<p:outputLabel id="labelEvidencia" for="evidencia"
+						value="Evidencia encontrada" />
+					<p:inputTextarea id="evidencia" required="true" rows="4" cols="100" readonly="true"
+						value="#{identificacionHallazgosEIAController.identificacionHallazgosEia.evidencia}" />
+						
+					<p:outputLabel id="labelNombreDoc" for="nombreDoc"
+						value="Nombre documento" />
+					<p:inputText id="nombreDoc" readonly="true"
+						value="#{identificacionHallazgosEIAController.identificacionHallazgosEia.documento}"
+						styleClass="w100" />
+
+
+				</h:panelGrid>
+
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton value="Cancelar" type="button"
+						onclick="PF('dlg3').hide()" styleClass="secondary" />
+				</div>
+
+				<script type="text/javascript">
+					function showModalHallazgo(xhr, status, args) {
+	    				if (args.hallazgo)
+							PF('dlg3').hide();
+	    				else
+	    					PF('dlg3').show();
+					}
+				</script>
+
+			</p:dialog>
+		</h:form>
+
+
+	</ui:define>
+</ui:composition>
+</html>

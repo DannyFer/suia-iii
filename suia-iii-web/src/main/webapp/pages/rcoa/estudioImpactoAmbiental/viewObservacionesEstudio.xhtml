@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+	<p:panelGrid id="observacionesTecnicosGrid" columns="1" layout="grid"
+		styleClass="w100"
+		rendered="#{(estudioImpactoAmbientalController.paginaActiva ne 'EIA_PLAN_MANEJO_AMBIENTAL_Y_SUB_PLANES' and estudioImpactoAmbientalController.mostrarResumenObservaciones) or (estudioImpactoAmbientalController.paginaActiva eq 'EIA_PLAN_MANEJO_AMBIENTAL_Y_SUB_PLANES' and estudioImpactoAmbientalController.mostrarResumenObservaciones and !estudioImpactoAmbientalController.requiereIngresoPlan)}">
+
+		<p:dataList type="none" styleClass="noBorder" paginator="true"
+			rows="10" paginatorPosition="bottom"
+			currentPageReportTemplate="{currentPage} de {totalPages}"
+			value="#{estudioImpactoAmbientalController.getObservacionesTecnicoSeccion()}"
+			var="obj" emptyMessage="No hay observaciones.">
+			<f:facet name="header">
+				<h:outputText
+					value="Observaciones (total: #{estudioImpactoAmbientalController.getObservacionesTecnicoSeccion().size()})" />
+			</f:facet>
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Observación del " />
+					<h:outputText value="#{obj.fechaRegistro}">
+						<f:convertDateTime pattern="dd/MM/yyyy" />
+					</h:outputText>
+				</f:facet>
+				<h:panelGrid styleClass="w100" columns="2"
+					columnClasses="w50 alTop, field_mrg w50 alTop">
+					<h:panelGrid styleClass="panel_data w100" columns="2"
+						columnClasses="header w50, null" rowClasses="null, alt">
+						<h:outputText value="Usuario" />
+						<h:outputText value="#{obj.usuario.persona.nombre}" />
+					</h:panelGrid>
+					<h:panelGrid styleClass="panel_data w100" columns="2"
+						columnClasses="header w50, null" rowClasses="null, alt">
+						<h:outputText value="Fecha" />
+						<h:outputText value="#{obj.fechaRegistro}">
+							<f:convertDateTime pattern="dd/MM/yyyy, h:mm:ss aa" />
+						</h:outputText>
+					</h:panelGrid>
+				</h:panelGrid>
+				<h:panelGrid styleClass="w100" columns="2"
+					columnClasses="w50 alTop, field_mrg w50 alTop">
+					<h:panelGrid styleClass="panel_data w100" columns="2"
+						columnClasses="header w50, null" rowClasses="null, alt">
+						<h:outputText value="Campo observado" />
+						<h:outputText value="#{obj.campo}" required="#{!obj.disabled}" />
+					</h:panelGrid>
+					<h:panelGrid styleClass="panel_data w100" columns="2"
+						columnClasses="header w50, null" rowClasses="null, alt">
+						<h:outputText value="¿Observación corregida?" />
+						<h:outputText value="#{obj.observacionCorregida}"
+							converter="booleanToStringConverter" />
+					</h:panelGrid>
+				</h:panelGrid>
+
+				<p:outputLabel value="Observación" styleClass="bold"
+					for="observacion" />
+				<control:imputConTextoEnriquecido id="observacion" valor="#{obj.descripcion}"
+							soloLectura="true" requerido="#{!obj.disabled}" 
+							requiredMessage="El campo 'Observación' es requerido"/>	
+					<ui:remove>
+				<p:inputTextarea value="#{obj.descripcion}" id="observacion"
+					readonly="true" rows="2" autoResize="false" maxlength="450" />
+					</ui:remove>
+			</p:panelGrid>
+		</p:dataList>
+
+	</p:panelGrid>
+</ui:composition>

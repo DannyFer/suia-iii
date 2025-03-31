@@ -1,0 +1,235 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task-projectRGD.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+	
+	 <ui:define name="context-extra">
+		<h:outputText value="Trámite" />
+		<h:outputText value="#{firmarPronunciamientoPermisoRGDController.codigo}" />
+		<p:button href="#{firmarPronunciamientoPermisoRGDController.urlVerTramite}" target="_blank" icon="ui-icon-search"
+		styleClass="primary button-small"/>
+		<h:outputText value="Operador"/>
+		<h:outputText value="#{firmarPronunciamientoPermisoRGDController.datosOperadorRgdBean.datosOperador.nombre}"/>
+		<p:commandButton type="button" icon="ui-icon-search" onclick="PF('dlgProponente').show()"
+			styleClass="primary button-small" />
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form id="idfrmfirma" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }">
+			<h:panelGrid styleClass="alCenter w100" columns="1">
+				<h:outputText value=" Firmar y enviar el oficio de pronunciamiento y Registro de generador de residuos y desechos peligrosos y/o especiales del trámite."
+					styleClass="encabezado1_4em" />
+				<h:panelGrid styleClass="alCenter w66" columns="1">
+					<p:panel styleClass="alCenter">						
+						
+						<h:outputText value="#{firmarPronunciamientoPermisoRGDController.codigo}"  styleClass="encabezado1_4em"/>
+						<h:panelGrid styleClass="alCenter w50" columns="2">
+							<h:outputText value="¿Cuenta con token?" styleClass="encabezado"
+								style="text-align:right" rendered="#{!firmarPronunciamientoPermisoRGDController.ambienteProduccion}"/>
+							<p:selectOneRadio id="verificaToken" value="#{firmarPronunciamientoPermisoRGDController.token}" 
+								rendered="#{!firmarPronunciamientoPermisoRGDController.ambienteProduccion}">
+								<f:selectItem itemLabel="Sí" itemValue="true" />
+								<f:selectItem itemLabel="No" itemValue="false" />
+								<p:ajax event="change" update="idfrmfirma btnEnviar" listener="#{firmarPronunciamientoPermisoRGDController.guardarToken}" />
+							</p:selectOneRadio>
+							
+							<p:outputLabel value="Firmar el oficio de pronunciamiento" rendered="#{firmarPronunciamientoPermisoRGDController.token}"/>
+							<ui:remove>
+							<p:commandButton value="Firmar" type="button" icon="ui-icon-key" styleClass="primary" 
+							onclick="PF('iddialogoficio').show();" update=":frmdialogoficio:pnlFirmaManualOficio"
+							rendered="#{!firmarPronunciamientoPermisoRGDController.token}"/>
+							</ui:remove>
+							<p:commandButton value="Firmar" type="button" icon="ui-icon-key" styleClass="primary"							
+							onclick="window.location.href='#{firmarPronunciamientoPermisoRGDController.firmarOficio()}'" 
+							rendered="#{firmarPronunciamientoPermisoRGDController.token}" />	
+							
+							<p:outputLabel value="Firmar el registro generador" rendered="#{firmarPronunciamientoPermisoRGDController.token}"/>
+							<ui:remove>
+							<p:commandButton value="Firmar" type="button" icon="ui-icon-key" styleClass="primary" 
+							onclick="PF('iddialogReporte').show();" update=":frmdialogReporte:pnlFirmaManualReporte"
+							rendered="#{!firmarPronunciamientoPermisoRGDController.token}"/>
+							</ui:remove>
+							<p:commandButton value="Firmar" type="button" icon="ui-icon-key" styleClass="primary"							
+							onclick="window.location.href='#{firmarPronunciamientoPermisoRGDController.firmarGenerador()}'" 
+							rendered="#{firmarPronunciamientoPermisoRGDController.token}" />
+							
+							<p:outputLabel value="Firmar oficio de pronunciamiento y registro generador" rendered="#{!firmarPronunciamientoPermisoRGDController.token}"/>
+							<p:commandButton value="Firmar" type="button" icon="ui-icon-key" styleClass="primary" 
+							onclick="PF('iddialogReporteOficio').show();" update=":frmdialogReporte:pnlFirmaManualReporte"
+							rendered="#{!firmarPronunciamientoPermisoRGDController.token}"/>
+								
+						</h:panelGrid>
+					</p:panel>
+				</h:panelGrid>
+			</h:panelGrid>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton id="btnEnviar" value="Enviar" process="@this" update="pnlButtons"
+						action="#{firmarPronunciamientoPermisoRGDController.completarTarea()}"
+						icon="ui-icon-check" disabled="#{!firmarPronunciamientoPermisoRGDController.documentosFirmados}">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+					<p:commandButton value="Cancelar" immediate="true"
+						action="#{firmarPronunciamientoPermisoRGDController.cancelar()}"
+						icon="ui-icon-cancel" styleClass="secondary" >
+						<p:confirm
+							message="#{msg['message.confirmacion.cancelacion.tarea']}"
+							header="#{msg['header.confirmacion.cancelacion.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+		</h:form>
+		
+		<h:form id="frmdialogoficio">
+			<p:dialog header="Firma Electrónica Oficio de Pronunciamiento" id="iddialogoficio"
+				widgetVar="iddialogoficio" closeOnEscape="false" modal="true"
+				resizable="false" width="auto" height="auto" position="center top">
+				<p:panel id="pnlFirmaManualOficio">
+					<h:panelGrid columns="2" cellpadding="10"
+						style="text-align:right !important">
+						<p:outputLabel value="1. Descargar el oficio de pronunciamiento" styleClass="bold" />
+						<p:commandButton value="Descargar" ajax="false"	icon="ui-icon-arrowthick-1-s" styleClass="primary" immediate="true">
+							<p:fileDownload value="#{firmarPronunciamientoPermisoRGDController.descargarOficio}" />
+						</p:commandButton>
+						<p:outputLabel for="uploadRequired"
+							value="2. Adjuntar el oficio de pronunciamiento firmado" styleClass="bold" />
+						<p:fileUpload
+							fileUploadListener="#{firmarPronunciamientoPermisoRGDController.uploadListenerOficioFirmada}"
+							multiple="false" sizeLimit="5242880"
+							allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Tamaño de archivo no válido"
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update="lblNombreDocFirmado">
+							<f:attribute name="clave" value=":form" />
+						</p:fileUpload>
+						<p:outputLabel value="" />
+						<h:outputText id="lblNombreDocFirmado"
+							value="#{firmarPronunciamientoPermisoRGDController.nombreDocumentoFirmadoOficio}" />
+					</h:panelGrid>
+				</p:panel>
+				<h:inputHidden id="uploadRequired"
+					required="#{!firmarPronunciamientoPermisoRGDController.token and !firmarPronunciamientoPermisoRGDController.informacionSubidaOficio}" />
+				<p:separator />
+				<div style="display: block; width: 100%; text-align: right;">
+					<p:commandButton value="Cerrar" styleClass="primary" update=":idfrmfirma:btnEnviar"
+						onclick="PF('iddialogoficio').hide()" icon="ui-icon-close" />
+				</div>
+			</p:dialog>
+			</h:form>
+			<h:form id="frmdialogReporte">
+			<p:dialog header="Firma Electrónica Registro Generador  de Desechos" id="iddialogReporte"
+				widgetVar="iddialogReporte" closeOnEscape="false" modal="true"
+				resizable="false" width="auto" height="auto" position="center top">
+				<p:panel id="pnlFirmaManualReporte">
+					<h:panelGrid columns="2" cellpadding="10"
+						style="text-align:right !important">
+						<p:outputLabel value="1. Descargar el Registro Generador  de Desechos" styleClass="bold" />
+						<p:commandButton value="Descargar" ajax="false"	icon="ui-icon-arrowthick-1-s" styleClass="primary" immediate="true">
+							<p:fileDownload value="#{firmarPronunciamientoPermisoRGDController.descargarRegistro}" />
+						</p:commandButton>
+						<p:outputLabel for="uploadRequiredRgd"
+							value="2. Adjuntar el Registro Generador de Desechos firmado" styleClass="bold" />
+						<p:fileUpload
+							fileUploadListener="#{firmarPronunciamientoPermisoRGDController.uploadListenerGeneradorFirmada}"
+							multiple="false" sizeLimit="5242880"
+							allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Tamaño de archivo no válido"
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update="lblNombreDocRgdFirmado">
+							<f:attribute name="clave" value=":form" />
+						</p:fileUpload>
+						<p:outputLabel value="" />
+						<h:outputText id="lblNombreDocRgdFirmado"
+							value="#{firmarPronunciamientoPermisoRGDController.nombreDocumentoFirmadoPermiso}" />
+					</h:panelGrid>
+				</p:panel>
+				<h:inputHidden id="uploadRequiredRgd"
+					required="#{!firmarPronunciamientoPermisoRGDController.token and !firmarPronunciamientoPermisoRGDController.informacionSubidaPermiso}" />
+				<p:separator />
+				<div style="display: block; width: 100%; text-align: right;">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('iddialogReporte').hide()" icon="ui-icon-close" update=":idfrmfirma:btnEnviar" />
+				</div>
+			</p:dialog>
+			</h:form>
+			<h:form id="frmdialogReporteOficio">
+			<p:dialog header="Firma Electrónica" id="iddialogReporte"
+				widgetVar="iddialogReporteOficio" closeOnEscape="false" modal="true"
+				resizable="false" width="auto" height="auto" position="center top">
+				
+				<p:panel id="pnlFirmaManualOficio">
+					<h:panelGrid columns="2" cellpadding="10"
+						style="text-align:right !important">
+						<p:outputLabel value="1. Descargar el oficio de pronunciamiento" styleClass="bold" />
+						<p:commandButton value="Descargar" ajax="false"	icon="ui-icon-arrowthick-1-s" styleClass="primary" immediate="true">
+							<p:fileDownload value="#{firmarPronunciamientoPermisoRGDController.descargarOficio}" />
+						</p:commandButton>
+						<p:outputLabel for="uploadRequired"
+							value="2. Adjuntar el oficio de pronunciamiento firmado" styleClass="bold" />
+						<p:fileUpload
+							fileUploadListener="#{firmarPronunciamientoPermisoRGDController.uploadListenerOficioFirmada}"
+							multiple="false" sizeLimit="5242880"
+							allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Tamaño de archivo no válido"
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update="lblNombreDocFirmado">
+							<f:attribute name="clave" value=":form" />
+						</p:fileUpload>
+						<p:outputLabel value="" />
+						<h:outputText id="lblNombreDocFirmado"
+							value="#{firmarPronunciamientoPermisoRGDController.nombreDocumentoFirmadoOficio}" />
+					</h:panelGrid>
+				
+				<h:inputHidden id="uploadRequired"
+					required="#{!firmarPronunciamientoPermisoRGDController.token and !firmarPronunciamientoPermisoRGDController.informacionSubidaOficio}" />				
+				
+					<h:panelGrid columns="2" cellpadding="10"
+						style="text-align:right !important">
+						<p:outputLabel value="3. Descargar el Registro Generador  de Desechos" styleClass="bold" />
+						<p:commandButton value="Descargar" ajax="false"	icon="ui-icon-arrowthick-1-s" styleClass="primary" immediate="true">
+							<p:fileDownload value="#{firmarPronunciamientoPermisoRGDController.descargarRegistro}" />
+						</p:commandButton>
+						<p:outputLabel for="uploadRequiredRgd"
+							value="4. Adjuntar el Registro Generador de Desechos firmado" styleClass="bold" />
+						<p:fileUpload
+							fileUploadListener="#{firmarPronunciamientoPermisoRGDController.uploadListenerGeneradorFirmada}"
+							multiple="false" sizeLimit="5242880"
+							allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Tamaño de archivo no válido"
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update="lblNombreDocRgdFirmado">
+							<f:attribute name="clave" value=":form" />
+						</p:fileUpload>
+						<p:outputLabel value="" />
+						<h:outputText id="lblNombreDocRgdFirmado"
+							value="#{firmarPronunciamientoPermisoRGDController.nombreDocumentoFirmadoPermiso}" />
+					</h:panelGrid>
+				</p:panel>
+				<h:inputHidden id="uploadRequiredRgd"
+					required="#{!firmarPronunciamientoPermisoRGDController.token and !firmarPronunciamientoPermisoRGDController.informacionSubidaPermiso}" />
+				<p:separator />
+				<div style="display: block; width: 100%; text-align: right;">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('iddialogReporteOficio').hide()" icon="ui-icon-close" update=":idfrmfirma:btnEnviar" />
+				</div>
+			</p:dialog>
+		</h:form>
+		<ui:include src="/pages/rcoa/generadorDesechos/datosOperador.xhtml" />
+	</ui:define>
+</ui:composition>

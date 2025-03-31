@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui"
+	  xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+		>
+
+<h:panelGroup id="envasadoEtiquetadoDesecho">
+	<p:panelGrid columns="1" layout="grid" styleClass="buttonAddEnvasadoEtiquetadoContainer w100">
+		<f:facet name="header">
+			<p:commandButton value="Adicionar" oncomplete="PF('adicionarEnvasadoEtiquetadoDesecho').toggle()" styleClass="buttonAddEnvasadoEtiquetado button-small-text toRight field_mrg"
+							 actionListener="#{envasadoEtiquetadoDesechosBean.cancelar()}"
+							 process="@this" update="datosEnvasadoEtiquetadoDesecho" icon="ui-icon-plusthick" />
+			<mae:panelGridHeaderHelp value="Envasado y etiquetado de desechos peligrosos o especiales *"
+									 conector="envasadoEtiquetadoDesechoHelp"
+									 help="#{helps['generadorDesecho.envasadoEtiquetadoDesecho']}" width="600px" />
+		</f:facet>
+
+		<p:outputLabel value="Estimado usuario, debe completar la información asociada al envasado y etiquetado de cada desecho seleccionado anteriormente." styleClass="bold text-red" escape="false" />
+
+		<ui:include src="/prevencion/registrogeneradordesechos/utiles/envasadoEtiquetadoDesechosAdd.xhtml" />
+
+		<p:dataList id="listadoEnvasadoEtiquetadoDesechos" type="none" value="#{envasadoEtiquetadoDesechosBean.desechosPeligrososEtiquetados}" var="desechoEtiquetado" rowIndexVar="index" emptyMessage="#{labels['common.table.empty']}">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<p:commandButton styleClass="button-small toRight field_mrg" process="@this" update=":form:listadoEnvasadoEtiquetadoDesechos" actionListener="#{envasadoEtiquetadoDesechosBean.eliminar(desechoEtiquetado)}" icon="ui-icon-trash">
+						<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar los datos asociados a este desecho?" icon="ui-icon-alert" />
+					</p:commandButton>
+					<p:commandButton styleClass="button-small toRight field_mrg" process="@this" update=":form:adicionarEnvasadoEtiquetadoDesecho" actionListener="#{envasadoEtiquetadoDesechosBean.editar(desechoEtiquetado)}" icon="ui-icon-pencil" oncomplete="PF('adicionarEnvasadoEtiquetadoDesecho').toggle()" />
+					<h:outputText value="Dato #{(index + 1)}" />
+				</f:facet>
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w25, null" rowClasses="null, alt">
+					<h:outputText value="Desecho" />
+					<h:outputText value="#{desechoEtiquetado.desechoPeligroso.descripcion}" />
+					<h:outputText value="Código" />
+					<h:outputText value="#{desechoEtiquetado.desechoPeligroso.clave}" />
+					<h:outputText value="CRTIB" title="#{helps['generadorDesecho.crtib']}" />
+					<h:outputText value="#{desechoEtiquetado.desechoPeligroso.nombresCRITB}" />
+				</h:panelGrid>
+				<h:panelGrid styleClass="w100" columns="2" columnClasses="w50 alTop, w50 field_mrg alTop">
+					<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+						<h:outputText value="Tipo de envase" />
+						<h:outputText value="#{desechoEtiquetado.tipoEnvase}" />
+						<h:outputText value="Otro tipo de envase" rendered="#{desechoEtiquetado.tipoEnvase.otro}" />
+						<h:outputText value="#{desechoEtiquetado.otroTipoEnvase}" rendered="#{desechoEtiquetado.tipoEnvase.otro}" />
+						<h:outputText value="Capacidad del envase" />
+						<h:outputText value="#{desechoEtiquetado.cantidad}" >
+							<f:convertNumber maxIntegerDigits="10" maxFractionDigits="10" pattern="#0.0000"/>
+						</h:outputText>
+						<h:outputText value="Unidad de medida" />
+						<h:outputText value="#{desechoEtiquetado.unidadMedida}" />
+					</h:panelGrid>
+					<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+						<h:outputText value="Tipo de etiquetado" />
+						<h:outputText value="#{desechoEtiquetado.tipoEtiquetado}" />
+						<h:outputText value="Otro tipo de etiquetado" rendered="#{desechoEtiquetado.tipoEtiquetado.otro}" />
+						<h:outputText value="#{desechoEtiquetado.otroMetodoEtiquetado}" rendered="#{desechoEtiquetado.tipoEtiquetado.otro}" />
+						<h:outputText value="Modelo de etiqueta" />
+						<p:commandButton icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true">
+							<p:fileDownload value="#{envasadoEtiquetadoDesechosBean.getStreamContent(desechoEtiquetado.modeloEtiqueta)}" />
+						</p:commandButton>
+					</h:panelGrid>
+				</h:panelGrid>
+				<p:outputLabel value="Observaciones sobre el método de etiquetado" styleClass="bold" />
+				<p:inputTextarea value="#{desechoEtiquetado.observaciones}" rows="2" styleClass="w100" readonly="true" />
+			</p:panelGrid>
+		</p:dataList>
+	</p:panelGrid>
+</h:panelGroup>
+
+
+</html>

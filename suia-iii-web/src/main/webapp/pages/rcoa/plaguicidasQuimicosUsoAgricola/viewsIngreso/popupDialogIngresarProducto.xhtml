@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<h:form id="formDialog">
+
+	<p:dialog header="Detalle del Producto" id="dlgAgregarProducto"
+		widgetVar="dlgAgregarProducto" modal="true" resizable="false"
+		width="700" closable="false">
+
+		<p:panelGrid id="pnlCultivoAdd" columns="2"
+			styleClass="panel_data w100" columnClasses="header w30, w70">
+
+			<p:outputLabel value="Nombre común del cultivo:" style="color: white"
+				for="cmbNombreComunCul" />
+			<p:selectOneMenu id="cmbNombreComunCul"
+				value="#{actualizarInformacionEtiquetaController.detalleProyectoPlaguicidas.cultivo}"
+				converter="selectItemConverter" filter="true"
+				filterMatchMode="startsWith" required="true"
+				disabled="#{!actualizarInformacionEtiquetaController.habilitarCultivo}">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{actualizarInformacionEtiquetaController.listaCultivos}"
+					var="cultivo" itemLabel="#{cultivo.nombreComun}"
+					itemValue="#{cultivo}" />
+				<p:ajax process="@this" update="cmbNombreCientifico pnlPlagaAdd"
+					listener="#{actualizarInformacionEtiquetaController.recuperarNombresCientificos()}" />
+			</p:selectOneMenu>
+
+			<p:outputLabel value="Nombre científico del cultivo:"
+				style="color: white" for="cmbNombreCientifico" />
+			<p:selectOneMenu id="cmbNombreCientifico" styleClass="cmbcursive"
+				value="#{actualizarInformacionEtiquetaController.detalleProyectoPlaguicidas.nombreCientificoCultivo}"
+				converter="selectItemConverter" filter="true"
+				filterMatchMode="startsWith" required="true"
+				disabled="#{!actualizarInformacionEtiquetaController.habilitarCultivo}">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{actualizarInformacionEtiquetaController.listaNombresCultivos}"
+					var="cientifico" itemLabel="#{cientifico}"
+					itemValue="#{cientifico}" />
+				<p:ajax process="@this" update="pnlPlagaAdd" />
+			</p:selectOneMenu>
+		</p:panelGrid>
+		<p:separator />
+
+		<p:panelGrid id="pnlPlagaAdd" columns="2" styleClass="panel_data w100"
+			columnClasses="header w30, w70">
+			<p:outputLabel value="Nombre cientifico de plaga:"
+				style="color: white" for="cmbNombreCienPlaga" />
+			<p:selectOneMenu id="cmbNombreCienPlaga" styleClass="cmbcursive"
+				value="#{actualizarInformacionEtiquetaController.nuevoPlagaCultivo.plaga}"
+				converter="selectItemConverter" filter="true"
+				filterMatchMode="startsWith">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{actualizarInformacionEtiquetaController.listaPlagas}"
+					var="plaga" itemLabel="#{plaga.nombreCientifico}"
+					itemValue="#{plaga}" />
+				<p:ajax process="@this" update="cmbNombreComPlaga"
+					listener="#{actualizarInformacionEtiquetaController.recuperarNombresComunes()}" />
+			</p:selectOneMenu>
+
+			<p:outputLabel value="Nombre común de Plaga:" style="color: white"
+				for="cmbNombreComPlaga" />
+			<p:selectOneMenu id="cmbNombreComPlaga"
+				value="#{actualizarInformacionEtiquetaController.nuevoPlagaCultivo.nombreComunPlaga}"
+				converter="selectItemConverter" filter="true"
+				filterMatchMode="startsWith">
+				<f:selectItem itemLabel="#{labels['common.item.choose']}"
+					itemValue="#{null}" noSelectionOption="true" />
+				<f:selectItems
+					value="#{actualizarInformacionEtiquetaController.listaNombresPlagas}"
+					var="plaga" itemLabel="#{plaga}" itemValue="#{plaga}" />
+				<p:ajax process="@this :formDialog:pnlCultivoAdd"
+					update="dtPlagas pnlPlagaAdd pnlCultivoAdd"
+					listener="#{actualizarInformacionEtiquetaController.aceptarPlaga()}" />
+			</p:selectOneMenu>
+		</p:panelGrid>
+
+		<p:separator />
+
+		<p:panelGrid id="pnlDosisAdd" columns="2" styleClass="panel_data w100"
+			columnClasses="header w30, w70">
+
+			<p:outputLabel value="Dosis:" style="color: white" for="txtDosis" />
+
+			<h:panelGrid columns="3" styleClass="w100"
+				columnClasses="null w40, null w30, null w30">
+				<pe:inputNumber id="txtDosis"
+					value="#{actualizarInformacionEtiquetaController.nuevaDosisCultivo.dosis}"
+					thousandSeparator="" maxValue="9999.999" required="true"
+					autocomplete="off">
+					<p:ajax process="@this" />
+				</pe:inputNumber>
+				<p:selectOneMenu id="cmbUnidades"
+					value="#{actualizarInformacionEtiquetaController.nuevaDosisCultivo.unidad}"
+					 filter="true"
+					filterMatchMode="startsWith" required="true"
+					requiredMessage="Seleccione la unidad para la dosis">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="#{null}" noSelectionOption="true" />
+					<f:selectItems
+						value="#{actualizarInformacionEtiquetaController.listaUnidades}"
+						var="unidad" itemLabel="#{unidad.nombre}" itemValue="#{unidad.nombre}" />
+					<p:ajax process="@this" />
+				</p:selectOneMenu>
+				<p:commandButton value="Agregar dosis" styleClass="primary"
+					process="@this :formDialog:pnlDosisAdd :formDialog:pnlCultivoAdd"
+					update="tblDosis :formDialog:pnlDosisAdd"
+					actionListener="#{actualizarInformacionEtiquetaController.aceptarDosis()}" />
+			</h:panelGrid>
+		</p:panelGrid>
+
+		<br />
+
+		<h:panelGrid styleClass="w100" columns="1" id="pnlPlagasDosis">
+			<p:dataTable id="dtPlagas" var="item" styleClass="table table-hover"
+				value="#{actualizarInformacionEtiquetaController.listaPlagaCultivo}"
+				paginator="true" paginatorAlwaysVisible="false"
+				paginatorPosition="bottom"
+				emptyMessage="#{labels['common.table.empty']}"
+				currentPageReportTemplate="{currentPage} de {totalPages}" rows="5"
+				rowsPerPageTemplate="5,10,15">
+
+				<p:column headerText="Plaga">
+					<h:outputText value="#{item.plaga.nombreCientifico}"
+						styleClass="italic" />
+					<h:outputText value=" (#{item.nombreComunPlaga})" />
+				</p:column>
+				<p:column headerText="Acción" styleClass="w70px alCenter">
+					<p:commandButton update="dtPlagas"
+						styleClass="button-small primary" process="@this"
+						icon="ui-icon-trash"
+						actionListener="#{actualizarInformacionEtiquetaController.eliminarPlaga(item)}"
+						immediate="true">
+						<p:confirm icon="ui-icon-alert" header="Confirmación"
+							message="¿Está seguro de eliminar el registro?" />
+					</p:commandButton>
+				</p:column>
+			</p:dataTable>
+
+			<br />
+
+			<p:dataTable id="tblDosis" var="item" styleClass="table table-hover"
+				value="#{actualizarInformacionEtiquetaController.listaDosisCultivo}"
+				paginator="true" paginatorAlwaysVisible="false"
+				paginatorPosition="bottom"
+				emptyMessage="#{labels['common.table.empty']}"
+				currentPageReportTemplate="{currentPage} de {totalPages}" rows="5"
+				rowsPerPageTemplate="5,10,15">
+				<p:column headerText="Dosis aprobada en la etiqueta">
+					<h:outputText value="#{item.dosis} #{item.unidad}" />
+				</p:column>
+				<p:column headerText="Acción" styleClass="w70px alCenter">
+					<p:commandButton update="tblDosis"
+						styleClass="button-small primary" process="@this"
+						icon="ui-icon-trash"
+						actionListener="#{actualizarInformacionEtiquetaController.eliminarDosis(item)}"
+						immediate="true">
+						<p:confirm icon="ui-icon-alert" header="Confirmación"
+							message="¿Está seguro de eliminar el registro?" />
+					</p:commandButton>
+				</p:column>
+			</p:dataTable>
+
+			<h:inputHidden
+				validator="#{actualizarInformacionEtiquetaController.validatePlagasDosis}" />
+		</h:panelGrid>
+
+		<br />
+		<p:outputPanel>
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" immediate="true"
+					oncomplete="PF('dlgAgregarProducto').hide();" resetValues="true"
+					actionListener="#{actualizarInformacionEtiquetaController.limpiarAdicionarCultivo()}"
+					process="@this" update=":form:dtProductos" />
+				<p:commandButton value="Guardar"
+					actionListener="#{actualizarInformacionEtiquetaController.aceptarAdicionarCultivo()}"
+					oncomplete="if(!args.validationFailed) PF('dlgAgregarProducto').hide();"
+					update=":form:dtProductos"
+					process="@this :formDialog:pnlCultivoAdd :formDialog:pnlPlagasDosis" />
+			</div>
+		</p:outputPanel>
+	</p:dialog>
+
+</h:form>
+</html>

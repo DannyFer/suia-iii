@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"	
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{informacionGeneralController.validarTareaBpmV2()}"/>
+        <ui:include src="contenido/menuMineria.xhtml" />
+        <style>
+            ul.error {
+                padding: 0;
+            }
+
+            ul.error li {
+                list-style: none;
+            }
+        </style>
+
+        <div class="content">
+            <h:form id="frmEnviar">
+                <p styleClass="allJustify">#{fichaMineriaEnviarControllerV2.mensaje}</p>
+                <h:inputHidden value="#{fichaMineriaEnviarControllerV2.pdf}" />
+
+                <h:panelGrid columns="2" style="margin-bottom:10px" cellpadding="5">
+                    <h:outputLabel for="condiciones" value="He leído y comprendo las condiciones" />
+
+                    <p:selectBooleanCheckbox id="condiciones" value="#{fichaMineriaEnviarControllerV2.condiciones}" required="true">
+                        <p:ajax update=":frmEnviar" process="@this" />
+                    </p:selectBooleanCheckbox>
+                </h:panelGrid>
+
+
+                <div class="buttons main">
+                	<p:commandButton value="Atrás" immediate="true" process="@this"  rendered="#{fichaMineriaEnviarControllerV2.ppc1()}"
+							action="/prevencion/categoria2/v2/fichaMineria/participacionCiudadanaSubir.jsf?faces-redirect=true"
+							icon="ui-icon-arrowthick-1-w" />
+							
+					<p:commandButton value="Atrás" immediate="true" process="@this"  rendered="#{!fichaMineriaEnviarControllerV2.ppc1()}"
+							action="/prevencion/categoria2/v2/fichaMineria/inventarioForestal.jsf?faces-redirect=true"
+							icon="ui-icon-arrowthick-1-w" />				 
+  
+                    <p:commandButton value="Visualizar ficha" styleClass="large" disabled="#{!fichaMineriaEnviarControllerV2.condiciones}"
+                                     rendered="#{fichaMineriaEnviarControllerV2.validarFichaMineraCompleta() and (fichaMineriaEnviarControllerV2.fichaAmbientalMineria.validarParticipacionCiudadana  or fichaMineriaEnviarControllerV2.ppc())}"
+                                     onclick="PF('dlg1').show();" icon="ui-icon-check"  immediate="true" process="@this">
+                    </p:commandButton>
+
+                    <p:commandButton value="Visualizar ficha" styleClass="large"  immediate="true" disabled="#{!fichaMineriaEnviarControllerV2.condiciones}"
+                                     rendered="#{!fichaMineriaEnviarControllerV2.validarFichaMineraCompleta() or (!fichaMineriaEnviarControllerV2.fichaAmbientalMineria.validarParticipacionCiudadana  and !fichaMineriaEnviarControllerV2.ppc())}"
+                                     onclick="PF('dlg2').show();" icon="ui-icon-check" process="@this"  type="button">
+                    </p:commandButton>
+
+
+                </div>
+
+                <p:dialog header="Registro Ambiental Minería Artesanal" onShow="#{fichaMineriaEnviarControllerV2.validarPagos()}"
+                          widgetVar="dlg1" modal="true" height="400px" width="90%">
+                    <br />
+                    <div align="left">
+                        <h:outputText
+                            value="Nota: En caso de que necesite realizar cambios en su registro ambiental cierre la ventana y seleccione la sección en la cual desea modificar la información."
+                            styleClass="encabezado text-red" />
+                    </div>
+                    <h:panelGroup>
+                        <div class="buttons main">
+                            <p:commandButton styleClass="large" value="Finalizar registro"
+                                             icon="ui-icon-check"
+                                             rendered="#{!fichaMineriaEnviarControllerV2.mostrarMensaje}"
+                                             action="#{fichaMineriaEnviarControllerV2.enviarFicha()}"
+                                             process="@this">
+                                <p:confirm header="Confirmación"
+                                           message="#{fichaMineriaEnviarControllerV2.mensajeFinalizacion}"
+                                           icon="ui-icon-alert" />
+                            </p:commandButton>
+                            <p:commandButton styleClass="large" value="Finalizar registro"
+                                             icon="ui-icon-check" 
+                                             rendered="#{fichaMineriaEnviarControllerV2.mostrarMensaje}"
+                                             onclick="PF('continuarDialog').show();"
+                                             process="@this">
+                                <p:confirm header="Confirmación"
+                                           message="#{fichaMineriaEnviarControllerV2.mensajeFinalizacion}"
+                                           icon="ui-icon-alert" />
+                            </p:commandButton>
+                        </div>
+                        <br />
+                        <br />
+                        <object data="#{fichaMineriaEnviarControllerV2.pdf}?pfdrid_c=true"
+                                height="350px" width="100%"/>
+                    </h:panelGroup>
+
+                </p:dialog>
+
+
+
+            </h:form>
+
+            <p:dialog header="Registro Ambiental Minería Artesanal" widgetVar="dlg2"
+                      modal="true" height="300">
+                <h:outputText
+                        value="Para finalizar el Registro Ambiental debe completar los siguientes puntos:" />
+                <ul class="error alLeft text-red ">
+                    <li><h:outputLink
+                            value="#{request.contextPath}/prevencion/categoria2/v2/fichaMineria/default.jsf"
+                            rendered="#{!fichaMineriaEnviarControllerV2.fichaAmbientalMineria.validarInformacionGeneral}">
+                        <h:outputText value="1 Información general" class="text-red " />
+                    </h:outputLink></li>
+                    <li><h:outputLink
+                            value="#{request.contextPath}/prevencion/categoria2/v2/fichaMineria/caracteristicas.jsf"
+                            rendered="#{!fichaMineriaEnviarControllerV2.fichaAmbientalMineria.validarCaracteristicasGenerales}">
+                        <h:outputText value="2 Características generales"
+                                      class="text-red " />
+                    </h:outputLink></li>
+                    <li><h:outputLink
+                            value="#{request.contextPath}/prevencion/categoria2/v2/fichaMineria/descripcionActividad.jsf"
+                            rendered="#{!fichaMineriaEnviarControllerV2.fichaAmbientalMineria.validarDescripcionActividad}">
+                        <h:outputText value="3 Descripción de la actividad"
+                                      class="text-red " />
+                    </h:outputLink></li>
+                    <li><h:outputLink
+                            value="#{request.contextPath}/prevencion/categoria2/v2/fichaMineria/caracteristicasAreas.jsf"
+                            rendered="#{!fichaMineriaEnviarControllerV2.fichaAmbientalMineria.validarCaracteristicasAreaInfluencia}">
+                        <h:outputText value="4 Características del área de influencia"
+                                      class="text-red " />
+                    </h:outputLink></li>
+                    <li><h:outputLink
+                            value="#{request.contextPath}/prevencion/categoria2/v2/fichaMineria/muestreoInicial.jsf"
+                            rendered="#{!fichaMineriaEnviarControllerV2.fichaAmbientalMineria.validarMuestreoInicialLineaBase}">
+                        <h:outputText value="5 Muestreo inicial o de línea base"
+                                      class="text-red " />
+                    </h:outputLink></li>
+                    <li><h:outputLink
+                            value="#{request.contextPath}/prevencion/categoria2/v2/fichaMineria/matrizImpactoAmbiental.jsf"
+                            rendered="#{!fichaMineriaEnviarControllerV2.fichaAmbientalMineria.validarMatrizIdentificacionImpactosAmbientales}">
+                        <h:outputText
+                                value="6 Matriz identificación impactos ambientales"
+                                class="text-red " />
+                    </h:outputLink></li>
+                    <li><h:outputLink
+                            value="#{request.contextPath}/prevencion/categoria2/v2/fichaMineria/planManejoAmbiental.jsf"
+                            rendered="#{!fichaMineriaEnviarControllerV2.fichaAmbientalMineria.validarPlanManejoAmbiental}">
+                        <h:outputText value="7 Plan de manejo ambiental"
+                                      class="text-red " />
+                    </h:outputLink></li>
+
+                    <li><h:outputLink
+                            value="#{request.contextPath}/prevencion/categoria2/v2/fichaMineria/inventarioForestal.jsf"
+                            rendered="#{!fichaMineriaEnviarControllerV2.fichaAmbientalMineria.validarInventarioForestal}">
+                        <h:outputText value="8 Inventario forestal"
+                                      class="text-red " />
+                    </h:outputLink></li>
+
+					<li><h:outputLink
+							value="#{request.contextPath}/prevencion/categoria2/v2/fichaMineria/participacionCiudadanaDescargar.jsf"
+							rendered="#{!fichaMineriaEnviarControllerV2.fichaAmbientalMineria.validarParticipacionCiudadana  and fichaMineriaEnviarControllerV2.ppc1()}">
+							<h:outputText value="9 Participación Ciudadana" class="text-red " />
+						</h:outputLink></li>
+
+					<li><h:outputLink
+								value="#{request.contextPath}/prevencion/categoria2/v2/fichaMineria/participacionCiudadanaSubir.jsf"
+								rendered="#{!fichaMineriaEnviarControllerV2.fichaAmbientalMineria.validarParticipacionCiudadana  and fichaMineriaEnviarControllerV2.ppc1()}">
+								<h:outputText value="10 Subir el informe de sistematización de Participación Ciudadana" class="text-red " />
+							</h:outputLink></li>
+                </ul>
+
+            </p:dialog>
+            
+		<h:form id="formSubmitV2">
+           <p:dialog id="continuarDialog" widgetVar="continuarDialog"
+                     header="Información" modal="true" closable="false"
+                     resizable="false" width="500">
+               <p:panel>
+                   <h:panelGrid columns="1" styleClass="w100"
+                                columnClasses="alCenter">
+                       <p:outputLabel
+                               value="- Estimado Usuario ha culminado satisfactoriamente la obtención de su Registro Ambiental del proyecto  #{fichaMineriaEnviarControllerV2.proyecto.codigo}, por favor dirigirse al listado de proyectos en resumen de etapas y documentos adjuntos, allí se descargará la Resolución Ambiental original de su proyecto.                     "/>
+                       <p:commandButton value="Aceptar" ajax="false" styleClass="primary" widgetVar="btnAceptar"
+                       					action="#{fichaMineriaEnviarControllerV2.enviarFicha()}"
+                                        onclick="PF('continuarDialog').hide();PF('statusDialog').show();" />
+                   </h:panelGrid>
+               </p:panel>
+           </p:dialog>
+           </h:form>
+        </div>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,183 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:controles="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:hh="http://java.sun.com/jsf/html">
+<ui:composition
+	template="/prevencion/licenciamiento-ambiental/eia/verEIA.xhtml">
+	<ui:define name="content-eia">
+			<h:form id="frmDatos">
+			<p:panel header="Identificación de hallazgos">
+					<p:panelGrid columns="2" layout="grid" styleClass="w100"
+						id="panelGridAdjuntos">
+						<f:facet name="header">
+							<h:outputText value="Documento de respaldo" />
+						</f:facet>
+						
+						<h:panelGrid styleClass="panel_data mw50" columns="2" columnClasses="header, null" rowClasses="null, alt">
+						
+							<p:outputLabel id="etiqueta"
+								value="#{empty identificacionHallazgosEIAController.documentoGeneral.nombre ? 'Documento de respaldo (zip)' : identificacionHallazgosEIAController.documentoGeneral.nombre}" />
+
+
+							<p:commandButton id="download"
+								rendered="#{not empty identificacionHallazgosEIAController.documentoGeneral.nombre}"
+								icon="ui-icon-arrowthick-1-s" ajax="false"
+								styleClass="button-small primary" title="Ver" immediate="true">
+								<p:fileDownload
+									value="#{identificacionHallazgosEIAController.getStreamContent()}" />
+							</p:commandButton>
+						</h:panelGrid>
+						
+						<!-- MarielaG para mostrar historico DOCUMENTOS HISTORICO-->
+						<h:panelGrid styleClass="panel_data" columns="2"
+							rendered="#{identificacionHallazgosEIAController.listaDocumentoGeneralHistorico.size() > 0}"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt">
+							<h:outputText value="Historial de documentos" />
+							<p:commandButton styleClass="button-small primary"
+								process="@this" icon="ui-icon-search"
+								update=":formDocumentosOriginal:documentosOriginalesDlg"
+								oncomplete="PF('documentosOriginalesDlg').show()" />
+						</h:panelGrid>
+						<!-- fin historico -->
+						<br></br>
+					</p:panelGrid>
+					<br></br>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					id="panelGridIdentificacion">
+					<f:facet name="header">
+						<h:outputText value="Identificación de hallazgos *" />
+					</f:facet>
+					<f:facet name="header">
+
+					</f:facet>
+
+					<p:dataTable id="tableIdentificacion"
+						value="#{identificacionHallazgosEIAController.listaIdentificacionHallazgos}"
+						var="ide" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Normativa">
+							<h:outputText value="#{ide.normativa}" />
+						</p:column>
+						<p:column headerText="Articulo">
+							<h:outputText value="#{ide.articulo}" />
+						</p:column>
+						<p:column headerText="Tipo de conformidad">
+							<h:outputText value="#{ide.conformidad}" />
+						</p:column>
+						<p:column headerText="Evidencia observada">
+							<h:outputText value="#{ide.evidencia}" />
+						</p:column>
+						<p:column headerText="Nombre documento">
+							<h:outputText value="#{ide.documento}" />
+						</p:column>
+						<!-- MarielaG para mostrar historico HALLAZGOS MODIFICADOS-->
+						<p:column styleClass="w40px alCenter" 
+						rendered="#{identificacionHallazgosEIAController.totalHallazgosModificados > 0}">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{ide.registroModificado}"
+								styleClass="button-small orange"
+								action="#{identificacionHallazgosEIAController.mostrarHallazgosOriginales(ide)}"
+								update=":frmDlgOrig:dlgOrig" process="@this"
+								oncomplete="PF('dlgOrig').show()" />
+ 								<!-- HALLAZGOS NUEVO -->
+							<h:outputText value="Nuevo" styleClass="bold text-orange" rendered="#{ide.nuevoEnModificacion}"/>
+						</p:column>
+						<!-- fin historico -->
+					</p:dataTable>
+
+					<!-- MarielaG para mostrar historico HALLAZGOS ELIMINADOS-->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{identificacionHallazgosEIAController.listaHallazgosEliminadosBdd.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText id="headerHallazgosHistorico"
+							value="Identificación de hallazgos eliminados" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-search"
+							action="#{identificacionHallazgosEIAController.fillHallazgosEliminados()}"
+							update=":frmDlgOrig:dlgOrig"
+							oncomplete="PF('dlgOrig').show()" />
+					</h:panelGrid>
+					<!-- fin historico -->
+				</p:panelGrid>
+			</p:panel>
+
+		</h:form>
+
+		<!-- MarielaG para mostrar historico DOCUMENTOS-->
+		<h:form id="formDocumentosOriginal">
+			<p:dialog header="Historial de documentos"
+				id="documentosOriginalesDlg" widgetVar="documentosOriginalesDlg"
+				modal="true" resizable="false" width="600">
+				<h:panelGroup id="datosDocumentosOriginal">
+					<p:dataTable
+						value="#{identificacionHallazgosEIAController.listaDocumentoGeneralHistorico}"
+						var="doc" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText
+								value="#{doc.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Documento">
+							<h:outputText value="#{doc.nombre}" />
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton id="download_historico" rendered="true"
+								icon="ui-icon-search" ajax="false"
+								styleClass="button-small background-orange" title="Ver"
+								immediate="true">
+								<p:fileDownload
+									value="#{identificacionHallazgosEIAController.getStreamContentOriginal(doc)}" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+
+		<!-- MarielaG para mostrar historico INFO HALLAZGO-->
+		<h:form id="frmDlgOrig">
+			<p:dialog id="dlgOrig" header="Historial identificación de hallazgos"
+				widgetVar="dlgOrig" modal="true" width="700" resizable="false">
+				<h:panelGroup id="datosHallazgosOriginales">
+					<p:dataTable id="tableIdentificacion"
+						value="#{identificacionHallazgosEIAController.listaHallazgosHistorico}"
+						var="ide" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText value="#{ide.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Normativa">
+							<h:outputText value="#{ide.normativa}" />
+						</p:column>
+						<p:column headerText="Articulo">
+							<h:outputText value="#{ide.articulo}" />
+						</p:column>
+						<p:column headerText="Tipo de conformidad">
+							<h:outputText value="#{ide.conformidad}" />
+						</p:column>
+						<p:column headerText="Evidencia observada">
+							<h:outputText value="#{ide.evidencia}" />
+						</p:column>
+						<p:column headerText="Nombre documento">
+							<h:outputText value="#{ide.documento}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+	</ui:define>
+</ui:composition>
+</html>

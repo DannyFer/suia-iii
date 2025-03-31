@@ -1,0 +1,145 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:controles-prime="http://java.sun.com/jsf/composite/controles-prime"
+                xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+    <p:panel header="Contexto de la Actividad" styleClass="separatorTop">
+        <style>
+            .menu-ficha {
+                font-size: 100%;
+                color: #222222;
+            }
+        </style>
+        <script>
+            $(document).ready(function () {
+
+                var url = window.location.pathname,
+                        urlRegExp = new RegExp(url.replace(/\/$/, '') + "$"); // create regexp to match current url pathname and remove trailing slash if present as it could collide with the link in navigation in case trailing slash wasn't present there
+                // now grab every link from the navigation
+                $('#menu-principal a').each(function () {
+                    // and test its normalized href against the url pathname regexp
+                    if (urlRegExp.test(this.href.replace(/\/$/, ''))) {
+                        $(this).addClass(' bold');
+                    }
+                });
+            })
+        </script>
+        <h:form>
+            <h:panelGrid columns="3" styleClass="mw50 panel_data"
+                         rowClasses="null, alt"
+                         columnClasses="header w25, null, alCenter w20px">
+                <h:outputText value="Actividad" />
+                <h:outputText value="#{bandejaTareasBean.tarea.taskName}"
+                              styleClass="bold " />
+                <h:outputText />
+                <h:outputText value="Flujo" />
+                <h:outputText value="#{bandejaTareasBean.tarea.processName}" />
+                <p:commandButton icon="ui-icon-search"
+                                 action="#{visualizarDiagrama.init(bandejaTareasBean.tarea.processInstanceId)}"
+                                 styleClass="primary button-small" />
+                <h:outputText value="Trámite" />
+                <h:outputText value="#{bandejaTareasBean.tarea.procedure}" />
+                <p:commandButton type="button" icon="ui-icon-search"
+                                 onclick="PF('modalShowTramite').show()"
+                                 styleClass="primary button-small" />
+                <h:outputText value="Proponente" />
+                <h:outputText value="#{proyectosBean.proponente}" />
+                <p:commandButton icon="ui-icon-search" 
+                                 update=":#{p:component('pnlProponente')}"
+                                 oncomplete="PF('modalShowProponente').show()"
+                                 styleClass="primary button-small" />
+
+            </h:panelGrid>
+            <p:dialog width="800" height="500" position="top" id="modalShowFlow"
+                      styleClass="modalShowFlow" header="Detalles del flujo"
+                      widgetVar="modalShowFlow" modal="true" resizable="true">
+                <p:panel header="Diagrama" collapsed="false" toggleable="false"
+                         styleClass="alCenter">
+                    <img src="#{request.contextPath}/resources/images/flujo.png" />
+                </p:panel>
+                <p:panel header="Historial de actividades" collapsed="true"
+                         toggleable="true" rendered="false">
+                    <h:outputText value="Loading..." />
+                </p:panel>
+                <p:panel header="Variables del flujo" collapsed="true"
+                         toggleable="true" rendered="false">
+                    <h:outputText value="Loading..." />
+                </p:panel>
+            </p:dialog>
+            <p:dialog width="400" height="150" id="modalShowTramite"
+                      header="Trámite" widgetVar="modalShowTramite" modal="true"
+                      resizable="false">
+                <h:panelGrid id="pnlTramite" columns="2" styleClass="w100">
+                    <h:outputLabel value="Nombre:"/>
+                    <h:outputText value="#{proyectosBean.proyecto.nombre}" />
+                    <br/> <h:outputText
+                        value="" />
+                    <h:outputLabel value="Actividad:" />
+                    <h:outputText
+                        value="#{proyectosBean.proyecto.catalogoCategoria.descripcion}" />
+                    <br/><h:outputText
+                        value="" />
+                    <h:outputLabel value="Resumen:" />
+                    <h:outputText value="#{proyectosBean.proyecto.resumen}" />
+                </h:panelGrid>
+            </p:dialog>
+
+            <p:dialog width="500" height="150" id="modalShowProponente"
+                      header="Proponente" widgetVar="modalShowProponente" modal="true"
+                      resizable="false">
+
+                <h:panelGrid styleClass="w100" columns="1" id="pnlProponente">
+                    <h:panelGrid styleClass="panel_data mw50" columns="2"
+                                 columnClasses="header, null" rowClasses="null, alt">
+                        <h:outputText value="Nombre" />
+                        <h:outputText value="#{proyectosBean.proponente}" />
+                    </h:panelGrid>
+                    <br />
+                    <h:outputText value="Ubicación geográfica" styleClass="bold" />
+                    <p:dataTable value="#{proyectosBean.ubicacionProponente}"
+                                 var="ubicacion">
+                        <p:column headerText="Provincia">
+                            <h:outputText
+                                value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+                        </p:column>
+                        <p:column headerText="Cantón">
+                            <h:outputText
+                                value="#{ubicacion.ubicacionesGeografica.nombre}" />
+                        </p:column>
+                        <p:column headerText="Parroquia">
+                            <h:outputText value="#{ubicacion.nombre}" />
+                        </p:column>
+                    </p:dataTable>
+                </h:panelGrid>
+
+
+            </p:dialog>
+        </h:form>
+    </p:panel>
+    <br />
+
+
+    <p:panel id="menu-principal">
+        <f:facet name="header">
+            <h:outputText value="Registro Ambiental"
+                          styleClass="encabezado1_1em alLeft ui-panel-title" />
+        </f:facet>
+        <h:form>
+
+            <ul>
+                <li><h:outputLink
+                        value="#{request.contextPath}/prevencion/emisionviabilidadtecnica/informes/informeTecnicoGirs.jsf?tipo=1"
+                        class="activo-true">
+                        <h:outputText value="Informe tecnico GIRS" class="menu-ficha" />
+                    </h:outputLink></li>
+                <li><h:outputLink
+                        value="#{request.contextPath}/prevencion/emisionviabilidadtecnica/estudioTecnicoCeldaEmergente/estudio.jsf"
+                        class="activo-true">
+                        <h:outputText value="Estudio viabilidad tecnica" class="menu-ficha" />
+                    </h:outputLink></li>
+            </ul>
+        </h:form>
+    </p:panel>
+</ui:composition>

@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+        >
+<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}"
+                      target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small"
+                             icon="ui-icon-search"/>
+        </h:outputLink>
+
+    </ui:define>
+    <ui:define name="content">
+        <f:loadBundle var="labels"
+                      basename="ec.gob.ambiente.core.resources.labels_es"/>
+        <h:form id="form">
+            <f:event type="preRenderView"
+                     listener="#{ingresarDocumentacionComplementariaController.validarTareaBpm()}"/>
+
+            <p:panel>
+                <p:outputLabel for="requiere-modificaciones"
+                               value="¿La información requiere modificaciones?"
+                               rendered="#{ingresarDocumentacionComplementariaBean.revisar}"/>
+                <p:selectOneRadio id="requiere-modificaciones"
+                                  value="#{ingresarDocumentacionComplementariaBean.informacionCompleta}"
+                                  required="#{ingresarDocumentacionComplementariaBean.revisar}"
+                                  rendered="#{ingresarDocumentacionComplementariaBean.revisar}">
+                    <f:selectItem itemLabel="Si" itemValue="true"/>
+                    <f:selectItem itemLabel="No" itemValue="false"/>
+                </p:selectOneRadio>
+                <p:outputLabel for="requiere-criterio-tecnico"
+                               value="¿Requiere criterio técnico?"
+                               rendered="#{ingresarDocumentacionComplementariaBean.revisar}"/>
+                <p:selectOneRadio id="requiere-criterio-tecnico"
+                                  value="#{ingresarDocumentacionComplementariaBean.criterioTecnico}"
+                                  required="#{ingresarDocumentacionComplementariaBean.revisar}"
+                                  rendered="#{ingresarDocumentacionComplementariaBean.revisar}">
+                    <f:selectItem itemLabel="Si" itemValue="true"/>
+                    <f:selectItem itemLabel="No" itemValue="false"/>
+                </p:selectOneRadio>
+                <p:separator/>
+                <p:panelGrid columns="1" styleClass="w100">
+                    <f:facet name="header">
+                        <h:outputText value="Documentación o información complementaria del PPS"/>
+                    </f:facet>
+                    <p:outputLabel value="Respuestas" for="respuesta"/>
+                    <p:inputTextarea maxlength="2200" scrollHeight="10" required="true" id="respuesta" rows="6" style="height: 70px;overflow: auto;" disabled="#{ingresarDocumentacionComplementariaBean.revisar}"
+                                     requiredMessage="Respuesta Obligatoria"
+                                     value="#{ingresarDocumentacionComplementariaBean.proyectoPPS.informacionComplementariaRespuesta}"
+                                     autoResize="true" widgetVar="100px"/>
+
+
+                    <h:panelGrid columns="2" columnClasses="null, field_mrg" id="wwww">
+                        <p:outputLabel
+                                value="#{empty ingresarDocumentacionComplementariaController.ingresarDocumentacionComplementariaBean.documentos.get('documentacionComplementariaPPS') ? 'Documento(.pdf)' :
+                                ingresarDocumentacionComplementariaController.ingresarDocumentacionComplementariaBean.documentos.get('documentacionComplementariaPPS').nombre}"/>
+                        <p:commandButton id="downloadInformeSistematizacionPPS" icon="ui-icon-arrowthick-1-s"
+                                         ajax="false" styleClass="button-small primary" title="Ver"
+                                         immediate="true"
+                                         rendered="#{not empty ingresarDocumentacionComplementariaController.ingresarDocumentacionComplementariaBean.documentos.get('documentacionComplementariaPPS')}">
+                            <p:fileDownload
+                                    value="#{ingresarDocumentacionComplementariaController.getStreamContent('documentacionComplementariaPPS')}"/>
+                        </p:commandButton>
+                    </h:panelGrid>
+                    <p:fileUpload
+                            fileUploadListener="#{ingresarDocumentacionComplementariaController.uploadListenerDocumentos}"
+                            multiple="false" sizeLimit="1048576" allowTypes="/(\.|\/)(pdf)$/i"
+                            label="Seleccionar" uploadLabel="Subir"
+                            invalidFileMessage="Tipo de archivo no válido"
+                            invalidSizeMessage="Tamaño de archivo no válido"
+                            cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                            auto="true" update="wwww"
+                            rendered="#{!ingresarDocumentacionComplementariaBean.revisar}" required="true" requiredMessage="Archivo Requerido">
+                        <f:attribute name="clave" value="documentacionComplementariaPPS"/>
+                    </p:fileUpload>
+
+                </p:panelGrid>
+
+
+                <p:fragment>
+                    <h:panelGroup id="pnl2">
+
+                        <observaciones:tablaObservaciones aparace="true"
+                                                          soloLectura="#{!mediosVerificacionController.mediosVerificacionBean.revisar}"
+                                                          mostrarSiVacio="#{mediosVerificacionController.mediosVerificacionBean.revisar}"
+                                                          idClase="#{mediosVerificacionController.mediosVerificacionBean.proyectosBean.proyecto.id}"
+                                                          nombreClase="ParticipacionSocial"
+                                                          seccion="ingresarCorreccionesDocumentacion"
+                                                          rol="admin"
+                                                          componenteActualizarEliminar="pnl2"/>
+                    </h:panelGroup>
+                </p:fragment>
+
+                <div class="buttons main">
+                    <p:commandButton value="Guardar" title="Completar tarea" styleClass="primary"
+                                     update="@form"
+
+                                     action="#{ingresarDocumentacionComplementariaController.guardar()}"
+                                     icon="ui-icon-check">
+                    </p:commandButton>
+                    <p:commandButton value="Enviar" update=":form"
+                                     action="#{ingresarDocumentacionComplementariaController.finalizar}"
+                                     icon="ui-icon-check"/>
+                </div>
+            </p:panel>
+
+			<p:dialog header="Estimado Proponente" widgetVar="dlgPPS" visible="#{mediosVerificacionBean.verDiag}" modal="true" resizable="false" width="500" closable="false">
+				<h:panelGroup rendered="true">
+					<h:outputText styleClass="alJustify"
+						value="Estimado proponente, Usted no puede ingresar información en la Evaluación Social del Sistema Único de Información Ambiental, sin 
+						contar con el oficio de aprobación de los Términos de Referencia para su Estudio de Impacto Ambiental, en cumplimiento del Art.21 de 
+						Reglamento Ambiental de Actividades Mineras. En tal razón, Usted debe elaborar los Términos de Referencia función de su proyecto en 
+						particular, los mismos, que deben ser presentados ante la Autoridad Ambiental Competente en forma física a través de un oficio, para ser 
+						sometidos a evaluación y aprobación ya sea del Ministerio del Ambiente y Agua o de la Autoridad Ambiental de Aplicación Responsable" />						
+					<div class="buttons">
+						<p:commandButton value="Aceptar" immediate="true" process="@this"
+                                    action="#{mediosVerificacionBean.cancelarActividadesMineria()}"/>
+					</div>
+				</h:panelGroup>
+			</p:dialog>
+
+        </h:form>
+
+
+    </ui:define>
+</ui:composition>
+</html>

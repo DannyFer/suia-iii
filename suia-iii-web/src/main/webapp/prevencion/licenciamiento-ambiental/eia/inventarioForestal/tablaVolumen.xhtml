@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+    <h:form id="frmDatosVolumen">
+        <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="">
+            <f:facet name="header">
+                <p:commandButton value="Adicionar"  styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick" 
+                                 action="#{inventarioForestalController.agregarVolumen()}" update=":#{p:component('frmVolumen')}" 
+                                 oncomplete="PF('dlgVolumen').show();"                />
+                <mae:panelGridHeaderHelp value="Tabla de volumen" conector="ubicacionHelp" image="#{request.contextPath}/resources/images/proyecto-mapa.png" help="" />
+
+            </f:facet>
+            <p:dataTable id="tblClVolumen" value="#{inventarioForestalController.inventarioForestalBean.listaInventarioForestalVolumen}"
+                         var="volumen" paginator="true" rows="10" paginatorPosition="bottom" scrollable="true" scrollWidth="750"
+                         emptyMessage="#{labels['common.table.empty']}">
+                <p:column headerText="Acciones" width="60">
+                    <div class="buttons-inline">
+                        <p:commandButton icon="ui-icon-pencil" action="#{inventarioForestalController.seleccionarVolumen(volumen)}"
+                                         title="Editar" styleClass="primary"
+                                         oncomplete="PF('dlgVolumen').show();" update=":#{p:component('frmVolumen')}"/>
+                        <p:commandButton icon="ui-icon-trash" action="#{inventarioForestalController.removerVolumen(volumen)}"
+                                         title="Remover" styleClass="secondary"
+                                         update="tblClVolumen"/>
+                    </div>
+                </p:column>
+                <p:column headerText="No. " width="40">
+                    <center>
+                        <h:outputText value="#{volumen.numero}" />
+                    </center>
+                </p:column>
+                <p:column headerText="Número / código de parcela" width="50">
+                    <center>
+                        <h:outputText value="#{volumen.codigo}"/>
+                    </center>
+                </p:column>
+                <p:column headerText="Familia" width="240">
+                    <center>
+                        <h:outputText value="#{volumen.familia}" />
+                    </center>
+                </p:column>
+                <p:column headerText="Nombre Científico" width="240">
+                    <center>
+                        <h:outputText value="#{volumen.nombreCientifico}"/>
+                    </center>
+                </p:column>
+                <p:column headerText="Nombre común" width="240">
+                    <center>
+                        <h:outputText value="#{volumen.nombreComun}" />
+                    </center>
+                </p:column>
+                <p:column headerText="DAP (Diámetro a la altura del pecho) - metros" width="240">
+                    <center>
+                        <h:outputText value="#{volumen.diametroAlturaPecho}"/>
+                    </center>
+                </p:column>
+                <p:column headerText="Altura total-metros" width="240">
+                    <center>
+                        <h:outputText value="#{volumen.alturaTotal}" />
+                    </center>
+                </p:column>
+                <p:column headerText="Altura comercial-metros" width="240">
+                    <center>
+                        <h:outputText value="#{volumen.alturaComercial}" />
+                    </center>
+                </p:column>
+                <p:column headerText="Área Basal - m2" width="240">
+                    <center>
+                        <h:outputText value="#{volumen.areaBasal}" />
+                    </center>
+                </p:column>
+                <p:column headerText="Volumen total - m3" width="240">
+                    <center>
+                        <h:outputText value="#{volumen.volumenTotal}" />
+                    </center>
+                </p:column>
+                <p:column headerText="Volumen comercial - m3" width="240">
+                    <center>
+                        <h:outputText value="#{volumen.volumenComercial}" />
+                    </center>
+                </p:column>
+
+            </p:dataTable>
+        </p:panelGrid>
+    </h:form>
+
+    <p:dialog header="Volumen" widgetVar="dlgVolumen" modal="true" resizable="false" draggable="false"
+              style="overflow: auto;" width="868" height="300">  
+        <h:form id="frmVolumen">
+            <p:panel>
+                <h:panelGrid columns="4">
+                    <h:outputLabel value="*Número / código de parcela:"/>
+                    <control:combo identificador="cmbPunto" lista="#{inventarioForestalController.inventarioForestalBean.listaCodigoPunto}" valor="#{inventarioForestalController.inventarioForestalBean.forestalVolumen.codigo}" requerido="true"/>
+                    <h:outputLabel value="*N° de registro:"/>
+                    <h:outputText value="#{inventarioForestalController.inventarioForestalBean.forestalVolumen.numero}"/>
+                    <h:outputLabel value="*Familia:"/>
+                    <control:todoTextoComoIngrese valor="#{inventarioForestalController.inventarioForestalBean.forestalVolumen.familia}" identificador="txtFamilia" tamanio="30" longitud="100" requerido="true"/>
+                    <h:outputLabel value="*Nombre Científico:"/>
+                    <control:todoTextoComoIngrese valor="#{inventarioForestalController.inventarioForestalBean.forestalVolumen.nombreCientifico}" identificador="txtNombreCientifico" tamanio="30" longitud="100" requerido="true"/>
+                    <h:outputLabel value="*Nombre común:"/>
+                    <control:todoTextoComoIngrese valor="#{inventarioForestalController.inventarioForestalBean.forestalVolumen.nombreComun}" identificador="txtNombreComun" tamanio="30" longitud="100" requerido="true"/>
+
+                    <h:outputLabel value="*DAP (Diámetro a la altura del pecho) - metros" />
+                    <control:soloTextoNumerosDecimales identificador="txtDapDlg" 
+                                                       valor="#{inventarioForestalController.inventarioForestalBean.forestalVolumen.diametroAlturaPecho}"
+                                                       requerido="true" tamanio="10"
+                                                       longitud="6"/>
+
+                    <h:outputLabel value="*Altura total-metros" />
+                    <control:soloTextoNumerosDecimales identificador="txtAlturaTotalDlg" 
+                                                       valor="#{inventarioForestalController.inventarioForestalBean.forestalVolumen.alturaTotal}"
+                                                       requerido="true" tamanio="10"
+                                                       longitud="6"/>
+
+                    <h:outputLabel value="*Altura comercial-metros" />
+                    <control:soloTextoNumerosDecimales identificador="txtAlturaComercialDlg" 
+                                                       valor="#{inventarioForestalController.inventarioForestalBean.forestalVolumen.alturaComercial}"
+                                                       requerido="true" tamanio="10"
+                                                       longitud="6"/>
+
+                    <h:outputLabel value="*Área Basal - m2" />
+                    <control:soloTextoNumerosDecimales identificador="txtAreaBasalDlg" 
+                                                       valor="#{inventarioForestalController.inventarioForestalBean.forestalVolumen.areaBasal}"
+                                                       requerido="true" tamanio="10"
+                                                       longitud="6"/>
+
+                    <h:outputLabel value="*Volumen total - m3" />
+                    <control:soloTextoNumerosDecimales identificador="txtVolumenTotalDlg" 
+                                                       valor="#{inventarioForestalController.inventarioForestalBean.forestalVolumen.volumenTotal}"
+                                                       requerido="true" tamanio="10"
+                                                       longitud="6"/>
+
+                    <h:outputLabel value="*Volumen comercial - m3" />
+                    <control:soloTextoNumerosDecimales identificador="txtVolumenComercialDlg" 
+                                                       valor="#{inventarioForestalController.inventarioForestalBean.forestalVolumen.volumenComercial}"
+                                                       requerido="true" tamanio="10"
+                                                       longitud="6"/>
+
+
+
+                </h:panelGrid>
+                <br/>
+                <center>
+                    <p:commandButton action="#{inventarioForestalController.guardarVolumen()}" value="Agregar" 
+                                     oncomplete="handleVolumenRequest(xhr, status, args)" styleClass="primary"
+                                     update="frmVolumen, :#{p:component('msgs')}, :#{p:component('tblClVolumen')}"/>
+                </center>
+            </p:panel>
+        </h:form>
+    </p:dialog>
+    <script type="text/javascript">
+        function handleVolumenRequest(xhr, status, args) {
+            if (args.validationFailed || !args.puntoVolumen) {
+                PF('dlgVolumen').jq.effect("shake", {times: 5}, 100);
+            }
+            else {
+                PF('dlgVolumen').hide();
+                $('#loginLink').fadeOut();
+            }
+        }
+    </script>
+
+</ui:composition>

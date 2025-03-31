@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<p:panel id="adicionarPunto" widgetVar="adicionarPunto" toggleable="true" toggleOrientation="vertical" styleClass="colapsablePanel" collapsed="true">
+	<p:ajax event="toggle" listener="#{puntosRecuperacionBean.toggleHandle}" update=":form:adicionarPunto" process="@this" />
+	<h:panelGroup id="containerPuntoRecuperacion">
+		<h:panelGroup rendered="#{puntosRecuperacionBean.panelAdicionarVisible}">
+			<h:panelGroup id="datosGeneralesPunto">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Datos generales" />
+					</f:facet>
+
+					<h:panelGrid styleClass="w100 separatorBottom" columns="3" columnClasses="w33, field_mrg w33,field_mrg w33">
+						<p:outputLabel for="puntoNombre" value="Nombre" />
+						<p:outputLabel for="puntoTelefono" value="Teléfono" />
+						<p:outputLabel for="puntoCorreo" value="Correo" />
+						<p:inputText id="puntoNombre" styleClass="w100" value="#{puntosRecuperacionBean.puntoRecuperacion.nombre}"
+									 required="true" maxlength="100" />
+						<p:inputText id="puntoTelefono" styleClass="w100" value="#{puntosRecuperacionBean.puntoRecuperacion.telefono}"
+									 required="true" maxlength="20">
+							<pe:keyFilter mask="num" />
+							<f:validateLength minimum="7" />
+						</p:inputText>
+						<p:inputText id="puntoCorreo" styleClass="w100" value="#{puntosRecuperacionBean.puntoRecuperacion.correo}"
+									 required="true" maxlength="100">
+							<t:validateEmail />
+						</p:inputText>
+					</h:panelGrid>
+
+					<h:panelGrid styleClass="w100 separatorBottom" columns="2" columnClasses="w50 alTop, field_mrg w50 alTop" id="containerDocumentoAdjunto"
+								 rendered="#{puntosRecuperacionBean.validarDocumentoUsoSuelos()}">						
+						<p:outputLabel value="Tipo de documento" for="tipoDocumento" />
+						<p:outputLabel rendered="#{puntosRecuperacionBean.tipoDocumentoCertificadoCompatibilidad}" id="certificadoUsoSuelos" value="#{not empty puntosRecuperacionBean.puntoRecuperacion.certificadoUsoSuelos ? puntosRecuperacionBean.puntoRecuperacion.certificadoUsoSuelos.nombre : 'Certificado/informe de compatibilidad de uso de suelos(.pdf) *'}" />
+						<p:outputLabel rendered="#{!puntosRecuperacionBean.tipoDocumentoCertificadoCompatibilidad}" id="certificadoCompatibilidadUsoSuelos" value="#{not empty puntosRecuperacionBean.puntoRecuperacion.certificadoCompatibilidadUsoSuelos ? puntosRecuperacionBean.puntoRecuperacion.certificadoCompatibilidadUsoSuelos.nombre : 'Solicitud de emisión de informe de compatibilidad de uso de suelo o afines(.pdf) *'}" />
+						<p:selectOneRadio id="tipoDocumento" value="#{puntosRecuperacionBean.tipoDocumentoCertificadoCompatibilidad}" layout="grid" columns="1" required="true">
+							<f:selectItem itemLabel="Certificado/informe de compatibilidad de uso de suelos" itemValue="true" />
+							<f:selectItem itemLabel="Solicitud de emisión de informe de compatibilidad de uso de suelo o afines" itemValue="false" />
+							<p:ajax process="@this" update="containerDocumentoAdjunto" />
+						</p:selectOneRadio>						
+						<p:fileUpload rendered="#{puntosRecuperacionBean.tipoDocumentoCertificadoCompatibilidad}" id="certificadoInfomeCompatibilidad" fileUploadListener="#{puntosRecuperacionBean.uploadListenerCertificadoCompatibilidad}" multiple="false" sizeLimit="209715200" allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar" uploadLabel="Subir" invalidFileMessage="Tipo de archivo no válido" invalidSizeMessage="Tamaño de archivo no válido" cancelLabel="Cancelar" mode="advanced" dragDropSupport="false" auto="true" update="certificadoUsoSuelos" />
+						<p:fileUpload rendered="#{!puntosRecuperacionBean.tipoDocumentoCertificadoCompatibilidad}" id="solicitudEmisionInformeCompatibilidad" fileUploadListener="#{puntosRecuperacionBean.uploadListenerCertificadoEmisionCompatibilidad}" multiple="false" sizeLimit="209715200" allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar" uploadLabel="Subir" invalidFileMessage="Tipo de archivo no válido" invalidSizeMessage="Tamaño de archivo no válido" cancelLabel="Cancelar" mode="advanced" dragDropSupport="false" auto="true" update="certificadoCompatibilidadUsoSuelos" />						
+					</h:panelGrid>
+
+					<h:panelGroup id="datosDireccion">
+						<p:outputLabel value="Dirección" for="direccionRecuperacion" styleClass="bold" />
+						<p:inputTextarea value="#{puntosRecuperacionBean.puntoRecuperacion.direccion}"
+										 id="direccionRecuperacion" rows="2" styleClass="w100" autoResize="false" maxlength="200"
+										 required="true" />
+					</h:panelGroup>
+
+					<ui:remove>
+					<h:panelGroup>
+						<t:aliasBeansScope>
+							<t:aliasBean alias="#{adicionarUbicacionesAliasBean}" value="#{adicionarUbicacionesBean}" />
+							<ui:include src="/comun/adicionarUbicacion.xhtml" />
+						</t:aliasBeansScope>
+					</h:panelGroup>
+					</ui:remove>
+				</p:panelGrid>
+			</h:panelGroup>
+
+			<h:panelGroup id="containerCoordenadas">
+				<p:panelGrid columns="1" layout="grid" styleClass="buttonAdjuntarCoordenadasContainer w100">
+					<f:facet name="header">
+						<p:commandButton value="Adjuntar" onclick="PF('adjuntarCoordenadas').show()" styleClass="buttonAdjuntarCoordenadas button-small-text toRight field_mrg" type="button" icon="ui-icon-document" />
+						<p:commandButton rendered="#{!empty cargarCoordenadasBean.plantillaCoordenadas}" value="Descargar plantilla" styleClass="button-small-text toRight field_mrg" icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true">
+							<p:fileDownload value="#{cargarCoordenadasBean.plantillaCoordenadas}" />
+						</p:commandButton>
+						<p:commandButton styleClass="button-small toRight field_mrg" ajax="false" immediate="true" icon="ui-icon-help">
+							<p:fileDownload value="#{cargarCoordenadasBean.ayudaCoordenadas}" />
+						</p:commandButton>
+						<h:outputText value="Sistema de referencias [Formato: sistema WGS84, zona 17S] *" />
+					</f:facet>
+					<ui:include src="/comun/cargarCoordenadas.xhtml" />
+					<h:panelGroup>
+						<t:aliasBeansScope>
+							<t:aliasBean alias="#{adicionarUbicacionesAliasBean}" value="#{adicionarUbicacionesBean}" />
+							<ui:include src="/comun/adicionarUbicaciones.xhtml" />
+						</t:aliasBeansScope>
+					</h:panelGroup>
+				</p:panelGrid>
+			</h:panelGroup>
+			<h:inputHidden validator="#{puntosRecuperacionBean.validateData}" />
+		</h:panelGroup>
+	</h:panelGroup>
+
+	<div class="buttons">
+		<p:commandButton value="#{puntosRecuperacionBean.editar ? 'Actualizar' : 'Aceptar'}"
+						 actionListener="#{puntosRecuperacionBean.aceptar()}"
+						 oncomplete="tooglePuntoRecuperacion(xhr, status, args)"
+						 process="@this adicionarPunto" update="adicionarPunto :form:listadoPuntos" />
+		<p:commandButton value="Cancelar" styleClass="secondary" actionListener="#{puntosRecuperacionBean.cancelar()}"
+						 oncomplete="PF('adicionarPunto').toggle()" process="@this" update="adicionarPunto">
+			<p:resetInput target="@form" />
+		</p:commandButton>
+	</div>
+	
+	<p:separator />
+</p:panel>
+
+<script type="text/javascript">
+	function tooglePuntoRecuperacion(xhr, status, args) {
+	    if(args.addPunto) {
+	    	PF('adicionarPunto').toggle();
+	    }            
+	}
+</script>
+
+</html>

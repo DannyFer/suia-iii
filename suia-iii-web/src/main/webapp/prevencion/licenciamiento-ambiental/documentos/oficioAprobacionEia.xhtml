@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}" target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+
+
+        <h:outputText value="Informe ténico"/>
+        <h:outputText value="Datos del informe técnico"/>
+
+        <p:commandButton styleClass="primary button-small"
+                         actionListener="#{oficioAprobacionEiaBean.setMostrarInforme(true)}"
+                         icon="ui-icon-search" oncomplete="PF('dlg2').show();"
+                         update="modal"/>
+
+        <p:dialog header="Informe Técnico" widgetVar="dlg2" modal="true" id="modal"
+                  height="500" width="100%">
+            <p:outputPanel rendered="#{oficioAprobacionEiaBean.mostrarInforme}">
+                <ui:include src="../vistaPrevia/informeTecnicoEIAVistaPrevia.xhtml"/>
+            </p:outputPanel>
+        </p:dialog>
+
+    </ui:define>
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{oficioAprobacionEiaBean.validarTareaBpm()}"/>
+        <p:remoteCommand process="@this"
+                         rendered="#{oficioAprobacionEiaBean.visualizarOficio()}" autoRun="true"
+                />
+        <style type="text/css">.ui-spinner-button {
+            margin-right: -22px;
+        }</style>
+        <h:form styleClass="formulario">
+            <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                         columnClasses="w100"
+                    >
+                <f:facet name="header">
+                    <mae:panelGridHeaderHelp value="Oficio de aprobación"
+                                             conector="generalHelp"
+                                             help="Para completar el Oficio, por favor ingrese la información requerida en las secciones correspondientes. Para previsualizar el documento presione Guardar."/>
+
+                </f:facet>
+                <h:panelGrid columns="1" styleClass="w100" id="pronunciamiento-wrapper"
+                             rendered="#{oficioAprobacionEiaBean.tipo!=null and oficioAprobacionEiaBean.tipo.equals('revisar')}"
+                             columnClasses="w50, field_mrg w50">
+                    <p:outputLabel for="requiere-modificaciones"
+                                   value="¿Requiere modificaciones el oficio?"
+                            ></p:outputLabel>
+                    <p:selectOneRadio id="requiere-modificaciones"
+                                      value="#{oficioAprobacionEiaBean.requiereModificaciones}"
+                                      required="true">
+                        <f:selectItem itemLabel="Si"
+                                      itemValue="true"/>
+                        <f:selectItem itemLabel="No"
+                                      itemValue="false"/>
+                        <p:ajax event="change" update="@(.formulario)"> </p:ajax>
+                    </p:selectOneRadio>
+                </h:panelGrid>
+
+                <div style="display:#{oficioAprobacionEiaBean.requiereModificaciones ? 'none':''}"><br/>
+
+                    <br/></div>
+
+
+                <object id="pdf_informe" type="application/pdf"
+                        style="display:#{oficioAprobacionEiaBean.requiereModificaciones ? 'none':''}"
+                        data="#{oficioAprobacionEiaBean.informePath}?pfdrid_c=true"
+                        width="100%" height="400px">
+                    Su navegador no soporta la visualización de pdf. Puede descargar el
+                    documento presionando el siguiente botón:
+                    <p:commandButton value="Descargar" styleClass="primary"
+                                     ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+                        <p:fileDownload value="#{oficioAprobacionEiaBean.stream}"/>
+                    </p:commandButton>
+                </object>
+
+                <br/> <br/>
+                <h:panelGrid columns="1" styleClass="w100" id="datos"
+                             rendered="#{!oficioAprobacionEiaBean.requiereModificaciones}">
+                      <p:outputLabel styleClass="bold" value="Asunto:" for="asunto"></p:outputLabel>
+                      <p:inputText id="asunto" value="#{oficioAprobacionEiaBean.oficioAprobacionEia.asunto}"
+                      			   required="true" requiredMessage="El campo 'Asunto' es requerido."/>
+                      <br/><br/>
+					  <p:outputLabel value="Pronunciamiento *" for="pronunciamiento" styleClass="bold"/>
+                     <control:imputConTextoEnriquecido id="pronunciamiento"
+                                                       requiredMessage="El campo 'Pronunciamiento' es requerido."
+                                                       valor="#{oficioAprobacionEiaBean.oficioAprobacionEia.actividades}"
+                                                       soloLectura="false"
+                                                       requerido="true"/>
+                    <p:fieldset legend="PAGO POR SEGUIMIENTO Y CONTROL" id="pagoWrapper"
+                                toggleable="true" toggleSpeed="500" collapsed="true">
+                        <p:panelGrid columns="3" layout="grid" styleClass="w100"
+                                     columnClasses="w50, field_mrg w50">
+                            <p:outputLabel value="Pago por inspección" for="pago"/>
+                            <p:outputLabel value="Número de técnicos" for="numeroTecnico"/>
+                            <p:outputLabel value="Número de días de visita" for="numeroVisitas"/>
+                            <p:spinner id="pago"
+                                       value="#{oficioAprobacionEiaBean.oficioAprobacionEia.pagoInspeccionDiaria}"
+                                       suffix="$"
+                                       required="true"
+                                       readonly="true"
+                                       min="0" styleClass="spinner" max="1000"/>
+                            <p:spinner value="#{oficioAprobacionEiaBean.oficioAprobacionEia.numeroTecnicos}"
+                                       required="true"
+                                       id="numeroTecnico"
+                                       min="0" styleClass="spinner" max="1000" maxlength="4"
+                                       onkeypress="return numbersonly(this, event)"/>
+                            <p:spinner value="#{oficioAprobacionEiaBean.oficioAprobacionEia.numeroDias}"
+                                       required="true"
+                                       id="numeroVisitas"
+                                       min="0" styleClass="spinner" max="1000" maxlength="4"
+                                       onkeypress="return numbersonly(this, event)"/>
+                        </p:panelGrid>
+                    </p:fieldset>
+                    <!--  <p:fieldset legend="REQUISITOS"
+                                  toggleable="true" toggleSpeed="500" collapsed="true">
+                          <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                                       columnClasses="w50, field_mrg w50">
+                              <p:outputLabel value="Requisitos iniciales"/>
+
+                              <control:imputConTextoEnriquecido
+                                      valor="#{oficioAprobacionEiaBean.oficioAprobacionEia.requisitos1}"
+                                      soloLectura="false"
+                                      requerido="false"/>
+                              <p:outputLabel value="Otros requisitos"/>
+                              <control:imputConTextoEnriquecido
+                                      valor="#{oficioAprobacionEiaBean.oficioAprobacionEia.requisitos1}"
+                                      soloLectura="false"
+                                      requerido="false"/>
+                          </p:panelGrid>
+                      </p:fieldset>-->
+
+                </h:panelGrid>
+            </p:panelGrid>
+            <br/>
+            <h:panelGroup id="pnl2"
+            rendered="#{oficioAprobacionEiaBean.tipo!=null}">
+            <p:fragment>
+            
+            <observaciones:tablaObservaciones aparace="true"
+                                                  soloLectura="#{oficioAprobacionEiaBean.tipo eq 'revisar' ? false : true}"
+                                                  mostrarSiVacio="true"
+                                                  idClase="#{oficioAprobacionEiaBean.proyectosBean.proyecto.id}"
+                                                  nombreClase="InformeTecnicoEia"
+                                                  seccion="informe"
+                                                  rol="sjsj"
+                                                  componenteActualizarEliminar="pnl2"/>             	
+
+            </p:fragment>
+            </h:panelGroup>
+            <br/>
+
+
+            <div class="buttons main">
+
+                <p:commandButton value="Atrás" update="pronunciamiento-wrapper,pagoWrapper"
+                                 action="#{oficioAprobacionEiaBean.guardarRegresar()}"
+                                 styleClass="ui-confirmdialog-yes secondary" icon="ui-icon-arrowthick-1-w"/>
+                <p:commandButton value="Guardar" update="pronunciamiento-wrapper,pagoWrapper"
+                                 action="#{oficioAprobacionEiaBean.guardar()}"
+                                 styleClass="ui-confirmdialog-yes secondary" icon="ui-icon-disk"/>
+                <p:commandButton value="Enviar"
+                                 action="#{oficioAprobacionEiaBean.completarTarea}"
+                                 update="pronunciamiento-wrapper,pagoWrapper"
+                                 title="Enviar datos" icon="ui-icon-check" styleClass="primary">
+                    <p:confirm message="¿Estás seguro que desea enviar la información?" header="Confirmación de envío"/>
+                </p:commandButton>
+            </div>
+
+        </h:form>
+    </ui:define>
+</ui:composition>

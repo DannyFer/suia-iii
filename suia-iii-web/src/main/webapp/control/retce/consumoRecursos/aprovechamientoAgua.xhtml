@@ -1,0 +1,315 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<script type="text/javascript">
+	function deshabilitarBotonesAgua() {
+		$('.btnsEditarAgua').prop('disabled', true);
+		$('.btnsEditarAgua').addClass('ui-state-disabled');
+	};
+	</script>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="APROVECHAMIENTO DE AGUA" />
+	</f:facet>
+
+	<p:panel id="adicionarConsumoAgua" widgetVar="adicionarConsumoAgua"
+		toggleable="true" toggleOrientation="vertical"
+		styleClass="colapsablePanel" collapsed="true">
+		<p:ajax event="toggle"
+			listener="#{consumoRecursosController.toggleHandleConsumoAgua}"
+			update=":form:adicionarConsumoAgua" process="@this" />
+		<h:panelGroup id="datosConsumoAgua">
+			<h:panelGroup
+				rendered="#{consumoRecursosController.panelAguaVisible}">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					id="pnlAgua">
+					<f:facet name="header">
+						<h:outputText value="Información aprovechamiento" />
+					</f:facet>
+					<h:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25, null" rowClasses="null, alt">
+						<p:outputLabel value="Fuente de aprovechamiento"
+							for="cmbFuenteAprovechamiento" styleClass="ui-label-form" />
+						<p:selectOneMenu id="cmbFuenteAprovechamiento"
+							disabled="#{consumoRecursosController.editarAgua}"
+							value="#{consumoRecursosController.fuenteSeleccionada}"
+							styleClass="w25" required="true" converter="selectItemConverter">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}"
+								itemValue="" noSelectionOption="true" />
+							<f:selectItems itemLabel="#{tipo.descripcion}"
+								itemValue="#{tipo}" var="tipo"
+								value="#{consumoRecursosController.listaTipoFuente}" />
+							<p:ajax process="@this" update="pnlAgua" />
+						</p:selectOneMenu>
+
+						<p:outputLabel value="Consumo anual (m3)" for="consumoAnualAgua"
+							styleClass="ui-label-form" />
+						<h:panelGrid styleClass="w25">
+							<pe:inputNumber id="consumoAnualAgua" thousandSeparator=""
+								style="width: 10% !important;" maxValue="999999999999999.99"
+								minValue="0" required="true" autocomplete="off"
+								value="#{consumoRecursosController.consumoAgua.consumoAnual}">
+								<f:validateDoubleRange minimum="0.1" />
+								<p:ajax event="blur" process="@this" />
+							</pe:inputNumber>
+						</h:panelGrid>
+
+						<p:outputLabel value="Proceso en que se consume"
+							styleClass="ui-label-form" for="procesosAgua" />
+						<p:selectManyCheckbox id="procesosAgua"
+							value="#{consumoRecursosController.consumoAgua.listaProcesos}"
+							converter="selectItemConverter" required="true"
+							requiredMessage="Debe seleccionar al menos 1 proceso">
+							<f:selectItems
+								value="#{consumoRecursosController.listaTipoProceso}" var="item"
+								itemLabel="#{item.descripcion}" itemValue="#{item}" />
+						</p:selectManyCheckbox>
+
+						<p:outputLabel value="Medio de verificación"
+							styleClass="ui-label-form" />
+						<p:dataTable id="tblDocumentosAgua"
+							value="#{consumoRecursosController.listaDocumentosMediosVerificacion}"
+							var="item" emptyMessage="#{labels['common.table.empty']}">
+							<f:facet name="header">
+								<p:commandButton value="Añadir" icon="ui-icon-plus"
+									title="Añadir" oncomplete="PF('adicionarDocumento').show()"
+									process="@this" style="float:right;" />
+							</f:facet>
+							<p:column headerText="Nombre">
+								<h:outputText value="#{item.nombre}" />
+							</p:column>
+							<p:column headerText="Descargar" styleClass="w70px alCenter">
+								<p:commandButton icon="ui-icon-arrowthick-1-s"
+									styleClass="button-small primary" title="Ver" ajax="false"
+									immediate="true">
+									<p:fileDownload
+										value="#{consumoRecursosController.descargar(item)}" />
+								</p:commandButton>
+							</p:column>
+						</p:dataTable>
+					</h:panelGrid>
+
+					<h:panelGroup>
+						<h:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="header w25, null" rowClasses="null, alt"
+							rendered="#{consumoRecursosController.fuenteSeleccionada.parametro.equals('1')}">
+							<p:outputLabel
+								value="Ubicación del punto de aprovechamiento (Coordenadas en formato WGS84 17S) *"
+								styleClass="ui-label-form" />
+							<h:panelGrid columns="4" styleClass="panel_data w100"
+								id="pnlCoordenadas"
+								columnClasses="header w25, w25, header w25, w25"
+								rowClasses="null, alt">
+								<p:outputLabel value="X"
+									styleClass="ui-label-form" />
+								<pe:inputNumber id="coordX"
+									value="#{consumoRecursosController.consumoAgua.coordenadaX}"
+									required="true" autocomplete="off" 
+									requiredMessage="El campo 'Coordenada X' es requerido."
+									decimalPlaces="4" thousandSeparator=""
+									maxValue="9999999999.9999">
+									<p:ajax process="@this" />
+									<p:tooltip for="coordX" escape="false" trackMouse="true"
+										value="Coordenanda X en formato WGS84 17S" />
+								</pe:inputNumber>
+
+								<p:outputLabel value="Y"
+									styleClass="ui-label-form" />
+								<pe:inputNumber id="coordY"
+									value="#{consumoRecursosController.consumoAgua.coordenadaY}"
+									required="true" autocomplete="off" 
+									requiredMessage="El campo 'Coordenada Y' es requerido."
+									decimalPlaces="4" thousandSeparator=""
+									maxValue="9999999999.9999">
+									<p:ajax process="@this" />
+									<p:tooltip for="coordY" escape="false" trackMouse="true"
+										value="Coordenanda Y en formato WGS84 17S" />
+								</pe:inputNumber>
+							</h:panelGrid>
+
+							<p:outputLabel value="Nombre del cuerpo hídrico"
+								for="cuerpoHidrico" styleClass="ui-label-form" />
+							<p:inputText id="cuerpoHidrico" maxlength="100" required="true"
+								value="#{consumoRecursosController.consumoAgua.nombreCuerpoHidrico}" />
+
+							<p:outputLabel value="No. de Resolución de autorización"
+								for="nroResolucion" styleClass="ui-label-form" />
+							<p:inputText id="nroResolucion" maxlength="10" required="true" 
+								value="#{consumoRecursosController.consumoAgua.nroResolucionAutorizacion}" />
+
+							<p:outputLabel value="Documento resolución" style="color: white"
+								for="docResolucion" />
+							<p:outputPanel id="pnlDocResolucion">
+								<p:fileUpload id="docResolucion"
+									fileUploadListener="#{consumoRecursosController.uploadFileResolucion}"
+									required="true" multiple="false" sizeLimit="20971520"
+									allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar (pdf 20Mb)"
+									uploadLabel="Subir"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+									cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+									auto="true" update="pnlDocResolucion" />
+								<p:commandButton icon="ui-icon-arrowthick-1-s"
+									styleClass="button-small primary toLeft" title="Ver"
+									ajax="false" immediate="true"
+									rendered="#{consumoRecursosController.resolucionAprovechamientoAgua.nombre ne null}">
+									<p:fileDownload
+										value="#{consumoRecursosController.descargar(consumoRecursosController.resolucionAprovechamientoAgua)}" />
+								</p:commandButton>
+							</p:outputPanel>
+
+							<p:outputLabel value="Vigencia de autorización *"
+								styleClass="ui-label-form" />
+							<h:panelGrid columns="4" styleClass="panel_data w100"
+								columnClasses="header w25, w25, header w25, w25"
+								rowClasses="null, alt">
+								<p:outputLabel value="Desde" styleClass="ui-label-form" />
+								<p:calendar id="startDate" required="true"
+									requiredMessage="El campo 'Desde' es requerido."
+									value="#{consumoRecursosController.consumoAgua.vigenciaDesde}"
+									pattern="dd/MM/yyyy" readonlyInput="true">
+									<p:ajax event="dateSelect" update=":#{p:component('endDate')}" />
+								</p:calendar>
+
+								<p:outputLabel value="Hasta" styleClass="ui-label-form" />
+								<p:calendar id="endDate" required="true"
+									requiredMessage="El campo 'Hasta' es requerido."
+									value="#{consumoRecursosController.consumoAgua.vigenciaHasta}"
+									pattern="dd/MM/yyyy"
+									mindate="#{consumoRecursosController.consumoAgua.vigenciaDesde}"
+									readonlyInput="true" />
+							</h:panelGrid>
+
+							<p:outputLabel value="Cuenca hidrográfica"
+								for="cuencaHidrografica" styleClass="ui-label-form" />
+							<p:inputText id="cuencaHidrografica" maxlength="100"
+								required="true"
+								value="#{consumoRecursosController.consumoAgua.cuencaHidrografica}" />
+						</h:panelGrid>
+						<h:inputHidden
+							validator="#{consumoRecursosController.validateConsumoAgua}" />
+					</h:panelGroup>
+
+					<div class="buttons">
+						<p:commandButton styleClass="primary"
+							value="#{consumoRecursosController.editarAgua ? 'Actualizar' : 'Aceptar'}"
+							actionListener="#{consumoRecursosController.agregarAgua()}"
+							oncomplete="toggleAgua(xhr, status, args)"
+							process="@this datosConsumoAgua"
+							update=":form:datosConsumoAgua :form:tblConsumoAgua" />
+						<p:commandButton value="Cancelar" styleClass="secondary"
+							action="#{consumoRecursosController.cancelarAgua()}"
+							oncomplete="PF('adicionarConsumoAgua').toggle()" process="@this"
+							update="datosConsumoAgua :form:tblConsumoAgua">
+							<p:resetInput target="@form" />
+						</p:commandButton>
+					</div>
+					<p:separator />
+				</p:panelGrid>
+			</h:panelGroup>
+		</h:panelGroup>
+	</p:panel>
+
+	<br />
+	<p:dataTable id="tblConsumoAgua"
+		value="#{consumoRecursosController.listaConsumoAgua}" var="item"
+		emptyMessage="#{labels['common.table.empty']}">
+		<f:facet name="header">
+			<p:commandButton value="Añadir" update=":form:datosConsumoAgua"
+				oncomplete="PF('adicionarConsumoAgua').toggle()"
+				onclick="deshabilitarBotonesAgua()"
+				styleClass="button-small-text toRight field_mrg btnsEditarAgua"
+				icon="ui-icon-plusthick" process="@this" style="float:right;" />
+		</f:facet>
+
+		<p:column headerText="Fuente de aprovechamiento">
+			<h:outputText value="#{item.tipoFuente.descripcion}" />
+		</p:column>
+		<p:column headerText="Consumo anual (m3)" styleClass="alCenter">
+			<h:outputText value="#{item.consumoAnual}">
+				<f:convertNumber pattern="#0.00" locale="en-US" />
+			</h:outputText>
+		</p:column>
+		<p:column headerText="Proceso en que se consume">
+			<p:dataTable styleClass="borderless"
+				rendered="#{item.listaProcesos.size() > 0}"
+				value="#{item.listaProcesos}" var="proceso">
+				<p:column style="text-align: left; background-color: #f5f5f5;">
+					<h:outputText value="#{proceso.descripcion}" />
+				</p:column>
+			</p:dataTable>
+		</p:column>
+		<p:column headerText="Medio de verificación">
+			<p:dataTable styleClass="borderless"
+				rendered="#{item.listaMediosVerificacion ne null and item.listaMediosVerificacion.size() > 0}"
+				value="#{item.listaMediosVerificacion}" var="documento">
+				<p:column style="text-align: left; background-color: #f5f5f5;">
+					<p:commandLink value="#{documento.nombre}" ajax="false">
+						<p:fileDownload
+							value="#{consumoRecursosController.descargar(documento)}" />
+					</p:commandLink>
+				</p:column>
+			</p:dataTable>
+			<h:outputText value="N/A"
+				rendered="#{item.listaMediosVerificacion eq null or item.listaMediosVerificacion.size() == 0}" />
+		</p:column>
+		<p:column styleClass="w15 alCenter"
+			headerText="Fuentes de aprovechamiento: Superficial, Subterránea, Marina">
+			<p:commandButton icon="ui-icon-search" title="ver"
+				rendered="#{item.tipoFuente.parametro.equals('1')}" process="@this"
+				update=":frmDialogs:verFuentesAprovechamiento" styleClass="primary"
+				oncomplete="PF('verFuentesAprovechamiento').show()"
+				actionListener="#{consumoRecursosController.verFuentesAprovechamiento(item)}" />
+			<h:outputText value="N/A"
+				rendered="#{!item.tipoFuente.parametro.equals('1')}" />
+		</p:column>
+		<p:column styleClass="w70px alCenter">
+			<p:commandButton icon="ui-icon-pencil" title="Editar" process="@this"
+				update=":form:datosConsumoAgua" styleClass="primary btnsEditarAgua"
+				onclick="deshabilitarBotonesAgua()"
+				oncomplete="PF('adicionarConsumoAgua').toggle()"
+				actionListener="#{consumoRecursosController.editarAgua(item)}" />
+			<p:commandButton icon="ui-icon-trash" title="Eliminar"
+				process="@this" styleClass="primary btnsEditarAgua"
+				actionListener="#{consumoRecursosController.eliminarAgua(item)}"
+				update="tblConsumoAgua" />
+		</p:column>
+		<p:columnGroup type="footer">
+			<p:row>
+				<p:column
+					style="text-align:right; font-weight: bold; padding: 10px;"
+					footerText="Consumo anual (m3/año)" />
+				<p:column>
+					<f:facet name="footer">
+						<h:outputText
+							value="#{consumoRecursosController.totalConsumoAgua}">
+							<f:convertNumber pattern="#0.00" locale="en-US" />
+						</h:outputText>
+					</f:facet>
+				</p:column>
+				<p:column colspan="4" footerText="" />
+			</p:row>
+		</p:columnGroup>
+	</p:dataTable>
+
+	<br />
+</p:panelGrid>
+
+<script type="text/javascript">
+	function toggleAgua(xhr, status, args) {
+		if(args.addAgua) {
+			PF('adicionarConsumoAgua').toggle();
+		}
+	}
+	
+</script>
+</html>

@@ -1,0 +1,373 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task-rappc.xhtml"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+	<ui:define name="content">
+
+		<h:form id="form">
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" id="pnlGeneral">
+				<f:facet name="header">
+					<h:outputText
+						value="Oficio de Pronunciamiento de Participación Ciudadana para la Consulta Ambiental*" />
+				</f:facet>
+
+
+				<h:panelGrid columns="2" layout="grid" styleClass="panel_data w100" columnClasses="header w70, w30" rendered="#{!ingresarExpedientePPCRegistroController.esScoutDrilling}">
+					<h:outputText
+						value="¿El Oficio de Pronunciamiento de Participación Ciudadana para la Consulta Ambiental que incluye el Pronunciamiento Final de la Ficha Ambiental, fue emitido en forma física?" />
+					<p:selectOneRadio required="true" id="rdtOficioFis"
+						value="#{ingresarExpedientePPCRegistroController.registroAmbiental.esOficioPPCFisico}"
+						requiredMessage="Oficio Pronunciamiento de PPC es requerido">
+						<f:selectItem itemValue="true" itemLabel="Si" />
+						<f:selectItem itemValue="false" itemLabel="No" />
+						<p:ajax process="@this" update=":form:pnlGeneral" />
+					</p:selectOneRadio>
+
+				</h:panelGrid>
+
+				<h:outputText style="font-weight: bold;"
+					value="Ingrese el expediente del Proceso de Participación Ciudadana para la Consulta Ambiental del proyecto, obra o actividad, en cumplimiento del Decreto ejecutivo Nro. 754 (2 de junio de 2023) y la Sentencia 51-23/IN emita por la Corte Constitucional el 9 de noviembre de 2023" />
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText
+							value="Adjuntar los archivos del Proceso de Participación Ciudadana para la Consulta Ambiental*" />
+					</f:facet>
+
+					<p:outputLabel
+						value="Adjuntar los archivos de manera cronológica con las firmas electrónicas de responsabilidad correspondientes, los documentos deben estar en formato .pdf o .rar, se sugiere que cada uno de los archivos tenga un máximo de 50MB, para lograr una subida óptima de sus archivos." />
+
+					<p:dataTable id="tabDocumento" var="item"
+						emptyMessage="#{labels['common.table.empty']}" lazy="true"
+						value="#{ingresarExpedientePPCRegistroController.listaDocumentos}"
+						paginator="false" paginatorAlwaysVisible="true" rows="10"
+						paginatorPosition="bottom">
+
+						<f:facet name="header">
+							<p:commandButton value="Añadir"
+								styleClass="button-small-text toRight field_mrg"
+								icon="ui-icon-plusthick" immediate="true"
+								oncomplete="PF('uploadFile').show()">
+							</p:commandButton>
+							<br />
+						</f:facet>
+
+						<p:column headerText="Documento">
+							<h:outputText value="#{item.nombre}" />
+						</p:column>
+						<p:column styleClass="alCenter" headerText="Acciones">
+							<center>
+								<p:commandButton icon="ui-icon-arrowthick-1-s" title="Descargar"
+									styleClass="secondary" ajax="false " update="tabDocumento"
+									immediate="true">
+									<p:fileDownload
+										value="#{ingresarExpedientePPCRegistroController.descargarDocumentos(item)}" />
+								</p:commandButton>
+
+								<p:commandButton icon="ui-icon-trash" title="Eliminar"
+									process="@this" styleClass="secondary"
+									actionListener="#{ingresarExpedientePPCRegistroController.eliminarDocumento(item)}"
+									update="tabDocumento">
+									<p:confirm header="Confirmación"
+										message="¿Está seguro que desea eliminar el documento?"
+										icon="ui-icon-alert" />
+								</p:commandButton>
+							</center>
+						</p:column>
+					</p:dataTable>
+
+				</p:panelGrid>
+
+
+				<h:panelGrid columns="2" layout="grid" styleClass="panel_data w100"
+					columnClasses="header w70, w30">
+					<h:outputText
+						value="Tipo de Pronunciamiento de Participación Ciudadana para la Consulta Ambiental: *" />
+					<p:selectOneRadio required="true" id="rdtPronPpc"
+						value="#{ingresarExpedientePPCRegistroController.registroAmbiental.esPronunciamientoAprobadoPPC}"
+						requiredMessage="Tipo de Pronunciamiento de Participación Ciudadana para la Consulta Ambiental es requerido">
+						<f:selectItem itemValue="true" itemLabel="Aprobación" />
+						<f:selectItem itemValue="false" itemLabel="Archivo" />
+						<p:ajax process="@this" update=":form:pnlGeneral"/>
+					</p:selectOneRadio>
+
+				</h:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{ingresarExpedientePPCRegistroController.registroAmbiental.esPronunciamientoAprobadoPPC}">
+					<f:facet name="header">
+						<h:outputText
+							value="Adjuntar los archivos de la Ficha Ambiental (opcional)" />
+					</f:facet>
+
+					<h:outputText
+						value="En caso de que se haya modificado el contenido de la Ficha Ambiental como resultado de las observaciones realizadas en el Proceso de Participación Ciudadana, por favor subir la versión final de la Ficha Ambiental que incluya todas las modificaciones requeridas." />
+					<p:outputLabel
+						value="Adjuntar únicamente los capítulos de la Ficha Ambiental que han sido modificados en formato .pdf o .rar, se sugiere que cada uno de los archivos tenga un máximo de 50MB, para lograr una subida óptima de sus archivos." />
+
+					<p:dataTable id="tabDocumentoFicha" var="item"
+						emptyMessage="#{labels['common.table.empty']}" lazy="true"
+						value="#{ingresarExpedientePPCRegistroController.listaDocumentosOpcional}"
+						paginator="false" paginatorAlwaysVisible="true" rows="10"
+						paginatorPosition="bottom">
+
+						<f:facet name="header">
+							<p:commandButton value="Añadir"
+								styleClass="button-small-text toRight field_mrg"
+								icon="ui-icon-plusthick" immediate="true"
+								oncomplete="PF('uploadFileFicha').show()">
+							</p:commandButton>
+							<br />
+						</f:facet>
+
+						<p:column headerText="Documento">
+							<h:outputText value="#{item.nombre}" />
+						</p:column>
+						<p:column styleClass="alCenter" headerText="Acciones">
+							<center>
+								<p:commandButton icon="ui-icon-arrowthick-1-s" title="Descargar"
+									styleClass="secondary" ajax="false " update="tabDocumentoFicha"
+									immediate="true">
+									<p:fileDownload
+										value="#{ingresarExpedientePPCRegistroController.descargarDocumentosOpcional(item)}" />
+								</p:commandButton>
+
+								<p:commandButton icon="ui-icon-trash" title="Eliminar"
+									process="@this" styleClass="secondary"
+									actionListener="#{ingresarExpedientePPCRegistroController.eliminarDocumentoOpcional(item)}"
+									update="tabDocumentoFicha">
+									<p:confirm header="Confirmación"
+										message="¿Está seguro que desea eliminar el documento?"
+										icon="ui-icon-alert" />
+								</p:commandButton>
+							</center>
+						</p:column>
+					</p:dataTable>
+
+
+				</p:panelGrid>
+
+				<p:panelGrid columns="2" layout="grid" styleClass="w100"
+					rendered="#{ingresarExpedientePPCRegistroController.registroAmbiental.esPronunciamientoAprobadoPPC and ingresarExpedientePPCRegistroController.registroAmbiental.esOficioPPCFisico}">
+					<f:facet name="header">
+						<h:outputText value="Emisión de Resolución de Registro Ambiental*" />
+					</f:facet>
+					<h:outputText
+						value="¿La Resolución de Registro Ambiental fue emitida en forma física?"
+						style="font-weight: bold;" />
+					<p:selectOneRadio required="true" id="rdtResFis"
+						value="#{ingresarExpedientePPCRegistroController.registroAmbiental.esResolucionRegistroFisica}"
+						requiredMessage="¿La Resolución de Registro Ambiental fue emitida en forma física? es requerido">
+						<f:selectItem itemValue="true" itemLabel="Si" />
+						<f:selectItem itemValue="false" itemLabel="No" />
+						<p:ajax process="@this" update=":form:pnlGeneral"/>
+					</p:selectOneRadio>
+
+				</p:panelGrid>
+
+
+			</p:panelGrid>
+
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Regresar" styleClass="large secondary"
+						action="#{ingresarExpedientePPCRegistroController.regresar}"
+						icon="ui-icon-check" process="@this" immediate="true">
+					</p:commandButton>
+
+					<p:commandButton value="Guardar"
+						actionListener="#{ingresarExpedientePPCRegistroController.guardar}"
+						styleClass="large" update="btnEnviar"/>
+
+					<p:commandButton id="btnEnviar" value="Enviar"
+						action="#{ingresarExpedientePPCRegistroController.completarTarea()}" 
+						disabled="#{!ingresarExpedientePPCRegistroController.guardado}"
+						process="@this"/>
+				</div>
+			</h:panelGroup>
+
+		</h:form>
+
+		<h:form id="formDialogs">
+			<p:dialog header="Adjuntar" widgetVar="uploadFile" modal="true"
+				resizable="false">
+				<p:outputPanel>
+					<p:panelGrid columns="1" columnClasses="label, value">
+						<h:outputText value="Seleccione el archivo que desea adjuntar" />
+						<p:fileUpload id="fileDocumento1"
+							fileUploadListener="#{ingresarExpedientePPCRegistroController.adjuntarDocumento}"
+							mode="advanced" auto="true" sizeLimit="52428800"
+							label="Seleccionar"
+							invalidFileMessage="El tipo de archivo no es pdf."
+							invalidSizeMessage="Tamaño de archivo incorrecto"
+							allowTypes="/(\.|\/)(pdf|rar)$/"
+							fileLimitMessage="Elija un solo archivo pdf de 50Mb"
+							update=":form:tabDocumento" uploadLabel="Subir"
+							cancelLabel="Cancelar" dragDropSupport="false" multiple="false">
+						</p:fileUpload>
+					</p:panelGrid>
+				</p:outputPanel>
+				<div class="buttons">
+					<p:commandButton type="button" value="Cerrar"
+						onclick="PF('uploadFile').hide()" />
+				</div>
+			</p:dialog>
+			
+			<p:dialog header="Adjuntar" widgetVar="uploadFileFicha" modal="true"
+				resizable="false">
+				<p:outputPanel>
+					<p:panelGrid columns="1" columnClasses="label, value">
+						<h:outputText value="Seleccione el archivo que desea adjuntar" />
+						<p:fileUpload id="fileDocumento2"
+							fileUploadListener="#{ingresarExpedientePPCRegistroController.adjuntarDocumentoFicha}"
+							mode="advanced" auto="true" sizeLimit="52428800"
+							label="Seleccionar"
+							invalidFileMessage="El tipo de archivo no es pdf."
+							invalidSizeMessage="Tamaño de archivo incorrecto"
+							allowTypes="/(\.|\/)(pdf|rar)$/"
+							fileLimitMessage="Elija un solo archivo pdf de 50Mb"
+							update=":form:tabDocumentoFicha" uploadLabel="Subir"
+							cancelLabel="Cancelar" dragDropSupport="false" multiple="false">
+						</p:fileUpload>
+					</p:panelGrid>
+				</p:outputPanel>
+				<div class="buttons">
+					<p:commandButton type="button" value="Cerrar"
+						onclick="PF('uploadFileFicha').hide()" />
+				</div>
+			</p:dialog>
+
+			<p:dialog header="Verificación de pago de Registro Ambiental"
+				widgetVar="verificacionPago" modal="true" resizable="false"
+				width="700">
+				<p:outputPanel id="pnlDatos">
+					<h:outputText
+						value="¿El operador realizó el pago correspondiente a la tasa del Registro Ambiental?"
+						style="font-weight: bold;" />
+					<p:selectOneRadio required="true" id="rdtResFis"
+						value="#{ingresarExpedientePPCRegistroController.registroAmbiental.tienePagoResolucion}"
+						requiredMessage="¿El operador realizó el pago correspondiente a la tasa del Registro Ambiental? es requerido">
+						<f:selectItem itemValue="true" itemLabel="Si" />
+						<f:selectItem itemValue="false" itemLabel="No" />
+						<p:ajax process="@this" update=":formDialogs:pnlDatos"/>
+					</p:selectOneRadio>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						rendered="#{ingresarExpedientePPCRegistroController.registroAmbiental.tienePagoResolucion}">
+						<f:facet name="header">
+							<h:outputText value="Información Pago realizado" />
+						</f:facet>
+						<h:outputText
+							value="Por favor registre la información del pago realizado por el operador que corresponde a la tasa del Registro Ambiental:"
+							style="font-weight: bold;" />
+
+						<h:panelGrid columns="2" layout="grid"
+							styleClass="panel_data w100" columnClasses="header w30, w70">
+							<h:outputText value="Nro. Referencia o comprobante*:" />
+							<p:inputText id="txtNumReferencia" 
+								value="#{ingresarExpedientePPCRegistroController.pagoRegistroAmbiental.numeroReferencia}"
+								maxlength="10" placeholder="Ingrese el número de comprobante"
+								required="true" requiredMessage="Nro. Referencia o comprobante es requerido">
+								<p:ajax process="@this"/>
+							</p:inputText>
+
+							<h:outputText value="Valor Pagado*:" />
+							<pe:inputNumber id="txtValorIngreso"
+								value="#{ingresarExpedientePPCRegistroController.pagoRegistroAmbiental.valorPagado}"
+								thousandSeparator="" maxValue="9999999.99" required="true"
+								requiredMessage="Valor Pagado es requerido" 
+								autocomplete="off" title="Registre el valor pagado">
+								<p:ajax process="@this"/>
+								<p:watermark for="txtValorIngreso" value="Registre el valor pagado" id="watermark" />
+							</pe:inputNumber>
+
+							<h:outputText value="Fecha de pago*:" />
+							<p:calendar styleClass="calendarClass"
+								value="#{ingresarExpedientePPCRegistroController.pagoRegistroAmbiental.fechaPago}"
+								pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" required="true"
+								requiredMessage="Fecha de pago es requerido">
+								<p:ajax process="@this" />
+							</p:calendar>
+
+							<h:outputText value="Fecha de emisión de la factura*:" />
+							<p:calendar styleClass="calendarClass"
+								value="#{ingresarExpedientePPCRegistroController.pagoRegistroAmbiental.fechaFactura}"
+								pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" required="true"
+								requiredMessage="Fecha de emisión de la factura es requerido">
+								<p:ajax process="@this" />
+							</p:calendar>
+
+							<h:outputText value="Nro. Factura*:" />
+							<p:inputText id="txtNumFac"
+								value="#{ingresarExpedientePPCRegistroController.pagoRegistroAmbiental.numeroFactura}"
+								maxlength="17" placeholder="Registre el número de factura emitida"
+								required="true" requiredMessage="Nro. Factura es requerido">
+								<p:ajax process="@this"/>
+							</p:inputText>
+
+							<h:outputText value="Factura*:" />
+							<h:panelGrid columns="2">
+								<p:fileUpload id="fileDocumento3"
+									fileUploadListener="#{ingresarExpedientePPCRegistroController.adjuntarDocumentoFactura}"
+									mode="advanced" auto="true" sizeLimit="52428800"
+									label="Adjuntar"
+									invalidFileMessage="El tipo de archivo no es pdf o rar."
+									invalidSizeMessage="Tamaño de archivo incorrecto"
+									allowTypes="/(\.|\/)(pdf|rar)$/"
+									fileLimitMessage="Elija un solo archivo pdf o rar de 50Mb"
+									update=":formDialogs:tabDocumentoFicha" uploadLabel="Subir"
+									cancelLabel="Cancelar" dragDropSupport="false" multiple="false">
+								</p:fileUpload>
+
+								<p:dataTable id="tabDocumentoFicha" var="item"
+									emptyMessage="#{labels['common.table.empty']}" lazy="true"
+									value="#{ingresarExpedientePPCRegistroController.listaFacturas}"
+									paginator="false" paginatorAlwaysVisible="true" rows="10"
+									paginatorPosition="bottom">
+
+									<p:column headerText="Documento">
+										<h:outputText value="#{item.nombre}" />
+									</p:column>
+									<p:column styleClass="alCenter" headerText="Acciones">
+										<center>
+											<p:commandButton icon="ui-icon-arrowthick-1-s"
+												title="Descargar" styleClass="secondary" ajax="false "
+												update="tabDocumentoFicha" immediate="true">
+												<p:fileDownload
+													value="#{ingresarExpedientePPCRegistroController.descargarFacturas(item)}" />
+											</p:commandButton>
+
+											<p:commandButton icon="ui-icon-trash" title="Eliminar"
+												process="@this" styleClass="secondary"
+												actionListener="#{ingresarExpedientePPCRegistroController.eliminarFactura(item)}"
+												update="tabDocumentoFicha">
+												<p:confirm header="Confirmación"
+													message="¿Está seguro que desea eliminar el documento?"
+													icon="ui-icon-alert" />
+											</p:commandButton>
+										</center>
+									</p:column>
+								</p:dataTable>
+							</h:panelGrid>
+						</h:panelGrid>
+					</p:panelGrid>
+
+				</p:outputPanel>
+				
+				<div class="buttons">
+					<p:commandButton value="Enviar"
+						actionListener="#{ingresarExpedientePPCRegistroController.finalizar}"/>
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,716 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:f="http://java.sun.com/jsf/core"  xmlns:controles="http://java.sun.com/jsf/composite/controles-prime">
+<ui:composition template="/prevencion/licenciamiento-ambiental/eia/verEIA.xhtml">
+	<ui:define name="content-eia">	
+		<h:form id="form">
+			<p:panel header="Ficha Técnica">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+					<f:facet name="header">
+						<h:outputText value="Datos del proyecto" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="Nombre proyecto " />
+						<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.nombre}" />
+						<h:outputText value="Código del proyecto" />
+						<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.codigo}" />
+						<h:outputText value="Proponente" />
+						<h:outputText value="#{fichaTecnicaControllerEia.getProponente()}" />
+						<h:outputText value="Ente responsable" />
+						<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.areaResponsable.areaName}" />
+					</h:panelGrid>
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="panel_data w100" rendered="#{!fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.datosOficinaPrincipal and !fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.concesionesMinerasMultiples}">
+					<f:facet name="header">
+						<h:outputText value="Ubicación geográfica" />
+					</f:facet>
+					<p:dataTable value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.proyectoUbicacionesGeograficas}" var="ubicacion">
+						<p:column headerText="Provincia">
+							<h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+						</p:column>
+						<p:column headerText="Cantón">
+							<h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+						</p:column>
+						<p:column headerText="Parroquia">
+							<h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}" />
+						</p:column>
+					</p:dataTable>
+					<p:outputLabel value="Dirección del proyecto, obra o actividad" styleClass="bold" />
+					<p:inputTextarea value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.direccionProyecto}" readonly="true" rows="2" />
+				</p:panelGrid>
+
+				<h:panelGroup id="pnlDetalles">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="Detalle del proyecto" />
+						</f:facet>
+						<h:panelGrid styleClass="panel_data mw50" columns="2" columnClasses="header, null" rowClasses="null, alt">
+							<h:outputText value="Sector " />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.tipoSector}" />
+							<h:outputText value="Superficie" />
+							<h:panelGroup>
+								<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.area}" />
+								<h:outputText value=" #{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.unidad}" />
+							</h:panelGroup>
+							<h:outputText value="Altitud" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.proyecto.altitud} msnm" />
+						</h:panelGrid>
+					</p:panelGrid>
+				</h:panelGroup>
+
+				<p:panelGrid columns="1" layout="grid" >
+					<f:facet name="header">
+						<h:outputText value="Ver plano de implantación *" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data" columns="2" columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText id="etiqueta" value="#{fichaTecnicaControllerEia.documentoGeneral.getNombre()}" />
+						<p:commandButton id="download" rendered="true" icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true">
+							<p:fileDownload value="#{fichaTecnicaControllerEia.getStreamContent(0)}" />
+						</p:commandButton>
+					</h:panelGrid>
+					<!-- Cris F:  para mostrar historico -->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{fichaTecnicaControllerEia.documentoGeneralOriginalList.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText id="documentoGeneralOriginal"
+							value="Historial Plano de implantación" />
+						<p:commandButton styleClass="button-small primary" process="@this :formDocumento"
+							icon="ui-icon-search"
+							oncomplete="PF('documentosOriginalesDlg').show()" 
+							action="#{fichaTecnicaControllerEia.obtenerListaElementos('Documento General')}" 
+							update=":formDocumento"/>
+					</h:panelGrid>
+					<!-- fin historico -->
+				</p:panelGrid>
+				
+				<p:panelGrid columns="1" layout="grid" rendered="#{fichaTecnicaControllerEia.esMineriaNoMetalicos}">
+					<f:facet name="header">
+						<h:outputText value="Ver Título Minero *" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data" columns="2" columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText id="etiqueta2" value="#{fichaTecnicaControllerEia.documentoTituloMinero.getNombre()}" />
+						<p:commandButton id="download2" rendered="true" icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true">
+							<p:fileDownload value="#{fichaTecnicaControllerEia.getStreamContent(2)}" />
+						</p:commandButton>
+					</h:panelGrid>
+					
+					<!-- Cris F:  para mostrar historico -->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{fichaTecnicaControllerEia.documentoTituloMineroOriginalList.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText id="tituloMineroOriginal"
+							value="Historial Título Minero" />
+						<p:commandButton styleClass="button-small primary" process="@this :formDocumento"
+							icon="ui-icon-search"
+							oncomplete="PF('documentosOriginalesDlg').show()" 
+							action="#{fichaTecnicaControllerEia.obtenerListaElementos('Titulo Minero')}" 
+							update=":formDocumento"/>
+					</h:panelGrid>
+					<!-- fin historico -->					
+				</p:panelGrid>
+				
+				<p:panelGrid columns="1" layout="grid" rendered="#{fichaTecnicaControllerEia.esMineriaNoMetalicos}">
+					<f:facet name="header">
+						<h:outputText value="Ver Registro Calificación Pequeño Minero *" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data" columns="2" columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText id="etiqueta3" value="#{fichaTecnicaControllerEia.documentoRegistroCalificacionMinero.getNombre()}" />
+						<p:commandButton id="download3" rendered="true" icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true">
+							<p:fileDownload value="#{fichaTecnicaControllerEia.getStreamContent(3)}" />
+						</p:commandButton>
+					</h:panelGrid>
+					
+					<!-- Cris F:  para mostrar historico -->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{fichaTecnicaControllerEia.documentoRegistroCalificacionMineroOriginalList.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText id="registroCalificacionMineroOriginal"
+							value="Historial Registro Calificación Pequeño Minero" />
+						<p:commandButton styleClass="button-small primary" process="@this :formDocumento"
+							icon="ui-icon-search"
+							oncomplete="PF('documentosOriginalesDlg').show()" 
+							action="#{fichaTecnicaControllerEia.obtenerListaElementos('Registro Calificacion Pequeño Minero')}" 
+							update=":formDocumento"/>
+					</h:panelGrid>
+					<!-- fin historico -->	
+					
+				</p:panelGrid>
+				
+				<p:panelGrid columns="1" layout="grid" rendered="#{fichaTecnicaControllerEia.esMineriaNoMetalicos}">
+					<f:facet name="header">
+						<h:outputText value="Ver Vigencia Derechos Mineros*" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data" columns="2" columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText id="etiqueta4" value="#{fichaTecnicaControllerEia.documentoVigenciaDerechosMineros.getNombre()}" />
+						<p:commandButton id="download4" rendered="true" icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true">
+							<p:fileDownload value="#{fichaTecnicaControllerEia.getStreamContent(4)}" />
+						</p:commandButton>
+					</h:panelGrid>					
+					
+						<!-- Cris F:  para mostrar historico -->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{fichaTecnicaControllerEia.documentoVigenciaDerechosMinerosOriginalList.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText id="vigenciaDerechosMinerosOriginal"
+							value="Historial Vigencia Derechos Mineros" />
+						<p:commandButton styleClass="button-small primary" process="@this :formDocumento"
+							icon="ui-icon-search"
+							oncomplete="PF('documentosOriginalesDlg').show()" 
+							action="#{fichaTecnicaControllerEia.obtenerListaElementos('Vigencia Derechos Mineros')}" 
+							update=":formDocumento"/>
+					</h:panelGrid>
+					<!-- fin historico -->	
+					
+				</p:panelGrid>
+
+				<h:panelGroup id="pnlConsultor">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="Consultor calificado" />
+						</f:facet>
+						<h:outputText value="#{labels['common.table.empty']}" rendered="#{!fichaTecnicaControllerEia.labelAdicionar}" />
+						<h:panelGroup>
+							<h:panelGrid styleClass="panel_data" columns="2" columnClasses="header, null" rowClasses="null, alt">
+								<h:outputText value="Consultor calificado" />
+								<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.consultorSeleccionado.nombre}" />
+							</h:panelGrid>
+						</h:panelGroup>
+
+						<!-- MarielaG para mostrar historico -->
+						<!-- se visualiza cuando: el estudio a sido modificado y 
+								el consultor original y el consultor actual existen pero son diferentes o
+							 	el consultor original NO existe pero el consultor actual si
+							 	Cris F: cambio para mostrar en modo de tabla todos los registros ingresados.-->
+						<h:panelGrid styleClass="panel_data" columns="2"
+							rendered="#{fichaTecnicaControllerEia.listaHistorialEstudio.size() > 0}"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt">
+							<h:outputText id="consultorCalificado"
+								value="Historial Consultor Calificado" />
+							<p:commandButton styleClass="button-small primary"
+								process="@this :formConsultorCalificado" icon="ui-icon-search"
+								oncomplete="PF('consultorCalificadoDlg').show()"
+								update=":formConsultorCalificado" />
+						</h:panelGrid>
+						<!-- fin historico -->
+					</p:panelGrid>
+				</h:panelGroup>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Equipo consultor" />
+					</f:facet>
+					<p:dataTable id="tblGrupoConsultor" rowIndexVar="index"
+								 value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.consultorNoCalificadosSeleccionados}"
+								 var="equipoConsultor"
+								 emptyMessage="#{labels['common.table.empty']}">
+						<p:column styleClass="w20px alCenter">
+							<h:outputText value="#{index + 1}" />
+						</p:column>
+						<p:column headerText="Nombre">
+							<h:outputText value="#{equipoConsultor.nombre}" />
+						</p:column>
+						<p:column headerText="Formación profesional">
+							<h:outputText value="#{equipoConsultor.formacionProfesional}" />
+						</p:column>
+						<p:column headerText="Componente de participación">
+							<h:outputText value="#{equipoConsultor.componentePaticipacion.nombre}" />
+						</p:column>
+						<!-- MarielaG para mostrar columna Descripción de participación -->
+						<p:column headerText="Descripción de participación">
+							<h:outputText value="#{equipoConsultor.descripcionParticipacionEquipConsultor}" />
+						</p:column>
+						<!-- Cris F: Mostrando el historico por cada consultor en la tabla -->
+						<p:column styleClass="w40px alCenter" rendered="#{fichaTecnicaControllerEia.listaConsultoresNoCalificadosOriginales.size() > 0 or fichaTecnicaControllerEia.totalConsultoresNoCalificadosModificados > 0}">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{equipoConsultor.registroModificado}"
+								styleClass="button-small orange"
+								action="#{fichaTecnicaControllerEia.mostrarOriginalConsultorNoCalificado(equipoConsultor)}"
+								update=":formEquipoOriginal:equipoConsultorOriginal" process="@this"
+								oncomplete="PF('equipoConsultorOriginal').show()" />
+ 								<!-- NUEVO -->
+							<h:outputText value="Nuevo" styleClass="bold text-orange" rendered="#{equipoConsultor.nuevoEnModificacion}"/>
+						</p:column>
+						<!-- fin historico -->
+					</p:dataTable>
+
+
+					<!-- MarielaG para mostrar historico -->
+					<h:panelGrid styleClass="panel_data" columns="2" 
+					rendered="#{!fichaTecnicaControllerEia.listaConsultoresNoCalificadosEliminadas.isEmpty() and 
+					fichaTecnicaControllerEia.listaConsultoresNoCalificadosEliminadas != null}"
+						columnClasses="header background-orange, null" rowClasses="null, alt">
+						<h:outputText id="consultor_orginal"
+							value="Equipo consultor eliminado" />
+							<p:commandButton styleClass="primary button-small"
+                                                 icon="ui-icon-search"
+                                                 process="@this :formEquipoOriginal:equipoConsultorOriginal"
+                                                 action="#{fichaTecnicaControllerEia.mostrarEliminados()}"
+                                                 oncomplete="PF('equipoConsultorOriginal').show()" 
+                                                 update=":formEquipoOriginal:tblGrupoConsultor"/>
+					</h:panelGrid>
+					<!-- fin historico -->
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.tieneFasesMineras}">
+					<f:facet name="header">
+						<h:outputText value="Tiene fases mineras" />
+					</f:facet>
+					<h:panelGrid columns="1">
+						<p:outputLabel value="¿Su proyecto tiene diferentes fases mineras?" for="tieneFases" styleClass="bold" />
+						<p:selectOneRadio value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.tieneFasesMineras}"
+										  required="true" id="tieneFases" disabled="true">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+						</p:selectOneRadio>
+						<h:outputText />
+
+					</h:panelGrid>
+				</p:panelGrid>
+
+				<h:panelGroup id="pnlFaseMinera">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25" rendered="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.tieneFasesMineras}">
+						<f:facet name="header">
+							<h:outputText value="Fases mineras *" />
+						</f:facet>
+						<h:panelGrid columns="2">
+							<p:outputLabel value="Fases" for="faseMinera" styleClass="bold"/>
+							<p:selectManyCheckbox
+									value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.fasesMinerasSeleccionadas}"
+									required="true" id="faseMinera" layout="grid" columns="3" styleClass="field_mrg w100" disabled="true">
+								<f:selectItems
+										value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.listaFasesMineras}" />
+							</p:selectManyCheckbox>
+						</h:panelGrid>
+					</p:panelGrid>
+				</h:panelGroup>
+
+				<h:panelGroup id="pnlBeneficio" >
+					<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25" rendered="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.verBeneficio}">
+						<f:facet name="header">
+							<h:outputText value="Beneficio" />
+						</f:facet>
+						<h:panelGrid styleClass="panel_data mw50" columns="2" columnClasses="header, null" rowClasses="null, alt">
+							<h:outputText value="Actividades" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.actividadBeneficio}" />
+							
+							<h:outputText value="Recuperación metálica" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.recuperacionMetalica}" />
+						
+							<h:outputText value="Construcción de relaves" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.tieneConstruccionRelaves == true ? 'Si' : 'No' }" />
+							
+							<h:outputText value="Localización y disposición de relaves" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.localizacionRelaves}" />
+							
+							<h:outputText value="Capacidad" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.capacidad}" />
+							
+							<h:outputText value="Estado" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.estadoBeneficio}" />					
+
+						</h:panelGrid>
+						
+						<!-- Cris f: mostrar historico Beneficio-->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{fichaTecnicaControllerEia.listaEstudioBeneficioHistorial.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText id="beneficioHistorico"
+							value="Historial Fases Mineras Beneficio" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-search"
+							oncomplete="PF('beneficioDlg').show()"/>
+					</h:panelGrid>
+					<!-- fin historico -->
+					
+					</p:panelGrid>
+					
+				</h:panelGroup>
+
+				<h:panelGroup id="explotacion">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25" rendered="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.verExplotacion}">
+						<f:facet name="header">
+							<h:outputText value="Explotación" />
+						</f:facet>
+						<h:panelGrid styleClass="panel_data mw50" columns="2" columnClasses="header, null" rowClasses="null, alt">
+							<h:outputText value="Método de explotación " />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.metodoDeExplotacion}" />
+							
+							<h:outputText value="Número de frentes de explotación " />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.numeroDeFrentesExplotacion}" />
+							
+							<h:outputText value="Volumen de explotación" />
+							<h:panelGroup>
+								<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.volumenDeExplotacion}" />
+								<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.unidadMedidaVolumen}" />
+							</h:panelGroup>	
+
+							<h:outputText value="Construcción de escombreras" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.tieneConstruccionEscombreras == true ? 'Si' : 'No'}" />
+							
+							<h:outputText value="Localización de la escombrera" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.localizacionEscombreras}" />
+														
+							<h:outputText value="Capacidad de la escombrera" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.capacidadEscombrera}" />				
+
+							<h:outputText value="Estado de la escombrera" />
+							<h:outputText value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.estadoExplotacion}" />							
+						</h:panelGrid>
+						<!-- Cris f: mostrar historico Explotación-->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{fichaTecnicaControllerEia.listaEstudioExplotacionHistorico.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText id="explotacionHistorico"
+							value="Historial Fases Mineras Explotación" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-search"
+							oncomplete="PF('explotacionDlg').show()"/>
+					</h:panelGrid>
+					<!-- fin historico -->
+						
+					</p:panelGrid>
+					
+					<p:panelGrid columns="1" layout="grid" styleClass="w100" 
+						rendered="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.verExplotacion and not empty fichaTecnicaControllerEia.fichaTecnicaBeanEia.listaCoordenadasGenerales}">
+                            <f:facet name="header">
+                                <h:panelGrid columns="3" styleClass="w100" columnClasses="w100">
+                                    <h:outputText value="Coordenadas" />
+                                </h:panelGrid>
+                            </f:facet>
+					<p:dataTable id="tblCoordenadas" rowIndexVar="index"
+                                         value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.listaCoordenadasGenerales}"
+                                         var="coordenadas" emptyMessage="#{labels['common.table.empty']}">
+                                <p:column styleClass="w20px alCenter">
+                                    <h:outputText value="#{index + 1}" />
+                                </p:column>
+                                <p:column headerText="Coordenada X">
+                                    <h:outputText value="#{coordenadas.x}" />
+                                </p:column>
+                                <p:column headerText="Coordenada Y">
+                                    <h:outputText value="#{coordenadas.y}" />
+                                </p:column>
+                                <p:column headerText="Descripción">
+                                    <h:outputText value="#{coordenadas.descripcion}" />
+                                </p:column>   
+                                <p:column styleClass="w40px alCenter" rendered="#{fichaTecnicaControllerEia.listaCoordenaGeneralesOriginales.size() > 0}">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{coordenadas.registroModificado}"
+								styleClass="button-small orange"
+								action="#{fichaTecnicaControllerEia.mostrarHistoricoCoordenadas(coordenadas)}"
+								update=":formCoordenadasOriginales:coordenadasOriginalesDlg" process="@this"
+								oncomplete="PF('coordenadasOriginalesDlg').show()" />
+ 								
+							<h:outputText value="Nuevo" styleClass="bold text-orange" rendered="#{coordenadas.nuevoEnModificacion}"/>
+						</p:column>
+						<!-- fin historico -->					
+                                                             
+                            </p:dataTable>
+                            
+                            <!-- mostrar historico COORDENADAS ELIMINADAS-->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{fichaTecnicaControllerEia.listaCoordenadasGeneralesEliminadas.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText id="coordenadaEliminarHistorico"
+							value="Coordenadas eliminadas" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-search"
+							oncomplete="PF('coordenadasOriginalesDlg').show()" 
+							update=":formCoordenadasOriginales:coordenadasOriginalesDlg"
+							action="#{fichaTecnicaControllerEia.mostrarHistoricoCoordenadasEliminadas()}"/>
+					</h:panelGrid>
+					<!-- fin historico -->
+                            
+                            
+					</p:panelGrid>
+					
+				</h:panelGroup>
+
+
+
+				<h:panelGroup id="pnlClausula">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w25, field_mrg w25">
+						<f:facet name="header">
+							<p:outputLabel value="Cláusula de responsabilidad *" />
+						</f:facet>
+						<h:panelGrid columns="2" styleClass="w100" >
+							<p:selectBooleanCheckbox value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.estudioImpactoAmbiental.aceptaClausula}" required="true" id="txtClausula"/>
+							<h:panelGroup>
+								<h:panelGrid columnClasses="alJustify">
+									<p:outputLabel value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.clausula}" for="txtClausula"/>
+								</h:panelGrid>
+							</h:panelGroup>
+						</h:panelGrid>
+					</p:panelGrid>
+				</h:panelGroup>
+
+			</p:panel>
+		</h:form>
+
+		<h:form id="formEquipoOriginal">
+			<p:dialog header="Equipo consultor original"
+				id="equipoConsultorOriginal"
+				widgetVar="equipoConsultorOriginal" modal="true"
+				resizable="false" width="600">
+				<h:panelGroup id="datosConsultorCalificado">
+					<h:panelGrid columns="1" columnClasses="w100">
+						<p:dataTable id="tblGrupoConsultor" rowIndexVar="index"
+							value="#{fichaTecnicaControllerEia.listaConsultorNoCalificadoHistorico}"
+							var="equipoConsultor"
+							emptyMessage="#{labels['common.table.empty']}">
+							<p:column styleClass="w20 alCenter" headerText="Observación">
+								<h:outputText value="#{equipoConsultor.numeroNotificacion == 1 ? 'Original' : equipoConsultor.numeroNotificacion -1 }" />
+							</p:column>
+							<p:column headerText="Nombre">
+								<h:outputText value="#{equipoConsultor.nombre}" />
+							</p:column>
+							<p:column headerText="Formación profesional">
+								<h:outputText value="#{equipoConsultor.formacionProfesional}" />
+							</p:column>
+							<p:column headerText="Componente de participación">
+								<h:outputText
+									value="#{equipoConsultor.componentePaticipacion.nombre}" />
+							</p:column>
+							<!-- MarielaG para mostrar columna Descripción de participación -->
+							<p:column headerText="Descripción de participación">
+								<h:outputText value="#{equipoConsultor.descripcionParticipacionEquipConsultor}" />
+							</p:column>
+						</p:dataTable>
+					</h:panelGrid>
+				</h:panelGroup>
+				<script type="text/javascript">
+                    function handleDatosConsultor(xhr, status, args) {
+                        if (args.validationFailed || !args.consultorCalificado) {
+                            PF('equipoConsultorOriginal').show();
+                        }
+                        else {
+                            PF('equipoConsultorOriginal').hide();
+                        }
+                    }
+                </script>
+			</p:dialog>
+		</h:form>
+		
+		<h:form id="formCoordenada">
+            <p:dialog header="Coordenas" id="coordenadaOriginal"
+                      widgetVar="coordenadaOriginal" modal="true" width="500"
+                      resizable="false" draggable="false">
+                <h:panelGrid columns="2" id="coordenadaOriginalContainer"
+                             styleClass="w100" columnClasses="w50, field_mrg w50">
+                    <p:outputLabel value="Coordenada X" for="coordenadaX"
+                                   styleClass="bold" />
+                    <p:outputLabel value="Coordenada Y" for="coordenadaY"
+                                   styleClass="bold" />
+
+                    <p:inputText id="coordenadaX"
+                                 value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.coordenadaGeneralOriginal.x}"
+                                 maxlength="15" required="true" readonly="true">                        
+                    </p:inputText>
+
+                    <p:inputText id="coordenadaY"
+                                 value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.coordenadaGeneralOriginal.y}"
+                                 maxlength="15" required="true" readonly="true">                        
+                    </p:inputText>
+
+                    <p:outputLabel value="Descripción" for="descripcion"
+                                   styleClass="bold" />
+                    <h:outputText />
+                    <p:inputText id="descripcion"
+                                 value="#{fichaTecnicaControllerEia.fichaTecnicaBeanEia.coordenadaGeneralOriginal.descripcion}"
+                                 maxlength="150" required="true" readonly="true"/>
+                    <h:outputText />
+                </h:panelGrid>
+                <p:separator />
+
+                <div class="buttons">
+                    <p:commandButton value="Cerrar" type="button"
+                                     onclick="PF('coordenadaOriginal').hide()" styleClass="secondary" />
+
+                </div>
+
+                <script type="text/javascript">
+                    function showModalAddCoordenadas(xhr, status, args) {
+                        if (args.addCordenadas)
+                            PF('coordenadaOriginal').hide();
+                        else
+                            PF('coordenadaOriginal').show();
+                    }
+                </script>
+            </p:dialog>
+        </h:form>
+        
+        
+        <!-- Mostrar historico COORDENADAS -->
+		<h:form id="formCoordenadasOriginales">
+			<p:dialog header="Coordenadas eliminadas"
+				id="coordenadasOriginalesDlg"
+				widgetVar="coordenadasOriginalesDlg" modal="true"
+				resizable="false" width="600">
+				<h:panelGroup id="datosCoodenadasOriginales">
+					<p:dataTable id="tblCoordenadasEliminadas" rowIndexVar="index"
+                                         value="#{fichaTecnicaControllerEia.listaCoordenadasVisualizacion}"
+                                         var="coordenadas" emptyMessage="#{labels['common.table.empty']}">
+                                <p:column headerText="Fecha Modificación" styleClass="alCenter">
+                                    <h:outputText value="#{coordenadas.fechaCreacion}" />
+                                </p:column>
+                                <p:column headerText="Coordenada X">
+                                    <h:outputText value="#{coordenadas.x}" />
+                                </p:column>
+                                <p:column headerText="Coordenada Y">
+                                    <h:outputText value="#{coordenadas.y}" />
+                                </p:column>
+                                <p:column headerText="Descripción">
+                                    <h:outputText value="#{coordenadas.descripcion}" />
+                                </p:column>   		
+                                                             
+                            </p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+		<!-- para mostrar historico -->
+		<!-- Cris F: cambio para tener una tabla -->
+		<h:form id="formDocumento">
+		<p:dialog header="Historial de Documentos"
+				id="documentosOriginalesDlg"
+				widgetVar="documentosOriginalesDlg" modal="true"
+				resizable="false" width="800">
+			<h:panelGrid columns="1" layout="grid" styleClass="w100">
+
+				<p:dataTable id="tblDocumentosOriginales" rowIndexVar="index"
+					value="#{fichaTecnicaControllerEia.documentosOriginales}"
+					var="documento" emptyMessage="#{labels['common.table.empty']}">
+					<p:column styleClass="w20 alCenter" headerText="Fecha Modificación">
+						<h:outputText
+							value="#{documento.fechaModificacion}" />
+					</p:column>
+					<p:column headerText="Documento">
+						<h:outputText value="#{documento.nombre}" />
+					</p:column>
+					<p:column styleClass="w5 alCenter">
+						<p:commandButton id="downloadOriginal" rendered="true"
+							icon="ui-icon-search" ajax="false"
+							styleClass="button-small orange" title="Ver" immediate="true">
+							<p:fileDownload
+								value="#{fichaTecnicaControllerEia.getStreamContentOriginal(documento)}" />
+						</p:commandButton>
+					</p:column>
+				</p:dataTable>				
+			</h:panelGrid>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+		<!-- para mostrar historico -->
+		<!-- Cris F: cambio para tener una tabla -->
+		<h:form id="formConsultorCalificado">
+		<p:dialog header="Historial Consultor Calificado"
+				id="consultorCalificadoDlg"
+				widgetVar="consultorCalificadoDlg" modal="true"
+				resizable="false" width="600">
+			<h:panelGrid columns="1" layout="grid" styleClass="w100">
+
+				<p:dataTable id="tblconsultorCalificado" rowIndexVar="index"
+					value="#{fichaTecnicaControllerEia.listaHistorialEstudio}"
+					var="consultor" emptyMessage="#{labels['common.table.empty']}">
+					<p:column styleClass="w20 alCenter" headerText="Fecha Modificación">
+						<h:outputText
+							value="#{consultor.fechaCreacion}" />
+					</p:column>
+					<p:column headerText="Consultor Calificado">
+						<h:outputText value="#{consultor.consultor.nombre}" />
+					</p:column>
+				</p:dataTable>				
+			</h:panelGrid>
+			</p:dialog>
+		</h:form>
+		
+		<h:form id="formBeneficio">
+		<p:dialog header="Historial Fases Mineras Beneficio"
+				id="beneficioDlg"
+				widgetVar="beneficioDlg" modal="true"
+				resizable="false" width="800">
+			<h:panelGrid columns="1" layout="grid" styleClass="w100">
+
+				<p:dataTable id="tblBeneficio" rowIndexVar="index"
+					value="#{fichaTecnicaControllerEia.listaEstudioBeneficioHistorial}"
+					var="beneficio" emptyMessage="#{labels['common.table.empty']}">
+					<p:column styleClass="w20 alCenter" headerText="Fecha Modificación">
+						<h:outputText
+							value="#{beneficio.fechaCreacion}" />
+					</p:column>
+					<p:column headerText="Actividades">
+						<h:outputText value="#{beneficio.actividadBeneficio}" />
+					</p:column>
+					<p:column headerText="Recuperación metálica">
+						<h:outputText value="#{beneficio.recuperacionMetalica}" />
+					</p:column>
+					<p:column headerText="Construcción de relaves">
+						<h:outputText value="#{beneficio.tieneConstruccionRelaves == true ? 'Si' : 'No'}" />
+					</p:column>
+					<p:column headerText="Localización y disposición de relaves">
+						<h:outputText value="#{beneficio.localizacionRelaves}" />
+					</p:column>
+					<p:column headerText="Capacidad">
+						<h:outputText value="#{beneficio.capacidad}" />
+					</p:column>
+					<p:column headerText="Estado">
+						<h:outputText value="#{beneficio.estadoBeneficio}" />
+					</p:column>
+				</p:dataTable>				
+			</h:panelGrid>
+			</p:dialog>
+		</h:form>
+		
+		<h:form id="formExplotacion">
+		<p:dialog header="Historial Fases Mineras Explotación"
+				id="explotacionDlg"
+				widgetVar="explotacionDlg" modal="true"
+				resizable="false" width="800">
+			<h:panelGrid columns="1" layout="grid" styleClass="w100">
+
+				<p:dataTable id="tblBeneficio" rowIndexVar="index"
+					value="#{fichaTecnicaControllerEia.listaEstudioExplotacionHistorico}"
+					var="explotacion" emptyMessage="#{labels['common.table.empty']}">
+					<p:column styleClass="w20 alCenter" headerText="Fecha Modificación">
+						<h:outputText
+							value="#{explotacion.fechaCreacion}" />
+					</p:column>
+					<p:column headerText="Método de explotación">
+						<h:outputText value="#{explotacion.metodoDeExplotacion}" />
+					</p:column>
+					<p:column headerText="Número de frentes de explotación">
+						<h:outputText value="#{explotacion.numeroDeFrentesExplotacion}" />
+					</p:column>
+					<p:column headerText="Volumen de explotación">
+						<h:outputText value="#{explotacion.volumenDeExplotacion}" />
+					</p:column>
+					<p:column headerText="Construcción de escombreras">
+						<h:outputText value="#{explotacion.tieneConstruccionEscombreras == true ? 'Si' : 'No'}" />
+					</p:column>
+					<p:column headerText="Localización de la escombrera">
+						<h:outputText value="#{explotacion.localizacionEscombreras}" />
+					</p:column>
+					<p:column headerText="Capacidad de la escombrera">
+						<h:outputText value="#{explotacion.capacidadEscombrera}" />
+					</p:column>
+					<p:column headerText="Estado de la escombrera">
+						<h:outputText value="#{explotacion.estadoExplotacion}" />
+					</p:column>
+				</p:dataTable>				
+			</h:panelGrid>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+        
+
+	</ui:define>
+</ui:composition>
+</html>

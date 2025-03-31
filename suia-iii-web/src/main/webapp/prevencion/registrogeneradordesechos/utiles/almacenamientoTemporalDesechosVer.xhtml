@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="Almacenamiento temporal de desechos peligrosos o especiales" />
+	</f:facet>
+
+	<p:dataList id="listadoAlmacenamientoTemporalDesechos" type="none" value="#{verRegistroGeneradorDesechoBean.almacenesGeneradorDesechos}" var="almacen" rowIndexVar="index" emptyMessage="#{labels['common.table.empty']}">
+		<p:panelGrid columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="Almacén #{(index + 1)}" />
+			</f:facet>
+			<p:dataTable value="#{almacen.almacenGeneradorDesechoPeligrosos}" var="desechoGenerador" emptyMessage="#{labels['common.table.empty']}">
+				<f:facet name="header">
+					<h:outputText value="Desechos almacenados" />
+				</f:facet>
+				<p:column headerText="Clave del desecho" styleClass="w20">
+					<h:outputText value="#{desechoGenerador.generadorDesechosDesechoPeligroso.desechoPeligroso.clave}" />
+				</p:column>
+				<p:column headerText="Descripción del desecho" sortBy="#{desecho.descripcion}">
+					<h:outputText value="#{desechoGenerador.generadorDesechosDesechoPeligroso.desechoPeligroso.descripcion}" />
+				</p:column>
+			</p:dataTable>
+
+			<h:panelGrid styleClass="w100" columns="2" columnClasses="w50 alTop, w50 alTop field_mrg">
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+					<h:outputText value="Nombre" />
+					<h:outputText value="#{almacen.codigo}" />
+					<h:outputText value="Local" />
+					<h:outputText value="#{almacen.tipoLocal}" />
+					<h:outputText value="Ventilación" />
+					<h:outputText value="#{almacen.tipoVentilacion}" />
+				</h:panelGrid>
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+					<h:outputText value="Iluminación" />
+					<h:outputText value="#{almacen.tipoIluminacion}" />
+					<h:outputText value="Material" />
+					<h:outputText value="#{almacen.tipoMaterialConstruccion}" />
+				</h:panelGrid>
+			</h:panelGrid>
+
+			<h:panelGrid styleClass="w100" columns="2" columnClasses="w50 alTop, w50 alTop field_mrg">
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+					<h:outputText value="Largo(m)" />
+					<h:outputText value="#{almacen.largo}" />
+					<h:outputText value="Ancho(m)" />
+					<h:outputText value="#{almacen.ancho}" />
+				</h:panelGrid>
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+					<h:outputText value="Altura(m)" />
+					<h:outputText value="#{almacen.altura}" />
+					<h:outputText value="Capacidad total(m3)" />
+					<h:outputText value="#{almacen.largo * almacen.ancho * almacen.altura}">
+						<f:convertNumber maxFractionDigits="3" />
+					</h:outputText>
+				</h:panelGrid>
+			</h:panelGrid>
+
+			<h:panelGrid styleClass="panel_data w50" columns="2" columnClasses="header w50, null" rowClasses="null, alt" rendered="#{empty verRegistroGeneradorDesechoBean.generadorDesechosPeligrosos.proyecto and !empty almacen.codigoPermisoAmbiental}">
+				<h:outputText value="Permiso ambiental" />
+				<h:outputText value="#{almacen.codigoPermisoAmbiental}" />
+				<h:outputText value="Fecha de emisión" />
+				<h:outputText value="#{almacen.fechaPermisoAmbiental}" />
+				<h:outputText value="Permiso ambiental para almacenamiento temporal"  rendered="#{almacen.permisoAlmacenamientoTmp != null}"/>
+				<p:commandButton icon="ui-icon-search" ajax="false" styleClass="button-small primary" title="Ver" immediate="true" rendered="#{almacen.permisoAlmacenamientoTmp != null}"> 
+						<p:fileDownload value="#{almacenamientoTemporalDesechosBean.getFilePermiso(almacen)}" />
+				</p:commandButton>
+			</h:panelGrid>
+
+			<h:panelGrid rendered="#{almacen.capacidadFosasRetencion > 0}" styleClass="panel_data w50" columns="2" columnClasses="header w50, null" rowClasses="null, alt">
+                <h:outputText value="Fosas de retención o muros de contención(m3)" />
+                <h:outputText value="#{almacen.capacidadFosasRetencion}">
+                <f:convertNumber maxFractionDigits="4"/>
+                </h:outputText>
+            </h:panelGrid>
+            
+			<p:outputLabel value="Sistemas de extinción de incendios" styleClass="bold" />
+			<p:inputTextarea value="#{almacen.sistemaExtincionIncendios}" rows="2" autoResize="false" readonly="true" />
+
+			<p:dataTable value="#{almacen.generadorDesechosAlmacenMedidasSeguridad}" var="medida" emptyMessage="#{labels['common.table.empty']}">
+				<f:facet name="header">
+					<h:outputText value="Medidas de seguridad" />
+				</f:facet>
+				<p:column headerText="Nombre" colspan="#{(medida.tipoMedidaSeguridad.id eq 1)?1:2}">
+					<h:outputText value="#{medida.tipoMedidaSeguridad.nombre}" />
+				</p:column>
+				<p:column headerText="Nombre" rendered="#{medida.tipoMedidaSeguridad.id eq 1}">
+					<h:outputText value="#{medida.otro}" />
+				</p:column>
+			</p:dataTable>
+		</p:panelGrid>
+	</p:dataList>
+</p:panelGrid>
+
+</html>

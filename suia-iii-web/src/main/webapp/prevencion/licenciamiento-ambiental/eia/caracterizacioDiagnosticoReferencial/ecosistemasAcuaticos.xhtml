@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+	<ui:define name="content">
+		<ui:include src="../contenido/menu.xhtml" />
+		<div class="content">
+			<h:form id="frm_ecosistema_acuatico">
+				<p:growl id="messages" showDetail="true" />
+
+				<h:panelGrid columns="1" id="dg_ecosistemas_acuatico"
+					styleClass="w100" columnClasses="w33, field_mrg w33, field_mrg w33">
+
+					<p:separator />
+
+					<p:selectBooleanCheckbox required="true"
+						itemLabel="Aplica ecosistemas acuáticos"
+						value="#{ecosistemaAcuatico.aplica}">
+					</p:selectBooleanCheckbox>
+
+					<p:separator />
+
+					<p:commandButton icon="ui-icon-plusthick" title="Agregar"
+						oncomplete="PF('dlgCoordenadas').show();"
+						update=":#{p:component('tbl_ecosistema_acuatico')}">
+					</p:commandButton>
+
+					<p:dataTable id="tbl_ecosistema_acuatico" var="ecosistema"
+						scrollable="true" scrollWidth="800"
+						value="#{ecosistemaAcuatico.coordenadas}">
+						<f:facet name="header">
+			            	Ecosistemas Acuáticos o Marinos
+						</f:facet>
+
+						<p:columnGroup type="header">
+							<p:row>
+								<p:column headerText="" width="25" />
+								<p:column headerText="" width="25" />
+								<p:column headerText="Descripción" width="200" />
+								<p:column headerText="X" width="50" />
+								<p:column headerText="Y" width="50" />
+								<p:column headerText="Altitud" width="50" />
+								<p:column headerText="Anexo Descripción" width="100" />
+								<p:column headerText="Anexo Imagen" width="100" />
+							</p:row>
+						</p:columnGroup>
+						<p:column style="width:32px;text-align:center">
+							<p:commandButton title="Editar"
+								action="#{ecosistemaAcuatico.editarCoordenada(ecosistema)}"
+								oncomplete="PF('dlgCoordenadas').show();"
+								update=":#{p:component('tbl_ecosistema_acuatico')}, :#{p:component('dlgCoordenadas')}"
+								icon="ui-icon-pencil">
+							</p:commandButton>
+						</p:column>
+						<p:column style="width:32px;text-align:center">
+							<p:commandButton title="Eliminar"
+								actionListener="#{ecosistemaAcuatico.eliminarCoordenada(ecosistema)}"
+								update=":#{p:component('tbl_ecosistema_acuatico')}, :#{p:component('dlgCoordenadas')}"
+								icon="ui-icon-closethick">
+							</p:commandButton>
+						</p:column>
+						<p:column>
+							<h:outputText value="#{ecosistema.descripcion}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{ecosistema.x}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{ecosistema.y}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{ecosistema.z}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{ecosistema.archivos.get('DESC_').name}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{ecosistema.archivos.get('IMG_').name}" />
+						</p:column>
+					</p:dataTable>
+
+				</h:panelGrid>
+				<div class="buttons main">
+					<p:commandButton value="Aceptar" icon="ui-icon-check"
+						action="#{ecosistemaAcuatico.guardar()}" />
+					<p:commandButton value="Cancelar" styleClass="secondary"
+						icon="ui-icon-cancel" action="#{ecosistemaAcuatico.cancelar()}"
+						process="@this">
+						<p:confirm header="Confirmación"
+							message="¿Está seguro de salir del registro de ecosistemas acuáticos?"
+							icon="ui-icon-alert" />
+					</p:commandButton>
+				</div>
+
+			</h:form>
+
+			<p:dialog header="Coordenadas" widgetVar="dlgCoordenadas"
+				id="dlgCoordenadas" modal="true" resizable="false" draggable="false"
+				style="overflow: auto;" width="550" height="300">
+				<h:form>
+					<p:separator />
+
+					<h:panelGrid columns="3" id="dg_Coordenadas" styleClass="w100"
+						columnClasses="w33, field_mrg w33, field_mrg w33">
+
+						<p:outputLabel for="txt_px" value="X" />
+						<p:outputLabel for="txt_py" value="Y" />
+						<p:outputLabel for="txt_altitud" value="Altitud" />
+
+						<p:inputText value="#{ecosistemaAcuatico.coordenada.x}"
+							onkeypress="return NumCheckDouble(event,this);" styleClass="w100"
+							required="true" id="txt_px" />
+
+						<p:inputText value="#{ecosistemaAcuatico.coordenada.y}"
+							onkeypress="return NumCheckDouble(event,this);" styleClass="w100"
+							required="true" id="txt_py" />
+
+						<p:inputText value="#{ecosistemaAcuatico.coordenada.z}"
+							onkeypress="return NumCheckDouble(event,this);" styleClass="w100"
+							required="true" id="txt_altitud" />
+
+						<p:outputLabel for="txt_descripcion" value="Descripción" />
+						<p:outputLabel for="file_descripcion" value="Anexo Descripción" />
+						<p:outputLabel for="file_imagen" value="Anexo Imagen" />
+
+						<p:inputTextarea rows="3" cols="6" required="true"
+							autoResize="false"
+							value="#{ecosistemaAcuatico.coordenada.descripcion}"
+							id="txt_descripcion" styleClass="w25">
+							<p:ajax />
+						</p:inputTextarea>
+
+						<p:row>
+							<p:fileUpload id="file_descripcion" auto="true"
+								fileUploadListener="#{ecosistemaAcuatico.handleFileUploadDescripciones}"
+								mode="advanced" value="#{ecosistemaAcuatico.archivoDescripcion}"
+								skinSimple="true" required="true" sizeLimit="10000000"
+								allowTypes="/(\.|\/)(pdf)$/"
+								update=":#{p:component('lblArchivo1')}" />
+
+							<p:outputLabel
+								value="#{ecosistemaAcuatico.archivoDescripcion.name}"
+								id="lblArchivo1" style="color:blue" />
+						</p:row>
+
+						<p:row>
+							<p:fileUpload id="file_imagen" auto="true"
+								fileUploadListener="#{ecosistemaAcuatico.handleFileUploadImagenes}"
+								mode="advanced" value="#{ecosistemaAcuatico.archivoImagen}"
+								skinSimple="true" required="true" sizeLimit="10000000"
+								allowTypes="/(\.|\/)(pdf)$/"
+								update=":#{p:component('lblArchivo2')}" />
+
+							<p:outputLabel value="#{ecosistemaAcuatico.archivoImagen.name}"
+								id="lblArchivo2" style="color:blue" />
+						</p:row>
+
+					</h:panelGrid>
+
+					<p:separator />
+
+					<p:commandButton value="Agregar" icon="ui-icon-plusthick"
+						oncomplete="handlePunto1Request(xhr, status, args)"
+						action="#{ecosistemaAcuatico.agregarCoordenada}"
+						update=":#{p:component('messages')}, :#{p:component('tbl_ecosistema_acuatico')}, :#{p:component('dlgCoordenadas')}" />
+
+				</h:form>
+			</p:dialog>
+			<script type="text/javascript">
+			        function handlePunto1Request(xhr, status, args) {
+			            if (args.validationFailed || !args.puntoIn) {
+			            	PF('dlgCoordenadas').show();
+			            }
+			            else {
+			                PF('dlgCoordenadas').hide();
+			                $('#loginLink').fadeOut();
+			            }
+			        }
+				    </script>
+
+		</div>
+	</ui:define>
+</ui:composition>

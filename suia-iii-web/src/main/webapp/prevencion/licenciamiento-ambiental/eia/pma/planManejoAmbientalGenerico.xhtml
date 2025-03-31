@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+	<ui:define name="content">
+		<ui:include src="../contenido/menu.xhtml" />
+		<div class="content">
+			<h:form id="frm_plan_manejo_ambiental_g">
+				<p:growl id="msgs" globalOnly="true" />
+
+				<f:loadBundle var="helps"
+					basename="ec.gob.ambiente.core.resources.helps_es" />
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					columnClasses="">
+					<f:facet name="header">
+						<p:commandButton value="Adjuntar"
+							onclick="PF('adjuntarArchivo').show()"
+							styleClass="button-small-text toRight field_mrg" type="button"
+							icon="ui-icon-document" />
+						<h:panelGroup id="headerCoordenadas">
+							<mae:panelGridHeaderHelp value="Adjuntar archivo" conector="coordenadasHelp"
+								help="Ayuda" />
+						</h:panelGroup>
+					</f:facet>
+				</p:panelGrid>
+
+				<p:dialog header="Adjuntar archivo" widgetVar="adjuntarArchivo"
+					modal="true" resizable="false">
+					<p:panelGrid columns="1" columnClasses="label, value">
+						<h:outputText value="Seleccione el archivo (.csv)" />
+						<p:fileUpload uploadLabel="Subir" auto="true"
+							cancelLabel="Cancelar" label="Seleccionar"
+							fileUploadListener="#{planManejoAmbientalBean.handleFileUpload}"
+							mode="advanced" dragDropSupport="false"
+							update=":#{p:component('tbl_plan_manejo_ambiental_g')}"
+							multiple="false" allowTypes="/(\.|\/)(csv)$/"
+							oncomplete="PF('adjuntarArchivo').hide()" />
+					</p:panelGrid>
+					<div class="buttons">
+						<p:commandButton type="button" value="Cerrar"
+							onclick="PF('adjuntarArchivo').hide()" />
+					</div>
+				</p:dialog>
+
+				<p:dataTable id="tbl_plan_manejo_ambiental_g" var="plan"
+					scrollable="true" scrollWidth="800"
+					value="#{planManejoAmbientalBean.listaPlanes}">
+					<f:facet name="header">
+			            	#{planManejoAmbientalBean.tipoPlan.tipo}
+						</f:facet>
+
+					<p:columnGroup type="header">
+						<p:row>
+							<p:column headerText="Aspecto ambiental" width="100" />
+							<p:column headerText="Impacto identificado" width="100" />
+							<p:column headerText="Medidas propuestas" width="100" />
+							<p:column headerText="Indicadores" width="100" />
+							<p:column headerText="Medios de verificación" width="100" />
+							<p:column headerText="Responsable" width="100" />
+							<p:column headerText="PLazo" width="100" />
+							<p:column headerText="Periodo" width="100" />
+						</p:row>
+					</p:columnGroup>
+					<p:column
+						styleClass="#{plan.aspectoAmbiental != null ? 'rojo' : 'alCenter' }">
+						<h:outputText
+							value="#{plan.aspectoAmbiental == null ? '>>' : plan.aspectoAmbiental}" />
+					</p:column>
+					<p:column
+						styleClass="#{plan.impactoIdentificado != null ? 'celeste' : 'alCenter' }">
+						<h:outputText
+							value="#{plan.impactoIdentificado == null ? '>>' : plan.impactoIdentificado}" />
+					</p:column>
+					<p:column>
+						<h:outputText value="#{plan.medidasPropuestas}" />
+					</p:column>
+					<p:column>
+						<h:outputText value="#{plan.indicadores}" />
+					</p:column>
+					<p:column>
+						<h:outputText value="#{plan.mediosVerificacion}" />
+					</p:column>
+					<p:column>
+						<h:outputText value="#{plan.responsable}" />
+					</p:column>
+					<p:column>
+						<h:outputText value="#{plan.plazo}" />
+					</p:column>
+					<p:column>
+						<h:outputText value="#{plan.periodo}" />
+					</p:column>
+				</p:dataTable>
+				<div class="buttons main">
+					<p:commandButton id="btnGuardar" value="Guardar"
+						icon="ui-icon-check" action="#{planManejoAmbientalBean.guardarPMA()}" />
+					<p:commandButton value="Cancelar" icon="ui-icon-cancel"
+						action="#{planManejoAmbientalBean.cancelarPMA()}" process="@this">
+						<p:confirm header="Confirmación"
+							message="¿Está seguro de cancelar?" icon="ui-icon-alert" />
+					</p:commandButton>
+				</div>
+			</h:form>
+		</div>
+	</ui:define>
+</ui:composition>

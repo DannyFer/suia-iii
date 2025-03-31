@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="context-extra">
+		<h:outputText value="Datos" />
+		<h:outputText value="Declaración Anual de Generador" />
+
+		<h:outputLink target="_blank"
+			value="#{request.contextPath}/control/retce/generadorDesechos/generadorDesechosPeligrososVer.jsf">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+	</ui:define>
+
+	<ui:define name="content">
+		<f:event type="preRenderView"
+			listener="#{informeOficioGeneradorController.validarTareaBpm()}" />
+		<h:form id="form">
+
+			<h:panelGrid styleClass="w100" id="pnlDocumentos">
+				<object type="application/pdf"
+					data="#{informeOficioGeneradorController.urlReporte}?pfdrid_c=true"
+					width="100%" height="500px">
+					Su navegador no soporta la visualización de pdf. Puede descargar el
+					documento presionando el siguiente botón:
+					<p:commandButton value="Descargar" styleClass="primary"
+						ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+						<p:fileDownload
+							value="#{informeOficioGeneradorController.informeTecnicoOficioGeneradorBean.getStream(informeOficioGeneradorController.nombreReporte, informeOficioGeneradorController.archivoReporte)}" />
+					</p:commandButton>
+				</object>
+				<br />
+				<br />
+
+				<h:panelGroup id="informeData"
+					rendered="#{informeOficioGeneradorController.mostrarInforme}">
+					<h:panelGrid columns="1" styleClass="w100"
+						id="pronunciamiento-wrapper" columnClasses="w50, field_mrg w50">
+						<p:outputLabel for="pronunciamiento"
+							value="Tipo de pronunciamiento" />
+						<p:selectOneRadio id="pronunciamiento"
+							value="#{informeOficioGeneradorController.informeTecnicoOficioGeneradorBean.informe.esReporteAprobacion}"
+							required="true">
+							<f:selectItem itemLabel="Pronunciamiento Aprobación"
+								itemValue="true" />
+							<f:selectItem itemLabel="Pronunciamiento Observación"
+								itemValue="false" />
+							<p:ajax process="@this" />
+						</p:selectOneRadio>
+
+					</h:panelGrid>
+
+					<br />
+
+					<p:fieldset legend="3. OBSERVACIONES" toggleable="true"
+						toggleSpeed="500" collapsed="true">
+						<p:panelGrid columns="1" layout="grid" styleClass="w100">
+							<p:outputLabel value="Observaciones generales" styleClass="bold" />
+							<control:imputConTextoEnriquecido
+								valor="#{informeOficioGeneradorController.informeTecnicoOficioGeneradorBean.informe.observaciones}"
+								soloLectura="false" requerido="false" />
+						</p:panelGrid>
+					</p:fieldset>
+
+					<br />
+
+					<p:fieldset legend="4. CONCLUSIONES *" toggleable="true"
+						toggleSpeed="500" collapsed="true">
+						<p:panelGrid columns="1" layout="grid" styleClass="w100">
+							<control:imputConTextoEnriquecido
+								requiredMessage="El campo Conclusiones es requerido"
+								valor="#{informeOficioGeneradorController.informeTecnicoOficioGeneradorBean.informe.conclusiones}"
+								soloLectura="false" requerido="true" />
+						</p:panelGrid>
+					</p:fieldset>
+
+					<br />
+
+					<p:fieldset legend="5. RECOMENDACIONES" toggleable="true"
+						toggleSpeed="500" collapsed="true">
+						<p:panelGrid columns="1" layout="grid" styleClass="w100">
+							<control:imputConTextoEnriquecido
+								valor="#{informeOficioGeneradorController.informeTecnicoOficioGeneradorBean.informe.recomendaciones}"
+								soloLectura="false" requerido="false" />
+						</p:panelGrid>
+					</p:fieldset>
+
+					<h:panelGroup id="pnlObsInformeTecnico">
+						<observaciones:tablaObservaciones idComponent="obsInformeTecnico"
+							seccion="GeneradorRETCE_Informe técnico"
+							componenteActualizarEliminar="pnlObsInformeTecnico"
+							aparace="true" mostrarSiVacio="false"
+							idClase="#{informeOficioGeneradorController.informeTecnicoOficioGeneradorBean.informe.id}"
+							nombreClase="informeGeneradorRetce" soloLectura="true" />
+					</h:panelGroup>
+				</h:panelGroup>
+
+				<h:panelGroup id="oficioObservacionData"
+					rendered="#{!informeOficioGeneradorController.mostrarInforme}">
+					<h:panelGrid columns="1" styleClass="w100"
+						columnClasses="w50, field_mrg w50">
+						<p:outputLabel for="pronunciamientoOf"
+							value="Tipo de pronunciamiento" />
+						<p:selectOneRadio id="pronunciamientoOf"
+							value="#{informeOficioGeneradorController.informeTecnicoOficioGeneradorBean.informe.esReporteAprobacion}"
+							required="true" disabled="true">
+							<f:selectItem itemLabel="Pronunciamiento Aprobación"
+								itemValue="true" />
+							<f:selectItem itemLabel="Pronunciamiento Observación"
+								itemValue="false" />
+						</p:selectOneRadio>
+					</h:panelGrid>
+					<br />
+				</h:panelGroup>
+
+			</h:panelGrid>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Guardar" process="@this :form:informeData"
+						styleClass="secondary"
+						actionListener="#{informeOficioGeneradorController.guardarInforme()}"
+						rendered="#{informeOficioGeneradorController.mostrarInforme}"
+						update="pnlDocumentos pnlButtons" icon="ui-icon-disk" />
+					<p:commandButton value="Siguiente" 
+						process="@this :form:informeData"
+						action="#{informeOficioGeneradorController.aceptarInforme()}"
+						rendered="#{informeOficioGeneradorController.mostrarInforme}"
+						update="pnlDocumentos pnlButtons" icon="ui-icon-arrowthick-1-e" />
+					<p:commandButton value="Atrás" styleClass="secondary"
+						action="#{informeOficioGeneradorController.guardarRegresar()}"
+						rendered="#{!informeOficioGeneradorController.mostrarInforme}"
+						update="pnlDocumentos pnlButtons" icon="ui-icon-arrowthick-1-w" />
+					<p:commandButton value="Guardar" styleClass="secondary"
+						process="@this :form:oficioObservacionData"
+						actionListener="#{informeOficioGeneradorController.guardarOficio()}"
+						rendered="#{!informeOficioGeneradorController.mostrarInforme}"
+						update="pnlDocumentos pnlButtons" icon="ui-icon-disk" />
+					<p:commandButton value="Enviar"
+						process="@this :form:oficioObservacionData" 
+						action="#{informeOficioGeneradorController.aceptar()}"
+						rendered="#{!informeOficioGeneradorController.mostrarInforme}"
+						update="pnlDocumentos pnlButtons" icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+</ui:composition>

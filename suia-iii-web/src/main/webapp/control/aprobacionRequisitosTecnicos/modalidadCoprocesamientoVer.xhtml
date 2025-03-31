@@ -1,0 +1,644 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition
+	template="/control/aprobacionRequisitosTecnicos/templates/verArt.xhtml">
+	<ui:define name="content-art">
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="#{labels['label.modalidad.coprocesamiento']}" />
+				</f:facet>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Capacidad anual de proceso" />
+					</f:facet>
+					<p:dataTable id="tblCoprocesamientoDesecho"
+						value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamiento.modalidadCoprocesamientoDesechos}"
+						var="desechoCoprocesamiento" paginator="true" rows="10"
+						styleClass="paginated"
+						emptyMessage="#{labels['common.table.empty']}">
+
+						<p:column styleClass="tblUno">
+							<f:facet name="header">
+								<h:outputText value="Nombre Desecho" />
+							</f:facet>
+							<h:outputText
+								value="#{desechoCoprocesamiento.desecho.descripcion}" />
+						</p:column>
+						<p:column styleClass="tblUno">
+							<f:facet name="header">
+								<h:outputText value="Código" />
+							</f:facet>
+							<h:outputText value="#{desechoCoprocesamiento.desecho.clave}" />
+						</p:column>
+						<p:column styleClass="tblUno">
+							<f:facet name="header">
+								<h:outputText value="Capacidad anual proceso (T)" />
+							</f:facet>
+							<h:outputText
+								value="#{desechoCoprocesamiento.capacidadAnualProceso}">
+								<f:convertNumber minFractionDigits="2" />
+							</h:outputText>
+						</p:column>
+						<p:column styleClass="tblUno" headerText="Desechos formulados">
+							<p:commandButton icon="ui-icon-search"
+								update=":#{p:component('datosDesechosFormulados')}"
+								process="@this"
+								action="#{modalidadCoprocesamientoController.seleccionarCoprocesamientoDesecho(desechoCoprocesamiento)}"
+								oncomplete="PF('desechosFormuladosWdgt').show();"
+								styleClass="button-small primary" />
+						</p:column>
+						<p:column styleClass="tblUno"
+							headerText="Desechos empleados directamente">
+							<p:commandButton icon="ui-icon-search"
+								update=":#{p:component('datosDesechosEmpleadosDirectamente')}"
+								process="@this"
+								action="#{modalidadCoprocesamientoController.seleccionarCoprocesamientoDesecho(desechoCoprocesamiento)}"
+								oncomplete="PF('desechosEmpleadosDirectamenteWdgt').show();"
+								styleClass="button-small primary" />
+						</p:column>
+						<p:column styleClass="tblUno">
+							<f:facet name="header">
+								<h:outputText value="Porcentaje de sustitución combustibles" />
+							</f:facet>
+							<h:outputText
+								value="#{desechoCoprocesamiento.porcentajeDeSustitucionDeCombustibleConvencional}" />
+						</p:column>
+						<p:column>
+							<div class="buttons-inline centrar">
+								<p:commandButton icon="ui-icon-search"
+									action="#{modalidadCoprocesamientoController.seleccionarCoprocesamientoDesecho(desechoCoprocesamiento)}"
+									title="Editar" styleClass="button-small primary"
+									immediate="true"
+									oncomplete="PF('dlgCoprocesamientoDesecho').show();"
+									update=":#{p:component('pnlCoprocesamientoDesecho')}" />
+							</div>
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+				<h:panelGrid styleClass="panel_data mw50" columns="2"
+					columnClasses="header, null" rowClasses="null, alt">
+					<h:outputText value="¿Es coprocesamiento en hornos cementeros? " />
+					<p:inputText
+						rendered="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamiento.incineraHornosCementeros==false}"
+						value="No" />
+					<p:inputText
+						rendered="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamiento.incineraHornosCementeros==true}"
+						value="Sí" />
+				</h:panelGrid>
+				<p:panelGrid styleClass="w100 separatorBottom" columns="1"
+					columnClasses="w50, field_mrg w50">
+					<f:facet name="header">
+						<h:outputText value="#{labels['label.manejo.desechos']}" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText id="nombreArchivo"
+							value="Plano de la Planta o del área donde se realiza el Coprocesamiento"
+							styleClass="bold" />
+						<p:commandButton icon="ui-icon-search"
+							styleClass="button-small primary toLeft" title="Ver"
+							action="#{modalidadCoprocesamientoController.descargar(0)}"
+							ajax="false"
+							rendered="#{!(modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamiento.planoPlanta.id==null)}" />
+					</h:panelGrid>
+				</p:panelGrid>
+				<p:panelGrid styleClass="w100 separatorBottom" columns="1"
+					columnClasses="w50, field_mrg w50" layout="grid"
+					id="pgRecoleccionDesechos">
+					<f:facet name="header">
+						<h:outputText value="#{labels['label.recoleccion.desechos']}" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+
+						<h:outputText value="Tipo de transporte(s) utilizado(s)" />
+
+						<h:panelGrid columns="1" id="tipoTransporte">
+							<p:inputText
+								rendered="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamiento.transportePropio}"
+								value="Propio" />
+							<p:inputText
+								rendered="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamiento.transporteContratado}"
+								value="Contratado" />
+						</h:panelGrid>
+						<h:outputText value="#{labels['label.empresa.autorizada']}"
+							rendered="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamiento.transporteContratado}" />
+						<p:inputText
+							rendered="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamiento.transporteContratado}"
+							value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamiento.nombreEmpresaAutorizada}" />
+					</h:panelGrid>
+				</p:panelGrid>
+
+
+				<p:panelGrid styleClass="w100 separatorBottom" columns="1"
+					columnClasses="w100 field_mrg" layout="grid"
+					id="pgCoprocesamientoDP">
+					<f:facet name="header">
+						<h:outputText value="#{labels['label.coprocesamiento.desechos']}" />
+					</f:facet>
+					<h:panelGroup>
+						<h:panelGrid styleClass="panel_data mw50" columns="2"
+							columnClasses="header, null" rowClasses="null, alt">
+							<h:outputText
+								value="Describir detalladamente el sistema de alimentación de desechos asi como las operaciones realizadas en esta actividad" />
+							<p:commandButton icon="ui-icon-search"
+								styleClass="button-small primary toLeft" title="Ver"
+								action="#{modalidadCoprocesamientoController.descargar(1)}"
+								ajax="false"
+								rendered="#{!(modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamiento.sistemaAlimentacionDesechosYOperacionesActividad.id==null)}" />
+						</h:panelGrid>
+					</h:panelGroup>
+					<h:panelGroup>
+						<p:panelGrid>
+							<p:row>
+								<p:column styleClass="w50">
+									<h:outputText value="Descripción de los siguientes requisitos "
+										styleClass="bold" />
+								</p:column>
+
+								<p:column styleClass="w50">
+
+									<p:commandButton icon="ui-icon-search"
+										styleClass="button-small primary toLeft" title="Ver"
+										action="#{modalidadCoprocesamientoController.descargar(2)}"
+										ajax="false"
+										rendered="#{!(modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamiento.requisitosCoprocesamientoDesechoPeligroso.id==null)}" />
+
+								</p:column>
+							</p:row>
+							<p:row style="border-style: none !important">
+								<p:column colspan="2">
+									<h:outputText
+										value="#{labels['label.coprocesamiento.requisitos']}"
+										escape="false" styleClass="alJustify" />
+								</p:column>
+							</p:row>
+
+						</p:panelGrid>
+						<h:panelGrid styleClass="panel_data mw50" columns="2"
+							columnClasses="header, null" rowClasses="null, alt"
+							rendered="#{not empty modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamiento.justificacionTecnica}">
+							<h:outputText
+								value="Justificación técnica correspondiente en el caso de no anexar alguno de los requisitos" />
+							<h:outputText
+								value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamiento.justificacionTecnica}" />
+						</h:panelGrid>
+					</h:panelGroup>
+
+				</p:panelGrid>
+
+				<p:panelGrid styleClass="w100 separatorBottom" columns="1"
+					columnClasses="w100 field_mrg" layout="grid">
+					<f:facet name="header">
+						<h:outputText
+							value="#{labels['label.coprocesamiento.protocolo.pruebas']}" />
+					</f:facet>
+
+					<h:panelGroup>
+						<p:panelGrid>
+							<h:panelGrid styleClass="panel_data mw50" columns="2"
+								columnClasses="header, null" rowClasses="null, alt">
+								<h:outputText
+									value="Descripción y desarrollo de la forma que se llevará a cabo el protocolo de pruebas indicando las caracteristicas técnicas bajo las que se desarollen " />
+								<p:commandButton icon="ui-icon-search"
+									styleClass="button-small primary toLeft" title="Ver"
+									action="#{modalidadCoprocesamientoController.descargar(3)}"
+									ajax="false"
+									rendered="#{!(modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamiento.resumenEjecutivoProtocoloPruebas.id==null)}" />
+
+							</h:panelGrid>
+						</p:panelGrid>
+					</h:panelGroup>
+
+					<p:panelGrid styleClass="w100" columns="1"
+						columnClasses="w100 field_mrg" layout="grid">
+						<f:facet name="header">
+							<h:outputText
+								value="#{labels['label.coprocesamiento.protocolo.descripcion']}" />
+						</f:facet>
+						<h:panelGroup>
+							<p:panelGrid columns="1" layout="grid" styleClass="w100 toLeft">
+								<f:facet name="header">
+									<h:outputText
+										value="Características de los desechos a coprocesar" />
+								</f:facet>
+								<p:panel style="overflow: auto">
+									<p:dataTable id="tblDesechoProcesar" style="width:900px;"
+										value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamiento.modalidadDesechoProcesados}"
+										var="desechoProcesar" paginator="true" rows="10"
+										styleClass="paginated"
+										emptyMessage="#{labels['common.table.empty']}">
+										<p:column styleClass="tblUno">
+											<f:facet name="header">
+												<h:outputText value="Nombre Desecho" />
+											</f:facet>
+											<h:outputText value="#{desechoProcesar.desecho.descripcion}" />
+										</p:column>
+										<p:column styleClass="tblUno">
+											<f:facet name="header">
+												<h:outputText value="Código" />
+											</f:facet>
+											<h:outputText value="#{desechoProcesar.desecho.clave}" />
+										</p:column>
+										<p:column styleClass="tblUno" headerText="Composición química">
+											<p:commandButton icon="ui-icon-search"
+												update=":#{p:component('datosComposicionQuimica')}"
+												process="@this"
+												action="#{modalidadCoprocesamientoController.seleccionarDesechoProcesar(desechoProcesar)}"
+												oncomplete="PF('composicionQuimicaWdgt').show();"
+												styleClass="button-small primary" />
+										</p:column>
+										<p:column styleClass="tblUno">
+											<f:facet name="header">
+												<h:outputText
+													value="Cantidad máxima desechos requeridos para el protocolo de pruebas" />
+											</f:facet>
+											<h:outputText
+												value="#{desechoProcesar.cantidadMaximaDesechosRequerido}">
+												<f:convertNumber minFractionDigits="4" />
+											</h:outputText>
+										</p:column>
+										<p:column styleClass="tblUno">
+											<f:facet name="header">
+												<h:outputText value="Punto de Inflamabilidad (°C)" />
+											</f:facet>
+											<h:outputText value="#{desechoProcesar.puntoInflamabilidad}" />
+										</p:column>
+										<p:column styleClass="tblUno">
+											<f:facet name="header">
+												<h:outputText value="Punto de Ebullición (°C)" />
+											</f:facet>
+											<h:outputText value="#{desechoProcesar.puntoEbullicion}">
+												<f:convertNumber minFractionDigits="2" />
+											</h:outputText>
+										</p:column>
+										<p:column styleClass="tblUno">
+											<f:facet name="header">
+												<h:outputText value="Porcentaje Humedad" />
+											</f:facet>
+											<h:outputText value="#{desechoProcesar.porcentajeHumedad}">
+												<f:convertNumber minFractionDigits="4" />
+											</h:outputText>
+										</p:column>
+										<p:column styleClass="tblUno">
+											<f:facet name="header">
+												<h:outputText value="Porcentaje de Cloro" />
+											</f:facet>
+											<h:outputText value="#{desechoProcesar.porcentajeCloro}">
+												<f:convertNumber minFractionDigits="4" />
+											</h:outputText>
+										</p:column>
+										<p:column styleClass="tblUno">
+											<f:facet name="header">
+												<h:outputText value="Metales Pesados" />
+											</f:facet>
+											<h:outputText value="#{desechoProcesar.metalPesado}">
+												<f:convertNumber minFractionDigits="4" />
+											</h:outputText>
+										</p:column>
+										<p:column>
+											<div class="buttons-inline centrar">
+												<p:commandButton icon="ui-icon-search"
+													action="#{modalidadCoprocesamientoController.seleccionarDesechoProcesar(desechoProcesar)}"
+													title="Editar" styleClass="button-small primary"
+													oncomplete="PF('dlgProcesarDesecho').show();"
+													immediate="true"
+													update=":#{p:component('pnlProcesarDesecho')}" />
+											</div>
+										</p:column>
+									</p:dataTable>
+								</p:panel>
+							</p:panelGrid>
+							<br />
+							<h:outputText value="En caso de formulación" styleClass="bold" />
+
+
+							<p:panel>
+								<p:panelGrid columns="1" layout="grid" styleClass="w100">
+									<f:facet name="header">
+										<h:outputText value="Características de la formulación" />
+									</f:facet>
+									<p:dataTable id="tblformulacion"
+										value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamiento.modalidadCoprocesamientoFormulaciones}"
+										var="formulacion" paginator="true" rows="10"
+										styleClass="paginated"
+										emptyMessage="#{labels['common.table.empty']}">
+										<p:column styleClass="tblUno">
+											<f:facet name="header">
+												<h:outputText value="Nro Formulación" />
+											</f:facet>
+											<h:outputText value="#{formulacion.indice + 1}" />
+										</p:column>
+										<p:column styleClass="tblUno"
+											headerText="Tipo de Desecho que compone la formulación">
+											<p:commandButton icon="ui-icon-search"
+												update=":#{p:component('datosTipoFormulacion')}"
+												process="@this"
+												action="#{modalidadCoprocesamientoController.seleccionarFormulario(formulacion)}"
+												oncomplete="PF('tipoDesechoFormulacionWdgt').show();"
+												styleClass="button-small primary" />
+										</p:column>
+										<p:column styleClass="tblUno">
+											<f:facet name="header">
+												<h:outputText value="Porcentaje humedad" />
+											</f:facet>
+											<h:outputText
+												value="#{formulacion.porcentajeHumedadFormulacion}">
+												<f:convertNumber minFractionDigits="4" />
+											</h:outputText>
+										</p:column>
+										<p:column styleClass="tblUno">
+											<f:facet name="header">
+												<h:outputText value="Porcentaje Cloro" />
+											</f:facet>
+											<h:outputText
+												value="#{formulacion.porcentajeCloroFormulacion}">
+												<f:convertNumber minFractionDigits="4" />
+											</h:outputText>
+										</p:column>
+										<p:column styleClass="tblUno">
+											<f:facet name="header">
+												<h:outputText value="Poder Calorífico (kJ/Kg)" />
+											</f:facet>
+											<h:outputText value="#{formulacion.poderCalorifico}">
+												<f:convertNumber minFractionDigits="4" />
+											</h:outputText>
+										</p:column>
+										<p:column>
+											<div class="buttons-inline centrar">
+												<p:commandButton icon="ui-icon-search"
+													action="#{modalidadCoprocesamientoController.seleccionarFormulario(formulacion)}"
+													title="Editar" styleClass="button-small primary"
+													oncomplete="PF('dlgFormulacion').show();" immediate="true"
+													update=":#{p:component('pnlFormulacion')}" />
+											</div>
+										</p:column>
+									</p:dataTable>
+								</p:panelGrid>
+								<h:panelGrid styleClass="panel_data mw100" columns="2"
+									columnClasses="header, null" rowClasses="null, alt"
+									rendered="#{!(modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamiento.procedimientoProtocoloPrueba.id==null)}">
+									<h:outputText value="Procedimiento" />
+									<p:commandButton icon="ui-icon-search"
+										styleClass="button-small primary toLeft" title="Ver"
+										action="#{modalidadCoprocesamientoController.descargar(4)}"
+										ajax="false" />
+								</h:panelGrid>
+							</p:panel>
+							<p:panelGrid>
+								<p:row>
+									<p:column styleClass="w50">
+										<h:outputText
+											value="Presentar la descripción de los siguientes requisitos "
+											styleClass="bold" id="lblRequisitosProtocoloPrueba" />
+									</p:column>
+
+									<p:column styleClass="w50">
+										<p:commandButton icon="ui-icon-search"
+											styleClass="button-small primary toLeft" title="Ver"
+											action="#{modalidadCoprocesamientoController.descargar(5)}"
+											ajax="false"
+											rendered="#{!(modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamiento.requisitosProtocoloPrueba.id==null)}" />
+									</p:column>
+								</p:row>
+								<p:row style="border-style: none !important">
+									<p:column colspan="2">
+										<h:outputText
+											value="#{labels['label.coprocesamiento.protocolo.requisitos']}"
+											escape="false" styleClass="alJustify" />
+									</p:column>
+								</p:row>
+							</p:panelGrid>
+						</h:panelGroup>
+					</p:panelGrid>
+				</p:panelGrid>
+
+			</p:panelGrid>
+			<t:div styleClass="buttons main">
+				<p:commandButton value="#{labels['label.atras']}" immediate="true"
+					process="@this"
+					action="#{aprobacionRequisitosTecnicosController.recuperarPageAtras(5,true)}"
+					icon="ui-icon-arrowthick-1-w" />
+				<p:commandButton value="#{labels['label.siguiente']}"
+					immediate="true" process="@this"
+					action="#{aprobacionRequisitosTecnicosController.recuperarPageSiguiente(5,true,true)}"
+					icon="ui-icon-arrowthick-1-e" />
+			</t:div>
+		</h:form>
+		<p:dialog header="Capacidad anual de proceso"
+			widgetVar="dlgCoprocesamientoDesecho" modal="true" resizable="false"
+			draggable="false">
+			<h:form>
+				<p:panel id="pnlCoprocesamientoDesecho">
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="Capacidad Anual del Proceso (T)" />
+						<h:outputText id="capacidad"
+							value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamientoDesecho.capacidadAnualProceso}">
+						</h:outputText>
+						<h:outputText value="Desechos formulados" />
+						<h:outputText id="desechosFormulados"
+							value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamientoDesecho.desechoFormulado}" />
+
+						<h:outputText value="Desechos empleados directamente" />
+						<h:outputText id="desechosEmpleadosDirectamente"
+							value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamientoDesecho.desechosEmpleadoDirectamente}" />
+
+						<h:outputText
+							value="% de sustitución de combustibles convencionales:" />
+						<h:outputText id="porcentSustComb"
+							value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamientoDesecho.porcentajeDeSustitucionDeCombustibleConvencional}">
+						</h:outputText>
+					</h:panelGrid>
+					<div class="buttons">
+
+						<p:commandButton value="Cerrar" immediate="true"
+							action="#{modalidadCoprocesamientoController.cerrarModal()}"
+							oncomplete="PF('dlgCoprocesamientoDesecho').hide();"
+							styleClass="primary" />
+					</div>
+				</p:panel>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="Características del desecho a coprocesar"
+			widgetVar="dlgProcesarDesecho" modal="true" resizable="false"
+			draggable="false" width="750">
+			<h:form>
+				<p:panel id="pnlProcesarDesecho">
+					<h:panelGrid styleClass="panel_data mw100" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText
+							value="Especificar la cantidad máxima de desechos requeridos para la realización del protocolo de pruebas (NOTA:No deberá exceder la Q máxima de almacenamiento) (T):" />
+						<h:outputText id="cantidadMaximaDesechosRequerido"
+							value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamientoDesechoProcesar.cantidadMaximaDesechosRequerido}">
+
+						</h:outputText>
+						<h:outputText value="Composición Química" />
+						<h:outputText
+							value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamientoDesechoProcesar.composicionQuimica}"
+							id="itComposicionQuimica" />
+						<h:outputText value="Punto de Inflamabilidad (°C)" />
+						<h:outputText id="puntoInflamabilidad"
+							value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamientoDesechoProcesar.puntoInflamabilidad}">
+							<pe:keyFilter mask="num" />
+						</h:outputText>
+
+						<h:outputText value="Punto de Ebullición (°C)" />
+						<h:outputText id="puntoEbullicion"
+							value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamientoDesechoProcesar.puntoEbullicion}">
+							<pe:keyFilter mask="num" />
+						</h:outputText>
+
+						<h:outputText value="Porcentaje de Humedad" />
+						<h:outputText id="porcentajeHumedad"
+							value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamientoDesechoProcesar.porcentajeHumedad}">
+
+						</h:outputText>
+
+						<h:outputText value="Porcentaje de Cloro" />
+						<h:outputText id="porcentajeCloro"
+							value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamientoDesechoProcesar.porcentajeCloro}">
+
+						</h:outputText>
+						<h:outputText value="Metales Pesados" />
+						<h:outputText id="itMetalesPesados"
+							value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamientoDesechoProcesar.metalPesado}">
+
+						</h:outputText>
+					</h:panelGrid>
+					<div class="buttons">
+
+						<p:commandButton value="Cerrar" immediate="true"
+							action="#{modalidadCoprocesamientoController.cerrarModal()}"
+							oncomplete="PF('dlgProcesarDesecho').hide();"
+							styleClass="primary" />
+					</div>
+				</p:panel>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="Características Formulación"
+			widgetVar="dlgFormulacion" modal="true" resizable="false"
+			draggable="false">
+			<h:form>
+				<p:panel id="pnlFormulacion">
+
+					<p:panelGrid columns="1" styleClass="w100"
+						columnClasses="w100 field_mrg" layout="grid">
+						<h:outputText value="Tipo de Desecho que compone la formulación" />
+						<control:imputConTextoEnriquecido id="itTipoDesechoFormulacion"
+							soloLectura="true" 
+							valor="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamientoFormulacion.tipoDesechoFormulacion}" />
+					</p:panelGrid>
+
+					<h:panelGrid styleClass="panel_data mw100" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="Porcentaje de Humedad" />
+
+						<h:outputText id="porcentajeHumedadFormulacion"
+							value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamientoFormulacion.porcentajeHumedadFormulacion}">
+
+						</h:outputText>
+
+						<h:outputText value="Porcentaje de Cloro" />
+
+						<h:outputText id="porcentajeCloroFormulacion"
+							value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamientoFormulacion.porcentajeCloroFormulacion}">
+
+						</h:outputText>
+
+
+						<h:outputText value="Poder Calorífico (kJ/kg)" />
+						<h:outputText id="itPoderCalorifico"
+							value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamientoFormulacion.poderCalorifico}">
+
+
+						</h:outputText>
+					</h:panelGrid>
+					<div class="buttons">
+						<p:commandButton value="Cerrar" immediate="true"
+							action="#{modalidadCoprocesamientoController.cerrarModal()}"
+							oncomplete="PF('dlgFormulacion').hide();" styleClass="primary" />
+					</div>
+				</p:panel>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="Desechos formulados" id="desechosFormulados"
+			widgetVar="desechosFormuladosWdgt" modal="true" resizable="false"
+			width="500">
+			<h:form>
+				<p:panelGrid id="datosDesechosFormulados" columns="1"
+					styleClass="w100" columnClasses="w50 field_mrg" layout="grid">
+					<p:inputTextarea id="desechosFormulados" maxlength="512"
+						readonly="true"
+						value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamientoDesecho.desechoFormulado}"
+						rows="6" cols="33" autoResize="false" />
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton value="Cerrar"
+						onclick="PF('desechosFormuladosWdgt').hide()" />
+				</div>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="Desechos empleados directamente"
+			id="desechosEmpleadosDirectamente"
+			widgetVar="desechosEmpleadosDirectamenteWdgt" modal="true"
+			resizable="false" width="500">
+			<h:form>
+				<p:panelGrid id="datosDesechosEmpleadosDirectamente" columns="1"
+					styleClass="w100" columnClasses="w50 field_mrg" layout="grid">
+					<p:inputTextarea id="desechosEmpleadosDirectamente" maxlength="512"
+						rows="6" cols="33" autoResize="false" readonly="true"
+						value="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamientoDesecho.desechosEmpleadoDirectamente}" />
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton value="Cerrar"
+						onclick="PF('desechosEmpleadosDirectamenteWdgt').hide()" />
+				</div>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="Composición química" id="composicionQuimica"
+			widgetVar="composicionQuimicaWdgt" modal="true" resizable="false"
+			width="500">
+			<h:form>
+				<p:panelGrid id="datosComposicionQuimica" columns="1"
+					styleClass="w100" columnClasses="w50 field_mrg" layout="grid">
+					<control:imputConTextoEnriquecido id="itComposicionQuimica"
+						soloLectura="true"
+						requiredMessage="El campo 'Composición Química' es requerido."
+						valor="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamientoDesechoProcesar.composicionQuimica}" />
+
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton value="Cerrar"
+						onclick="PF('composicionQuimicaWdgt').hide()" />
+				</div>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="Tipo de Desecho que compone la formulación"
+			id="tipoDesechoFormulacion" widgetVar="tipoDesechoFormulacionWdgt"
+			modal="true" resizable="false" width="500">
+			<h:form>
+				<p:panelGrid id="datosTipoFormulacion" columns="1" styleClass="w100"
+					columnClasses="w50 field_mrg" layout="grid">
+					<control:imputConTextoEnriquecido id="itTipoDesechoFormulacion"
+						soloLectura="true"
+						valor="#{modalidadCoprocesamientoController.modalidadCoprocesamientoBean.modalidadCoprocesamientoFormulacion.tipoDesechoFormulacion}" />
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton value="Cerrar"
+						onclick="PF('tipoDesechoFormulacionWdgt').hide()" />
+				</div>
+			</h:form>
+		</p:dialog>
+	</ui:define>
+</ui:composition>
+</html>

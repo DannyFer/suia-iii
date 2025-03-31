@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<h:panelGroup id="normativaVigente">
+
+		<p:panelGrid id="pnlNormativa" columns="1" layout="grid"
+			styleClass="w100"
+			rendered="#{emisionesAtmosfericasVerController.mostrarEstadoFuente}">
+			<f:facet name="header">
+				<h:outputText value="NORMATIVA VIGENTE" />
+			</f:facet>
+
+			<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">			
+								
+				<h:outputText value="Fuente Fija de Combustión:" />
+				<h:outputText value="#{emisionesAtmosfericasVerController.detalleEmision.fuenteFijaCombustion.fuente}" />
+				<h:outputText value="Tipo de combustible:"
+					rendered="#{emisionesAtmosfericasVerController.idTipoCombustible eq null ? false : true}" />
+				<h:outputText
+					value="#{emisionesAtmosfericasVerController.detalleEmision.tipoCombustible.descripcion}"
+					rendered="#{emisionesAtmosfericasVerController.idTipoCombustible eq null ? false : true}" />
+
+				<h:outputText value="Autorización:"
+					rendered="#{emisionesAtmosfericasVerController.idAutorizacion eq null ? false : true}" />
+				<h:outputText value="#{emisionesAtmosfericasVerController.detalleEmision.autorizacionEmisiones.descripcion}"
+					rendered="#{emisionesAtmosfericasVerController.idAutorizacion eq null ? false : true}" />
+					<h:outputText value="Tabla:" />
+				<h:outputText value="#{emisionesAtmosfericasVerController.detalleEmision.tipoCombustible eq null ?
+				emisionesAtmosfericasVerController.detalleEmision.fuenteFijaCombustion.nombreTabla : 
+				emisionesAtmosfericasVerController.detalleEmision.tipoCombustible.nombreTabla}"/>
+			</p:panelGrid>
+			
+			
+	</p:panelGrid>
+	
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				id="idParametro" rendered="#{emisionesAtmosfericasVerController.mostrarLimites}">
+								
+				<p:dataTable
+					value="#{emisionesAtmosfericasVerController.listaDatosObtenidosTotal}"
+					var="limite" emptyMessage="#{labels['common.table.empty']}">
+										
+					<p:columnGroup type="header">					
+					<p:row>						
+						<p:column rowspan="2" headerText="Parámetro"/>
+						<p:column rowspan="2" headerText="Unidad"/>
+						<p:column rowspan="2" headerText="Límite máximo permisible"/>
+						<p:column colspan="2" headerText="Resultados"/>
+						<p:column rowspan="2" headerText="Acciones" 
+						rendered="#{emisionesAtmosfericasVerController.numeroObservacion > 0}"/>						
+					</p:row>
+					<p:row>						
+						<p:column headerText="Resultado"/>
+						<p:column headerText="Estado"/>
+					</p:row>					
+					</p:columnGroup>					
+					
+					<p:column>
+						<h:outputText value="#{limite.limiteMaximoPermitido.parametro.descripcion}" />
+					</p:column>
+					<p:column>
+						<h:outputText value="#{limite.limiteMaximoPermitido.parametro.unidad}" />
+					</p:column>
+					<p:column headerText="Límite máximo permisible">
+						<h:outputText value="#{limite.limiteMaximoPermitido.valor}" />
+					</p:column>
+					<p:column headerText="Resultado">
+						<h:outputText value="#{limite.valorCorregido}" />
+					</p:column>
+					<p:column headerText="Estado">
+						<h:outputText value="#{limite.cumple}" />
+					</p:column>
+					
+					<p:column styleClass="w60px alCenter" headerText="Ingrese Valores" 
+						rendered="#{emisionesAtmosfericasVerController.numeroObservacion > 0}">
+						<p:commandButton
+							styleClass="button-small orange" process="@this"
+							icon="ui-icon-pencil" oncomplete="PF('datosHDiag').show()"
+							actionListener="#{emisionesAtmosfericasVerController.obtenerDato(limite)}"
+							rendered="#{limite.registroModificado}"
+							update=":dialogform:datosHPanel"
+							title="Historial">							
+						</p:commandButton>
+						
+						<h:outputText value="#{limite.nuevoEnModificacion ? 'Nuevo' : ''}" styleClass="text-orange"/>
+						
+					</p:column>
+					
+				</p:dataTable>
+				
+				<h:panelGrid styleClass="panel_data" columns="2"
+							columnClasses="header background-orange, null"
+							rowClasses="null, alt"
+							rendered="#{not empty emisionesAtmosfericasVerController.listaHistorialDatosObtenidosEliminados}">
+							<h:outputText id="normativaHis" value="Normativa vigente historial" />
+							<p:commandButton styleClass="button-small orange"
+								icon="ui-icon-search" process="@this"
+								oncomplete="PF('datosEliminadoDiag').show()"/>
+			</h:panelGrid>
+				
+			</p:panelGrid>
+			
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{!emisionesAtmosfericasVerController.mostrarLimites}">
+	
+		<div>
+			El combustible seleccionado no tiene que reportar datos de emisiones.
+		</div>
+		
+		
+	</p:panelGrid>
+			
+			
+			<p:dialog header="Normativa Vigente"
+				id="datosEliminadoDiag" widgetVar="datosEliminadoDiag" modal="true"
+				width="1000" resizable="true" draggable="true" closable="true"
+				paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" 				
+				currentPageReportTemplate="{currentPage} de {totalPages}" rows="5">
+
+			<p:panel id="datosEliminadosPanel">	
+							
+				<p:dataTable
+					value="#{emisionesAtmosfericasVerController.listaHistorialDatosObtenidosEliminados}"
+					var="limite" emptyMessage="#{labels['common.table.empty']}">
+										
+					<p:columnGroup type="header">					
+					<p:row>
+						<p:column rowspan="2" headerText="Fecha Modificación"/>
+						<p:column rowspan="2" headerText="Tipo Combustible o Fuente Fija"/>
+						<p:column rowspan="2" headerText="Autorización"/>
+						<p:column rowspan="2" headerText="Tabla"/>
+						<p:column rowspan="2" headerText="Parámetro"/>
+						<p:column rowspan="2" headerText="Unidad"/>
+						<p:column rowspan="2" headerText="Límite máximo permisible"/>
+						<p:column colspan="2" headerText="Resultados"/>
+					</p:row>
+					<p:row>						
+						<p:column headerText="Resultado"/>
+						<p:column headerText="Estado"/>
+					</p:row>					
+					</p:columnGroup>
+					
+					<p:column>
+						<h:outputText value="#{limite.fechaCreacion}" />
+					</p:column>
+					<p:column>
+						<h:outputText value="#{limite.limiteMaximoPermitido.tipoCombustible eq null ? limite.limiteMaximoPermitido.fuenteFijaCombustion.descripcion :
+						 limite.limiteMaximoPermitido.tipoCombustible.descripcion}" />
+					</p:column>					
+					<p:column>
+						<h:outputText value="#{limite.limiteMaximoPermitido.autorizacionEmisiones eq null ? '' :
+						 limite.limiteMaximoPermitido.autorizacionEmisiones.descripcion}" />
+					</p:column>
+					<p:column>
+						<h:outputText value="#{limite.limiteMaximoPermitido.tipoCombustible eq null ? 
+						limite.limiteMaximoPermitido.fuenteFijaCombustion.nombreTabla : limite.limiteMaximoPermitido.tipoCombustible.nombreTabla}"/>
+					</p:column>
+					<p:column>
+						<h:outputText value="#{limite.limiteMaximoPermitido.parametro.descripcion}" />
+					</p:column>
+					<p:column>
+						<h:outputText value="#{limite.limiteMaximoPermitido.parametro.unidad}" />
+					</p:column>
+					<p:column headerText="Límite máximo permisible">
+						<h:outputText value="#{limite.limiteMaximoPermitido.valor}" />
+					</p:column>
+					<p:column headerText="Resultado">
+						<h:outputText value="#{limite.valorCorregido}" />
+					</p:column>
+					<p:column headerText="Estado">
+						<h:outputText value="#{limite.cumple}" />
+					</p:column>					
+				</p:dataTable>
+		
+		</p:panel>
+		</p:dialog>
+		
+	</h:panelGroup>
+
+</html>

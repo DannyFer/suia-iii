@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<h:form id="formPagoInformacion">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText escape="false" value="Inicio de registro de generadores" />
+				</f:facet>
+				<h:panelGrid columns="1" styleClass="w100">
+					<h:outputText value="#{realizarPagoRegistroGeneradorBean.usuarioAutenticado}, #{msg['outputText.prevencion.registroGenerador.textoAyudaPago']}" escape="false" styleClass="alJustify" rendered="#{realizarPagoRegistroGeneradorBean.permitirContinuar}" />
+					<h:outputText styleClass="encabezado1_4em" value="El registro de generador no puede continuar." rendered="#{!realizarPagoRegistroGeneradorBean.permitirContinuar}" />
+				</h:panelGrid>
+			</p:panelGrid>
+			<t:div styleClass="buttons main">
+				<p:commandButton value="Iniciar proceso" immediate="true" actionListener="#{realizarPagoRegistroGeneradorBean.iniciarProceso()}" icon="ui-icon-check" styleClass="large" rendered="#{!realizarPagoRegistroGeneradorBean.procesoIniciado}" disabled="#{!realizarPagoRegistroGeneradorBean.permitirContinuar}">
+					<p:confirm header="Confirmación" message="Esta acción dará inicio al proceso Registro de generador de desechos especiales y/o peligrosos. ¿Está seguro que desea continuar?" icon="ui-icon-alert" />
+				</p:commandButton>
+				<p:commandButton value="Continuar" immediate="true" actionListener="#{realizarPagoRegistroGeneradorBean.continuar()}" icon="ui-icon-check" styleClass="large" rendered="#{realizarPagoRegistroGeneradorBean.procesoIniciado}" disabled="#{!realizarPagoRegistroGeneradorBean.permitirContinuar}" />
+				<p:commandButton value="Cancelar" immediate="true" action="#{realizarPagoRegistroGeneradorBean.cancelar()}" icon="ui-icon-cancel" styleClass="secondary" />
+			</t:div>
+
+			<p:dialog header="Advertencia" id="showModalOtrosProcesos" widgetVar="showModalOtrosProcesos" modal="true" width="500" closable="true" draggable="false" resizable="false">
+				<p:separator />
+				<h:panelGrid columns="1" styleClass="w100">
+					<h:outputText value="Estimado usuario:" styleClass="bold alJustify" />
+					<h:outputText value="Recuerde que usted tiene #{realizarPagoRegistroGeneradorBean.procesosActivos} proceso(s) activo(s) de 'Registro de generador de desechos especiales y/o peligrosos'." styleClass="bold text-red alJustify" />
+					<h:outputText />
+					<h:outputText value="Si requiere iniciar un nuevo proceso, cierre esta ventana." styleClass="bold alJustify" />
+					<h:outputText value="Si desea continuar un proceso ya iniciado, haga clic en el botón 'Ir a bandeja'." styleClass="bold alJustify" />
+				</h:panelGrid>
+				<p:separator />
+				<t:div styleClass="buttons">
+					<p:commandButton value="Cerrar y continuar" type="button" styleClass="primary" onclick="PF('showModalOtrosProcesos').hide();" />
+					<p:commandButton value="Ir a bandeja" styleClass="secondary" immediate="true" action="/bandeja/bandejaTareas.jsf?faces-redirect=true" />
+				</t:div>
+			</p:dialog>
+
+			<p:remoteCommand rendered="#{realizarPagoRegistroGeneradorBean.showModalOtrosProcesos}" autoRun="true" update="showModalOtrosProcesos" oncomplete="showModalOtrosProcesos(xhr, status, args)" />
+
+			<script type="text/javascript">
+        		function showModalOtrosProcesos(xhr, status, args) {
+            		if (#{realizarPagoRegistroGeneradorBean.showModalOtrosProcesos}) {
+            	    	PF('showModalOtrosProcesos').show();
+            		}                    
+        		}
+		    </script>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

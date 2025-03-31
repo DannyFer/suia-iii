@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:f="http://java.sun.com/jsf/core"
+                template="/WEB-INF/templates/default-task.xhtml"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+    <ui:define name="context-extra">
+
+    </ui:define>
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{validarPagoLicenciaBean.validarTareaBpm()}"/>
+        <h:form>
+            <h:panelGrid cellpadding="2" styleClass="w100">
+
+                <p:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w50, w50">
+                    <f:facet name="header">
+                        <h:outputText value="Validar pago o Adjuntar Poliza/Garantía bancaria *"/>
+                        <mae:panelGridHeaderHelp conector="planoHelp"
+                                                 help="Validar pago o Adjuntar Poliza/Garantía bancaria."
+                                                 width="500px" value=""/>
+                    </f:facet>
+                    <h:panelGrid columns="2" columnClasses="null, field_mrg" id="etiqueta">
+                        <p:outputLabel
+                                value="#{empty validarPagoLicenciaBean.nombreFichero ? 'Documento(.pdf)' : validarPagoLicenciaBean.nombreFichero}"/>
+                        <p:commandButton id="download" icon="ui-icon-arrowthick-1-s" ajax="false"
+                                         styleClass="button-small primary" title="Ver" immediate="true"
+                                         rendered="#{not empty validarPagoLicenciaBean.nombreFichero}">
+                            <p:fileDownload value="#{validarPagoLicenciaBean.getStreamContent()}"/>
+                        </p:commandButton>
+                    </h:panelGrid>
+                    <h:outputText/>
+                    <p:fileUpload fileUploadListener="#{validarPagoLicenciaBean.adjuntarComprobante}" multiple="false"
+                                  sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar"
+                                  uploadLabel="Subir" invalidFileMessage="Tipo de archivo no válido"
+                                  invalidSizeMessage="Tamaño de archivo no válido" cancelLabel="Cancelar"
+                                  mode="advanced" dragDropSupport="false" auto="true" update="etiqueta download"/>
+                    <h:outputText/>
+
+
+                    <p:outputLabel value="Comprobante (Archivo PDF)" for="archComprobanteHide" rendered="false"/>
+
+                    <h:inputHidden id="archComprobanteHide"
+                                   required="#{!validarPagoLicenciaBean.subido}"></h:inputHidden>
+                </p:panelGrid>
+
+
+                <p:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w50, w50">
+                    <f:facet name="header">
+                        <h:outputText value="Ingresar datos de la licencia *"/>
+                        <mae:panelGridHeaderHelp conector="planoHelp"
+                                                 help="Ingresar datos de la licencia."
+                                                 width="500px" value=""/>
+                    </f:facet>
+                    <p:outputLabel rendered="#{validarPagoLicenciaBean.comprobante != null}"
+                                   value="#{validarPagoLicenciaBean.comprobante.name}"/>
+
+                    <p:outputLabel for="txtNumeroPoliza" value="N&uacute;mero de poliza"/>
+                    <p:outputLabel for="txtValue" value="Valor"/>
+
+                    <p:inputText id="txtNumeroPoliza" required="true"  suffix="$"
+                                 value="#{validarPagoLicenciaBean.licenciaAmbiental.numeroLicencia}"
+                                 maxlength="30"/>
+
+                    <p:inputText id="txtValue" required="true"
+                                 value="#{validarPagoLicenciaBean.licenciaAmbiental.costoInversion}"
+                                 onkeypress="return numbersonly(this, event, false);"
+                                 maxlength="6">
+                        <f:validateDoubleRange minimum="0.001" maximum="500000"/>
+                        <pe:keyFilter mask="num"/>
+                        <p:ajax process="@this" immediate="true"/>
+                    </p:inputText>
+
+                    <p:outputLabel value="Vigencia de Poliza" styleClass="bold"/>
+                    <p:outputLabel value=""/>
+
+                    <p:outputLabel for="startDate" value="Desde"/>
+                    <p:outputLabel for="endDate" value="Hasta"/>
+                    <p:calendar id="startDate" required="true" maxdate="#{validarPagoLicenciaBean.currentDate}"
+                                value="#{validarPagoLicenciaBean.licenciaAmbiental.fechaEmision}"
+                                pattern="dd/MM/yyyy"
+                                readonlyInput="true">
+                        <p:ajax event="dateSelect" update=":#{p:component('endDate')}"/>
+                    </p:calendar>
+
+                    <p:calendar id="endDate" required="true"
+                                value="#{validarPagoLicenciaBean.licenciaAmbiental.fechaVigencia}"
+                                pattern="dd/MM/yyyy" mindate="#{validarPagoLicenciaBean.licenciaAmbiental.fechaEmision}"
+                                readonlyInput="true"/>
+
+                </p:panelGrid>
+
+
+            </h:panelGrid>
+            <h:panelGroup id="pnl2">
+                <observaciones:tablaObservaciones aparace="true"
+                                                  soloLectura="true"
+                                                  mostrarSiVacio="false"
+                                                  idClase="#{proyectosBean.proyecto.id}"
+                                                  nombreClase="PagoLicenciaAmbiental"
+                                                  seccion="comprobante"
+                                                  rol="tecnico"
+                                                  componenteActualizarEliminar="pnl2"/>
+
+            </h:panelGroup>
+
+            <div class="buttons main">
+                <p:commandButton value="Enviar"
+                                 action="#{validarPagoLicenciaBean.realizarTarea}"
+                                 title="Enviar datos" icon="ui-icon-check">
+                </p:commandButton>
+            </div>
+
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

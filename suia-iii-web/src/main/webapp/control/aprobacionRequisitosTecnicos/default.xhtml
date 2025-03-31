@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	template="/control/aprobacionRequisitosTecnicos/templates/defaultTemplate.xhtml"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+	<ui:define name="content-art">
+		<style type="text/css">
+		.cssCheckDisabled .ui-state-active {
+			background: #008a8a
+				url("/suia-iii/javax.faces.resource/images/ui-bg_flat_65_008a8a_40x100.png.jsf?ln=primefaces-suia")
+				50% 50% repeat-x !important;
+		}
+		</style>
+
+		<h:form id="form">
+
+			<p:panel columns="2" id="parte2" header="Tipo de requisitos" styleClass="100">
+
+				<p:separator />
+				<h:outputText styleClass="w100 text-red bold"
+							  value="#{msg['label.informacion']}"/>
+				<p:separator />
+
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="#{msg['label.proyecto']}" />
+					</f:facet>
+					<p:inputTextarea
+						value="#{aprobacionRequisitosTecnicosController.aprobacionRequisitosTecnicosBean.aprobacionRequisitosTecnicos.nombreProyecto}"
+						rows="4" cols="33" readonly="true" />
+				</p:panelGrid>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="#{msg['label.tipo.requisito']}" />
+					</f:facet>
+					<h:panelGrid columns="1" id="containerQuestions">
+						<h:outputText styleClass="w100 text-red bold"
+									  value="#{msg['label.mensaje']}"/>
+						<p:separator />
+
+						<h:panelGrid columns="3" columnClasses="w20px,w90,null">
+							<p:selectBooleanCheckbox id="generaDesechos" styleClass="cssCheckDisabled"
+								value="#{aprobacionRequisitosTecnicosController.aprobacionRequisitosTecnicosBean.aprobacionRequisitosTecnicos.transporte}"
+								disabled="#{!aprobacionRequisitosTecnicosController.aprobacionRequisitosTecnicosBean.habilitarTipoRequisitos}">
+								<p:ajax process="@this" />
+							</p:selectBooleanCheckbox>
+							<p:outputLabel for="generaDesechos"
+								value="Transporte de sustancias químicas" />
+							<p:commandButton
+								styleClass="button-small toRight field_mrg primary" ajax="false"
+								immediate="true" icon="ui-icon-help" title="Ayuda">
+								<p:fileDownload
+									value="#{registroProyectoBean.getStreamContent(registroProyectoBean.ayudaTransporteSustanciasQuimicasPeligrosas)}" />
+							</p:commandButton>
+
+							<p:selectBooleanCheckbox styleClass="cssCheckDisabled"
+								value="#{aprobacionRequisitosTecnicosController.aprobacionRequisitosTecnicosBean.aprobacionRequisitosTecnicos.gestion}"
+								id="desechos"
+								disabled="#{!aprobacionRequisitosTecnicosController.aprobacionRequisitosTecnicosBean.habilitarTipoRequisitos}">
+								<p:ajax update="pnlModalidades" event="change"
+									listener="#{aprobacionRequisitosTecnicosController.limpiarSeleccionModalidades}" />
+							</p:selectBooleanCheckbox>
+							<p:outputLabel for="desechos"
+								value="Gestión de desechos peligrosos" />
+							<mae:btnHelp
+								help="#{helps['registro.gestionDesechosPeligrosos']}"
+								conector="ayudaDesechos"
+								buttonStyleClass="button-small toRight field_mrg primary" />
+						</h:panelGrid>
+					</h:panelGrid>
+				</p:panelGrid>
+				<h:panelGroup id="pnlModalidades">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						rendered="#{aprobacionRequisitosTecnicosController.aprobacionRequisitosTecnicosBean.aprobacionRequisitosTecnicos.gestion}">
+						<f:facet name="header">
+							<h:outputText value="#{msg['label.modalidades']} *" />
+						</f:facet>
+						<h:panelGrid columns="2" styleClass="w100"
+							columnClasses="alTop w50, field_mrg_x2 alTop w50">
+							<p:selectManyCheckbox id="modalidad" layout="grid" columns="2"  styleClass="cssCheckDisabled"
+								value="#{aprobacionRequisitosTecnicosController.aprobacionRequisitosTecnicosBean.modalidadesSeleccionadas}"
+								converter="selectItemConverter" >
+								<f:selectItems 
+									value="#{aprobacionRequisitosTecnicosController.aprobacionRequisitosTecnicosBean.modalidades}" 
+									var="item" itemDisabled="#{item.deshabilitado}" />
+								<p:ajax update=":#{p:component('pnl_otros_modalidad')}" 
+									listener="#{aprobacionRequisitosTecnicosController.validarOtros}" />
+							</p:selectManyCheckbox>
+							<h:panelGrid columns="1" id="pnl_otros_modalidad"
+								styleClass="w100">
+								<p:outputLabel value="Otra modalidad" for="otroModalidadValor"
+									rendered="#{aprobacionRequisitosTecnicosController.aprobacionRequisitosTecnicosBean.mostrarOtros}" />
+								<p:inputText id="otroModalidadValor" styleClass="w100"
+									maxlength="50"
+									requiredMessage="Debe especificar el valor del campo Otra modalidad."
+									required="true"
+									value="#{aprobacionRequisitosTecnicosController.aprobacionRequisitosTecnicosBean.aprobacionRequisitosTecnicos.otraModalidad}"
+									rendered="#{aprobacionRequisitosTecnicosController.aprobacionRequisitosTecnicosBean.mostrarOtros}" />
+							</h:panelGrid>
+						</h:panelGrid>
+					</p:panelGrid>
+				</h:panelGroup>
+
+				<h:inputHidden validator="#{aprobacionRequisitosTecnicosController.validateDatos}" />
+
+			</p:panel>
+			<t:div styleClass="buttons main">
+				<p:commandButton value="Guardar" id="btnGuardar" icon="ui-icon-disk"
+					action="#{aprobacionRequisitosTecnicosController.guardarPagina()}"
+					process="@form" update="@all" />
+				<p:commandButton value="#{labels['label.siguiente']}"
+					immediate="true" process="@this"
+					action="#{aprobacionRequisitosTecnicosController.continuar(false)}"
+					icon="ui-icon-arrowthick-1-e" />
+			</t:div>
+
+			
+
+		</h:form>
+
+	
+
+	</ui:define>
+</ui:composition>

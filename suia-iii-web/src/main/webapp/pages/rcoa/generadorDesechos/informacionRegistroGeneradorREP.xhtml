@@ -1,0 +1,122 @@
+<ui:composition template="/WEB-INF/templates/default-task-projectRGD.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+ <ui:define name="context-extra">
+		<h:outputText value="Operador"/>
+		<h:outputText value="#{informacionRegistroGeneradorREPController.datosOperadorRgdBean.datosOperador.nombre}"/>
+		<p:commandButton type="button" icon="ui-icon-search" onclick="PF('dlgProponente').show()"
+			styleClass="primary button-small" />
+	</ui:define>
+	<ui:define name="content">
+
+		<script type="text/javascript">
+		$(document).ready(function() {
+			$('.wizard-custom-btn-back').hide();
+			$('.wizard-custom-btn-only-end').hide();
+		});
+	</script>
+	
+
+		<style type="text/css">
+.ui-fileupload-content {
+	border: none !important;
+	padding: 0px;
+}
+
+noBorders tr, .noBorders td {
+background: none !important;
+border: none !important;
+} 
+
+.ui-selectcheckboxmenu-list-item label{
+	color:#222222 !important;
+}
+
+.ui-selectcheckboxmenu-label-container label{
+	color:#222222 !important;
+}
+
+.ui-selectlistbox-listcontainer{
+ overflow: initial !important;
+
+</style>
+
+		<link rel="stylesheet" type="text/css"
+			href="#{request.contextPath}/resources/css/plugin/wizard.css" />
+
+		<h:form id="form" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }">
+
+			<p:wizard widgetVar="wizard"
+				flowListener="#{wizardBean.onFlowProcess}" showNavBar="false"
+				nextLabel="Siguiente" backLabel="Atrás" id="wizardGenerador">
+				<p:tab id="paso1" titletip="Información General" title="Información General">
+					<ui:include	src="/pages/rcoa/generadorDesechos/informacionRegistroREP/informacionGeneral.xhtml" />
+				</p:tab>		
+				<p:tab id="paso2" titletip="Ubicación de los puntos" title="Ubicación de los puntos">
+					<ui:include src="/pages/rcoa/generadorDesechos/informacionRegistroREP/puntosRecuperacionREP.xhtml" />	
+				</p:tab>
+				<p:tab id="paso3" titletip="Identificación de residuos o desechos" title="Identificación de residuos o desechos">
+					<t:aliasBeansScope>
+						<t:aliasBean alias="#{adicionarDesechosAliasRcoaBean}" value="#{adicionarDesechosPeligrososRcoaBean}" />
+
+						<t:aliasBean alias="#{customHelp}" value="#{helps['generadorDesecho.identificarDesechos']}" />
+						<t:aliasBean alias="#{customImage}" value="#{request.contextPath}/resources/images/help/imagen-vacia.png" />
+
+						<ui:include
+						src="/pages/rcoa/generadorDesechos/informacionRegistroREP/identificacionResiduosDesechosREP.xhtml" />
+						<h:inputHidden validator="#{adicionarDesechosAliasRcoaBean.validateDesechos}" />
+					</t:aliasBeansScope>
+				</p:tab>
+				<p:tab id="paso4" titletip="Finalizar" title="Finalizar">
+					<ui:include src="/pages/rcoa/generadorDesechos/informacionRegistroREP/finalizarREP.xhtml" />
+				</p:tab>
+				
+			</p:wizard>
+
+			<div class="buttons main">				
+				<p:commandButton value="Atrás" icon="ui-icon-arrowthick-1-w"
+					oncomplete="PF('wizard').back();reloadWizard();"
+					styleClass="wizard-custom-btn-back" process="@this"
+					update="wizardGenerador,btnSiguiente"
+					action="#{informacionRegistroGeneradorREPController.btnAtras}"/>
+				<p:commandButton id="btnGuardar" value="Guardar" title="Guardar"
+					icon="ui-icon-disk" update="btnSiguiente" 
+					actionListener="#{informacionRegistroGeneradorREPController.guardar()}"
+					styleClass="#{informacionRegistroGeneradorREPController.style}"/>
+				<p:commandButton id="btnSiguiente" value="Siguiente"
+					icon="ui-icon-arrowthick-1-e"
+					oncomplete="PF('wizard').next();reloadWizard();"
+					styleClass="wizard-custom-btn-next"
+					actionListener="#{informacionRegistroGeneradorREPController.btnSiguiente}"
+					update="wizardGenerador,btnSiguiente, btnGuardar" 
+					disabled="#{!informacionRegistroGeneradorREPController.guardado}"/>
+				<p:commandButton value="Enviar" id="btnEnviar" process="@this"
+					styleClass="wizard-custom-btn-only-end"
+					icon="ui-icon-check" onclick="PF('dialogConfirmacion').show()" 
+					disabled="#{!informacionRegistroGeneradorREPController.aceptarCondiciones}">
+				</p:commandButton>
+			</div>
+			<h:outputScript name="/plugin/wizard.js" library="js" />
+			
+			<p:dialog id="dialogConfirmacion" widgetVar="dialogConfirmacion" modal="true" resizable="false" width="400" header="Confirmación">
+				<div>
+					<p class="alJustify" >¿Estimado usuario está seguro que desea enviar la información para continuar con su proceso de Registro de Generador de Residuos y Desechos Peligrosos y/o Especiales por Responsabilidad Extendida del Productor, una vez aceptado no podrá modificar la información ingresada respecto al trámite?</p>
+				</div>
+				<div class="buttons">
+					<p:commandButton value="Aceptar" action="#{informacionRegistroGeneradorREPController.enviar()}" oncomplete="PF('dialogConfirmacion').hide()"/>
+					<p:commandButton type="button" value="Cancelar" onclick="PF('dialogConfirmacion').hide()" />
+				</div>
+			</p:dialog>
+		</h:form>
+
+		<ui:include src="/pages/rcoa/generadorDesechos/datosOperador.xhtml" />
+		
+	</ui:define>
+</ui:composition>

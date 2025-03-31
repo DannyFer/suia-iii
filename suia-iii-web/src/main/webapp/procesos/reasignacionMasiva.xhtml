@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<h:form>
+			<p:panel header="Reasignación masiva">
+				<h:panelGrid  columns="2" columnClasses="w50 field_mrg" >
+				<p:dataTable widgetVar="usuariostbl"
+                         value="#{asignacionMasivaBean.listaEntityUsuario}"                         
+                         var="usuario" paginator="true" rows="10">
+                <p:column headerText="Usuario" filterBy="#{usuario.nombre}"
+                          filterMatchMode="contains">
+                    <h:outputText value="#{usuario.nombre}"/>
+                </p:column>
+                 <p:column headerText="Nombre usuario" filterBy="#{usuario.nombreUsuario}"
+                          filterMatchMode="contains">
+                    <h:outputText value="#{usuario.nombreUsuario}"/>
+                </p:column>
+               
+             
+                <p:column headerText="Acción">
+                    <p:commandButton value="Buscar" icon="ui-icon-search" action="#{asignacionMasivaController.buscarUsuarioCompleto(usuario)}" title="Seleccionar" update="@form" styleClass="primary" />                    
+                </p:column>
+            </p:dataTable>
+				
+				</h:panelGrid>
+				<ui:remove>
+				<h:panelGrid styleClass="w50" columns="2" columnClasses="w50 field_mrg" rendered="#{!usuarioController.validarUsuarioIngresado()}">
+			
+					<p:outputLabel for="name" value="Usuario" />
+					<h:outputText />
+					<p:inputText id="name" value="#{asignacionMasivaBean.nombre}" styleClass="w100" />
+					<h:panelGroup>
+						<div class="buttons-inline">
+							<p:commandButton value="Buscar" icon="ui-icon-search" actionListener="#{asignacionMasivaController.buscarUsuario()}" update="@form" styleClass="primary" />
+							<p:commandButton value="Cancelar" icon="ui-icon-cancel" actionListener="#{asignacionMasivaController.cancelar()}" update="@form" styleClass="secondary" />
+						</div>
+					</h:panelGroup>
+					
+				</h:panelGrid>
+				</ui:remove>
+
+				<h:panelGroup rendered="#{!empty asignacionMasivaBean.usuario}">
+					<br />
+					<h:panelGrid styleClass="panel_data mw50" columns="2" columnClasses="header w33, null" rowClasses="null, alt">
+						<h:outputText value="Usuario" />
+						<h:outputText value="#{asignacionMasivaBean.usuario.nombre}" />
+						<h:outputText value="Cédula/RUC" />
+						<h:outputText value="#{asignacionMasivaBean.usuario.pin}" />
+						<h:outputText value="Nombre" />
+						<h:outputText value="#{asignacionMasivaBean.usuario.persona.nombre}" />
+						<h:outputText value="Rol(es)" />
+						<h:outputText value="#{asignacionMasivaBean.usuario.rolUsuarios}" converter="listToStringConverter" />
+					</h:panelGrid>
+
+					<br />
+					<br />
+
+					<p:dataTable value="#{asignacionMasivaBean.tasksToAssign}" var="tarea" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" widgetVar="tareasTable" rows="15" rowStyleClass="#{tarea.value.sourceType eq 'source_type_external_suia' ? 'row-resalted' : tarea.value.sourceType eq 'source_type_external_hydrocarbons' ? 'row-resalted-hyd' : ''}" emptyMessage="#{labels['common.table.empty']}">
+						<f:facet name="header">
+							<h:outputText value="Tareas asignadas a este usuario (total: #{asignacionMasivaBean.tasksToAssign.size()})" />
+						</f:facet>
+						<p:column styleClass="w20px alCenter">
+							<p:selectBooleanCheckbox value="#{tarea.selected}" disabled="#{tarea.value.internal and asignacionMasivaBean.tasksExternalSelected or !tarea.value.internal and asignacionMasivaBean.tasksInternalSelected}" styleClass="select-task-check">
+								<p:ajax process="@this" update="@(.select-user-btn) @(.select-task-check)"  />
+							</p:selectBooleanCheckbox>
+						</p:column>
+						<p:column headerText="Trámite" styleClass="alCenter singleLine">
+							<h:outputText value="#{tarea.value.procedure}" title="#{tarea.value.procedure}" />
+						</p:column>
+						<p:column headerText="Flujo" styleClass="singleLine">
+							<h:outputText value="#{tarea.value.processNameHuman}" title="#{tarea.value.processNameHuman}" />
+						</p:column>
+						<p:column headerText="Actividad" styleClass="singleLine">
+							<h:outputText value="#{tarea.value.taskNameHuman}" title="#{tarea.value.taskNameHuman}" />
+						</p:column>
+						<p:column headerText="Registro" styleClass="alCenter w15">
+							<h:outputText value="#{tarea.value.activationDate}">
+								<f:convertDateTime pattern="dd/MM/yyyy h:mm a" />
+							</h:outputText>
+						</p:column>
+					</p:dataTable>
+					<br />
+					<p:separator />
+					<br />
+					
+					
+						<h:panelGrid styleClass="w50" columns="2" id="motivosReasignacio" rendered="#{asignacionMasivaBean.tasksToAssign.size()>0 or asignacionMasivaBean.loadUsers}"
+							columnClasses="w50 field_mrg">
+							<p:outputLabel  value="Motivo de reasignación" for="motivoReasignacion"
+								styleClass="w100" />
+							<p:inputTextarea id="motivoReasignacion" placeholder="Ingresar el motivo de reasignación del proyecto" maxlength="250" styleClass="w100"
+								value="#{asignacionMasivaBean.motivoReasignacion}" />
+						</h:panelGrid>
+					
+					<br />
+					<p:separator />
+					<br />
+					<h:panelGrid rendered="#{asignacionMasivaBean.loadUsers}" styleClass="w50" columns="2" columnClasses="w50 field_mrg">					
+						<p:outputLabel for="userName" value="Nombre de usuario" />
+						<h:outputText />
+						<p:inputText id="userName" value="#{asignacionMasivaBean.userNameFilter}" maxlength="250" styleClass="w100" />
+						<h:panelGroup>
+							<div class="buttons-inline">
+								<p:commandButton value="Buscar" icon="ui-icon-search" actionListener="#{asignacionMasivaController.filtrarUsuarios()}" update="@form" styleClass="primary" />
+								<p:commandButton value="Recargar" icon="ui-icon-refresh" actionListener="#{asignacionMasivaController.recargarUsuarios()}" update="@form" styleClass="secondary" />
+							</div>
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<p:dataTable id="tablaUsuarios" rendered="#{asignacionMasivaBean.loadUsers}" value="#{asignacionMasivaBean.lazyUserWorkloadDataModel}" lazy="true" var="user" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" rows="5" rowStyleClass="#{user.internal ? '' : 'row-resalted'}" emptyMessage="#{labels['common.table.empty']}">
+						<f:facet name="header">
+							<h:outputText value="Usuarios disponibles (total: #{asignacionMasivaBean.lazyUserWorkloadDataModel.rowCount})" />
+						</f:facet>
+						<p:column headerText="Usuario" styleClass="w25">
+							<h:outputText value="#{user.userName}" />
+						</p:column>
+						<p:column headerText="Nombre" styleClass="w40" >
+							<h:outputText value="#{user.fullName}" />
+						</p:column>
+						<p:column headerText="Total de tareas" styleClass="w15 alCenter">
+							<h:outputText value="#{user.tramites}" />
+						</p:column>
+						<p:column headerText="Carga (%)" styleClass="w15 alCenter">
+							<h:outputText value="#{user.carga}">
+								<f:convertNumber maxFractionDigits="2" />
+							</h:outputText>
+						</p:column>
+						<p:column styleClass="w20px alCenter">
+							<p:commandButton icon="ui-icon-radio-on" 
+							 disabled="#{!asignacionMasivaBean.tasksSelected}"
+							actionListener="#{asignacionMasivaController.selectUser(user)}" oncomplete="PF('dialogUser').show()" update="@(.dialogUser),@form" styleClass="select-user-btn button-small primary" />
+						</p:column>
+						<ui:remove>
+							disabled="#{(!asignacionMasivaBean.tasksExternalSelected and !user.internal) || (!asignacionMasivaBean.tasksInternalSelected and user.internal)}"
+						</ui:remove>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:panel>
+
+			<p:dialog minWidth="150" width="400" id="dialogUser" styleClass="dialogUser" header="¿Asignar el trabajo a este usuario?" widgetVar="dialogUser" modal="true" resizable="false">
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header, null" rowClasses="null, alt">
+					<h:outputText value="Usuario" />
+					<h:outputText value="#{asignacionMasivaBean.selectedUser.userName}" />
+					<h:outputText value="Nombre" />
+					<h:outputText value="#{asignacionMasivaBean.selectedUser.fullName}" />
+					<h:outputText value="Número de trámites" />
+					<h:outputText value="#{asignacionMasivaBean.selectedUser.tramites}" />
+					<h:outputText value="Carga (%)" />
+					<h:outputText value="#{asignacionMasivaBean.selectedUser.carga}">
+						<f:convertNumber maxFractionDigits="2" />
+					</h:outputText>
+				</h:panelGrid>
+				<p:separator />
+				<div class="buttons">
+					<p:commandButton process="@this" update="@form" actionListener="#{asignacionMasivaController.asignar()}" value="Aceptar" oncomplete="PF('dialogUser').hide()" />
+					<p:commandButton type="button" value="Cerrar" onclick="PF('dialogUser').hide()" />
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

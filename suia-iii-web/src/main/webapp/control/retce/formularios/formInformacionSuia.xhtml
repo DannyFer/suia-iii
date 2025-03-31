@@ -1,0 +1,294 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"	
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75" rendered="#{informacionBasicaController.emiteSuia or informacionBasicaController.emiteFisico}">
+					
+					<h:outputText value="Código" for="codigoProyecto" rendered="#{not empty informacionBasicaController.informacionProyecto.codigo or informacionBasicaController.emiteSuia}" />
+					<h:outputText id="codigoProyecto" value="#{informacionBasicaController.informacionProyecto.codigo}" rendered="#{not empty informacionBasicaController.informacionProyecto.codigo or informacionBasicaController.emiteSuia}"/>
+														
+					<h:outputText value="Nombre de Proyecto *" for="nombreProyecto"/>
+					<h:outputText value="#{informacionBasicaController.informacionProyecto.nombreProyecto}" 
+					rendered="#{informacionBasicaController.emiteSuia or !informacionBasicaController.habilitarIngreso}"/>
+					<p:inputText id="nombreProyecto" value="#{informacionBasicaController.informacionProyecto.nombreProyecto}"
+					required="true" requiredMessage="Nombre Proyecto es requerido" 
+					rendered="#{!informacionBasicaController.emiteSuia and informacionBasicaController.habilitarIngreso}" maxlength="200"/>
+					
+					<h:outputText value="#{informacionBasicaController.emiteFisico?'Tipo de Permiso *':'Tipo de Permiso *'}" for="tipoTramite"/>
+					<h:outputText value="#{informacionBasicaController.informacionProyecto.nombreProceso}" rendered="#{!informacionBasicaController.habilitarIngreso}"/>
+					<p:panelGrid id="pnlNombreProceso" columns="2" styleClass="quitarBordeGrid" columnClasses="w50" rendered="#{informacionBasicaController.habilitarIngreso}">
+						<p:selectOneRadio id="tipoTramite" value="#{informacionBasicaController.informacionProyecto.nombreProceso}" 
+						required="true" requiredMessage="#{informacionBasicaController.emiteFisico?'Nombre Proceso':'Tipo de Trámite'} es requerido" styleClass="textoTitulo #{(informacionBasicaController.emiteFisico and informacionBasicaController.informacionProyecto.nombreProceso eq 'Licencia Ambiental')?'w100':'w50'}" filter="true" filterMatchMode="contains"
+						disabled="#{informacionBasicaController.emiteSuia}"
+						rendered="#{informacionBasicaController.habilitarIngreso}">						
+							<f:selectItem itemLabel="#{informacionBasicaController.emiteFisico?'Ficha':'Registro'} Ambiental" itemValue="Registro Ambiental"/>
+							<f:selectItem itemLabel="Licencia Ambiental" itemValue="Licencia Ambiental"/>
+							<p:ajax listener="#{informacionBasicaController.ingresarInclusion}" update="pnlNombreProceso"/>						
+						</p:selectOneRadio>
+						<h:outputText value="#{informacionBasicaController.msjLicenciaFisica}" 
+										rendered="#{informacionBasicaController.emiteFisico and informacionBasicaController.informacionProyecto.nombreProceso eq 'Licencia Ambiental' }"/>
+					</p:panelGrid>
+					
+					<h:outputText value="Sector *" for="sectorProyecto"/>
+					<h:outputText value="#{informacionBasicaController.informacionProyecto.tipoSector.nombre}" 
+					rendered="#{!informacionBasicaController.habilitarIngreso}"/>
+					<p:selectOneMenu id="sectorProyecto" required="true" requiredMessage="Sector es requerido" styleClass="w100"
+					value="#{informacionBasicaController.informacionProyecto.tipoSector}" disabled="#{informacionBasicaController.emiteSuia}" converter="selectItemConverter"
+					rendered="#{informacionBasicaController.habilitarIngreso}">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{informacionBasicaController.tipoSectorList}" var="item" itemLabel="#{item.nombre}" itemValue="#{item}"/>
+						<p:ajax event="change" listener="#{informacionBasicaController.sectorListener}" update="faseProyecto"/>
+					</p:selectOneMenu>
+					
+					<h:outputText value="Fase *" for="faseProyecto"/>
+					<h:outputText value="#{informacionBasicaController.disabledFase?'N/A':informacionBasicaController.informacionProyecto.faseRetce.descripcion}" 
+					rendered="#{!informacionBasicaController.habilitarIngreso}"/>										
+					<p:selectOneMenu id="faseProyecto" required="true" requiredMessage="Fase es requerido" styleClass="w100"
+					value="#{informacionBasicaController.informacionProyecto.faseRetce}" disabled="#{informacionBasicaController.disabledFase}" converter="selectItemConverter"
+					rendered="#{informacionBasicaController.habilitarIngreso}">
+						<f:selectItem itemLabel="#{informacionBasicaController.disabledFase?'N/A':'Seleccione...'}" noSelectionOption="true"/>
+						<f:selectItems value="#{informacionBasicaController.faseRetceList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+					</p:selectOneMenu>
+					
+					<h:outputText value="Inicio de Operaciones " for="inicioOperaciones"/>
+					<h:outputText value="#{informacionBasicaController.informacionProyecto.fechaInicioOperaciones}" 
+					rendered="#{!informacionBasicaController.habilitarIngreso}">
+					<f:convertDateTime pattern="dd/MM/yyyy"/>
+					</h:outputText>					
+					<p:calendar id="inicioOperaciones" styleClass="calendarClass" value="#{informacionBasicaController.informacionProyecto.fechaInicioOperaciones}" 
+					pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" disabled="#{informacionBasicaController.emiteSuia}"
+					required="false" requiredMessage="Inicio de Operaciones es requerido" maxdate="#{informacionBasicaController.fechaActual}"
+					rendered="#{informacionBasicaController.habilitarIngreso}"/>					
+					
+					<h:outputText value="Número de Autorización Ambiental Administrativa Principal (Número de Resolución) *" for="numeroResolucion"/>
+					<h:outputText value="#{informacionBasicaController.informacionProyecto.numeroResolucion}" 
+					rendered="#{!informacionBasicaController.habilitarIngreso}"/>					
+					<p:inputText id="numeroResolucion" value="#{informacionBasicaController.informacionProyecto.numeroResolucion}"
+					required="true" requiredMessage="Numero Resolución es requerido" disabled="#{informacionBasicaController.emiteSuia and not empty informacionBasicaController.informacionProyecto.numeroResolucion}" maxlength="30"
+					rendered="#{informacionBasicaController.habilitarIngreso}">
+					<p:ajax event="change" listener="#{informacionBasicaController.cambioNumeroResolucion}" />
+					</p:inputText>
+					<h:outputText value="Resolución Ambiental *" for="adjuntoResolucion" />	
+					<h:panelGroup >
+                    <p:fileUpload id="fileResolucion" 
+                                              fileUploadListener="#{informacionBasicaController.fileUploadResolucion}"
+                                              value="#{informacionBasicaController.fileAdjuntoResolucion}" sizeLimit="20971520"
+                                              allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar  (pdf 20Mb)"
+                                              update="#{p:component('nombreAdjuntoResolucion')}"
+                                              uploadLabel="Subir" auto="true"                                              
+                                              cancelLabel="Cancelar"
+                                              invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+                                              invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+                                              styleClass="w100 toLeft" mode="advanced"
+                                              rendered="#{informacionBasicaController.habilitarIngreso and informacionBasicaController.emiteFisico}"/>
+                    <br/>                  
+                    <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar"
+					rendered="#{informacionBasicaController.adjuntoResolucion.id!=null or informacionBasicaController.adjuntoResolucion.contenidoDocumento!=null}">
+								<p:fileDownload value="#{informacionBasicaController.documentoAdjuntoResolucion}"/>
+					</p:commandButton>
+                    <h:outputText id="nombreAdjuntoResolucion" value="#{informacionBasicaController.adjuntoResolucion.nombre}"/>
+                    </h:panelGroup>
+                    <h:outputText value="Fecha de emisión del permiso ambiental *" for="fechaEmision"/>
+                    <h:outputText value="#{informacionBasicaController.informacionProyecto.fechaEmision}" 
+					rendered="#{!informacionBasicaController.habilitarIngreso}">
+					<f:convertDateTime pattern="dd/MM/yyyy"/>
+					</h:outputText>						
+					<p:calendar id="fechaEmision" styleClass="calendarClass" value="#{informacionBasicaController.informacionProyecto.fechaEmision}" 
+					pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" disabled="#{informacionBasicaController.emiteSuia}"
+					required="true" requiredMessage="Fecha de emisión del permiso ambiental es requerido" maxdate="#{informacionBasicaController.fechaActual}"
+					rendered="#{informacionBasicaController.habilitarIngreso}"/>
+
+					<h:outputText value="Número de Oficio de Certificado de Intersección *" rendered="#{informacionBasicaController.emiteFisico}"/>
+					<p:inputText value="#{informacionBasicaController.informacionProyecto.certificadoInterseccion}"
+					required="true" requiredMessage="El Certificado de Intersección es requerido" maxlength="30" rendered="#{informacionBasicaController.emiteFisico and informacionBasicaController.habilitarIngreso}" />
+					<h:outputText value="#{informacionBasicaController.informacionProyecto.certificadoInterseccion}" rendered="#{informacionBasicaController.emiteFisico and !informacionBasicaController.habilitarIngreso}"/>
+
+                    <h:outputText value="Fecha de Certificado de Intersección *" for="fechaCertificado" rendered="#{informacionBasicaController.emiteFisico}"/>
+                    <h:outputText value="#{informacionBasicaController.informacionProyecto.fechaCertificadoInterseccion}" 
+					rendered="#{informacionBasicaController.emiteFisico and !informacionBasicaController.habilitarIngreso}">
+					<f:convertDateTime pattern="dd/MM/yyyy"/>
+					</h:outputText>						
+					<p:calendar id="fechaCertificado" styleClass="calendarClass" value="#{informacionBasicaController.informacionProyecto.fechaCertificadoInterseccion}" 
+					pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" disabled="#{informacionBasicaController.emiteSuia}"
+					required="true" requiredMessage="Fecha de Certificado de Intersección es requerido" maxdate="#{informacionBasicaController.fechaActual}"
+					rendered="#{informacionBasicaController.emiteFisico and informacionBasicaController.habilitarIngreso}"/>
+					
+					<h:outputText value="Mapa de interseccion " for="adjuntoMapa" rendered="#{informacionBasicaController.emiteFisico}"/>	
+					<h:panelGroup rendered="#{informacionBasicaController.emiteFisico}">
+                    <p:fileUpload id="fileMapa" 
+                                              fileUploadListener="#{informacionBasicaController.fileUploadMapa}"
+                                              value="#{informacionBasicaController.fileAdjuntoMapa}" sizeLimit="20971520"
+                                              allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar"
+                                              update="#{p:component('nombreAdjuntoMapa')}"
+                                              uploadLabel="Subir" auto="true"                                              
+                                              cancelLabel="Cancelar"
+                                              invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+                                              invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+                                              styleClass="w100 toLeft" mode="advanced"
+                                              rendered="#{informacionBasicaController.habilitarIngreso}"/>
+                    <br/>
+                    <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar"
+					rendered="#{informacionBasicaController.adjuntoMapa.id!=null or informacionBasicaController.adjuntoMapa.contenidoDocumento!=null}">
+								<p:fileDownload value="#{informacionBasicaController.documentoMapa}"/>
+					</p:commandButton>
+                    <h:outputText id="nombreAdjuntoMapa" value="#{informacionBasicaController.adjuntoMapa.nombre}"/>            
+                    </h:panelGroup>
+				</p:panelGrid>
+
+				<h:outputLabel value="Coordenadas del proyecto" rendered="#{informacionBasicaController.emiteFisico}"/>
+				<p:panelGrid columns="3" styleClass="panel_data w100" columnClasses="header w25,w5,null" rendered="#{informacionBasicaController.emiteSuia}">
+					<h:outputText value="Coordenadas" rendered="#{informacionBasicaController.adjuntoCoordenadas.contenidoDocumento != null}"/>					
+					<p:commandButton id="fileCoordDownload" icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar"
+					rendered="#{informacionBasicaController.adjuntoCoordenadas.contenidoDocumento != null}">
+								<p:fileDownload value="#{informacionBasicaController.documentoCoordenadas}"/>
+					</p:commandButton>
+					<h:outputText value="#{informacionBasicaController.adjuntoCoordenadas.nombre}" rendered="#{informacionBasicaController.adjuntoCoordenadas.contenidoDocumento != null}"/>
+
+					<h:outputText value="Mapa" rendered="#{informacionBasicaController.adjuntoMapa != null}"/>
+					<p:commandButton id="fileMapaDownload" icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar"
+					rendered="#{informacionBasicaController.adjuntoMapa.id != null}">
+								<p:fileDownload value="#{informacionBasicaController.documentoMapa}"/>
+					</p:commandButton>			
+					<h:outputText value="#{informacionBasicaController.adjuntoMapa.nombre}" rendered="#{informacionBasicaController.adjuntoMapa.contenidoDocumento != null}"/>							
+					<h:outputText value="" rendered="#{informacionBasicaController.adjuntoMapa.contenidoDocumento == null}"/>
+					<h:outputText value="" rendered="#{informacionBasicaController.adjuntoMapa.id == null}"/>
+				</p:panelGrid>
+
+				<h:panelGrid columns="4" styleClass="panel_data w100" columnClasses="header w25,null w25, header w25,null w25" rendered="#{informacionBasicaController.emiteFisico}">
+					<p:outputLabel value="Datum" style="color: white"/>
+				        <p:selectOneRadio id="formato" value="#{informacionBasicaController.informacionProyecto.formatoCoordenadas}" required="true" requiredMessage="Datum es requerido" rendered="#{informacionBasicaController.habilitarIngreso}">
+				            <f:selectItem itemLabel="PSAD56" itemValue="PSAD56"/>
+				            <f:selectItem itemLabel="WGS84" itemValue="WGS84"/>
+				            <f:selectItem itemLabel="UTM" itemValue="UTM"/>
+				            <p:ajax process="formato" immediate="true" update="pnlUpload"/>
+				        </p:selectOneRadio>
+				        <p:outputLabel value="#{informacionBasicaController.informacionProyecto.formatoCoordenadas}" style="color: black" rendered="#{!informacionBasicaController.habilitarIngreso}"/>
+				        <p:outputLabel value="Zona" style="color: white" />
+				        <p:selectOneRadio id="zona" value="#{informacionBasicaController.informacionProyecto.zona}" required="true" requiredMessage="Zona es requerido" rendered="#{informacionBasicaController.habilitarIngreso}">
+				            <f:selectItem itemLabel="16S" itemValue="16S"/>
+				            <f:selectItem itemLabel="17S" itemValue="17S"/>
+				            <f:selectItem itemLabel="18S" itemValue="18S"/>
+				            <p:ajax update="pnlUpload"></p:ajax>
+				        </p:selectOneRadio>
+				        <p:outputLabel value="#{informacionBasicaController.informacionProyecto.zona}" style="color: black" rendered="#{!informacionBasicaController.habilitarIngreso}"/>
+				</h:panelGrid>
+				
+				<h:panelGroup id="containerCoordenadas" rendered="#{informacionBasicaController.emiteFisico and informacionBasicaController.habilitarIngreso}">
+				</h:panelGroup>
+				    <p:outputPanel id="pnlUpload">
+					<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75" rendered="#{informacionBasicaController.getMostrarUpload()}">
+					<h:outputText value="Descargar Plantilla" rendered="#{informacionBasicaController.habilitarIngreso}" />
+					<p:commandButton rendered="#{not empty cargarCoordenadasBean.plantillaCoordenadas and informacionBasicaController.habilitarIngreso}" value="Descargar plantilla" icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true">
+						<p:fileDownload value="#{cargarCoordenadasBean.plantillaCoordenadas}" />
+					</p:commandButton>
+							
+				    <h:outputText value="Archivo de Coordenadas *" /> 
+      				<h:panelGroup >
+                    <p:fileUpload id="fileCoordenadas" 
+                                              fileUploadListener="#{informacionBasicaController.fileUploadCoordenadas}"
+                                              value="#{informacionBasicaController.fileAdjuntoCoordenadas}" sizeLimit="20971520"
+                                              allowTypes="/(\.|\/)(xls)$/" label="Seleccionar"
+                                              update="#{p:component('nombreAdjuntoCoordenadas')}"
+                                              uploadLabel="Subir" auto="true"                                              
+                                              cancelLabel="Cancelar"
+                                              invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo xls"
+                                              invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+                                              styleClass="w100 toLeft" mode="advanced"
+                                              rendered="#{informacionBasicaController.habilitarIngreso}"/>
+                    <br/>
+                    <p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" title="Descargar"
+					rendered="#{informacionBasicaController.adjuntoCoordenadas.id!=null or informacionBasicaController.adjuntoCoordenadas.contenidoDocumento!=null}">
+								<p:fileDownload value="#{informacionBasicaController.documentoCoordenadas}"/>
+					</p:commandButton>
+                    <h:outputText id="nombreAdjuntoCoordenadas" value="#{informacionBasicaController.adjuntoCoordenadas.nombre}"/>            
+                    </h:panelGroup>
+				</p:panelGrid>
+				</p:outputPanel>
+				<ui:remove>
+				<h:panelGroup id="containerCoordenadas1" rendered="#{informacionBasicaController.emiteFisico and informacionBasicaController.habilitarIngreso}">
+					<p:panelGrid columns="1" layout="grid" styleClass="buttonAdjuntarCoordenadasContainer w100">
+						<f:facet name="header">
+							<p:commandButton value="Adjuntar" actionListener="#{informacionBasicaController.cargarCoordenadasListener}" process="@this" styleClass="buttonAdjuntarCoordenadas button-small-text toRight field_mrg" icon="ui-icon-document" />
+							<p:commandButton rendered="#{not empty cargarCoordenadasBean.plantillaCoordenadas}" value="Descargar plantilla" styleClass="button-small-text toRight field_mrg" icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true">
+								<p:fileDownload value="#{cargarCoordenadasBean.plantillaCoordenadas}" />
+							</p:commandButton>
+							<p:commandButton styleClass="button-small toRight field_mrg" ajax="false" immediate="true" icon="ui-icon-help">
+								<p:fileDownload value="#{cargarCoordenadasBean.ayudaCoordenadas}" />
+							</p:commandButton>
+						</f:facet>
+						<ui:include src="/comun/cargarCoordenadasRetce.xhtml" />
+					</p:panelGrid>
+				</h:panelGroup>
+				</ui:remove>
+				
+				<p:outputPanel rendered="#{informacionBasicaController.emiteSuia or informacionBasicaController.emiteFisico}">
+					<h:outputText value="Ubicacción Geográfica del proyecto" style="font-weight: bold;"/>
+					<p:outputPanel id="pnlUbicaciones" >
+							<p:dataTable id="listaubicacionesSuia" value="#{informacionBasicaController.listaUbicacionesGeograficas}" var="ubicacion" emptyMessage="#{labels['common.table.empty']}"
+		                   			  style="table-layout=auto" rendered="#{!informacionBasicaController.emiteFisico}">
+							<f:facet name="header">
+							</f:facet>							
+							<p:column headerText="Provincia">
+								<h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+							</p:column>
+							<p:column headerText="Cantón">
+								<h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}" />
+							</p:column>
+							<p:column headerText="Parroquia">
+								<h:outputText value="#{ubicacion.nombre}"/>
+							</p:column>
+						</p:dataTable>
+					</p:outputPanel>
+				</p:outputPanel>
+					
+				<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75" rendered="#{informacionBasicaController.emiteSuia or informacionBasicaController.emiteFisico  }">
+					<p:outputPanel rendered="false">
+					<h:outputText value="Actividad del CIIU *" for="actividadCiiu"/>
+					<h:outputText value="#{informacionBasicaController.actividadCiiu.descripcion}" 
+					rendered="#{!informacionBasicaController.habilitarIngreso}"/>
+					<p:selectOneMenu id="actividadCiiu" value="#{informacionBasicaController.actividadCiiu}" 
+					required="true" requiredMessage="Actividad del CIIU es requerido" styleClass="w100" filter="true" filterMatchMode="contains" converter="selectItemConverter"
+					rendered="#{informacionBasicaController.habilitarIngreso}">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOptiosubActividadCiiun="true"/>
+						<f:selectItems value="#{informacionBasicaController.actividadCiiuList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>
+						<p:ajax event="change" listener="#{informacionBasicaController.actividadCiiuListener}" update="subActividadCiiu"/>						
+					</p:selectOneMenu>
+
+					<h:outputText value="SubActividad del CIIU *" for="subActividadCiiu"/>
+					<h:outputText value="#{informacionBasicaController.informacionProyecto.actividadCiiu.descripcion}" 
+					rendered="#{!informacionBasicaController.habilitarIngreso}"/>						
+					<p:selectOneMenu id="subActividadCiiu" value="#{informacionBasicaController.informacionProyecto.actividadCiiu}" 
+					required="true" requiredMessage="SubActividad del CIIU es requerido" styleClass="w100" filter="true" filterMatchMode="contains" converter="selectItemConverter"
+					rendered="#{informacionBasicaController.habilitarIngreso}">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{informacionBasicaController.subActividadCiiuList}" var="item" itemLabel="#{item.descripcion}" itemValue="#{item}"/>												
+					</p:selectOneMenu>
+					</p:outputPanel>
+					<h:outputText value="Ente Responsable que emitió el permiso ambiental *" for="enteResponsable"/>
+					<h:outputText value="#{informacionBasicaController.informacionProyecto.areaResponsable.areaName}" 
+					rendered="#{!informacionBasicaController.habilitarIngreso}"/>
+					<p:selectOneMenu id="enteResponsable" value="#{informacionBasicaController.informacionProyecto.areaResponsable}" disabled="#{informacionBasicaController.emiteSuia}"
+					required="true" requiredMessage="Ente responsable es requerido" styleClass="w100" filter="true" filterBy="#{item.areaName}" filterMatchMode="contains" converter="selectItemConverter"
+					rendered="#{informacionBasicaController.habilitarIngreso}">
+						<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+						<f:selectItems value="#{informacionBasicaController.areasList}" var="item" itemValue="#{item}" itemLabel="#{item.areaName} (#{item.areaAbbreviation})"/>
+					</p:selectOneMenu>
+					
+					<h:outputText value="Ente Responsable de Control y Seguimiento *" for="enteSeguimiento"/>
+					<h:outputText value="#{informacionBasicaController.informacionProyecto.areaSeguimiento.areaName}" 
+					rendered="#{!informacionBasicaController.habilitarIngreso}"/>
+					<p:outputPanel id="opnlEnteSeguimiento" rendered="#{informacionBasicaController.habilitarIngreso}">
+						<p:selectOneMenu id="enteSeguimiento" value="#{informacionBasicaController.informacionProyecto.areaSeguimiento}"  disabled="#{informacionBasicaController.emiteSuia}"
+						required="true" requiredMessage="Ente seguimiento es requerido" styleClass="w100" filter="true" filterBy="#{item.areaName}" filterMatchMode="contains" converter="selectItemConverter">
+							<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+							<f:selectItems value="#{informacionBasicaController.obtenerEnteSeguimientoListaUno()}" var="item" itemValue="#{item}" itemLabel="#{item.areaName} (#{item.areaAbbreviation})"/>
+						</p:selectOneMenu>
+					</p:outputPanel>
+
+				</p:panelGrid>
+	</ui:composition>

@@ -1,0 +1,291 @@
+<ui:composition template="/WEB-INF/templates/default.xhtml" 
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"	
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+	<ui:define name="content">
+		<style type="text/css">
+		.valigntop{
+			vertical-align: top;
+		}
+		
+		.ui-datatable-pink table {
+			width: 100%;
+			table-layout: auto;
+			font-size: 12px;
+		}
+		.tree-table-no-header thead {
+			/*display: none*/
+			text-align: center !important;
+		}
+		
+		.ui-datatable-header{
+			height: 30px;
+			text-shadow: none;
+		}
+		
+		.textoCenterColumnContent{
+		    text-align: center !important;
+		}
+		
+		.textoTitulo{
+			-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+			filter: Alpha(Opacity=100) !important;	
+			opacity: 100 !important;
+			box-shadow:none !important;
+			color: red !important;
+			font-weight: bold !important;
+		}
+
+		.textoTitulo td{
+			-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+			filter: Alpha(Opacity=100) !important;	
+			opacity: 100 !important;
+			box-shadow:none !important;
+			color: red !important;
+			font-weight: bold !important;
+		}
+		
+		.quitarBordeGrid.ui-panelgrid>*>tr,.quitarBordeGrid.ui-panelgrid .ui-panelgrid-cell {
+    			border: none;
+		}
+		
+		
+		.encabezadoIconos {
+			font-weight: bold;
+			display: block;
+			margin-bottom: 14px;
+			margin-top: 14px;
+			font-size: 1em;
+			margin: 0 !important;
+		}
+		
+		.sectorIconos {
+			width: 110px;
+			height: 120px;
+		}
+		</style>
+		<h:form id="form" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }">
+			
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText
+						value="Proyecto principal - Autorización Administrativa Ambiental"/>
+				</f:facet>				
+				
+				<h:panelGrid id="pnlProyectoPrincipal">	
+					<p:dataTable id="tableProyectos" widgetVar="tableProyectos" value="#{asociacionProyectoDigitalizacionController.listaAutorizacionPrincipal}"   
+						filterDelay="600" var="item" rows="10" paginator="true" paginatorAlwaysVisible="false" 
+						paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rowsPerPageTemplate="5,10,15" 
+						emptyMessage="#{labels['common.table.empty']}" >
+														
+						<p:column headerText="Código de proyecto" styleClass="w10">
+							<h:outputText value="#{item.codigoProyecto}" style="word-wrap: break-word;"/>
+						</p:column>
+						
+						<p:column headerText="Número de resolución">
+							<h:outputText value="#{item.resolucion}" style="word-wrap: break-word;"/>
+						</p:column>
+						
+						<p:column headerText="Fecha de emisión">
+							<h:outputText value="#{item.fechaResolucion}"/>
+						</p:column>
+						
+						<p:column headerText="Nombre del Proyecto">
+							<h:outputText value="#{item.nombreProyecto}"/>
+						</p:column>
+						
+						<p:column headerText="Sector">
+							<h:outputText value="#{item.tipoSector}"/>
+						</p:column>
+						
+						<p:column headerText="Tipo de Permiso Ambiental">
+							<h:outputText value="#{item.autorizacionAdministrativaAmbiental}"/>
+						</p:column>
+						
+						<p:column headerText="Responsable de emisión de la AAA">
+							<h:outputText value="#{item.areaEmisora.areaAbbreviation}"/>
+						</p:column>
+						
+						<p:column headerText="Estado de la Digitalización" styleClass="w10">
+							<h:outputText value="Completado"/>
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+				
+				<h:panelGrid columns="2">
+				
+				<h:outputText value="¿Tiene resoluciones derivadas o asociadas a esta Autorización Administrativa Ambiental, tales como inclusiones Ambientales (Estudios complementarios), Actualizaciones de ficha ambiental, Actualizaciones o reformas de Licencia Ambiental y otras?" />
+				<p:selectOneRadio id="permisoFisico" layout="grid" columns="2"  styleClass="textoTitulo" 
+						value="#{asociacionProyectoDigitalizacionController.tieneAsociacion}" 
+						required="true">
+						<f:selectItem itemLabel="Si" itemValue="#{true}"/>
+						<f:selectItem itemLabel="No" itemValue="#{false}"/>
+						
+						<p:ajax update="pnlPadre pnlProyectosSuiaLazy @form" process="@this" listener="#{asociacionProyectoDigitalizacionController.cargarTramites()}"/>
+		
+					</p:selectOneRadio>					
+				</h:panelGrid>							
+				
+				<h:panelGrid id="pnlPadre" rendered="#{asociacionProyectoDigitalizacionController.tieneAsociacion}">
+				
+				<h:panelGrid id="pnlProyectosSuiaLazy" >
+					<p:dataTable id="tableProyectosSuiaLazy" widgetVar="tableProyectosSuiaLazy" value="#{asociacionProyectoDigitalizacionController.listaProyectosSuiaLazy}"   
+						filterDelay="60" sortBy="#{item.codigo}" var="item" rows="10" paginator="true" paginatorAlwaysVisible="false" lazy="true" 
+						paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rowsPerPageTemplate="5,10,15" 
+						emptyMessage="#{labels['common.table.empty']}" filteredValue="#{asociacionProyectoDigitalizacionController.listaProyectosSuiaFilter}"
+						 selection="#{asociacionProyectoDigitalizacionController.listaProyectosSeleccionados}" rowKey="#{item.id}">
+									
+						<p:ajax event="rowSelectCheckbox" update="@form" />
+						<p:ajax event="rowUnselectCheckbox" update="@form" />
+					
+						<p:column headerText="Código del proyecto" filterBy="#{item.codigo}" filterMatchMode="contains">
+							<h:outputText value="#{item.codigo}"/>
+						</p:column>
+						
+						<p:column headerText="Número de resolución" filterBy="#{item.codigoDocumento}" filterMatchMode="contains">
+							<h:outputText value="#{item.resolucion}"/>
+						</p:column>
+						
+						<p:column headerText="Fecha de emisión" filterBy="#{item.codigo}" filterMatchMode="contains">
+							<h:outputText value="#{item.fecha}"/>
+						</p:column>
+						
+						<p:column headerText="Nombre del Proyecto" filterBy="#{item.nombre}" filterMatchMode="contains">
+							<h:outputText value="#{item.nombre}"/>
+						</p:column>										
+						
+						<p:column headerText="Sector" filterBy="#{item.sector}" filterMatchMode="contains">
+							<h:outputText value="#{item.sector}"/>
+						</p:column>
+						
+						<p:column headerText="Tipo de Permiso Ambiental">
+							<h:outputText value="#{item.categoria}"/>
+						</p:column>
+						
+						<p:column headerText="Responsable de emisión de la AAA">
+							<h:outputText value="#{item.areaEmisora}"/>
+						</p:column>	
+						
+						<p:column headerText="Estado de digitalización" style="text-align: center">
+							<h:outputText value="#{item.estado}"/>				
+						</p:column>
+						
+						<p:column headerText="sisytema" style="text-align: center" rendered="false">
+							<h:outputText value="#{item.fuente}"/>				
+						</p:column>
+						
+						<p:column selectionMode="multiple" headerText="Acción de asociación" style="text-align:center" width="10%">
+							<h:outputText value="#{item.idRegistro}" rendered="false" />
+						</p:column>
+				</p:dataTable>
+				</h:panelGrid>
+				
+				<h:panelGrid columns="2">
+					<h:outputText value="Si la Autorización Administrativa Ambiental no se encuentra en el presente listado favor agregar la información correspondiente dando clic en el botón Registrar" />
+					<p:commandButton value="Registrar"
+							process="@this" actionListener="#{asociacionProyectoDigitalizacionController.redirigirNuevo()}"
+							styleClass="primary" />
+				</h:panelGrid>		
+				
+				<h:panelGrid>
+					<p:dataTable id="tableOtrosProyectos" widgetVar="tableOtrosProyectos" value="#{asociacionProyectoDigitalizacionController.listaOtrosProyectos}"   
+						filterDelay="600" sortBy="#{item.codigo}" var="item" rows="10" paginator="true" paginatorAlwaysVisible="false" 
+						paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rowsPerPageTemplate="5,10,15" 
+						emptyMessage="#{labels['common.table.empty']}" filteredValue="#{asociacionProyectoDigitalizacionController.listaOtrosProyectosSuiaFilter}"
+						rowKey="#{item.id}" selection="#{asociacionProyectoDigitalizacionController.listaOtrosProyectosSeleccionados}">
+						
+						<p:ajax event="toggleSelect" update="@form" />
+						<p:ajax event="rowSelectCheckbox" update="@form" />
+						<p:ajax event="rowUnselectCheckbox" update="@form" />
+						
+						<p:column headerText="id" >
+							<h:outputText value="#{item.id}"/>
+							<h:outputText value="#{item.idRegistro}"/>
+						</p:column>
+						<p:column headerText="Código del trámite" filterBy="#{item.codigo}" filterMatchMode="contains">
+							<h:outputText value="#{item.codigo}" style="word-wrap: break-word;"/>
+						</p:column>
+						<p:column headerText="Código del documento de aprobación" filterBy="#{item.codigo}" filterMatchMode="contains">
+							<h:outputText value="#{item.nombre}" style="word-wrap: break-word;"/>
+						</p:column>
+						<p:column headerText="Fecha Inicio">
+							<h:outputText value="#{item.fecha}" style="word-wrap: break-word;"/>
+						</p:column>
+						<p:column headerText="Fecha Fin">
+							<h:outputText value="#{item.fechaFin}" style="word-wrap: break-word;"/>
+						</p:column>
+						
+						<p:column selectionMode="multiple" headerText="Acción de asociación" style="text-align:center" width="10%">
+							<h:outputText value="#{item.idRegistro}" rendered="false" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+				
+				</h:panelGrid>
+				
+			</p:panelGrid>
+			
+				<div class="buttons main">
+				<p:commandButton value="Cancelar" actionListener="#{asociacionProyectoDigitalizacionController.redireccionarProyectos()}"
+					process="@this" styleClass="primary" />
+								
+				<p:commandButton value="Siguiente"
+					actionListener="#{asociacionProyectoDigitalizacionController.siguiente()}" update=":form:certificadoInterseccion"
+					process="@this" styleClass="primary">
+				</p:commandButton>
+				</div>
+
+			<p:dialog modal="true" id="siguienteDlgDigitalizacion" widgetVar="siguienteDlgDigitalizacion" width="350px" closable="false">
+				<div class="alCenter">
+					<h:outputText value="¿Está seguro de proceder con la digitalización y asociación  del(os) presente(s) proyecto(s) a su proyecto principal?" />
+				<br />
+				<br />
+				</div>
+				<div class="buttons main">
+					<p:commandButton id="btnCancelar" value="Cancelar" actionListener="#{asociacionProyectoDigitalizacionController.continuarSiguiente()}"
+						process="@this" styleClass="primary" />
+						<p:commandButton value="Aceptar" process="@this" update="@this" oncomplete="PF('siguienteDlgDigitalizacion').hide()"
+						actionListener="#{asociacionProyectoDigitalizacionController.continuar()}" styleClass="primary"/>
+				</div>
+			</p:dialog>
+
+			<p:dialog modal="true" id="mdlFinalizacion" widgetVar="mdlFinalizacion" width="350px" closable="false">
+				<div class="alCenter">
+					<h:outputLabel value="“Estimado usuario, usted ha completado el proceso de digitalización y asociación" />
+					<br/><br/>
+					<h:outputText value="¿Desea realizar la digitalización de más Autorizaciones Administrativas Ambientales?" />
+				<br />
+				<br />
+				</div>
+				<div class="buttons main">
+					<p:commandButton value="No" actionListener="#{asociacionProyectoDigitalizacionController.redireccionarBandeja()}"
+						oncomplete="PF('mdlFinalizacion').hide()" process="@this" styleClass="primary" />
+						<p:commandButton value="Si" process="@this" update="@this" oncomplete="PF('mdlFinalizacion').hide()"
+						actionListener="#{asociacionProyectoDigitalizacionController.redireccionarProyectos()}" styleClass="primary"/>
+				</div>
+			</p:dialog>
+			
+			<p:dialog modal="true" id="certificadoInterseccion" widgetVar="certificadoInterseccion" width="350px" closable="false">
+				<div class="alCenter">
+					<h:outputText value="#{asociacionProyectoDigitalizacionController.mensajeCI}" />
+				<br />
+				<br />
+				</div>
+				<div class="buttons main">
+					<p:commandButton value="No" actionListener="#{asociacionProyectoDigitalizacionController.cancelarAsociacion()}"
+						oncomplete="PF('certificadoInterseccion').hide()" process="@this" styleClass="primary" />
+						<p:commandButton value="Si" process="@this" update="@this" oncomplete="PF('certificadoInterseccion').hide()"
+						actionListener="#{asociacionProyectoDigitalizacionController.guardarAsociacion4cat(asociacionProyectoDigitalizacionController.codigoProyecto4Cat)}" styleClass="primary"/>
+				</div>
+			</p:dialog>
+
+		</h:form>
+		</ui:define>
+		</ui:composition>

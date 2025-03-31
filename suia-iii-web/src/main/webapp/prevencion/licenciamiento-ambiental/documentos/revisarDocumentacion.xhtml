@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:f="http://java.sun.com/jsf/core"
+                template="/WEB-INF/templates/default-task.xhtml"
+                xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+    <ui:define name="context-extra">
+
+    </ui:define>
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{revisarDocumentacionPagoLicenciaBean.validarTareaBpm()}"/>
+        <h:form>
+
+            <h:panelGrid columns="1" styleClass="w100" id="pronunciamiento-wrapper"
+                         columnClasses="w50, field_mrg w50">
+                <p:outputLabel for="requiere-modificaciones"
+                               value="¿La información es correcta?"></p:outputLabel>
+                <p:selectOneRadio id="requiere-modificaciones"
+                                  value="#{revisarDocumentacionPagoLicenciaBean.esCorrecto}"
+                                  required="true">
+                    <f:selectItem itemLabel="Si"
+                                  itemValue="true"/>
+                    <f:selectItem itemLabel="No"
+                                  itemValue="false"/>
+                </p:selectOneRadio>
+
+            </h:panelGrid>
+            <br/>
+
+            <h:panelGrid cellpadding="2" styleClass="w100">
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="w100">
+                    <f:facet name="header">
+                        <h:outputText value="Adjuntar comprobante de pago, Poliza o Garantía bancaria *"/>
+                        <mae:panelGridHeaderHelp conector="planoHelp"
+                                                 help="Adjuntar comprobante de pago, Poliza o Garantía bancaria."
+                                                 width="500px" value=""/>
+                    </f:facet>
+                    <h:panelGrid columns="2" columnClasses="null, field_mrg" id="etiqueta" 
+                    rendered="#{validarPagoLicenciaBean.subido}">
+                        <p:outputLabel
+                                value="#{empty validarPagoLicenciaBean.nombreFichero ? 'Documento(.pdf)' : validarPagoLicenciaBean.nombreFichero}"/>
+                        <p:commandButton id="download" icon="ui-icon-arrowthick-1-s" ajax="false"
+                                         styleClass="button-small primary" title="Ver" immediate="true" >
+                            <p:fileDownload value="#{validarPagoLicenciaBean.getStreamContent()}"/>
+                        </p:commandButton>
+                    </h:panelGrid>
+                    <h:panelGrid columns="2" columnClasses="null, field_mrg" id="etiquetaDocumentos" 
+                    rendered="#{!validarPagoLicenciaBean.subido}" cellpadding = "7">
+                        <p:outputLabel value="1. Factura por permiso ambiental" />
+                        <p:commandButton id="downloadFactura" icon="ui-icon-arrowthick-1-s" ajax="false"
+                                         styleClass="button-small primary" title="Ver" immediate="true" >
+                            <p:fileDownload value="#{validarPagoLicenciaBean.getStreamContent(1020)}"/>
+                        </p:commandButton>
+                        
+                        <p:outputLabel value="2. Protocolización del pago por emisión de permiso ambiental" />
+                        <p:commandButton id="downloadProtocolizacion" icon="ui-icon-arrowthick-1-s" ajax="false"
+                                         styleClass="button-small primary" title="Ver" immediate="true" >
+                            <p:fileDownload value="#{validarPagoLicenciaBean.getStreamContent(1021)}"/>
+                        </p:commandButton>
+                        
+                        <p:outputLabel value="3. Póliza o garantía bancaria por el 100% del costo de implementación del PMA" 
+                        rendered="#{!validarPagoLicenciaBean.esEmpresaPublica}"/>
+                        <p:commandButton id="downloadPoliza" icon="ui-icon-arrowthick-1-s" ajax="false"
+                                         styleClass="button-small primary" title="Ver" immediate="true" 
+                                         rendered="#{!validarPagoLicenciaBean.esEmpresaPublica}">
+                            <p:fileDownload value="#{validarPagoLicenciaBean.getStreamContent(1022)}"/>
+                        </p:commandButton>
+                        
+                        <p:outputLabel value="#{!validarPagoLicenciaBean.esEmpresaPublica ? 4 : 3}. Justificación del costo de las medidas incluidas dentro del PMA" />
+                        <p:commandButton id="downloadJustificacion" icon="ui-icon-arrowthick-1-s" ajax="false"
+                                         styleClass="button-small primary" title="Ver" immediate="true" >
+                            <p:fileDownload value="#{validarPagoLicenciaBean.getStreamContent(1023)}"/>
+                        </p:commandButton>
+                        
+                        <p:outputLabel value="#{!validarPagoLicenciaBean.esEmpresaPublica ? 5 : 4}. Cronograma valorado del PMA" />
+                        <p:commandButton id="downloadCronograma" icon="ui-icon-arrowthick-1-s" ajax="false"
+                                         styleClass="button-small primary" title="Ver" immediate="true" >
+                            <p:fileDownload value="#{validarPagoLicenciaBean.getStreamContent(1024)}"/>
+                        </p:commandButton>
+                    </h:panelGrid>
+
+                </p:panelGrid>
+
+
+                <p:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w50, w50">
+                    <f:facet name="header">
+                        <h:outputText value="Ingresar datos de la licencia *"/>
+                        <mae:panelGridHeaderHelp conector="planoHelp"
+                                                 help="Ingresar datos de la licencia."
+                                                 width="500px" value=""/>
+                    </f:facet>
+                    <p:outputLabel rendered="#{validarPagoLicenciaBean.comprobante != null}"
+                                   value="#{validarPagoLicenciaBean.comprobante.name}"/>
+
+					<p:outputLabel for="txtNumeroPoliza" value="N&uacute;mero de poliza"
+						rendered="#{!validarPagoLicenciaBean.esEmpresaPublica}" />
+					<p:outputLabel value="Costo de implementación del PMA" />
+                    <p:outputLabel value="" rendered="#{validarPagoLicenciaBean.esEmpresaPublica}"/>
+
+                    <p:inputText id="txtNumeroPoliza" readonly="true"
+                                 value="#{validarPagoLicenciaBean.licenciaAmbiental.numeroLicencia}"
+                                 maxlength="150"
+                                 rendered="#{!validarPagoLicenciaBean.esEmpresaPublica}"/>
+                    <p:inputText styleClass="w20" id="txtCostoPMA" disabled="true"
+						suffix="$" value="#{cronogramaPmaEIAController.total}" />
+
+                    <p:outputLabel value="Vigencia de Poliza" styleClass="bold" rendered="#{!validarPagoLicenciaBean.esEmpresaPublica}"/>
+                    <p:outputLabel value=""/>
+
+                    <p:outputLabel for="startDate" value="Desde" rendered="#{!validarPagoLicenciaBean.esEmpresaPublica}"/>
+                    <p:outputLabel for="endDate" value="Hasta" rendered="#{!validarPagoLicenciaBean.esEmpresaPublica}"/>
+                    <p:calendar id="startDate" readonly="true"
+                                value="#{validarPagoLicenciaBean.licenciaAmbiental.fechaEmision}"
+                                pattern="dd/MM/yyyy" mindate="#{validarPagoLicenciaBean.currentDate}"
+                                readonlyInput="true" disabled="true"
+                                rendered="#{!validarPagoLicenciaBean.esEmpresaPublica}">
+                        <p:ajax event="dateSelect" update=":#{p:component('endDate')}"/>
+                    </p:calendar>
+                    <p:calendar id="endDate" readonly="true"
+                                value="#{validarPagoLicenciaBean.licenciaAmbiental.fechaVigencia}"
+                                pattern="dd/MM/yyyy" mindate="#{validarPagoLicenciaBean.licenciaAmbiental.fechaEmision}"
+                                readonlyInput="true" disabled="true"
+                                rendered="#{!validarPagoLicenciaBean.esEmpresaPublica}"/>
+                                
+                    <p:outputLabel for="txtValue" value="Costo total del proyecto"/>
+                    <p:outputLabel value="" />
+                    <pe:inputNumber id="txtValue" decimalPlaces="2" disabled="true"
+                    			 value="#{validarPagoLicenciaBean.licenciaAmbiental.costoInversion}"
+                                 maxValue="999999999.99" minValue="0.00">
+                    </pe:inputNumber>
+                    <p:outputLabel value="" />
+
+                </p:panelGrid>
+
+
+            </h:panelGrid>
+
+
+            <h:panelGroup id="pnl2">
+                <observaciones:tablaObservaciones aparace="true"
+                                                  soloLectura="false"
+                                                  mostrarSiVacio="true"
+                                                  idClase="#{proyectosBean.proyecto.id}"
+                                                  nombreClase="PagoLicenciaAmbiental"
+                                                  seccion="comprobante"
+                                                  rol="tecnico"
+                                                  componenteActualizarEliminar="pnl2"/>
+
+            </h:panelGroup>
+
+            <div class="buttons main">
+                <p:commandButton value="Enviar"
+                                 action="#{revisarDocumentacionPagoLicenciaBean.realizarTarea}"
+                                 title="Enviar datos" icon="ui-icon-check">
+                    <p:confirm message="¿Estás seguro que desea enviar la información?"
+                               header="Confirmación de envío"></p:confirm>
+                </p:commandButton>
+            </div>
+
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

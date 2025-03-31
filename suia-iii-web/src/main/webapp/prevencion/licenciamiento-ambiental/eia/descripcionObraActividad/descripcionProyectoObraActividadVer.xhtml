@@ -1,0 +1,739 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:controles="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition
+	template="/prevencion/licenciamiento-ambiental/eia/verEIA.xhtml">
+	<ui:define name="content-eia">
+		<h:form id="form">
+			<p:growl id="msgs" globalOnly="true" />
+			<p:panel id="actividadPnl"
+				header="Descripción del proyecto, obra o actividad">
+
+				<!--Descripcion del proyecto-->
+				<p:panelGrid styleClass="w100 separatorBottom" columns="1"
+					columnClasses="w100">
+					<f:facet name="header">
+						<h:outputText value="Descripción del proyecto, obra o actividad" />
+					</f:facet>
+
+				
+
+					<h:panelGrid columns="1">
+						<p:outputLabel for="nombreArchivoDescripcionHidden"
+							value="Seleccione documento (.pdf) *" id="lblDescripcion"
+							escape="false" />
+					</h:panelGrid>
+
+					<h:panelGrid styleClass="w50 toLeft" columns="2">
+						<h:outputText id="nombreDescripcion"
+							value="#{descripcionProyectoController.estudio.documentoDescripcion.nombre}" />
+						<p:commandButton id="download" icon="ui-icon-arrowthick-1-s" rendered="true"
+							styleClass="button-small primary toLeft" title="Ver" immediate="true"
+							ajax="false">
+							<p:fileDownload value ="#{descripcionProyectoController.descargar(0)}"/>
+						</p:commandButton>
+
+						<h:inputHidden id="nombreArchivoDescripcionHidden"
+							value="#{descripcionProyectoController.descripcionProyectoBean.nombreDocumentoDescripcion}" />
+					</h:panelGrid>
+
+					<!-- MarielaG para mostrar historico DOCUMENTOS HISTORICO-->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{descripcionProyectoController.listaDocumentoDescripcionHistorico.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText value="Historial de documentos" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-search"
+							action="#{descripcionProyectoController.fillHistorialDocumentos(0)}"
+							update=":formDocumentosOriginal:documentosOriginalesDlg"
+							oncomplete="PF('documentosOriginalesDlg').show()" />
+					</h:panelGrid>
+					<!-- fin historico -->
+
+				</p:panelGrid>
+
+				<br />
+
+				<!--Actividades-->
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{!descripcionProyectoController.esMineriaNoMetalicos}">
+					<f:facet name="header" styleClass="background-orange">
+						<h:outputText id="lblActivProy" value="Actividades del proyecto *" />
+					</f:facet>
+					<p:dataTable id="tblActividad" rowIndexVar="index"
+						value="#{descripcionProyectoController.descripcionProyectoBean.listaActividades}"
+						var="actividad" emptyMessage="#{labels['common.table.empty']}">
+						<p:column styleClass="w20px alCenter">
+							<h:outputText value="#{index + 1}" />
+						</p:column>
+						<p:column headerText="Fase">
+							<h:outputText
+								value="#{actividad.catalogoCategoriaFase.fase.nombre}" />
+						</p:column>
+
+						<p:column headerText="Actividad">
+							<h:outputText value="#{actividad.nombreActividad}" />
+						</p:column>
+
+						<p:column headerText="Nro Coordenadas">
+							<h:outputText value="#{actividad.coordenadasGeneral.size()}" />
+						</p:column>
+						<!--MarielaG para mostrar historico -->
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton update=":formActividad:adicionarActividad"
+								styleClass="button-small orange " process="@this"
+								icon="ui-icon-search"
+								rendered="#{actividad.actividadModificada}"
+								disabled="#{!actividad.actividadModificada}"
+								actionListener="#{descripcionProyectoController.seleccionarActividadLicenciamiento(actividad)}"
+								oncomplete="PF('adicionarActividad').show()" />
+							<p:commandButton update=":formActividad:adicionarActividad"
+								styleClass="button-small primary" process="@this"
+								icon="ui-icon-search"
+								rendered="#{!actividad.nuevoRegistro and !actividad.actividadModificada}"
+								actionListener="#{descripcionProyectoController.seleccionarActividadLicenciamiento(actividad)}"
+								oncomplete="PF('adicionarActividad').show()" />
+						</p:column>
+						<!--fin historico -->
+					</p:dataTable>
+					
+					<!-- MarielaG para mostrar historico -->
+					<h:panelGrid styleClass="panel_data" columns="2" 
+					rendered="#{descripcionProyectoController.listaActividadesEliminadas.size() > 0}"
+						columnClasses="header background-orange, null" rowClasses="null, alt">
+						<h:outputText id="headerActividadesEliminadas"
+							value="Actividades eliminadas" />
+                            <p:commandButton 
+								styleClass="button-small primary" process="@this"
+								icon="ui-icon-search"
+								oncomplete="PF('actividadesOriginalesDlg').show()" />                     
+					</h:panelGrid>
+					<!-- fin historico -->
+				</p:panelGrid>
+
+				<br />
+
+				<!--Sustancias químicas-->
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{!descripcionProyectoController.esMineriaNoMetalicos}">
+					<f:facet name="header">
+						
+						<mae:panelGridHeaderHelp value="Sustancias químicas"
+							render="false" conector="generalHelp"
+							image="#{request.contextPath}/resources/images/help-how.png"
+							help="#{helps['no.help.yet']}" />
+					</f:facet>			
+					
+					 <p:dataTable
+                            value="#{descripcionProyectoController.descripcionProyectoBean.sustanciaQuimicasSeleccionadas}"
+                            var="sustancia" id="tablaSustancias"
+                            emptyMessage="#{labels['common.table.empty']}">
+                        <p:column headerText="Nombre" styleClass="w60">
+                            <h:outputText value="#{sustancia.descripcion}"/>
+                        </p:column>
+                        <p:column headerText="Código" styleClass="w60">
+                            <h:outputText value="#{sustancia.codigoOnu}"/>
+                        </p:column>
+                        <!-- MarielaG para mostrar historico-->
+						<p:column styleClass="w40px alCenter" rendered="#{descripcionProyectoController.descripcionProyectoBean.sustanciasModificadas > 0}">
+							<h:outputText value="Nuevo" styleClass="bold text-orange"
+								rendered="#{sustancia.nuevoEnModificacion}" />
+						</p:column>
+						<!-- fin historico -->
+                    </p:dataTable>
+                    
+                    <!-- MarielaG para mostrar historico -->
+					<h:panelGrid styleClass="panel_data" columns="2" 
+					rendered="#{descripcionProyectoController.descripcionProyectoBean.sustanciasQuimicasHistorico.size() > 0}"
+						columnClasses="header background-orange, null" rowClasses="null, alt">
+						<h:outputText id="headerSustanciaOriginal"
+							value="Sustancias químicas eliminadas" />
+                            <p:commandButton 
+								styleClass="button-small primary" process="@this"
+								icon="ui-icon-search"
+								oncomplete="PF('sustanciasOriginalesDlg').show()" />                     
+					</h:panelGrid>
+					<!-- fin historico -->
+				</p:panelGrid>
+
+				<br />
+
+				<!--Cronograma de fases de proyecto-->
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{!descripcionProyectoController.esMineriaNoMetalicos}">
+					<f:facet name="header">
+						<mae:panelGridHeaderHelp
+							value="Cronograma de fases de actividades" render="false"
+							conector="generalHelp"
+							image="#{request.contextPath}/resources/images/help-how.png"
+							help="#{helps['no.help.yet']}" />
+					</f:facet>
+
+					<p:dataTable value="#{descripcionProyectoController.calendario}"
+						var="actividadCal" id="tablaCalendario"
+						emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="Fase" styleClass="w60">
+							<h:outputText
+								value="#{actividadCal.catalogoCategoriaFase.fase.nombre}" />
+						</p:column>
+						<p:column headerText="Fecha inicio" styleClass="w15">
+							<h:outputText value="#{actividadCal.fechaInicio}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+						</p:column>
+						<p:column headerText="Fecha fin" styleClass="w15">
+							<h:outputText value="#{actividadCal.fechaFin}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+						</p:column>						
+						<!-- MarielaG para mostrar historico CRONOGRAMA MODIFICADOS-->
+						<p:column styleClass="w40px alCenter" 
+						rendered="#{descripcionProyectoController.calendarioOriginal.size() > 0}">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{actividadCal.registroModificado}"
+								styleClass="button-small orange"
+								action="#{descripcionProyectoController.mostrarCronogramasOriginales(actividadCal)}"
+								update=":formCronogramaOriginal:cronogramaOriginalDlg" process="@this"
+								oncomplete="PF('cronogramaOriginalDlg').show()" />
+ 								<!-- REGISTRO NUEVO -->
+							<h:outputText value="Nuevo" styleClass="bold text-orange" rendered="#{actividadCal.nuevoEnModificacion}"/>
+						</p:column>
+						<!-- fin historico -->
+					</p:dataTable>
+					
+					<!-- MarielaG para mostrar historico CRONOGRAMA ELIMINADOS-->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{descripcionProyectoController.calendarioEliminadoEnBdd.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText value="Identificación de hallazgos eliminados" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-search"
+							action="#{descripcionProyectoController.fillCronogramasEliminados()}"
+							update=":formCronogramaOriginal:cronogramaOriginalDlg"
+							oncomplete="PF('cronogramaOriginalDlg').show()" />
+					</h:panelGrid>
+					<!-- fin historico -->
+				</p:panelGrid>
+
+				<br />
+
+				<!--Materiales, insumos, equipos y herramientas-->
+				<p:panelGrid styleClass="w100 separatorBottom" columns="1"
+					columnClasses="w100" rendered="#{!descripcionProyectoController.esMineriaNoMetalicos}">
+					<f:facet name="header">
+						<h:outputText value="Materiales, insumos, equipos y herramientas" />
+					</f:facet>
+
+					<h:panelGrid columns="1">
+						<p:outputLabel for="nombreArchivoInsumosHidden"
+							value="Seleccione documento (.pdf) *" id="lblInsumos"
+							escape="false" />
+					</h:panelGrid>
+
+					<h:panelGrid styleClass="w50 toLeft" columns="2">
+						<h:outputText id="nombreInsumos"
+							value="#{descripcionProyectoController.estudio.documentoInsumos.nombre}" />
+						<p:commandButton icon="ui-icon-arrowthick-1-s" rendered="true" immediate="true"
+							styleClass="button-small primary toLeft" title="Ver"
+							ajax="false">
+							<p:fileDownload value ="#{descripcionProyectoController.descargar(1)}"/>
+						</p:commandButton>
+						<h:inputHidden id="nombreArchivoInsumosHidden"
+							value="	#{descripcionProyectoController.descripcionProyectoBean.nombreDocumentoInsumos}" />
+					</h:panelGrid>
+					
+					<!-- MarielaG para mostrar historico DOCUMENTOS HISTORICO-->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{descripcionProyectoController.listaDocumentoInsumoHistorico.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText value="Historial de documentos" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-search"
+							action="#{descripcionProyectoController.fillHistorialDocumentos(1)}"
+							update=":formDocumentosOriginal:documentosOriginalesDlg"
+							oncomplete="PF('documentosOriginalesDlg').show()" />
+					</h:panelGrid>
+					<!-- fin historico -->
+
+				</p:panelGrid>
+
+				<br />
+
+				
+			</p:panel>
+
+			<p:dialog id="deleteBookingDlg" header="Confirmación"
+				widgetVar="deleteBookingWdgt" modal="true" dynamic="true">
+				<h:panelGroup id="deleteBookingInner" layout="block"
+					style="margin:10px;">
+					<h:outputText
+						value="¿Está usted seguro de eliminar esta sustancia química?" />
+				</h:panelGroup>
+
+				<f:facet name="footer">
+					<h:panelGroup layout="block"
+						style="text-align:right; padding:2px; white-space:nowrap;">
+						<p:commandButton value="Eliminar" process="deleteBookingDlg"
+							update=":#{p:component('tablaSustancias')}"
+							action="#{descripcionProyectoController.eliminarSustanciaQuimica()}"
+							oncomplete="PF('deleteBookingWdgt').hide()" />
+						<p:commandButton type="button" value="Cerrar"
+							onclick="PF('deleteBookingWdgt').hide()" />
+					</h:panelGroup>
+				</f:facet>
+			</p:dialog>
+		</h:form>
+
+		<h:form id="formActividad">
+			<p:dialog header="Descripción de la actividad del proyecto"
+				id="adicionarActividad" widgetVar="adicionarActividad" modal="true"
+				width="600" resizable="false" draggable="false">
+				<h:panelGrid columns="1" id="actividadContainer">
+					<!--MarielaG para mostrar historico -->
+					<!-- cuando es un registro que se ingreso en la modificacion -->
+					<h:panelGrid columns="1" styleClass="w100 uppercase"
+						columnClasses="w100"
+						rendered="#{descripcionProyectoController.descripcionProyectoBean.actividadLicenciamiento.nuevoRegistro}">
+						<p:outputLabel value="Registro Nuevo" styleClass="bold text-orange" />
+					</h:panelGrid>
+					<!--fin historico -->
+					
+					<h:panelGrid columns="2" styleClass="w100 separatorBottom"
+						columnClasses="w50, field_mrg w50">
+						<p:outputLabel value="Fase" for="fase" styleClass="bold" />
+						<p:outputLabel value="Actividad" for="actividad" styleClass="bold" />
+
+						
+						<p:inputText id="fase"
+							value="#{descripcionProyectoController.descripcionProyectoBean.actividadLicenciamiento.catalogoCategoriaFase}"
+							maxlength="150" readonly="true" />
+						<p:inputText id="actividad"
+							value="#{descripcionProyectoController.descripcionProyectoBean.actividadLicenciamiento.nombreActividad}"
+							maxlength="150" readonly="true" />
+					</h:panelGrid>
+
+					<!-- MarielaG para mostrar historico INFO GENERAL-->
+					<h:panelGrid styleClass="panel_data separatorBottom" columns="2"
+						rendered="#{descripcionProyectoController.listaActividadesHistorico.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText value="Historial información general" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+						update=":formInfoOriginal:infoOriginalDlg"
+							icon="ui-icon-search" oncomplete="PF('infoOriginalDlg').show()" />
+					</h:panelGrid>
+					<!-- fin historico -->
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="Coordenadas *" />
+						</f:facet>
+						<p:dataTable id="tblCoordenadas" rowIndexVar="index"
+							value="#{descripcionProyectoController.descripcionProyectoBean.listaCoordenadasGenerales}"
+							var="coordenadas" emptyMessage="#{labels['common.table.empty']}">
+							<p:column styleClass="w20px alCenter">
+								<h:outputText value="#{index + 1}" />
+							</p:column>
+							<p:column headerText="Coordenada X">
+								<h:outputText value="#{coordenadas.x}" />
+							</p:column>
+							<p:column headerText="Coordenada Y">
+								<h:outputText value="#{coordenadas.y}" />
+							</p:column>
+							<p:column headerText="Descripción">
+								<h:outputText value="#{coordenadas.descripcion}" />
+							</p:column>
+							<!-- MarielaG para mostrar historico COORDENADA-->
+							<p:column styleClass="w10 alCenter"
+								rendered="#{descripcionProyectoController.listaCoordenadasOriginal.size() > 0}">
+								<p:commandButton icon="ui-icon-search"
+									rendered="#{coordenadas.registroModificado}"
+									styleClass="button-small orange"
+									action="#{descripcionProyectoController.mostrarCoordenadaHistorial(coordenadas)}"
+									update=":formCoordenadas:coordenadasDlg" process="@this"
+									oncomplete="PF('coordenadasDlg').show()" />
+								<!-- REGISTRO NUEVO -->
+								<h:outputText value="Nuevo" styleClass="bold text-orange"
+									rendered="#{coordenadas.nuevoEnModificacion}" />
+							</p:column>
+							<!-- fin historico -->
+						</p:dataTable>
+					</p:panelGrid>
+					<!-- MarielaG para mostrar historico -->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{descripcionProyectoController.listaCoordenadasEliminadasBdd.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText value="Coordenadas eliminadas" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-search"
+							action="#{descripcionProyectoController.fillCoordenadasEliminadas()}"
+							update=":formCoordenadas:coordenadasDlg" 
+							oncomplete="PF('coordenadasDlg').show()" />
+					</h:panelGrid>
+					<!-- fin historico -->
+				</h:panelGrid>
+
+				<p:separator />
+
+				<div class="buttons">
+				
+					<p:commandButton value="Aceptar" type="button"
+						onclick="PF('adicionarActividad').hide()" styleClass="secondary" />
+				</div>
+
+				<script type="text/javascript">
+                    function showModalAddActividad(xhr, status, args) {
+                        if (args.addActividadLicenciamiento)
+                            PF('adicionarActividad').hide();
+                        else
+                            PF('adicionarActividad').show();
+                    }
+                </script>
+			</p:dialog>
+		</h:form>
+
+		<h:form id="formCoordenada">
+			<p:dialog header="Coordenadas" id="adicionarCoordenada"
+				widgetVar="adicionarCoordenada" modal="true" width="400"
+				resizable="false" draggable="false">
+				<h:panelGrid columns="2" id="adicionarCoordenadaContainer"
+					styleClass="w100" columnClasses="w50, field_mrg w50">
+					<p:outputLabel value="Coordenada X" for="coordenadaX"
+						styleClass="bold" />
+					<p:outputLabel value="Coordenada Y" for="coordenadaY"
+						styleClass="bold" />
+
+					<p:inputText id="coordenadaX"
+						value="#{descripcionProyectoController.descripcionProyectoBean.coordenadaGeneral.x}"
+						maxlength="15" readonly="true">
+						<pe:keyFilter mask="num" />
+					</p:inputText>
+
+					<p:inputText id="coordenadaY"
+						value="#{descripcionProyectoController.descripcionProyectoBean.coordenadaGeneral.y}"
+						maxlength="15" readonly="true">
+						<pe:keyFilter mask="num" />
+					</p:inputText>
+
+					<p:outputLabel value="Descripción" for="descripcion"
+						styleClass="bold" />
+					<h:outputText />
+					<p:inputText id="descripcion"
+						value="#{descripcionProyectoController.descripcionProyectoBean.coordenadaGeneral.descripcion}"
+						maxlength="150" readonly="true" />
+					<h:outputText />
+
+				</h:panelGrid>
+				<p:separator />
+
+				<div class="buttons">
+				
+					<p:commandButton value="Aceptar" type="button"
+						onclick="PF('adicionarCoordenada').hide()" styleClass="secondary" />
+				</div>
+
+				<script type="text/javascript">
+                    function showModalAddCoordenadas(xhr, status, args) {
+                        if (args.addCordenadas)
+                            PF('adicionarCoordenada').hide();
+                        else
+                            PF('adicionarCoordenada').show();
+                    }
+                </script>
+			</p:dialog>
+		</h:form>
+		<p:dialog header="Fases del proyecto"
+			id="agregarActividadCalendarioDlg"
+			widgetVar="agregarActividadCalendarioWdgt" modal="true"
+			resizable="false" width="300">
+			<h:form id="formDlg">
+				<h:panelGroup id="datosGenerales">
+					<h:panelGrid styleClass="w100 separatorBottom" columns="2"
+						columnClasses="alRight, field_mrg w66 alLeft">
+						<p:outputLabel value="Fase:" />
+						<h:outputText
+							value="#{descripcionProyectoController.fasesProyectoEia.catalogoCategoriaFase.fase.nombre}" />
+						<p:outputLabel for="startDate" value="Fecha inicio:" />
+						<p:calendar id="startDate" required="true"
+							value="#{descripcionProyectoController.fasesProyectoEia.fechaInicio}"
+							styleClass="w15">
+							<p:ajax event="dateSelect" update="endtDate" />
+						</p:calendar>
+						<p:outputLabel for="endtDate" value="Fecha fin:" />
+						<p:calendar id="endtDate"
+							value="#{descripcionProyectoController.fasesProyectoEia.fechaFin}"
+							styleClass="w15">
+							<f:attribute name="startDate"
+								value="#{descripcionProyectoController.fasesProyectoEia.fechaInicio}" />
+							<f:validator validatorId="dateRangeValidator" />
+						</p:calendar>
+					</h:panelGrid>
+				</h:panelGroup>
+				<div class="buttons">
+					<p:commandButton styleClass="buttonAceptar" value="Guardar"
+						update=":form:tablaCalendario,:formDlg:datosGenerales"
+						process="@this :formDlg:datosGenerales"
+						action="#{descripcionProyectoController.agregarFechasAFaseProyecto}" />
+
+				</div>
+			</h:form>
+		</p:dialog>
+
+		<h:form id="formSustanciaQuimica">
+			<p:dialog header="Seleccionar sustancia química"
+				id="adicionarSustanciaQuimica" widgetVar="adicionarSustanciaQuimica"
+				modal="true" resizable="false" width="600">
+				<h:panelGroup id="datosSustanciaQuimica">
+
+					 <h:panelGrid columns="1" columnClasses="w100">
+                        <p:dataTable id="tblSustanciasQuimicas" paginator="true"
+                                     paginatorPosition="bottom" rows="10" var="sustanciaQuimica"
+                                     value="#{descripcionProyectoController.descripcionProyectoBean.sustanciaQuimicasPeligrosas}"
+                                     emptyMessage="#{labels['common.table.empty']}">
+                            <p:column headerText="Sustancia Química"
+                                      filterBy="#{sustanciaQuimica.descripcion}" filterMatchMode="contains"
+                                      sortBy="#{sustanciaQuimica.descripcion}">
+                                <h:outputText value="#{sustanciaQuimica.descripcion}"/>
+                            </p:column>
+                            <p:column styleClass="alCenter w20px">
+                                <p:selectBooleanCheckbox
+                                        value="#{sustanciaQuimica.seleccionado}"/>
+                            </p:column>
+                        </p:dataTable>
+                    </h:panelGrid>
+					<div class="buttons">
+                        <p:commandButton styleClass="buttonAceptar" value="Aceptar"
+                                         update=":#{p:component('tablaSustancias')},:#{p:component('datosSustanciaQuimica')}"
+                                         action="#{descripcionProyectoController.agregarSustanciasQuimicasSeleccionadas}"/>
+
+                    </div>
+				</h:panelGroup>
+				<script type="text/javascript">
+			        function handleDatosConsultor(xhr, status, args) {
+			            if (args.validationFailed || !args.consultorCalificado) {
+			            	PF('adicionarSustanciaQuimica').show();
+			            }
+			            else {
+			                PF('adicionarSustanciaQuimica').hide();
+			            }
+			        }
+			    </script>
+			</p:dialog>
+		</h:form>
+		
+		<!-- MarielaG para mostrar historico DOCUMENTOS-->
+		<h:form id="formDocumentosOriginal">
+			<p:dialog header="Historial de documentos"
+				id="documentosOriginalesDlg" widgetVar="documentosOriginalesDlg"
+				modal="true" resizable="false" width="600">
+				<h:panelGroup id="datosDocumentosOriginal">
+					<p:dataTable value="#{descripcionProyectoController.listaDocumentosHistorico}"
+						var="doc" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText
+								value="#{doc.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Documento">
+							<h:outputText value="#{doc.nombre}" />
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton id="download_historico" rendered="true"
+								icon="ui-icon-search" ajax="false"
+								styleClass="button-small background-orange" title="Ver"
+								immediate="true">
+								<p:fileDownload
+									value="#{descripcionProyectoController.descargarOriginal(doc)}" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+		<!-- MarielaG para mostrar historico ACTIVIDADES INFO GENERAL--> 
+		<h:form id="formInfoOriginal">
+			<p:dialog header="Historial de actividad"
+				id="infoOriginalDlg" widgetVar="infoOriginalDlg" modal="true"
+				resizable="false"
+				width="600">
+				<h:panelGroup id="datosInfo">
+					<p:dataTable id="tblInfo" rowIndexVar="index"
+						value="#{descripcionProyectoController.listaActividadesHistorico}"
+						var="actividad" emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText
+								value="#{actividad.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Fase">
+							<h:outputText
+								value="#{actividad.catalogoCategoriaFase.fase.nombre}" />
+						</p:column>
+						<p:column headerText="Actividad">
+							<h:outputText value="#{actividad.nombreActividad}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+		<!-- MarielaG para mostrar historico ACTIVIDADES-->
+		<h:form id="formActividadesOriginales">
+			<p:dialog header="Historial de actividades"
+				id="actividadesOriginalesDlg" widgetVar="actividadesOriginalesDlg"
+				modal="true" resizable="false" width="600">
+				<h:panelGroup id="datosActividadesOriginales">
+					<h:panelGrid columns="1" columnClasses="w100">
+						<p:dataTable id="tblActividadEliminados" rowIndexVar="index"
+						rendered="#{descripcionProyectoController.listaActividadesEliminadas.size() > 0}"
+						value="#{descripcionProyectoController.listaActividadesEliminadas}"
+						var="actividad" emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText
+								value="#{actividad.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Fase">
+							<h:outputText
+								value="#{actividad.catalogoCategoriaFase.fase.nombre}" />
+						</p:column>
+
+						<p:column headerText="Actividad">
+							<h:outputText value="#{actividad.nombreActividad}" />
+						</p:column>
+
+						<p:column headerText="Nro Coordenadas">
+							<h:outputText value="#{actividad.coordenadasGeneral.size()}" />
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton update=":formActividad:adicionarActividad"
+								styleClass="button-small primary" process="@this"
+								icon="ui-icon-search"
+								actionListener="#{descripcionProyectoController.seleccionarActividadLicenciamiento(actividad)}"
+								oncomplete="PF('adicionarActividad').show()" />
+						</p:column>
+					</p:dataTable>
+					</h:panelGrid>
+				</h:panelGroup>
+				<script type="text/javascript">
+                    function showSustanciasOriginales(xhr, status, args) {
+                    	if (args.addSustancias)
+                            PF('sustanciasOriginalesDlg').hide();
+                        else
+                            PF('sustanciasOriginalesDlg').show();
+                    }
+                </script>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+		<!-- MarielaG para mostrar historico COORDENADAS-->
+		<h:form id="formCoordenadas">
+			<p:dialog header="Historial de coordenadas"
+				id="coordenadasDlg" widgetVar="coordenadasDlg" modal="true"
+				resizable="false"
+				width="600">
+				<h:panelGroup id="datosCoordenadas">
+					<p:dataTable id="tblCoordenadas" rowIndexVar="index"
+						value="#{descripcionProyectoController.listaCoordenadasHistorico}"
+						var="coordenada" emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText
+								value="#{coordenada.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Coordenada X">
+							<h:outputText value="#{coordenada.x}" />
+						</p:column>
+						<p:column headerText="Coordenada Y" styleClass="singleLine">
+							<h:outputText value="#{coordenada.y}" />
+						</p:column>
+						<p:column headerText="Descripción">
+							<h:outputText value="#{coordenada.descripcion}" />
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+		<!-- MarielaG para mostrar historico SUSTANCIAS PELIGROSAS-->
+		<h:form id="formSustanciasOriginales">
+			<p:dialog header="Historial de sustancias químicas"
+				id="sustanciasOriginalesDlg" widgetVar="sustanciasOriginalesDlg"
+				modal="true" resizable="false" width="600">
+				<h:panelGroup id="datosSustanciasOriginales">
+					<h:panelGrid columns="1" columnClasses="w100">
+						<p:dataTable
+                            value="#{descripcionProyectoController.descripcionProyectoBean.sustanciasQuimicasHistorico}"
+                            var="sustancia" id="tablaSustanciasOriginales"
+                            emptyMessage="#{labels['common.table.empty']}">
+                        <p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText value="#{sustancia.fechaCreacion}" />
+						</p:column>
+                        <p:column headerText="Nombre" styleClass="w60">
+                            <h:outputText value="#{sustancia.descripcion}"/>
+                        </p:column>
+                        <p:column headerText="Código" styleClass="w60">
+                            <h:outputText value="#{sustancia.codigoOnu}"/>
+                        </p:column>
+                    </p:dataTable>
+					</h:panelGrid>
+				</h:panelGroup>
+				<script type="text/javascript">
+                    function showSustanciasOriginales(xhr, status, args) {
+                    	if (args.addSustancias)
+                            PF('sustanciasOriginalesDlg').hide();
+                        else
+                            PF('sustanciasOriginalesDlg').show();
+                    }
+                </script>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+		<!-- MarielaG para mostrar historico CRONOGRAMA FASES--> 
+		<h:form id="formCronogramaOriginal">
+			<p:dialog header="Historial de cronogramas"
+				id="cronogramaOriginalDlg" widgetVar="cronogramaOriginalDlg"
+				modal="true" resizable="false" width="600">
+				<h:panelGroup id="datosCronogramaOriginal">
+					<h:panelGrid columns="1" columnClasses="w100">
+						<p:dataTable value="#{descripcionProyectoController.listaCalendarioHistorial}"
+							var="actividadCal" id="tablaCalendarioOriginal"
+							emptyMessage="#{labels['common.table.empty']}">
+							<p:column headerText="Fecha Modificacion" styleClass="w15 alCenter">
+								<h:outputText
+									value="#{actividadCal.fechaCreacion}" />
+							</p:column>
+							<p:column headerText="Fase" styleClass="w60">
+								<h:outputText
+									value="#{actividadCal.catalogoCategoriaFase.fase.nombre}" />
+							</p:column>
+							<p:column headerText="Fecha inicio" styleClass="w15">
+								<h:outputText value="#{actividadCal.fechaInicio}">
+									<f:convertDateTime pattern="dd/MM/yyyy" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="Fecha fin" styleClass="w15">
+								<h:outputText value="#{actividadCal.fechaFin}">
+									<f:convertDateTime pattern="dd/MM/yyyy" />
+								</h:outputText>
+							</p:column>
+						</p:dataTable>
+					</h:panelGrid>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+		
+	</ui:define>
+</ui:composition>
+</html>

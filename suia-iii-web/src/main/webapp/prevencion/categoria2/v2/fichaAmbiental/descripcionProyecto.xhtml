@@ -1,0 +1,94 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+	<ui:define name="content">
+        <f:event type="preRenderView" listener="#{descripcionProyectoPmaBean.validarTareaBpmV2()}"/>
+		<ui:include src="contenido/menu.xhtml" />
+		<div class="content">
+			<h:form>
+				<p:panel id="parte3"
+					header="5. DESCRIPCI&Oacute;N DEL PROYECTO, OBRA O ACTIVIDAD">
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						columnClasses="w100, field_mrg w100">
+						<f:facet name="header">
+							<mae:panelGridHeaderHelp value="DESCRIPCI&Oacute;N DEL PROYECTO"
+								conector="generalHelp"
+								image="#{request.contextPath}/resources/images/help-how.png"
+								help="#{helps['registro.general']}" />
+						</f:facet>
+						<p:outputLabel value="Descripci&oacute;n del proyecto: " />
+						<p:outputLabel value="#{fichaAmbientalPmaBean.proyecto.resumen}"
+							styleClass="w100" />
+					</p:panelGrid>
+					<h:panelGrid columns="1"
+						rendered="#{fichaAmbientalPmaBean.proyecto.generaDesechos}">
+						<h:panelGroup id="desechoContainer"
+							rendered="#{fichaAmbientalPmaBean.proyecto.generaDesechos}">
+							<br />
+							<p:outputLabel value="Desechos generados" />
+							<br />
+							<br />
+							<p:dataTable
+								value="#{fichaAmbientalPmaBean.proyecto.proyectoDesechoPeligrosos}"
+								id="tableDesechos" var="desecho"
+								sortBy="#{desecho.desechoPeligroso.descripcion}"
+								sortOrder="ASCENDING" rows="10" paginator="true"
+								paginatorAlwaysVisible="false" paginatorPosition="bottom"
+								emptyMessage="#{labels['common.table.empty']}">
+								<p:column headerText="Clave del desecho" styleClass="w20">
+									<h:outputText value="#{desecho.desechoPeligroso.clave}" />
+								</p:column>
+								<p:column headerText="Descripción del desecho">
+									<h:outputText value="#{desecho.desechoPeligroso.descripcion}" />
+								</p:column>
+							</p:dataTable>
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<h:panelGrid columns="1"
+						rendered="#{fichaAmbientalPmaBean.habilitarTablaTipoDesechoEspecial}">
+						<h:panelGroup id="tipoDesechoContainer"
+							rendered="#{fichaAmbientalPmaBean.habilitarTablaTipoDesechoEspecial}">
+							<br />
+							<p:outputLabel value="Tipos de desechos especiales" />
+							<br />
+							<br />
+							<p:dataTable
+								value="#{fichaAmbientalPmaBean.desechoPeligrososEspeciales}"
+								id="tableDesechosEspeciales" var="desechoEsp"
+								sortOrder="ASCENDING" rows="10" paginator="true"
+								paginatorAlwaysVisible="false" paginatorPosition="bottom"
+								emptyMessage="#{labels['common.table.empty']}">
+								<p:column style="width:15px;text-align:center">
+									<p:selectBooleanCheckbox value="#{desechoEsp.seleccionado}" />
+								</p:column>
+								<p:column headerText="Clave del desecho" styleClass="w20">
+									<h:outputText value="#{desechoEsp.clave}" />
+								</p:column>
+								<p:column headerText="Descripci&oacute;n del desecho">
+									<h:outputText value="#{desechoEsp.descripcion}" />
+								</p:column>
+							</p:dataTable>
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<f:facet name="footer">
+						<t:div styleClass="buttons main">
+							<p:commandButton value="Guardar"
+								action="#{fichaAmbientalPmaController.guardarParte5}"
+								icon="ui-icon-disk" update="@form" />
+						</t:div>
+					</f:facet>
+				</p:panel>
+			</h:form>
+		</div>
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="context-extra">
+		<h:outputText value="#{contextoViabilidadPfnController.etiqueta}" />
+		<h:outputText value="#{contextoViabilidadPfnController.nombreTecnico}" />
+		<p:commandButton
+			action="#{contextoViabilidadPfnController.visualizarInformacion()}"
+			styleClass="primary button-small" icon="ui-icon-search" />
+	</ui:define>
+
+
+	<ui:define name="content">
+		<f:event type="preRenderView"
+				listener="#{revisarInformacionViabilidadPfnController.validarTareaApoyoBpm()}" />
+
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText
+						value="Informe de factibilidad para obtener la viabilidad ambiental dentro del Patrimonio Forestal Nacional" />
+				</f:facet>
+
+				<p:panelGrid columns="2" styleClass="panel_data w50"
+					columnClasses="header w85, null">
+					<h:outputText value="#{proyectosBean.proyecto.codigo}"
+						rendered="#{!empty proyectosbean.proyecto.codigo}" />
+
+					<p:outputLabel
+						value="Oficio del #{labels['roca.lc.certificado.categorizacion']}"
+						style="color: white" />
+					<p:commandButton icon="ui-icon-search"
+						styleClass="button-small primary toLeft" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{revisarInformacionViabilidadPfnController.descargar(1)}" />
+					</p:commandButton>
+					<p:outputLabel
+						value="Mapa del #{labels['roca.lc.certificado.categorizacion']}"
+						style="color: white" />
+					<p:commandButton icon="ui-icon-search"
+						styleClass="button-small primary toLeft" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{revisarInformacionViabilidadPfnController.descargar(2)}" />
+					</p:commandButton>
+					<p:outputLabel value="Coordenadas del proyecto"
+						style="color: white" />
+					<p:commandButton icon="ui-icon-search"
+						styleClass="button-small primary toLeft" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{revisarInformacionViabilidadPfnController.descargar(3)}" />
+					</p:commandButton>
+					<p:outputLabel for="docRespuestas"
+						value="Información de Viabilidad Ambiental" style="color: white" />
+					<p:commandButton id="docRespuestas" icon="ui-icon-arrowthick-1-s"
+						styleClass="button-small primary toLeft" title="Ver" ajax="false"
+						immediate="true">
+						<p:fileDownload
+							value="#{revisarInformacionViabilidadPfnController.descargar(4)}" />
+					</p:commandButton>
+				</p:panelGrid>
+			</p:panelGrid>
+			<br />
+			<h:outputText
+				value="Para continuar por favor descargue la información proporcionada por el operador"
+				styleClass="encabezado text-red" />
+			<br />
+			<h:panelGrid columns="1" styleClass="w100" columnClasses="null">
+
+				<p:outputLabel value="Requerimiento del técnico responsable"
+					for="txtDetalleApoyo" />
+				<p:inputTextarea id="txtDetalleApoyo" maxlength="2000" rows="5"
+					disabled="true" style="resize: none;" autoResize="false"
+					value="#{revisarInformacionViabilidadPfnController.viabilidadProyecto.detalleApoyo}" />
+			</h:panelGrid>
+
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Enviar" process="@this form"
+						actionListener="#{revisarInformacionViabilidadPfnController.enviarRevisionApoyo()}"
+						update="pnlButtons" icon="ui-icon-check" />
+				</div>
+			</h:panelGroup>
+
+			<ui:include
+				src="/pages/rcoa/viabilidadAmbientalForestal/_viewInformacionExtra.xhtml" />
+
+		</h:form>
+	</ui:define>
+</ui:composition>

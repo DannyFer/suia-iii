@@ -1,0 +1,100 @@
+<ui:composition 
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	template="/WEB-INF/templates/default-task.xhtml">
+	
+	<ui:define name="content">
+
+		<h:form id="form">
+			<h:panelGroup>
+				<h:panelGrid styleClass="alCenter w100" columns="1">
+					<h:outputText value="Firmar oficio de pronunciamiento"
+						styleClass="encabezado1_4em" />
+					<h:panelGrid styleClass="alCenter w66" columns="1">
+						<p:panel styleClass="alCenter" rendered="#{!firmaOficioPronunciamientoDiagnosticoController.firmaSoloToken}">
+							<h:panelGrid styleClass="alCenter w50" columns="2">
+								<h:outputText value="¿Cuenta con token?" styleClass="encabezado"
+									style="text-align:right" />
+								<p:selectOneRadio id="verificaToken" 
+									value="#{firmaOficioPronunciamientoDiagnosticoController.token}">
+									<f:selectItem itemLabel="Sí" itemValue="true" />
+									<f:selectItem itemLabel="No" itemValue="false" />
+									<p:ajax event="change" update=":form :formDialogs"
+										listener="#{firmaOficioPronunciamientoDiagnosticoController.guardarToken}" />
+								</p:selectOneRadio>
+							</h:panelGrid>
+						</p:panel>
+					</h:panelGrid>
+				</h:panelGrid>
+			</h:panelGroup>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Firmar documento " type="button"
+						styleClass="large" icon="ui-icon-key"
+						rendered="#{!firmaOficioPronunciamientoDiagnosticoController.token}"
+						update=":formDialogs:pnlFirmaManualOficio"
+						onclick="PF('signDialogOficio').show();" />
+					<p:commandButton value="Firmar documento" type="button"
+						styleClass="large" icon="ui-icon-key"
+						rendered="#{firmaOficioPronunciamientoDiagnosticoController.token}"
+						onclick="window.location.href='#{firmaOficioPronunciamientoDiagnosticoController.firmarDocumento()}'" />
+
+					<p:commandButton value="Enviar"
+						action="#{firmaOficioPronunciamientoDiagnosticoController.completarTarea()}"
+						title="Enviar" icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+		</h:form>
+
+		<h:form id="formDialogs">
+			<p:dialog header="Firma Electrónica" id="signDialogOficio"
+				widgetVar="signDialogOficio" closeOnEscape="false" modal="true"
+				resizable="false" width="auto" height="auto" position="center top">
+				<p:panel id="pnlFirmaManualOficio">
+					<h:panelGrid columns="2" cellpadding="10"
+						style="text-align:right !important">
+						<p:outputLabel value="1. Descargar el oficio de pronunciamiento"
+							styleClass="bold" />
+						<p:commandButton value="Descargar" ajax="false"
+							icon="ui-icon-arrowthick-1-s" styleClass="primary"
+							immediate="true">
+							<p:fileDownload value="#{firmaOficioPronunciamientoDiagnosticoController.stream}" />
+						</p:commandButton>
+
+						<p:outputLabel for="uploadRequired"
+							value="2. Adjuntar el oficio de pronunciamiento firmado" styleClass="bold" />
+						<p:fileUpload
+							fileUploadListener="#{firmaOficioPronunciamientoDiagnosticoController.uploadListenerDocumentos}"
+							multiple="false" sizeLimit="5242880"
+							allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Tamaño de archivo no válido"
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update="lblNombreOficioFirmado"
+							rendered="#{!firmaOficioPronunciamientoDiagnosticoController.token}">
+							<f:attribute name="clave" value=":form" />
+						</p:fileUpload>
+						<p:outputLabel value="" />
+						<h:outputText id="lblNombreOficioFirmado"
+							value="#{firmaOficioPronunciamientoDiagnosticoController.documentoManual.nombreDocumento}" />
+					</h:panelGrid>
+				</p:panel>
+				<h:inputHidden id="uploadRequired"
+					required="#{!firmaOficioPronunciamientoDiagnosticoController.token and !firmaOficioPronunciamientoDiagnosticoController.documentoSubido}" />
+				<p:separator />
+				<div style="display: block; width: 100%; text-align: right;">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialogOficio').hide()" icon="ui-icon-close" />
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

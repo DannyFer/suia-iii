@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" 
+xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" 
+xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" 
+xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" 
+xmlns:t="http://myfaces.apache.org/tomahawk"
+xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+	<h:panelGroup>
+		<p:panelGrid id="transporteGrid" columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="Transporte"/>
+			</f:facet>
+			<h:outputText value="Ruta"/>
+			<p:dataTable id="rutaTable" var="item" value="#{gestorDesechosPeligrososVerController.listRutas}">
+				<f:facet name="header"></f:facet>
+				<p:column headerText="Nombre">
+					<h:outputText value="#{item.nombre}"/>
+				</p:column>
+				<p:column headerText="Desde">
+					<h:outputText value="#{item.nombreProvinciaOrigen}"/>
+				</p:column>
+				<p:column headerText="Hasta">
+					<h:outputText value="#{item.nombreProvinciaDestino}"/>
+				</p:column>
+			</p:dataTable>
+		</p:panelGrid>
+	</h:panelGroup>
+
+	<h:panelGroup>
+		<p:panelGrid id="manifiestoGrid" columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="Manifiesto Único"/>
+			</f:facet>
+			
+			<h:outputText value="Manifiesto Único"/>
+			<p:dataTable id="manifiestoTable" var="item" value="#{gestorDesechosPeligrososVerController.listManifiestoUnicoTransporte}">
+				<f:facet name="header"></f:facet>
+				<p:column headerText="Identificación de manifiesto">
+					<h:outputText value="#{item.numeroManifiesto}"/>
+				</p:column>
+				<p:column headerText="Adjunto">
+					<center>
+						<p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" 
+						title="Descargar" value="Descargar" rendered="#{item.adjuntoManifiesto.nombre != null}">
+							<p:fileDownload value="#{gestorDesechosPeligrososVerController.getStreamedContentDocumento(item.adjuntoManifiesto)}"/>
+						</p:commandButton>
+					</center>
+				</p:column>
+				<p:column headerText="N° de registro de generador de desechos peligrosos y especiales / N° de licencia de gestor">
+					<h:outputText value="#{item.numeroRGD}"/>
+				</p:column>
+				<p:column headerText="Fecha de recepción de los residuos y desechos  peligrosos y especiales">
+					<h:outputText value="#{item.fechaRecepcion}">
+						<f:convertDateTime pattern="dd-MM-yyyy"/>
+					</h:outputText>
+				</p:column>
+			</p:dataTable>
+			
+			<h:outputText value="Identificación del desecho"/>
+			<p:dataTable id="desechoTable" var="item" value="#{gestorDesechosPeligrososVerController.listDesechoGestorTransporte}">
+				<f:facet name="header"></f:facet>
+				<p:column headerText="Número de manifiesto">
+					<h:outputText value="#{item.manifiestoUnico.numeroManifiesto}"/>
+				</p:column>
+				<p:column headerText="Nombre del residuo o desecho peligroso o especial">
+					<h:outputText value="#{item.desechoPeligroso.descripcion}"/>
+				</p:column>
+				<p:column headerText="Código">
+					<h:outputText value="#{item.clave}"/>
+				</p:column>
+				<p:column headerText="Unidad">
+					<h:outputText value="#{item.unidadDesechoTransporte.descripcion}"/>
+				</p:column>
+				<p:column headerText="Cantidad recibida">
+					<h:outputText value="#{item.cantidad}"/>
+				</p:column>
+				<p:column headerText="Reporte en unidades">
+					<h:outputText value="#{item.reporteUnidades}"/>
+				</p:column>
+			</p:dataTable>
+
+			<h:outputText value="Transferencia"/>
+			<p:dataTable id="transferenciaTable" var="item" value="#{gestorDesechosPeligrososVerController.listEmpresasTransporte}">
+				<f:facet name="header"></f:facet>
+				<p:column headerText="Manifiesto Único">
+					<h:outputText value="#{item.manifiestoUnico.numeroManifiesto}"/>
+				</p:column>
+				<p:column headerText="Fecha de Transferencia">
+					<h:outputText value="#{item.fechaTransferencia}">
+						<f:convertDateTime pattern="dd-MM-yyyy"/>
+					</h:outputText>
+				</p:column>
+				<p:column headerText="Empresa gestora">
+					<h:outputText value="#{item.sedePrestadorServiciosDesechos.prestadorServiciosDesechos.nombre}"/>
+				</p:column>
+				<p:column headerText="Número de autorización">
+					<h:outputText value="#{item.sedePrestadorServiciosDesechos.codigoPermisoAmbiental}"/>
+				</p:column>
+			</p:dataTable>
+		</p:panelGrid>
+		
+		<p:panelGrid id="sumatoriaGrid" columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="Sumatoria"/>
+			</f:facet>
+			<p:dataTable id="sumatoriaTable" var="item" value="#{gestorDesechosPeligrososVerController.listTotalManifiestoTransporte}">
+				<f:facet name="header">
+				</f:facet>
+				<p:column headerText="Nombre del residuo o desecho peligroso o especial">
+					<h:outputText value="#{item.desechoPeligroso.descripcion}"/>
+				</p:column>
+				<p:column headerText="Código">
+					<h:outputText value="#{item.desechoPeligroso.clave}"/>
+				</p:column>
+				<p:column headerText="Total">
+					<h:outputText value="#{item.totalDesecho}"/>
+				</p:column>
+				<p:column headerText="Reporte en unidades (U) únicamente para los desechos ES-04 y ES-06">
+					<h:outputText value="#{item.totalUnidadesES}"/>
+				</p:column>
+			</p:dataTable>
+		</p:panelGrid>
+		
+		<p:panelGrid id="exportacionTransporteGrid" columns="1" layout="grid" styleClass="w100">
+			<f:facet name="header">
+				<h:outputText value="Exportacion"/>
+			</f:facet>
+			<p:dataTable var="item" value="#{gestorDesechosPeligrososVerController.listDesechoGestorTransporteExportacion}">
+				<f:facet name="header"></f:facet>
+				<p:column headerText="Nombre del residuo o desecho peligroso o especial">
+					<h:outputText value="#{item.desechoPeligroso.descripcion}"/>
+				</p:column>
+				<p:column headerText="Código">
+					<h:outputText value="#{item.desechoPeligroso.clave}"/>
+				</p:column>
+				<p:column headerText="Cantidad">
+					<h:outputText value="#{item.cantidad}"/>
+				</p:column>
+				<p:column headerText="País de destino">
+					<h:outputText value="#{item.pais.nombre}"/>
+				</p:column>
+				<p:column headerText="Autorización">
+					<center>
+						<p:commandButton icon="ui-icon-arrowthickstop-1-s" styleClass="secondary" ajax="false" immediate="true" process="@this" 
+						title="Descargar" value="Descargar" rendered="#{item.documentoAutorizacion.nombre != null}">
+							<p:fileDownload value="#{gestorDesechosPeligrososVerController.getStreamedContentDocumento(item.documentoAutorizacion)}"/>
+						</p:commandButton>
+					</center>
+				</p:column>
+			</p:dataTable>
+		</p:panelGrid>
+		
+		<p:panelGrid id="observacionesGridTransporte" columns="1" layout="grid" styleClass="w100" rendered="#{gestorDesechosPeligrososVerController.verObservaciones}">
+			<observaciones:tablaObservaciones idComponent="observacionesTransporte"
+					componenteActualizarEliminar="observacionesTransporte"
+					seccion="GestorDesechosPeligrososTransporte"
+					nombreClase="GestorDesechosPeligrosos"
+					idClase="#{gestorDesechosPeligrososVerController.gestorDesechosPeligrosos.id}"		
+					aparace="true"
+					mostrarSiVacio="true"
+					soloLectura="false"/>
+		</p:panelGrid>
+	</h:panelGroup>
+</html>

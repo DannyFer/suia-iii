@@ -1,0 +1,90 @@
+<ui:composition template="/WEB-INF/templates/default-blank.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+
+	<ui:define name="content">
+		<script type="text/javascript">
+			$(document).ready(function() {
+				$('.wizard-custom-btn-back').hide();
+				$('.wizard-custom-btn-only-end').hide();
+			});
+		</script>
+		<link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/plugin/wizard.css" />
+		
+		<h:form id="form" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{ingresoDigitalizacionProyectosController.esTecnico}">
+				<f:facet name="header">
+					<h:outputText value="Datos de la persona que digitalizó el proyecto." />
+				</f:facet>
+				<h:panelGrid id="pnltecnicoCrea" layout="grid" styleClass="panel_data w100" columnClasses="header w25,null w25, header w25,null w25" columns="4">
+					<h:outputText value="Persona que digitalizó:" />
+					<h:outputText value="#{ingresoDigitalizacionProyectosController.usuarioCreacion.persona.nombre}"/>
+					<h:outputText value="Fecha digitalización:" />
+					<h:outputText value="#{ingresoDigitalizacionProyectosController.autorizacionAdministrativa.fechaCreacion}">
+					 	<f:convertDateTime pattern="yyyy-MM-dd HH:mm" />
+					</h:outputText>
+				</h:panelGrid>
+			</p:panelGrid>
+			<p:panelGrid id="pnltecnico" layout="grid" styleClass="panel_data w100" columnClasses="header w25,null w25, header w25,null w25"
+				columns="4" rendered="#{ingresoDigitalizacionProyectosController.habilitarEditar and false}">
+				<f:facet name="header">
+					<h:outputText value="Datos del técnico responsable de la actualización." />
+				</f:facet>
+				<h:outputText value="Técnico:" />
+				<h:outputText value="#{ingresoDigitalizacionProyectosController.usuarioTecnico.persona.nombre}"/>
+				<h:outputText value="Fecha actualización:" />
+				<h:outputText value="#{ingresoDigitalizacionProyectosController.fechaActual}">
+				 	<f:convertDateTime pattern="yyyy-MM-dd HH:mm" />
+				</h:outputText>
+			</p:panelGrid>
+			<p:panelGrid id="pnlVinculaciones" layout="grid" styleClass="panel_data w100" columns="1">
+				<f:facet name="header">
+					<h:outputText value="Vinculaciones." />
+				</f:facet>
+				<h:outputText value="¿Este proyecto tiene vinculados otros proyectos?" />
+				<p:selectOneRadio id="sorVinculaciones" value="#{ingresoDigitalizacionProyectosController.tieneVinculados}" disabled="true">
+						<f:selectItem itemLabel="Sí" itemValue="true" />
+						<f:selectItem itemLabel="No" itemValue="false" />
+				</p:selectOneRadio> 
+				<h:outputText value="Si el proyecto tiene vinculados otros proyectos, estos pueden ser revisados a través del ícono Digitalizar y/o Vincular" />
+			</p:panelGrid>
+		
+			<p:panelGrid columns="1" layout="grid" styleClass="w100 allCenter">
+				<f:facet name="header">
+					<h:outputText value="Digitalizar Autorizaciones Administrativas Ambientales (AAA)" />
+				</f:facet>
+				<p:wizard widgetVar="wizard" flowListener="#{ingresoDigitalizacionProyectosController.onFlowProcess}" showNavBar="false"
+						nextLabel="Siguiente" backLabel="Atrás" id="wizardDigitalizacion">
+					<p:tab id="paso1" titletip="Datos AAA" title="Datos AAA">
+						<ui:include src="/pages/rcoa/digitalizacion/formulario/formDatosDigitalizacionVer.xhtml" />	
+					</p:tab>		
+					<p:tab id="paso2" titletip="Ubicación geográfica" title="Ubicación geográfica">
+						<ui:include src="/pages/rcoa/digitalizacion/formulario/formDatosUbicacionDigitalizacionVer.xhtml" />
+					</p:tab>
+					<p:tab id="paso3" titletip="Documentos del proyecto" title="Documentos del proyecto">
+						<ui:include src="/pages/rcoa/digitalizacion/formulario/formDatosDocumentosDigitalizacionVer.xhtml" />
+					</p:tab>
+				</p:wizard>
+			</p:panelGrid>
+		
+			<p:panel id="pnlButtons" styleClass="buttons main">
+				<p:commandButton id="btnCerrar" value="Cerrar" icon="ui-icon-arrowthick-1-w" onclick="window.close();" process="@this" styleClass="secondary" />
+				<p:commandButton  value="Cerrar" actionListener="#{ingresoDigitalizacionProyectosController.redireccionarBandeja()}"
+					process="@this" rendered="false"/>
+				<p:commandButton id="btnAtras" type="button" value="Atrás" icon="ui-icon-arrowthick-1-w" onclick="PF('wizard').back();reloadWizard();"
+					styleClass="wizard-custom-btn-back" process="@this" update="wizardDigitalizacion pnlButtons" />
+				<p:commandButton id="btnSiguiente" value="Siguiente" process="@this" icon="ui-icon-arrowthick-1-e"
+					oncomplete="PF('wizard').next();reloadWizard();" styleClass="wizard-custom-btn-next" update="pnlButtons"/>
+			</p:panel>
+			<h:outputScript name="/plugin/wizard.js" library="js" />
+		</h:form>
+	</ui:define>
+</ui:composition>

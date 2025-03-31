@@ -1,0 +1,362 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+
+<div style="padding-bottom: 12px; padding-left: 4px;">
+	<h:outputText value="Productos SGA / PMA" styleClass="bold" />
+</div>
+
+<h:panelGrid styleClass="w100">
+	<p:dataTable id="dtbProductoSgaPma" var="productoPqua"
+		styleClass="table table-hover"
+		value="#{administrarProductoSgaPmaBean.listaProductosAprobados}"
+		paginator="true" paginatorAlwaysVisible="false"
+		paginatorPosition="bottom"
+		emptyMessage="#{labels['common.table.empty']}"
+		currentPageReportTemplate="{currentPage} de {totalPages}" rows="20"
+		rowsPerPageTemplate="20,40,60">
+
+		<p:column headerText="RUC / Cédula"
+			filterBy="#{productoPqua.cedulaRuc}" filterMatchMode="contains">
+			<h:outputText value="#{productoPqua.cedulaRuc}" />
+		</p:column>
+		<p:column headerText="Nombre Operador"
+			filterBy="#{productoPqua.nombreOperador}" filterMatchMode="contains">
+			<h:outputText value="#{productoPqua.nombreOperador}" />
+		</p:column>
+		<p:column headerText="Nombre comercial producto"
+			filterBy="#{productoPqua.nombreComercialProducto}"
+			filterMatchMode="contains">
+			<h:outputText value="#{productoPqua.nombreComercialProducto}" />
+		</p:column>
+		<p:column headerText="Composición del producto">
+			<h:outputText value="#{productoPqua.composicionProducto}" />
+		</p:column>
+		<p:column headerText="Formulación">
+			<h:outputText value="#{productoPqua.formulacion}" />
+		</p:column>
+		<p:column headerText="Categoría Toxicológica">
+			<h:outputText value="#{productoPqua.categoriaFinal.nombre}" />
+		</p:column>
+		<p:column headerText="Tipo de producto">
+			<h:outputText value="#{productoPqua.tipoProducto.nombre}" />
+		</p:column>
+		<p:column headerText="Acción" styleClass="w10 alCenter">
+			<f:facet name="header">
+				<p:commandButton value="Agregar" title="Agregar"
+					styleClass="secondary" process="@this" icon="ui-icon-plus"
+					actionListener="#{administrarProductoSgaPmaBean.agregarProducto()}"
+					update=":form:tab:dlgProductoSgaAct"
+					oncomplete="PF('dlgProductoSgaAct').show();" resetValues="true" />
+			</f:facet>
+			<p:commandButton styleClass="button-small primary" process="@this"
+				icon="ui-icon-pencil" resetValues="true"
+				actionListener="#{administrarProductoSgaPmaBean.editarProducto(productoPqua)}"
+				oncomplete="PF('dlgProductoSgaAct').show();" immediate="true"
+				update=":form:tab:dlgProductoSgaAct" />
+
+			<p:commandButton styleClass="button-small primary" process="@this"
+				icon="ui-icon-trash"
+				actionListener="#{administrarProductoSgaPmaBean.eliminarProducto(productoPqua)}"
+				update="dtbProductoSgaPma"
+				rendered="#{productoPqua.aprobacionFisica and !productoPqua.tieneRegistroPma}">
+				<p:confirm icon="ui-icon-alert" header="Confirmación"
+					message="¿Está seguro de eliminar el registro?" />
+			</p:commandButton>
+		</p:column>
+	</p:dataTable>
+
+</h:panelGrid>
+
+
+<p:dialog header="#{administrarProductoSgaPmaBean.tituloVentana}"
+	id="dlgProductoSgaAct" widgetVar="dlgProductoSgaAct" modal="true"
+	resizable="false" width="800" closable="false">
+
+	<p:panel id="pnlVerMedio" style="max-height: 500px; overflow: auto">
+
+		<h:panelGrid styleClass="w100" columns="1">
+			<p:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25, null">
+				<p:outputLabel value="RUC / Cédula:" style="color: white"
+					for="txtCedula" />
+				<h:panelGroup>
+					<h:panelGrid styleClass="w100" columns="2"
+						columnClasses="w50 null, w50 null">
+						<p:inputText id="txtCedula"
+							value="#{administrarProductoSgaPmaBean.productoSeleccionado.cedulaRuc}"
+							disabled="#{administrarProductoSgaPmaBean.productoSeleccionado.id ne null and !administrarProductoSgaPmaBean.productoSeleccionado.aprobacionFisica}"
+							maxlength="20" autocomplete="off" required="true">
+						</p:inputText>
+						<p:commandButton value="Buscar" update="pnlDataOperador2"
+							styleClass="primary" immediate="true"
+							actionListener="#{administrarProductoSgaPmaBean.buscarCedula()}"
+							process="@this">
+							<p:ajax process="txtCedula" />
+						</p:commandButton>
+					</h:panelGrid>
+				</h:panelGroup>
+			</p:panelGrid>
+
+			<p:panelGrid id="pnlDataOperador2" columns="2"
+				styleClass="panel_data w100" columnClasses="header w25, null">
+				<h:outputText value="Nombre Operador:" />
+				<p:inputText disabled="true"
+					value="#{administrarProductoSgaPmaBean.productoSeleccionado.nombreOperador}" />
+
+				<h:outputText value="Representante Legal:"
+					rendered="#{administrarProductoSgaPmaBean.productoSeleccionado.representanteLegal ne null}" />
+				<p:inputText disabled="true"
+					value="#{administrarProductoSgaPmaBean.productoSeleccionado.representanteLegal}"
+					rendered="#{administrarProductoSgaPmaBean.productoSeleccionado.representanteLegal ne null}" />
+			</p:panelGrid>
+
+			<p:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25, null">
+
+				<p:outputLabel value="N° de Registro / Dictamen ambiental:"
+					style="color: white" for="txtNumRegistroA" />
+				<p:inputText id="txtNumRegistroA"
+					value="#{administrarProductoSgaPmaBean.productoSeleccionado.numeroRegistro}"
+					maxlength="100" required="true" />
+
+				<p:outputLabel value="Fecha de registro:" style="color: white"
+					for="calFechaRegistroA" />
+				<p:calendar id="calFechaRegistroA" required="true"
+					value="#{administrarProductoSgaPmaBean.productoSeleccionado.fechaRegistro}"
+					pattern="dd/MM/yyyy" readonlyInput="true" navigator="true" >
+				</p:calendar>
+
+				<p:outputLabel value="Nombre comercial del producto:"
+					style="color: white" for="txtNombreComercialA" />
+				<p:inputText id="txtNombreComercialA"
+					value="#{administrarProductoSgaPmaBean.productoSeleccionado.nombreComercialProducto}"
+					maxlength="100" required="true" />
+
+				<p:outputLabel value="Composición del producto:"
+					style="color: white" for="txtComposicionA" />
+				<p:inputText id="txtComposicionA"
+					value="#{administrarProductoSgaPmaBean.productoSeleccionado.composicionProducto}"
+					maxlength="100" required="true" placeholder="Chlorpyrifos;Fipronil" />
+
+				<p:outputLabel value="Valor:" style="color: white" for="txtValorA" />
+				<p:inputText id="txtValorA" placeholder="234,4564;23,3434;654,8765"
+					value="#{administrarProductoSgaPmaBean.productoSeleccionado.valor}"
+					required="true" 
+					maxlength="100" />
+
+				<p:outputLabel value="Unidad de medida:" style="color: white"
+					for="txtUnidadMedA" />
+				<p:inputText id="txtUnidadMedA" placeholder="g/l;g/kg"
+					value="#{administrarProductoSgaPmaBean.productoSeleccionado.unidadMedida}"
+					maxlength="100" required="true" />
+
+				<p:outputLabel value="Formulación:" style="color: white"
+					for="txtFormulacionA" />
+				<p:inputText id="txtFormulacionA"
+					value="#{administrarProductoSgaPmaBean.productoSeleccionado.formulacion}"
+					maxlength="100" required="true" />
+
+				<p:outputLabel value="Abreviatura de formulación:"
+					style="color: white" for="txtAbreviaturaA" />
+				<p:inputText id="txtAbreviaturaA"
+					value="#{administrarProductoSgaPmaBean.productoSeleccionado.abreviaturaFormulacion}"
+					maxlength="100" required="true" />
+
+				<p:outputLabel style="color: white" value="Categoría Toxicológica:"
+					for="cmbCategoriaToxA" />
+				<p:selectOneMenu id="cmbCategoriaToxA"
+					value="#{administrarProductoSgaPmaBean.productoSeleccionado.categoriaFinal}"
+					converter="selectItemConverter" filter="true"
+					filterMatchMode="startsWith" required="true">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="#{null}" noSelectionOption="true" />
+					<f:selectItems
+						value="#{administrarProductoSgaPmaBean.listaTipoCategoria}"
+						var="item" itemLabel="#{item.nombre}" itemValue="#{item}" />
+					<p:ajax process="@this" update="lblColorA"
+						listener="#{administrarProductoSgaPmaBean.validarColorEtiqueta()}" />
+				</p:selectOneMenu>
+
+				<h:outputText value="Color de franja:" />
+				<h:outputText id="lblColorA" styleClass="bold"
+					value="#{administrarProductoSgaPmaBean.productoSeleccionado.colorFranjaFinal.nombre}"
+					style="color:#{administrarProductoSgaPmaBean.productoSeleccionado.colorFranjaFinal.valor}" />
+
+				<p:outputLabel style="color: white" value="Tipo de producto:"
+					for="cmbTipoProducto" />
+				<p:selectOneMenu id="cmbTipoProducto" required="true"
+					value="#{administrarProductoSgaPmaBean.productoSeleccionado.tipoProducto}"
+					converter="selectItemConverter" filter="true"
+					filterMatchMode="startsWith">
+					<f:selectItem itemLabel="#{labels['common.item.choose']}"
+						itemValue="#{null}" noSelectionOption="true" />
+					<f:selectItems
+						value="#{administrarProductoSgaPmaBean.listaTipoProducto}"
+						var="item" itemLabel="#{item.nombre}" itemValue="#{item}" />
+					<p:ajax process="@this" update="pnlOtros" />
+				</p:selectOneMenu>
+			</p:panelGrid>
+
+			<h:panelGroup id="pnlOtros">
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25,null"
+					rendered="#{administrarProductoSgaPmaBean.productoSeleccionado.tipoProducto.valor eq '1'}">
+					<p:outputLabel style="color: white" value="Especifique:"
+						for="txtOtro" />
+					<p:inputText id="txtOtro" maxlength="100" autocomplete="off"
+						required="true"
+						value="#{administrarProductoSgaPmaBean.productoSeleccionado.otroTipoProducto}" />
+				</p:panelGrid>
+			</h:panelGroup>
+
+
+			<p:panelGrid columns="2" styleClass="panel_data w100"
+				columnClasses="header w25,null">
+				<p:outputLabel style="color: white"
+					value="Documento de justificación:"  />
+				<h:panelGroup>
+					<h:outputText value="Admite .pdf de 20MB" />
+					<p:fileUpload id="fluDocumento"
+						fileUploadListener="#{administrarProductoSgaPmaBean.uploadJustificacion}"
+						mode="advanced" auto="true" sizeLimit="20971520"
+						label="Seleccione"
+						invalidFileMessage="El tipo de archivo no es pdf." required="true"
+						invalidSizeMessage="Tamaño de archivo incorrecto"
+						allowTypes="/(\.|\/)(pdf)$/" update="idNombreDocumento"
+						requiredMessage="El campo 'Documento Justificación' es requerido">
+					</p:fileUpload>
+					<h:outputText id="idNombreDocumento"
+						value="#{administrarProductoSgaPmaBean.productoSeleccionado.documentoJustificacion.nombre}" />
+					<br />
+					<br />
+					<p:dataTable var="item" id="tblJustificaciones"
+						value="#{administrarProductoSgaPmaBean.listaDocumentosJustificacion}"
+						emptyMessage="#{labels['common.table.empty']}"
+						sortBy="#{item.fechaCreacion}" sortOrder="ASCENDING">
+						<p:column headerText="Nombre documento">
+							<h:outputText value="#{item.nombre}" />
+						</p:column>
+						<p:column headerText="Fecha" width="20%">
+							<h:outputText value="#{item.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Acción" styleClass="w70px alCenter">
+							<p:commandButton id="downloadAutorizacion"
+								icon="ui-icon-arrowthick-1-s" styleClass="button-small primary"
+								title="Ver" ajax="false" immediate="true"
+								rendered="#{item.nombre ne null}">
+								<p:fileDownload
+									value="#{administrarProductoSgaPmaBean.descargarDocumento(item)}" />
+							</p:commandButton>
+							<p:commandButton icon="ui-icon-trash" title="Eliminar"
+								styleClass="button-small primary" process="@this"
+								update="tblJustificaciones"
+								actionListener="#{administrarProductoSgaPmaBean.eliminarDocumento(item)}"
+								rendered="#{item.esNuevo()}">
+								<p:confirm header="Confirmación"
+									message="¿Está seguro que desea eliminar el documento?"
+									icon="ui-icon-alert" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:panelGrid>
+
+			<br />
+			<br />
+			<p:separator />
+			<h:outputText value="Cultivos y Plagas" styleClass="bold" />
+			<p:dataTable id="dtProductos" var="producto"
+				styleClass="table table-hover"
+				value="#{administrarProductoSgaPmaBean.listaDetalleProyectoPlaguicidas}"
+				paginator="true" paginatorAlwaysVisible="false"
+				paginatorPosition="bottom"
+				emptyMessage="#{labels['common.table.empty']}"
+				currentPageReportTemplate="{currentPage} de {totalPages}" rows="5"
+				rowsPerPageTemplate="5,10,15">
+				<p:column headerText="Nombre del cultivo">
+					<h:outputText value="#{producto.cultivo.nombreComun}" />
+					<h:outputText value=" (#{producto.nombreCientificoCultivo})"
+						styleClass="italic" />
+				</p:column>
+				<p:column headerText="Plaga">
+					<h:outputText value="#{producto.getDetallePlagas()}" escape="false" />
+				</p:column>
+				<p:column headerText="Dosis aprobada en la etiqueta"
+					styleClass="w20">
+					<h:outputText value="#{producto.getDetalleDosis()}" escape="false" />
+				</p:column>
+				<p:column styleClass="alCenter">
+					<f:facet name="header">
+						<center>
+							<p:commandButton value="Adicionar" title="Adicionar"
+								styleClass="secondary" icon="ui-icon-plus"
+								update=":form:tab:dlgAgregarProducto"
+								actionListener="#{administrarProductoSgaPmaBean.agregarDetalle()}"
+								oncomplete="PF('dlgAgregarProducto').show();" process="@this">
+							</p:commandButton>
+						</center>
+					</f:facet>
+					<p:commandButton styleClass="button-small primary" process="@this"
+						icon="ui-icon-pencil"
+						actionListener="#{administrarProductoSgaPmaBean.editarDetalle(producto)}"
+						update=":form:tab:dlgAgregarProducto"
+						oncomplete="PF('dlgAgregarProducto').show();" immediate="true" />
+
+					<p:commandButton update="dtProductos"
+						styleClass="button-small primary" process="@this"
+						icon="ui-icon-trash" rendered="#{producto.registroFisico}"
+						actionListener="#{administrarProductoSgaPmaBean.eliminarDetalle(producto)}"
+						immediate="true">
+						<p:confirm icon="ui-icon-alert" header="Confirmación"
+							message="¿Está seguro de eliminar el registro?" />
+					</p:commandButton>
+				</p:column>
+			</p:dataTable>
+
+			<h:inputHidden
+				validator="#{administrarProductoSgaPmaBean.validateProducto}" />
+		</h:panelGrid>
+	</p:panel>
+
+	<br />
+	<p:outputPanel>
+		<div class="buttons main">
+			<p:commandButton value="Cancelar" resetValues="true"
+				actionListener="#{administrarProductoSgaPmaBean.limpiarProducto()}"
+				oncomplete="PF('dlgProductoSgaAct').hide();"
+				update="dtbProductoSgaPma" process="@this" />
+			<p:commandButton value="Aceptar"
+				actionListener="#{administrarProductoSgaPmaBean.aceptarProducto()}"
+				oncomplete="handledlgProductoSgaAct(xhr, status, args)"
+				update="dlgProductoSgaAct dtbProductoSgaPma"
+				process="dlgProductoSgaAct" />
+		</div>
+	</p:outputPanel>
+</p:dialog>
+
+<ui:include
+	src="/pages/rcoa/plaguicidasQuimicosUsoAgricola/viewsCatalogos/_viewAgregarCultivoPlagas.xhtml" />
+
+<script type="text/javascript">
+	function handledlgProductoSgaAct(xhr, status, args) {
+		if (args.validationFailed || !args.addProducto) {
+			PF('dlgProductoSgaAct').show();
+		}
+		else {
+			PF('dlgProductoSgaAct').hide();
+		}
+	}
+	</script>
+
+</html>

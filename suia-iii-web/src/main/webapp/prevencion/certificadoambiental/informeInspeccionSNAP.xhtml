@@ -1,0 +1,645 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:t="http://myfaces.apache.org/tomahawk"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+    <ui:define name="content">    
+        <h:form id="form">        
+        <h:panelGrid styleClass="w100" id="panelDocumento" rendered="#{informeInspeccionSnapCAController.verPdf}">
+			<h:outputText value="Elaborar Informe Inspección SNAP" styleClass="bold" />
+			<p:separator />
+			<object type="application/pdf" id="informe"
+					data="#{informeInspeccionSnapCAController.urlPdf}?pfdrid_c=true"
+					height="600" width="100%" />
+		</h:panelGrid>
+		
+        <h:panelGrid styleClass="w100" rendered="#{!informeInspeccionSnapCAController.verPdf}">	
+        	<p:panel header="PROYECTO">            	
+                <h:panelGrid columns="2" layout="grid" styleClass="w100" cellpadding="4" cellspacing="4" columnClasses="w25,w75">                    
+                		<p:outputLabel value="Nombre del Proyecto"/>                        
+                        <h:outputText required="true"  value="#{proyectosBean.proyecto.nombre}"/>
+                        <p:outputLabel value="Nombre del Área Protegida" />                        
+                        <h:outputText id="nombre_area" required="true" styleClass="w100" value="#{informeInspeccionSnapCAController.areaInterseca}" escape="false"/>
+                        <p:outputLabel value="Código de Informe" for="codigo"/>                        
+                        <p:inputText id="codigo" value="#{informeInspeccionSnapCAController.informeSnap.codigo}"
+                        required="true"  requiredMessage="El campo 'Código de Informe' es requerido." maxlength="50" style="text-transform:uppercase;"/>
+                        <p:watermark value="MAE-DPA(correspondiente)-2019-UNP-AP(Área protegida)-001(Núm de Informe)" for="codigo"/>
+                </h:panelGrid>
+            </p:panel>
+            
+            <p:panel header="EXTENSIÓN DEL ÁREA">            	
+                <h:panelGrid columns="3" layout="grid" styleClass="w50" cellpadding="4" cellspacing="4">                    
+                        <p:outputLabel value="MEDIDAS" />
+                        <p:outputLabel value="UNIDADES" />
+                        <p:outputLabel value="EXTENSIÓN DEL ÁREA" />
+                        
+                        <p:outputLabel value="Longitud" for="longitud"/>
+                        <p:selectOneMenu  id="unidad_longitud" required="false"  value="#{informeInspeccionSnapCAController.informeSnap.unidadLongitud}"
+                        requiredMessage="El campo Unidad Longitud es requerido.">
+                        	<f:selectItem itemLabel="Seleccione..."/>
+                        	<f:selectItem itemLabel="km" itemValue="km"/>
+                            <f:selectItem itemLabel="m2" itemValue="m2"/>
+                            <f:selectItem itemLabel="ha" itemValue="ha"/>
+                            <f:ajax event="change" listener="#{informeInspeccionSnapCAController.cambiarUnidadListener('longitud')}" render="longitud"/>                            
+                        </p:selectOneMenu>                        
+                        <p:inputText id="longitud" required="false"  value="#{informeInspeccionSnapCAController.informeSnap.longitud}"
+                        requiredMessage="El campo Longitud es requerido.">
+                        	<f:validateDoubleRange minimum="0.0"/>
+                        </p:inputText>
+                        
+                        <p:outputLabel value="Superficie" for="superficie"/>
+                        <p:selectOneMenu id="unidad_superficie" required="false"  value="#{informeInspeccionSnapCAController.informeSnap.unidadSuperficie}"
+                        requiredMessage="El campo Unidad Superficie es requerido.">
+                        	<f:selectItem itemLabel="Seleccione..."/>
+                            <f:selectItem itemLabel="m2" itemValue="m2"/>
+                            <f:selectItem itemLabel="ha" itemValue="ha"/>
+                            <f:ajax event="change" listener="#{informeInspeccionSnapCAController.cambiarUnidadListener('superficie')}" render="superficie"/>                            
+                        </p:selectOneMenu>                        
+                        <p:inputText id="superficie" required="false"  value="#{informeInspeccionSnapCAController.informeSnap.superficie}"
+                        requiredMessage="El campo Superficie Longitud es requerido.">
+                        	<f:validateDoubleRange minimum="0.0"/>
+                        </p:inputText>
+                        
+                        <p:inputText id="otraExtension" required="false"  value="#{informeInspeccionSnapCAController.informeSnap.otraExtension}">
+                        	<p:ajax event="keyup" update="unidadOtraExtension valorOtraExtension"/>
+                        </p:inputText>
+                        
+                        <p:selectOneMenu id="unidadOtraExtension" required="false"  value="#{informeInspeccionSnapCAController.informeSnap.unidadOtraExtension}"
+                        disabled="#{empty informeInspeccionSnapCAController.informeSnap.otraExtension}">
+                        	<f:selectItem itemLabel="Seleccione..."/>
+                        	<f:selectItem itemLabel="km" itemValue="km"/>
+                            <f:selectItem itemLabel="m2" itemValue="m2"/>
+                            <f:selectItem itemLabel="ha" itemValue="ha"/>
+                            <f:ajax event="change" listener="#{informeInspeccionSnapCAController.cambiarUnidadListener('valorOtraExtension')}" render="valorOtraExtension"/>                            
+                        </p:selectOneMenu>                        
+                        <p:inputText id="valorOtraExtension" required="false"  value="#{informeInspeccionSnapCAController.informeSnap.valorOtraExtension}"
+                        disabled="#{empty informeInspeccionSnapCAController.informeSnap.otraExtension}">
+                        	<f:validateDoubleRange minimum="0.0"/>
+                        </p:inputText>
+                        <p:watermark for="otraExtension" value="Otra"/>
+                                               
+                </h:panelGrid>
+            </p:panel>
+        
+        
+            <p:panel header="PREGUNTA 1">
+            	<h:outputText value="LAS COORDENADAS DEL PROYECTO U OBRA PROPUESTO, CUAL ZONIFICACIÓN DEL ÁREA PROTEGIDA OCUPA; Y  ES PERMITIDA"/>
+            	<mae:panelGridHeaderHelp id="button" conector="descripcionHelp" help="#{helps['ca.informe.snap.zonificacion']}" width="500px"/>
+                <h:panelGrid columns="2" layout="grid" styleClass="w50" cellpadding="4" cellspacing="4">                                    
+                        <p:outputLabel value="Zona de Protección (ZP)"/>                        
+                        <p:selectBooleanCheckbox id="zp" required="true"  value="#{informeInspeccionSnapCAController.informeSnap.zonaProteccion}"/>                        
+                     
+                        <p:outputLabel value="Zona Uso Pública y Turismo(ZUPT)"/>
+                        <p:selectBooleanCheckbox id="zupt" required="true"  value="#{informeInspeccionSnapCAController.informeSnap.zonaUsoPublicaTurismo}"/>
+                                             
+                        <p:outputLabel value="Zona Recuperación (ZR)"/>
+                        <p:selectBooleanCheckbox id="zr" required="true"  value="#{informeInspeccionSnapCAController.informeSnap.zonaRecuperacion}"/>
+                        
+                        <p:outputLabel value="Zona Uso Sostenible (ZUS)"/>
+                        <p:selectBooleanCheckbox id="zus" required="true"  value="#{informeInspeccionSnapCAController.informeSnap.zonaUsoSostenible}"/>
+                        
+                        <p:outputLabel value="Zona Manejo Comunitario (ZMC)"/>
+                        <p:selectBooleanCheckbox id="zmc" required="true"  value="#{informeInspeccionSnapCAController.informeSnap.zonaManejoComunitario}"/>   
+                     
+                </h:panelGrid>               
+            
+                <h:panelGrid columns="1" layout="grid" styleClass="w100" cellpadding="4" cellspacing="4">                    
+                        <p:outputLabel value="¿EL PROYECTO, OBRA O ACTIVIDAD ES PERMITIDO?"/>
+                        <p:selectOneRadio id="Pregunta_1" required="true"  value="#{informeInspeccionSnapCAController.informeSnap.actividadPermitida}"
+                        requiredMessage="La pregunta 1 es requerida">
+                        	<f:selectItem itemLabel="Sí" itemValue="true"/>
+                            <f:selectItem itemLabel="No" itemValue="false"/>
+                        </p:selectOneRadio>
+                </h:panelGrid>
+                
+               
+            </p:panel>
+            <p:panel header="PREGUNTA 2">                           
+                <h:panelGrid columns="1" layout="grid" styleClass="w100" cellpadding="4" cellspacing="4">                    
+                        <h:outputText value="LAS COORDENADAS VERIFICADAS DENTRO DEL AP, TAMBIÉN INTERSECAN CON RAMSAR, ZONA DE PROTECCIÓN NÚCLEO DE RESERVA DE BIOSFERA Y ECOSISTEMAS FRÁGILES"/>
+                        <mae:panelGridHeaderHelp conector="descripcionHelp" help="#{helps['ca.informe.snap.interseca_ramsar']}" width="500px"/>
+                        <p:selectOneRadio id="Pregunta_2" required="true"  value="#{informeInspeccionSnapCAController.informeSnap.intersecaRamsar}"
+                        requiredMessage="La pregunta 2 es requerida">
+                        	<f:selectItem itemLabel="Sí" itemValue="true"/>
+                            <f:selectItem itemLabel="No" itemValue="false"/>
+                            <p:ajax update="Dellalle_Pregunta2"/>
+                        </p:selectOneRadio>
+                        <p:outputLabel value="DETALLAR:"/>
+                        <p:inputTextarea id="Dellalle_Pregunta2" required="#{informeInspeccionSnapCAController.informeSnap.intersecaRamsar}"  value="#{informeInspeccionSnapCAController.informeSnap.intersecaRamsarDescripcion}"
+						autoResize="false" rows="4" maxlength="2000" disabled="#{!informeInspeccionSnapCAController.informeSnap.intersecaRamsar}"
+						requiredMessage="Detalle de la pregunta 2 es requerido"/>  
+                </h:panelGrid>
+            </p:panel>
+            <p:panel header="PREGUNTA 3">
+            	                           
+                <h:panelGrid columns="1" layout="grid" styleClass="w100" cellpadding="4" cellspacing="4">                    
+                        <h:outputText value="EL SECTOR DONDE SE REALIZARÁ EL PROYECTO, OBRA PROPUESTO DENTRO DEL ÁREA PROTEGIDA FORMA PARTE DEL TERRITORIO ANCESTRAL  DE COMUNIDADES, PUEBLOS Y NACIONALIDADES QUE SERÍAN BENEFICIADAS DEL PROYECTO U OBRA"/>
+                        <p:selectOneRadio id="Pregunta_3" required="true"  value="#{informeInspeccionSnapCAController.informeSnap.territorioAnsestral}"
+                        requiredMessage="La pregunta 3 es requerida">
+                        	<f:selectItem itemLabel="Sí" itemValue="true"/>
+                            <f:selectItem itemLabel="No" itemValue="false"/>
+                            <p:ajax update="Dellalle_Pregunta3"/>
+                        </p:selectOneRadio>
+                        <p:outputLabel value="DETALLAR LA COMUNIDAD Y EL TIEMPO DE SU ANCESTRALIDAD EN LA AP:"/>
+                        <p:inputTextarea id="Dellalle_Pregunta3" required="#{informeInspeccionSnapCAController.informeSnap.territorioAnsestral}"  value="#{informeInspeccionSnapCAController.informeSnap.territorioAnsestralDescripcion}"
+                        autoResize="false" rows="4" maxlength="2000" disabled="#{!informeInspeccionSnapCAController.informeSnap.territorioAnsestral}"
+                        requiredMessage="Detalle de la pregunta 3 es requerido"/>  
+                </h:panelGrid>
+            </p:panel>
+            <p:panel header="PREGUNTA 4">            	                         
+                <h:panelGrid columns="1" layout="grid" styleClass="w100" cellpadding="4" cellspacing="4">                    
+                        <h:outputText value="CUÁL ES EL ESTADO DE LA VEGETACIÓN DONDE SE REALIZARÁ EL PROYECTO U OBRA."/>
+                        <p:selectOneRadio id="Pregunta_4" required="true"  value="#{informeInspeccionSnapCAController.informeSnap.estadoVegetacion}" layout="grid" columns="1"
+                        requiredMessage="La pregunta 4 es requerida">                        	
+                            <f:selectItem itemLabel="Primario (vegetación en estado natural inicial o en regeneración sin riesgo de afectación)" itemValue="PRIMARIO"/>
+                            <f:selectItem itemLabel="Secundario (vegetación alterada)" itemValue="SECUNDARIO"/>
+                        </p:selectOneRadio>
+                        
+                        <h:outputText value="Incorporar como anexo una fotografía (.pdf)"/>
+
+                                <h:panelGrid styleClass="w25" cellpalding="2" columns="2">
+                                    <h:outputText id="nombreArchivoEstadoVegetacion"
+                                                  value="#{informeInspeccionSnapCAController.informeSnap.estadoVegetacionDocumento.nombre}"/>
+                                    <p:commandButton ajax="false" immediate="true"
+                                                     rendered="#{!(informeInspeccionSnapCAController.informeSnap.estadoVegetacionDocumento.id==null)}"
+                                                     onclick="PrimeFaces.monitorDownload(start, stop);"
+                                                     styleClass="primary"
+                                                     icon="ui-icon-arrowthick-1-s">
+                                        <p:fileDownload
+                                                value="#{informeInspeccionSnapCAController.descargar()}"/>
+                                    </p:commandButton>
+                                    <h:inputHidden id="nombreArchivoEstadoVegetacionHidden"
+                                                   value="#{informeInspeccionSnapCAController.nombreFileEstadoVegetacion}"/>
+                                </h:panelGrid>
+                        
+                        
+                        <p:fileUpload id="filePlano"
+                                              fileUploadListener="#{informeInspeccionSnapCAController.fileUpload}"
+                                              value="#{informeInspeccionSnapCAController.fileEstadoVegetacion}" sizeLimit="1048576"
+                                              allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar"
+                                              uploadLabel="Subir" auto="true"
+                                              update=":#{p:component('nombreArchivoEstadoVegetacion')},:#{p:component('nombreArchivoEstadoVegetacionHidden')}"
+                                              cancelLabel="Cancelar"
+                                              invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+                                              invalidSizeMessage="Debe adjuntar un archivo no mayor de 1 Mb."
+                                              styleClass="w50 toLeft" mode="advanced">
+                         </p:fileUpload>
+                         
+                </h:panelGrid>	
+					
+                
+            </p:panel>
+            <p:panel header="PREGUNTA 5">                         
+                <h:panelGrid columns="1" layout="grid" styleClass="w100" cellpadding="4" cellspacing="4">                    
+                        <h:outputText value="EXISTE VEGETACIÓN NATIVA ARBÓREA, CON ESPECIES MADERABLES SUPERIOR A 10 CENTÍMETROS DE DAP (DIAMETRO A LA ALTURA DEL PECHO)."/>
+                        <mae:panelGridHeaderHelp conector="descripcionHelp" help="#{helps['ca.informe.snap.vegetacion_nativa']}" width="500px"/>
+                        <p:selectOneRadio id="Pregunta_5" required="true"  value="#{informeInspeccionSnapCAController.informeSnap.vegetacionNativa}"
+                        requiredMessage="La pregunta 5 es requerida">
+                        	<f:selectItem itemLabel="Sí" itemValue="true"/>
+                            <f:selectItem itemLabel="No" itemValue="false"/>
+                            <p:ajax update="especiesNativasGrid"/>
+                        </p:selectOneRadio>                         
+                </h:panelGrid>
+                <h:panelGrid id="especiesNativasGrid" columns="1" layout="grid" styleClass="w50" cellpadding="4" cellspacing="4"> 
+                <p:dataTable id="especiesNativasTable" value="#{informeInspeccionSnapCAController.especiesPorTipo('NATIVA')}" var="item" rendered="#{informeInspeccionSnapCAController.informeSnap.vegetacionNativa}">
+						<p:columnGroup type="header">
+							<p:row>
+								<p:column
+									headerText="Nombre Común"
+									style="width:125px !important" />
+								<p:column
+									headerText="Nombre Científico"
+									style="width:125px !important" />								
+								<p:column>
+									<f:facet name="header">
+										<p:commandButton icon="ui-icon-plus"
+											value="Agregar" styleClass="secondary"
+											process="especiesNativasTable" update=":form:especiesNativasGrid :formDiag:especieDiag"
+											actionListener="#{informeInspeccionSnapCAController.crearEspecie('NATIVA')}"
+											oncomplete="PF('especieDiag').show()">
+											<p:resetInput target=":formDiag:especieDiag" />
+										</p:commandButton>
+									</f:facet>
+								</p:column>
+							</p:row>							
+						</p:columnGroup>
+						<p:column>
+							<p:outputLabel
+								value="#{item.nombreEspecie}"
+								style="width:125px !important" />
+						</p:column>
+						<p:column>
+							<p:outputLabel value="#{item.nombreCientifico}"
+								style="width:125px !important" />
+						</p:column>						
+
+						<p:column styleClass="w15">
+							<center>
+								<p:commandButton icon="ui-icon-pencil"
+									title="Editar" process="especiesNativasTable"
+									update=":form:especiesNativasGrid :formDiag:especieDiag"
+									styleClass="primary" oncomplete="PF('especieDiag').show()"
+									actionListener="#{informeInspeccionSnapCAController.editarEspecie(item)}" />
+								<p:commandButton icon="ui-icon-trash"
+									title="Eliminar" process="@this"
+									styleClass="primary"
+									actionListener="#{informeInspeccionSnapCAController.eliminarEspecie(item)}"
+									update="especiesNativasTable">
+									<p:confirm icon="ui-icon-alert"
+										header="Estimado usuario"
+										message="¿Está seguro de eliminar?" />
+								</p:commandButton>
+							</center>
+						</p:column>
+					</p:dataTable>
+					</h:panelGrid>
+                
+                
+            </p:panel>
+            <p:panel header="PREGUNTA 6">                           
+                <h:panelGrid columns="1" layout="grid" styleClass="w100" cellpadding="4" cellspacing="4">                    
+                        <h:outputText value="EXISTIRÍA AFECTACIÓN VALORES DE CONSERVACION DEL ÁREA PROTEGIDA"/>
+                        <mae:panelGridHeaderHelp conector="descripcionHelp" help="#{helps['ca.informe.snap.afectacion_valores_conservacion']}" width="500px"/>
+                        <p:selectOneRadio id="Pregunta_6" required="true"  value="#{informeInspeccionSnapCAController.informeSnap.afectacionValoresConservacion}"
+                        requiredMessage="La pregunta 6 es requerida">
+                        	<f:selectItem itemLabel="Sí" itemValue="true"/>
+                            <f:selectItem itemLabel="No" itemValue="false"/>
+                            <p:ajax update="Dellalle_Pregunta6"/>
+                        </p:selectOneRadio>
+                        <p:outputLabel value="DETALLAR LOS VALORES DE CONSERVACIÓN"/>
+                        <p:inputTextarea id="Dellalle_Pregunta6" required="#{informeInspeccionSnapCAController.informeSnap.afectacionValoresConservacion}"  value="#{informeInspeccionSnapCAController.informeSnap.afectacionValoresConservacionDescripcion}"
+                        autoResize="false" rows="4" maxlength="2000" disabled="#{!informeInspeccionSnapCAController.informeSnap.afectacionValoresConservacion}"
+                        requiredMessage="Detalle de la pregunta 6 es requerido"/>  
+                </h:panelGrid>
+            </p:panel>
+            <p:panel header="PREGUNTA 7">                          
+                <h:panelGrid columns="1" layout="grid" styleClass="w100" cellpadding="4" cellspacing="4">                    
+                        <h:outputText value="EL PROYECTO U OBRA PROPUESTA AFECTARÍA A ESPECIES AMENAZADAS, ENDÉMICAS, SENSIBLES Y MIGRATORIAS."/>
+                        <mae:panelGridHeaderHelp conector="descripcionHelp" help="#{helps['ca.informe.snap.afectacion_especies']}" width="500px"/>
+                        <p:selectOneRadio id="Pregunta_7" required="true"  value="#{informeInspeccionSnapCAController.informeSnap.afectacionEspecies}"
+                        requiredMessage="La pregunta 7 es requerida">
+                        	<f:selectItem itemLabel="Sí" itemValue="true"/>
+                            <f:selectItem itemLabel="No" itemValue="false"/>
+                            <p:ajax update="especiesAmenazadasGrid"/>
+                        </p:selectOneRadio>                         
+                </h:panelGrid>                
+                <h:panelGrid id="especiesAmenazadasGrid" columns="1" layout="grid" styleClass="w100" cellpadding="4" cellspacing="4"> 
+                <p:dataTable id="especiesAmenazadasTable" value="#{informeInspeccionSnapCAController.especiesPorTipo('AMENAZADA')}" var="item" rendered="#{informeInspeccionSnapCAController.informeSnap.afectacionEspecies}">
+						<p:columnGroup type="header">
+							<p:row>
+								<p:column
+									headerText="Nombre Común"
+									style="width:125px !important" />
+								<p:column
+									headerText="Nombre Científico"
+									style="width:125px !important" />
+								<p:column
+									headerText="Amenaza categoria del Libro Rojo"
+									style="width:100px !important" />
+								<p:column
+									headerText="Endémica"
+									style="width:75px !important" />
+								<p:column
+									headerText="Sensible"
+									style="width:75px !important" />
+								<p:column
+									headerText="Migratoria"
+									style="width:75px !important" />
+								<p:column
+									headerText="Cites"
+									style="width:75px !important" />														
+								<p:column>
+									<f:facet name="header">
+										<p:commandButton icon="ui-icon-plus"
+											value="Agregar" styleClass="secondary"
+											process="especiesAmenazadasTable" update=":form:especiesAmenazadasGrid :formDiag:especieDiag"
+											actionListener="#{informeInspeccionSnapCAController.crearEspecie('AMENAZADA')}"
+											oncomplete="PF('especieDiag').show()">
+											<p:resetInput target=":formDiag:especieDiag" />
+										</p:commandButton>
+									</f:facet>
+								</p:column>
+							</p:row>							
+						</p:columnGroup>
+						<p:column>
+							<p:outputLabel
+								value="#{item.nombreEspecie}"
+								style="width:125px !important" />
+						</p:column>
+						<p:column>
+							<p:outputLabel value="#{item.nombreCientifico}"
+								style="width:125px !important" />
+						</p:column>	
+						<p:column>
+							<p:outputLabel value="#{item.amenazaCategoriaLibroRojo}"
+								style="width:125px !important" />
+						</p:column>	
+						<p:column>
+							<p:outputLabel value="#{item.endemica}"
+								style="width:125px !important" />
+						</p:column>	
+						<p:column>
+							<p:outputLabel value="#{item.sensible}"
+								style="width:125px !important" />
+						</p:column>	
+						<p:column>
+							<p:outputLabel value="#{item.migratoria}"
+								style="width:125px !important" />
+						</p:column>	
+						<p:column>
+							<p:outputLabel value="#{item.cites}"
+								style="width:125px !important" />
+						</p:column>						
+
+						<p:column styleClass="w15">
+							<center>
+								<p:commandButton icon="ui-icon-pencil"
+									title="Editar" process="especiesAmenazadasTable"
+									update=":form:especiesAmenazadasGrid :formDiag:especieDiag"
+									styleClass="primary" oncomplete="PF('especieDiag').show()"
+									actionListener="#{informeInspeccionSnapCAController.editarEspecie(item)}" />
+								<p:commandButton icon="ui-icon-trash"
+									title="Eliminar" process="@this"
+									styleClass="primary"
+									actionListener="#{informeInspeccionSnapCAController.eliminarEspecie(item)}"
+									update="especiesAmenazadasTable">
+									<p:confirm icon="ui-icon-alert"
+										header="Estimado usuario"
+										message="¿Está seguro de eliminar?" />
+								</p:commandButton>
+							</center>
+						</p:column>
+					</p:dataTable>
+					</h:panelGrid>
+            </p:panel>
+            <p:panel header="PREGUNTA 8">                       
+                <h:panelGrid columns="1" layout="grid" styleClass="w100" cellpadding="4" cellspacing="4">                    
+                        <h:outputText value="EXISTIRÍA AFECTACIÓN A LA CONECTIVIDAD DE LOS ECOSISTEMAS Y FUENTES HÍDRICAS.  "/>
+                        <p:selectOneRadio id="Pregunta_8" required="true"  value="#{informeInspeccionSnapCAController.informeSnap.afectacionFuentesHidricas}"
+                        requiredMessage="La pregunta 8 es requerida">
+                        	<f:selectItem itemLabel="Sí" itemValue="true"/>
+                            <f:selectItem itemLabel="No" itemValue="false"/>
+                            <p:ajax update="Dellalle_Pregunta8"/>
+                        </p:selectOneRadio>
+                        <p:outputLabel value="DETALLAR CONECTIVIDAD O NOMBRE DE FUENTS HIDRICAS QUE SERÍA AFECTADAS."/>
+                        <p:inputTextarea id="Dellalle_Pregunta8" required="#{informeInspeccionSnapCAController.informeSnap.afectacionFuentesHidricas}"  value="#{informeInspeccionSnapCAController.informeSnap.afectacionFuentesHidricasDescripcion}"
+                        autoResize="false" rows="4" maxlength="2000" disabled="#{!informeInspeccionSnapCAController.informeSnap.afectacionFuentesHidricas}"
+                        requiredMessage="Detalle de la pregunta 8 es requerido"/>  
+                </h:panelGrid>
+            </p:panel>
+            <p:panel header="PREGUNTA 9">            	                            
+                <h:panelGrid columns="1" layout="grid" styleClass="w100" cellpadding="4" cellspacing="4">                    
+                        <h:outputText value="EXISTIRÍA AFECTACIÓN A LOS SERVICIOS ECOSISTÉMICOS"/>
+                        <mae:panelGridHeaderHelp conector="descripcionHelp" help="#{helps['ca.informe.snap.afectacion_servicios_ecosistemicos']}" width="500px"/>
+                        <p:selectOneRadio id="Pregunta_9" required="true"  value="#{informeInspeccionSnapCAController.informeSnap.afectacionServiciosEcosistemicos}"
+                        requiredMessage="La pregunta 9 es requerida">
+                        	<f:selectItem itemLabel="Sí" itemValue="true"/>
+                            <f:selectItem itemLabel="No" itemValue="false"/>
+                            <p:ajax update="Dellalle_Pregunta9"/>
+                        </p:selectOneRadio>
+                        <p:outputLabel value="DETALLAR EL SERVICIO ECOSISTEMICO QUE SERÍAN AFECTADOS."/>
+                        <p:inputTextarea id="Dellalle_Pregunta9" required="#{informeInspeccionSnapCAController.informeSnap.afectacionServiciosEcosistemicos}"  value="#{informeInspeccionSnapCAController.informeSnap.afectacionServiciosEcosistemicosDescripcion}"
+                        autoResize="false" rows="4" maxlength="2000" disabled="#{!informeInspeccionSnapCAController.informeSnap.afectacionServiciosEcosistemicos}"
+                        requiredMessage="Detalle de la pregunta 9 es requerido"/>  
+                </h:panelGrid>
+            </p:panel>
+            <p:panel header="PREGUNTA 10">            	                        
+                <h:panelGrid columns="1" layout="grid" styleClass="w100" cellpadding="4" cellspacing="4">                    
+                        <h:outputText value="EXISTEN PROYECTOS CON INVERSIÓN ECONÓMICA Y DESARROLLO SOSTENIBLE DEL ÁREA PROTEGIDA EN EL SECTOR PROPUESTO."/>
+                        <p:selectOneRadio id="Pregunta_10" required="true"  value="#{informeInspeccionSnapCAController.informeSnap.existeProyectosInversion}"
+                        requiredMessage="La pregunta 10 es requerida">
+                        	<f:selectItem itemLabel="Sí" itemValue="true"/>
+                            <f:selectItem itemLabel="No" itemValue="false"/>
+                            <p:ajax update="Dellalle_Pregunta10"/>
+                        </p:selectOneRadio>
+                        <p:outputLabel value="DETALLAR EL PROYECTO DEL AP."/>
+                        <p:inputTextarea id="Dellalle_Pregunta10" required="#{informeInspeccionSnapCAController.informeSnap.existeProyectosInversion}"  value="#{informeInspeccionSnapCAController.informeSnap.existeProyectosInversionDescripcion}"
+                        autoResize="false" rows="4" maxlength="2000" disabled="#{!informeInspeccionSnapCAController.informeSnap.existeProyectosInversion}"
+                        requiredMessage="Detalle de la pregunta 10 es requerido"/>  
+                </h:panelGrid>
+            </p:panel>            
+           
+            </h:panelGrid>
+            
+                 <t:div styleClass="buttons main">                            
+                            <p:commandButton value="Guardar" rendered="#{!informeInspeccionSnapCAController.verPdf}"
+                                             action="#{informeInspeccionSnapCAController.guardar()}"
+                                             icon="ui-icon-disk" update=":#{p:component('form')}"/>
+                            <p:commandButton value="Editar" rendered="#{informeInspeccionSnapCAController.verPdf}"
+                                             action="#{informeInspeccionSnapCAController.editarFormulario()}"
+                                             icon="ui-icon-pencil" update=":#{p:component('form')}"/>
+                            
+<!--                             <p:commandButton value="Firmar" rendered="#{informeInspeccionSnapCAController.verPdf}"  -->
+<!--             								 onclick="PF('signDialogFirmar').show();" -->
+<!--             								 icon="ui-icon-key"/>                                                               -->
+                       
+							<p:commandButton value="Firmar" immediate="true"
+								rendered="#{informeInspeccionSnapCAController.mostrarBotonFirmar}"
+								actionListener="#{informeInspeccionSnapCAController.guardarDocumento()}"
+								icon="ui-icon-key"/>                       
+                       
+                        </t:div>
+                        
+                        			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600px" height="auto">
+				<p:panel>
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel value="Firmar informe de inspeccion SNAP"
+							styleClass="bold" />
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold"
+							rendered="#{!informeInspeccionSnapCAController.ambienteProduccion}" />
+						<p:selectOneRadio id="verificaToken"
+							value="#{informeInspeccionSnapCAController.token}"
+							rendered="#{!informeInspeccionSnapCAController.ambienteProduccion}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change" update="pnlFirmaManual pnlFirmaToken"
+								listener="#{informeInspeccionSnapCAController.guardarToken}" />
+						</p:selectOneRadio>
+
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{informeInspeccionSnapCAController.ambienteProduccion}" />
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{informeInspeccionSnapCAController.ambienteProduccion}" />
+
+						<h:panelGroup id="pnlFirmaToken">
+							<p:commandButton value="Firmar documento" type="button"
+								styleClass="primary" icon="ui-icon-key"
+								rendered="#{informeInspeccionSnapCAController.token}"
+								onclick="window.location.href='#{informeInspeccionSnapCAController.firmarOficio()}'"
+								process="@this" />
+						</h:panelGroup>
+
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!informeInspeccionSnapCAController.token}">
+							<p:outputLabel value="1. Descargar el Informe" styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload
+									value="#{informeInspeccionSnapCAController.descargarDocumento()}" />
+							</p:commandButton>
+							<p:outputLabel for="uploadRequired"
+								value="2. Adjuntar el Informe firmado"
+								styleClass="bold" />
+							<p:fileUpload id="Idfirmada"
+								fileUploadListener="#{informeInspeccionSnapCAController.uploadFileFirmado}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreDocFirmado"
+								rendered="#{!informeInspeccionSnapCAController.token}">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreDocFirmado"
+								value="#{informeInspeccionSnapCAController.nombreDocumentoFirmado}" />
+						</h:panelGrid>
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!informeInspeccionSnapCAController.token and !informeInspeccionSnapCAController.informacionSubida}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialog').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						action="#{informeInspeccionSnapCAController.enviar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>                        
+                        
+              <p:dialog header="Firmar Documento" id="signDialogFirmar" widgetVar="signDialogFirmar" closeOnEscape="false" modal="true" resizable="false" width="auto" height="auto" position="center top">                
+                <p:panel>
+                    <h:panelGrid columns="2" cellpadding="10" style="text-align:right !important">
+                     	<p:outputLabel value="1. Descargue el documento" styleClass="bold"/>
+                        <p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary" immediate="true">
+                            <p:fileDownload value="#{informeInspeccionSnapCAController.descargarDocumento()}"/>
+                        </p:commandButton>                        
+                                            
+                        <p:outputLabel value="2. Adjunte el documento firmado " styleClass="bold"/>
+                        <p:fileUpload
+                                fileUploadListener="#{informeInspeccionSnapCAController.uploadFileFirmado}"
+                                multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                                label="Seleccionar" uploadLabel="Subir"
+                                invalidFileMessage="Tipo de archivo no válido"
+                                invalidSizeMessage="Tamaño de archivo no válido"
+                                cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                auto="true" update="signDialogFirmar">                            
+                        </p:fileUpload>
+                    </h:panelGrid>
+                </p:panel>                
+            </p:dialog>
+         </h:form>
+         
+         <h:form id="formDiag">
+         
+         <p:dialog modal="true" id="especieDiag" widgetVar="especieDiag"
+				header="DESCRIPCIÓN DE LA ESPECIE"
+				style=" position: absolute;  top: 100%;  width: 100%;"
+				width="600px" closable="false">
+				<h:panelGrid id="especieDiagGrid" columns="2" styleClass="panel_data w100"	columnClasses="w25,w75">
+					 
+					<p:outputLabel value="Nombre Común" for="nombre_especie"/> 
+					<p:inputText id="nombre_especie"
+						value="#{informeInspeccionSnapCAController.especie.nombreEspecie}"
+						maxlength="20" required="true"
+						requiredMessage="Ingrese el nombre común">						
+					</p:inputText>
+					
+					<p:outputLabel value="Nombre Científico" for="nombre_cientifico"/>
+					<p:inputText id="nombre_cientifico" 
+						value="#{informeInspeccionSnapCAController.especie.nombreCientifico}"
+						maxlength="20" required="true"
+						requiredMessage="Ingrese el nombre Científico">						
+					</p:inputText>
+					
+					<p:outputLabel value="Amenaza categoria del Libro Rojo" for="amenaza" 
+					rendered="#{informeInspeccionSnapCAController.especie.tipo eq 'AMENAZADA'}"/>					
+					<p:selectOneRadio id="amenaza" required="true"  value="#{informeInspeccionSnapCAController.especie.amenazaCategoriaLibroRojo}"
+					requiredMessage="Ingrese Amenaza categoria del Libro Rojo"
+					rendered="#{informeInspeccionSnapCAController.especie.tipo eq 'AMENAZADA'}">
+                        	<f:selectItem itemLabel="Sí" itemValue="SI"/>
+                            <f:selectItem itemLabel="No" itemValue="NO"/>
+                    </p:selectOneRadio>		
+					
+					<p:outputLabel value="Endémica" for="endemica"
+					rendered="#{informeInspeccionSnapCAController.especie.tipo eq 'AMENAZADA'}"/>					
+					<p:selectOneRadio id="endemica" required="true"  value="#{informeInspeccionSnapCAController.especie.endemica}"
+					requiredMessage="Ingrese Endémica"
+					rendered="#{informeInspeccionSnapCAController.especie.tipo eq 'AMENAZADA'}">
+                        	<f:selectItem itemLabel="Sí" itemValue="SI"/>
+                            <f:selectItem itemLabel="No" itemValue="NO"/>
+                    </p:selectOneRadio>
+                    
+                    <p:outputLabel value="Sensible" for="sensible"
+                    rendered="#{informeInspeccionSnapCAController.especie.tipo eq 'AMENAZADA'}"/>					
+					<p:selectOneRadio id="sensible" required="true"  value="#{informeInspeccionSnapCAController.especie.sensible}"
+					requiredMessage="Ingrese Sensible"
+					rendered="#{informeInspeccionSnapCAController.especie.tipo eq 'AMENAZADA'}">
+                        	<f:selectItem itemLabel="Sí" itemValue="SI"/>
+                            <f:selectItem itemLabel="No" itemValue="NO"/>
+                    </p:selectOneRadio>
+                    
+                    <p:outputLabel value="Migratoria" for="migratoria"
+                    rendered="#{informeInspeccionSnapCAController.especie.tipo eq 'AMENAZADA'}"/>					
+					<p:selectOneRadio id="migratoria" required="true"  value="#{informeInspeccionSnapCAController.especie.migratoria}"
+					requiredMessage="Ingrese Migratoria"
+					rendered="#{informeInspeccionSnapCAController.especie.tipo eq 'AMENAZADA'}">
+                        	<f:selectItem itemLabel="Sí" itemValue="SI"/>
+                            <f:selectItem itemLabel="No" itemValue="NO"/>
+                    </p:selectOneRadio>
+                    
+                    <p:outputLabel value="Cites" for="cites"
+                    rendered="#{informeInspeccionSnapCAController.especie.tipo eq 'AMENAZADA'}"/>					
+					<p:selectOneRadio id="cites" required="true"  value="#{informeInspeccionSnapCAController.especie.cites}"
+					requiredMessage="Ingrese Cites"
+					rendered="#{informeInspeccionSnapCAController.especie.tipo eq 'AMENAZADA'}">
+                        	<f:selectItem itemLabel="Sí" itemValue="SI"/>
+                            <f:selectItem itemLabel="No" itemValue="NO"/>
+                    </p:selectOneRadio>
+
+
+				</h:panelGrid>
+				<t:div styleClass="buttons">
+					<p:commandButton icon="ui-icon-cancel"
+						value="Cerrar" process="@this"
+						oncomplete="PF('especieDiag').hide()" styleClass="secondary" />
+					<p:commandButton icon="ui-icon-plus" value="Agregar"
+						process="especieDiag" oncomplete="if(!args.validationFailed) PF('especieDiag').hide()"
+						actionListener="#{informeInspeccionSnapCAController.agregarEspecie()}"
+						update="especieDiagGrid :form:especiesNativasGrid :form:especiesAmenazadasGrid" />
+				</t:div>
+			</p:dialog>
+			
+         
+         </h:form>
+    </ui:define>
+</ui:composition>

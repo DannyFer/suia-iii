@@ -1,0 +1,189 @@
+<ui:composition template="/WEB-INF/templates/default.xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+	<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+		<ui:define name="content">
+			<h:form id="formTransaction">
+				<h:panelGrid columns="1" styleClass="w100" rendered="#{pagosTasaRegistroAmbientalV1Controller.montoTotalProyecto>0 and pagosTasaRegistroAmbientalV1Controller.montoTotalCoberturaVegetal eq 0}">
+					<h:outputText value="#{pagosTasaRegistroAmbientalV1Controller.mensaje}" escape="false" styleClass="alJustify"/>					
+				</h:panelGrid>
+				<p:panel>
+					<h:panelGrid styleClass="panel_data w100" columns="3"
+						columnClasses="header w25, bold w25, w50">
+						
+						<h:outputText value="Valor del proyecto" rendered="#{!pagosTasaRegistroAmbientalV1Controller.esEmpresaPublica and pagosTasaRegistroAmbientalV1Controller.montoTotalProyecto>0 and pagosTasaRegistroAmbientalV1Controller.montoTotalCoberturaVegetal>0}"/>
+						<h:outputText value="Valor por control y seguimiento" rendered="#{pagosTasaRegistroAmbientalV1Controller.esEmpresaPublica and pagosTasaRegistroAmbientalV1Controller.montoTotalProyecto>0 and pagosTasaRegistroAmbientalV1Controller.montoTotalCoberturaVegetal>0}"/>
+
+						<h:panelGroup rendered="#{pagosTasaRegistroAmbientalV1Controller.montoTotalProyecto>0 and pagosTasaRegistroAmbientalV1Controller.montoTotalCoberturaVegetal>0}">
+							<h:outputText value="#{pagosTasaRegistroAmbientalV1Controller.montoTotalProyecto}">
+								<f:convertNumber pattern="#0.00" />
+							</h:outputText>
+							<h:outputText value=" USD" />
+						</h:panelGroup>
+						<h:outputText value="#{pagosTasaRegistroAmbientalV1Controller.mensaje}" styleClass="alJustify"
+							rendered="#{pagosTasaRegistroAmbientalV1Controller.montoTotalProyecto>0 and pagosTasaRegistroAmbientalV1Controller.montoTotalCoberturaVegetal>0}"/>
+						<h:outputText value="Valor cobertura vegetal" rendered="#{pagosTasaRegistroAmbientalV1Controller.montoTotalCoberturaVegetal>0}"/>
+						<h:panelGroup rendered="#{pagosTasaRegistroAmbientalV1Controller.montoTotalCoberturaVegetal>0}">
+							<h:outputText value="#{pagosTasaRegistroAmbientalV1Controller.montoTotalCoberturaVegetal}" >
+								<f:convertNumber pattern="#0.00" />
+							</h:outputText>
+							<h:outputText value=" USD" />
+						</h:panelGroup>
+						<h:outputText value="#{pagosTasaRegistroAmbientalV1Controller.mensajeCobertura}" styleClass="alJustify"
+							rendered="#{pagosTasaRegistroAmbientalV1Controller.montoTotalCoberturaVegetal>0}"/>
+				
+						<h:outputText value="Valor total a pagar" rendered="#{!pagosTasaRegistroAmbientalV1Controller.esEmpresaPublica or pagosTasaRegistroAmbientalV1Controller.montoTotalCoberturaVegetal>0}" />
+						<h:outputText value="Valor por control y seguimiento" rendered="#{pagosTasaRegistroAmbientalV1Controller.esEmpresaPublica and pagosTasaRegistroAmbientalV1Controller.montoTotalCoberturaVegetal le 0}" />
+						<h:panelGroup>
+  							<h:outputText value="#{pagosTasaRegistroAmbientalV1Controller.valorTotalAPagar}">
+								<f:convertNumber pattern="#0.00" />
+							</h:outputText>
+							<h:outputText value=" USD" />
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<h:panelGrid styleClass="panel_data w100" columns="2" rendered="false"
+						id="pnlGenerarNut" columnClasses="header w25, bold w75"
+						rowClasses="null, alt">
+						<h:outputText value="Generar NUT"
+							rendered="#{pagosTasaRegistroAmbientalV1Controller.generarNUT and pagosTasaRegistroAmbientalV1Controller.documentosNUT.size() eq 0}" />
+						<h:panelGroup
+							rendered="#{pagosTasaRegistroAmbientalV1Controller.generarNUT and pagosTasaRegistroAmbientalV1Controller.documentosNUT.size() eq 0}">
+							<p:commandButton icon="	ui-icon-document"
+								styleClass="primary button-small"
+								action="#{pagosTasaRegistroAmbientalV1Controller.generarNut()}" process="@this"
+								rendered="#{pagosTasaRegistroAmbientalV1Controller.generarNUT}"
+								update="pnlGenerarNut">
+								<p:confirm header="Aviso"
+									message="Usted debe generar el NUT si aún no ha realizado el pago en la institución bancaria"
+									icon="ui-icon-alert" />
+							</p:commandButton>
+							<p:confirmDialog global="true" showEffect="fade"
+								hideEffect="fade">
+								<p:commandButton value="Cancelar" type="button"
+									styleClass="ui-confirmdialog-no primary toRight"
+									icon="ui-icon-closethick" />
+								<p:commandButton value="Generar" type="button"
+									styleClass="ui-confirmdialog-yes primary toRight"
+									icon="ui-icon-check" />
+							</p:confirmDialog>
+						</h:panelGroup>
+						<h:outputText value="Descargar NUT" rendered="#{pagosTasaRegistroAmbientalV1Controller.documentosNUT.size() > 0}" />
+						<h:panelGroup rendered="#{pagosTasaRegistroAmbientalV1Controller.documentosNUT.size() > 0}">
+							<p:dataTable styleClass="noHeader borderless"
+								value="#{pagosTasaRegistroAmbientalV1Controller.documentosNUT}" var="documento">
+								<p:column style="text-align: left; background-color: #f5f5f5;">
+									<h:outputText value="#{documento.nombreDocumento}" />
+									<p:commandButton icon="ui-icon-arrowthick-1-s"
+										styleClass="button-small primary" title="Ver"
+										style="margin-left: 10px" ajax="false" immediate="true">
+										<p:fileDownload
+											value="#{pagosTasaRegistroAmbientalV1Controller.descargar(documento)}" />
+									</p:commandButton>
+								</p:column>
+							</p:dataTable>
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+					<p:panelGrid id="pnl_transacciones" columns="3" layout="grid"
+						styleClass="w100"
+						columnClasses="w50, field_mrg w30, field_mrg w20">
+						<f:facet name="header">
+							<mae:panelGridHeaderHelp value="Ingreso de transacciones"
+								conector="generalHelp" render="false"
+								image="#{request.contextPath}/resources/images/help-how.png"
+								help="#{helps['no.help.yet']}" />
+						</f:facet>
+						<p:outputLabel for="institucionBancaria" value="Institución bancaria" />
+						<p:outputLabel for="numeroTransaccion" value="Número de comprobante" />
+						<h:outputText />
+						<p:inputText id="institucionBancaria" disabled="true" value="#{pagosTasaRegistroAmbientalV1Controller.transaccionFinanciera.institucionFinanciera.nombreInstitucion}" />
+
+							<p:inputText id="numeroTransaccion" placeholder="Ej: 584777"
+								disabled="#{pagosTasaRegistroAmbientalV1Controller.cumpleValorTotalProyecto}"
+								required="true"
+								value="#{pagosTasaRegistroAmbientalV1Controller.transaccionFinanciera.numeroTransaccion}"
+								maxlength="50" />
+							<p:commandButton value="Adicionar" icon="ui-icon-plusthick"
+								disabled="#{pagosTasaRegistroAmbientalV1Controller.cumpleValorTotalProyecto}"
+								action="#{pagosTasaRegistroAmbientalV1Controller.guardarTransaccion(1)}"
+								styleClass="primary"
+								update=":#{p:component('tbl_transacciones')}, :#{p:component('pnl_transacciones')}"
+								process="@this institucionBancaria numeroTransaccion" />
+					</p:panelGrid>
+
+					<br />
+					<p:panelGrid id="pnl_transacciones_cobertura" columns="3" layout="grid"
+						styleClass="w100" rendered="#{pagosTasaRegistroAmbientalV1Controller.mostrarPnlCobertura}"
+						columnClasses="w50, field_mrg w30, field_mrg w20">
+						<f:facet name="header">
+							<mae:panelGridHeaderHelp value="Ingreso de transacciones cobertura vegetal"
+								conector="generalHelp" render="false"
+								image="#{request.contextPath}/resources/images/help-how.png"
+								help="#{helps['no.help.yet']}" />
+						</f:facet>
+						<p:outputLabel for="institucionBancariaCobertura" value="Institución bancaria" />
+						<p:outputLabel for="numeroTransaccionCobertura" value="Número de comprobante" />
+						<h:outputText />
+
+						<p:inputText id="institucionBancariaCobertura" disabled="true" value="#{pagosTasaRegistroAmbientalV1Controller.transaccionFinancieraCobertura.institucionFinanciera.nombreInstitucion}" />
+							<p:inputText id="numeroTransaccionCobertura" placeholder="Ej: 584777"
+								disabled="#{pagosTasaRegistroAmbientalV1Controller.cumpleValorTotalCobertura}"
+								required="true"
+								value="#{pagosTasaRegistroAmbientalV1Controller.transaccionFinancieraCobertura.numeroTransaccion}"
+								maxlength="50" />
+							<p:commandButton value="Adicionar" icon="ui-icon-plusthick"
+								disabled="#{pagosTasaRegistroAmbientalV1Controller.cumpleValorTotalCobertura}"
+								action="#{pagosTasaRegistroAmbientalV1Controller.guardarTransaccion(2)}"
+								styleClass="primary"
+								update=":#{p:component('tbl_transacciones')}, :#{p:component('pnl_transacciones_cobertura')}"
+								process="@this institucionBancariaCobertura numeroTransaccionCobertura" />
+					</p:panelGrid>
+
+					<h:form id="formTransactionList">
+						<p:dataTable id="tbl_transacciones"
+							value="#{pagosTasaRegistroAmbientalV1Controller.transaccionesFinancieras}"
+							var="transaccionFinanciera"
+							emptyMessage="#{labels['common.table.empty']}">
+							<p:column headerText="Institución financiera">
+								<h:outputText
+									value="#{transaccionFinanciera.institucionFinanciera.nombreInstitucion}" />
+							</p:column>
+							<p:column headerText="Número de comprobante"
+								styleClass="w33 alCenter">
+								<h:outputText value="#{transaccionFinanciera.numeroTransaccion}" />
+							</p:column>
+							<p:column headerText="Monto" styleClass="w15 alCenter">
+								<h:outputText value="#{transaccionFinanciera.montoTransaccion}">
+									<f:convertNumber pattern="#0.00" />
+								</h:outputText>
+							</p:column>
+							<p:column styleClass="w20px alCenter">
+								<p:commandButton icon="ui-icon-trash"
+									styleClass="primary button-small"
+									action="#{pagosTasaRegistroAmbientalV1Controller.eliminarTransacion(transaccionFinanciera)}"
+									update=":#{p:component('tbl_transacciones')}, :#{p:component('pnl_transacciones')}, :#{p:component('pnl_transacciones_cobertura')}" />
+							</p:column>
+						</p:dataTable>
+					</h:form>
+
+					<p:outputPanel id="pnlFinalizarBtn">
+						<div class="buttons main">
+							<p:commandButton value="Enviar" id="btnEnviar"
+								icon="ui-icon-check"
+								action="#{pagosTasaRegistroAmbientalV1Controller.completarTarea}" />
+						</div>
+					</p:outputPanel>
+				</p:panel>
+			</h:form>
+		</ui:define>
+	</ui:composition>
+</ui:composition>

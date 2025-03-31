@@ -1,0 +1,277 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:controles-prime="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+	<ui:define name="content">
+		<style>
+.col1 {
+	width: 30%;
+}
+
+.col2 {
+	width: 70%;
+}
+
+.colAlign {
+	vertical-align: top;
+	width: 30%;
+}
+
+.w37 {
+	width: 37%;
+}
+
+.w21 {
+	width: 21%;
+}
+</style>
+		<p:growl globalOnly="true" id="msgs" />
+
+		<h:form>
+			<p:panel header="Contraseña usuario">
+			<h:outputText style="font-weight: bold;"  value="Debe tener al menos un dígito, una minúscula, una mayúscula y un mínimo 8 caracteres.  " />
+			<ui:remove>
+			<br/>
+			<h:outputText style="font-weight: bold;"  value="Por ejemplo:" />
+			<br/>
+			<h:outputText style="font-weight: bold;"  value="HolaJus2018@" />
+			<br/>
+			<h:outputText style="font-weight: bold;"  value="Pepi@to221." />
+			<br/>
+			<h:outputText style="font-weight: bold;"  value="1234Ds().1" />
+			</ui:remove>
+				<br/>
+				<br/>
+				<h:panelGrid id="pnlContrasenia" columns="2" width="100%"
+					columnClasses="col1,col2">
+					<h:outputText value="Contraseña actual" />
+					<p:password
+						value="#{edicionPerfilController.promotorBean.passwordAnterior}"
+						required="true"
+						requiredMessage="Debe ingresar la contraseña actual"
+						styleClass="w37" />
+					<h:outputText value="Nueva contraseña" />
+					<p:password id="pwd1" title="Debe tener al menos un dígito, una minúscula, una mayúscula y un mínimo 8 caracteres" 					
+						value="#{edicionPerfilController.promotorBean.password}"
+						styleClass="w37"
+						requiredMessage="Debe ingresar la nueva contraseña" match="pwd2"
+						required="true"
+						validatorMessage="Debe ingresar la misma contraseña"
+						feedback="true" promptLabel="Ingrese su Contraseña"
+						weakLabel="Seguridad baja" goodLabel="Seguridad buena"
+						strongLabel="Seguridad fuerte" />
+					<h:outputText value="Confirmar nueva contraseña" />
+					<p:password id="pwd2"
+						value="#{edicionPerfilController.promotorBean.password}"
+						styleClass="w37" required="true"
+						requiredMessage="Debe ingresar la confirmación de la nueva contraseña" />
+					
+						
+				</h:panelGrid>
+				<br/>
+				<h:outputText style="font-weight: bold;" value="Estimado usuario sino recuerda su clave actual dirijase al link olvidó su contraseña" />
+				<div class="buttons main">
+					<p:commandButton value="Cambiar contraseña" icon="ui-icon-check"
+						styleClass="extraLarge" update=":#{p:component('msgs')}"
+						action="#{edicionPerfilController.guardarContrasenia()}" />
+				</div>
+			</p:panel>
+		</h:form>
+
+		<h:form id="frmDatosUsuario">
+			<p:panel id="panelUsuario" header="Usuario">
+				<h:panelGrid columns="2" width="100%" columnClasses="col1,col2">
+
+					<h:outputLabel value="Tipo Entidad" />
+					<p:selectOneMenu
+						value="#{edicionPerfilController.promotorBean.tipoPersona}"
+						disabled="true" style="width: 251px;">
+						<f:selectItem itemLabel="Persona Natural" itemValue="N" />
+						<f:selectItem itemLabel="Persona Jurídica" itemValue="J" />
+					</p:selectOneMenu>
+				</h:panelGrid>
+				<h:panelGrid id="pnlPersonaNatural" columns="2" width="100%"
+					columnClasses="col1,col2"
+					rendered="#{edicionPerfilController.promotorBean.tipoPersona == 'N'}">
+					<h:outputLabel value="Tipo de documento" />
+					<controles-prime:combo identificador="cmbTipoDocumento"
+						lista="#{combosController.listaTipoDocumento}"
+						valor="#{edicionPerfilController.promotorBean.usuario.docuId}"
+						habilitar="true" />
+					<h:outputLabel value="Cédula / RUC / Pasaporte" />
+					<p:inputText readonly="true" styleClass="w37"
+						value="#{edicionPerfilController.promotorBean.usuario.pin}" />
+					<h:outputLabel value="Nombres y Apellidos"
+						rendered="#{edicionPerfilController.promotorBean.usuario.docuId !='Pasaporte'}" />
+					<h:outputLabel value="Nombres y Apellidos*"
+						rendered="#{edicionPerfilController.promotorBean.usuario.docuId =='Pasaporte'}" />
+					<p:inputText
+						readonly="#{edicionPerfilController.promotorBean.usuario.docuId !='Pasaporte'}"
+						styleClass="w37"
+						value="#{edicionPerfilController.promotorBean.persona.nombre}" />
+					<h:outputLabel value="Tratamiento y Título Académico *" />
+					<h:panelGroup>
+						<p:selectOneMenu id="cmbTratamiento" style="width: 94px;" disabled="true"
+							value="#{edicionPerfilController.promotorBean.idTipoTrato}">
+							<f:selectItems value="#{combosController.listaTipoTratos}" />
+						</p:selectOneMenu>
+						<h:outputText value="...." style="color:white;" />
+						<p:inputText
+							value="#{edicionPerfilController.promotorBean.persona.titulo}"
+							styleClass="w21" maxlength="15"
+							style="vertical-align: top; text-transform: uppercase;"
+							onkeypress="return soloLetras(event);"
+							onchange="javascript:this.value = this.value.toUpperCase();" />
+					</h:panelGroup>
+					<h:outputLabel value="Nacionalidad*" />
+					<controles-prime:combo identificador="cmbNacionalidad"
+						lista="#{combosController.listaNacionalidades}"
+						valor="#{edicionPerfilController.promotorBean.idNacionalidad}" />
+					<h:outputLabel value="Género*" />
+					<controles-prime:combo identificador="cmbGenero"
+						lista="#{combosController.listaGenero}" habilitar="false"
+						valor="#{edicionPerfilController.promotorBean.persona.genero}" />
+				</h:panelGrid>
+				<h:panelGrid id="pnlPersonaJuridica" columns="2" width="100%"
+					columnClasses="col1,col2"
+					rendered="#{edicionPerfilController.promotorBean.tipoPersona == 'J'}">
+					<h:outputLabel value="RUC" />
+					<p:inputText
+						value="#{edicionPerfilController.promotorBean.organizacion.ruc}"
+						readonly="true" styleClass="w37" />
+					<h:outputLabel value="Nombre organización *" />
+					<controles-prime:todoTextoMayuscula
+						identificador="txtNombreOrganizacion"
+						valor="#{edicionPerfilController.promotorBean.organizacion.nombre}"
+						tamanio="33" longitud="250" soloLectura="true" />
+					<h:outputLabel value="Cédula / RUC Representante" />
+					<p:inputText
+						value="#{edicionPerfilController.promotorBean.persona.pin}"
+						readonly="true" />
+					<h:outputLabel value="Nombres y Apellidos del representante" />
+					<controles-prime:soloTextoMayuscula
+						identificador="txtNombreRepresentante" soloLectura="true"
+						valor="#{edicionPerfilController.promotorBean.persona.nombre}"
+						tamanio="33" longitud="250" />
+					<h:outputLabel value="Cargo Representante" />
+					<controles-prime:todoTextoMayuscula
+						identificador="txtCargoRepresentante"
+						valor="#{edicionPerfilController.promotorBean.persona.posicion}"
+						tamanio="33" longitud="250" />
+					<h:outputLabel value="Tipo de Organización*" />
+					<p:selectOneMenu id="cmbTipoOrganizacion" disabled="true"
+						value="#{edicionPerfilController.promotorBean.idTipoOrganizacion}">
+						<f:selectItems value="#{combosController.listaTipoOrganizacion}" />
+						<p:ajax event="change" update="pnlParticipacionEstado" />
+					</p:selectOneMenu>
+					<h:outputText value="" />
+					<h:panelGroup id="pnlParticipacionEstado">
+						<controles-prime:combo identificador="cmbParticipacionEstado" 
+							rendered="#{edicionPerfilController.promotorBean.idTipoOrganizacion == 8}"
+							lista="#{combosController.listaEmpresaMixta}" habilitar="true"
+							valor="#{edicionPerfilController.promotorBean.organizacion.participacionEstado}" />
+					</h:panelGroup>
+				</h:panelGrid>
+			</p:panel>
+
+			<p:panel header="Información de Contacto">
+				<h:panelGrid columns="2" width="100%" columnClasses="col1,col2">
+					<h:outputLabel value="Teléfono*" />
+					<p:inputText
+						value="#{edicionPerfilController.promotorBean.telefono}"
+						styleClass="w37" id="txtTelefono" maxlength="15"
+						onkeypress="return numbersonly(this,event)">
+						<pe:keyFilter mask="num" />
+					</p:inputText>
+					<h:outputLabel value="Celular*" />
+					<p:inputText
+						value="#{edicionPerfilController.promotorBean.celular}"
+						styleClass="w37" id="txtCelular" maxlength="15"
+						onkeypress="return numbersonly(this,event)">
+						<pe:keyFilter mask="num" />
+					</p:inputText>
+					<h:outputLabel value="Correo Electrónico*" />
+					<p:inputText value="#{edicionPerfilController.promotorBean.email}"
+						styleClass="w37" id="txtEmail" maxlength="250" />
+					<h:outputLabel value="Dirección*" />
+					<p:inputTextarea maxlength="250" rows="2"
+						value="#{edicionPerfilController.promotorBean.direccion}"
+						styleClass="w37" id="txtDireccion" />
+					<h:outputLabel value="Información de Contacto Adicional" />
+					<p:dataTable id="tblContacto" style="width: 100%"
+						value="#{edicionPerfilController.promotorBean.listaContactoOpcionales}"
+						var="contacto" emptyMessage="-">
+						<p:column width="30%">
+							<f:facet name="header">
+								<p:selectOneMenu id="cmbTipoContacto"
+									value="#{edicionPerfilController.promotorBean.idFormaContacto}"
+									style="width: 175px;">
+									<f:selectItems
+										value="#{combosController.listaFormasContactoPromotor}" />
+									<p:ajax event="change"
+										update=":#{p:component('valor')}, :#{p:component('btnContacto')}"
+										listener="#{edicionPerfilController.validarNumeros()}" />
+								</p:selectOneMenu>
+							</f:facet>
+							<ui:remove>
+							<p:selectOneMenu disabled="true"
+								style="width: 175px; background-color: #FFFFFF; color: black;"
+								value="#{contacto.formasContacto.id}">
+								<f:selectItems
+									value="#{combosController.listaFormasContactoPromotor}" />
+							</p:selectOneMenu>
+							</ui:remove>
+							<p:outputLabel value="#{contacto.formasContacto.nombre}"/>
+						</p:column>
+
+						<p:column width="55%">
+							<f:facet name="header">
+								<p:inputText
+									value="#{edicionPerfilController.promotorBean.contacto.valor}"
+									size="40" maxlength="255"
+									onkeypress="#{edicionPerfilController.promotorBean.scriptNumeros}"
+									id="valor" />
+							</f:facet>
+							<h:outputText value="#{contacto.valor}" />
+						</p:column>
+
+						<p:column width="15%">
+							<f:facet name="header">
+								<p:commandButton id="btnContacto" value="Adicionar"
+									action="#{edicionPerfilController.agregarContacto()}"
+									disabled="#{edicionPerfilController.promotorBean.idFormaContacto == null|| edicionPerfilController.promotorBean.idFormaContacto =='0'}"
+									update="tblContacto,:#{p:component('msgs')}" />
+							</f:facet>
+							<div class="buttons-inline alCenter">
+								<p:commandButton icon="ui-icon-trash" title="Remover"
+									styleClass="primary"
+									action="#{edicionPerfilController.removerContacto(contacto)}"
+									update="tblContacto" />
+							</div>
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+			</p:panel>
+
+			<p:panel header="Ubicación">
+				<mae-composite:ubicacionGeografica
+					idParroquia="#{edicionPerfilController.promotorBean.idParroquia}" />
+			</p:panel>
+			<div class="buttons main">
+				<p:commandButton id="btnAceptar" value="Aceptar"
+					action="#{edicionPerfilController.guardar()}" icon="ui-icon-check"
+					update=":#{p:component('msgs')}, :#{p:component('frmDatosUsuario')}" />
+				<p:commandButton value="Cancelar" rendered="#{!loginBean.reactivarContrasena}"
+					action="/bandeja/bandejaTareas.jsf" styleClass="secondary"
+					icon="ui-icon-cancel" ajax="false" immediate="true" />
+			</div>
+		</h:form>
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,572 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+				xmlns:ui="http://java.sun.com/jsf/facelets"
+				xmlns:h="http://java.sun.com/jsf/html"
+				xmlns:p="http://primefaces.org/ui"
+				xmlns:f="http://java.sun.com/jsf/core"
+				xmlns:t="http://myfaces.apache.org/tomahawk"
+				xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+				xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+				xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+				xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+				template="/control/aprobacionRequisitosTecnicos/templates/defaultTemplate.xhtml"
+				xmlns:pe="http://primefaces.org/ui/extensions">
+	<ui:define name="content-art">
+		<h:form>
+			<p:panel
+					header="Tipo de eliminación o disposición final de los desechos generados en la gestión">
+				<p:panelGrid id="parte" columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Tipo de eliminación o disposición final" />
+					</f:facet>
+					<f:facet name="header">
+						<p:commandButton value="Adicionar"
+										 styleClass="button-small-text toRight field_mrg"
+										 action="#{eliminacionDesechoControllers.adicionarDisposicion()}"
+										 icon="ui-icon-plusthick"
+										 update=":#{p:component('pnlEliminacion')}"
+										 oncomplete="PF('dlgEliminacion').show();">
+						</p:commandButton>
+						<mae:panelGridHeaderHelp conector="generalHelp"
+												 help="#{helps['registro.ambiental.p2.promotor']}" />
+					</f:facet>
+
+					<p:dataTable id="tblEliminacion"
+								 value="#{eliminacionDesechoControllers.eliminacionDesechosBean.eliminacionesRecepciones}"
+								 var="eliminacion" emptyMessage="#{labels['common.table.empty']}">
+						<p:column style="width:16px">
+							<p:rowToggler />
+						</p:column>
+						<p:column headerText="Nombre de desecho peligroso">
+							<h:outputText
+									value="#{eliminacion.entityRecepcionDesecho.descripcionDesecho}" />
+						</p:column>
+						<p:column headerText="Código de desecho">
+							<h:outputText
+									value="#{eliminacion.entityRecepcionDesecho.codigo}" />
+						</p:column>
+						<p:column headerText="Tipos de eliminaciones">
+							<h:outputText
+									value="#{eliminacion.eliminacionDesechos.size()}" />
+						</p:column>
+						<p:column headerText="Acciones">
+							<div class="buttons-inline centrar">
+								<p:commandButton icon="ui-icon-pencil"
+												 action="#{eliminacionDesechoControllers.seleccionarDisposicion(eliminacion)}"
+												 title="Editar" styleClass="button-small primary"
+												 oncomplete="PF('dlgEliminacion').show();"
+												 update=":#{p:component('pnlEliminacion')}" />
+								<p:commandButton icon="ui-icon-trash"
+												 action="#{eliminacionDesechoControllers.seleccionarDisposicion(eliminacion)}"
+												 title="Remover" styleClass="button-small primary"
+												 oncomplete="PF('deleteBookingWdgt').show();" />
+							</div>
+						</p:column>
+						<p:rowExpansion>
+							<p:dataTable value="#{eliminacion.eliminacionDesechos}"
+										 var="desecho">
+								<p:columnGroup type="header">
+									<p:row>
+										<p:column colspan="3"
+												  headerText="Sistema de eliminación o disposición final" />
+										<p:column colspan="2"
+												  headerText="Generación de desechos peligrosos debido a la eliminación" />
+									</p:row>
+									<p:row>
+										<p:column rowspan="2" headerText="Tipo"/>
+										<p:column colspan="2" rowspan="1" headerText="Capacidad anual" />
+										<p:column rowspan="2" headerText="Nombre de desecho peligroso, especial o no peligroso" />
+										<p:column rowspan="2" headerText="Código del desecho" />
+									</p:row>
+									<p:row>
+										<p:column headerText="Cantidad(T)" />
+										<p:column headerText="Cantidad(u)" />
+
+									</p:row>
+								</p:columnGroup>
+								<p:column>
+									<h:outputLabel styleClass="text-area" value="#{desecho.tipoEliminacionDesecho.nombre.contains('métodos') ? desecho.tipoEliminacionDesecho.nombre.concat('(').concat(desecho.otroDesecho).concat(')') : desecho.tipoEliminacionDesecho.nombre}" />
+								</p:column>
+								<p:column>
+									<h:outputText value="#{desecho.cantidad}">
+										<f:convertNumber minFractionDigits="2" />
+									</h:outputText>
+								</p:column>
+								<p:column>
+									<h:outputText
+											value="#{!empty desecho.cantidadEspecial ? desecho.cantidadEspecial : 'N/A'}">
+										<f:convertNumber minFractionDigits="2" />
+									</h:outputText>
+								</p:column>
+								<p:column>
+									<h:outputLabel
+											value="#{empty desecho.desecho.descripcion ? desecho.nombreDesecho : desecho.desecho.descripcion}" />
+								</p:column>
+								<p:column>
+									<h:outputLabel
+											value="#{empty desecho.desecho.clave ? 'N/A' : desecho.desecho.clave }" />
+								</p:column>
+
+							</p:dataTable>
+						</p:rowExpansion>
+					</p:dataTable>
+				</p:panelGrid>
+			</p:panel>
+			<h:panelGroup id="pnl2"
+						  rendered="#{eliminacionDesechoControllers.aprobacionRequisitosTecnicosBean.revisar}">
+				<p:fragment>
+					<!--<h2 class="bold">Observaciones de la eliminación de desechos.</h2>-->
+					<observaciones:tablaObservaciones aparace="true"
+													  soloLectura="#{eliminacionDesechoControllers.aprobacionRequisitosTecnicosBean.revisar}"
+													  mostrarSiVacio="#{!eliminacionDesechoControllers.aprobacionRequisitosTecnicosBean.revisar}"
+													  idClase="#{eliminacionDesechoControllers.aprobacionRequisitosTecnicosBean.aprobacionRequisitosTecnicos.id}"
+													  nombreClase="AprobacionRequisitosTecnicos"
+													  seccion="#{eliminacionDesechoControllers.aprobacionRequisitosTecnicosBean.seccion}"
+													  rol="sjsj" componenteActualizarEliminar="pnl2" />
+				</p:fragment>
+			</h:panelGroup>
+			<t:div styleClass="buttons main">
+				<p:commandButton value="Atrás" immediate="true" process="@this"
+								 action="/control/aprobacionRequisitosTecnicos/gestion/almacenamientoTemporal.jsf?faces-redirect=true"
+								 icon="ui-icon-arrowthick-1-w" />
+				<p:commandButton value="Guardar"
+								 update=":#{p:component('tblEliminacion')}" id="btnGuardar"
+								 oncomplete="handleNumDesechosEliminacionRequest(xhr, status, args);window.scrollTo(0,120);"
+								 icon="ui-icon-disk"
+								 action="#{eliminacionDesechoControllers.guardar()}" />
+				<p:commandButton value="Siguiente" immediate="true" process="@this"
+								 action="#{aprobacionRequisitosTecnicosController.recuperarPageSiguiente(false)}"
+								 icon="ui-icon-arrowthick-1-e" />
+			</t:div>
+			<p:dialog header="Importante" id="importanteDlg"
+					  widgetVar="importanteWdgt" modal="true" resizable="false"
+					  width="300" closable="false">
+				<h:outputText value="Usted debe llenar antes la sección:" />
+				<ul class="error alLeft text-red ">
+					<li><h:outputLink class="text-red "
+									  value="#{request.contextPath}/control/aprobacionRequisitosTecnicos/recepcionDesechosPeligrosos#{mode}.jsf">
+						<h:outputText value="Recepción de desechos peligrosos" />
+					</h:outputLink></li>
+				</ul>
+			</p:dialog>
+		</h:form>
+
+		<p:dialog header="Datos eliminación o disposición final"
+				  widgetVar="dlgEliminacion" modal="true" resizable="false"
+				  draggable="false" width="750" >
+			<h:form>
+				<p:panel id="pnlEliminacion">
+					<h:panelGrid id="pngEliminacion" columns="2" styleClass="w100"
+								 columnClasses="w30,null">
+						<h:outputLabel value="Desecho *" />
+						<p:selectOneMenu
+								value="#{eliminacionDesechoControllers.eliminacionDesechosBean.eliminacionRecepcion.entityRecepcionDesecho}"
+								id="cmbDesecho" converter="selectItemConverter"
+								style="width:200px">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}"
+										  itemValue="" noSelectionOption="true" />
+							<f:selectItems
+									value="#{eliminacionDesechoControllers.eliminacionDesechosBean.listaEntityRecepcionDesecho}" />
+							<p:ajax event="change" update="pnlCodigo"
+									oncomplete="handleEliminarRegistroRequest(xhr, status, args)"
+									listener="#{eliminacionDesechoControllers.validarDesechoEspecial()}" />
+						</p:selectOneMenu>
+
+						<h:outputLabel value="Código de Eliminación" />
+						<h:panelGroup id="pnlCodigo">
+							<h:outputLabel
+									rendered="#{eliminacionDesechoControllers.eliminacionDesechosBean.eliminacionRecepcion.entityRecepcionDesecho != null}"
+									value="#{eliminacionDesechoControllers.eliminacionDesechosBean.eliminacionRecepcion.entityRecepcionDesecho.codigo}" />
+						</h:panelGroup>
+					</h:panelGrid>
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+								 columnClasses="w50, field_mrg w50">
+						<f:facet name="header">
+							<p:commandButton value="Adicionar"
+											 styleClass="button-small-text toRight field_mrg"
+											 action="#{eliminacionDesechoControllers.adicionarDesecho()}"
+											 icon="ui-icon-plusthick"
+											 update=":#{p:component('tblDesecho')},:#{p:component('pnlGeneracion')} "
+											 oncomplete="handleDesechoInicialRequest(xhr, status, args)">
+							</p:commandButton>
+							<mae:panelGridHeaderHelp value="Desechos" conector="generalHelp"
+													 help="#{helps['registro.ambiental.p2.promotor']}" />
+						</f:facet>
+						<p:dataTable id="tblDesecho"
+									 value="#{eliminacionDesechosBean.eliminacionRecepcion.eliminacionDesechos}"
+									 var="desecho" emptyMessage="#{labels['common.table.empty']}" scrollable="true" scrollHeight="150">
+							<p:column headerText="Tipo" >
+								<h:outputLabel value="#{desecho.tipoEliminacionDesecho.nombre.contains('métodos') ? desecho.tipoEliminacionDesecho.nombre.concat('(').concat(desecho.otroDesecho).concat(')') : desecho.tipoEliminacionDesecho.nombre}" />
+							</p:column>
+							<p:column headerText="Cantidad Anual (T)" >
+								<h:outputText value="#{desecho.cantidad}">
+									<f:convertNumber maxFractionDigits="2" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="Cantidad Unidad (u)" >
+								<h:outputLabel
+										value="#{!empty agregarSustanciasQuimicasBean.sustanciaSeleccionada.codigoOnu ? agregarSustanciasQuimicasBean.sustanciaSeleccionada.codigoOnu : agregarSustanciasQuimicasBean.sustanciaSeleccionada.numeroCas}" />
+								<h:outputText
+										value="#{empty desecho.cantidadEspecial ? 'N/A' : desecho.cantidadEspecial}">
+									<f:convertNumber maxFractionDigits="2" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="Nombre del nuevo desecho generado" >
+								<h:outputLabel
+										value="#{empty desecho.desecho.descripcion ? desecho.nombreDesecho : desecho.desecho.descripcion}" />
+							</p:column>
+							<p:column headerText="Código del nuevo desecho generado" >
+								<h:outputLabel
+										value="#{empty desecho.desecho.clave ? 'N/A' : desecho.desecho.clave }" />
+							</p:column>
+							<p:column headerText="Acciones" styleClass="w60px">
+								<p:commandButton icon="ui-icon-pencil"
+												 styleClass="button-small primary"
+												 action="#{eliminacionDesechoControllers.seleccionarEliminacionDesecho(desecho)}"
+												 title="Editar" oncomplete="PF('dlgGeneracion').show();"
+												 update=":#{p:component('pnlGeneracion')}" />
+
+								<p:commandButton update=":#{p:component('tblDesecho')}"
+												 styleClass="button-small primary" process="@this"
+												 icon="ui-icon-circle-close"
+												 actionListener="#{eliminacionDesechoControllers.eliminarDesecho(desecho)}" />
+							</p:column>
+						</p:dataTable>
+					</p:panelGrid>
+					<br />
+					<div class="buttons">
+						<p:commandButton value="Guardar"
+										 update=":#{p:component('tblEliminacion')}"
+										 action="#{eliminacionDesechoControllers.guardarDisposicion()}"
+										 oncomplete="handleEliminacionRequest(xhr, status, args)"
+										 styleClass="primary" />
+						<p:commandButton value="Cerrar"
+										 action="#{eliminacionDesechoControllers.cerrarModal()}"
+										 oncomplete="PF('dlgEliminacion').hide();" styleClass="primary" />
+					</div>
+				</p:panel>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog header="Datos generación desechos a la eliminación"
+				  widgetVar="dlgGeneracion" modal="true"
+				  resizable="false" draggable="false" width="500">
+			<h:form id="form">
+				<p:panel id="pnlGeneracion">
+					<h:panelGroup id="efCantidadDesechoPeligrosoContainer">
+						<h:panelGrid styleClass="w100" columns="2">
+							<h:panelGroup
+									id="#{tipoEliminacionDesechoBean.tipoEliminacionDesechoBtnLabel}">
+								<p:outputLabel value="Tipo de eliminación o disposición final"
+											   rendered="#{empty tipoEliminacionDesechoModalBean.tipoEliminacionDesechoSeleccionada}" />
+								<h:outputText
+										rendered="#{not empty tipoEliminacionDesechoModalBean.tipoEliminacionDesechoSeleccionada}" />
+							</h:panelGroup>
+							<h:panelGroup
+									id="#{tipoEliminacionDesechoModalBean.tipoEliminacionDesechoBtn}">
+								<p:commandButton styleClass="primary extraLarge"
+												 value="Seleccionar"
+												 oncomplete="PF('seleccionarTipoEliminacionDesecho').show()"
+												 actionListener="#{tipoEliminacionDesechoModalBean.reset()}"
+												 process="@this"
+												 update=":#{p:component('seleccionarTipoEliminacionDesecho')}"
+												 rendered="#{empty tipoEliminacionDesechoModalBean.tipoEliminacionDesechoSeleccionada}" />
+								<h:outputText
+										rendered="#{not empty tipoEliminacionDesechoModalBean.tipoEliminacionDesechoSeleccionada}" />
+							</h:panelGroup>
+						</h:panelGrid>
+						<h:panelGrid styleClass="w100" columns="1">
+							<h:panelGroup
+									id="#{tipoEliminacionDesechoModalBean.tipoEliminacionDesechoContainer}">
+								<h:panelGrid columns="2" styleClass="w100 panel_data"
+											 columnClasses="header w33, null w66" rowClasses="null, alt"
+											 rendered="#{not empty tipoEliminacionDesechoModalBean.tipoEliminacionDesechoSeleccionada}">
+									<h:outputText value="Tipo de eliminación o disposición final" />
+									<h:outputText
+											value="#{tipoEliminacionDesechoModalBean.tipoEliminacionDesechoSeleccionada}" />
+								</h:panelGrid>
+							</h:panelGroup>
+							<h:panelGroup
+									id="#{tipoEliminacionDesechoModalBean.textoAdicionalOtroSeleccionadoContainer}">
+								<p:outputLabel
+										value="#{tipoEliminacionDesechoModalBean.tipoEliminacionDesechoSeleccionada.nombre}"
+										rendered="#{tipoEliminacionDesechoModalBean.otroSeleccionado}" />
+								<p:inputTextarea
+										id="#{tipoEliminacionDesechoModalBean.textoAdicionalOtroId}"
+										value="#{eliminacionDesechosBean.eliminacionDesecho.otroDesecho}"
+										autoResize="false" maxlength="100"  cols="1"
+										rendered="#{tipoEliminacionDesechoModalBean.otroSeleccionado}" />
+							</h:panelGroup>
+						</h:panelGrid>
+					</h:panelGroup>
+					<h:panelGrid styleClass="w100 separatorBottom" columns="2"
+								 columnClasses="w50, field_mrg w50">
+						<p:outputLabel value="Cantidad Anual (T):" for="txtCantidad" />
+						<pe:inputNumber id="txtCantidad" decimalPlaces="2"
+										thousandSeparator="" widgetVar="txtCantidad"
+										value="#{eliminacionDesechosBean.eliminacionDesecho.cantidad}"
+										required="true"
+										validatorMessage="El campo 'Capacidad (T)' debe tener máximo 10 digitos y 2 decimales."
+										maxValue="9999999999.99" minValue="0" maxlength="10" />
+						<p:outputLabel value="Cantidad Unidad (u) :"
+									   for="txtCantidadEspecial"
+									   rendered="#{eliminacionDesechosBean.eliminacionDesecho.desechoEspecial}" />
+						<pe:inputNumber id="txtCantidadEspecial" decimalPlaces="2"
+										thousandSeparator="" widgetVar="txtCantidadEspecial"
+										value="#{eliminacionDesechosBean.eliminacionDesecho.cantidadEspecial}"
+										required="true"
+										validatorMessage="El campo 'Capacidad (u)' debe tener máximo 10 digitos y 2 decimales."
+										maxValue="9999999999.99" minValue="0" maxlength="10"
+										rendered="#{eliminacionDesechosBean.eliminacionDesecho.desechoEspecial}" />
+					</h:panelGrid>
+					<h:panelGrid id="pngGeneracion2" columns="2" styleClass="w100"
+								 columnClasses="w30,null" layout="grid">
+						<f:facet name="header">
+							<h:outputText value="Generación del Desecho debido a la eliminación"/>
+						</f:facet>
+						<h:panelGrid styleClass="w100" columns="3"
+									 columnClasses="w50, field_mrg w50">
+							<h:outputLabel value="#{msg['label.pregunta.desecho']}:" />
+							<p:selectBooleanCheckbox id="ckValidar"
+													 value="#{eliminacionDesechosBean.eliminacionDesecho.esDesechoPeligro}">
+								<p:ajax listener="#{eliminacionDesechoControllers.limpiarDatos}"
+										update=":#{p:component('pnlDatosSi')},:#{p:component('pnlDatosNo')}"></p:ajax>
+							</p:selectBooleanCheckbox>
+							<mae:btnHelp conector="actividadHelp"
+										 buttonStyleClass="button-small primary"
+										 help="#{helps['pregunta.eliminacion']}" />
+						</h:panelGrid>
+					</h:panelGrid>
+
+					<h:panelGrid id="pnlDatosSi" columns="2" styleClass="w100"
+								 columnClasses="w30,null">
+						<h:panelGroup
+								rendered="#{eliminacionDesechosBean.eliminacionDesecho.esDesechoPeligro}">
+							<p:panelGrid id="desechoContainer" columns="1" layout="grid"
+										 styleClass="w100">
+								<f:facet name="header">
+									<p:commandButton value="Seleccionar"
+													 oncomplete="PF('seleccionarDesecho').show()"
+													 styleClass="button-small-text toRight field_mrg"
+													 icon="ui-icon-check"
+													 actionListener="#{agregarDesechoPeligroso.reset()}"
+													 process="@this" update=":#{p:component('seleccionarDesecho')}" />
+									<mae:panelGridHeaderHelp value="Desecho *"
+															 conector="desechoHelp" help="#{helps['desecho.seleccionar']}"
+															 width="500px" />
+								</f:facet>
+
+								<h:panelGrid styleClass="w100 separatorBottom" columns="2"
+											 rendered="#{not empty agregarDesechoPeligroso.desechoSeleccionado.descripcion}"
+											 columnClasses="w50, field_mrg w50">
+									<p:outputLabel value="Nombre de desecho peligroso o especial" />
+									<h:outputText
+											value="#{agregarDesechoPeligroso.desechoSeleccionado.descripcion}" />
+									<p:outputLabel value="Clave de desecho peligroso o especial" />
+									<h:outputText
+											value="#{agregarDesechoPeligroso.desechoSeleccionado.clave}" />
+									<p:outputLabel
+											rendered="#{not empty agregarDesechoPeligroso.codigoGenerador}"
+											value="Código generador" />
+									<h:outputText
+											rendered="#{not empty agregarDesechoPeligroso.codigoGenerador}"
+											value="#{agregarDesechoPeligroso.codigoGenerador}" />
+								</h:panelGrid>
+								<h:panelGroup id="datosGenerales">
+									<h:panelGrid styleClass="w100 separatorBottom" columns="2"
+												 columnClasses="w50, field_mrg w50">
+										<p:outputLabel value="#{labels['label.provincia.destino']}" for="provDestino"/>
+										<p:selectOneMenu id="provDestino" styleClass="w100"
+														 converter="selectItemConverter"
+														 value="#{eliminacionDesechosBean.provinciaDestino}" required="true">
+											<f:selectItem itemLabel="#{labels['common.item.choose']}"
+														  itemValue="" noSelectionOption="true" />
+											<f:selectItems
+													value="#{eliminacionDesechoControllers.eliminacionDesechosBean.provincias}" />
+											<p:ajax
+													listener="#{eliminacionDesechoControllers.cargarCantones()}"
+													update="cantDestino" />
+										</p:selectOneMenu>
+										<p:outputLabel value="#{labels['label.canton.destino']}" for="cantDestino" />
+										<p:selectOneMenu id="cantDestino" styleClass="w100" required="true"
+														 converter="selectItemConverter"
+														 value="#{eliminacionDesechoControllers.eliminacionDesechosBean.eliminacionDesecho.cantonDestino}">
+											<f:selectItem itemLabel="#{labels['common.item.choose']}"
+														  itemValue="" noSelectionOption="true" />
+											<f:selectItems
+													value="#{eliminacionDesechoControllers.eliminacionDesechosBean.cantones}" />
+											<p:ajax event="change" />
+										</p:selectOneMenu>
+									</h:panelGrid>
+								</h:panelGroup>
+							</p:panelGrid>
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<h:panelGrid id="pnlDatosNo" columns="2" styleClass="w100"
+								 columnClasses="w30,null">
+						<h:panelGroup
+								rendered="#{!eliminacionDesechosBean.eliminacionDesecho.esDesechoPeligro}">
+							<h:panelGrid styleClass="w100 separatorBottom" columns="2"
+										 columnClasses="w50, field_mrg w50">
+								<h:outputLabel for="txtNombreDesecho"
+											   value="Nombre de desecho no peligroso :" />
+								<p:inputText id="txtNombreDesecho" maxlength="255"
+											 value="#{eliminacionDesechosBean.eliminacionDesecho.nombreDesecho}"
+											 styleClass="w100" />
+								<p:outputLabel value="#{labels['label.provincia.destino']} " />
+								<p:selectOneMenu id="provDestino2" styleClass="w100"
+												 converter="selectItemConverter"
+												 value="#{eliminacionDesechosBean.provinciaDestino}">
+									<f:selectItem itemLabel="#{labels['common.item.choose']}"
+												  itemValue="" noSelectionOption="true"/>
+									<f:selectItems
+											value="#{eliminacionDesechoControllers.eliminacionDesechosBean.provincias}" />
+									<p:ajax
+											listener="#{eliminacionDesechoControllers.cargarCantones()}"
+											update="cantDestino2" />
+								</p:selectOneMenu>
+								<p:outputLabel value="#{labels['label.canton.destino']} " />
+								<p:selectOneMenu id="cantDestino2" styleClass="w100"
+												 converter="selectItemConverter"
+												 value="#{eliminacionDesechoControllers.eliminacionDesechosBean.eliminacionDesecho.cantonDestino}">
+									<f:selectItem itemLabel="#{labels['common.item.choose']}"
+												  itemValue=""  noSelectionOption="true"/>
+									<f:selectItems
+											value="#{eliminacionDesechoControllers.eliminacionDesechosBean.cantones}" />
+									<p:ajax event="change" />
+								</p:selectOneMenu>
+							</h:panelGrid>
+						</h:panelGroup>
+					</h:panelGrid>
+					<br />
+					<div class="buttons">
+						<p:commandButton value="Guardar"
+										 update=":#{p:component('tblDesecho')}"
+										 action="#{eliminacionDesechoControllers.adicionarDesechoPeligroso()}"
+										 oncomplete="handleDesechoRequest(xhr, status, args)"
+										 styleClass="primary" />
+						<p:commandButton value="Cerrar"
+										 action="#{eliminacionDesechoControllers.cerrarModalDesechos()}"
+										 oncomplete="PF('dlgGeneracion').hide();" styleClass="primary" />
+					</div>
+				</p:panel>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog header="Seleccionar tipo de eliminación del desecho"
+				  id="seleccionarTipoEliminacionDesecho"
+				  widgetVar="seleccionarTipoEliminacionDesecho" modal="true"
+				  resizable="false" width="600" draggable="false">
+			<h:form>
+				<t:aliasBeansScope>
+					<t:aliasBean alias="#{adicionarTipoEliminacionAliasBean}"
+								 value="#{tipoEliminacionDesechoModalBean}" />
+					<ui:include
+							src="/control/aprobacionRequisitosTecnicos/gestion/tipoEliminacionModal.xhtml" />
+				</t:aliasBeansScope>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog header="Seleccionar desecho" id="seleccionarDesecho"
+				  widgetVar="seleccionarDesecho" modal="true" resizable="false"
+				  width="600">
+			<h:form>
+				<ui:include
+						src="/prevencion/registroProyecto/utiles/registroModalDesechoPeligroso.xhtml" />
+			</h:form>
+		</p:dialog>
+		<p:dialog id="deleteBookingDlg" header="Confirmación"
+				  widgetVar="deleteBookingWdgt" modal="true" dynamic="true">
+			<h:panelGroup id="deleteBookingInner" layout="block"
+						  style="margin:10px;">
+				<h:outputText
+						value="¿Está usted seguro de eliminar el tipo de eliminación ya que se eliminará la información ingresada del desecho en la modalidad respectiva?" />
+			</h:panelGroup>
+			<p:separator />
+			<div class="buttons">
+				<p:commandButton value="Eliminar" process="deleteBookingDlg"
+								 update=":#{p:component('tblEliminacion')}"
+								 action="#{eliminacionDesechoControllers.eliminarDisposicion()}"
+								 oncomplete="PF('deleteBookingWdgt').hide()" />
+				<p:commandButton type="button" value="Cerrar"
+								 onclick="PF('deleteBookingWdgt').hide()" />
+			</div>
+		</p:dialog>
+		<p:dialog id="deleteDesechosDlg" header="Confirmación"
+				  widgetVar="deleteDesechosWdgt" modal="true" dynamic="true">
+			<h:panelGroup id="deleteDesechoInner" layout="block"
+						  style="margin:10px;">
+				<h:outputText
+						value="¿Está usted seguro de eliminar todos los registros?" />
+			</h:panelGroup>
+			<p:separator />
+			<div class="buttons">
+				<p:commandButton value="Eliminar" process="deleteDesechosDlg"
+								 update=":#{p:component('tblDesecho')}"
+								 action="#{eliminacionDesechoControllers.eliminarDesechos()}"
+								 oncomplete="PF('deleteDesechosWdgt').hide()" />
+				<p:commandButton type="button" value="Cerrar"
+								 onclick="PF('deleteDesechosWdgt').hide()" />
+			</div>
+		</p:dialog>
+
+		<p:dialog id="numDesechoAlmacenDlg" header="Información"
+				  widgetVar="numDesechoAlmacenWdgt" modal="true" width="400"
+				  resizable="false">
+			<h:panelGroup id="numDesechoAlmacen" layout="block">
+				<h:outputText
+						value="El número de desechos que usted definió es #{eliminacionDesechoControllers.eliminacionDesechosBean.listaEntityRecepcionDesecho.size()}, por lo tanto debe agregar el resto de desechos, caso contrario no podra completar la tarea." />
+			</h:panelGroup>
+			<p:separator />
+			<div class="buttons">
+				<p:commandButton type="button" value="Aceptar"
+								 styleClass="buttonAceptar"
+								 onclick="PF('numDesechoAlmacenWdgt').hide()" />
+			</div>
+		</p:dialog>
+
+		<script type="text/javascript">
+			function showModalAddLocation(xhr, status, args) {
+				PF('dlgOrigen').show();
+				if (args.addLocation) {
+					PF('dlgOrigen').hide();
+				}
+			}
+			function handleDesechoRequest(xhr, status, args) {
+				if (args.validationFailed || !args.desechoIn) {
+				}
+				else {
+					PF('dlgGeneracion').hide();
+					$('#loginLink').fadeOut();
+				}
+			}
+			function handleDesechoInicialRequest(xhr, status, args) {
+				if (args.adicionar) {
+					PF('dlgGeneracion').show();
+				}
+			}
+
+			function handleEliminacionRequest(xhr, status, args) {
+				if (args.validationFailed || !args.disposicionIn) {
+				}
+				else {
+					PF('dlgEliminacion').hide();
+					$('#loginLink').fadeOut();
+				}
+			}
+			function handleEliminarRegistroRequest(xhr, status, args) {
+				if (args.eliminarRegistro) {
+					PF('deleteDesechosWdgt').show();
+				}
+			}
+			function handleNumDesechosEliminacionRequest(xhr, status, args) {
+				if (args.numDesechosEliminacion) {
+
+					PF('numDesechoAlmacenWdgt').show();
+				}
+
+			}
+		</script>
+	</ui:define>
+</ui:composition>

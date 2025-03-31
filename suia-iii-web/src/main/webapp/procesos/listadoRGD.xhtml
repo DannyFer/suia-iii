@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components">
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<f:loadBundle var="labels" basename="ec.gob.ambiente.core.resources.labels_es" />
+		<script type="text/javascript">	       
+
+	        function showModalEliminarRGD(xhr, status, args) {
+	        	PF('eliminarRGD').show();
+	            if (args.eliminarRGD) {
+	            	PF('eliminarRGD').hide();
+	            }
+	        }
+
+	        function cleanComponentsValues() {
+	        }
+
+    	</script>
+		<h:form id="formRGD">
+    		<p:dataTable id="tableRGD" widgetVar="tableRGD" value="#{proyectosRGDController.proyectosLazy}" lazy="true"  filterDelay="600" 
+				sortBy="#{rgd.codigo}" sortOrder="descending" var="rgd" rows="10" paginator="true" paginatorAlwaysVisible="true" 
+				paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rowsPerPageTemplate="5,10,15" emptyMessage="#{labels['common.table.empty']}">  
+    			<f:facet name="header">
+					<h:outputText value="Listado de Registro Generador Desechos" />
+				</f:facet>
+				<p:column headerText="Código" filterBy="#{rgd.solicitud}" filterMatchMode="contains" styleClass="alCenter w25">
+					<h:outputText value="#{rgd.solicitud}" />
+				</p:column>
+				<p:column headerText="Proyecto" filterBy="#{rgd.codigo}" filterMatchMode="contains" styleClass="alCenter w15">
+					<h:outputText value="#{rgd.codigo}" />
+				</p:column>
+				<p:column headerText="Usuario" filterBy="#{rgd.usuarioCreacion}" filterMatchMode="contains" styleClass="alCenter w25">					
+					<h:outputText value="#{(empty rgd.usuarioCreacion || rgd.usuarioCreacion==null) ? 'SISTEMA':rgd.usuarioCreacion}"/>
+				</p:column>
+				<p:column headerText="Provincia" styleClass="alCenter w15" >
+					<h:outputText value="#{( empty rgd.provincia || rgd.provincia==null) ?'SIN DATO':rgd.provincia}"/>
+				</p:column>
+				<p:column headerText="Registro" styleClass="alCenter w15">
+						<h:outputText value="#{empty rgd.fechaModificacion ? rgd.fechaCreacion:rgd.fechaModificacion}">
+							<f:convertDateTime pattern="dd/MM/yyyy"/>
+						</h:outputText>
+				</p:column>
+				<p:column headerText="Área Responsable" filterBy="#{rgd.areaResponsable.areaAbbreviation}" filterMatchMode="contains" styleClass="alCenter w15">
+					<h:outputText value="#{rgd.areaResponsable.areaAbbreviation}" />
+				</p:column>
+				<p:column headerText="Archivar" styleClass="alCenter w40px" rendered="#{proyectosRGDController.deletionActive}">						
+					<p:commandButton actionListener="#{proyectosRGDController.seleccionarRGD(rgd)}" process="@this" update=":formDelete:eliminarRGD" icon="ui-icon-trash" styleClass="button-small primary" oncomplete="PF('eliminarRGD').show()" title="Archivar"/>                        
+				</p:column>
+			</p:dataTable>
+    	</h:form>
+    	
+		<h:form id="formDelete">			
+			<p:dialog header="Archivar RGD" id="eliminarRGD" widgetVar="eliminarRGD" modal="true" width="500" resizable="false" closable="true" draggable="false">
+				<h:panelGrid columns="1" styleClass="w100">
+					<p:outputLabel value="Recuerde la responsabilidad de la acción que esta ejecutando."/>
+					<p:outputLabel value="Ingrese el motivo por el cual desea archivar el registro generador de desecho" for="motivoRGD" />
+					<p:inputTextarea id="motivoRGD" value="#{proyectosRGDController.motivoEliminar}" required="true" autoResize="false" rows="3" maxlength="1000"
+					requiredMessage="Ingrese el motivo por el cual desea archivar el registro generador de desecho">
+						<f:validateLength minimum="20" />
+					</p:inputTextarea>
+					<p:outputLabel value="Es necesario que adjunte la solicitud del pedido de Proponente que sustente el archivo del RGD en formato pdf."/>
+					<p:outputLabel id="PagoRGD" value="Número de Tránsacción (pago): #{proyectosRGDController.pagoRgd}" rendered="#{proyectosRGDController.pagoRgd!=null}"/>
+					<p:outputLabel id="MontoPagoRGD" value="Monto: #{proyectosRGDController.montoPagoRgd}"/>
+				</h:panelGrid>
+				 <p:outputLabel id="adjuntoRGD" value="Adjuntar Archivo: #{proyectosRGDController.documentoAdjunto.nombre}" for="fileAdjuntoRGD"/>
+            			<p:fileUpload id="fileAdjuntoRGD" required="true" requiredMessage="Adjunto obligatorio"
+                                fileUploadListener="#{proyectosRGDController.uploadFile}"
+                                multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                                label="Seleccionar" uploadLabel="Subir"
+                                invalidFileMessage="Tipo de archivo no válido"
+                                invalidSizeMessage="Tamaño de archivo no válido"
+                                cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                auto="true" update="adjuntoRGD">                            
+                        </p:fileUpload>
+                        
+				<div class="buttons">					
+					<p:commandButton process="@this motivoRGD fileAdjuntoRGD" value="Archivar" icon="ui-icon-check" actionListener="#{proyectosRGDController.suspenderRGD}" update=":formDelete:eliminarRGD :formRGD:tableRGD" oncomplete="showModalEliminarRGD(xhr, status, args)" />					
+				</div>
+			</p:dialog>
+		</h:form>	
+
+		<h:form>
+			<p:remoteCommand autoRun="true" oncomplete="cleanComponentsValues()" />
+		</h:form>
+
+		
+		
+	</ui:define>
+</ui:composition>
+</html>

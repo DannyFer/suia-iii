@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml"
+                xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+    <ui:define name="context-extra">
+        <h:outputText value="Datos" rendered="#{empty elaborarPronunciamientoAreaLABean.tipo}"/>
+        <h:outputText value="Estudio de Impacto Ambiental" rendered="#{empty elaborarPronunciamientoAreaLABean.tipo}"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}" target="_blank" rendered="#{empty elaborarPronunciamientoAreaLABean.tipo}">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+
+        <h:outputText value="TDR" rendered="#{not empty elaborarPronunciamientoAreaLABean.tipo}"/>
+        <h:outputText value="Documento de TDR" rendered="#{not empty elaborarPronunciamientoAreaLABean.tipo}"/>
+
+
+        <p:commandButton id="downloadadjuntoTDR" icon="ui-icon-arrowthick-1-s"
+                         ajax="false" styleClass="button-small primary" title="Ver"
+                         immediate="true"
+                         rendered="#{not empty elaborarPronunciamientoAreaLABean.tipo}">
+            <p:fileDownload value="#{elaborarPronunciamientoAreaLABean.stream}"/>
+        </p:commandButton>
+
+    </ui:define>
+    <ui:define name="content">
+        <f:metadata>
+            <f:viewParam name="area" value="#{revisarPronunciamientoAreaLABean.area}"/>
+        </f:metadata>
+        <f:event type="preRenderView" listener="#{revisarPronunciamientoAreaLAController.validarTareaBpm()}"/>
+        <h:form>
+            <h3>Recepción de pronunciamiento</h3>
+
+            <h:outputLabel value="¿Recibió el pronunciamiento?"/>
+            <p:selectOneRadio id="opcion"
+                              value="#{revisarPronunciamientoAreaLABean.correcto}" required="true">
+                <f:selectItem itemLabel="Si" itemValue="true"/>
+                <f:selectItem itemLabel="No" itemValue="false"/>
+            </p:selectOneRadio>
+			
+			<h:panelGrid styleClass="w100" id="panelDocumento" rendered="#{elaborarPronunciamientoAreaLABean.visibleMemorando}">
+				<h:outputText value="Revisar Pronunciamiento" styleClass="bold" />
+				<p:separator />
+				<object type="application/pdf" id="pronunciamiento"
+						data="#{elaborarPronunciamientoAreaLABean.urlPronunciamientoForestal}?pfdrid_c=true"
+						height="600" width="100%">
+				 <p:commandButton value="Descargar" styleClass="primary"
+		                             ajax="false" icon="ui-icon-arrowthick-1-s"
+		                             action="#{elaborarPronunciamientoAreaLABean.descargarPronunciamiento()}"/>
+				</object>
+			</h:panelGrid>
+		
+            <h:panelGrid styleClass="w100">
+            <p:outputLabel styleClass="bold" rendered="#{elaborarPronunciamientoAreaLABean.visibleMemorando}" 
+                           value="Asunto *" for="asunto"></p:outputLabel>
+            <ui:remove><control:imputConTextoEnriquecido id="asunto" rendered="#{elaborarPronunciamientoAreaLABean.visibleMemorando}"
+                                              requiredMessage="#{msg['label.prevencion.tdr.campo']} 'Asunto' #{msg['label.prevencion.tdr.requerido']}."
+                                              valor="#{revisarPronunciamientoAreaLABean.pronunciamiento.asunto}"
+                                              soloLectura="true" requerido="true"/></ui:remove>
+			<p:inputText value="#{elaborarPronunciamientoAreaLABean.pronunciamiento.asunto}" required="true" readonly="true"
+             id="asunto" rendered="#{elaborarPronunciamientoAreaLABean.visibleMemorando}"
+             requiredMessage="#{msg['label.prevencion.tdr.campo']} 'Asunto' #{msg['label.prevencion.tdr.requerido']}."/> 
+
+            <h:outputText rendered="#{elaborarPronunciamientoAreaLABean.visibleMemorando}"/>
+            <h:outputText rendered="#{elaborarPronunciamientoAreaLABean.visibleMemorando}"/>
+            
+                <p:outputLabel styleClass="bold"
+                               value="Pronunciamiento *" for="pronunciamieno"/>
+                <control:imputConTextoEnriquecido id="pronunciamieno"
+                                                  requiredMessage="#{msg['label.prevencion.tdr.campo']} 'Pronunciamiento' #{msg['label.prevencion.tdr.requerido']}."
+                                                  valor="#{revisarPronunciamientoAreaLABean.pronunciamiento.contenido}"
+                                                  soloLectura="true" requerido="false"/>
+            </h:panelGrid>
+            <h:outputText/>
+            <h:outputText/>
+
+            <h:panelGroup id="pnl1">
+                <observaciones:tablaObservaciones aparace="true"
+                                                  idClase="#{revisarPronunciamientoAreaLABean.proyecto.id}"
+                                                  nombreClase="Pronunciamiento"
+                                                  seccion="#{revisarPronunciamientoAreaLABean.area}" soloLectura="false"
+                                                  rol="sjsj"
+                                                  componenteActualizarEliminar="pnl1"/>
+            </h:panelGroup>
+
+
+            <div class="buttons main">
+                <p:commandButton value="Enviar" styleClass="primary"
+                                 action="#{revisarPronunciamientoAreaLAController.iniciarTarea}"
+                                 title="Enviar datos" icon="ui-icon-check">
+                </p:commandButton>
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>

@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:controles-prime="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<h:head>
+	<h:outputStylesheet name="suia-layout.css" library="css" />
+	<h:outputStylesheet name="suia-styles.css" library="css" />
+	<h:outputStylesheet name="suia-pf-custom.css" library="css" />
+	<h:outputScript name="util.js" library="js" />
+	<link rel="shortcut icon"
+		href="#{request.contextPath}/resources/images/arbol.ico" />
+	<title>MAAE</title>
+</h:head>
+
+<style>
+.ui-panel-titlebar {
+	text-align: center !important;
+}
+</style>
+
+<h:body>
+	<div>
+		<div class="header-left-part"></div>
+		<div id="header" class="containerHeader">
+			<div class="header-right-part"></div>
+			<div class="clear"></div>
+			<div class="header-right-part-bar"></div>
+			<div class="clear"></div>
+		</div>
+
+		<div class="container bordercontainer">
+			<div id="page">
+				<div id="content">
+					<ui:include src="/WEB-INF/templates/status.xhtml" />
+					<p:growl globalOnly="true" id="msgs" />
+
+
+					<h:form id="form"
+						onkeypress="if (event.keyCode == 13) { return false; }">
+
+						<p:panel id="parte2">
+							<f:facet name="header">
+								<h:outputText id='txtTitulo' style="font-size: large; "
+									value="OPINIÓN PÚBLICA" />
+							</f:facet>
+							<br></br>
+							<p:panelGrid id="formulario1" columns="2"
+								styleClass="panel_data w100" columnClasses="header w25,null w75">
+
+
+
+
+
+								<h:outputText value="Número de Cédula *" />
+								<h:panelGroup id="cedulaGroup">
+
+									<p:inputText id="cedula"
+										value="#{demoController.cedulaProponente}"
+										style="width:400px!important"
+										required="#{!demoController.esOrg}"
+										requiredMessage="Número de Cédula es requerido" maxlength="10" 
+										onkeyup="$(this).val($(this).val().replace(/[^0-9]/g, ''));"/>
+
+									<p:commandButton value="Validar" styleClass="primary"
+										actionListener="#{demoController.validarCedulaRepLegal}"
+										process="@this cedulaGroup" update="@this Nombre cedula" />
+								</h:panelGroup>
+
+								<h:outputText value="Nombre *" />
+								<p:inputText id="Nombre"
+									value="#{demoController.nombreProponente}" maxlength="50"
+									required="true" requiredMessage="Nombre es requerido"
+									readonly="true" disabled="true">
+									<p:ajax process="@this" />
+								</p:inputText>
+
+
+								<h:outputText value="E-mail*" />
+								<p:inputText id="email" value="#{demoController.email}"
+									maxlength="50" required="true"
+									requiredMessage="e-mail es requerido"
+									validatorMessage="Correo electrónico no valido">
+									<f:validateRegex
+										pattern="[\w\.-]*[a-zA-Z0-9_]@[\w\.-]*[a-zA-Z0-9]\.[a-zA-Z][a-zA-Z\.]*[a-zA-Z]" />
+									<p:ajax process="@this" />
+								</p:inputText>
+
+
+
+								<h:outputText value="Pertenece a una organización" />
+
+								<p:selectBooleanCheckbox value="#{demoController.esOrg}">
+									<p:ajax process="@this "
+										update="@this organizacion ruc validarRuc"
+										listener="#{demoController.esOrganizacion}" />
+								</p:selectBooleanCheckbox>
+
+								<h:outputText value="RUC *" />
+								<h:panelGroup id="RUCGroup">
+
+									<p:inputText id="ruc" value="#{demoController.rucProponente}"
+										style="width:400px!important"
+										required="#{demoController.cedulaProponente}"
+										requiredMessage="RUC es requerido" maxlength="13"
+										disabled="#{!demoController.esOrg}"
+										readonly="#{!demoController.esOrg}"
+										onkeyup="$(this).val($(this).val().replace(/[^0-9]/g, ''));" />
+
+									<p:commandButton id="validarRuc" value="Validar RUC"
+										styleClass="primary"
+										actionListener="#{demoController.validarRucRepLegal}"
+										process="@this RUCGroup" update="@this organizacion ruc"
+										disabled="#{!demoController.esOrg}"
+										readonly="#{!demoController.esOrg}" />
+								</h:panelGroup>
+
+
+
+								<h:outputText value="Nombre Organización" />
+								<p:inputText id="organizacion"
+									value="#{demoController.organizacion}" maxlength="50"
+									required="#{demoController.cedulaProponente}"
+									requiredMessage="Nombre es requerido" rendered="true"
+									disabled="true" readonly="true">
+									<p:ajax process="@this" />
+								</p:inputText>
+							</p:panelGrid>
+
+
+
+							<p:panelGrid id="formulario2" columns="2"
+								styleClass="panel_data w100" columnClasses="header w25,null w75">
+
+
+								<h:outputText value="Mesa de Trabajo *" for="idMesaDeTrabajo" />
+								<p:selectOneMenu id="idMesaDeTrabajo" required="true"
+									requiredMessage="Se debe selccionar una Mesa de Trabajo"
+									value="#{demoController.mesaSeleccionada}" style="width:100%"
+									styleClass="w75">
+									<f:selectItem itemLabel="Seleccionar la Mesa de Trabajo ..."
+										itemValue="" />
+									<f:selectItems value="#{demoController.mesaDeTrabajoOpciones}"
+										var="item" itemLabel="#{item}" itemValue="#{item}" />
+									<p:ajax update="idArticulos" />
+
+								</p:selectOneMenu>
+
+
+								<h:outputText value="Artículo *" for="idArticulos" />
+								<p:selectOneMenu id="idArticulos" required="true"
+									requiredMessage="Se debe selccionar un Artículo"
+									value="#{demoController.articuloSeleccionado}"
+									style="width:100%" styleClass="w75">
+									<f:selectItem itemLabel="Seleccione el Articulo ..."
+										itemValue="" />
+									<f:selectItems value="#{demoController.atriculosLista}"
+										var="item" itemLabel="#{item}" itemValue="#{item}" />
+									<p:ajax update="@this" />
+
+								</p:selectOneMenu>
+
+
+
+
+								<h:outputText value="Propuesta *" for="propuesta" />
+								<p:inputTextarea id="propuesta" rows="6" cols="33"
+									value="#{demoController.propuesta}" required="true"
+									requiredMessage="El campo Propuesta es obligatorio" />
+
+								<h:outputText value="Justificación *" for="justificacion" />
+								<p:inputTextarea id="justificacion" rows="6" cols="33"
+									value="#{demoController.justificacion}" required="true"
+									requiredMessage="El campo Justificación es obligatorio" />
+
+
+
+
+							</p:panelGrid>
+
+
+							<p:panelGrid id="formulario3" columns="2"
+								styleClass="panel_data w100" columnClasses="header w25,null w75">
+
+								<h:outputText value="Nota" for="nota" />
+
+								<p:panelGrid id="formulario4" columns="2"
+									styleClass="panel_data w100" columnClasses="null w85,null w15">
+
+									<p>#{demoController.notas.get(1)}</p>
+
+									<p:selectBooleanCheckbox style="align:rigth"
+										value="#{demoController.aceptarTerminos}" itemLabel="Aceptar">
+										<p:ajax process="@this "
+											update="@form guardar btnGuardar dialogo"
+											listener="#{demoController.aceptar}" />
+									</p:selectBooleanCheckbox>
+
+								</p:panelGrid>
+
+
+
+
+							</p:panelGrid>
+
+
+
+
+
+							<div align="right">
+
+
+								<p:commandButton id="btnGuardar"
+									disabled="#{!demoController.habilitarGuardar}" value="Guardar"
+									type="button" styleClass="primary" icon="ui-icon-disk"
+									onclick="PF('dlg1').show()" update="@this Nombre dialogo" />
+
+								<p:dialog id="dialogo" header="Confirmación" widgetVar="dlg1"
+									minHeight="40" width="550" showEffect="fade">
+									<p class="p-m-0"
+										style="text-align: justify; text-justify: inter-word;">
+
+										Yo, #{demoController.mensajeCedula} #{demoController.mensajeRUC}
+										
+										; declaro bajo juramento que
+										toda la información ingresada corresponde a la realidad y
+										reconozco la responsabilidad que genera la falsedad u
+										ocultamiento de proporcionar datos falsos o errados, en
+										atención a lo que establece el artículo 255 del Código
+										Orgánico Integral Penal, que señala: Falsedad u ocultamiento
+										de información para el Ministerio del Ambiente, Agua y
+										Transición Ecológica.</p>
+
+									<p class="p-m-0"
+										style="text-align: justify; text-justify: inter-word;">En
+										la constitución ecuatoriana de la participación ciudadana se
+										menciona:</p>
+
+									<p class="p-m-0"
+										style="text-align: justify; text-justify: inter-word;">
+										Sección tercera</p>
+
+									<p class="p-m-0"
+										style="text-align: justify; text-justify: inter-word;">
+										Comunicación e Información</p>
+
+
+									<p class="p-m-0"
+										style="text-align: justify; text-justify: inter-word;">
+										<STRONG>Art 16.- </STRONG>"Todas las personas, en forma
+										individual o colectiva, tienen derecho a:
+									</p>
+
+									<p class="p-m-0"
+										style="text-align: justify; text-justify: inter-word;">
+										5.- Integrar los espacion de participación previstos en la
+										Constitución en el campo de la comunicación"</p>
+
+									<p:commandButton value="Aceptar" icon="ui-icon-check"
+										id="guardar" process="@this formulario1 formulario2"
+										styleClass="primary"
+										actionListener="#{demoController.guardar}"
+										disabled="#{!demoController.habilitarGuardar}"
+										onclick="PF('dlg1').hide()">
+										<p:ajax process="@this" />
+									</p:commandButton>
+
+
+
+								</p:dialog>
+							</div>
+						</p:panel>
+
+
+
+
+
+
+
+
+
+
+
+
+					</h:form>
+				</div>
+			</div>
+		</div>
+
+		<ui:insert name="footer">
+			<ui:include src="/WEB-INF/templates/footer.xhtml" />
+		</ui:insert>
+
+	</div>
+</h:body>
+</html>
+

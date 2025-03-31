@@ -1,0 +1,104 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<p:panel id="adicionarRecoleccionTransporte" widgetVar="adicionarRecoleccionTransporte" toggleable="true" toggleOrientation="vertical" styleClass="colapsablePanel" collapsed="true">
+	<p:ajax event="toggle" listener="#{recoleccionTransporteDesechosBean.toggleHandle}" update=":form:adicionarRecoleccionTransporte" process="@this" />
+	<h:panelGroup id="datosRecoleccionTransporte">
+		<h:panelGroup rendered="#{recoleccionTransporteDesechosBean.panelAdicionarVisible}">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Datos generales" />
+				</f:facet>
+
+				<h:panelGrid styleClass="w100" columns="1">
+					<p:outputLabel value="Seleccionar desecho" for="rtDesecho" />
+					<p:selectOneMenu id="rtDesecho" value="#{recoleccionTransporteDesechosBean.generadorDesechosRecolector.desechoPeligroso}" required="#{recoleccionTransporteDesechosBean.panelAdicionarVisible}" styleClass="w100" converter="selectItemConverter">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+						<f:selectItems value="#{recoleccionTransporteDesechosBean.desechosPeligrosoDisponibles}" />
+						<p:ajax process="@this" update="rtDesechoPeligrosoContainer identificarEmpresasContainer" listener="#{recoleccionTransporteDesechosBean.modificarDesecho()}" />
+					</p:selectOneMenu>
+				</h:panelGrid>
+
+				<h:panelGroup id="rtDesechoPeligrosoContainer">
+					<h:panelGrid styleClass="panel_data w100 separatorBottom" columns="2" columnClasses="header w25, null" rowClasses="null, alt" rendered="#{not empty recoleccionTransporteDesechosBean.generadorDesechosRecolector.desechoPeligroso}">
+						<h:outputText value="Desecho" />
+						<h:outputText value="#{recoleccionTransporteDesechosBean.generadorDesechosRecolector.desechoPeligroso.descripcion}" />
+						<h:outputText value="Código" />
+						<h:outputText value="#{recoleccionTransporteDesechosBean.generadorDesechosRecolector.desechoPeligroso.clave}" />
+						<h:outputText value="CRTIB" title="#{helps['generadorDesecho.crtib']}" />
+						<h:outputText value="#{recoleccionTransporteDesechosBean.generadorDesechosRecolector.desechoPeligroso.nombresCRITB}" />
+					</h:panelGrid>
+				</h:panelGroup>
+			</p:panelGrid>
+
+			<h:panelGroup id="identificarEmpresasContainer">
+				<h:panelGroup rendered="#{not empty recoleccionTransporteDesechosBean.generadorDesechosRecolector.desechoPeligroso}">
+					<ui:include src="/prevencion/registrogeneradordesechos/utiles/identificarEmpresas.xhtml" />
+				</h:panelGroup>
+			</h:panelGroup>
+
+			<t:aliasBeansScope>
+				<t:aliasBean alias="#{adicionarUbicacionesAliasBean}" value="#{adicionarUbicacionesEmpresaPrestadoraServiciosBean}" />
+				<p:panelGrid columns="1" layout="grid" styleClass="buttonSeleccionarUbicacionContainer w100">
+					<f:facet name="header">
+						<p:commandButton value="Adicionar" actionListener="#{adicionarUbicacionesAliasBean.resetSelections()}" process="@this" update="#{adicionarUbicacionesAliasBean.dialogWidgetVar}" oncomplete="PF('#{adicionarUbicacionesAliasBean.dialogWidgetVar}').show()" styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg" icon="ui-icon-plusthick" />
+						<h:outputText value="Ubicación geográfica de origen *" />
+					</f:facet>
+					<ui:include src="/comun/adicionarUbicaciones.xhtml" />
+				</p:panelGrid>
+			</t:aliasBeansScope>
+
+			<h:panelGroup id="panelUbicacionDestino">
+				<p:panelGrid layout="grid" columns="1" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Ubicación geográfica de destino *" />
+					</f:facet>
+					
+					<h:panelGrid columns="2" style="margin-bottom:10px" cellpadding="5">
+				        <h:outputText value="Nivel Nacional: " />
+				        <p:selectBooleanCheckbox value="#{recoleccionTransporteDesechosBean.checknivelnacional}">
+				        	<p:ajax process="@this" listener="#{recoleccionTransporteDesechosBean.nivelnacional()}" update=":form:panelUbicacionDestino"/>
+				        </p:selectBooleanCheckbox>			        
+			        </h:panelGrid>
+					
+					<h:panelGrid styleClass="w100" columns="2" columnClasses="w50, field_mrg w50" rendered="#{!recoleccionTransporteDesechosBean.checknivelnacional}">
+						<p:outputLabel for="provinciaDestino" value="Provincia de destino" />
+						<p:outputLabel for="cantonDestino" value="Cantón de destino" />
+						<p:selectOneMenu id="provinciaDestino" value="#{recoleccionTransporteDesechosBean.provinciaDestino}" converter="selectItemConverter" styleClass="w100" required="#{recoleccionTransporteDesechosBean.panelAdicionarVisible}">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+							<f:selectItems value="#{recoleccionTransporteDesechosBean.provincias}" />
+							<p:ajax process="@this" listener="#{recoleccionTransporteDesechosBean.cargarCantones()}" update=":form:panelUbicacionDestino" />
+						</p:selectOneMenu>
+						<p:selectOneMenu id="cantonDestino" value="#{recoleccionTransporteDesechosBean.cantonDestino}" converter="selectItemConverter" styleClass="w100" required="#{recoleccionTransporteDesechosBean.panelAdicionarVisible}">
+							<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+							<f:selectItems value="#{recoleccionTransporteDesechosBean.cantones}" />
+						</p:selectOneMenu>
+					</h:panelGrid>
+				</p:panelGrid>
+			</h:panelGroup>
+
+			<h:inputHidden validator="#{recoleccionTransporteDesechosBean.validateData}" />
+		</h:panelGroup>
+	</h:panelGroup>
+
+	<div class="buttons">
+		<p:commandButton value="#{recoleccionTransporteDesechosBean.editar ? 'Actualizar' : 'Aceptar'}" oncomplete="toogleAdicionarRecoleccionTransporte(xhr, status, args)" actionListener="#{recoleccionTransporteDesechosBean.aceptar()}" process="@this :form:datosRecoleccionTransporte" update=":form:datosRecoleccionTransporte :form:listadoRecoleccionTransporte " />
+		<p:commandButton value="Cancelar" styleClass="secondary" onclick="PF('adicionarRecoleccionTransporte').toggle()" process="@this" actionListener="#{recoleccionTransporteDesechosBean.cancelar()}">
+			<p:resetInput target="@form" />
+		</p:commandButton>
+	</div>
+
+	<ui:include src="/prevencion/registrogeneradordesechos/utiles/seleccionarEmpresaModal.xhtml" />
+
+
+	<script type="text/javascript">
+	function toogleAdicionarRecoleccionTransporte(xhr, status, args) {
+	    if(args.addRecoleccionTransporte) {
+	    	PF('adicionarRecoleccionTransporte').toggle();
+	    }            
+	}
+</script>
+	<p:separator />
+</p:panel>
+
+</html>

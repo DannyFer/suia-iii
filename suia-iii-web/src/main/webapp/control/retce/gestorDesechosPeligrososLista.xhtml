@@ -1,0 +1,106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+	<ui:composition template="/WEB-INF/templates/default.xhtml" 
+		xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:p="http://primefaces.org/ui"	
+		xmlns:pe="http://primefaces.org/ui/extensions"
+		xmlns:t="http://myfaces.apache.org/tomahawk"
+		xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+		xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite">
+		<ui:define name="content">
+			
+			<h:form id="formInformacionTable" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }">
+				<p:panel style="text-align:center;">
+					<f:facet name="header">
+						<h:outputText value="Declaraciones anuales de residuos y desechos peligrosos y especiales - Declaración de gestor" styleClass="uppercase"/>
+					</f:facet>
+				</p:panel>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Información del operador"/>
+					</f:facet>
+					<p:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25,null w75">
+						<h:outputText value="RUC / Cédula:"/>
+						<h:outputText value="#{loginBean.usuario.nombre}"/>					
+						<h:outputText value="Nombre:"/>
+						<h:outputText value="#{gestorDesechosPeligrososController.nombreUsuario}"/>					
+						<h:outputText value="Representante legal:" rendered="#{not empty gestorDesechosPeligrososController.representanteLegal}"/>
+						<h:outputText value="#{gestorDesechosPeligrososController.representanteLegal}" rendered="#{not empty gestorDesechosPeligrososController.representanteLegal}"/>						
+					</p:panelGrid>				
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Información del proyecto"/>
+					</f:facet>
+					<p:panelGrid columns="2" styleClass="panel_data w1000"
+						columnClasses="header w25,null w75">
+						<h:outputText value="Nombre Proyecto:"/>
+						<h:outputText value="#{gestorDesechosPeligrososController.informacionProyecto.nombreProyecto}"/>					
+						<h:outputText value="#{gestorDesechosPeligrososController.informacionProyecto.esEmisionFisica?'Nombre Proceso':'Tipo de Trámite'}:"/>
+						<h:outputText value="#{gestorDesechosPeligrososController.informacionProyecto.nombreProceso}"/>
+						<h:outputText value="Código Proyecto"/>
+						<h:outputText value="#{gestorDesechosPeligrososController.informacionProyecto.esEmisionFisica ? 
+						gestorDesechosPeligrososController.informacionProyecto.numeroResolucion : gestorDesechosPeligrososController.informacionProyecto.codigo}"/>
+					</p:panelGrid>				
+				</p:panelGrid>
+			</h:form>
+
+			<h:form id="formTramiteTable" prependId="false" onkeypress="if (event.keyCode == 13) {return false; }">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText value="Lista de declaraciones anuales de residuos y desechos peligrosos y especiales - Declaración de gestor" styleClass="uppercase"/>
+					</f:facet>
+					<p:dataTable id="listaDeclaracionTable" value="#{gestorDesechosPeligrososController.listGestorDesechosPeligrosos}" var="item"
+					paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" currentPageReportTemplate="{currentPage} de {totalPages}" rows="15">
+						<f:facet name="header">
+							<p:commandButton icon="ui-icon-plus" value="#{msg['button.agregar']}" process=":formTramiteTable:listaDeclaracionTable" update=":formTramiteTable" 
+							style="float:right" oncomplete="PF('tramiteDiag').show()"/>
+						</f:facet>
+						<p:column headerText="Código">
+							<h:outputText value="#{item.codigo}"/>
+						</p:column>
+						<p:column headerText="Año de declaración">
+							<h:outputText value="#{item.anio}"/>
+						</p:column>
+						<p:column headerText="Acciones">
+							<center>
+								<p:commandButton icon="ui-icon-pencil" title="#{msg['button.editar']}" styleClass="secondary"  process=":formTramiteTable:listaDeclaracionTable" update="@all" 
+									actionListener="#{gestorDesechosPeligrososController.editarDeclaracion(item)}" rendered="#{!item.enviado}"/>
+								<p:commandButton icon="ui-icon-trash" title="#{msg['button.eliminar']}" styleClass="secondary"  process=":formTramiteTable:listaDeclaracionTable" update=":formTramiteTable:listaDeclaracionTable" 
+									actionListener="#{gestorDesechosPeligrososController.eliminarDeclaracion(item)}" rendered="#{!item.enviado}"/>
+								<p:commandButton icon="ui-icon-search" title="#{msg['button.eliminar']}" styleClass="secondary" actionListener="#{gestorDesechosPeligrososController.verDeclaracion(item)}"
+									rendered="#{item.enviado}"/>
+							</center>
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+			</h:form>
+
+			<h:form id="formTramiteDialogs">
+				<p:dialog id="tramiteDiag" widgetVar="tramiteDiag" header="Trámite" width="900px" closable="false">
+					<p:panelGrid id="tramiteDiagGrid" columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+						<h:outputText value="Año de declaración:" for="anioDeclaracion" />
+						<p:selectOneMenu value="#{gestorDesechosPeligrososController.gestorDesechosPeligrosos.anio}" id="anioDeclaracion" style="width: 20%;" 
+							required="true" requiredMessage="El campo año es requerido">
+							<f:selectItem itemLabel="Seleccione" itemValue=""/>
+							<f:selectItems value="#{gestorDesechosPeligrososController.listaAniosMeta}" 
+								var="anio" itemLabel="#{anio.toString()}" itemValue="#{anio.toString()}"/>
+						</p:selectOneMenu>
+					</p:panelGrid>
+					<t:div styleClass="buttons">
+						<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('tramiteDiag').hide()" styleClass="secondary"
+							update=":formTramiteDialogs:tramiteDiagGrid" actionListener="#{gestorDesechosPeligrososController.resetDeclaracion()}"/>
+						<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}" process="tramiteDiag" oncomplete="if(!args.validationFailed) PF('tramiteDiag').hide();"
+							update=":formTramiteDialogs:tramiteDiagGrid"
+							actionListener="#{gestorDesechosPeligrososController.agregarDeclaracion()}"/>
+					</t:div>
+				</p:dialog>
+			</h:form>
+		</ui:define>
+	</ui:composition>
+</html>

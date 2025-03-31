@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<h:form>
+			<p:panelGrid columns="2" layout="grid">
+				<f:facet name="header">
+					<h:outputText value="Datos denuncia" />
+				</f:facet>
+				<h:outputLabel value="Fecha del evento o contingenca *:"
+					for="fechaEvento" />
+				<p:calendar id="fechaEvento"
+					value="#{denunciaBean.denuncia.fechaEvento}"
+					readonly="#{denunciaBean.desabilitarCampos}" required="true"
+					requiredMessage="Fecha del evento o contingenca es requerida" />
+				<h:outputLabel value="Lugar del evento o contingencia *:"
+					for="luegarEvento" />
+				<p:inputText id="luegarEvento"
+					value="#{denunciaBean.denuncia.lugarEvento}"
+					readonly="#{denunciaBean.desabilitarCampos}" required="true"
+					size="50"
+					requiredMessage="Lugar del evento o contingencia es requerido" />
+				<h:outputLabel value="Provincia *:" for="cmb_provincias" />
+				<p:selectOneMenu value="#{denunciaBean.provincia}"
+					id="cmb_provincias" requiredMessage="Provincia es requerido">
+					<f:selectItems
+						value="#{denunciaController.denunciaBean.provincias}"
+						var="provincia" itemValue="#{provincia}"
+						itemLabel="#{provincia.nombre}" />
+					<f:converter converterId="selectItemConverter" />
+					<p:ajax listener="#{denunciaController.cargarCantones}"
+						update="cmb_cantones" />
+				</p:selectOneMenu>
+				<h:outputLabel value="Cant&oacute;n :" for="cmb_cantones" />
+				<p:selectOneMenu value="#{denunciaBean.canton}" id="cmb_cantones">
+					<f:selectItems value="#{denunciaBean.cantones}" var="canton"
+						itemValue="#{canton}" itemLabel="#{canton.nombre}" />
+					<f:converter converterId="selectItemConverter" />
+					<p:ajax listener="#{denunciaController.cargarParroquias}"
+						update="cmb_parroquias" />
+				</p:selectOneMenu>
+				<h:outputLabel value="Parroquia :" for="cmb_parroquias" />
+				<p:selectOneMenu value="#{denunciaBean.parroquia}"
+					id="cmb_parroquias">
+					<f:selectItems value="#{denunciaBean.parroquias}" var="parroquia"
+						itemValue="#{parroquia}" itemLabel="#{parroquia.nombre}" />
+					<f:converter converterId="selectItemConverter" />
+				</p:selectOneMenu>
+				<h:outputLabel value="Referencias *:" for="referencia" />
+				<p:inputTextarea id="referencia"
+					value="#{denunciaBean.denuncia.referencia}"
+					readonly="#{denunciaBean.desabilitarCampos}" cols="45" rows="3"
+					requiredMessage="Referencias es requerido" />
+
+				<h:outputLabel
+					value="Breve descripci&oacute;n del evento o supuesta contaminacion :"
+					for="descripcion" />
+				<p:inputTextarea id="descripcion"
+					value="#{denunciaBean.denuncia.descripcion}"
+					readonly="#{denunciaBean.desabilitarCampos}" cols="45" rows="3" />
+				<h:outputLabel value="Responsable en caso de conocerlo :"
+					for="responsable" />
+				<p:inputText id="responsable"
+					value="#{denunciaBean.denuncia.responsable}"
+					readonly="#{denunciaBean.desabilitarCampos}" />
+				<h:outputLabel value="Sustancias o producctos involucrados :"
+					for="sustancia" />
+				<p:inputText id="sustancia"
+					value="#{denunciaBean.denuncia.sustanciaInvolucrada}" size="50" />
+				<h:outputLabel value="Medidas que se han adoptado :" for="medidas" />
+				<p:inputTextarea id="medidas"
+					value="#{denunciaBean.denuncia.medidasRealizadas}"
+					readonly="#{denunciaBean.desabilitarCampos}" cols="45" rows="3" />
+			</p:panelGrid>
+			<br />
+			<p:panelGrid columns="2" layout="grid">
+				<f:facet name="header">
+					<h:outputText value="Datos de contacto" />
+				</f:facet>
+				<h:outputLabel value="Nombre :" for="nombre" />
+				<p:inputText id="nombre" value="#{denunciaBean.denunciante.nombre}"
+					readonly="#{denunciaBean.desabilitarCampos}" />
+				<h:outputLabel value="Tel&eacute;fono *:" for="telefono" />
+				<p:inputText id="telefono"
+					value="#{denunciaBean.denunciante.telefono}"
+					readonly="#{denunciaBean.desabilitarCampos}" />
+				<h:outputLabel value="Direcci&oacute;n :" for="direccion" />
+				<p:inputTextarea id="direccion"
+					value="#{denunciaBean.denunciante.direccion}"
+					readonly="#{denunciaBean.desabilitarCampos}" cols="45" rows="3" />
+				<h:outputLabel value="C.I :" for="identificacion" />
+				<p:inputText id="identificacion"
+					value="#{denunciaBean.denunciante.identificacion}"
+					readonly="#{denunciaBean.desabilitarCampos}" />
+
+				<h:outputLabel value="Anexos" />
+				<p:fileUpload value="#{denunciaBean.file}" mode="simple"
+					skinSimple="true" />
+
+			</p:panelGrid>
+			<br />
+			<p:panelGrid columns="2" layout="grid" style="text-align: center">
+				<f:facet name="header">
+					<h:outputLabel value="¿Aceptar o rechazar denuncia?" />
+				</f:facet>
+				<p:commandButton value="Aceptar Denuncia"
+					action="#{denunciaController.aceptarDenuncia()}"
+					rendered="#{!denunciaBean.desabilitarCampos}" update="@form" />
+				<p:commandButton value="Rechazar Denuncia"
+					action="#{denunciaController.rechazarDenuncia()}"
+					rendered="#{!denunciaBean.desabilitarCampos}" />
+			</p:panelGrid>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

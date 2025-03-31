@@ -1,0 +1,833 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+      xmlns:p="http://primefaces.org/ui">
+<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}" target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+
+    </ui:define>
+    <ui:define name="content">
+
+        <f:event type="preRenderView"
+                 listener="#{completarInformeFinalPPSController.validarTareaBpm()}"/>
+        <h:form id="form">
+            <p:panel>
+                <f:facet name="header">
+                    <h:outputText value="Informe Final Participación Social"/>
+                </f:facet>
+
+                <p:panelGrid columns="1" styleClass="w100" id="formMediosConvocatoria">
+
+
+                    <p:dataTable id="tblFinalPPS" widgetVar="tblFinalPPS" rows="10"
+                                 paginator="true" paginatorAlwaysVisible="false"
+                                 var="registro" value="#{completarInformeFinalPPSController.listaRegistroMedios}">
+
+                        <f:facet name="header">
+                            <h:outputText value="Medios de Convocatoria *"/>
+
+                            <p:commandButton rendered="#{!completarInformeFinalPPSController.revisar}"
+                                             styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg"
+                                             icon="ui-icon-plusthick" value="Adicionar"
+                                             update=":frmDlg1:dlg1" process="@this"
+                                             action="#{completarInformeFinalPPSController.crearRegistro()}"
+                                             oncomplete="PF('dlg1').show();">
+                                <p:resetInput target=":frmDlg1:dlg1"/>
+                            </p:commandButton>
+
+
+                        </f:facet>
+                        <p:column headerText="Medios de Concovatoria"
+                                  filterMatchMode="contains" styleClass="alCenter w15">
+                            <h:outputText value="#{registro.catalogoMedio.nombreMedio}"/>
+                        </p:column>
+                        <p:column headerText="Fecha de Inicio de Convocatoria"
+                                  filterMatchMode="contains" styleClass="alCenter w15">
+                            <h:outputText value="#{registro.fechaInicio}"/>
+                        </p:column>
+                        <p:column headerText="Fecha de Finalización de Convocatoria"
+                                  filterMatchMode="contains" styleClass="alCenter w15">
+                            <h:outputText value="#{registro.fechaFin}"/>
+                        </p:column>
+                        <p:column headerText="Medios Utilizados - Lugares"
+                                  filterMatchMode="contains" styleClass="alCenter w15">
+                            <h:outputText value="#{registro.lugar}"/>
+                        </p:column>
+                        <p:column headerText="Respaldo" filterMatchMode="contains"
+                                  styleClass="alCenter w15">
+                            <h:outputText value="#{registro.nombreDocumentoResplado}"/>
+                        </p:column>
+                        <p:column styleClass="w40px alCenter" rendered="#{!completarInformeFinalPPSController.revisar}">
+                            <p:commandButton icon="ui-icon-pencil"
+                                             styleClass="button-small primary"
+                                             action="#{completarInformeFinalPPSController.editarRegistro(registro)}"
+                                             update=":frmDlg1:dlg1" process="@this"
+                                             oncomplete="PF('dlg1').show()"/>
+                            <p:commandButton icon="ui-icon-circle-close"
+                                             styleClass="button-small primary"
+                                             action="#{completarInformeFinalPPSController.eliminarRegistro(registro)}"
+                                             update=":form:tblFinalPPS" process="@this">
+                                <p:confirm header="Confirmación"
+                                           message="¿Está seguro que desea eliminar este Hallazgo?"
+                                           icon="ui-icon-alert"/>
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" id="frm_documentoMecanismo">
+                        <h:outputLabel value=" Convocatoria pública: *"/>
+                        <h:panelGrid columns="2" columnClasses="null, field_mrg"
+                                     id="etiquetaGeneral1">
+
+                            <h:outputText
+                                    value="#{empty completarInformeFinalPPSController.documentoMecanismo.nombre? 'Documento:(.pdf|.rar|.zip)': completarInformeFinalPPSController.documentoMecanismo.nombre}"/>
+
+                            <p:commandButton id="downloadGeneral1"
+                                             rendered="#{not empty completarInformeFinalPPSController.documentoMecanismo.nombre}"
+                                             icon="ui-icon-arrowthick-1-s" ajax="false"
+                                             styleClass="button-small primary" title="Ver" immediate="true">
+                                <p:fileDownload
+                                        value="#{completarInformeFinalPPSController.getStreamContent('Mecanismos')}"/>
+                            </p:commandButton>
+                        </h:panelGrid>
+                        <h:outputText/>
+
+
+                        <p:fileUpload rendered="#{!completarInformeFinalPPSController.revisar}"
+                                      fileUploadListener="#{completarInformeFinalPPSController.uploadListenerDocumentosMecanismos}"
+                                      multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf|rar|zip)$/i"
+                                      label="Seleccionar" uploadLabel="Subir"
+                                      invalidFileMessage="Tipo de archivo no válido"
+                                      invalidSizeMessage="Debe adjuntar un archivo no mayor de 5 Mb."
+                                      cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                      auto="true" update="etiquetaGeneral1, downloadGeneral1"/>
+
+                        <br/>
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" id="frm_invitacionPersonal">
+
+                        <h:outputLabel value="Invitación personal: *"/>
+                        <h:panelGrid columns="2" columnClasses="null, field_mrg"
+                                     id="etiquetaGeneral7">
+
+                            <h:outputText
+                                    value="#{empty completarInformeFinalPPSController.invitacionPersonal.nombre? 'Documento:(.zip|.rar|.pdf)': completarInformeFinalPPSController.invitacionPersonal.nombre}"/>
+
+                            <p:commandButton id="downloadGeneral7"
+                                             rendered="#{not empty completarInformeFinalPPSController.invitacionPersonal.nombre}"
+                                             icon="ui-icon-arrowthick-1-s" ajax="false"
+                                             styleClass="button-small primary" title="Ver" immediate="true">
+                                <p:fileDownload
+                                        value="#{completarInformeFinalPPSController.getStreamContent('InvitacionPersonal')}"/>
+                            </p:commandButton>
+                        </h:panelGrid>
+                        <h:outputText/>
+
+
+                        <p:fileUpload rendered="#{!completarInformeFinalPPSController.revisar}"
+                                      fileUploadListener="#{completarInformeFinalPPSController.uploadListenerDocumentosInvitacionPersonal}"
+                                      multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf|rar|zip)$/i"
+                                      label="Seleccionar" uploadLabel="Subir"
+                                      invalidFileMessage="Tipo de archivo no válido"
+                                      invalidSizeMessage="Debe adjuntar un archivo no mayor de 5 Mb."
+                                      cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                      auto="true" update="etiquetaGeneral7, downloadGeneral7"/>
+
+                        <br/>
+                    </p:panelGrid>
+
+
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" id="frm_otro"
+                                 rendered="#{!completarInformeFinalPPSController.revisar or not empty completarInformeFinalPPSController.otro.nombre}">
+
+                        <h:outputLabel value="Otro:"/>
+                        <h:panelGrid columns="2" columnClasses="null, field_mrg"
+                                     id="etiquetaGeneral8">
+
+                            <h:outputText
+                                    value="#{empty completarInformeFinalPPSController.otro.nombre? 'Documento:(.zip|.rar|.pdf)': completarInformeFinalPPSController.otro.nombre}"/>
+
+                            <p:commandButton id="downloadGeneral8"
+                                             rendered="#{not empty completarInformeFinalPPSController.otro.nombre}"
+                                             icon="ui-icon-arrowthick-1-s" ajax="false"
+                                             styleClass="button-small primary" title="Ver" immediate="true">
+                                <p:fileDownload
+                                        value="#{completarInformeFinalPPSController.getStreamContent('Otro')}"/>
+                            </p:commandButton>
+                        </h:panelGrid>
+                        <h:outputText/>
+
+                        <p:fileUpload rendered="#{!completarInformeFinalPPSController.revisar}"
+                                      fileUploadListener="#{completarInformeFinalPPSController.uploadListenerDocumentosOtro}"
+                                      multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf|rar|zip)$/i"
+                                      label="Seleccionar" uploadLabel="Subir"
+                                      invalidFileMessage="Tipo de archivo no válido"
+                                      invalidSizeMessage="Debe adjuntar un archivo no mayor de 5 Mb."
+                                      cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                      auto="true" update="etiquetaGeneral8, downloadGeneral8"/>
+
+                        <br/>
+                    </p:panelGrid>
+
+                </p:panelGrid>
+
+
+            </p:panel>
+        </h:form>
+
+        <h:form id="frmDlg1">
+            <p:dialog id="dlg1" widgetVar="dlg1" header="Medios de Convocatoria"
+                      modal="true">
+                <p:panelGrid id="panel" columns="1" layout="grid" styleClass="w100">
+                    <h:panelGrid layout="grid">
+                        <h:panelGrid columns="2">
+                            <p:outputLabel value="Tipo de Convocatoria" for="catalogo1"/>
+                            <p:selectOneMenu id="catalogo1" required="true" converter="selectItemConverter"
+                                             value="#{completarInformeFinalPPSController.registroMedios.catalogoMedio}">
+                                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                              itemValue="#{null}"/>
+                                <f:selectItems value="#{completarInformeFinalPPSController.listaMedios}" var="medio"
+                                               itemLabel="#{medio.nombreMedio}" itemValue="#{medio}"/>
+                            </p:selectOneMenu>
+                            <p:outputLabel for="fecIniconvocatoria"
+                                           value="Fecha de inicio de convocatoria"/>
+                            <p:calendar id="fecIniconvocatoria" required="true"
+                                        value="#{completarInformeFinalPPSController.registroMedios.fechaInicio}">
+                                <p:ajax event="dateSelect" update="@(.fecFinconvocatoria)"/>
+                            </p:calendar>
+                            <p:outputLabel for="fecFinconvocatoria"
+                                           value="Fecha de finalización de convocatoria"/>
+                            <p:calendar id="fecFinconvocatoria" styleClass="fecFinconvocatoria" required="true"
+                                        mindate="#{completarInformeFinalPPSController.registroMedios.fechaInicio}"
+                                        value="#{completarInformeFinalPPSController.registroMedios.fechaFin}"/>
+                            <p:outputLabel value="Medios utilizados - Lugares" for="lugar"/>
+                            <p:inputTextarea maxlength="50" scrollHeight="10" required="true" id="lugar"
+                                             autoResize="true"
+                                             value="#{completarInformeFinalPPSController.registroMedios.lugar}"/>
+
+                            <p:outputLabel value="Nombre de Documento" for="documento"/>
+                            <p:inputTextarea maxlength="50" scrollHeight="10" required="true" id="documento"
+                                             autoResize="true"
+                                             value="#{completarInformeFinalPPSController.registroMedios.nombreDocumentoResplado}"/>
+
+                        </h:panelGrid>
+                    </h:panelGrid>
+                </p:panelGrid>
+                <p:separator/>
+
+                <div class="buttons">
+                    <p:commandButton
+                            actionListener="#{completarInformeFinalPPSController.agregarRegistro()}"
+                            process="@this :frmDlg1:dlg1" value="Aceptar"
+                            update=":form:tblFinalPPS panel"/>
+                    <p:commandButton icon="ui-icon-close" value="Cancelar" type="button" styleClass="secondary"
+                                     onclick="PF('dlg1').hide();">
+                        <p:resetInput target="frmDlg1"/>
+                    </p:commandButton>
+                </div>
+            </p:dialog>
+        </h:form>
+
+        <!-- ********************** -->
+        <h:form id="formMecanismos">
+            <p:panel>
+                <!-- 				<f:facet name="header"> -->
+                <!-- 					<h:outputText value="Mecanismos de Particiapacion Social" /> -->
+                <!-- 				</f:facet> -->
+
+                <p:panelGrid columns="1" styleClass="w100" id="panelMecanismosPPS">
+
+
+                    <p:dataTable id="tblMecanismosPPS" widgetVar="tblMecanismosPPS"
+                                 rows="10" paginator="true" paginatorAlwaysVisible="false"
+                                 var="mecanismo" value="#{completarInformeFinalPPSController.listaMecanismos}">
+                        <f:facet name="header">
+                            <h:outputText value="Mecanismos de Participación social *"/>
+                            <p:commandButton rendered="#{!completarInformeFinalPPSController.revisar}"
+                                             styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg"
+                                             icon="ui-icon-plusthick" value="Adicionar"
+                                             update=":frmDlg2:dlg2" process="@this"
+                                             action="#{completarInformeFinalPPSController.crearMecanismo}"
+                                             oncomplete="PF('dlg2').show();">
+                                <p:resetInput target=":frmDlg2:dlg2"/>
+                            </p:commandButton>
+                        </f:facet>
+
+                        <p:column headerText="Mecanismos de participación social"
+                                  filterMatchMode="contains" styleClass="alCenter w15">
+                            <h:outputText value="#{mecanismo.catalogoMedio.nombreMedio}"/>
+                        </p:column>
+                        <p:column headerText="Fecha de Inicio de Mecanismo"
+                                  filterMatchMode="contains" styleClass="alCenter w15">
+                            <h:outputText value="#{mecanismo.fechaInicio}"/>
+                        </p:column>
+                        <p:column headerText="Fecha de Finalización de Mecanismo"
+                                  filterMatchMode="contains" styleClass="alCenter w15">
+                            <h:outputText value="#{mecanismo.fechaFin}"/>
+                        </p:column>
+                        <p:column headerText="Medios Utilizados - Lugares"
+                                  filterMatchMode="contains" styleClass="alCenter w15">
+                            <h:outputText value="#{mecanismo.lugar}"/>
+                        </p:column>
+                        <p:column headerText="Hora" filterMatchMode="contains"
+                                  styleClass="alCenter w15">
+                            <h:outputText value="#{mecanismo.hora}">
+                                <f:convertDateTime pattern="HH:mm"/>
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Provincia" filterMatchMode="contains"
+                                  styleClass="alCenter w15">
+                            <h:outputText
+                                    value="#{mecanismo.ubicacionesGeografica.ubicacionesGeografica.ubicacionesGeografica.nombre}"/>
+                        </p:column>
+                        <p:column headerText="Cantón" filterMatchMode="contains"
+                                  styleClass="alCenter w15">
+                            <h:outputText value="#{mecanismo.ubicacionesGeografica.ubicacionesGeografica.nombre}"/>
+                        </p:column>
+                        <p:column headerText="Parroquia" filterMatchMode="contains"
+                                  styleClass="alCenter w15">
+                            <h:outputText value="#{mecanismo.ubicacionesGeografica.nombre}"/>
+                        </p:column>
+                        <p:column headerText="Comunidad" filterMatchMode="contains"
+                                  styleClass="alCenter w15">
+                            <h:outputText value="#{mecanismo.comunidad}"/>
+                        </p:column>
+                        <p:column headerText="Respaldo" filterMatchMode="contains"
+                                  styleClass="alCenter w15">
+                            <h:outputText value="#{mecanismo.nombreDoc}"/>
+                        </p:column>
+                        <p:column styleClass="w40px alCenter" rendered="#{!completarInformeFinalPPSController.revisar}">
+                            <p:commandButton icon="ui-icon-pencil"
+                                             styleClass="button-small primary"
+                                             action="#{completarInformeFinalPPSController.editarMecanismo(mecanismo)}"
+                                             update=":frmDlg2:dlg2" process="@this"
+                                             oncomplete="PF('dlg2').show()"/>
+                            <p:commandButton icon="ui-icon-circle-close"
+                                             styleClass="button-small primary"
+                                             action="#{completarInformeFinalPPSController.eliminarMecanismo(mecanismo)}"
+                                             update=":formMecanismos:tblMecanismosPPS" process="@this">
+                                <p:confirm header="Confirmación"
+                                           message="¿Está seguro que desea eliminar este Hallazgo?"
+                                           icon="ui-icon-alert"/>
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+
+
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" id="frm_actaApertura">
+
+                        <h:outputLabel value="Acta apertura y cierre de CIP: *"/>
+                        <h:panelGrid columns="2" columnClasses="null, field_mrg"
+                                     id="etiquetaGeneral3">
+
+                            <h:outputText
+                                    value="#{empty completarInformeFinalPPSController.actaApertura.nombre? 'Documento:(.zip|.rar|.pdf)': completarInformeFinalPPSController.actaApertura.nombre}"/>
+
+                            <p:commandButton id="downloadGeneral3"
+                                             rendered="#{not empty completarInformeFinalPPSController.actaApertura.nombre}"
+                                             icon="ui-icon-arrowthick-1-s" ajax="false"
+                                             styleClass="button-small primary" title="Ver" immediate="true">
+                                <p:fileDownload
+                                        value="#{completarInformeFinalPPSController.getStreamContent('ActaApertura')}"/>
+                            </p:commandButton>
+                        </h:panelGrid>
+                        <h:outputText/>
+
+
+                        <p:fileUpload rendered="#{!completarInformeFinalPPSController.revisar}"
+                                      fileUploadListener="#{completarInformeFinalPPSController.uploadListenerDocumentosActaApertura}"
+                                      multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf|rar|zip)$/i"
+                                      label="Seleccionar" uploadLabel="Subir"
+                                      invalidFileMessage="Tipo de archivo no válido"
+                                      invalidSizeMessage="Debe adjuntar un archivo no mayor de 5 Mb."
+                                      cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                      auto="true" update="etiquetaGeneral3, downloadGeneral3"/>
+
+                        <br/>
+                    </p:panelGrid>
+
+
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" id="frm_registroCIP">
+
+                        <h:outputLabel value="Registro CIP: *"/>
+                        <h:panelGrid columns="2" columnClasses="null, field_mrg"
+                                     id="etiquetaGeneral4">
+
+                            <h:outputText
+                                    value="#{empty completarInformeFinalPPSController.registroCIP.nombre? 'Documento:(.zip|.rar|.pdf)': completarInformeFinalPPSController.registroCIP.nombre}"/>
+
+                            <p:commandButton id="downloadGeneral4"
+                                             rendered="#{not empty completarInformeFinalPPSController.registroCIP.nombre}"
+                                             icon="ui-icon-arrowthick-1-s" ajax="false"
+                                             styleClass="button-small primary" title="Ver" immediate="true">
+                                <p:fileDownload
+                                        value="#{completarInformeFinalPPSController.getStreamContent('RegistroCIP')}"/>
+                            </p:commandButton>
+                        </h:panelGrid>
+                        <h:outputText/>
+
+
+                        <p:fileUpload rendered="#{!completarInformeFinalPPSController.revisar}"
+                                      fileUploadListener="#{completarInformeFinalPPSController.uploadListenerDocumentosRegistroCIP}"
+                                      multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf|rar|zip)$/i"
+                                      label="Seleccionar" uploadLabel="Subir"
+                                      invalidFileMessage="Tipo de archivo no válido"
+                                      invalidSizeMessage="Debe adjuntar un archivo no mayor de 5 Mb."
+                                      cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                      auto="true" update="etiquetaGeneral4, downloadGeneral4"/>
+
+                        <br/>
+                    </p:panelGrid>
+
+
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" id="frm_actaAsamblea">
+
+                        <h:outputLabel value="Acta de Asamblea: *"/>
+                        <h:panelGrid columns="2" columnClasses="null, field_mrg"
+                                     id="etiquetaGeneral5">
+
+                            <h:outputText
+                                    value="#{empty completarInformeFinalPPSController.actaAsamblea.nombre? 'Documento:(.zip|.rar|.pdf)': completarInformeFinalPPSController.actaAsamblea.nombre}"/>
+
+                            <p:commandButton id="downloadGeneral5"
+                                             rendered="#{not empty completarInformeFinalPPSController.actaAsamblea.nombre}"
+                                             icon="ui-icon-arrowthick-1-s" ajax="false"
+                                             styleClass="button-small primary" title="Ver" immediate="true">
+                                <p:fileDownload
+                                        value="#{completarInformeFinalPPSController.getStreamContent('ActaAsamblea')}"/>
+                            </p:commandButton>
+                        </h:panelGrid>
+                        <h:outputText/>
+
+
+                        <p:fileUpload rendered="#{!completarInformeFinalPPSController.revisar}"
+                                      fileUploadListener="#{completarInformeFinalPPSController.uploadListenerDocumentosActaAsamblea}"
+                                      multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf|rar|zip)$/i"
+                                      label="Seleccionar" uploadLabel="Subir"
+                                      invalidFileMessage="Tipo de archivo no válido"
+                                      invalidSizeMessage="Debe adjuntar un archivo no mayor de 5 Mb."
+                                      cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                      auto="true" update="etiquetaGeneral5, downloadGeneral5"/>
+
+                        <br/>
+                    </p:panelGrid>
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" id="frm_registroAsistencia">
+
+                        <h:outputLabel value="Registro de Asistencia: *"/>
+                        <h:panelGrid columns="2" columnClasses="null, field_mrg"
+                                     id="etiquetaGeneral6">
+
+                            <h:outputText
+                                    value="#{empty completarInformeFinalPPSController.registroAsistencia.nombre? 'Documento:(.zip|.rar|.pdf)': completarInformeFinalPPSController.registroAsistencia.nombre}"/>
+
+                            <p:commandButton id="downloadGeneral6"
+                                             rendered="#{not empty completarInformeFinalPPSController.registroAsistencia.nombre}"
+                                             icon="ui-icon-arrowthick-1-s" ajax="false"
+                                             styleClass="button-small primary" title="Ver" immediate="true">
+                                <p:fileDownload
+                                        value="#{completarInformeFinalPPSController.getStreamContent('RegistroAsistencia')}"/>
+                            </p:commandButton>
+                        </h:panelGrid>
+                        <h:outputText/>
+
+
+                        <p:fileUpload rendered="#{!completarInformeFinalPPSController.revisar}"
+                                      fileUploadListener="#{completarInformeFinalPPSController.uploadListenerDocumentosRegistroAsistencia}"
+                                      multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf|rar|zip)$/i"
+                                      label="Seleccionar" uploadLabel="Subir"
+                                      invalidFileMessage="Tipo de archivo no válido"
+                                      invalidSizeMessage="Debe adjuntar un archivo no mayor de 5 Mb."
+                                      cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                      auto="true" update="etiquetaGeneral6, downloadGeneral6"/>
+
+                        <br/>
+                    </p:panelGrid>
+
+
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" id="frm_documentoMedios"
+                                 rendered="#{!completarInformeFinalPPSController.revisar or not empty completarInformeFinalPPSController.documentoMedios.nombre}">
+
+                        <h:panelGrid columns="2" columnClasses="null, field_mrg"
+                                     id="etiquetaGeneral">
+                            <h:outputLabel value="Otro"/>
+                            <h:outputText
+                                    value="#{empty completarInformeFinalPPSController.documentoMedios.nombre? 'Documento:(.zip|.rar|.pdf)': completarInformeFinalPPSController.documentoMedios.nombre}"/>
+
+                            <p:commandButton id="downloadGeneral"
+                                             rendered="#{not empty completarInformeFinalPPSController.documentoMedios.nombre}"
+                                             icon="ui-icon-arrowthick-1-s" ajax="false"
+                                             styleClass="button-small primary" title="Ver" immediate="true">
+                                <p:fileDownload
+                                        value="#{completarInformeFinalPPSController.getStreamContent('Medios')}"/>
+                            </p:commandButton>
+                        </h:panelGrid>
+                        <h:outputText/>
+
+
+                        <p:fileUpload rendered="#{!completarInformeFinalPPSController.revisar}"
+                                      fileUploadListener="#{completarInformeFinalPPSController.uploadListenerDocumentosMedios}"
+                                      multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(zip|rar|pdf)$/i"
+                                      label="Seleccionar" uploadLabel="Subir"
+                                      invalidFileMessage="Tipo de archivo no válido"
+                                      invalidSizeMessage="Debe adjuntar un archivo no mayor de 5 Mb."
+                                      cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                      auto="true" update="etiquetaGeneral, downloadGeneral"/>
+
+                        <br/>
+                    </p:panelGrid>
+                </p:panelGrid>
+
+            </p:panel>
+        </h:form>
+
+        <h:form id="frmdatos">
+            <p:panel>
+                <h:panelGrid styleClass="w100" layout="grid">
+                    <f:facet name="header">
+                        <h:outputText value="Informe final Participacion Social"/>
+                    </f:facet>
+
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" id="frm_informeFinal">
+
+                        <h:outputLabel value="Informe final PPS: *"/>
+                        <h:panelGrid columns="2" columnClasses="null, field_mrg"
+                                     id="etiquetaGeneral2">
+
+                            <h:outputText
+                                    value="#{empty completarInformeFinalPPSController.informeFinal.nombre? 'Documento:(.zip|.rar|.pdf)': completarInformeFinalPPSController.informeFinal.nombre}"/>
+
+                            <p:commandButton id="downloadGeneral2"
+                                             rendered="#{not empty completarInformeFinalPPSController.informeFinal.nombre}"
+                                             icon="ui-icon-arrowthick-1-s" ajax="false"
+                                             styleClass="button-small primary" title="Ver" immediate="true">
+                                <p:fileDownload
+                                        value="#{completarInformeFinalPPSController.getStreamContent('InformeFinal')}"/>
+                            </p:commandButton>
+                        </h:panelGrid>
+                        <h:outputText/>
+
+
+                        <p:fileUpload rendered="#{!completarInformeFinalPPSController.revisar}"
+                                      fileUploadListener="#{completarInformeFinalPPSController.uploadListenerDocumentosInformeFinal}"
+                                      multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf|rar|zip)$/i"
+                                      label="Seleccionar" uploadLabel="Subir"
+                                      invalidFileMessage="Tipo de archivo no válido"
+                                      invalidSizeMessage="Debe adjuntar un archivo no mayor de 5 Mb."
+                                      cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                      auto="true" update="etiquetaGeneral2, downloadGeneral2"/>
+
+                        <br/>
+                    </p:panelGrid>
+
+
+                    <p:panelGrid columns="1" styleClass="w100" id="formPreguntasObservaciones">
+
+
+                        <p:dataTable id="tblPreguntasObservaciones" widgetVar="tblPreguntasObservaciones" rows="10"
+                                     paginator="true" paginatorAlwaysVisible="false" rowIndexVar="index"
+                                     var="pregunta" value="#{completarInformeFinalPPSController.listaPreguntas}">
+
+                            <f:facet name="header">
+                                <h:outputText value="Preguntas - observaciones realizados en el proceso"/>
+
+                                <p:commandButton rendered="#{!completarInformeFinalPPSController.revisar}"
+                                                 styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg"
+                                                 icon="ui-icon-plusthick" value="Adicionar"
+                                                 update=":frmdatos:tblPreguntasObservaciones" process="@this"
+                                                 action="#{completarInformeFinalPPSController.crearPregunta()}">
+                                </p:commandButton>
+
+
+                            </f:facet>
+
+                            <p:column headerText="No" styleClass="alCenter w5">
+                                <h:outputText value="#{index + 1}"/>
+                            </p:column>
+
+                            <p:column headerText="Observaciones del proceso de participación social *"
+                                      filterMatchMode="contains" styleClass="alCenter w20"
+                                      filterValue="#{pregunta.pregunta}">
+                                <p:inputTextarea maxlength="2200" scrollHeight="10" required="true" id="preguntas"
+                                                 style="height: 60px;overflow: auto"
+                                                 requiredMessage="El campo 'Observaciones del proceso de participación social' es requerido."
+                                                 disabled="#{completarInformeFinalPPSController.revisar}"
+                                                 value="#{pregunta.pregunta}"
+                                                 autoResize="true" styleClass="w100"><p:ajax/></p:inputTextarea>
+
+
+                            </p:column>
+
+                            <p:column headerText="Respuestas dadas durante el PPS"
+                                      filterMatchMode="contains" styleClass="alCenter w30"
+                                      filterValue="#{pregunta.respuestaFacilitador}">
+                                <p:inputTextarea maxlength="2200" scrollHeight="10" required="false"
+                                                 id="respuestaFacilitador" style="height: 60px;overflow: auto"
+                                                 disabled="#{completarInformeFinalPPSController.revisar}"
+                                                 value="#{pregunta.respuestaFacilitador}"
+                                                 autoResize="true" styleClass="w100"><p:ajax/></p:inputTextarea>
+
+
+                            </p:column>
+                            <p:column headerText="Detalle de la inclusión de las observaciones en el estudio ambiental o justificación de su no inclusión"
+                                      filterMatchMode="contains" styleClass="alCenter w30"
+                                      filterValue="#{pregunta.respuestaPromotor}">
+                                <p:inputTextarea maxlength="2200" scrollHeight="10" required="false"
+                                                 id="respuestaPromotor" style="height: 60px;overflow: auto"
+                                                 disabled="true"
+                                                 value="#{pregunta.respuestaPromotor}"
+                                                 autoResize="true" styleClass="w100"><p:ajax/></p:inputTextarea>
+
+
+                            </p:column>
+                            <p:column styleClass="w40px alCenter"
+                                      rendered="#{!completarInformeFinalPPSController.revisar}">
+                                <p:commandButton icon="ui-icon-pencil" rendered="false"
+                                                 styleClass="button-small primary"
+                                                 action="#{completarInformeFinalPPSController.editarRegistro(pregunta)}"
+                                                 update=":frmDlg1:dlg1" process="@this"
+                                                 oncomplete="PF('dlg1').show()"/>
+                                <p:commandButton icon="ui-icon-circle-close"
+                                                 styleClass="button-small primary"
+                                                 action="#{completarInformeFinalPPSController.eliminarPregunta(pregunta)}"
+                                                 update=":frmdatos:tblPreguntasObservaciones" process="@this">
+                                    <p:confirm header="Confirmación"
+                                               message="¿Está seguro que desea eliminar esta pregunta?"
+                                               icon="ui-icon-alert"/>
+                                </p:commandButton>
+                            </p:column>
+                        </p:dataTable>
+                    </p:panelGrid>
+
+
+                </h:panelGrid>
+            </p:panel>
+
+
+            <!--respuestas del promotor-->
+
+            <p:separator
+                    rendered="#{ completarInformeFinalPPSController.revisar and completarInformeFinalPPSController.participacionSocialAmbiental.informacionComplementariaRespuesta != null and not empty completarInformeFinalPPSController.participacionSocialAmbiental.informacionComplementariaRespuesta}"/>
+            <p:panelGrid columns="1" styleClass="w100"
+                         rendered="#{ completarInformeFinalPPSController.revisar and completarInformeFinalPPSController.participacionSocialAmbiental.informacionComplementariaRespuesta != null and not empty completarInformeFinalPPSController.participacionSocialAmbiental.informacionComplementariaRespuesta}">
+
+                <f:facet name="header">
+                    <h:outputText value="Documentación o información complementaria del PPS"/>
+                </f:facet>
+                <p:outputLabel value="Respuestas" for="respuesta"/>
+                <p:inputTextarea maxlength="2200" scrollHeight="10" required="true" id="respuesta"
+                                 style="overflow: auto;  min-height: 100px;"
+                                 disabled="#{ingresarDocumentacionComplementariaBean.revisar}"
+                                 requiredMessage="Respuesta Obligatoria"
+                                 value="#{ingresarDocumentacionComplementariaBean.proyectoPPS.informacionComplementariaRespuesta}"
+                                 autoResize="true"/>
+
+
+                <h:panelGrid columns="2" columnClasses="null, field_mrg" id="wwww"
+                             rendered="#{not empty ingresarDocumentacionComplementariaController.ingresarDocumentacionComplementariaBean.documentos.get('documentacionComplementariaPPS')}">
+
+                    <p:outputLabel
+                            value="#{empty ingresarDocumentacionComplementariaController.ingresarDocumentacionComplementariaBean.documentos.get('documentacionComplementariaPPS') ? 'Documento(.zip|.rar|.pdf)' :
+                                ingresarDocumentacionComplementariaController.ingresarDocumentacionComplementariaBean.documentos.get('documentacionComplementariaPPS').nombre}"/>
+                    <p:commandButton id="downloadInformeSistematizacionPPS" icon="ui-icon-arrowthick-1-s"
+                                     ajax="false" styleClass="button-small primary" title="Ver"
+                                     immediate="true"
+                                     rendered="#{not empty ingresarDocumentacionComplementariaController.ingresarDocumentacionComplementariaBean.documentos.get('documentacionComplementariaPPS')}">
+                        <p:fileDownload
+                                value="#{ingresarDocumentacionComplementariaController.getStreamContent('documentacionComplementariaPPS')}"/>
+                    </p:commandButton>
+                </h:panelGrid>
+
+
+            </p:panelGrid>
+
+            <!--respuestas del promotor-->
+
+
+            <p:panelGrid columns="1" layout="grid" styleClass="w100 observaciones" id="pnl11" rendered="#{!completarInformeFinalPPSController.tipo.equals('revisarDatos')}">
+
+                <p:outputLabel for="requiere-modificaciones"
+                               value="¿Está correcta la información correspondiente al informe final del PPS?"
+                               rendered="#{completarInformeFinalPPSController.revisar}"/>
+                <p:selectOneRadio id="requiere-modificaciones"
+                                  value="#{completarInformeFinalPPSController.informacionCompleta}"
+                                  required="#{completarInformeFinalPPSController.revisar}"
+                                  rendered="#{completarInformeFinalPPSController.revisar}">
+                    <f:selectItem itemLabel="Si" itemValue="true"/>
+                    <f:selectItem itemLabel="No" itemValue="false"/>
+                    <p:ajax update="@(.observaciones)"/>
+                </p:selectOneRadio>
+
+ 
+                <p:fragment>
+                    <h:panelGroup id="pnl1">
+
+                        <observaciones:tablaObservaciones aparace="true"
+                                                          soloLectura="#{!mediosVerificacionController.mediosVerificacionBean.revisar}"
+                                                          mostrarSiVacio="#{mediosVerificacionController.mediosVerificacionBean.revisar}"
+                                                          idClase="#{mediosVerificacionController.mediosVerificacionBean.proyectosBean.proyecto.id}"
+                                                          nombreClase="ParticipacionSocial"
+                                                          seccion="completarInformeFinalPPS"
+                                                          rol="admin"
+                                                          idComponent="pnl1"
+                                                          componenteActualizarEliminar="pnl1"/>
+                    </h:panelGroup>
+                </p:fragment>
+                <p:panelGrid columns="1" layout="grid" styleClass="w100 observaciones" id="pnl12"
+                             rendered="#{completarInformeFinalPPSController.informacionCompleta}">
+
+                    <p:outputLabel for="requiereInformacionPromotor"
+                                   value="¿Requiere documentación o información complementaria del PPS por parte del promotor?"
+                                   rendered="#{completarInformeFinalPPSController.revisar}"/>
+                    <p:selectOneRadio id="requiereInformacionPromotor"
+                                      value="#{completarInformeFinalPPSController.requiereInformacionPromotor}"
+                                      required="#{completarInformeFinalPPSController.revisar}"
+                                      rendered="#{completarInformeFinalPPSController.revisar}">
+                        <f:selectItem itemLabel="Si" itemValue="true"/>
+                        <f:selectItem itemLabel="No" itemValue="false"/>
+                    </p:selectOneRadio>
+
+
+                    <p:fragment>
+                        <h:panelGroup id="pnl2">
+
+                            <observaciones:tablaObservaciones aparace="true"
+                                                              soloLectura="#{!mediosVerificacionController.mediosVerificacionBean.revisar}"
+                                                              mostrarSiVacio="#{mediosVerificacionController.mediosVerificacionBean.revisar}"
+                                                              idClase="#{mediosVerificacionController.mediosVerificacionBean.proyectosBean.proyecto.id}"
+                                                              nombreClase="ParticipacionSocial"
+                                                              seccion="ingresarCorreccionesDocumentacion"
+                                                              rol="admin"
+                                                              idComponent="pnl2"
+                                                              componenteActualizarEliminar="pnl2"/>
+                        </h:panelGroup>
+                    </p:fragment>
+
+
+                </p:panelGrid>
+
+            </p:panelGrid>
+
+
+            <div class="buttons main">
+                <p:commandButton value="Guardar" title="Completar tarea" styleClass="primary"
+                                 update="@this"
+                                 rendered="#{!completarInformeFinalPPSController.tipo.equals('revisarDatos')}"
+                                 action="#{completarInformeFinalPPSController.guardar()}"
+                                 icon="ui-icon-check">
+                </p:commandButton>
+
+                <p:commandButton value="Enviar" title="Completar tarea" styleClass="primary" update="@this"
+                                 action="#{completarInformeFinalPPSController.enviarDatos()}"
+                                 rendered="#{!completarInformeFinalPPSController.tipo.equals('revisarDatos')}"
+                                 icon="ui-icon-check">
+                </p:commandButton>
+
+            </div>
+        </h:form>
+        <h:form id="frmDlg2">
+            <p:dialog id="dlg2" widgetVar="dlg2" header="Mecanismos de participación social"
+                      modal="true">
+                <p:panelGrid id="panel1" columns="1" layout="grid" styleClass="w100">
+                    <h:panelGrid layout="grid">
+                        <h:panelGrid columns="2">
+
+                            <p:outputLabel value="Mecanismo de participación social" for="catalogM"/>
+                            <p:selectOneMenu id="catalogM" converter="selectItemConverter"
+                                             value="#{completarInformeFinalPPSController.mecanismo.catalogoMedio}">
+                                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                              itemValue="#{null}"/>
+                                <f:selectItems value="#{completarInformeFinalPPSController.listaMecanismosCatalogo}"
+                                               var="meca" itemLabel="#{meca.nombreMedio}" itemValue="#{meca}"/>
+                            </p:selectOneMenu>
+
+                            <p:outputLabel for="fecInimecanismo"
+                                           value="Fecha de inicio de Mecanismo"/>
+                            <p:calendar id="fecInimecanismo" required="true"
+                                        value="#{completarInformeFinalPPSController.mecanismo.fechaInicio}">
+                                <p:ajax event="dateSelect" update="@(.fecFinmecanismo)"/>
+                            </p:calendar>
+                            <p:outputLabel for="fecFinmecanismo"
+                                           value="Fecha de finalización de Mecanismo"/>
+                            <p:calendar id="fecFinmecanismo" required="true" styleClass="fecFinmecanismo"
+                                        mindate="#{completarInformeFinalPPSController.mecanismo.fechaInicio}"
+                                        value="#{completarInformeFinalPPSController.mecanismo.fechaFin}"/>
+                            <p:outputLabel value="Lugar" for="LugarM"/>
+                            <p:inputTextarea maxlength="50" scrollHeight="10" required="true" id="LugarM"
+                                             autoResize="true"
+                                             value="#{completarInformeFinalPPSController.mecanismo.lugar}"/>
+                            <p:outputLabel value="Hora" for="hora"/>
+                            <p:calendar id="hora" value="#{completarInformeFinalPPSController.mecanismo.hora}"
+                                        pattern="HH:mm" timeOnly="true"
+                                        onkeypress="return numbersonly(this, event, false);" maxlength="5"/>
+
+                            <p:outputLabel value="Provincia" for="cmb_provincias"/>
+                            <p:selectOneMenu value="#{denunciaBean.provincia}" required="true"
+                                             id="cmb_provincias" requiredMessage="Provincia es requerido">
+                                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                              itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems
+                                        value="#{denunciaController.denunciaBean.provincias}"
+
+                                        var="provincia" itemValue="#{provincia}"
+                                        itemLabel="#{provincia.nombre}"/>
+                                <f:converter converterId="selectItemConverter"/>
+                                <p:ajax listener="#{denunciaController.cargarCantones}"
+                                        update="cmb_cantones"/>
+                            </p:selectOneMenu>
+                            <p:outputLabel value="Cant&oacute;n" for="cmb_cantones"/>
+                            <p:selectOneMenu value="#{denunciaBean.canton}" id="cmb_cantones" required="true">
+                                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                              itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{denunciaBean.cantones}" var="canton"
+                                               itemValue="#{canton}" itemLabel="#{canton.nombre}"/>
+                                <f:converter converterId="selectItemConverter"/>
+                                <p:ajax listener="#{denunciaController.cargarParroquias}"
+                                        update="cmb_parroquias"/>
+                            </p:selectOneMenu>
+                            <p:outputLabel value="Parroquia" for="cmb_parroquias"/>
+                            <p:selectOneMenu value="#{denunciaBean.parroquia}" required="true"
+                                             id="cmb_parroquias">
+                                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                              itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{denunciaBean.parroquias}" var="parroquia"
+                                               itemValue="#{parroquia}" itemLabel="#{parroquia.nombre}"/>
+                                <f:converter converterId="selectItemConverter"/>
+                            </p:selectOneMenu>
+                            <p:outputLabel value="Comunidad" for="comunidad"/>
+                            <p:inputTextarea maxlength="50" scrollHeight="10" required="true" id="comunidad"
+                                             autoResize="true"
+                                             value="#{completarInformeFinalPPSController.mecanismo.comunidad}"/>
+                            <p:outputLabel value="Respaldo" for="nombreDoc"/>
+                            <p:inputTextarea maxlength="50" scrollHeight="10" required="true" id="nombreDoc"
+                                             autoResize="true"
+                                             value="#{completarInformeFinalPPSController.mecanismo.nombreDoc}"/>
+                        </h:panelGrid>
+                    </h:panelGrid>
+                </p:panelGrid>
+                <p:separator/>
+
+                <div class="buttons">
+                    <p:commandButton
+                            actionListener="#{completarInformeFinalPPSController.agregarMecanismo()}"
+                            process="@this :frmDlg2:dlg2" value="Aceptar"
+                            update=":formMecanismos:tblMecanismosPPS panel1"/>
+                    <p:commandButton icon="ui-icon-close" value="Cancelar" type="button" styleClass="secondary"
+                                     onclick="PF('dlg2').hide();">
+                        <p:resetInput target="frmDlg2"/>
+                    </p:commandButton>
+                </div>
+            </p:dialog>
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>

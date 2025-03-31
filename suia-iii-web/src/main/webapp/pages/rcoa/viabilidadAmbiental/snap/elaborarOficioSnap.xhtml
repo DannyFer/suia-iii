@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="content">
+		<script type="text/javascript">
+		 function removeDisabled()
+		    {
+		        $('.ui-state-disabled').removeClass('ui-state-disabled');
+		    }
+	</script>
+
+		<f:event type="preRenderView"
+			listener="#{elaborarOficioSnapController.validarTareaBpm()}" />
+
+		<h:form id="form">
+			<h:panelGroup id="pnlDatos">
+				<h:panelGrid styleClass="w100" id="pnlDocumentos">
+
+					<object type="application/pdf"
+						data="#{elaborarOficioSnapController.urlOficio}?pfdrid_c=true"
+						width="100%" height="500px">
+						Su navegador no soporta la visualización de pdf. Puede descargar
+						el documento presionando el siguiente botón:
+						<p:commandButton value="Descargar" styleClass="primary"
+							ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+							<p:fileDownload
+								value="#{elaborarOficioSnapController.getStream(elaborarOficioSnapController.nombreOficio, elaborarOficioSnapController.archivoOficio)}" />
+						</p:commandButton>
+					</object>
+
+					<br />
+					<br />
+					<h:panelGrid columns="2" styleClass="w100"
+						columnClasses="w25, null">
+						<h:outputText value="Informe de inspección" />
+						<p:commandButton icon="ui-icon-arrowthick-1-s" value="Descargar"
+							styleClass="primary toLeft" title="Ver" ajax="false"
+							immediate="true">
+							<p:fileDownload
+								value="#{elaborarOficioSnapController.descargarInforme()}" />
+						</p:commandButton>
+
+						<h:outputText value="Tipo de pronunciamiento" />
+						<p:selectOneRadio id="rdbPronunciamiento"
+							value="#{elaborarOficioSnapController.esReporteAprobacion}"
+							required="true" disabled="true" styleClass="cssRadioDisabled">
+							<f:selectItem itemLabel="Pronunciamiento Aprobación"
+								itemValue="true" />
+							<f:selectItem itemLabel="Pronunciamiento Observación"
+								itemValue="false" />
+						</p:selectOneRadio>
+					</h:panelGrid>
+
+					<br />
+					<p:fieldset legend="RECOMENDACIONES" toggleable="true"
+						toggleSpeed="500" collapsed="false">
+						<control:imputConTextoEnriquecido
+							valor="#{elaborarOficioSnapController.oficioViabilidadSnapBean.oficioPronunciamiento.recomendaciones}"
+							soloLectura="false" requerido="false" />
+					</p:fieldset>
+					
+				</h:panelGrid>
+			</h:panelGroup>
+
+			<br />
+					<h:panelGroup id="pnlObsInformeTecnico">
+						<observaciones:tablaObservacionesViabilidad
+							idComponent="obsTecnico" seccion="Viabilidad oficio SNAP"
+							componenteActualizarEliminar="pnlObsInformeTecnico"
+							aparace="true" mostrarSiVacio="false"
+							idClase="#{elaborarOficioSnapController.oficioViabilidadSnapBean.oficioPronunciamiento.id}"
+							nombreClase="oficioViabilidadSnap" soloLectura="true" />
+					</h:panelGroup>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Guardar" process="@this form"
+						update="pnlDatos pnlButtons"
+						actionListener="#{elaborarOficioSnapController.guardar()}"
+						icon="ui-icon-disk" />
+					<p:commandButton value="Enviar" process="@this"
+						action="#{elaborarOficioSnapController.aceptar()}"
+						disabled="#{!elaborarOficioSnapController.oficioGuardado}"
+						update="pnlDatos pnlButtons" icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+</ui:composition>

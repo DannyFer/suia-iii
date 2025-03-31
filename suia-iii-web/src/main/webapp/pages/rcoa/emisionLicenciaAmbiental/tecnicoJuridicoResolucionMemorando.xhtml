@@ -1,0 +1,317 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+	<ui:define name="context-extra">
+		<h:outputText value="Código RGDP"
+			rendered="#{contextoTareaEIAController.tieneRgd}" />
+		<h:outputText
+			value="#{contextoTareaEIAController.proyecto.codigoRgdAsociado}"
+			rendered="#{contextoTareaEIAController.tieneRgd}" />
+		<h:outputLink target="_blank"
+			rendered="#{contextoTareaEIAController.tieneRgd}"
+			value="#{contextoTareaEIAController.redireccionarRgd()}">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+
+		<h:outputText value="Código RSQ"
+			rendered="#{contextoTareaEIAController.tieneRsq}" />
+		<h:outputText
+			value="#{contextoTareaEIAController.proyecto.codigoRsqAsociado}"
+			rendered="#{contextoTareaEIAController.tieneRsq}" />
+		<h:outputLink target="_blank"
+			rendered="#{contextoTareaEIAController.tieneRsq}"
+			value="#{contextoTareaEIAController.redireccionarRsq()}">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+
+		<h:outputText value="Código ART"
+			rendered="#{contextoTareaEIAController.tieneArt}" />
+		<h:outputText value="#{contextoTareaEIAController.art.solicitud}"
+			rendered="#{contextoTareaEIAController.tieneArt}" />
+		<p:commandButton ajax="false" icon="ui-icon-search"
+			styleClass="primary button-small" immediate="true"
+			rendered="#{contextoTareaEIAController.tieneArt}">
+			<p:fileDownload
+				value="#{contextoTareaEIAController.descargarOficoArt()}" />
+		</p:commandButton>
+
+		<h:outputText value="Datos" />
+		<h:outputText value="Estudio de Impacto Ambiental" />
+		<h:outputLink target="_blank"
+			value="#{request.contextPath}/pages/rcoa/estudioImpactoAmbiental/verProyectoEIAResumen.jsf">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+	</ui:define>
+
+	<ui:define name="content">
+		<f:event type="preRenderView" listener="#" />
+
+		<h:form id="form">
+			<p:tabView id="tab">
+				<p:tab title="Resolución">
+					<h:panelGrid styleClass="w100" id="resolucionData">
+						<object id="pdf_resolucion" type="application/pdf"
+							data="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.documentoResolucion.informePath}?pfdrid_c=true"
+							width="100%" height="500px">
+							Su navegador no soporta la visualización de pdf. Puede descargar
+							el documento presionando el siguiente botón:
+							<p:commandButton value="Descargar" styleClass="primary"
+								ajax="false" icon="ui-icon-arrowthick-1-s">
+								<p:fileDownload
+									value="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.getStream(emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.documentoResolucion.nombreFichero, emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.documentoResolucion.archivoInforme)}" />
+							</p:commandButton>
+						</object>
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGroup id="DecicionOficio">
+						<h:panelGrid styleClass="panel_data w100" columns="2"
+							columnClasses="header w50, null" rowClasses="null, null">
+							<f:event type="preRenderView"
+								listener="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.validarExisteObservacionesJuridicoResolucion()}" />
+							<h:outputText
+								value="¿Es necesario realizar correcciones sobre el proyecto de resolución o memorando?" />
+							<p:selectOneRadio
+								value="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.correccionResolucion}"
+								required="true"
+								requiredMessage="Seleccione si requiere o no correcciones"
+								disabled="true" styleClass="cssRadioDisabled">
+								<f:selectItem itemValue="true" itemLabel="SI" />
+								<f:selectItem itemValue="false" itemLabel="NO" />
+								<p:ajax update="@this @form"></p:ajax>
+							</p:selectOneRadio>
+						</h:panelGrid>
+					</h:panelGroup>
+					<h:panelGroup id="ObservacionRegistro">
+						<observaciones:tablaObservacionesResolucionLicencia
+							idComponent="observacionesMemoTecJuriPronun"
+							seccion="MemorandoTecnicoJuridicoPronunciamiento" aparace="true"
+							mostrarSiVacio="true" idActualizar="@form"
+							nombreClase="ObservacionesResolucionAmbientalJuridico"
+							idClase="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.documentoResolucion.id}"
+							soloLectura="false" />
+					</h:panelGroup>
+				</p:tab>
+				<p:tab title="Memorando"
+					rendered="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.correccionResolucion}">
+					<h:panelGrid styleClass="w100" id="memorandoData">
+						<object id="pdf_oficioPronunciamiento" type="application/pdf"
+							data="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.documentoMemorandoTecnicoJuridico.informePath}?pfdrid_c=true"
+							width="100%" height="500px">
+							Su navegador no soporta la visualización de pdf. Puede descargar
+							el documento presionando el siguiente botón:
+							<p:commandButton value="Descargar" styleClass="primary"
+								ajax="false" icon="ui-icon-arrowthick-1-s">
+								<p:fileDownload
+									value="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.getStream(emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.documentoMemorandoTecnicoJuridico.nombreFichero, emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.documentoMemorandoTecnicoJuridico.archivoInforme)}" />
+							</p:commandButton>
+						</object>
+						<br />
+						<br />
+						<h:panelGrid columns="1" layout="grid" styleClass="w100">
+							<p:outputLabel value="Asunto *" styleClass="bold" />
+							<p:inputText
+								value="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.documentoMemorandoTecnicoJuridico.asuntoOficio}"
+								maxlength="200" />
+						</h:panelGrid>
+						<br />
+						<h:panelGrid columns="1" layout="grid" styleClass="w100"
+							columnClasses="w100">
+							<p:outputLabel value="Pronunciamiento *" styleClass="bold" />
+							<control:imputConTextoEnriquecido
+								valor="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.documentoMemorandoTecnicoJuridico.pronunciamientoOficio}"
+								soloLectura="false" />
+						</h:panelGrid>
+					</h:panelGrid>
+				</p:tab>
+				<p:tab title="Pronunciamiento"
+					rendered="#{not emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.correccionResolucion}">
+					<h:panelGrid styleClass="w100" id="oficioPronunciamientoData">
+						<object id="pdf_oficioPronunciamiento" type="application/pdf"
+							data="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.documentoPronunciamiento.informePath}?pfdrid_c=true"
+							width="100%" height="500px">
+							Su navegador no soporta la visualización de pdf. Puede descargar
+							el documento presionando el siguiente botón:
+							<p:commandButton value="Descargar" styleClass="primary"
+								ajax="false" icon="ui-icon-arrowthick-1-s">
+								<p:fileDownload
+									value="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.getStream(emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.documentoPronunciamiento.nombreFichero, emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.documentoPronunciamiento.archivoInforme)}" />
+							</p:commandButton>
+						</object>
+						<br />
+						<br />
+						<h:panelGrid columns="1" layout="grid" styleClass="w100">
+							<p:outputLabel value="Asunto *" styleClass="bold" />
+							<p:inputText
+								value="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.documentoPronunciamiento.asuntoOficio}"
+								maxlength="200" />
+						</h:panelGrid>
+						<br />
+						<h:panelGrid columns="1" layout="grid" styleClass="w100">
+							<p:outputLabel value="Pronunciamiento *" styleClass="bold" />
+							<control:imputConTextoEnriquecido
+								valor="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.documentoPronunciamiento.pronunciamientoOficio}"
+								soloLectura="false" />
+						</h:panelGrid>
+					</h:panelGrid>
+				</p:tab>
+			</p:tabView>
+			<br />
+			<br />
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Guardar" update="@form" icon="ui-icon-disk"
+						actionListener="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.guardar}" />
+					<p:commandButton value="Enviar" icon="ui-icon-check"
+						process="@this" update=":form:pnlButtons"
+						actionListener="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.enviar}"
+						disabled="#{!emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.datosGuardados}"
+						rendered="#{!emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.habilitarFirma}">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+					<p:commandButton value="Firmar documento"
+						styleClass="large buttonLarge" icon="ui-icon-key"
+						update=":form:pnlButtons :formDialogs:pnlFirma"
+						actionListener="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.subirDocumento()}"
+						disabled="#{!emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.datosGuardados}"
+						rendered="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.habilitarFirma}" />
+
+				</div>
+			</h:panelGroup>
+		</h:form>
+
+		<h:form>
+			<br />
+			<h:panelGroup id="pnlObsOficio"
+				rendered="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.existeObservaciones}">
+				<p:panelGrid columns="1" layout="grid">
+					<f:facet name="header">
+						<h:outputText value="Observaciones al Memorando" />
+					</f:facet>
+					<observaciones:tablaObservacionesResolucionLicencia
+						idComponent="observacionesResolucionLicencia"
+						seccion="RevisionPronunciamientoJuridico" aparace="true"
+						mostrarSiVacio="false" idActualizar=":form:pnlButtons"
+						nombreClase="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.claseObservaciones}"
+						idClase="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.idDocumentoPronunciamiento}"
+						soloLectura="true" />
+				</p:panelGrid>
+			</h:panelGroup>
+		</h:form>
+
+		<h:form id="formDialogs">
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600" height="auto" position="center top">
+
+				<p:panel id="pnlFirma">
+
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel
+							rendered="#{!emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.correccionResolucion}"
+							value="Pronunciamiento Nro: #{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.documentoPronunciamiento.codigoReporte}"
+							styleClass="bold" />
+						<h:outputLabel
+							rendered="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.correccionResolucion}"
+							value="Memorando Nro: #{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.documentoMemorandoTecnicoJuridico.codigoReporte}"
+							styleClass="bold" />
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold"
+							rendered="#{!emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.firmaSoloToken}" />
+						<p:selectOneRadio id="verificaToken"
+							value="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.token}"
+							rendered="#{!emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.firmaSoloToken}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change" update="pnlFirmaManual pnlFirmaToken"
+								listener="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.guardarToken}" />
+						</p:selectOneRadio>
+
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.firmaSoloToken}" />
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.firmaSoloToken}" />
+
+						<h:panelGroup id="pnlFirmaToken">
+							<p:commandButton value="Firmar documento" type="button"
+								styleClass="primary" icon="ui-icon-key"
+								rendered="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.token}"
+								onclick="window.location.href='#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.urlAlfresco}'" />
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.token}">
+							<h:outputLabel
+								value="1. Descargue el #{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.nombreTipoDocumento}"
+								styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload
+									value="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.descargar()}" />
+							</p:commandButton>
+
+							<p:outputLabel for="uploadRequired"
+								value="2. Adjunte el #{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.nombreTipoDocumento} firmado"
+								styleClass="bold" />
+							<p:fileUpload
+								fileUploadListener="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.uploadListenerDocumentos}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreOficioFirmado"
+								rendered="#{!emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.token}">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreOficioFirmado"
+								value="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.documentoFirmado.nombre}" />
+						</h:panelGrid>
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.token and !emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.subido}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialogOficio').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						action="#{emisionLicenciaAmbientalTecnicoJuriResolucionMemoController.completarTarea()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

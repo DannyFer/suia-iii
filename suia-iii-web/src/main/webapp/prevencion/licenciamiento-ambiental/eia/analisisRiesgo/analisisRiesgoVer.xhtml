@@ -1,0 +1,170 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:controles="http://java.sun.com/jsf/composite/controles-prime">
+<ui:composition
+        template="/prevencion/licenciamiento-ambiental/eia/verEIA.xhtml">
+    <ui:define name="content-eia">
+        <h:form id="frmDatos">
+            <p:panel header="Análisis de riesgos">
+                <p:panelGrid styleClass="w100" columns="1">
+                    <f:facet name="header">
+                        <h:outputText value="Documento de respaldo" />
+                    </f:facet>
+
+                    <p:separator />
+                    <h:outputText styleClass="w100 text-red"
+                                  value="Adjuntar documento de Análisis de riesgos" />
+                    <p:separator />
+
+                    <h:panelGrid styleClass="panel_data mw50" columns="2"
+                                 columnClasses="header, null" rowClasses="null, alt">
+                        <h:outputText id="etiqueta"
+                                      value="#{analisisRiesgoEIAController.documentoGeneral.getNombre()}" />
+                        <p:commandButton id="download" rendered="true"
+                                         icon="ui-icon-search" ajax="false"
+                                         styleClass="button-small primary" title="Ver" immediate="true">
+                            <p:fileDownload
+                                    value="#{analisisRiesgoEIAController.getStreamContent()}" />
+                        </p:commandButton>
+                    </h:panelGrid>
+					<!-- MarielaG para mostrar historico DOCUMENTOS HISTORICO-->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{analisisRiesgoEIAController.listaDocumentoGeneralHistorico.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText value="Historial de documentos" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-search"
+							update=":formDocumentosOriginal:documentosOriginalesDlg"
+							oncomplete="PF('documentosOriginalesDlg').show()" />
+					</h:panelGrid>
+					<!-- fin historico -->
+				</p:panelGrid>
+                
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{!analisisRiesgoEIAController.esMineriaNoMetalicos}">
+                    <f:facet name="header">
+                        <h:outputText value="Análisis de riesgo" />
+                    </f:facet>
+                    <p:dataTable id="tableAnalisis"
+                                 value="#{analisisRiesgoEIAController.analisisRiesgoEIABean.listaAnalisisRiesgoEia}"
+                                 var="ana" paginator="true" rows="10" paginatorPosition="bottom"
+                                 emptyMessage="#{labels['common.table.empty']}"
+                                 paginatorAlwaysVisible="false">
+                        <p:column headerText="Tipo">
+                            <h:outputText value="#{ana.riesgo.subTipo.tipo.descripcion}" />
+                        </p:column>
+                        <p:column headerText="Subtipo">
+                            <h:outputText value="#{ana.riesgo.subTipo.nombre}" />
+                        </p:column>
+                        <p:column headerText="Riesgo">
+                            <h:outputText
+                                    value="#{empty ana.otroRiesgo  ? ana.riesgo.nombre : ana.otroRiesgo}" />
+                        </p:column>
+                        <p:column headerText="Resultado">
+                            <h:outputText value="#{ana.resultados}" />
+                        </p:column>
+                        <!-- MarielaG para mostrar historico ANALISIS MODIFICADOS-->
+						<p:column styleClass="w40px alCenter" 
+						rendered="#{analisisRiesgoEIAController.analisisRiesgoEIABean.listaAnalisisRiesgoEiaOriginales.size() > 0}">
+							<p:commandButton icon="ui-icon-search"
+								rendered="#{ana.registroModificado}"
+								styleClass="button-small orange"
+								action="#{analisisRiesgoEIAController.mostrarOriginal(ana)}"
+								update=":formAnalisisOriginales:analisisOriginalesDlg" process="@this"
+								oncomplete="PF('analisisOriginalesDlg').show()" />
+ 								<!-- HALLAZGOS NUEVO -->
+							<h:outputText value="Nuevo" styleClass="bold text-orange" rendered="#{ana.nuevoEnModificacion}"/>
+						</p:column>
+						<!-- fin historico -->
+                    </p:dataTable>
+                    
+                    <!-- MarielaG para mostrar historico REGISTROS ELIMINADOS-->
+					<h:panelGrid styleClass="panel_data" columns="2"
+						rendered="#{analisisRiesgoEIAController.analisisRiesgoEIABean.listaAnalisisRiesgoEliminadosBdd.size() > 0}"
+						columnClasses="header background-orange, null"
+						rowClasses="null, alt">
+						<h:outputText id="headerHistorico"
+							value="Análisis de riesgos eliminados" />
+						<p:commandButton styleClass="button-small primary" process="@this"
+							icon="ui-icon-search"
+							action="#{analisisRiesgoEIAController.fillAnalisisEliminados()}"
+							update=":formAnalisisOriginales:analisisOriginalesDlg"
+							oncomplete="PF('analisisOriginalesDlg').show()" />
+					</h:panelGrid>
+					<!-- fin historico -->
+                </p:panelGrid>
+            </p:panel>
+        </h:form>
+
+		<!-- MarielaG para mostrar historico DOCUMENTOS-->
+		<h:form id="formDocumentosOriginal">
+			<p:dialog header="Historial de documentos"
+				id="documentosOriginalesDlg" widgetVar="documentosOriginalesDlg"
+				modal="true" resizable="false" width="600">
+				<h:panelGroup id="datosDocumentosOriginal">
+					<p:dataTable
+						value="#{analisisRiesgoEIAController.listaDocumentoGeneralHistorico}"
+						var="doc" paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{labels['common.table.empty']}"
+						paginatorAlwaysVisible="false">
+						<p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText
+								value="#{doc.fechaCreacion}" />
+						</p:column>
+						<p:column headerText="Documento">
+							<h:outputText value="#{doc.nombre}" />
+						</p:column>
+						<p:column styleClass="w40px alCenter">
+							<p:commandButton id="download_historico" rendered="true"
+								icon="ui-icon-search" ajax="false"
+								styleClass="button-small background-orange" title="Ver"
+								immediate="true">
+								<p:fileDownload
+									value="#{analisisRiesgoEIAController.getStreamContentOriginal(doc)}" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+    	
+    	<!-- MarielaG para mostrar historico registros--> 
+		<h:form id="formAnalisisOriginales">
+			<p:dialog header="Historial de análisis de riesgos"
+				id="analisisOriginalesDlg"
+				widgetVar="analisisOriginalesDlg" modal="true"
+				resizable="false" width="600">
+				<h:panelGroup id="datosOriginales">
+					<p:dataTable id="tableAnalisis"
+                                 value="#{analisisRiesgoEIAController.analisisRiesgoEIABean.listaAnalisisRiesgoEiaHistorico}"
+                                 var="ana" paginator="true" rows="10" paginatorPosition="bottom"
+                                 emptyMessage="#{labels['common.table.empty']}"
+                                 paginatorAlwaysVisible="false">
+                        <p:column headerText="Fecha Modificación" styleClass="w15 alCenter">
+							<h:outputText value="#{ana.fechaCreacion}" />
+						</p:column>
+                        <p:column headerText="Tipo">
+                            <h:outputText value="#{ana.riesgo.subTipo.tipo.descripcion}" />
+                        </p:column>
+                        <p:column headerText="Subtipo">
+                            <h:outputText value="#{ana.riesgo.subTipo.nombre}" />
+                        </p:column>
+                        <p:column headerText="Riesgo">
+                            <h:outputText
+                                    value="#{empty ana.otroRiesgo  ? ana.riesgo.nombre : ana.otroRiesgo}" />
+                        </p:column>
+                        <p:column headerText="Resultado">
+                            <h:outputText value="#{ana.resultados}" />
+                        </p:column>
+                    </p:dataTable>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+    </ui:define>
+</ui:composition>
+</html>

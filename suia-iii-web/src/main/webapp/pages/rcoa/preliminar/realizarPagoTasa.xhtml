@@ -1,0 +1,148 @@
+<ui:composition template="/WEB-INF/templates/default.xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+	<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+		<ui:define name="content">
+
+			<h:form id="formTransaction" onkeypress="if (event.keyCode == 13) {return false; }">
+				<p:panel>
+					<h:panelGrid styleClass="panel_data w100" columns="2"
+						columnClasses="header w25, bold w75">
+						<h:outputText value="Valor total a pagar" />
+						<h:panelGroup>
+							<h:outputText value="#{pagosTasaController.valorTotalUsoSitema}">
+								<f:convertNumber pattern="#0.00" />
+							</h:outputText>
+							<h:outputText value=" USD" />
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<ui:remove>
+					<h:panelGrid styleClass="panel_data w100" columns="2"
+						id="pnlGenerarNut" columnClasses="header w25, bold w75"
+						rowClasses="null, alt">
+						<h:outputText value="Generar NUT"
+							rendered="#{pagosTasaController.generarNUT and pagosTasaController.documentosNUT.size() eq 0}" />
+						<h:panelGroup
+							rendered="#{pagosTasaController.generarNUT and pagosTasaController.documentosNUT.size() eq 0}">
+							<p:commandButton icon="	ui-icon-document"
+								styleClass="primary button-small"
+								action="#{pagosTasaController.generarNut()}" process="@this"
+								rendered="#{pagosTasaController.generarNUT}"
+								update="pnlGenerarNut">
+								<p:confirm header="Aviso"
+									message="Usted debe generar el NUT si aún no ha realizado el pago en la institución bancaria"
+									icon="ui-icon-alert" />
+							</p:commandButton>
+							<p:confirmDialog global="true" showEffect="fade"
+								hideEffect="fade">
+								<p:commandButton value="Cancelar" type="button"
+									styleClass="ui-confirmdialog-no primary toRight"
+									icon="ui-icon-closethick" />
+								<p:commandButton value="Generar" type="button"
+									styleClass="ui-confirmdialog-yes primary toRight"
+									icon="ui-icon-check" />
+							</p:confirmDialog>
+						</h:panelGroup>
+						<h:outputText value="Descargar NUT"
+							rendered="#{pagosTasaController.documentosNUT.size() > 0}" />
+						<h:panelGroup
+							rendered="#{pagosTasaController.documentosNUT.size() > 0}">
+							<p:dataTable styleClass="noHeader borderless"
+								value="#{pagosTasaController.documentosNUT}" var="documento">
+								<p:column style="text-align: left; background-color: #f5f5f5;">
+									<h:outputText value="#{documento.nombreDocumento}" />
+									<p:commandButton icon="ui-icon-arrowthick-1-s"
+										styleClass="button-small primary" title="Ver"
+										style="margin-left: 10px" ajax="false" immediate="true">
+										<p:fileDownload
+											value="#{pagosTasaController.descargar(documento)}" />
+									</p:commandButton>
+								</p:column>
+							</p:dataTable>
+						</h:panelGroup>
+					</h:panelGrid>
+					</ui:remove>
+					<br />
+					<p:panelGrid id="pnl_transacciones" columns="3" layout="grid"
+						styleClass="w100"
+						columnClasses="w33, field_mrg w33, field_mrg w33">
+						<f:facet name="header">
+							<mae:panelGridHeaderHelp value="Ingreso de transacciones"
+								conector="generalHelp" render="false"
+								image="#{request.contextPath}/resources/images/help-how.png"
+								help="#{helps['no.help.yet']}" />
+						</f:facet>
+						<p:outputLabel for="institucionBancaria"
+							value="Institución bancaria" />
+						<p:outputLabel for="numeroTransaccion"
+							value="Número de comprobante" />
+						<h:outputText />
+
+						<p:inputText id="institucionBancaria" disabled="true"
+							value="#{pagosTasaController.transaccionFinanciera.institucionFinanciera.nombreInstitucion}" />
+
+
+						<p:inputText id="numeroTransaccion" placeholder="Ej: 584777"
+							disabled="#{pagosTasaController.cumpleValorTotal}"
+							required="true"
+							value="#{pagosTasaController.transaccionFinanciera.numeroTransaccion}"
+							maxlength="50"
+							onkeypress="return numbersonly(this, event);">
+						</p:inputText>
+						
+						<p:commandButton value="Adicionar" icon="ui-icon-plusthick"
+								disabled="#{pagosTasaController.cumpleValorTotal}"
+								action="#{pagosTasaController.guardarTransaccion(1)}"
+								styleClass="primary"
+								update=":#{p:component('tbl_transacciones')}, :#{p:component('pnl_transacciones')}"
+								process="@this institucionBancaria numeroTransaccion" />
+					</p:panelGrid>
+
+
+					<h:form id="formTransactionList">
+						<p:dataTable id="tbl_transacciones"
+							value="#{pagosTasaController.transaccionesFinancieras}"
+							var="transaccionFinanciera"
+							emptyMessage="#{labels['common.table.empty']}">
+							<p:column headerText="Institución financiera">
+								<h:outputText
+									value="#{transaccionFinanciera.institucionFinanciera.nombreInstitucion}" />
+							</p:column>
+							<p:column headerText="Número de comprobante"
+								styleClass="w33 alCenter">
+								<h:outputText value="#{transaccionFinanciera.numeroTransaccion}" />
+							</p:column>
+							<p:column headerText="Monto" styleClass="w15 alCenter">
+								<h:outputText value="#{transaccionFinanciera.montoTransaccion}">
+									<f:convertNumber pattern="#0.00" />
+								</h:outputText>
+							</p:column>
+							<p:column styleClass="w20px alCenter">
+								<p:commandButton icon="ui-icon-trash"
+									styleClass="primary button-small"
+									action="#{pagosTasaController.eliminarTransacion(transaccionFinanciera)}"
+									update=":#{p:component('tbl_transacciones')}, :#{p:component('pnl_transacciones')}" />
+							</p:column>
+						</p:dataTable>
+					</h:form>
+
+					<p:outputPanel id="pnlFinalizarBtn">
+						<div class="buttons main">
+							<p:commandButton value="Enviar" id="btnEnviar"
+								icon="ui-icon-check"
+								action="#{pagosTasaController.completarTarea}" />
+						</div>
+					</p:outputPanel>
+				</p:panel>
+			</h:form>
+		</ui:define>
+	</ui:composition>
+</ui:composition>

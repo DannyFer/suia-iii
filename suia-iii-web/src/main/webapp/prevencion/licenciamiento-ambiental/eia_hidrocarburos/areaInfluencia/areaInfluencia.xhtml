@@ -1,0 +1,513 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:controles="http://java.sun.com/jsf/composite/controles-prime"
+      xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:H="http://java.sun.com/jsf/html"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition template="/prevencion/licenciamiento-ambiental/eia/default.xhtml">
+    <ui:define name="content-eia">
+        <h:form id="form">
+            <p:panel header="Determinación del área de influencia">
+
+                <p:separator />
+                <h:outputText styleClass="w100 text-red"
+                              value="Debe adjuntar documento de estudio de áreas de influencia" />
+                <p:separator />
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" id="panelGridAdjuntos">
+                    <f:facet name="header">
+                        <h:outputText value="Determinación del área de influencia *"/>
+
+                    </f:facet>
+                    <h:panelGroup id="panelAdjuntos">
+                        <p:outputLabel id="lblAdjunto"
+                                       value="#{empty areaInfluenciaBean.documentoGeneral.nombre ? 'Documento del estudio (.pdf)' : areaInfluenciaBean.documentoGeneral.nombre}"/>
+
+                        <span class="w10"></span>
+
+                        <p:commandButton id="download"
+                                         rendered="#{not empty areaInfluenciaBean.documentoGeneral.nombre}"
+                                         icon="ui-icon-arrowthick-1-s" ajax="false"
+                                         styleClass="button-small primary" title="Ver" immediate="true">
+                            <p:fileDownload value="#{areaInfluenciaController.getStreamContent()}"/>
+                        </p:commandButton>
+                    </h:panelGroup>
+                    <br></br>
+
+
+                    <p:fileUpload
+                            fileUploadListener="#{areaInfluenciaController.uploadListenerDocumentos}"
+                            multiple="false" sizeLimit="5242880"
+                            allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+                            uploadLabel="Subir" invalidFileMessage="Tipo de archivo no válido"
+                            invalidSizeMessage="Debe adjuntar un archivo no mayor de 5 Mb."
+                            cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                            auto="true" update="panelGridAdjuntos"/>
+
+
+                    <br></br>
+                </p:panelGrid>
+
+                <h:inputHidden  id="campoOculto" validator="#{areaInfluenciaController.validateAdjunto}" />
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" id="pnlGridInflDirecta">
+                    <f:facet name="header">
+                        <h:outputText value="Área de influencia directa"/>
+                    </f:facet>
+                    <h:outputLabel value="Componente físico" styleClass="bold"/>
+                    <h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="w50, field_mrg w50">
+                        <p:outputLabel value="Descripción" for="dirFisDes" styleClass="bold"/>
+                        <p:outputLabel value="Distancia" for="dirFisDis" styleClass="bold"/>
+                        <p:inputTextarea id="dirFisDes"
+                                         value="#{areaInfluenciaBean.areaInfluencia.directaFisicoDescripcion}"
+                                         maxlength="2200" required="true" autoResize="false">
+                            <f:validateLength maximum="2200"/>
+                        </p:inputTextarea>
+
+                        <h:panelGrid columns="2" styleClass="w100" columnClasses="w50, field_mrg w25">
+                            <p:inputText id="dirFisDis"
+                                         value="#{areaInfluenciaBean.areaInfluencia.directaFisicoDistancia}"
+                                         maxlength="6" required="true" styleClass="w50">
+                                <pe:keyFilter mask="num"/>
+                            </p:inputText>
+
+                            <p:selectOneMenu id="dirFisDisUni" required="true"
+                                             value="#{areaInfluenciaBean.areaInfluencia.directaFisicoDistanciaUnidad}"
+                                             styleClass="w50" label="Unidad">
+
+                                <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue=""
+                                              noSelectionOption="true"/>
+                                <f:selectItems value="#{areaInfluenciaBean.multiplosMetro}"
+                                               var="multiplo" itemValue="#{multiplo}" itemLabel="#{multiplo.simbolo}"/>
+                            </p:selectOneMenu>
+                        </h:panelGrid>
+                    </h:panelGrid>
+
+
+                    <h:outputLabel value="Componente biótico" styleClass="bold"/>
+                    <h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="w50, field_mrg w50">
+
+                        <p:outputLabel value="Descripción" for="dirBioDes" styleClass="bold"/>
+                        <p:outputLabel value="Distancia" for="dirBioDis" styleClass="bold"/>
+                        <p:inputTextarea id="dirBioDes"
+                                         value="#{areaInfluenciaBean.areaInfluencia.directaBioticoDescripcion}"
+                                         maxlength="2200" required="true" autoResize="false">
+                            <f:validateLength maximum="2200"/>
+                        </p:inputTextarea>
+                        <h:panelGrid columns="2" styleClass="w100" columnClasses="w50, field_mrg w25">
+                            <p:inputText id="dirBioDis"
+                                         value="#{areaInfluenciaBean.areaInfluencia.directaBioticoDistancia}"
+                                         maxlength="6" required="true">
+                                <pe:keyFilter mask="num"/>
+                            </p:inputText>
+                            <p:selectOneMenu id="dirBioDisUni" required="true"
+                                             value="#{areaInfluenciaBean.areaInfluencia.directaBioticoDistanciaUnidad}"
+                                             label="Unidad">
+
+                                <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue=""
+                                              noSelectionOption="true"/>
+                                <f:selectItems value="#{areaInfluenciaBean.multiplosMetro}"
+                                               var="multiplo" itemValue="#{multiplo}" itemLabel="#{multiplo.simbolo}"/>
+                            </p:selectOneMenu>
+                        </h:panelGrid>
+                    </h:panelGrid>
+
+                </p:panelGrid>
+
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" id="pnlGridInflIndirecta">
+                    <f:facet name="header">
+                        <h:outputText value="Área de influencia indirecta"/>
+                    </f:facet>
+                    <h:outputLabel value="Componente físico" styleClass="bold"/>
+                    <h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="w50, field_mrg w50">
+                        <p:outputLabel value="Descripción" for="indFisDes" styleClass="bold"/>
+                        <p:outputLabel value="Distancia" for="indFisDis" styleClass="bold"/>
+                        <p:inputTextarea id="indFisDes"
+                                         value="#{areaInfluenciaBean.areaInfluencia.indirectaFisicoDescripcion}"
+                                         maxlength="2200" required="true" autoResize="false">
+                            <f:validateLength maximum="2200"/>
+                        </p:inputTextarea>
+
+
+                        <h:panelGrid columns="2" styleClass="w100" columnClasses="w50, field_mrg w25">
+                            <p:inputText id="indFisDis"
+                                         value="#{areaInfluenciaBean.areaInfluencia.indirectaFisicoDistancia}"
+                                         maxlength="6" required="true">
+                                <pe:keyFilter mask="num"/>
+
+                            </p:inputText>
+
+                            <p:selectOneMenu id="indFisDisUni" required="true"
+                                             value="#{areaInfluenciaBean.areaInfluencia.indirectaFisicoDistanciaUnidad}"
+                                             label="Unidad">
+
+                                <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue=""
+                                              noSelectionOption="true"/>
+                                <f:selectItems value="#{areaInfluenciaBean.multiplosMetro}"
+                                               var="multiplo" itemValue="#{multiplo}" itemLabel="#{multiplo.simbolo}"/>
+                            </p:selectOneMenu>
+
+                        </h:panelGrid>
+                    </h:panelGrid>
+
+
+                    <h:outputLabel value="Componente biótico" styleClass="bold"/>
+
+                    <h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="w50, field_mrg w50">
+                        <p:outputLabel value="Descripción" for="indBioDes" styleClass="bold"/>
+                        <p:outputLabel value="Distancia" for="indBioDis" styleClass="bold"/>
+                        <p:inputTextarea id="indBioDes"
+                                         value="#{areaInfluenciaBean.areaInfluencia.indirectaBioticoDescripcion}"
+                                         maxlength="2200" required="true" autoResize="false">
+                            <f:validateLength maximum="2200"/>
+                        </p:inputTextarea>
+
+
+                        <h:panelGrid columns="2" styleClass="w100" columnClasses="w50, field_mrg w25">
+                            <p:inputText id="indBioDis"
+                                         value="#{areaInfluenciaBean.areaInfluencia.indirectaBioticoDistancia}"
+                                         maxlength="6" required="true">
+                                <pe:keyFilter mask="num"/>
+                            </p:inputText>
+                            <p:selectOneMenu id="indBioDisUni" required="true"
+                                             value="#{areaInfluenciaBean.areaInfluencia.indirectaBioticoDistanciaUnidad}"
+                                             label="Unidad">
+
+                                <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue=""
+                                              noSelectionOption="true"/>
+                                <f:selectItems value="#{areaInfluenciaBean.multiplosMetro}"
+                                               var="multiplo" itemValue="#{multiplo}" itemLabel="#{multiplo.simbolo}"/>
+                            </p:selectOneMenu>
+                        </h:panelGrid>
+                    </h:panelGrid>
+
+
+                </p:panelGrid>
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" id="pnlGridInfraestructura">
+                    <f:facet name="header">
+                        <p:commandButton value="Adicionar" oncomplete="PF('adicionarInfraestructura').show()"
+                                         styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick"
+                                         actionListener="#{areaInfluenciaController.resetInfraestructura()}"
+                                         process="@this" update=":form:adicionarInfraestructura"/>
+                        <h:outputText value="Determinación de áreas de influencia del proyecto medio social"/>
+                    </f:facet>
+                    <p:dataTable id="tableInfraestructura" value="#{areaInfluenciaBean.infraestructurasAfectadas}"
+                                 var="infraestructura" emptyMessage="#{labels['common.table.empty']}">
+                        <p:columnGroup type="header">
+                            <p:row>
+                                <p:column rowspan="2"
+                                          headerText="Infraestructura y/o actividades a las que afecta el proyecto"/>
+                                <p:column colspan="2" headerText="Área de influencia directa"/>
+                                <p:column colspan="2" headerText="Área de influencia indirecta"/>
+                                <p:column rowspan="2" headerText=""/>
+                            </p:row>
+                            <p:row>
+                                <p:column headerText="Propietarios"/>
+                                <p:column headerText="Comunidades, centros, poblados, etc."/>
+                                <p:column headerText="Parroquias, territorios de nacionalidades indígenas, etc."/>
+                                <p:column
+                                        headerText="Otras jurisdicciones: Cantón, Provincia, etc. (Dependerá del alcance del proyecto)"/>
+                            </p:row>
+                        </p:columnGroup>
+                        <p:column>
+                            <h:outputText value="#{infraestructura.nombre}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputText value="#{infraestructura.propietario}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputText value="#{infraestructura.comunidad}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputText value="#{infraestructura.lugar}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputText value="#{infraestructura.otraJurisdiccion}"/>
+                        </p:column>
+
+                        <p:column styleClass="w40px alCenter">
+                            <p:commandButton update=":form:adicionarInfraestructura :form:pnlGridDistancias"
+                                             styleClass="button-small primary"
+                                             process="@this" icon="ui-icon-pencil"
+                                             actionListener="#{areaInfluenciaController.seleccionarInfraestructura(infraestructura)}"
+                                             oncomplete="PF('adicionarInfraestructura').show()"/>
+                            <p:commandButton update=":form:tableInfraestructura :form:pnlGridDistancias"
+                                             styleClass="button-small primary" process="@this"
+                                             icon="ui-icon-circle-close"
+                                             actionListener="#{areaInfluenciaController.eliminarInfraestructura(infraestructura)}">
+                                <p:confirm header="Confirmación"
+                                           message="¿Está seguro que desea eliminar esta infraestructura?"
+                                           icon="ui-icon-alert"/>
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+                </p:panelGrid>
+
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" id="pnlGridDistancias">
+                    <f:facet name="header">
+                        <h:outputText
+                                value="Distancia entre elementos del proyecto y los elementos sensibles del medio social"/>
+                    </f:facet>
+                    <p:dataTable id="tableDistancias" value="#{areaInfluenciaBean.infraestructurasAfectadas}"
+                                 var="infraestructura" emptyMessage="#{labels['common.table.empty']}" tableStyle="table-layout: auto">
+
+                        <p:columnGroup type="header">
+
+                            <p:row>
+                                <p:column colspan="3" headerText="Distancias"/>
+                            </p:row>
+                            <p:row>
+                                <p:column headerText="Infraestructura"/>
+                                <p:column headerText="Elementos sensibles"/>
+                                <p:column headerText=""/>
+                            </p:row>
+
+                        </p:columnGroup>
+
+                        <p:column>
+                            <h:outputText value="#{infraestructura.nombre}"/>
+                        </p:column>
+                        <p:column>
+                            <p:dataTable var="distancia" value="#{infraestructura.distanciaElementoSensibles}"  emptyMessage="#{labels['common.table.empty']}">
+
+                                <p:column headerText="Elemento">
+                                    <h:outputText value="#{empty distancia.otroElemento ? distancia.elementoSensible.nombre : distancia.otroElemento }"/>
+                                </p:column>
+                                <p:column headerText="Descripción">
+                                    <h:outputText value="#{distancia.descripcion}"/>
+                                </p:column>
+                                <p:column headerText="Distancia (m)">
+                                    <h:outputText value="#{distancia.distancia}"/>
+                                </p:column>
+                            </p:dataTable>
+                        </p:column>
+                        <p:column>
+                            <p:commandButton update=":form:adicionarDistancia" styleClass="button-small primary"
+                                             process="@this" icon="ui-icon-pencil"
+                                             actionListener="#{areaInfluenciaController.seleccionarInfraestructura(infraestructura)}"
+                                             oncomplete="PF('adicionarDistancia').show()"/>
+
+                        </p:column>
+
+                    </p:dataTable>
+                </p:panelGrid>
+            </p:panel>
+
+
+            <p:separator/>
+
+            <div class="buttons main">
+                <p:commandButton value="Atrás" immediate="true" process="@this"
+                                 action="/prevencion/licenciamiento-ambiental/eia/analisisAlternativas/analisisAlternativas.jsf?faces-redirect=true"
+                                 icon="ui-icon-arrowthick-1-w"/>
+
+                <p:commandButton value="Guardar" icon="ui-icon-check" action="#{areaInfluenciaController.guardar()}"
+                                 process="@this pnlGridInflDirecta pnlGridInflIndirecta :form:campoOculto" update="@form"/>
+
+                <p:commandButton value="Siguiente" immediate="true" process="@this"
+                                 action="/prevencion/licenciamiento-ambiental/eia/inventarioForestal/inventarioForestal.jsf?id=8&amp;faces-redirect=true"
+                                 icon="ui-icon-arrowthick-1-e"/>
+
+            </div>
+
+
+            <p:dialog header="Determinación de áreas de influencia del proyecto medio social"
+                      id="adicionarInfraestructura" widgetVar="adicionarInfraestructura" modal="true" width="600"
+                      resizable="false" draggable="false">
+                <h:panelGroup id="infraestructuraContainer">
+                    <h:panelGrid columns="2" styleClass="w100" columnClasses="w50, field_mrg w50">
+                        <p:outputLabel value="Infraestructura y/o actividades del proyecto" for="infraestructura"/>
+                        <p:outputLabel value="Propietarios" for="propietarios"/>
+                        <p:inputTextarea id="infraestructura" styleClass="w50"
+                                         value="#{areaInfluenciaBean.infraestructuraAfectada.nombre}" maxlength="500"
+                                         required="true" autoResize="false">
+                            <f:validateLength maximum="500"/>
+                        </p:inputTextarea>
+                        <p:inputTextarea id="propietarios" styleClass="w50"
+                                         value="#{areaInfluenciaBean.infraestructuraAfectada.propietario}"
+                                         maxlength="500" required="false" autoResize="false">
+                            <f:validateLength maximum="500"/>
+                        </p:inputTextarea>
+                        <p:outputLabel value="Comunidades , centros, poblados, etc" for="comunidades"/>
+                        <p:outputLabel value="Parroquia, Territorios de nacionalidades" for="lugar"/>
+                        <p:inputTextarea id="comunidades" styleClass="w50"
+                                         value="#{areaInfluenciaBean.infraestructuraAfectada.comunidad}"
+                                         maxlength="500" required="true" autoResize="false">
+                            <f:validateLength maximum="500"/>
+                        </p:inputTextarea>
+                        <p:inputTextarea id="lugar" styleClass="w50"
+                                         value="#{areaInfluenciaBean.infraestructuraAfectada.lugar}" maxlength="500"
+                                         required="true" autoResize="false">
+                            <f:validateLength maximum="500"/>
+                        </p:inputTextarea>
+
+                        <p:outputLabel value="Otras jurisdicciones" for="otraJurisdiccion"/>
+                        <br></br>
+                        <p:inputTextarea id="otraJurisdiccion" styleClass="w50"
+                                         value="#{areaInfluenciaBean.infraestructuraAfectada.otraJurisdiccion}"
+                                         maxlength="500" autoResize="false">
+                            <f:validateLength maximum="500"/>
+                        </p:inputTextarea>
+
+                    </h:panelGrid>
+                </h:panelGroup>
+
+                <p:separator/>
+
+                <div class="buttons">
+                    <p:commandButton actionListener="#{areaInfluenciaController.adicionarInfraestructura()}"
+                                     process="@this :form:infraestructuraContainer" value="Aceptar"
+                                     update=":form:tableInfraestructura :form:infraestructuraContainer :form:pnlGridDistancias"
+                                     oncomplete="showModalAddInfraestructura(xhr, status, args)"/>
+                    <p:commandButton value="Cancelar" type="button" onclick="PF('adicionarInfraestructura').hide()"
+                                     styleClass="secondary"/>
+                </div>
+            </p:dialog>
+
+
+            <p:dialog header="Distancias entre los elementos del proyecto y los elementos sensibles del medio social"
+                      id="adicionarDistancia" widgetVar="adicionarDistancia" modal="true" width="600"
+                      resizable="false" draggable="false">
+
+                <h:panelGroup id="distanciaContainer">
+                    <h:panelGrid columns="2" styleClass="w100" columnClasses="w50, field_mrg w50">
+                        <p:outputLabel value="Infraestructura y/o actividades del proyecto"/>
+                        <h:outputText value="#{areaInfluenciaBean.infraestructuraAfectada.nombre}"/>
+                    </h:panelGrid>
+
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" >
+                        <f:facet name="header">
+                            <p:commandButton value="Adicionar" oncomplete="PF('adicionarElemento').show()"
+                                             styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick"
+                                             actionListener="#{areaInfluenciaController.resetDistancia()}"
+                                             process="@this" update=":form:adicionarElemento"/>
+                            <h:outputText value="Elementos sensibles"/>
+                        </f:facet>
+
+                        <p:dataTable value="#{areaInfluenciaBean.infraestructuraAfectada.distanciaElementoSensibles}"
+                                     var="distancia"  emptyMessage="#{labels['common.table.empty']}">
+                            <p:column headerText="Elemento">
+                                <h:outputText value="#{distancia.elementoSensible.nombre}"/>
+                            </p:column>
+                            <p:column headerText="Descripción">
+                                <h:outputText value="#{distancia.descripcion}"/>
+                            </p:column>
+                            <p:column headerText="Distancia (m)">
+                                <h:outputText value="#{distancia.distancia}"/>
+                            </p:column>
+
+                            <p:column styleClass="w40px alCenter">
+                                <p:commandButton update=":form:adicionarElemento :form:pnlGridDistancias" styleClass="button-small primary"
+                                                 process="@this" icon="ui-icon-pencil"
+                                                 actionListener="#{areaInfluenciaController.seleccionarDistancia(distancia)}"
+                                                 oncomplete="PF('adicionarElemento').show()"/>
+                                <p:commandButton update=":form:distanciaContainer :form:pnlGridDistancias"
+                                                 styleClass="button-small primary" process="@this"
+                                                 icon="ui-icon-circle-close"
+                                                 actionListener="#{areaInfluenciaController.eliminarDistancia(distancia)}">
+                                    <p:confirm header="Confirmación"
+                                               message="¿Está seguro que desea eliminar esta distancia?"
+                                               icon="ui-icon-alert"/>
+                                </p:commandButton>
+                            </p:column>
+                        </p:dataTable>
+                    </p:panelGrid>
+                </h:panelGroup>
+                <p:separator/>
+
+                <div class="buttons">
+                    <p:commandButton
+                            process="@none" value="Aceptar"
+                            update=":form:tableInfraestructura :form:infraestructuraContainer :form:pnlGridDistancias"
+                            onclick="PF('adicionarDistancia').hide()"/>
+
+                </div>
+            </p:dialog>
+
+
+            <p:dialog header="Distancia"
+                      id="adicionarElemento" widgetVar="adicionarElemento" modal="true" width="600"
+                      resizable="false" draggable="false">
+                <h:panelGroup id="elementoContainer">
+                    <h:panelGrid columns="2" styleClass="w100" columnClasses="w50, field_mrg w50">
+                        <p:outputLabel value="Elemento" for="elemento" />
+                        <p:outputLabel id="labelOtroElemento" for="otroElemento" value="Otro elemento"
+                                       rendered="#{areaInfluenciaBean.habilitarOtroElemento}"/>
+                        <h:outputText value="" rendered="#{!areaInfluenciaBean.habilitarOtroElemento}"/>
+                        <p:selectOneMenu
+                                id="elemento" required="true"
+                                value="#{areaInfluenciaBean.distanciaElementoSensible.elementoSensible}"
+                                converter="selectItemConverter">
+                            <f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue=""
+                                          noSelectionOption="true"/>
+                            <f:selectItems
+                                    value="#{areaInfluenciaBean.catalogoElementosSensibles}" var="elemento" itemLabel="#{elemento.nombre}" itemValue="#{elemento}"/>
+                            <p:ajax event="change" update="elementoContainer"
+                                    listener="#{areaInfluenciaController.controlarOtroElemento}"/>
+                        </p:selectOneMenu>
+
+
+                        <p:inputText id="otroElemento"
+                                     value="#{areaInfluenciaBean.distanciaElementoSensible.otroElemento}"
+                                     required="true"
+                                     rendered="#{areaInfluenciaBean.habilitarOtroElemento}"
+                                     maxlength="150"/>
+                        <h:outputText value="" rendered="#{!areaInfluenciaBean.habilitarOtroElemento}"/>
+
+                        <p:outputLabel value="Descripción del elemento" for="descripcionElemento"/>
+                        <p:outputLabel value="Distancia (m)" for="distanciaElemento" />
+
+                        <p:inputTextarea id="descripcionElemento"
+                                         value="#{areaInfluenciaBean.distanciaElementoSensible.descripcion}" maxlength="150"
+                                         required="true" autoResize="false">
+                            <f:validateLength maximum="150"/>
+                        </p:inputTextarea>
+                        <p:inputText value="#{areaInfluenciaBean.distanciaElementoSensible.distancia}" id="distanciaElemento" maxlength="6">
+                            <pe:keyFilter mask="num"/>
+                        </p:inputText>
+                    </h:panelGrid>
+
+
+
+                </h:panelGroup>
+                <p:separator/>
+
+                <div class="buttons">
+
+
+                    <p:commandButton actionListener="#{areaInfluenciaController.adicionarDistancia()}"
+                                     process="@this :form:elementoContainer" value="Aceptar"
+                                     update=":form:pnlGridDistancias :form:adicionarDistancia :form:adicionarElemento"
+                                     oncomplete="showModalAddElemento(xhr, status, args)"/>
+                    <p:commandButton value="Cancelar" type="button" onclick="PF('adicionarElemento').hide()"
+                                     styleClass="secondary"/>
+
+                </div>
+            </p:dialog>
+        </h:form>
+
+        <script type="text/javascript">
+
+            function showModalAddInfraestructura(xhr, status, args) {
+                if (args.addInfraestructura)
+                    PF('adicionarInfraestructura').hide();
+                else
+                    PF('adicionarInfraestructura').show();
+            }
+
+
+            function showModalAddElemento(xhr, status, args) {
+                if (args.addElemento)
+                    PF('adicionarElemento').hide();
+                else
+                    PF('adicionarElemento').show();
+            }
+
+        </script>
+
+
+    </ui:define>
+</ui:composition>
+</html>

@@ -1,0 +1,185 @@
+	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<p:panel id="adicionarAlmacenamientoTemporalDesecho" widgetVar="adicionarAlmacenamientoTemporalDesecho" toggleable="true" toggleOrientation="vertical" styleClass="colapsablePanel" collapsed="true">
+	<p:ajax event="toggle" listener="#{almacenamientoTemporalDesechosBean.toggleHandle}" update=":form:adicionarAlmacenamientoTemporalDesecho" process="@this" />
+
+	<h:panelGroup id="datosAlmacenamientoTemporalDesecho">
+		<h:panelGroup rendered="#{almacenamientoTemporalDesechosBean.panelAdicionarVisible}">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<p:commandButton value="Adicionar" oncomplete="PF('seleccionarDesechoAlmacen').show()" process="@this" update="seleccionarDesechoAlmacen" actionListener="#{almacenamientoTemporalDesechosBean.seleccionarDesechos()}" styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick" />
+					<h:outputText value="Desechos *" />
+				</f:facet>
+				<p:dataTable id="tbl_desechosAlmacen" value="#{almacenamientoTemporalDesechosBean.generadorDesechosAlmacen.desechosPeligrosos}" var="desecho" emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Clave del desecho" styleClass="w20">
+						<h:outputText value="#{desecho.clave}" />
+					</p:column>
+					<p:column headerText="Descripción del desecho" sortBy="#{desecho.descripcion}">
+						<h:outputText value="#{desecho.descripcion}" />
+					</p:column>
+					<p:column styleClass="w20px">
+						<p:commandButton update=":form:tbl_desechosAlmacen" styleClass="button-small primary" process="@this" icon="ui-icon-circle-close" actionListener="#{almacenamientoTemporalDesechosBean.eliminarDesechoAlmacen(desecho)}" />
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+			<ui:include src="/prevencion/registrogeneradordesechos/utiles/seleccionarDesechosAlmacenModal.xhtml" />
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Características del almacén *" />
+				</f:facet>
+
+				<h:panelGrid styleClass="w100 separatorBottom" columns="3" columnClasses="w33, field_mrg w33, field_mrg w33">
+					<p:outputLabel for="nombreAlmacen" value="Nombre" />
+					<p:outputLabel for="localAlmacen" value="Local" />
+					<p:outputLabel for="ventilacionAlmacen" value="Ventilación" />
+					<p:inputText id="nombreAlmacen" value="#{almacenamientoTemporalDesechosBean.generadorDesechosAlmacen.codigo}" styleClass="w100" required="true" maxlength="150" />
+					<p:selectOneMenu id="localAlmacen" value="#{almacenamientoTemporalDesechosBean.generadorDesechosAlmacen.tipoLocal}" styleClass="w100" required="true" converter="selectItemConverter">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+						<f:selectItems value="#{almacenamientoTemporalDesechosBean.tiposLocal}" />
+						<p:ajax process="@this" />
+					</p:selectOneMenu>
+					<p:selectOneMenu id="ventilacionAlmacen" value="#{almacenamientoTemporalDesechosBean.generadorDesechosAlmacen.tipoVentilacion}" styleClass="w100" required="true" converter="selectItemConverter">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+						<f:selectItems value="#{almacenamientoTemporalDesechosBean.tiposVentilacion}" />
+						<p:ajax process="@this" />
+					</p:selectOneMenu>
+
+					<p:outputLabel for="iluminacionAlmacen" value="Iluminación" />
+					<p:outputLabel for="materialAlmacen" value="Material" />
+					<h:outputText />
+					<p:selectOneMenu id="iluminacionAlmacen" value="#{almacenamientoTemporalDesechosBean.generadorDesechosAlmacen.tipoIluminacion}" styleClass="w100" required="true" converter="selectItemConverter">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+						<f:selectItems value="#{almacenamientoTemporalDesechosBean.tiposIluminacion}" />
+						<p:ajax process="@this" />
+					</p:selectOneMenu>
+					<p:selectOneMenu id="materialAlmacen" value="#{almacenamientoTemporalDesechosBean.generadorDesechosAlmacen.tipoMaterialConstruccion}" styleClass="w100" required="true" converter="selectItemConverter">
+						<f:selectItem itemLabel="#{labels['common.item.choose']}" itemValue="" noSelectionOption="true" />
+						<f:selectItems value="#{almacenamientoTemporalDesechosBean.tiposMaterialConstruccion}" />
+						<p:ajax process="@this" />
+					</p:selectOneMenu>
+					<h:outputText />
+				</h:panelGrid>
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Dimensiones del almacén *" />
+				</f:facet>
+				<h:panelGrid styleClass="w100 separatorBottom" columns="4" columnClasses="w25, field_mrg w25, field_mrg w25, field_mrg w25">
+					<p:outputLabel for="largoAlmacen" value="Largo(m)" />
+					<p:outputLabel for="anchoAlmacen" value="Ancho(m)" />
+					<p:outputLabel for="alturaAlmacen" value="Altura(m)" />
+					<p:outputLabel for="capacidadTotalAlmacen" value="Capacidad total(m3)" />
+					<p:inputText id="largoAlmacen" value="#{almacenamientoTemporalDesechosBean.generadorDesechosAlmacen.largo}" styleClass="w100" required="true" maxlength="10">
+						<f:validateDoubleRange minimum="1" />
+						<pe:keyFilter mask="num" />
+						<p:ajax process="@this" update="capacidadTotalAlmacen" event="keyup" global="false" />
+						<p:ajax process="@this" update="capacidadTotalAlmacen" event="blur" global="false" />
+					</p:inputText>
+					<p:inputText id="anchoAlmacen" value="#{almacenamientoTemporalDesechosBean.generadorDesechosAlmacen.ancho}" styleClass="w100" required="true" maxlength="10">
+						<f:validateDoubleRange minimum="1" />
+						<pe:keyFilter mask="num" />
+						<p:ajax process="@this" update="capacidadTotalAlmacen" event="keyup" global="false" />
+						<p:ajax process="@this" update="capacidadTotalAlmacen" event="blur" global="false" />
+					</p:inputText>
+					<p:inputText id="alturaAlmacen" value="#{almacenamientoTemporalDesechosBean.generadorDesechosAlmacen.altura}" styleClass="w100" required="true" maxlength="10">
+						<f:validateDoubleRange minimum="1" />
+						<pe:keyFilter mask="num" />
+						<p:ajax process="@this" update="capacidadTotalAlmacen" event="keyup" global="false" />
+						<p:ajax process="@this" update="capacidadTotalAlmacen" event="blur" global="false" />
+					</p:inputText>
+					<p:inputText id="capacidadTotalAlmacen" readonly="true" styleClass="w100" value="#{almacenamientoTemporalDesechosBean.generadorDesechosAlmacen.largo * almacenamientoTemporalDesechosBean.generadorDesechosAlmacen.ancho * almacenamientoTemporalDesechosBean.generadorDesechosAlmacen.altura}">
+						<f:convertNumber maxFractionDigits="3" />
+					</p:inputText>
+				</h:panelGrid>
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{empty registroGeneradorDesechoBean.generadorDesechosPeligrosos.proyecto}">
+				<f:facet name="header">
+					<h:outputText value="#{almacenamientoTemporalDesechosBean.esResponsabilidadExtendida? almacenamientoTemporalDesechosBean.mensajeArchivo :'Permiso ambiental de la bodega '} #{almacenamientoTemporalDesechosBean.esResponsabilidadExtendida? ' *' :''}" />
+				</f:facet>
+				<h:panelGrid>
+					<p:outputLabel value="#{almacenamientoTemporalDesechosBean.esResponsabilidadExtendida?'En caso de utilizar un local externo o sus  propias instalaciones para almacenamiento de sus residuos se requiere se adjunte y detalle el permiso ambiental que le permite realizar esta fase de gestión':'En caso de utilizar un local externo a sus propias instalaciones para almacenamiento de sus desechos, se requiere un permiso ambiental para el almacenamiento de desechos peligrosos'}" />
+				</h:panelGrid>
+				<h:panelGrid styleClass="w100" columns="5" columnClasses="w25,w5, field_mrg w25, field_mrg w5, field_mrg w40">
+					<p:outputLabel for="codigoBodega" value="Código" />
+					<h:outputText />
+					<p:outputLabel for="fechaEmision" value="Fecha de emisión" />
+					<h:outputText />
+					<h:outputText value="" rendered="#{!almacenamientoTemporalDesechosBean.esResponsabilidadExtendida}"/>
+					<p:outputLabel id="adjuntarPermisotemp" value="#{not empty almacenamientoTemporalDesechosBean.generadorDesechosAlmacen.permisoAlmacenamientoTmp ? almacenamientoTemporalDesechosBean.generadorDesechosAlmacen.permisoAlmacenamientoTmp.nombre : almacenamientoTemporalDesechosBean.mensajeArchivo } #{not empty almacenamientoTemporalDesechosBean.generadorDesechosAlmacen.permisoAlmacenamientoTmp ? '' : '(.pdf *)' }" rendered="#{almacenamientoTemporalDesechosBean.esResponsabilidadExtendida}"/>
+
+					<p:inputText id="codigoBodega" value="#{almacenamientoTemporalDesechosBean.generadorDesechosAlmacen.codigoPermisoAmbiental}" styleClass="w100" maxlength="20" required="#{almacenamientoTemporalDesechosBean.esResponsabilidadExtendida}">
+					</p:inputText>
+					<mae:btnHelp help="#{formatearAyudaController.obtenerAyuda(helps['generadorDesecho.codigoAlmacen'])}" conector="codigoAyuda" styleClass="w100" />
+					<p:calendar id="fechaEmision" label="Fecha de emisión" value="#{almacenamientoTemporalDesechosBean.generadorDesechosAlmacen.fechaPermisoAmbiental}" maxdate="#{almacenamientoTemporalDesechosBean.currentDate}" readonlyInput="true" styleClass="w100" pattern="dd/MM/yyyy" navigator="true" required="#{almacenamientoTemporalDesechosBean.esResponsabilidadExtendida}" />
+					<h:outputText />
+					<p:fileUpload id="adjuntarPermisotempUpload" fileUploadListener="#{almacenamientoTemporalDesechosBean.uploadListenerPermisoAlmacenamiento}" multiple="false" sizeLimit="209715200" allowTypes="/(\.|\/)(pdf)$/" label="Seleccionar" uploadLabel="Subir" invalidFileMessage="Tipo de archivo no válido" invalidSizeMessage="Tamaño de archivo no válido" cancelLabel="Cancelar" mode="advanced" dragDropSupport="false" auto="true" update="adjuntarPermisotemp" rendered="#{almacenamientoTemporalDesechosBean.esResponsabilidadExtendida}"/>
+				</h:panelGrid>
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText value="Descripción del almacenamiento *" />
+				</f:facet>
+				<p:outputPanel id="numeroDigitosfosasOMuros">
+					<h:panelGrid styleClass="w33" columns="1"
+						rendered="#{almacenamientoTemporalDesechosBean.verificarFosas}">
+						<p:outputLabel for="fosasOMuros"
+							value="Fosas de retención o muros de contención(m3)" />
+						<pe:inputNumber id="fosasOMuros"
+							value="#{almacenamientoTemporalDesechosBean.generadorDesechosAlmacen.capacidadFosasRetencion}"
+							required="true" minValue="0.0" maxValue="99999.9999">
+						</pe:inputNumber>
+					</h:panelGrid>
+				</p:outputPanel>
+				<h:panelGrid styleClass="w100 separatorBottom" columns="1">
+					<p:outputLabel for="sistemasIncendios" value="Sistemas de extinción de incendios" />
+					<p:inputTextarea id="sistemasIncendios" value="#{almacenamientoTemporalDesechosBean.generadorDesechosAlmacen.sistemaExtincionIncendios}" rows="2" autoResize="false" maxlength="200" required="true" />
+				</h:panelGrid>
+			</p:panelGrid>
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<p:commandButton value="Adicionar" oncomplete="PF('seleccionarMedidaSeguridad').show()" process="@this" update="seleccionarMedidaSeguridad" styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick" />
+					<h:outputText value="Medidas de seguridad adicionales" />
+				</f:facet>
+				<p:dataTable id="tbl_tiposMedidasSeguridad" value="#{medidasSeguridadBean.tiposMedidasSeguridadSeleccionadas}" var="medida" emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Nombre">
+						<h:outputText value="#{medida.nombre}" />
+					</p:column>
+					<p:column styleClass="w20px">
+						<p:commandButton update=":form:tbl_tiposMedidasSeguridad :form:tableMedidasSeguridad :form:textoAdicionalContainer" styleClass="button-small primary" process="@this" icon="ui-icon-circle-close" actionListener="#{medidasSeguridadController.quitarMedidaSeguridad(medida)}" />
+					</p:column>
+				</p:dataTable>
+				<h:panelGroup id="textoAdicionalContainer">
+					<p:inputTextarea id="medidasTextoAdicional" value="#{medidasSeguridadBean.otro}" rows="2" styleClass="w100" autoResize="false" maxlength="200" required="#{medidasSeguridadBean.otroSeleccionado}" rendered="#{medidasSeguridadBean.otroSeleccionado}" />
+				</h:panelGroup>
+			</p:panelGrid>
+			<h:inputHidden validator="#{almacenamientoTemporalDesechosBean.validateData}" />
+		</h:panelGroup>
+	</h:panelGroup>
+
+	<div class="buttons">
+		<p:commandButton value="#{almacenamientoTemporalDesechosBean.editar ? 'Actualizar' : 'Aceptar'}" actionListener="#{almacenamientoTemporalDesechosBean.aceptar()}" oncomplete="toogleAlmacenamiento(xhr, status, args)" process="@this datosAlmacenamientoTemporalDesecho" update="datosAlmacenamientoTemporalDesecho listadoAlmacenamientoTemporalDesechos" />
+		<p:commandButton value="Cancelar" actionListener="#{almacenamientoTemporalDesechosBean.cancelar()}" styleClass="secondary" oncomplete="PF('adicionarAlmacenamientoTemporalDesecho').toggle()" process="@this" update="datosAlmacenamientoTemporalDesecho">
+			<p:resetInput target="@form" />
+		</p:commandButton>
+	</div>
+
+	<ui:include src="/prevencion/registrogeneradordesechos/utiles/seleccionarMedidaSeguridadModal.xhtml" />
+
+	<p:separator />
+</p:panel>
+
+<script type="text/javascript">
+	function toogleAlmacenamiento(xhr, status, args) {
+	    if(args.addAlmacen) {
+	    	PF('adicionarAlmacenamientoTemporalDesecho').toggle();
+	    }            
+	}
+</script>
+
+</html>

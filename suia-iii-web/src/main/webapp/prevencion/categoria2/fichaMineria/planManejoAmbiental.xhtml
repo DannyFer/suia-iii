@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" template="/WEB-INF/templates/default.xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:t="http://myfaces.apache.org/tomahawk" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:control="http://java.sun.com/jsf/composite/controles-prime" xmlns:pe="http://primefaces.org/ui/extensions">
+	<ui:define name="content">
+        <f:event type="preRenderView" listener="#{informacionGeneralController.validarTareaBpm()}"/>
+		<ui:include src="contenido/menuMineria.xhtml" />
+		<style>
+.tblUno .ui-datatable th {
+	background: #00aac3;
+}
+
+.tblDos .ui-datatable th {
+	background: #008a8a;
+}
+
+.tblUnoBorder .ui-datatable .ui-widget-header {
+	border-top: 4px solid #00aac3 !important;
+}
+
+.tblDosBorder .ui-datatable .ui-widget-header {
+	border-top: 4px solid #008a8a !important;
+}
+
+.ui-spinner-button {
+	left: 0 !important;
+}
+
+.spinner .ui-state-default .ui-icon {
+	background-image:
+		url("/suia-iii/javax.faces.resource/images/ui-icons_222222_256x240.png.jsf?ln=primefaces-suia")
+		!important;
+}
+</style>
+		<div class="content">
+			<h:form id="frmCronograma">
+				<p:growl id="msgs" globalOnly="true" />
+				<p:panel header="7. PLAN DE MANEJO AMBIENTAL (PMA Ingresar los planes que apliquen a su proyecto, obra o actividad.)">
+					<p:panelGrid id="pnlActividades" columns="1" layout="grid" styleClass="w100" columnClasses="">
+						<f:facet name="header">
+							<p:commandButton value="Exportar" styleClass="button-small-text toRight field_mrg" icon="ui-icon-arrowstop-1-s" onclick="PF('exportarDlg').show();" rendered="#{detalleMineriaController.detalleMineriaBean.sumaTotal > 0}">
+							</p:commandButton>
+							<p:commandButton value="Descargar plan ejemplo" ajax="false" id="btnDescargar" immediate="true" onclick="PrimeFaces.monitorDownload(start, stop);" styleClass="button-small-text toRight field_mrg" icon="ui-icon-arrowstop-1-s">
+								<p:fileDownload value="#{detalleMineriaController.descargarPlan()}" />
+							</p:commandButton>
+							<mae:panelGridHeaderHelp value="Cronograma" conector="generalHelp" image="#{request.contextPath}/resources/images/help-how.png" help="#{helps['no.help.yet']}" render="false" />
+						</f:facet>
+						<p:dataGrid id="dtGrid" value="#{detalleMineriaController.detalleMineriaBean.listaEntityPlanCronograma}" var="actividad" columns="1">
+							<div class="#{actividad.idTabla}">
+								<p:dataTable id="tbl" value="#{actividad.listaDetalleCronograma}"  var="plan" emptyMessage="#{labels['common.table.empty']}">
+									<f:facet name="header">
+                                        #{actividad.plan.tipo}
+                                        <p:commandButton value="Adicionar" styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick" action="#{detalleMineriaController.agregarActividad(actividad)}" update=":#{p:component('pnlActividad')}" oncomplete="PF('dlgActividad').show();">
+										</p:commandButton>
+										<p:commandButton value="Subir puntos de monitoreo" styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick" oncomplete="PF('dlgPuntos').show();" rendered="#{actividad.plan.codigo == 'PMS'}">
+										</p:commandButton>
+									</f:facet>
+									<p:column styleClass="tblUno">
+										<f:facet name="header">
+											<h:outputText value="Actividad" />
+										</f:facet>
+										<h:outputText value="#{plan.actividad}" />
+									</p:column>
+									<p:column>
+										<f:facet name="header">
+											<h:outputText value="Responsable" />
+										</f:facet>
+										<h:outputText value="#{plan.responsable}" />
+									</p:column>
+									<p:column>
+										<f:facet name="header">
+											<h:outputText value="Fecha inicio" />
+										</f:facet>
+										<h:outputText value="#{plan.fechaInicio}">
+											<f:convertDateTime pattern="dd-MM-yyyy" />
+										</h:outputText>
+									</p:column>
+									<p:column>
+										<f:facet name="header">
+											<h:outputText value="Fecha fin" />
+										</f:facet>
+										<h:outputText value="#{plan.fechaFin}">
+											<f:convertDateTime pattern="dd-MM-yyyy" />
+										</h:outputText>
+									</p:column>
+									<p:column>
+										<f:facet name="header">
+											<h:outputText value="Presupuesto" />
+										</f:facet>
+										<h:outputText value="#{plan.presupuesto}">
+											<f:convertNumber type="currency" currencySymbol="$ USD " />
+										</h:outputText>
+									</p:column>
+									<p:column>
+									   <f:facet name="header">
+									      <h:outputText value="Frecuencia" />
+									   </f:facet>
+									   <h:outputText value="#{plan.frecuencia} #{plan.unidadPeriodo.freunName}" />
+                           			</p:column>
+									<p:column exportable="false">
+										<f:facet name="header">
+											<h:outputText value="Acciones" />
+										</f:facet>
+										<div class="buttons-inline centrar">
+											<ui:remove><p:commandButton icon="ui-icon-pencil" action="#{detalleMineriaController.seleccionarActividad(plan)}" title="Editar" styleClass="primary" oncomplete="PF('dlgActividad').show();" update=":#{p:component('pnlActividad')}" /></ui:remove>
+											<p:commandButton icon="ui-icon-pencil" action="#{detalleMineriaController.seleccionarActividad(plan, actividad)}" title="Editar" styleClass="primary" oncomplete="PF('dlgActividad').show();" update=":#{p:component('pnlActividad')}" />											
+											<p:commandButton icon="ui-icon-trash" action="#{detalleMineriaController.seleccionarActividadEliminar(plan, actividad)}" title="Remover" styleClass="secondary" oncomplete="PF('deleteBookingWdgt').show();" />
+										</div>
+									</p:column>
+								</p:dataTable>
+							</div>
+							<f:facet name="footer">
+								<h:panelGrid id="pnlTotal" columns="2" style="float: right; padding-right: 10px;">
+									<h:outputLabel value="Total:" />
+									<h:outputText value="#{detalleMineriaController.detalleMineriaBean.sumaTotal}">
+										<f:convertNumber type="currency" currencySymbol="$ USD " />
+									</h:outputText>
+								</h:panelGrid>
+							</f:facet>
+						</p:dataGrid>
+					</p:panelGrid>
+					<br />
+					<f:facet name="footer">
+						<div class="buttons main">
+							<p:commandButton value="Atrás" immediate="true" process="@this" icon="ui-icon-arrowthick-1-w" action="/prevencion/categoria2/fichaMineria/matrizImpactoAmbiental.jsf?faces-redirect=true" />
+							<p:commandButton value="Guardar" icon="ui-icon-disk" oncomplete="window.scrollTo(0,0);" update=":#{p:component('frmCronograma')}" action="#{detalleMineriaController.guardar()}" />
+							<p:commandButton value="Siguiente" immediate="true" process="@this" icon="ui-icon-arrowthick-1-e" action="/prevencion/categoria2/fichaMineria/enviarFicha.jsf?faces-redirect=true" />
+						</div>
+					</f:facet>
+					<br />
+					<div style="height: 300px; overflow: scroll; overflow-x: hidden">
+						<pe:timeline id="timeline" value="#{detalleMineriaController.model}" var="booking" timeZone="America/Guayaquil" zoomMax="#{detalleMineriaController.detalleMineriaBean.zoomMax}" zoomMin="#{detalleMineriaController.detalleMineriaBean.zoomMin}" start="#{detalleMineriaController.detalleMineriaBean.start}" end="#{detalleMineriaController.detalleMineriaBean.end}" axisOnTop="true" zoomable="true" locale="es" showNavigation="true" selectable="false" editable="false" width="780" timeChangeable="false" minHeight="250" widgetVar="timelineWdgt">
+
+							<h:panelGrid columns="1">
+								<h:outputLabel value="Plan:" />
+								<h:outputText value="#{booking.plan.tipo}" style="font-size: 75%" />
+								<h:outputLabel value="Presupuesto:" />
+								<h:outputText value="#{booking.presupuesto}" style="font-size: 75%">
+									<f:convertNumber type="currency" currencySymbol="$ USD " />
+								</h:outputText>
+							</h:panelGrid>
+						</pe:timeline>
+					</div>
+
+
+					<p:dialog id="deleteBookingDlg" header="Confirmación" widgetVar="deleteBookingWdgt" modal="true" dynamic="true">
+						<h:panelGroup id="deleteBookingInner" layout="block" style="margin:10px;">
+							<h:outputText value="¿Está usted seguro de eliminar esta actividad?" />
+						</h:panelGroup>
+
+						<f:facet name="footer">
+							<h:panelGroup layout="block" style="text-align:right; padding:2px; white-space:nowrap;">
+								<p:commandButton value="Eliminar" process="deleteBookingDlg" update=":#{p:component('pnlActividades')}, :#{p:component('timeline')}" action="#{detalleMineriaController.remover()}" oncomplete="PF('deleteBookingWdgt').hide()" />
+								<p:commandButton type="button" value="Cerrar" onclick="PF('deleteBookingWdgt').hide()" />
+							</h:panelGroup>
+						</f:facet>
+					</p:dialog>
+
+					<p:dialog id="exportar" header="Confirmación" widgetVar="exportarDlg" resizable="false" modal="true" dynamic="true" closable="false" width="250" height="100">
+						<p:panelGrid id="pnlExportar" columns="1" columnClasses="label, value">
+							<h:outputText value="Descargue el archivo en formato excel (.xls)" />
+						</p:panelGrid>
+						<div class="buttons centrar">
+							<p:commandButton value="Descargar" ajax="false" update=":#{p:component('pnlActividades')}, :#{p:component('timeline')}" icon="ui-icon-arrowstop-1-s" action="#{detalleMineriaController.generarReporteTablas()}">
+							</p:commandButton>
+							<p:commandButton value="Cerrar" icon="ui-icon-close" onclick="PF('exportarDlg').hide()" />
+						</div>
+					</p:dialog>
+
+				</p:panel>
+			</h:form>
+		</div>
+		<p:dialog header="Detalle actividad" widgetVar="dlgActividad" modal="true" resizable="false" draggable="false" width="450" height="250">
+			<h:form>
+				<p:panel>
+					<h:panelGrid id="pnlActividad" styleClass="w100" columns="2" columnClasses="w30,null">
+						<h:outputLabel value="*Plan:" />
+						<h:outputText value="#{detalleMineriaController.detalleMineriaBean.actividad.plan.tipo}" />
+						<h:outputLabel value="*Actividad:" />
+						<p:inputText value="#{detalleMineriaController.detalleMineriaBean.actividad.actividad}" label="Actividad" styleClass="w100" maxlength="150" />
+						<h:outputLabel value="*Responsable:" />
+						<p:inputText value="#{detalleMineriaController.detalleMineriaBean.actividad.responsable}" label="Responsable" styleClass="w100" maxlength="150" />
+						<h:outputLabel value="*Presupuesto:" />
+						<p:inputText value="#{detalleMineriaController.detalleMineriaBean.actividad.presupuesto}" label="Presupuesto" maxlength="10" onkeypress="return NumCheckDouble(event, this);" />
+
+						<h:outputLabel value="*Fecha inicio:" />
+						<p:calendar value="#{detalleMineriaController.detalleMineriaBean.actividad.fechaInicio}" timeZone="America/Guayaquil" readonlyInput="true" pattern="dd/MM/yyyy" label="Desde" />
+
+						<h:outputLabel value="*Fecha fin:" />
+						<p:calendar value="#{detalleMineriaController.detalleMineriaBean.actividad.fechaFin}" timeZone="America/Guayaquil" readonlyInput="true" pattern="dd/MM/yyyy" label="Hasta" />
+						<h:outputLabel value="Frecuencia:" />
+						<p:panelGrid id="cmpPeriodo" styleClass="noBorder" columns="2">
+							<p:spinner styleClass="spinner" value="#{detalleMineriaController.detalleMineriaBean.actividad.frecuencia}" min="1" max="10" maxlength="2" onkeypress="return numbersonly(this, event)" />
+							<p:selectOneMenu id="selectPeriodo" converter="selectItemConverter"
+								style="width:105px;"
+								value="#{detalleMineriaController.detalleMineriaBean.actividad.unidadPeriodo}">
+									<f:selectItem itemLabel="#{labels['common.item.choose']}"
+										itemValue="" noSelectionOption="true" />
+									<f:selectItems
+									value="#{detalleMineriaController.detalleMineriaBean.listaUnidadPeriodicidad}"
+									var="periodo" itemLabel="#{periodo.freunName}"
+									itemValue="#{periodo}" />
+	                  		</p:selectOneMenu>
+						</p:panelGrid>
+					<ui:remove><p:spinner styleClass="spinner" value="#{detalleMineriaController.detalleMineriaBean.actividad.frecuencia}" min="1" max="10" maxlength="2" onkeypress="return numbersonly(this, event)" /></ui:remove>
+					</h:panelGrid>
+
+					<br />
+
+					<center>
+						<p:commandButton value="Guardar" update=":#{p:component('pnlActividades')}, :#{p:component('timeline')}, :#{p:component('msgs')}" action="#{detalleMineriaController.guardarActividad()}" styleClass="primary" oncomplete="handleActividadRequest(xhr, status, args);" />
+					</center>
+				</p:panel>
+			</h:form>
+		</p:dialog>
+		<p:dialog header="Puntos de monitoreo" widgetVar="dlgPuntos" modal="true" resizable="false" draggable="false" width="450" height="250">
+			<h:form>
+				<h:panelGrid>
+					<p:commandButton rendered="#{!empty detalleMineriaController.detalleMineriaBean.plantillaAgregarPuntosMonitoreo}" value="Descargar plantilla" styleClass="primary" icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true" style="text-align: center; !important">
+						<p:fileDownload value="#{detalleMineriaController.getStreamContent(detalleMineriaController.detalleMineriaBean.plantillaAgregarPuntosMonitoreo)}" />
+					</p:commandButton>
+
+					<h:outputText />
+					<h:outputText />
+					<h:outputText />
+
+					<p:outputLabel value="*Adjuntar Documento (Formato XLS, XLSX):" for="adjunto" />
+					<p:fileUpload id="adjunto" required="true" fileUploadListener="#{detalleMineriaController.handleFileUpload}" mode="advanced" label="Seleccione" auto="true" sizeLimit="1048576" allowTypes="/(\.|\/)(xls|xlsx)$/" update="nombreDoc" requiredMessage="El campo 'Adjuntar Documento (Formato PDF)' es requerido." invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo XLS o XLSX" invalidSizeMessage="Debe adjuntar un archivo no mayor de 1 Mb." />
+					<p:commandLink id="nombreDoc" target="_blank" value="#{detalleMineriaController.detalleMineriaBean.entityAdjunto.nombre}" action="#{detalleMineriaController.descargar()}" ajax="false" />
+				</h:panelGrid>
+				<br />
+				<center>
+					<p:commandButton value="Cerrar" icon="ui-icon-close" styleClass="primary" onclick="PF('dlgPuntos').hide()" />
+				</center>
+			</h:form>
+		</p:dialog>
+
+		<script type="text/javascript">
+            function handleActividadRequest(xhr, status, args) {
+                if (args.validationFailed || !args.actividadIn) {
+                }
+                else {
+                    PF('dlgActividad').hide();
+                    $('#loginLink').fadeOut();
+                }
+            }
+        </script>
+
+	</ui:define>
+</ui:composition>

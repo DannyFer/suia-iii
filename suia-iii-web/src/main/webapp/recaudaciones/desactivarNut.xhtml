@@ -1,0 +1,268 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+	<ui:define name="content">
+		<style type="text/css">
+.ui-panel .ui-panel-titlebar {
+	padding: 10px 12px 4px;
+}
+</style>
+
+		<h:form id="form">
+			<p:panel header="DESACTIVAR NUT Y ACTIVAR INGRESO DE PAGO MANUAL"
+				id="pnlDataNut">
+				<br />
+				<h:panelGrid styleClass="w66" columns="1" columnClasses="w100">
+					<p:outputLabel for="txtFiltro" value="Buscar Proyecto"
+						styleClass="bold" />
+				</h:panelGrid>
+				<h:panelGrid styleClass="w66" columns="2"
+					columnClasses="w50, field_mrg">
+					<p:inputText id="txtFiltro" required="true" autocomplete="off"
+						value="#{desactivarNutController.proyecto}" styleClass="w100" />
+					<h:panelGroup>
+						<div class="buttons-inline">
+							<p:commandButton icon="ui-icon-search" styleClass="primary"
+								actionListener="#{desactivarNutController.buscarNut()}"
+								update="pnlInfo" process="@this txtFiltro" />
+							<p:commandButton value="Limpiar" styleClass="secondary"
+								actionListener="#{desactivarNutController.limpiar()}"
+								update="pnlInfo" process="@this" />
+						</div>
+					</h:panelGroup>
+				</h:panelGrid>
+
+				<br />
+				<br />
+
+				<h:panelGroup id="pnlInfo">
+					<h:panelGrid columns="1" layout="grid" styleClass="w100"
+						columnClasses="w100"
+						rendered="#{desactivarNutController.proyectoHabilitado}">
+
+						<p:dataTable value="#{desactivarNutController.listNutTramite}"
+							var="nutItem" id="tblNuts">
+							<p:column headerText="Proceso">
+								<h:outputText value="#{nutItem.proceso.processName}" />
+							</p:column>
+							<p:column headerText="Código NUT" styleClass="w20">
+								<h:outputText
+									value="#{nutItem.id eq null ? 'N/A' : nutItem.nutCodigo}" />
+							</p:column>
+							<p:column headerText="Estado NUT" styleClass="alCenter w20">
+								<h:outputText
+									value="#{nutItem.id eq null ? 'N/A' : nutItem.estadosNut.descripcion}" />
+							</p:column>
+							<p:column styleClass="alCenter w8">
+								<p:commandButton styleClass="primary" icon="ui-icon-check"
+									title="Desactivar"
+									rendered="#{nutItem.id ne null and nutItem.estadosNut.id ne 3 and nutItem.estadosNut.id ne 4}"
+									process="@this"
+									actionListener="#{desactivarNutController.visualizarNut(nutItem)}"
+									update=":form:dlgInfoNut" />
+								<p:commandButton styleClass="primary" icon="ui-icon-search"
+									title="Ver"
+									rendered="#{nutItem.estadosNut.id eq 4 or nutItem.estadosNut.id eq 3}"
+									process="@this"
+									actionListener="#{desactivarNutController.visualizarNut(nutItem)}"
+									update=":form:dlgInfoNut" />
+								<p:commandButton styleClass="primary" icon="ui-icon-check"
+									title="Desactivar" rendered="#{nutItem.id eq null}"
+									process="@this"
+									actionListener="#{desactivarNutController.abrirPagoManual(nutItem)}"
+									update=":form:dlgPagoManual" />
+							</p:column>
+						</p:dataTable>
+
+						<br />
+					</h:panelGrid>
+
+				</h:panelGroup>
+			</p:panel>
+
+
+			<p:dialog header="Desactivar NUT" id="dlgInfoNut"
+				widgetVar="dlgInfoNut" modal="true" resizable="false" width="600"
+				closable="false">
+
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null"
+					rendered="#{desactivarNutController.numeroNut ne null}">
+					<p:outputLabel value="RUC / Cédula:" style="color: white" />
+					<h:outputText value="#{desactivarNutController.cedulaOperador}" />
+
+					<h:outputText value="Nombre Operador" />
+					<h:outputText value="#{desactivarNutController.nombreOperador}" />
+
+					<p:outputLabel value="Proceso" style="color: white" />
+					<h:outputText
+						value="#{desactivarNutController.procesoNut.processName}" />
+
+					<p:outputLabel value="Código NUT" style="color: white" />
+					<h:outputText
+						value="#{desactivarNutController.numeroNut.nutCodigo}" />
+
+					<p:outputLabel value="Valor" style="color: white" />
+					<h:outputText value="#{desactivarNutController.numeroNut.nutValor}" />
+
+					<p:outputLabel value="Fecha de activación" style="color: white" />
+					<h:outputText
+						value="#{desactivarNutController.numeroNut.nutFechaActivacion}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</h:outputText>
+
+				</p:panelGrid>
+
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null"
+					rendered="#{desactivarNutController.numeroNut ne null and desactivarNutController.numeroNut.bnfTramitNumber ne null}">
+					<p:outputLabel value="Nro. Referencia" style="color: white" />
+					<h:outputText
+						value="#{desactivarNutController.numeroNut.bnfTramitNumber}" />
+
+					<p:outputLabel value="Fecha de pago" style="color: white" />
+					<h:outputText
+						value="#{desactivarNutController.numeroNut.bnfFechaPago}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</h:outputText>
+				</p:panelGrid>
+
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null"
+					rendered="#{desactivarNutController.numeroNut ne null and desactivarNutController.numeroNut.observacionBdd ne null}">
+					<p:outputLabel value="Observacion" style="color: white" />
+					<h:outputText
+						value="#{desactivarNutController.numeroNut.observacionBdd}" />
+
+					<p:outputLabel value="Fecha Observación" style="color: white" />
+					<h:outputText
+						value="#{desactivarNutController.numeroNut.fechaObservacionBdd}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</h:outputText>
+				</p:panelGrid>
+				<br />
+
+				<p:panelGrid columns="2" styleClass="panel_data w100"
+					columnClasses="header w25, null"
+					rendered="#{desactivarNutController.deshabilitarNut}">
+					<p:outputLabel value="Motivo desactivación:" style="color: white"
+						for="txtMotivo" />
+					<p:inputTextarea id="txtMotivo"
+						value="#{desactivarNutController.motivo}" rows="4"
+						styleClass="w100" required="true" autoResize="false"
+						maxlength="500" />
+				</p:panelGrid>
+
+				<br />
+				<p:outputPanel>
+					<div class="buttons main">
+						<p:commandButton value="Cancelar" resetValues="true"
+							oncomplete="PF('dlgInfoNut').hide();" process="@this" />
+						<p:commandButton value="Aceptar"
+							actionListener="#{desactivarNutController.desactivarNut()}"
+							oncomplete="handleDlgNut(xhr, status, args)" update="form"
+							process="dlgInfoNut"
+							rendered="#{desactivarNutController.deshabilitarNut}">
+							<p:confirm header="Confirmación"
+								message="¿Está seguro que desea desactivar el NUT y activar el pago manual?"
+								icon="ui-icon-alert" />
+						</p:commandButton>
+					</div>
+				</p:outputPanel>
+			</p:dialog>
+
+			<p:dialog header="Activar pago manual" id="dlgPagoManual"
+				widgetVar="dlgPagoManual" modal="true" resizable="false" width="600"
+				closable="false">
+
+				<h:panelGrid columns="1" styleClass="w100 alCenter" id="pnlDatos">
+					<p:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25, null">
+						<p:outputLabel value="RUC / Cédula:" style="color: white" />
+						<h:outputText value="#{desactivarNutController.cedulaOperador}" />
+
+						<h:outputText value="Nombre Operador" />
+						<h:outputText value="#{desactivarNutController.nombreOperador}" />
+
+						<p:outputLabel value="Proceso" style="color: white" />
+						<h:outputText
+							value="#{desactivarNutController.procesoNut.processName}" />
+					</p:panelGrid>
+
+					<br />
+					<h:outputText
+						value="No se ha generado un número NUT para el proyecto."
+						escape="false" styleClass="alJustify bold"
+						rendered="#{desactivarNutController.deshabilitarPago}" />
+					<p:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25, null"
+						rendered="#{desactivarNutController.deshabilitarPago}">
+						<p:outputLabel value="Motivo desactivación:" style="color: white"
+							for="txtMotivoD" />
+						<p:inputTextarea id="txtMotivoD"
+							value="#{desactivarNutController.motivo}" rows="4"
+							styleClass="w100" required="true" autoResize="false"
+							maxlength="200" />
+					</p:panelGrid>
+
+					<p:panelGrid columns="2" styleClass="panel_data w100"
+						columnClasses="header w25, null"
+						rendered="#{!desactivarNutController.deshabilitarPago}">
+						<p:outputLabel value="Observacion" style="color: white" />
+						<h:outputText
+							value="#{desactivarNutController.numeroNut.proyectoLiberado.observacionBdd}" />
+
+						<p:outputLabel value="Fecha Observación" style="color: white" />
+						<h:outputText
+							value="#{desactivarNutController.numeroNut.proyectoLiberado.fechaCreacion}">
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+						</h:outputText>
+					</p:panelGrid>
+
+					<br />
+					<p:outputPanel>
+						<div class="buttons main">
+							<p:commandButton value="Cancelar" resetValues="true"
+								oncomplete="PF('dlgPagoManual').hide();" process="@this" />
+							<p:commandButton styleClass="large" value="Activar pago manual"
+								process="@this txtMotivoD" update="@form pnlDataNut"
+								oncomplete="handleDlgManual(xhr, status, args)"
+								actionListener="#{desactivarNutController.activarPagoManual}"
+								rendered="#{desactivarNutController.deshabilitarPago}">
+								<p:confirm header="Confirmación"
+									message="¿Está seguro que desea activar el pago manual para el proyecto?"
+									icon="ui-icon-alert" />
+							</p:commandButton>
+						</div>
+					</p:outputPanel>
+				</h:panelGrid>
+			</p:dialog>
+
+			<script type="text/javascript">
+	function handleDlgNut(xhr, status, args) {
+		if (args.validationFailed || !args.addMotivo) {
+			PF('dlgInfoNut').show();
+		}
+		else {
+			PF('dlgInfoNut').hide();
+		}
+	}
+
+	function handleDlgManual(xhr, status, args) {
+		if (args.validationFailed || !args.addMotivoManual) {
+			PF('dlgPagoManual').show();
+		}
+		else {
+			PF('dlgPagoManual').hide();
+		}
+	}
+	</script>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

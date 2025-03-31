@@ -1,0 +1,246 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+	<ui:define name="content">
+		<style type="text/css">
+.ui-panelgrid-header .ui-widget-header td {
+	background: #008A8A !important;
+}
+
+.pnlHeaders .ui-widget-content {
+	border: none !important;
+}
+
+.pnlHeaders .ui-datagrid-header {
+	text-align: left !important;
+	background: #008A8A !important;
+	color: #FFFFFF !important;
+	font-weight: bold;
+	padding-top: 0 !important;
+}
+</style>
+
+		<ui:remove>
+			<f:event type="preRenderView"
+				listener="#{ingresarFormularioController.validarTareaBpm()}" />
+		</ui:remove>
+
+
+		<h:form id="form">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100"
+				id="pnlDatos">
+				<f:facet name="header">
+					<h:outputText
+						value="INFORMACIÓN COMPLEMENTARIA DEL PROPONENTE PARA EL ANÁLISIS DE LA VIABILIDAD AMBIENTAL DE UN PROYECTO, OBRA O ACTIVIDAD EN EL SISTEMA NACIONAL DE ÁREAS PROTEGIDAS" />
+				</f:facet>
+
+				<h:panelGroup rendered="#{ingresarFormularioController.verGeneral}">
+
+					<p:dataGrid var="cabecera"
+						value="#{ingresarFormularioController.preguntasForm1}" columns="1"
+						layout="grid">
+						<p:dataGrid var="pregunta" value="#{cabecera.listaPreguntas}"
+							columns="1" layout="grid" id="pnlCabeceras"
+							styleClass="pnlHeaders">
+							<f:facet name="header">
+								<h:outputText value="#{cabecera.descripcion}" />
+							</f:facet>
+
+							<p:panelGrid columns="2" styleClass="panel_data w100"
+								columnClasses="header w25, null">
+								<p:outputLabel for="txtFacilidades"
+									value="#{pregunta.descripcion}" style="color: white" />
+								<p:outputPanel styleClass="alRight">
+									<p:inputTextarea id="txtFacilidades" maxlength="8000" rows="5"
+										rendered="#{pregunta.tipo eq 2}" required="true"
+										style="resize: none;" autoResize="false"
+										placeholder="#{pregunta.descripcion}"
+										value="#{pregunta.respuesta.respText}" />
+									<p:commandButton value="Guardar" process="@this txtFacilidades"
+										styleClass="secondary alRight"
+										action="#{ingresarFormularioController.guardarCampo(pregunta)}"
+										icon="ui-icon-disk" />
+								</p:outputPanel>
+							</p:panelGrid>
+						</p:dataGrid>
+					</p:dataGrid>
+
+					<p:panelGrid columns="1" styleClass="panel_data w100"
+						columnClasses="null, null"
+						rendered="#{ingresarFormularioController.requiereAclaratoria}">
+						<f:facet name="header">
+							<h:outputText value="Información aclaratoria o complementaria" />
+						</f:facet>
+						<p:inputTextarea id="txtDetalleAclaratoria" rows="5"
+							required="true" style="resize: none;" autoResize="false"
+							disabled="true"
+							value="#{ingresarFormularioController.viabilidadProyecto.detalleAclaratoria}" />
+					</p:panelGrid>
+				</h:panelGroup>
+
+				<h:panelGroup rendered="#{!ingresarFormularioController.verGeneral}">
+					<p:dataGrid var="cabecera"
+						value="#{ingresarFormularioController.preguntasForm2}" columns="1"
+						layout="grid">
+						<p:dataGrid var="pregunta" value="#{cabecera.listaPreguntas}"
+							columns="1" layout="grid" id="pnlCabeceras"
+							styleClass="pnlHeaders">
+							<f:facet name="header">
+								<h:outputText value="#{cabecera.descripcion}" />
+							</f:facet>
+
+							<p:panelGrid columns="2" styleClass="panel_data w100"
+								columnClasses="header w25, null">
+								<p:outputLabel for="txtFacilidades"
+									value="#{pregunta.descripcion}" style="color: white" />
+								<p:outputPanel styleClass="alRight">
+									<p:inputTextarea id="txtFacilidades" maxlength="6000" rows="5"
+										rendered="#{pregunta.tipo eq 2}" required="true"
+										style="resize: none;" autoResize="false"
+										placeholder="#{pregunta.descripcion}"
+										value="#{pregunta.respuesta.respText}" />
+									<p:commandButton value="Guardar" process="@this txtFacilidades"
+										styleClass="secondary alRight"
+										action="#{ingresarFormularioController.guardarCampo(pregunta)}"
+										icon="ui-icon-disk" />
+								</p:outputPanel>
+							</p:panelGrid>
+
+						</p:dataGrid>
+					</p:dataGrid>
+
+					<br />
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="Documentación que sustente su pedido" />
+						</f:facet>
+
+						<h:outputText value="#{ingresarFormularioController.notaSustento}"
+							escape="false" />
+
+						<p:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="header w25, null">
+
+
+							<p:outputLabel value="Adjuntar" style="color: white" />
+							<p:outputPanel id="pnlDocSustento">
+								<p:fileUpload id="docSustento"
+									fileUploadListener="#{ingresarFormularioController.uploadFile}"
+									multiple="false" sizeLimit="20971520"
+									allowTypes="/(\.|\/)(pdf|zip|rar)$/"
+									label="Seleccionar archivo a adjuntar (.pdf .zip, .rar)"
+									uploadLabel="Subir"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+									cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+									auto="true" required="true" update="pnlDocSustento" />
+								<p:commandButton icon="ui-icon-arrowthick-1-s"
+									styleClass="button-small primary toLeft" title="Ver"
+									ajax="false" immediate="true"
+									rendered="#{ingresarFormularioController.documentoSustento.nombre ne null}">
+									<p:fileDownload
+										value="#{ingresarFormularioController.descargar(ingresarFormularioController.documentoSustento)}" />
+								</p:commandButton>
+								<h:outputText
+									value="#{ingresarFormularioController.documentoSustento.nombre}"
+									rendered="#{ingresarFormularioController.documentoSustento.nombre ne null}" />
+							</p:outputPanel>
+						</p:panelGrid>
+					</p:panelGrid>
+
+					<p:panelGrid columns="1" styleClass="panel_data w100"
+						columnClasses="null, null"
+						rendered="#{ingresarFormularioController.requiereAclaratoria}">
+						<f:facet name="header">
+							<h:outputText value="Información aclaratoria o complementaria" />
+						</f:facet>
+						<p:inputTextarea id="txtAclaratoria" rows="5" required="true"
+							style="resize: none;" autoResize="false" disabled="true"
+							value="#{ingresarFormularioController.viabilidadProyecto.detalleAclaratoria}" />
+						<h:outputText
+							value="En caso de ser necesario, a continuación adjunte la documentación que corresponde a información aclaratoria o complementaria:"
+							escape="false" />
+						<p:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="header w25, null">
+							<p:outputLabel value="Adjuntar *" style="color: white" />
+							<p:outputPanel id="pnlDocAclaratoria">
+								<p:fileUpload id="docAclaratoria"
+									fileUploadListener="#{ingresarFormularioController.uploadAclaratoria}"
+									multiple="false" sizeLimit="20971520"
+									allowTypes="/(\.|\/)(pdf|zip|rar)$/"
+									label="Seleccionar archivo a adjuntar (.pdf .zip, .rar)"
+									uploadLabel="Subir"
+									invalidFileMessage="Tipo de archivo no válido"
+									invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+									cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+									auto="true" required="true" update="tblDocAclaratoria" />
+								<br />
+								<p:dataTable id="tblDocAclaratoria" styleClass="w100"
+									value="#{ingresarFormularioController.listaDocumentosAclaratoria}"
+									var="documento" emptyMessage="#{labels['common.table.empty']}">
+									<p:column headerText="Documentos">
+										<h:outputText value="#{documento.nombre}" />
+									</p:column>
+									<p:column headerText="Acciones" styleClass="w70px alCenter">
+										<p:commandButton icon="ui-icon-arrowthick-1-s"
+											styleClass="secondary" title="Descargar" ajax="false"
+											immediate="true">
+											<p:fileDownload
+												value="#{ingresarFormularioController.descargar(documento)}" />
+										</p:commandButton>
+										<p:commandButton icon="ui-icon-trash" title="Eliminar"
+											process="@this" styleClass="primary"
+											actionListener="#{ingresarFormularioController.eliminarDocumento(documento)}"
+											update="tblDocAclaratoria" />
+									</p:column>
+								</p:dataTable>
+
+							</p:outputPanel>
+						</p:panelGrid>
+					</p:panelGrid>
+
+					<h:panelGroup id="fieldValidate">
+						<h:inputHidden
+							rendered="#{ingresarFormularioController.form2Guardado}"
+							validator="#{ingresarFormularioController.validateDatosIngreso}" />
+					</h:panelGroup>
+				</h:panelGroup>
+
+			</p:panelGrid>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Regresar" immediate="true"
+						styleClass="secondary"
+						action="#{ingresarFormularioController.siguiente(true)}"
+						rendered="#{!ingresarFormularioController.verGeneral}"
+						update="pnlDatos pnlButtons" icon="ui-icon-arrowthick-1-w" />
+					<p:commandButton value="Guardar" process="@this form"
+						actionListener="#{ingresarFormularioController.guardarGeneral()}"
+						update="pnlButtons fieldValidate" icon="ui-icon-disk" />
+					<p:commandButton value="Siguiente" immediate="true"
+						styleClass="secondary"
+						action="#{ingresarFormularioController.siguiente(false)}"
+						disabled="#{!ingresarFormularioController.form1Guardado}"
+						rendered="#{ingresarFormularioController.verGeneral}"
+						update="pnlDatos pnlButtons" icon="ui-icon-arrowthick-1-e" />
+					<p:commandButton value="Enviar" process="@this form"
+						action="#{ingresarFormularioController.enviar()}"
+						disabled="#{!ingresarFormularioController.form2Guardado}"
+						rendered="#{!ingresarFormularioController.verGeneral}"
+						update="pnlDatos pnlButtons fieldValidate" icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+</ui:composition>

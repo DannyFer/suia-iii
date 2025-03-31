@@ -1,0 +1,280 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+<ui:composition>
+	<f:loadBundle var="helps"
+		basename="ec.gob.ambiente.core.resources.helps_es" />
+	<f:loadBundle var="msg"
+		basename="ec.gob.ambiente.core.resources.messages_es" />
+	<h:panelGrid columns="1" layout="grid" styleClass="w100">
+		<f:facet name="header">
+			<h:outputText
+				value="#{msg['label.prevencion.tdr.diagnosticoAmbientalLineaBase']}"
+				styleClass="encabezado1_5em alLeft" />
+		</f:facet>
+		<p:fragment>
+			<h:outputText />
+			<h:outputText />
+			<p:outputLabel
+				value="#{msg['label.prevencion.tdr.metodologiaGeneral']}: *" />
+			<control:imputConTextoEnriquecido
+				requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.metodologiaGeneral']} #{msg['label.prevencion.tdr.requerido']}."
+				valor="#{ingresarTDRBean.tdrEia.tdelGeneralMethodology}"
+				soloLectura="#{ingresarTDRBean.procesoIniciado}" requerido="true" />
+
+			<h:outputText />
+			<h:outputText />
+			<p:outputLabel
+				value="#{msg['label.prevencion.tdr.determinacionAreaReferencial']}: *" />
+			<control:imputConTextoEnriquecido
+				requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.determinacionAreaReferencial']} #{msg['label.prevencion.tdr.requerido']}."
+				valor="#{ingresarTDRBean.tdrEia.tdelDeterminationReferenceArea}"
+				soloLectura="#{ingresarTDRBean.procesoIniciado}" requerido="true" />
+
+			<h:outputText />
+			<h:outputText />
+			<p:outputLabel
+				value="#{msg['label.prevencion.tdr.metodologiaCaracterizacionComponenteFisicoOAbiotico']}: *" />
+			<control:imputConTextoEnriquecido
+				requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.metodologiaCaracterizacionComponenteFisicoOAbiotico']} #{msg['label.prevencion.tdr.requerido']}."
+				valor="#{ingresarTDRBean.tdrEia.tdelMethodologyPhysicalAbiotic}"
+				soloLectura="#{ingresarTDRBean.procesoIniciado}" requerido="true" />
+
+			<h:outputText />
+			<h:outputText />
+			<p:panelGrid columns="1" layout="grid" styleClass="w100 alCenter">
+				<f:facet name="header">
+					<p:commandButton value="Evaluar Medio Físico"
+						styleClass="button-small-text toRight field_mrg"
+						rendered="#{!ingresarTDRBean.procesoIniciado}" process="@this"
+						immediate="true" icon="ui-icon-check"
+						actionListener="#{ingresarTDRBean.limpiarMedioFisico()}"
+						oncomplete="PF('physicalDialog').show()" update="@(.physicalDlg)"></p:commandButton>
+					<mae:panelGridHeaderHelp
+						value="#{msg['label.physicalEnvironment']}"
+						conector="actividadHelp" help="#{helps['registro.medioFisico']}" />
+				</f:facet>
+
+				<p:dataTable id="physicalGroupDatatable"
+					styleClass="physicalGroupDatatable"
+					value="#{ingresarTDRBean.mediosFisicosSeleccionados}"
+					emptyMessage="#{labels['common.table.empty']}" rowIndexVar="rowIndex"
+					var="physicalEnvironments" paginator="true" rows="5"
+					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					rowsPerPageTemplate="5,10,15" paginatorPosition="bottom">
+
+					<p:column headerText="#{msg['label.numero']}" width="5%">
+						#{rowIndex+1}
+					</p:column>
+
+					<p:column headerText="#{msg['label.environment']}">
+						<h:outputText
+							value="#{physicalEnvironments.catalogoGeneral.descripcion}" />
+					</p:column>
+
+					<p:column headerText="#{msg['label.isApplicable']}">
+						<h:outputText value="#{physicalEnvironments.aplicable}" />
+					</p:column>
+					<p:column headerText="Acciones" style="text-align: center"
+						rendered="#{!ingresarTDRBean.procesoIniciado}">
+						<p:fragment>
+							<p:commandButton title="#{msg['button.editar']}" id="btn_editar"
+								actionListener="#{ingresarTDRBean.seleccionarMedioFisico(physicalEnvironments)}"
+								icon="ui-icon-pencil"
+								update=":#{p:component('frmMedioFisicoEdit')}" process="@this"
+								oncomplete="PF('medioFisicoEditDialog').show()" />
+							<p:commandButton title="#{msg['button.eliminar']}"
+								update="@(.physicalGroupDatatable)" process="@this"
+								actionListener="#{ingresarTDRBean.eliminarMedioFisico(physicalEnvironments)}"
+								icon="ui-icon-trash"></p:commandButton>
+						</p:fragment>
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+			
+			<h:outputText />
+			<h:outputText />
+			<p:panelGrid columns="1" layout="grid" styleClass="w100 alCenter">
+				<f:facet name="header">
+					<p:commandButton value="Evaluar Medio Biotico"
+						styleClass="button-small-text toRight field_mrg"
+						rendered="#{!ingresarTDRBean.procesoIniciado}" process="@this"
+						immediate="true" icon="ui-icon-check"
+						actionListener="#{ingresarTDRBean.limpiarMedioBiotico()}"
+						oncomplete="PF('bioticDialog').show()" update="@(.bioticDlg)"></p:commandButton>
+					<mae:panelGridHeaderHelp
+						value="#{msg['label.bioticEnvironment']}"
+						conector="actividadHelp" 
+						help="#{helps['registro.medioBiotico']}" />
+				</f:facet>
+
+				<p:dataTable id="bioticGroupDatatable"
+					styleClass="bioticGroupDatatable"
+					value="#{ingresarTDRBean.mediosBioticosSeleccionados}"
+					emptyMessage="#{labels['common.table.empty']}" rowIndexVar="rowIndex"
+					var="bioticEnvironments" paginator="true" rows="5"
+					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					rowsPerPageTemplate="5,10,15" paginatorPosition="bottom">
+
+					<p:column headerText="#{msg['label.numero']}" width="5%">
+						#{rowIndex+1}
+					</p:column>
+
+					<p:column headerText="#{msg['label.environment']}">
+						<h:outputText
+							value="#{bioticEnvironments.catalogoGeneral.descripcion}" />
+					</p:column>
+
+					<p:column headerText="#{msg['label.isApplicable']}">
+						<h:outputText value="#{bioticEnvironments.aplicable}" />
+					</p:column>
+					<p:column headerText="Acciones" style="text-align: center"
+						rendered="#{!ingresarTDRBean.procesoIniciado}">
+						<p:fragment>
+							<p:commandButton title="#{msg['button.editar']}" id="btn_editarBiotic"
+								actionListener="#{ingresarTDRBean.seleccionarMedioBiotico(bioticEnvironments)}"
+								icon="ui-icon-pencil"
+								update=":#{p:component('frmMedioBioticoEdit')}" process="@this"
+								oncomplete="PF('medioBioticoEditDialog').show()" />
+							<p:commandButton title="#{msg['button.eliminar']}"
+								update="@(.bioticGroupDatatable)" process="@this"
+								actionListener="#{ingresarTDRBean.eliminarMedioBiotico(bioticEnvironments)}"
+								icon="ui-icon-trash"></p:commandButton>
+						</p:fragment>
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+			
+			
+			<h:outputText />
+			<h:outputText />
+			<p:panelGrid columns="1" layout="grid" styleClass="w100 alCenter">
+				<f:facet name="header">
+					<p:commandButton value="Evaluar Medio Social"
+						styleClass="button-small-text toRight field_mrg"
+						rendered="#{!ingresarTDRBean.procesoIniciado}" process="@this"
+						immediate="true" icon="ui-icon-check"
+						actionListener="#{ingresarTDRBean.limpiarMedioSocial()}"
+						oncomplete="PF('socialDialog').show()" update="@(.socialDlg)"></p:commandButton>
+					<mae:panelGridHeaderHelp
+						value="#{msg['label.socialEnvironment']}"
+						conector="actividadHelp" 
+						help="#{helps['registro.medioSocial']}" />
+				</f:facet>
+
+				<p:dataTable id="socialGroupDatatable"
+					styleClass="socialGroupDatatable"
+					value="#{ingresarTDRBean.mediosSocialesSeleccionados}"
+					emptyMessage="#{labels['common.table.empty']}" rowIndexVar="rowIndex"
+					var="socialEnvironments" paginator="true" rows="5"
+					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					rowsPerPageTemplate="5,10,15" paginatorPosition="bottom">
+
+					<p:column headerText="#{msg['label.numero']}" width="5%">
+						#{rowIndex+1}
+					</p:column>
+
+					<p:column headerText="#{msg['label.environment']}">
+						<h:outputText
+							value="#{socialEnvironments.catalogoGeneral.descripcion}" />
+					</p:column>
+
+					<p:column headerText="#{msg['label.isApplicable']}">
+						<h:outputText value="#{socialEnvironments.aplicable}" />
+					</p:column>
+					<p:column headerText="Acciones" style="text-align: center"
+						rendered="#{!ingresarTDRBean.procesoIniciado}">
+						<p:fragment>
+							<p:commandButton title="#{msg['button.editar']}" id="btn_editarSocial"
+								actionListener="#{ingresarTDRBean.seleccionarMedioSocial(socialEnvironments)}"
+								icon="ui-icon-pencil"
+								update=":#{p:component('frmMedioSocialEdit')}" process="@this"
+								oncomplete="PF('medioSocialEditDialog').show()" />
+							<p:commandButton title="#{msg['button.eliminar']}"
+								update="@(.socialGroupDatatable)" process="@this"
+								actionListener="#{ingresarTDRBean.eliminarMedioSocial(socialEnvironments)}"
+								icon="ui-icon-trash"></p:commandButton>
+						</p:fragment>
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+
+
+			<h:outputText />
+			<h:outputText />
+			<p:outputLabel
+				value="#{msg['label.prevencion.tdr.metodologiaCaracterizacionComponenteBiotico']}: *" />
+			<control:imputConTextoEnriquecido
+				requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.metodologiaCaracterizacionComponenteBiotico']} #{msg['label.prevencion.tdr.requerido']}."
+				valor="#{ingresarTDRBean.tdrEia.tdelMethodologyBiotic}"
+				soloLectura="#{ingresarTDRBean.procesoIniciado}" requerido="true" />
+
+			<h:outputText />
+			<h:outputText />
+			<p:outputLabel
+				value="#{msg['label.prevencion.tdr.metodologiaCaracterizacionAspectosSocioeconomicosYCulturales']}: *" />
+			<control:imputConTextoEnriquecido
+				requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.metodologiaCaracterizacionAspectosSocioeconomicosYCulturales']} #{msg['label.prevencion.tdr.requerido']}."
+				valor="#{ingresarTDRBean.tdrEia.tdelMethodologySocioeconomicCultural}"
+				soloLectura="#{ingresarTDRBean.procesoIniciado}" requerido="true" />
+		</p:fragment>
+	</h:panelGrid>
+
+	<p:separator />
+	<div class="buttons">
+		<p:commandButton id="saveComment"
+			rendered="#{ingresarTDRBean.procesoIniciado}"
+			value="#{msg['button.guardar']}"
+			actionListener="#{ingresarObservacionesTDRController.guardarObservacion(3)}"
+			update=":formularioTDR" icon="ui-icon-disk"></p:commandButton>
+
+		<p:commandButton value="#{msg['button.guardar']}"
+			rendered="#{!ingresarTDRBean.procesoIniciado}"
+			update=":formularioTDR"
+			action="#{ingresarTDRController.guardarFichaTecnicaSimple()}" />
+		<p:commandButton value="#{msg['button.limpiar']}"
+			icon="ui-icon-document"
+			rendered="#{!ingresarTDRBean.procesoIniciado}" styleClass="secondary"
+			actionListener="#{ingresarTDRBean.limpiarFormulario(3)}"
+			update=":formularioTDR" process="@this">
+			<p:resetInput target=":formularioTDR" />
+		</p:commandButton>
+	</div>
+
+	<p:fragment>
+		<h:panelGrid columns="2" rendered="#{ingresarTDRBean.procesoIniciado}">
+			<p:outputLabel for="commentRadio"
+				value="#{msg['label.prevencion.tdr.observacionLabel']}"
+				styleClass="bold" />
+			<p:selectOneRadio required="true" id="commentRadio"
+				value="#{ingresarTDRBean.observacionTdrEiaLiciencia.obs_diagnosticoAmbientalLineaBase}">
+				<f:selectItem itemLabel="Sí" itemValue="true" />
+				<f:selectItem itemLabel="No" itemValue="false" />
+				<p:ajax process="@this" update="commentValue"></p:ajax>
+			</p:selectOneRadio>
+		</h:panelGrid>
+	</p:fragment>
+	<h:panelGroup id="commentValue"
+		rendered="#{ingresarTDRBean.procesoIniciado}">
+		<p:outputLabel value="#{msg['label.prevencion.tdr.justifique']}: *"
+			rendered="#{ingresarTDRBean.observacionTdrEiaLiciencia.obs_diagnosticoAmbientalLineaBase}" />
+		<control:imputConTextoEnriquecido soloLectura="false"
+			requiredMessage="#{msg['label.prevencion.tdr.campo']} #{msg['label.prevencion.tdr.justifique']} #{msg['label.prevencion.tdr.requerido']}."
+			valor="#{ingresarTDRBean.observacionTdrEiaLiciencia.diagnosticoAmbientalLineaBase}"
+			requerido="#{ingresarTDRBean.observacionTdrEiaLiciencia.obs_diagnosticoAmbientalLineaBase}"
+			rendered="#{ingresarTDRBean.observacionTdrEiaLiciencia.obs_diagnosticoAmbientalLineaBase}" />
+	</h:panelGroup>
+
+	<ui:include src="/prevencion/tdr/utils/medioFisico.xhtml" />
+	<ui:include src="/prevencion/tdr/utils/medioBiotico.xhtml" />
+	<ui:include src="/prevencion/tdr/utils/medioSocial.xhtml" />
+</ui:composition>
+</html>

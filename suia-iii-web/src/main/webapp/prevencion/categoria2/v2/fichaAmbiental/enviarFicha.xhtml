@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{fichaAmbientalGeneralFinalizarControllerV2.validarTareaBpm()}"/>
+        <script>
+            jQuery(document).ready(function () {
+                jQuery('#menu-principal a').click(function () {
+                    return false
+                })
+
+            })
+        </script>
+
+        <h:form id="frmEnviar">
+            <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                <f:facet name="header">
+                    <mae:panelGridHeaderHelp render="false" value="Generar registro ambiental"
+                                             conector="generalHelp"
+                                             image="#{request.contextPath}/resources/images/help-how.png"
+                                             help="#{helps['no.help.yet']}" />
+                </f:facet>
+                <p class="allJustify"> Estimado Usuario:<br/>
+                    Con el objetivo de aportar a la
+                    <strong><i>“CAMPAÑA CERO PAPEL”</i></strong> y fomentar buenas prácticas ambientales le recordamos que
+                    <strong>NO</strong> es necesario imprimir el Permiso Ambiental.
+                    <br/>
+                    Todos los permisos ambientales serán publicados para conocimiento de la ciudadanía en el portal del Sistema Único de Información Ambiental SUIA en la sección
+                    <strong>Transparencia/Difusión de Registros Ambientales.</strong>
+                    <br/></p>
+
+                <p class="allJustify">#{fichaAmbientalGeneralFinalizarControllerV2.mensaje}</p>
+                <h:panelGrid columns="2" layout="grid" rendered="#{!fichaAmbientalGeneralFinalizarControllerV2.showLinkSurvey()}">
+                    <p>Visualizar información ingresada</p>
+
+                    <p:commandButton value="Descargar" ajax="false"
+                                     icon="ui-icon-arrowthick-1-s" styleClass="primary"
+                                     action="#{fichaAmbientalGeneralFinalizarControllerV2.descargarFichaRegistroAmbiental()}"/>
+
+                    <p>Descargar Resolución del Registro Ambiental</p>
+
+                    <p:commandButton value="Descargar" ajax="false"
+                                     styleClass="primary" icon="ui-icon-arrowthick-1-s"
+                                     action="#{fichaAmbientalGeneralFinalizarControllerV2.descargarLicencia()}"/>
+                </h:panelGrid>
+				<h:panelGrid columns="1" layout="grid" rendered="#{fichaAmbientalGeneralFinalizarControllerV2.showLinkSurvey()}">
+                    <p>Estimado Proponente se solicita completar la siguiente encuesta, una vez realizado dicha tareas podrá obtener la documentación de su proyecto</p>
+                    <p:commandButton value="Encuesta" styleClass="primary" update="surveyDialog"
+                    	actionListener="#{fichaAmbientalGeneralFinalizarControllerV2.showDialogSurvey()}" />
+                </h:panelGrid>
+               
+            </p:panelGrid>
+
+            <div class="buttons main">
+
+                <p:commandButton value="Finalizar" styleClass="finalizar"
+                                 action="#{fichaAmbientalGeneralFinalizarControllerV2.redireccionarBandeja()}"
+                                 icon="ui-icon-check" process="@this" update="continuarDialog">
+                </p:commandButton>
+
+            </div>
+
+            <p:dialog id="surveyDialog" header="Encuesta de Satisfacción de Servicios" modal="true" closable="true" resizable="false" 
+            	visible="#{fichaAmbientalGeneralFinalizarControllerV2.showSurvey}" onHide="location.reload();">
+            	<iframe frameborder="0" align="left" src="#{fichaAmbientalGeneralFinalizarControllerV2.urlLinkSurvey()}"
+            		scrolling="auto" width="925" height="450" marginheight="5" marginwidth="10"></iframe>
+            </p:dialog>
+
+            <p:dialog id="continuarDialog" widgetVar="continuarDialog"
+                      header="Información" modal="true" closable="false"
+                      resizable="false" width="500">
+                <p:panel>
+                    <h:panelGrid columns="1" styleClass="w100"
+                                 columnClasses="alCenter">
+                        <p:outputLabel
+                                value="#{fichaAmbientalGeneralFinalizarControllerV2.mensajeFinalizar}"/>
+                        <p:commandButton value="Aceptar" ajax="false" styleClass="primary"
+                                         action="#{fichaAmbientalGeneralFinalizarControllerV2.direccionar()}"/>
+                    </h:panelGrid>
+                </p:panel>
+            </p:dialog>
+
+            <p:dialog header="Descargar" widgetVar="dlg1" modal="true"
+                      closable="false" height="100px">
+                <p:commandButton value="Descargar" ajax="false"
+                                 icon="ui-icon-arrowthick-1-s" styleClass="primary"
+                                 action="#{fichaAmbientalGeneralFinalizarControllerV2.descargarFichaRegistroAmbiental()}"/>
+
+                <p:commandButton value="Cerrar" styleClass="primary"
+                                 onclick="PF('dlg1').hide();" icon="ui-icon-closethick"
+                                 process="@this" update="@(.finalizar)">
+                </p:commandButton>
+            </p:dialog>
+
+
+            <p:dialog header="Descargar" widgetVar="dlg2" modal="true"
+                      closable="false" height="100px">
+                <p:commandButton value="Descargar" ajax="false"
+                                 styleClass="primary" icon="ui-icon-arrowthick-1-s"
+                                 action="#{fichaAmbientalGeneralFinalizarControllerV2.descargarLicencia()}"/>
+
+                <p:commandButton value="Cerrar" onclick="PF('dlg2').hide();"
+                                 styleClass="primary" icon="ui-icon-closethick" process="@this"
+                                 update="@(.finalizar)">
+                </p:commandButton>
+            </p:dialog>
+
+            <p:dialog
+                    header="Notificación de Registro de Generador de Desechos Peligrosos y/o Especiales"
+                    id="procesoAdministrativo" widgetVar="procesoAdministrativo"
+                    modal="true" width="600" resizable="false" closable="true"
+                    draggable="false">
+                <p:separator/>
+                <h:panelGrid columns="1" styleClass="w100"
+                             columnClasses="alJustify">
+                    <h:outputText
+                            rendered="#{fichaAmbientalGeneralFinalizarControllerV2.mostrar60()}"
+                            value="Estimado usuario, en cumplimiento de la normativa ambiental vigente, usted debe iniciar el proceso de obtención del respectivo Registro de Generador de Desechos Peligrosos y/o Especiales en el término no mayor a 60 días hábiles, en caso de no aplicar, se debe remitir el justificativo a esta Dependencia dentro del mismo término."
+                            styleClass="bold text-red"/>
+                    <h:outputText
+                            rendered="#{fichaAmbientalGeneralFinalizarControllerV2.mostrar30()}"
+                            value="Estimado usuario, en cumplimiento de la normativa ambiental vigente, usted debe iniciar el proceso de obtención del respectivo Registro de Generador de Desechos Peligrosos y/o Especiales en el término no mayor a 30 días hábiles, en caso de no aplicar, se debe remitir el justificativo a esta Dependencia dentro del mismo término."
+                            styleClass="bold text-red"/>
+                    <h:outputText
+                            rendered="#{fichaAmbientalGeneralFinalizarControllerV2.mostrar00()}"
+                            value="Estimado usuario, en cumplimiento de la normativa ambiental vigente, usted debe iniciar el proceso de obtención del respectivo Registro de Generador de Desechos Peligrosos y/o Especiales de forma inmediata, en caso de no aplicar, se debe remitir el justificativo a esta Dependencia."
+                            styleClass="bold text-red"/>
+                </h:panelGrid>
+            </p:dialog>
+
+            <p:remoteCommand process="@this" update="procesoAdministrativo"
+                             rendered="#{fichaAmbientalGeneralFinalizarControllerV2.mostrar30() or fichaAmbientalGeneralFinalizarControllerV2.mostrar60() or fichaAmbientalGeneralFinalizarControllerV2.mostrar00()}"
+                             autoRun="true"
+                             oncomplete="PF('procesoAdministrativo').show()"/>
+        </h:form>
+    </ui:define>
+</ui:composition>

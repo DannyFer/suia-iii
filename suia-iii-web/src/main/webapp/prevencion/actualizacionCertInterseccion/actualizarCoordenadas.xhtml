@@ -1,0 +1,532 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<h:form id="form">
+			<mae-components:readOnly>
+				<p:panelGrid columns="2" layout="grid" styleClass="w100"
+					columnClasses="w50, field_mrg w50">
+					<f:facet name="header">
+						<h:outputText value="Detalles del Proyecto" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data w100" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="Código" />
+						<h:outputText value="#{verProyectoBean.proyecto.codigo}" />
+						<h:outputText value="Fecha de registro" />
+						<h:outputText value="#{verProyectoBean.proyecto.fechaRegistro}">
+							<f:convertDateTime pattern="dd/MM/yyyy" />
+						</h:outputText>
+						<h:outputText value="Proponente" />
+						<h:outputText value="#{verProyectoBean.getLabelProponente()}" />
+						<h:outputText value="Ente responsable" />
+						<h:outputText
+							value="#{verProyectoBean.proyecto.areaResponsable.areaName}" />
+					</h:panelGrid>
+					<h:panelGrid styleClass="panel_data w100" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="Sector" />
+						<h:outputText value="#{verProyectoBean.proyecto.tipoSector}" />
+						<h:outputText value="Superficie" />
+						<h:panelGroup>
+							<h:outputText value="#{verProyectoBean.proyecto.area}" />
+							<h:outputText value=" #{verProyectoBean.proyecto.unidad}" />
+						</h:panelGroup>
+						<h:outputText value="Remoción Cobertura Vegetal Nativa"
+							rendered="#{verProyectoBean.categoriaI}" />
+						<h:outputText
+							value="#{verProyectoBean.proyecto.remocionCoberturaVegetal?'Si':'No'}"
+							rendered="#{verProyectoBean.categoriaI}" />
+						<h:outputText
+							value="Remoción Cobertura Vegetal Nativa Según Informe Técnico"
+							rendered="#{verProyectoBean.categoriaI and verProyectoBean.informeForestal != null}" />
+						<h:outputText
+							value="#{verProyectoBean.informeForestal.remocionCoberturaVegetal?'Si':'No'}"
+							rendered="#{verProyectoBean.categoriaI and verProyectoBean.informeForestal != null}" />
+						<h:outputText value="Altitud"
+							rendered="#{!verProyectoBean.categoriaI}" />
+						<h:outputText value="#{verProyectoBean.proyecto.altitud} msnm"
+							rendered="#{!verProyectoBean.categoriaI}" />
+						<h:outputText value="Acuerdos de Concesiones"
+							rendered="#{!verProyectoBean.categoriaI and verProyectoBean.registroCamaroneras}" />
+						<p:dataTable paginator="true" paginatorAlwaysVisible="false"
+							sortOrder="descending" paginatorPosition="bottom" rows="2"
+							value="#{verProyectoBean.listProyectoCamaroneras}"
+							var="listaProCamaroneras"
+							styleClass="alCenter w100 table-column-header"
+							rendered="#{!verProyectoBean.categoriaI and verProyectoBean.registroCamaroneras}">
+							<p:column headerText="Acuerdo">
+								<h:outputText value="#{listaProCamaroneras.camaroneras.acuerdo}"
+									rendered="#{listaProCamaroneras.codigoCamaronera==null}" />
+								<h:outputText value="#{listaProCamaroneras.codigoCamaronera}"
+									rendered="#{listaProCamaroneras.codigoCamaronera!=null}" />
+							</p:column>
+							<p:column headerText="Extensión">
+								<h:outputText
+									value="#{listaProCamaroneras.extensionCamaronera} ha"
+									rendered="#{listaProCamaroneras.codigoCamaronera==null}" />
+								<h:outputText
+									value="#{listaProCamaroneras.camaroneras.extension} ha"
+									rendered="#{listaProCamaroneras.codigoCamaronera!=null}" />
+							</p:column>
+							<p:column style="width:20px;text-align:center;">
+								<p:commandButton icon="ui-icon-search"
+									styleClass="button-small primary"
+									action="#{verProyectoController.descargarAlfrescoDocumentoCamaronera(listaProCamaroneras.documento)}"
+									ajax="false"
+									rendered="#{listaProCamaroneras.codigoCamaronera!=null}" />
+							</p:column>
+						</p:dataTable>
+					</h:panelGrid>
+
+					<h:outputText value="Nombre del Proyecto, obra o actividad" />
+					<h:outputText value="Resumen del Proyecto, obra o actividad" />
+					<h:panelGroup>
+						<p:inputTextarea value="#{verProyectoBean.proyecto.nombre}"
+							rows="2" styleClass="w100" style="overflow:auto;" />
+					</h:panelGroup>
+					<h:panelGroup>
+						<p:inputTextarea value="#{verProyectoBean.proyecto.resumen}"
+							rows="2" styleClass="w100" style="overflow:auto;" />
+					</h:panelGroup>
+				</p:panelGrid>
+				<p:panelGrid columns="1" layout="grid" styleClass="w100 alCenter">
+					<f:facet name="header">
+						<h:outputText value="Actividad" />
+					</f:facet>
+					<h:panelGrid styleClass="panel_data mw50" columns="2"
+						columnClasses="header, null" rowClasses="null, alt">
+						<h:outputText value="Descripción de la actividad" />
+						<h:outputText
+							value="#{verProyectoBean.proyecto.catalogoCategoria.descripcion}" />
+						<h:outputText value="Su trámite corresponde a un(a)" />
+						<h:outputText
+							value="#{verProyectoBean.proyecto.catalogoCategoria.tipoLicenciamiento}" />
+						<h:outputText value="Tiempo de emisión" />
+						<h:outputText
+							value="#{!empty verProyectoBean.proyecto.catalogoCategoria.tipoLicenciamiento and !empty verProyectoBean.proyecto.catalogoCategoria.tipoLicenciamiento.duracionTramite ? verProyectoBean.proyecto.catalogoCategoria.tipoLicenciamiento.duracionTramite : ''}" />
+						<h:outputText value="Costo del trámite" />
+						<h:panelGroup>
+							<h:outputText
+								rendered="#{!empty verProyectoBean.proyecto.catalogoCategoria.tipoLicenciamiento and !empty verProyectoBean.proyecto.catalogoCategoria.tipoLicenciamiento.costo and !empty verProyectoBean.proyecto.catalogoCategoria.tipoLicenciamiento.moneda}"
+								value="#{verProyectoBean.proyecto.catalogoCategoria.tipoLicenciamiento.costo}" />
+							<h:outputText
+								rendered="#{!empty verProyectoBean.proyecto.catalogoCategoria.tipoLicenciamiento and !empty verProyectoBean.proyecto.catalogoCategoria.tipoLicenciamiento.costo and !empty verProyectoBean.proyecto.catalogoCategoria.tipoLicenciamiento.moneda}"
+								value=" #{verProyectoBean.proyecto.catalogoCategoria.tipoLicenciamiento.moneda}" />
+							<h:outputText
+								rendered="#{empty verProyectoBean.proyecto.catalogoCategoria.tipoLicenciamiento or empty verProyectoBean.proyecto.catalogoCategoria.tipoLicenciamiento.costo or empty verProyectoBean.proyecto.catalogoCategoria.tipoLicenciamiento.moneda}"
+								value="#{verProyectoBean.proyecto.catalogoCategoria.tipoLicenciamiento.descripcionCosto}" />
+						</h:panelGroup>
+
+					</h:panelGrid>
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					rendered="#{!verProyectoBean.proyecto.datosOficinaPrincipal and !verProyectoBean.proyecto.concesionesMinerasMultiples}">
+					<f:facet name="header">
+						<h:outputText value="Ubicación geográfica" />
+					</f:facet>
+					<h:panelGrid columns="2" styleClass="w100"
+						columnClasses="w50, field_mrg w50">
+						<h:panelGrid styleClass="panel_data w100" columns="2"
+							columnClasses="header, null" rowClasses="null, alt"
+							rendered="false">
+							<h:outputText value="Tipo de ubicación" />
+							<h:outputText value="#{verProyectoBean.proyecto.tipoUbicacion}" />
+						</h:panelGrid>
+						<h:panelGrid styleClass="panel_data w50" columns="2"
+							columnClasses="header, null" rowClasses="null, alt">
+							<h:outputText value="Tipo de zona" />
+							<h:outputText value="#{verProyectoBean.proyecto.tipoPoblacion}" />
+						</h:panelGrid>
+					</h:panelGrid>
+					<p:dataTable
+						value="#{verProyectoBean.proyecto.proyectoUbicacionesGeograficas}"
+						var="ubicacion">
+						<p:column headerText="Provincia">
+							<h:outputText
+								value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+						</p:column>
+						<p:column headerText="Cant&oacute;n">
+							<h:outputText
+								value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+						</p:column>
+						<p:column headerText="Parroquia">
+							<h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}" />
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					rendered="#{!verProyectoBean.proyecto.datosOficinaPrincipal}">
+					<f:facet name="header">
+						<h:outputText value="Dirección del proyecto, obra o actividad" />
+					</f:facet>
+					<p:inputTextarea
+						value="#{verProyectoBean.proyecto.direccionProyecto}" rows="2"
+						styleClass="w100" />
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					rendered="#{!verProyectoBean.categoriaI}">
+					<f:facet name="header">
+						<h:outputText
+							value="Sistema de referencias (Formato: sistema WGS84, zona 17S)" />
+					</f:facet>
+					<p:dataTable id="tbl_coordenadas_info" rowIndexVar="index"
+						value="#{verProyectoBean.proyecto.formasProyectos}" var="item"
+						emptyMessage="#{labels['common.table.empty']}">
+						<p:subTable value="#{item.coordenadas}" var="coordenada">
+							<p:columnGroup type="header">
+								<p:row>
+									<p:column
+										headerText="Grupo de coordenadas #{index + 1} (#{item.tipoForma})"
+										styleClass="alCenter w100 table-column-header" colspan="5" />
+								</p:row>
+								<p:row>
+									<p:column headerText="Shape"
+										styleClass="alCenter table-column-header" />
+									<p:column headerText="X"
+										styleClass="alCenter table-column-header" />
+									<p:column headerText="Y"
+										styleClass="alCenter table-column-header" />
+									<p:column headerText="Tipo"
+										styleClass="alCenter table-column-header" />
+									<p:column headerText="Descripci&oacute;n"
+										styleClass="alCenter table-column-header" />
+								</p:row>
+							</p:columnGroup>
+							<p:column headerText="Shape" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.orden}" />
+							</p:column>
+							<p:column headerText="X" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.x}" />
+							</p:column>
+							<p:column headerText="Y" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.y}" />
+							</p:column>
+							<p:column headerText="Tipo" styleClass="alCenter w15">
+								<h:outputText value="#{item.tipoForma}" />
+							</p:column>
+							<p:column headerText="Descripci&oacute;n" styleClass="alCenter">
+								<h:outputText value="#{coordenada.descripcion}" />
+							</p:column>
+						</p:subTable>
+					</p:dataTable>
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" styleClass="w100"
+					rendered="#{!verProyectoBean.categoriaI}">
+					<f:facet name="header">
+						<h:panelGrid columns="3" styleClass="w100"
+							columnClasses="w50, null, field_mrg w50">
+							<h:outputText value="Tipo de estudio"
+								rendered="#{!verProyectoBean.categoriaI}" />
+							<h:outputText rendered="#{verProyectoBean.categoriaI}" />
+							<t:div styleClass="header-separator"
+								rendered="#{!verProyectoBean.categoriaI}" />
+							<h:outputText
+								value="En el proyecto, obra o actividad se realiza:" />
+						</h:panelGrid>
+					</f:facet>
+					<h:panelGrid columns="2" styleClass="w100"
+						columnClasses="w50 alTop, field_mrg w50 alTop">
+						<h:panelGrid styleClass="panel_data w100" columns="2"
+							columnClasses="header, mw50" rowClasses="null, alt">
+							<h:outputText value="Estudio" />
+							<h:outputText value="#{verProyectoBean.proyecto.tipoEstudio}" />
+							<h:outputText value="Inicio de operaciones"
+								rendered="#{verProyectoBean.estudioExPost}" />
+							<h:outputText
+								value="#{verProyectoBean.proyecto.fechaInicioOperaciones}"
+								rendered="#{verProyectoBean.estudioExPost}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+							<h:outputText value="Tipo de emisión"
+								rendered="#{verProyectoBean.emisionInclusionAmbiental}" />
+							<h:outputText
+								value="#{verProyectoBean.proyecto.tipoEmisionInclusionAmbiental}"
+								rendered="#{verProyectoBean.emisionInclusionAmbiental}" />
+							<h:outputText value="Número de resolución"
+								rendered="#{verProyectoBean.emisionInclusionAmbiental}" />
+							<h:outputText
+								value="#{verProyectoBean.proyecto.numeroDeResolucion}"
+								rendered="#{verProyectoBean.emisionInclusionAmbiental}" />
+						</h:panelGrid>
+						<h:panelGrid styleClass="panel_data w100" columns="2"
+							columnClasses="header, mw50" rowClasses="null, alt">
+							<h:outputText
+								value="Generación de desechos especiales o peligrosos" />
+							<h:outputText value="#{verProyectoBean.proyecto.generaDesechos}"
+								converter="booleanToStringConverter" />
+							<h:outputText value="Gestión de desechos peligrosos" />
+							<h:outputText
+								value="#{verProyectoBean.proyecto.gestionaDesechosPeligrosos}"
+								converter="booleanToStringConverter" />
+							<h:outputText value="Empleo de sustancias químicas" />
+							<h:outputText
+								value="#{verProyectoBean.proyecto.utilizaSustaciasQuimicas}"
+								converter="booleanToStringConverter" />
+							<h:outputText
+								value="Transporte de sustancias químicas peligrosas" />
+							<h:outputText
+								value="#{verProyectoBean.proyecto.transporteSustanciasQuimicasPeligrosos}"
+								converter="booleanToStringConverter" />
+						</h:panelGrid>
+					</h:panelGrid>
+				</p:panelGrid>
+				<ui:remove>
+				</ui:remove>
+			</mae-components:readOnly>
+
+			<div class="buttons main">
+				<p:commandButton value="Actualizar las Coordenadas"
+					actionListener="#{actualizarCertificadoController.nueva}"
+					icon="ui-icon-check" update="containerCoordenadas" />
+			</div>
+
+			<br />
+			<br />
+			<h:panelGroup id="containerCoordenadas">
+				<p:panelGrid columns="1" layout="grid"
+					rendered="#{actualizarCertificadoController.verCoordenadas}"
+					styleClass="buttonAdjuntarCoordenadasContainer w100">
+					<f:facet name="header">
+						<p:commandButton value="Adjuntar"
+							styleClass="buttonAdjuntarCoordenadas button-small-text toRight field_mrg"
+							type="button" icon="ui-icon-document"
+							onclick="PF('adjuntarCoordenadas').show()" />
+						<p:commandButton value="Descargar plantilla"
+							styleClass="button-small-text toRight field_mrg"
+							icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true">
+							<p:fileDownload
+								value="#{cargarCoordenadasBean.plantillaCoordenadasGeograficas}" />
+						</p:commandButton>
+						<mae:panelGridHeaderHelp
+							value="Ingrese las coordenadas del área geográfica en DATUM WGS 84 zona 17 sur *"
+							conector="actividadHelp"
+							help="#{helps['registro.coordenadas.rcoa']}" width="500px" />
+					</f:facet>
+					<h:outputText value="#{helps['rcoa.registro.coordenadas']}" />
+					<p:outputLabel value="Seleccionar el formato de las coordenadas"
+						styleClass="bold" />
+					<p:dataTable id="tbl_coordenadas" rowIndexVar="index"
+						value="#{actualizarCertificadoController.coordinatesWrappersGeo}"
+						var="item" emptyMessage="#{labels['common.table.empty']}">
+						<p:subTable value="#{item.coordenadas}" var="coordenada">
+							<p:columnGroup type="header">
+								<p:row>
+									<p:column headerText="Área Geográfica"
+										styleClass="alCenter table-column-header" />
+									<p:column headerText="Shape"
+										styleClass="alCenter table-column-header" />
+									<p:column headerText="X"
+										styleClass="alCenter table-column-header" />
+									<p:column headerText="Y"
+										styleClass="alCenter table-column-header" />
+								</p:row>
+							</p:columnGroup>
+							<p:column headerText="Área Geográfica" styleClass="alCenter w5">
+								<h:outputText value="#{coordenada.areaGeografica}" />
+							</p:column>
+							<p:column headerText="Shape" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.orden}" />
+							</p:column>
+							<p:column headerText="X" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.x.intValue()}" />
+							</p:column>
+							<p:column headerText="Y" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.y.intValue()}" />
+							</p:column>
+						</p:subTable>
+					</p:dataTable>
+				</p:panelGrid>
+
+				<p:panelGrid columns="1" layout="grid"
+					rendered="#{actualizarCertificadoController.verCoordenadas}"
+					styleClass="buttonAdjuntarCoordenadasContainer w100">
+					<f:facet name="header">
+						<p:commandButton value="Adjuntar"
+							styleClass="buttonAdjuntarCoordenadas button-small-text toRight field_mrg"
+							type="button" icon="ui-icon-document"
+							onclick="PF('adjuntarCoordenadasImple').show()"
+							rendered="#{actualizarCertificadoController.coordenadasGeograficas.size()>0}"
+							update="certificadoIntercepcionRcoa1" />
+						<p:commandButton value="Descargar plantilla"
+							styleClass="button-small-text toRight field_mrg"
+							icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true">
+							<p:fileDownload
+								value="#{cargarCoordenadasBean.plantillaCoordenadasImplantacion}" />
+						</p:commandButton>
+						<mae:panelGridHeaderHelp
+							value="Ingrese las coordenadas del área implantación en DATUM WGS 84 zona 17 sur *"
+							conector="actividadHelp"
+							help="#{helps['registro.coordenadas.rcoa.implantacion']}"
+							width="500px" />
+					</f:facet>
+
+					<h:outputText value="#{helps['rcoa.registro.coordenadas']}" />
+					<p:outputLabel value="Seleccionar el formato de las coordenadas"
+						styleClass="bold" />
+					<p:dataTable id="tbl_coordenadas_implementacion"
+						rowIndexVar="index"
+						value="#{actualizarCertificadoController.coordinatesWrappers}"
+						var="item" emptyMessage="#{labels['common.table.empty']}">
+						<p:subTable value="#{item.coordenadas}" var="coordenada">
+							<p:columnGroup type="header">
+								<p:row>
+									<p:column
+										headerText="Grupo de coordenadas #{index + 1} (#{item.tipoForma})"
+										styleClass="alCenter w100 table-column-header" colspan="4" />
+								</p:row>
+								<p:row>
+									<p:column headerText="Área Geográfica"
+										styleClass="alCenter table-column-header" />
+									<p:column headerText="Shape"
+										styleClass="alCenter table-column-header" />
+									<p:column headerText="X"
+										styleClass="alCenter table-column-header" />
+									<p:column headerText="Y"
+										styleClass="alCenter table-column-header" />
+								</p:row>
+							</p:columnGroup>
+							<p:column headerText="Área Geográfica" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.areaGeografica}" />
+							</p:column>
+							<p:column headerText="Shape" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.orden}" />
+							</p:column>
+							<p:column headerText="X" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.x.intValue()}" />
+							</p:column>
+							<p:column headerText="Y" styleClass="alCenter w15">
+								<h:outputText value="#{coordenada.y.intValue()}" />
+							</p:column>
+						</p:subTable>
+					</p:dataTable>
+				</p:panelGrid>
+			</h:panelGroup>
+
+			<p:dialog header="Adjuntar coordenadas" width="600" height="auto"
+				widgetVar="adjuntarCoordenadas" modal="true" resizable="false">
+
+				<p:panel>
+					<h:outputText value="#{helps['registro.coordenadas.rcoa.legal']}"
+						escape="false" />
+				</p:panel>
+
+				<br />
+				<p:panelGrid columns="1" styleClass="w100"
+					columnClasses="label, value">
+					<h:outputText value="Seleccione el archivo excel (.xls)" />
+					<p:fileUpload uploadLabel="Subir" auto="true"
+						cancelLabel="Cancelar" label="Seleccionar"
+						fileUploadListener="#{actualizarCertificadoController.handleFileUpload}"
+						mode="advanced" dragDropSupport="false" multiple="false"
+						allowTypes="/(\.|\/)(xls)$/"
+						invalidFileMessage="El archivo es inválido."
+						invalidSizeMessage="El archivo es demasiado grande."
+						update="@form" />
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton type="button" value="Cerrar"
+						onclick="PF('adjuntarCoordenadas').hide()" />
+				</div>
+			</p:dialog>
+
+			<p:dialog header="Adjuntar coordenadas"
+				widgetVar="adjuntarCoordenadasImple" modal="true" resizable="false">
+				<p:panelGrid columns="1" columnClasses="label, value">
+					<h:outputText value="Seleccione el archivo excel (.xls)" />
+					<p:fileUpload uploadLabel="Subir" auto="true"
+						cancelLabel="Cancelar" label="Seleccionar"
+						fileUploadListener="#{actualizarCertificadoController.handleFileUploadImple}"
+						mode="advanced" dragDropSupport="false" multiple="false"
+						allowTypes="/(\.|\/)(xls)$/"
+						invalidFileMessage="El archivo es inválido."
+						invalidSizeMessage="El archivo es demasiado grande."
+						update="@form" />
+				</p:panelGrid>
+				<div class="buttons">
+					<p:commandButton type="button" value="Cerrar"
+						onclick="PF('adjuntarCoordenadasImple').hide()" />
+				</div>
+			</p:dialog>
+
+			<p:dialog header="Información de intersección"
+				id="certificadoIntercepcionRcoa1"
+				widgetVar="certificadoIntercepcionRcoa1" modal="true" width="400"
+				resizable="false" closable="false" draggable="false"
+				visible="#{actualizarCertificadoController.mostrarDetalleInterseccion}">
+				<h:panelGroup>
+					<h:panelGrid columns="1" styleClass="alJustify w100">
+						<h:outputText
+							value="#{actualizarCertificadoController.detalleInterseccionProyecto}"
+							styleClass="bold" escape="false" />
+					</h:panelGrid>
+					<br />
+					<div class="buttons">
+						<p:commandButton value="Aceptar" styleClass="primary"
+							oncomplete="PF('certificadoIntercepcionRcoa1').hide()" />
+					</div>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+
+		<h:form id="frmDialogs">
+			<p:dialog header="Documentos actualizados" width="600" height="auto"
+				widgetVar="docActualizados" modal="true" resizable="false"
+				closable="false">
+				<p:panel>
+
+					<h:panelGrid columns="2" styleClass="w100"
+						columnClasses="bold w40, null" rowClasses="null, alt">
+
+						<h:outputText value="Mapa de certificado" />
+						<p:commandButton icon="ui-icon-arrowthick-1-s" value="Descargar"
+							styleClass="primary" ajax="false" immediate="true">
+							<p:fileDownload
+								value="#{actualizarCertificadoController.descargarMapa()}" />
+						</p:commandButton>
+
+						<h:outputText value="Certificado de intersección" />
+						<p:commandButton icon="ui-icon-arrowthick-1-s" value="Descargar"
+							styleClass="primary" ajax="false" immediate="true">
+							<p:fileDownload
+								value="#{actualizarCertificadoController.descargarCertificadoInterseccion()}" />
+						</p:commandButton>
+					</h:panelGrid>
+
+				</p:panel>
+
+				<br />
+
+				<div class="buttons">
+					<p:commandButton value="Aceptar" id="btnActualizar"
+						actionListener="#{actualizarCertificadoController.guardarDocumentos()}">
+						<p:confirm
+							message="¿Está seguro que desea actualizar los documentos?"
+							header="Confirmación" />
+					</p:commandButton>
+					<p:commandButton value="Cancelar" id="btnCancelar"
+						actionListener="#{actualizarCertificadoController.limpiarActualizacion()}">
+						<p:confirm
+							message="¿Está seguro que desea cancelar la actualización?"
+							header="Confirmación" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

@@ -1,0 +1,110 @@
+<html template="/WEB-INF/templates/default.xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+
+<style type="text/css">
+.ui-fileupload-content {
+	border: none !important;
+	padding: 0px;
+}
+</style>
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+
+	<h:panelGroup id="pnlSustancias">
+		<p:dataTable style="margin: auto;" id="tblSustanciasRetce"
+			value="#{sustanciasRetceController.listaSustanciasEnergia}"
+			var="item" emptyMessage="#{labels['common.table.empty']}"
+			sortBy="#{item.tipoComponente.descripcion} #{item.catologSustanciasRetce.descripcionProductoQuimico}">
+
+			<f:facet name="header">
+				<p:commandButton value="Agregar"
+					oncomplete="PF('adicionarSustancia').show()"
+					actionListener="#{sustanciasRetceController.nuevaSustancia()}"
+					styleClass="button-small-text toRight field_mrg" process="@this"
+					update=":frmSustancia:datosSustancias" icon="ui-icon-plusthick" />
+			</f:facet>
+
+
+			<p:column headerText="Componente">
+				<h:outputText value="#{item.tipoComponente.descripcion}" />
+			</p:column>
+			<p:column headerText="Sustancia RETCE">
+				<h:outputText
+					value="#{item.catologSustanciasRetce.descripcionProductoQuimico}" >
+					<f:convertNumber maxIntegerDigits="10" maxFractionDigits="10"
+						pattern="##########.##########" locale="en" />
+				</h:outputText>
+			</p:column>
+			<p:column headerText="Reporte (t/año)" styleClass="alCenter">
+				<h:outputText value="#{item.reporteToneladaAnio}" />
+			</p:column>
+			<p:column headerText="Método de estimación" styleClass="">
+				<h:outputText value="#{item.catalogoMetodoEstimacion.descripcion}" />
+			</p:column>
+			<p:column headerText="Cálculo" styleClass="w5 alCenter">
+				<p:commandButton icon="ui-icon-arrowthick-1-s"
+					styleClass="button-small primary" title="Ver" ajax="false"
+					immediate="true"
+					rendered="#{!item.catalogoMetodoEstimacion.descripcion.equals('Medición Directa')}">
+					<p:fileDownload
+						value="#{sustanciasRetceController.descargar(item.documento)}" />
+				</p:commandButton>
+				<h:outputText value="N/A"
+					rendered="#{item.catalogoMetodoEstimacion.descripcion.equals('Medición Directa')}" />
+			</p:column>
+			<p:column headerText="RUC" styleClass="">
+				<h:outputText
+					value="#{item.catalogoMetodoEstimacion.descripcion.equals('Medición Directa') ? item.datosLaboratorio.ruc : 'N/A'}" />
+			</p:column>
+			<p:column headerText="Nombre del laboratorio" styleClass="">
+				<h:outputText
+					value="#{item.catalogoMetodoEstimacion.descripcion.equals('Medición Directa') ? item.datosLaboratorio.nombre : 'N/A'}" />
+			</p:column>
+			<p:column headerText="Informe de monitoreo" styleClass="w5 alCenter">
+				<p:commandButton icon="ui-icon-arrowthick-1-s"
+					styleClass="button-small primary" title="Ver" ajax="false"
+					immediate="true"
+					rendered="#{item.catalogoMetodoEstimacion.descripcion.equals('Medición Directa')}">
+					<p:fileDownload
+						value="#{sustanciasRetceController.descargar(item.datosLaboratorio.documentoLaboratorio)}" />
+				</p:commandButton>
+				<h:outputText value="N/A"
+					rendered="#{!item.catalogoMetodoEstimacion.descripcion.equals('Medición Directa')}" />
+			</p:column>
+			<p:column styleClass="w70px alCenter">
+				<p:commandButton icon="ui-icon-pencil" title="Editar"
+					process="@this" update=":frmSustancia:datosSustancias"
+					styleClass="primary" oncomplete="PF('adicionarSustancia').show()"
+					actionListener="#{sustanciasRetceController.editarSustancia(item)}" />
+				<p:commandButton icon="ui-icon-trash" title="Eliminar"
+					process="@this" styleClass="primary"
+					actionListener="#{sustanciasRetceController.eliminarSustancia(item)}"
+					update="tblSustanciasRetce" />
+			</p:column>
+		</p:dataTable>
+	</h:panelGroup>
+	<br />
+</p:panelGrid>
+
+
+
+<script type="text/javascript">
+	function handleSustancia(xhr, status, args) {
+		if (args.validationFailed || !args.addSustancia) {
+            	PF('adicionarSustancia').show();
+            }
+            else {
+                PF('adicionarSustancia').hide();
+            }
+	}
+	
+</script>
+</html>

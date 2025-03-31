@@ -1,0 +1,232 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+	<ui:define name="context-extra">
+		<h:outputText value="Datos" />
+		<h:outputText value="Estudio de Impacto Ambiental" />
+		<h:outputLink target="_blank"
+			value="#{request.contextPath}/pages/rcoa/estudioImpactoAmbiental/verProyectoEIAResumen.jsf">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+	</ui:define>
+
+	<ui:define name="content">
+
+		<style type="text/css">
+.ui-fileupload-content {
+	border: none !important;
+	padding: 0px;
+}
+
+.ui-fileupload-buttonbar {
+	text-align: right !important;
+}
+</style>
+
+		<h:form id="form">
+
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<h:outputText
+						value="Oficio de Pronunciamiento de Participación Ciudadana para la Consulta Ambiental" />
+				</f:facet>
+
+				<h:panelGrid styleClass="panel_data w100" columns="2"
+					columnClasses="header w40, bold">
+					<h:outputText
+						value="¿El Oficio de Pronunciamiento de Participación Ciudadana para la Consulta Ambiental fue emitido en forma física? *" />
+					<p:selectOneRadio id="participacion"
+						requiredMessage="El campo 'Oficio de Pronunciamiento del Proceso de Participación Ciudadana' es requerido"
+						value="#{ingresarExpedienteBPCController.expedienteBPC.pronunciamientoFisico}"
+						required="true">
+						<f:selectItem itemLabel="SI" itemValue="true" />
+						<f:selectItem itemLabel="NO" itemValue="false" />
+						<p:ajax process="@this" update="pnlResolucion pnlExpediente pnlPagoControl" listener="#{ingresarExpedienteBPCController.participacion()}" />
+					</p:selectOneRadio>
+				</h:panelGrid>
+
+				<h:outputText
+					value="Ingrese el expediente del Proceso de Participación Ciudadana para la Consulta Ambiental del proyecto, obra o actividad, en cumplimiento del Decreto ejecutivo Nro. 754 (2 de junio de 2023) y la Sentencia 51-23/IN emita por la Corte Constitucional el 9 de noviembre de 2023" />
+
+				<p:panelGrid columns="1" layout="grid" styleClass="w100">
+					<f:facet name="header">
+						<h:outputText
+							value="Adjuntar los archivos del Proceso de Participación Ciudadana para la Consulta Ambiental" />
+					</f:facet>
+
+					<p:outputLabel
+						value="Adjuntar los archivos de manera cronológica con las firmas electrónicas de responsabilidad correspondientes, los documentos deben estar en formato .pdf o .rar, se sugiere que cada uno de los archivos tenga un máximo de 50MB, para lograr una subida óptima de sus archivos" />
+
+					<p:fileUpload id="fileExpedientePPC" multiple="false"
+						fileUploadListener="#{ingresarExpedienteBPCController.uploadDocPPC}"
+						sizeLimit="52428800" allowTypes="/(\.|\/)(rar|pdf)$/"
+						label="Añadir" uploadLabel="Subir"
+						invalidFileMessage="Tipo de archivo no válido"
+						invalidSizeMessage="Debe adjuntar un archivo no mayor de 50 Mb."
+						cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+						auto="true" required="true" styleClass="w100 alCenter"
+						update="tblExpedientePPC" />
+					<p:dataTable id="tblExpedientePPC" styleClass="w100 alcenter"
+						value="#{ingresarExpedienteBPCController.listaDocumentoBPC}"
+						var="documento" emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="Documento">
+							<h:outputText value="#{documento.nombreDocumento}" />
+						</p:column>
+						<p:column headerText="Acciones" styleClass="w70px alCenter">
+							<p:commandButton icon="ui-icon-arrowthick-1-s"
+								styleClass="primary" title="Descargar" ajax="false"
+								immediate="true">
+								<p:fileDownload
+									value="#{ingresarExpedienteBPCController.descargarDocumento(documento)}" />
+							</p:commandButton>
+							<p:commandButton icon="ui-icon-trash" title="Eliminar"
+								process="@this" styleClass="primary"
+								actionListener="#{ingresarExpedienteBPCController.eliminarDocumentoBPC(documento)}"
+								update="tblExpedientePPC" />
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+
+				<h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w40, bold">
+					<h:outputText
+						value="Tipo de Pronunciamiento de Participación Ciudadana para la Consulta Ambiental *" />
+					<p:selectOneRadio id="pronunciamiento"
+						requiredMessage="El campo 'Tipo de Pronunciamiento del Proceso de Participación Ciudadana' es requerido"
+						value="#{ingresarExpedienteBPCController.expedienteBPC.pronunciamientoAprobado}"
+						required="true">
+						<f:selectItem itemLabel="Aprobación" itemValue="true" />
+						<f:selectItem itemLabel="Archivo" itemValue="false" />
+						<p:ajax process="@this" update="pnlResolucion pnlExpediente pnlPagoControl" listener="#{ingresarExpedienteBPCController.cambioPronunciamiento()}" />
+					</p:selectOneRadio>
+				</h:panelGrid>
+			</p:panelGrid>
+
+			<br />
+
+			<h:panelGroup id="pnlExpediente">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100"
+					rendered="#{ingresarExpedienteBPCController.expedienteBPC.pronunciamientoAprobado}">
+					<f:facet name="header">
+						<h:outputText
+							value="Adjuntar los archivos del Estudio de Impacto Ambiental (opcional)" />
+					</f:facet>
+
+					<h:outputText
+						value="En caso de que se haya modificado el contenido del Estudio de Impacto Ambiental como resultado de las observaciones realizadas en el Proceso de Participación Ciudadana, por favor subir la versión final del Estudio de Impacto Ambiental que incluya todas las modificaciones requeridas" />
+
+					<p:fileUpload id="fileEsIAModificado" multiple="false"
+						fileUploadListener="#{ingresarExpedienteBPCController.uploadDocEstudio}"
+						sizeLimit="52428800" allowTypes="/(\.|\/)(rar|pdf)$/"
+						label="Añadir" uploadLabel="Subir"
+						invalidFileMessage="Tipo de archivo no válido"
+						invalidSizeMessage="Debe adjuntar un archivo no mayor de 50 Mb."
+						cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+						auto="true" required="true" styleClass="w100 alCenter"
+						update="tblEsIAModificado" />
+					<p:dataTable id="tblEsIAModificado" styleClass="w100 alcenter"
+						value="#{ingresarExpedienteBPCController.listaDocumentosEsIA}"
+						var="documento" emptyMessage="#{labels['common.table.empty']}">
+						<p:column headerText="Documento">
+							<h:outputText value="#{documento.nombreDocumento}" />
+						</p:column>
+						<p:column headerText="Acciones" styleClass="w70px alCenter">
+							<p:commandButton icon="ui-icon-arrowthick-1-s"
+								styleClass="primary" title="Descargar" ajax="false"
+								immediate="true">
+								<p:fileDownload
+									value="#{ingresarExpedienteBPCController.descargarDocumento(documento)}" />
+							</p:commandButton>
+							<p:commandButton icon="ui-icon-trash" title="Eliminar"
+								process="@this" styleClass="primary"
+								actionListener="#{ingresarExpedienteBPCController.eliminarDocumentoEiA(documento)}"
+								update="tblEsIAModificado" />
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
+			</h:panelGroup>
+
+			<br />
+
+			<h:panelGroup id="pnlResolucion">
+			    <p:panelGrid columns="1" layout="grid" styleClass="w100" 
+			                 rendered="#{ingresarExpedienteBPCController.expedienteBPC.pronunciamientoFisico and ingresarExpedienteBPCController.expedienteBPC.pronunciamientoAprobado}">
+			        <f:facet name="header">
+			            <h:outputText value="Emisión de Resolución de Licencia Ambiental" />
+			        </f:facet>
+			        <h:panelGrid styleClass="panel_data w100" columns="2"
+			                     columnClasses="header w40, bold">
+			            <h:outputText
+			                value="¿La Resolución de Licencia Ambiental fue emitida de forma física? *" />
+			            <p:selectOneRadio id="resolucion"
+			                              requiredMessage="El campo '¿La Resolución de Licencia Ambiental fue emitida de forma física?' es requerido"
+			                              value="#{ingresarExpedienteBPCController.expedienteBPC.tieneResolucionFisica}"
+			                              required="true">
+			                <f:selectItem itemLabel="SI" itemValue="true" />
+			                <f:selectItem itemLabel="NO" itemValue="false" />
+			                <p:ajax process="@this" update="pnlPagoControl" />
+			            </p:selectOneRadio>
+			        </h:panelGrid>
+			    </p:panelGrid>
+			</h:panelGroup>
+			
+			<br />
+			
+			<h:panelGroup id="pnlPagoControl">
+			    <p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{not ingresarExpedienteBPCController.expedienteBPC.tieneResolucionFisica and ingresarExpedienteBPCController.expedienteBPC.tieneResolucionFisica != null}">
+			        <f:facet name="header">
+			            <h:outputText value="Pago por control y seguimiento" />
+			        </f:facet>
+			        <h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w40, bold">
+			            <h:outputText value="Pago por control y seguimiento *" />
+			            <pe:inputNumber required="true" id="valorPago" placeholder="Registre el valor a pagar"
+			                            requiredMessage="El campo 'Pago por control y seguimiento' es requerido."
+			                            validatorMessage="Pago por control y seguimiento no puede ser cero"
+			                            minValue="0" maxValue="999999999999999.99" decimalPlaces="2" style="width:30px"
+			                            value="#{ingresarExpedienteBPCController.expedienteBPC.pagoControlSeguimiento}">
+			                <p:ajax process="@this" />
+			                <f:validateDoubleRange minimum="1" />
+			            </pe:inputNumber>
+			        </h:panelGrid>
+			    </p:panelGrid>
+			</h:panelGroup>
+			
+
+
+			<div class="buttons main">
+				<p:commandButton value="Cancelar" immediate="true"
+					icon="ui-icon-cancel" styleClass="secondary"
+					action="/bandeja/bandejaTareas.jsf?faces-redirect=true">
+					<p:confirm
+						message="#{msg['message.confirmacion.cancelacion.tarea']}"
+						header="#{msg['header.confirmacion.cancelacion.tarea']}" />
+				</p:commandButton>
+
+				<p:commandButton value="Guardar" process="form" icon="ui-icon-disk"
+					styleClass="primary"
+					actionListener="#{ingresarExpedienteBPCController.guardarExpediente()}" />
+
+				<p:commandButton value="Finalizar" styleClass="secondary"
+					action="#{ingresarExpedienteBPCController.completarTarea()}"
+					title="#{msg['label.enviarDatos']}" icon="ui-icon-check"
+					widgetVar="btnEnviar" onstart="PF('btnEnviar').disable()"
+					update="@form">
+					<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+						header="#{msg['header.confirmacion.envio.tarea']}" />
+				</p:commandButton>
+
+			</div>
+		</h:form>
+	</ui:define>
+</ui:composition>

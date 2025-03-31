@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+	<ui:define name="content">
+        <f:event type="preRenderView" listener="#{informacionGeneralController.validarTareaBpm()}"/>
+		<ui:include src="contenido/menuMineria.xhtml" />
+		<div class="content">
+			<p:panel header="3. Descripción de la actividad " id="pnlTodo">
+				<h:form id="frmDatos">
+					<p:panelGrid columns="2" layout="grid" styleClass="w100"
+						columnClasses="">
+						<f:facet name="header">
+                                                    <mae:panelGridHeaderHelp value="Información" render="false"
+								conector="generalHelp"
+								image="#{request.contextPath}/resources/images/help-how.png"
+								help="#{helps['registro.general']}" />
+						</f:facet>
+						
+						<p:outputLabel value="Nombre de la concesión minera" for="txtNombreConcesion" rendered="#{descripcionActividadMineraController.activarConcesion()}"/>
+						<p:inputText id="txtNombreConcesion" rendered="#{descripcionActividadMineraController.activarConcesion()}" disabled="true"
+							value="#{descripcionActividadMineraController.descripcionActividadMineraBean.fichaAmbientalMineria.nombreConcesion}">
+						</p:inputText>
+						
+						<p:outputLabel value="Código de la concesión minera" for="txtCodigoConcesion" rendered="#{descripcionActividadMineraController.activarConcesion()}"/>
+						<p:inputText id="txtCodigoConcesion" rendered="#{descripcionActividadMineraController.activarConcesion()}" disabled="true"
+							value="#{descripcionActividadMineraController.descripcionActividadMineraBean.fichaAmbientalMineria.codigoConcesion}">
+						</p:inputText>
+						
+						<p:outputLabel value="N°. de personas que laborarán *"
+							for="numPersonas" />
+						<p:inputText maxlength="5"
+							value="#{descripcionActividadMineraController.descripcionActividadMineraBean.descripcionActividadMineria.numeroPersonasLaboran}"
+							id="numPersonas">
+							<p:ajax />
+							<pe:keyFilter mask="num" />
+						</p:inputText>
+
+						<p:outputLabel value="Monto de la inversión ($ USD) *" for="txtMonto" />
+						<p:inputText maxlength="20"
+							value="#{descripcionActividadMineraController.descripcionActividadMineraBean.descripcionActividadMineria.montoInversion}"
+							id="txtMonto">
+							<pe:keyFilter mask="num" />
+							<p:ajax />
+						</p:inputText>
+
+						<h:outputLabel
+							value="Volumen de producción diario (metros cúbicos) *"
+							for="txtVolumen" />
+						<p:inputText maxlength="10"
+							value="#{descripcionActividadMineraController.descripcionActividadMineraBean.descripcionActividadMineria.volumenProduccionDiario}"
+							id="txtVolumen">
+							<pe:keyFilter mask="num" />
+							<p:ajax />
+						</p:inputText>
+
+						<p:outputLabel value="Nombre de la planta beneficio *"
+							for="txtNombre" />
+                                                <p:inputTextarea id="txtNombre" maxlength="250" autoResize="false"
+							value="#{descripcionActividadMineraController.descripcionActividadMineraBean.descripcionActividadMineria.nombrePlantaBeneficio}">
+							<p:ajax />
+						</p:inputTextarea>
+
+						<p:outputLabel value="¿Tiene licencia ambiental? *" for="rbtNombre" />
+						<p:selectOneRadio
+							value="#{descripcionActividadMineraController.tieneLicenciaAmbiental}"
+							id="rbtNombre">
+							<f:selectItem itemLabel="Sí" itemValue="Si" />
+							<f:selectItem itemLabel="No" itemValue="No" />
+							<p:ajax event="change"
+								listener="#{descripcionActividadMineraController.cambiarEtiqueta()}"
+								update=":#{p:component('frmDatos')},:#{p:component('txtNumeroObservacion')}" />
+						</p:selectOneRadio>
+						<p:outputLabel
+							value="#{descripcionActividadMineraController.descripcionActividadMineraBean.etiqueta} *"
+							id="etiqueta" for="txtNumeroObservacion" />
+						<p:inputTextarea id="txtNumeroObservacion"
+							value="#{descripcionActividadMineraController.descripcionActividadMineraBean.descripcionActividadMineria.numeroObservacionLicenciaAmbiental}">
+							<p:ajax />
+						</p:inputTextarea>
+					</p:panelGrid>
+				</h:form>
+				<br />
+				<ui:include src="actividades.xhtml" />
+				<br />
+				<ui:include src="instalaciones.xhtml" />
+				<br />
+				<ui:include src="herramientas.xhtml" />
+				<br />
+				<ui:include src="insumos.xhtml" />
+
+				<h:form>
+					<br />					
+					<div class="buttons main">
+							<p:commandButton value="Atrás" immediate="true" process="@this" icon="ui-icon-arrowthick-1-w"
+								action="/prevencion/categoria2/fichaMineria/caracteristicas.jsf?faces-redirect=true"/>
+							<p:commandButton value="Guardar" icon="ui-icon-disk" update=":#{p:component('pnlTodo')}" 
+								oncomplete="window.scrollTo(0,0);" action="#{descripcionActividadMineraController.guardar()}"/>
+							<p:commandButton value="Siguiente" immediate="true" process="@this" icon="ui-icon-arrowthick-1-e"
+								action="/prevencion/categoria2/fichaMineria/caracteristicasAreas.jsf?faces-redirect=true"/>
+					</div>
+					
+					
+					<p:dialog id="dlgInfo" header="Información" widgetVar="dlgInfo" resizable="false" modal="true" dynamic="true" closable="false" width="250" height="80">
+						<p:panelGrid columns="1" columnClasses="label, value">
+							<h:outputText value="Debe ingresar la información solicitada en el punto 2." />
+						</p:panelGrid>
+						<div class="buttons alCenter">
+							<p:commandButton value="Aceptar" action="#{descripcionActividadMineraController.cancelar()}" 
+								styleClass="secondary" icon="ui-icon-check" ajax="false" immediate="true" />
+						</div>
+					</p:dialog>
+				</h:form>
+			</p:panel>
+		</div>
+	</ui:define>
+</ui:composition>

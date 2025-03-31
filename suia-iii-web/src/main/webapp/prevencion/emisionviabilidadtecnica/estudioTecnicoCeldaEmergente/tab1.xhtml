@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:t="http://myfaces.apache.org/tomahawk"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+    <div class="arrow-indicator arrow-indicator3" data-forStyleClass="buttonAdjuntarCoordenadas"></div>
+
+    <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                 columnClasses="">
+        <f:facet name="header">
+            <mae:panelGridHeaderHelp value="ETAPA 1" render="false"
+                                     conector="generalHelp"
+                                     image="#{request.contextPath}/resources/images/help-how.png"
+                                     help="#{helps['registro.general']}" />
+        </f:facet>
+
+        <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                     columnClasses="">
+            <f:facet name="header">
+                <mae:panelGridHeaderHelp value="1. Diagnóstico y Factibilidad" render="false"
+                                         conector="generalHelp"
+                                         image="#{request.contextPath}/resources/images/help-how.png"
+                                         help="#{helps['registro.general']}" />
+            </f:facet>
+
+        </p:panelGrid>    
+        <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                     columnClasses="">
+            <f:facet name="header">
+                <mae:panelGridHeaderHelp value="1.1 Información básica sobre el área del Proyecto" render="false"
+                                         conector="generalHelp"
+                                         image="#{request.contextPath}/resources/images/help-how.png"
+                                         help="#{helps['registro.general']}" />
+            </f:facet>
+
+            <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                         columnClasses="">
+                <f:facet name="header">
+                    <mae:panelGridHeaderHelp value="1.1.1 Descripción del proyecto" render="false"
+                                             conector="generalHelp"
+                                             image="#{request.contextPath}/resources/images/help-how.png"
+                                             help="#{helps['registro.general']}" />
+                </f:facet>
+                <p:outputLabel for="txtDescripcionProyecto:cptxtDescripcionProyecto" value="Descripción del proyecto"/>
+                <control:todoAreaTexto id="txtDescripcionProyecto" identificador="txtDescripcionProyecto" valor="#{estudioCeldaEmergenteController.estudioCeldaEmergenteBB.viabilidadTecnicaCelda.descripcionProyecto}" requerido="true" longitud="255" tamanio="30"/>
+            </p:panelGrid>    
+        </p:panelGrid>
+
+        <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                     columnClasses="">
+            <f:facet name="header">
+                <mae:panelGridHeaderHelp value="1.1.2 Datos Generales" render="false"
+                                         conector="generalHelp"
+                                         image="#{request.contextPath}/resources/images/help-how.png"
+                                         help="#{helps['registro.general']}" />
+            </f:facet>
+            <p:panelGrid columns="1" layout="grid" styleClass="buttonSeleccionarUbicacionContainer w100" id="pnlUbiCoor">
+                <f:facet name="header">
+                    <mae:panelGridHeaderHelp value="Ubicación geográfica *" conector="ubicacionHelp" image="#{request.contextPath}/resources/images/help/proyecto-mapa.png" help="#{helps['registro.ubicaciones']}" width="500px" />
+                </f:facet>
+                <mae:ubicacionGeografica idParroquia="#{estudioCeldaEmergenteController.estudioCeldaEmergenteBB.idParroquia}" id="pr"/>
+                <p:commandButton value="Agregar" icon="ui-icon-plus" styleClass="primary" action="#{estudioCeldaEmergenteController.agregarUbicacion()}" update=":#{p:component('pnlUbiCoor')}" process="@this,pr"/>
+                <p:dataTable  var="ubicacion" emptyMessage="#{labels['common.table.empty']}" id="tblUbicacion"
+                              value="#{estudioCeldaEmergenteController.estudioCeldaEmergenteBB.listaUbicacionGeografica}">
+                    <p:column headerText="Provincia">
+                        <h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}"/>
+                    </p:column>
+                    <p:column headerText="Cant&oacute;n">
+                        <h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}"/>
+                    </p:column>
+                    <p:column headerText="Parroquia">
+                        <h:outputText value="#{ubicacion.nombre}"/>
+                    </p:column>
+                    <p:column styleClass="w20px">
+                    </p:column>
+                </p:dataTable>
+            </p:panelGrid> 
+
+            <p:outputPanel id="ubicaciones">
+                <p:panelGrid columns="1" layout="grid" styleClass="buttonAdjuntarCoordenadasContainer w100">
+                    <f:facet name="header">
+                        <p:commandButton value="Adjuntar" onclick="PF('adjuntarCoordenadas').show()" styleClass="buttonAdjuntarCoordenadas button-small-text toRight field_mrg" type="button" icon="ui-icon-document" />
+                        <p:commandButton rendered="#{!empty cargarCoordenadasEmisionBean.plantillaCoordenadas}" value="Descargar plantilla" styleClass="button-small-text toRight field_mrg" icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true">
+                            <p:fileDownload value="#{cargarCoordenadasEmisionBean.plantillaCoordenadas}" />
+                        </p:commandButton>
+                        <p:commandButton styleClass="button-small toRight field_mrg" ajax="false" immediate="true" icon="ui-icon-help">
+                            <p:fileDownload value="#{cargarCoordenadasEmisionBean.ayudaCoordenadas}" />
+                        </p:commandButton>
+                        <h:outputText value="Sistema de referencias [Formato: sistema WGS84, zona 17S] *" />
+                    </f:facet>
+                </p:panelGrid>
+                <ui:include src="cargarCoordenadasEmision.xhtml" />
+                <script type="text/javascript">
+                    arrow_indicator_start_onover(".arrow-indicator3", 4, '.buttonAdjuntarCoordenadasContainer', false);
+                </script>
+            </p:outputPanel>
+
+
+
+            <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                         columnClasses="">
+                <f:facet name="header">
+                    <mae:panelGridHeaderHelp value="Población" render="false"
+                                             conector="generalHelp"
+                                             image="#{request.contextPath}/resources/images/help-how.png"
+                                             help="#{helps['registro.general']}" />
+                </f:facet>
+                <h:panelGrid columns="3" layout="grid" styleClass="w100" columnClasses="w30, w60">
+                    <p:outputLabel value="Urbana" for="txtUrbana:cptxtUrbana"/>
+                    <p:outputLabel value="Rural" for="txtRural:cptxtRural"/>
+                    <p:outputLabel value="Índice de crecimiento" for="txtIndice:cptxtIndice"/>
+                    <control:soloTextoNumeros identificador="txtUrbana" id="txtUrbana" valor="#{estudioCeldaEmergenteController.estudioCeldaEmergenteBB.viabilidadTecnicaCelda.poblacionUrbana}" requerido="true" longitud="30" tamanio="30"/>
+                    <control:soloTextoNumeros identificador="txtRural" id="txtRural" valor="#{estudioCeldaEmergenteController.estudioCeldaEmergenteBB.viabilidadTecnicaCelda.poblacionRural}" requerido="true" longitud="30" tamanio="30"/>
+                    <control:soloTextoNumeros identificador="txtIndice" id="txtIndice" valor="#{estudioCeldaEmergenteController.estudioCeldaEmergenteBB.viabilidadTecnicaCelda.indiceCrecimiento}" requerido="true" longitud="30" tamanio="30"/>
+                </h:panelGrid>                
+                <h:panelGrid columns="2" layout="grid" id="tot">
+                    <p:commandButton value="Total Población" process="@this,txtUrbana:cptxtUrbana,txtRural:cptxtRural" styleClass="primary" update=":#{p:component('tot')}"/>
+                    <control:soloTextoNumeros identificador="txtTotal" id="txtTotal" valor="#{estudioCeldaEmergenteController.estudioCeldaEmergenteBB.viabilidadTecnicaCelda.poblacionUrbana + estudioCeldaEmergenteController.estudioCeldaEmergenteBB.viabilidadTecnicaCelda.poblacionRural}" requerido="true" longitud="30" tamanio="30" soloLectura="true"/>
+                </h:panelGrid>
+            </p:panelGrid>
+        </p:panelGrid>
+        <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                     columnClasses="">
+            <f:facet name="header">
+                <mae:panelGridHeaderHelp value="1.1.3 Características físicas, geográficas y ambientales de la región" render="false"
+                                         conector="generalHelp"
+                                         image="#{request.contextPath}/resources/images/help-how.png"
+                                         help="#{helps['registro.general']}" />
+            </f:facet>
+            <p:outputLabel for="txtCFGA:cptxtCFGA" value="Características físicas, geográficas y ambientales de la región"/>
+            <control:todoAreaTexto id="txtCFGA" identificador="txtCFGA" valor="#{estudioCeldaEmergenteController.estudioCeldaEmergenteBB.viabilidadTecnicaCelda.caracteristicasRegion}" requerido="true" longitud="255" tamanio="30"/>
+
+        </p:panelGrid>
+
+        <div class="buttons main">
+            <p:commandButton value="Siguiente" action="#{estudioCeldaEmergenteController.activaTab2()}" update=":#{p:component('pnl')}"  icon="ui-icon-arrowthick-1-e" styleClass="primary"
+                             />
+        </div>
+
+    </p:panelGrid>   
+
+    <p:dialog header="Adjuntar coordenadas" widgetVar="adjuntarCoordenadas" modal="#{cargarCoordenadasEmisionBean.modalLoadFile}" resizable="false">
+        <p:panelGrid columns="1" columnClasses="label, value">
+            <h:outputText value="Seleccione el archivo excel (.xls)" />
+            <p:fileUpload uploadLabel="Subir" auto="true" cancelLabel="Cancelar" label="Seleccionar" fileUploadListener="#{cargarCoordenadasEmisionBean.handleFileUpload}" mode="advanced" dragDropSupport="false"  multiple="false" allowTypes="/(\.|\/)(xls)$/" oncomplete="showModalTransformation()" invalidFileMessage="El archivo es inválido." invalidSizeMessage="El archivo es demasiado grande." />
+        </p:panelGrid>
+        <div class="buttons">
+            <p:commandButton type="button" value="Cerrar" onclick="PF('adjuntarCoordenadas').hide()" />
+        </div>
+    </p:dialog>
+
+</ui:composition>

@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:p="http://primefaces.org/ui" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:composite="http://java.sun.com/jsf/composite">
+
+<composite:interface>
+	<composite:attribute name="renderAreas" default="true" />
+</composite:interface>
+
+<composite:implementation>
+	<h:panelGrid columns="2">
+		<p:outputLabel value="Fecha Actual:" style="font-weight: bold;" />
+		<h:outputText value="#{emitirPronunciamientoCC.fecha}">
+			<f:convertDateTime pattern="dd/MM/yyyy h:mm a" />
+		</h:outputText>
+	</h:panelGrid>
+
+	<p:inputTextarea rows="10" cols="50" value="#{emitirPronunciamientoCC.pronunciamiento.contenido}" queryDelay="750" minQueryLength="4" autoResize="false" styleClass="w75" style="margin:10px 0;" />
+
+	<h:panelGrid columns="3">
+		<p:outputLabel value="Anexos" />
+		<p:commandButton value="Adjuntar" oncomplete="PF('uploadFile').show()" styleClass="w100" />
+		<p:commandLink value="Total de archivos adjuntos: #{emitirPronunciamientoCC.ficherosSubidos.size()}" oncomplete="PF('viewFiles').show()" update="tablaVerAdjuntos" styleClass="linkFiles">
+		</p:commandLink>
+	</h:panelGrid>
+
+	<p:dialog header="Adjuntar" widgetVar="uploadFile" modal="true" resizable="false">
+		<p:outputPanel>
+			<p:panelGrid columns="1" columnClasses="label, value">
+				<h:outputText value="Seleccione los archivos que desea adjuntar" />
+				<p:fileUpload uploadLabel="Subir" cancelLabel="Cancelar" label="Seleccionar" fileUploadListener="#{emitirPronunciamientoController.uploadListener}" mode="advanced" dragDropSupport="false" update="@form" multiple="true" />
+			</p:panelGrid>
+		</p:outputPanel>
+		<div class="buttons">
+			<p:commandButton type="button" value="Cerrar" onclick="PF('uploadFile').hide()" />
+		</div>
+	</p:dialog>
+
+	<p:dialog minWidth="150" id="tablaVerAdjuntos" styleClass="tablaVerAdjuntos" header="Archivos adjuntos" widgetVar="viewFiles" modal="true" resizable="false">
+		<h:dataTable value="#{emitirPronunciamientoCC.ficherosSubidos}" var="file">
+			<h:column>
+				<h:outputText value="#{file.fileName}" />
+			</h:column>
+			<h:column style="text-align: center; padding-left:10px;">
+				<p:commandButton icon="ui-icon-search" ajax="false" styleClass="buttonDownloadFiles">
+					<p:fileDownload value="#{emitirPronunciamientoController.getFileToDownload(file)}" />
+				</p:commandButton>
+				<p:commandButton icon="ui-icon-trash" process="@this" actionListener="#{emitirPronunciamientoController.eliminarArchivo(file)}" update="@(.tablaVerAdjuntos) @(.linkFiles)" oncomplete="PF('viewFiles').show()" />
+			</h:column>
+		</h:dataTable>
+		<h:outputText value="No hay archivos adjuntos para esta sección" styleClass="bold" rendered="#{empty emitirPronunciamientoCC.ficherosSubidos}" />
+		<p:separator />
+		<div class="buttons">
+			<p:commandButton type="button" value="Cerrar" onclick="PF('viewFiles').hide()" />
+		</div>
+	</p:dialog>
+</composite:implementation>
+
+</html>

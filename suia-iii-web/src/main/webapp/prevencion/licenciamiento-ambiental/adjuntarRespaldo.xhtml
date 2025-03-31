@@ -1,0 +1,269 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:f="http://java.sun.com/jsf/core"
+                template="/WEB-INF/templates/default-task.xhtml"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+    <ui:define name="context-extra">
+
+    </ui:define>
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{validarPagoLicencia2Bean.validarTareaBpm()}"/>
+        <h:form id="frmDatos">
+            <h:panelGrid cellpadding="2" styleClass="w100">
+
+				<p:panelGrid columns="2" layout="grid" styleClass="w100"
+					columnClasses="w50, w50">
+					<f:facet name="header">
+						<h:outputText
+							value="Adjuntar comprobante de pago, Poliza o Garantía bancaria *" />
+						<mae:panelGridHeaderHelp conector="planoHelp"
+							help="Adjuntar comprobante de pago, Poliza o Garantía bancaria."
+							width="500px" value="" />
+					</f:facet>
+
+					<p:outputLabel value="1. Factura por permiso ambiental *" styleClass="bold" />
+					<p:outputLabel value="2. Protocolización del pago por emisión de permiso ambiental *" styleClass="bold" />
+					<h:panelGrid columns="2" columnClasses="null, field_mrg"
+						id="gridFactura">
+						<p:outputLabel
+							value="#{empty validarPagoLicencia2Bean.facturaPermisoAmbiental.nombre ? 'Documento(.pdf)' : validarPagoLicencia2Bean.facturaPermisoAmbiental.nombre}" />
+						<p:commandButton id="downloadFactura"
+							icon="ui-icon-arrowthick-1-s" ajax="false"
+							styleClass="button-small primary" title="Ver" immediate="true"
+							rendered="#{not empty validarPagoLicencia2Bean.facturaPermisoAmbiental.nombre}">
+							<p:fileDownload
+								value="#{validarPagoLicencia2Bean.getStreamContent(1020)}" />
+						</p:commandButton>
+					</h:panelGrid>
+					<h:panelGrid columns="2" columnClasses="null, field_mrg"
+						id="gridProtocolo">
+						<p:outputLabel
+							value="#{empty validarPagoLicencia2Bean.protocolizacionPago.nombre ? 'Documento(.pdf)' : validarPagoLicencia2Bean.protocolizacionPago.nombre}" />
+						<p:commandButton id="downloadProtocolo"
+							icon="ui-icon-arrowthick-1-s" ajax="false"
+							styleClass="button-small primary" title="Ver" immediate="true"
+							rendered="#{not empty validarPagoLicencia2Bean.protocolizacionPago.nombre}">
+							<p:fileDownload
+								value="#{validarPagoLicencia2Bean.getStreamContent(1021)}" />
+						</p:commandButton>
+					</h:panelGrid>
+					<p:fileUpload id="fileUploadFactura"
+						fileUploadListener="#{validarPagoLicencia2Bean.adjuntarComprobante}"
+						multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/"
+						label="Seleccionar" uploadLabel="Subir"
+						invalidFileMessage="Tipo de archivo no válido"
+						invalidSizeMessage="Tamaño de archivo no válido"
+						cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+						auto="true" update="gridFactura downloadFactura">
+						<f:attribute name="tipoDocumento" value="1020" />
+					</p:fileUpload>
+					<p:fileUpload id="fileUploadProtocolizacionPago"
+						fileUploadListener="#{validarPagoLicencia2Bean.adjuntarComprobante}"
+						multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/"
+						label="Seleccionar" uploadLabel="Subir"
+						invalidFileMessage="Tipo de archivo no válido"
+						invalidSizeMessage="Tamaño de archivo no válido"
+						cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+						auto="true" update="gridProtocolo downloadProtocolo">
+						<f:attribute name="tipoDocumento" value="1021" />
+					</p:fileUpload>
+
+					<p:outputLabel value=""/>
+                    <p:outputLabel value=""/>
+
+					<p:outputLabel
+						value="3. Póliza o garantía bancaria por el 100% del costo de implementación del PMA *" styleClass="bold" 
+						rendered="#{!validarPagoLicencia2Bean.esEmpresaPublica}"/>
+					<p:outputLabel
+						value="#{!validarPagoLicencia2Bean.esEmpresaPublica ? 4 : 3}. Justificación del costo de las medidas incluidas dentro del PMA *" styleClass="bold" />
+					<p:outputLabel value="4. Cronograma valorado del PMA *" styleClass="bold" rendered="#{validarPagoLicencia2Bean.esEmpresaPublica}"/>
+					<h:panelGrid columns="2" columnClasses="null, field_mrg"
+						id="gridPoliza" rendered="#{!validarPagoLicencia2Bean.esEmpresaPublica}">
+						<p:outputLabel
+							value="#{empty validarPagoLicencia2Bean.polizaPma.nombre ? 'Documento(.pdf)' : validarPagoLicencia2Bean.polizaPma.nombre}" />
+						<p:commandButton id="downloadPoliza" icon="ui-icon-arrowthick-1-s"
+							ajax="false" styleClass="button-small primary" title="Ver"
+							immediate="true"
+							rendered="#{not empty validarPagoLicencia2Bean.polizaPma.nombre}">
+							<p:fileDownload
+								value="#{validarPagoLicencia2Bean.getStreamContent(1022)}" />
+						</p:commandButton>
+					</h:panelGrid>
+					<h:panelGrid columns="2" columnClasses="null, field_mrg"
+						id="gridCosto">
+						<p:outputLabel
+							value="#{empty validarPagoLicencia2Bean.justificacionPma.nombre ? 'Documento(.pdf)' : validarPagoLicencia2Bean.justificacionPma.nombre}" />
+						<p:commandButton id="downloadCosto" icon="ui-icon-arrowthick-1-s"
+							ajax="false" styleClass="button-small primary" title="Ver"
+							immediate="true"
+							rendered="#{not empty validarPagoLicencia2Bean.justificacionPma.nombre}">
+							<p:fileDownload
+								value="#{validarPagoLicencia2Bean.getStreamContent(1023)}" />
+						</p:commandButton>
+					</h:panelGrid>
+					<h:panelGrid columns="2" columnClasses="null, field_mrg"
+						id="gridCronograma" rendered="#{validarPagoLicencia2Bean.esEmpresaPublica}">
+						<p:outputLabel
+							value="#{empty validarPagoLicencia2Bean.cronogramaPma.nombre ? 'Documento(.pdf)' : validarPagoLicencia2Bean.cronogramaPma.nombre}" />
+						<p:commandButton id="downloadCronograma"
+							icon="ui-icon-arrowthick-1-s" ajax="false"
+							styleClass="button-small primary" title="Ver" immediate="true"
+							rendered="#{not empty validarPagoLicencia2Bean.cronogramaPma.nombre}">
+							<p:fileDownload
+								value="#{validarPagoLicencia2Bean.getStreamContent(1024)}" />
+						</p:commandButton>
+					</h:panelGrid>
+					<p:fileUpload id="fileUploadPoliza" rendered="#{!validarPagoLicencia2Bean.esEmpresaPublica}"
+						fileUploadListener="#{validarPagoLicencia2Bean.adjuntarComprobante}"
+						multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/"
+						label="Seleccionar" uploadLabel="Subir"
+						invalidFileMessage="Tipo de archivo no válido"
+						invalidSizeMessage="Tamaño de archivo no válido"
+						cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+						auto="true" update="gridPoliza downloadPoliza">
+						<f:attribute name="tipoDocumento" value="1022" />
+					</p:fileUpload>
+					<p:fileUpload id="fileUploadJustificacion"
+						fileUploadListener="#{validarPagoLicencia2Bean.adjuntarComprobante}"
+						multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/"
+						label="Seleccionar" uploadLabel="Subir"
+						invalidFileMessage="Tipo de archivo no válido"
+						invalidSizeMessage="Tamaño de archivo no válido"
+						cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+						auto="true" update="gridCosto downloadCosto">
+						<f:attribute name="tipoDocumento" value="1023" />
+					</p:fileUpload>
+					<p:fileUpload id="fileUploadCronograma" rendered="#{validarPagoLicencia2Bean.esEmpresaPublica}"
+						fileUploadListener="#{validarPagoLicencia2Bean.adjuntarComprobante}"
+						multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/"
+						label="Seleccionar" uploadLabel="Subir"
+						invalidFileMessage="Tipo de archivo no válido"
+						invalidSizeMessage="Tamaño de archivo no válido"
+						cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+						auto="true" update="gridCronograma downloadCronograma">
+						<f:attribute name="tipoDocumento" value="1024" />
+					</p:fileUpload>
+
+					<p:outputLabel value="" rendered="#{!validarPagoLicencia2Bean.esEmpresaPublica}"/>
+                    <p:outputLabel value="" rendered="#{!validarPagoLicencia2Bean.esEmpresaPublica}"/>
+
+					<p:outputLabel value="5. Cronograma valorado del PMA *" styleClass="bold" rendered="#{!validarPagoLicencia2Bean.esEmpresaPublica}"/>
+					<h:outputText rendered="#{!validarPagoLicencia2Bean.esEmpresaPublica}"/>
+					<h:panelGrid columns="2" columnClasses="null, field_mrg"
+						id="gridCronograma_2" rendered="#{!validarPagoLicencia2Bean.esEmpresaPublica}">
+						<p:outputLabel
+							value="#{empty validarPagoLicencia2Bean.cronogramaPma.nombre ? 'Documento(.pdf)' : validarPagoLicencia2Bean.cronogramaPma.nombre}" />
+						<p:commandButton id="downloadCronograma_2"
+							icon="ui-icon-arrowthick-1-s" ajax="false"
+							styleClass="button-small primary" title="Ver" immediate="true"
+							rendered="#{not empty validarPagoLicencia2Bean.cronogramaPma.nombre}">
+							<p:fileDownload
+								value="#{validarPagoLicencia2Bean.getStreamContent(1024)}" />
+						</p:commandButton>
+					</h:panelGrid>
+					<h:outputText rendered="#{!validarPagoLicencia2Bean.esEmpresaPublica}"/>
+					<p:fileUpload id="fileUploadCronograma_2" rendered="#{!validarPagoLicencia2Bean.esEmpresaPublica}"
+						fileUploadListener="#{validarPagoLicencia2Bean.adjuntarComprobante}"
+						multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/"
+						label="Seleccionar" uploadLabel="Subir"
+						invalidFileMessage="Tipo de archivo no válido"
+						invalidSizeMessage="Tamaño de archivo no válido"
+						cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+						auto="true" update="gridCronograma_2 downloadCronograma_2">
+						<f:attribute name="tipoDocumento" value="1024" />
+					</p:fileUpload>
+					<h:outputText rendered="#{!validarPagoLicencia2Bean.esEmpresaPublica}"/>
+
+
+					<h:outputText />
+					<p:outputLabel value="Comprobante (Archivo PDF)"
+						for="archComprobanteHide" rendered="false" />
+				</p:panelGrid>
+
+
+				<p:panelGrid columns="2" layout="grid" styleClass="w100" columnClasses="w50, w50">
+                    <f:facet name="header">
+                        <h:outputText value="Ingresar datos de la licencia *"/>
+                        <mae:panelGridHeaderHelp conector="planoHelp"
+                                                 help="Ingresar datos de la licencia."
+                                                 width="500px" value=""/>
+                    </f:facet>
+                    <p:outputLabel rendered="#{validarPagoLicencia2Bean.comprobante != null}"
+                                   value="#{validarPagoLicencia2Bean.comprobante.name}"/>
+
+                    <p:outputLabel for="txtNumeroPoliza" value="N&uacute;mero de poliza"
+                    rendered="#{!validarPagoLicencia2Bean.esEmpresaPublica}"/>
+                    <p:outputLabel value="Costo de implementación del PMA" />
+                    <p:outputLabel value="" rendered="#{validarPagoLicencia2Bean.esEmpresaPublica}"/>
+                    <p:inputText id="txtNumeroPoliza" required="true" suffix="$"
+                                 value="#{validarPagoLicencia2Bean.licenciaAmbiental.numeroLicencia}"
+                                 maxlength="30"
+                                 rendered="#{!validarPagoLicencia2Bean.esEmpresaPublica}"/>
+                    <p:inputText styleClass="w20" id="txtCostoPMA" disabled="true"
+						suffix="$" value="#{cronogramaPmaEIAController.total}" />
+                     
+
+                    <p:outputLabel value="Vigencia de Poliza" styleClass="bold" rendered="#{!validarPagoLicencia2Bean.esEmpresaPublica}"/>
+                    <p:outputLabel value=""/>
+                    <p:outputLabel for="startDate" value="Desde" rendered="#{!validarPagoLicencia2Bean.esEmpresaPublica}"/>
+                    <p:outputLabel for="endDate" value="Hasta" rendered="#{!validarPagoLicencia2Bean.esEmpresaPublica}"/>
+                    <p:calendar id="startDate" required="true" 
+                                value="#{validarPagoLicencia2Bean.licenciaAmbiental.fechaEmision}"
+                                pattern="dd/MM/yyyy"
+                                readonlyInput="true"
+                                rendered="#{!validarPagoLicencia2Bean.esEmpresaPublica}">
+                        <p:ajax event="dateSelect" update=":#{p:component('endDate')}" process="@this" 
+                        		listener="#{validarPagoLicencia2Bean.validarFechaIni}" />
+                    </p:calendar>
+                    <p:calendar id="endDate" required="true"
+                                value="#{validarPagoLicencia2Bean.licenciaAmbiental.fechaVigencia}"
+                                pattern="dd/MM/yyyy" mindate="#{validarPagoLicencia2Bean.licenciaAmbiental.fechaEmision}"
+                                readonlyInput="true"
+                                rendered="#{!validarPagoLicencia2Bean.esEmpresaPublica}"/>
+                    
+                    <p:outputLabel for="txtValue" value="Valor proyecto"/>
+                    <p:outputLabel value=""/>
+                    <pe:inputNumber id="txtValue" decimalPlaces="2" disabled="true"
+                    			 value="#{validarPagoLicencia2Bean.licenciaAmbiental.costoInversion}"
+                                 maxValue="999999999.99" minValue="0.00">
+                    </pe:inputNumber>
+                    <p:outputLabel value=""/>
+
+                </p:panelGrid>
+
+
+            </h:panelGrid>
+            <h:panelGroup id="pnl2">
+                <observaciones:tablaObservaciones aparace="true"
+                                                  soloLectura="true"
+                                                  mostrarSiVacio="false"
+                                                  idClase="#{proyectosBean.proyecto.id}"
+                                                  nombreClase="PagoLicenciaAmbiental"
+                                                  seccion="comprobante"
+                                                  rol="tecnico"
+                                                  componenteActualizarEliminar="pnl2"/>
+
+            </h:panelGroup>
+
+            <div class="buttons main">
+                <p:commandButton value="Enviar"
+                                 action="#{validarPagoLicencia2Bean.realizarTarea}"
+                                 title="Enviar datos" icon="ui-icon-check">
+                </p:commandButton>
+            </div>
+
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

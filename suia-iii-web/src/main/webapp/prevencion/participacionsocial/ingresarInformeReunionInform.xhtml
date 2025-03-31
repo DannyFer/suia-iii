@@ -1,0 +1,415 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+      xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+        >
+
+<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}" target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+
+    </ui:define>
+    <ui:define name="content">
+
+        <f:event type="preRenderView" listener="#{informeReunionInformacionController.validarTareaBpm()}"/>
+        <h:form id="form">
+            <p:outputLabel for="requiere-modificaciones"
+                           value="¿La información de los Medios de Verificación está completa?"
+                           rendered="#{informeReunionInformacionBean.revisar and informeReunionInformacionBean.tipo.equals('revisar')}"/>
+            <p:selectOneRadio id="requiere-modificaciones"
+                              value="#{informeReunionInformacionBean.informacionCompleta}"
+                              required="#{informeReunionInformacionBean.revisar and informeReunionInformacionBean.tipo.equals('revisar')}"
+                              rendered="#{informeReunionInformacionBean.revisar and informeReunionInformacionBean.tipo.equals('revisar')}">
+                <f:selectItem itemLabel="Si" itemValue="true"/>
+                <f:selectItem itemLabel="No" itemValue="false"/>
+            </p:selectOneRadio>
+
+
+            <p:panel>
+                <f:facet name="header">
+                    <p:outputLabel value="Ingresar Documentos de Respaldo"/>
+                    <mae:panelGridHeaderHelp value=""
+                                             conector="generalHelp"
+                                             help="" render="false"/>
+
+
+                </f:facet>
+                <p:panelGrid columns="1" styleClass="w100" rendered="false">
+                    <h:inputHidden id="ingresarDatos"
+                                   required="#{
+                (informeReunionInformacionController.informeReunionInformacionBean.registrosMediosParticipacionSocial==null
+                or informeReunionInformacionController.informeReunionInformacionBean.registrosMediosParticipacionSocial.size()==0)
+                and !mediosVerificacionController.mediosVerificacionBean.revisar}"/>
+                    <p:dataTable id="table" widgetVar="table"
+                                 rows="20" paginator="true" paginatorAlwaysVisible="true"
+                                 paginatorPosition="bottom"
+                                 currentPageReportTemplate="{currentPage} de {totalPages}"
+                                 rowsPerPageTemplate="5,10,15"
+                                 emptyMessage="#{labels['common.table.empty']}"
+                                 value="#{informeReunionInformacionController.informeReunionInformacionBean.registrosMediosParticipacionSocial}"
+                                 var="record">
+
+                        <f:facet name="header">
+                            <div class="buttons important alRight ">
+                                <p:commandButton title="Adicionar" value="Adicionar" immediate="true"
+                                                 rendered="#{!mediosVerificacionController.mediosVerificacionBean.revisar}"
+                                                 styleClass="primary"
+                                                 actionListener="#{informeReunionInformacionController.limpiar()}"
+                                                 oncomplete="PF('docResp').show();" update=":form_docResp"/></div>
+
+
+                        </f:facet>
+                        <p:column headerText="Tipo de Documento"
+                                  filterMatchMode="contains" styleClass="alCenter w15"
+                                  sortBy="#{record.catalogoMedio.nombreMedio}">
+                            <p:outputLabel value="#{record.catalogoMedio.nombreMedio}"/>
+                        </p:column>
+                        <p:column headerText="Descripcion"
+                                  filterMatchMode="contains" styleClass="alCenter w15"
+                                  sortBy="#{record.descripcion}">
+                            <p:outputLabel value="#{record.descripcion}"/>
+                        </p:column>
+                        <p:column headerText="Respaldo"
+                                  filterMatchMode="contains" styleClass="alCenter w15"
+                                  sortBy="#{record.nombreDocumentoResplado}">
+                            <p:outputLabel value="#{record.nombreDocumentoResplado}"/>
+                        </p:column>
+                        <p:column headerText="Acciones"
+                                  rendered="#{!mediosVerificacionController.mediosVerificacionBean.revisar}"
+                                  styleClass="alCenter w10">
+                            <p:commandButton
+                                    actionListener="#{informeReunionInformacionController.editarInformeReunion(record)}"
+                                    process="@this" update=":form_docResp:docResp"
+                                    icon="ui-icon-pencil" styleClass="button-small primary"
+                                    oncomplete="PF('docResp').show()"/>
+                            <p:commandButton
+                                    actionListener="#{informeReunionInformacionController.eliminarInformeReunion(record)}"
+                                    process="@this" update=":form:table"
+                                    icon="ui-icon-trash" styleClass="button-small primary">
+                                <p:confirm header="Confirmación" message="¿Está seguro de eliminar?"
+                                           icon="ui-icon-alert"/>
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+
+
+                </p:panelGrid>
+
+                <h:panelGrid layout="grid" styleClass="w100 alLeft">
+                    <f:facet name="header">
+                        <p:outputLabel value="Adjuntar Documento" for="adjuntarDocumento"/>
+                        <mae:panelGridHeaderHelp value=""
+                                                 conector="generalHelp"
+                                                 help="Para respaldar la descripción del medio de verificación utilizada deberá adjuntar facturas, contratos, publicaciones en la prensa, ect."/>
+
+
+                    </f:facet>
+
+                    <h:inputHidden id="adjuntarDocumento"
+                                   required="#{empty informeReunionInformacionController.informeReunionInformacionBean.documentos.get('respaldoInformeReunionPPS') and !mediosVerificacionController.mediosVerificacionBean.revisar}"/>
+                    <h:panelGroup>
+                        <h:panelGrid columns="2" columnClasses="null, field_mrg" id="wwww">
+                            <p:outputLabel
+                                    value="#{empty informeReunionInformacionController.informeReunionInformacionBean.documentos.get('respaldoInformeReunionPPS') ? 'Documento(.rar|.zip|.pdf)' :
+                                informeReunionInformacionController.informeReunionInformacionBean.documentos.get('respaldoInformeReunionPPS').nombre}"/>
+                            <p:commandButton id="downloadInformeSistematizacionPPS" icon="ui-icon-arrowthick-1-s"
+                                             ajax="false" styleClass="button-small primary" title="Ver"
+                                             immediate="true"
+                                             rendered="#{not empty informeReunionInformacionController.informeReunionInformacionBean.documentos.get('respaldoInformeReunionPPS')}">
+                                <p:fileDownload
+                                        value="#{informeReunionInformacionController.getStreamContentFile('respaldoInformeReunionPPS')}"/>
+                            </p:commandButton>
+                        </h:panelGrid>
+                        <p:fileUpload
+                                fileUploadListener="#{informeReunionInformacionController.uploadListenerDocumentos}"
+                                multiple="false" sizeLimit="2097152" allowTypes="/(\.|\/)(zip|rar|pdf)$/i"
+                                label="Seleccionar" uploadLabel="Subir"
+                                invalidFileMessage="Tipo de archivo no válido"
+                                invalidSizeMessage="Tamaño de archivo no válido"
+                                cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                                auto="true" update="wwww"
+                                rendered="#{!informeReunionInformacionBean.revisar}"
+                                >
+                            <f:attribute name="clave" value="respaldoInformeReunionPPS"/>
+                        </p:fileUpload>
+
+                    </h:panelGroup>
+                </h:panelGrid>
+
+
+                <p:panel>
+
+                    <p:panelGrid columns="1" styleClass="w100" id="panelMecanismosPPS">
+
+
+                        <p:dataTable id="tblMecanismosPPS" widgetVar="tblMecanismosPPS" rowIndexVar="index"
+                                     rows="10" paginator="true" paginatorAlwaysVisible="false"
+                                     var="mecanismo" value="#{informeReunionInformacionBean.listaMecanismos}">
+                            <f:facet name="header">
+                                <p:outputLabel value="Información de la/s reunión/es informativa/s"
+                                               for="mecanismosHid"/>
+                                <p:commandButton rendered="#{!informeReunionInformacionBean.revisar}"
+                                                 styleClass="buttonSeleccionarUbicacion button-small-text toRight field_mrg"
+                                                 icon="ui-icon-plusthick" value="Adicionar"
+                                                 update=":frmDlg2:dlg2" process="@this"
+                                                 action="#{informeReunionInformacionBean.crearMecanismo}"
+                                                 oncomplete="PF('dlg2').show();">
+                                    <p:resetInput target=":frmDlg2:dlg2"/>
+                                </p:commandButton>
+                                <h:inputHidden id="mecanismosHid"
+                                               required="#{empty informeReunionInformacionBean.listaMecanismos}"/>
+                            </f:facet>
+
+                            <p:column headerText="No."
+                                      styleClass="alCenter w5">
+                                <h:outputText value="#{index + 1}"/>
+                            </p:column>
+                            <p:column headerText="Fecha de Inicio"
+                                      filterMatchMode="contains" styleClass="alCenter w15">
+                                <h:outputText value="#{mecanismo.fechaInicio}"/>
+                            </p:column>
+                            <p:column headerText="Fecha de Finalización"
+                                      filterMatchMode="contains" styleClass="alCenter w15">
+                                <h:outputText value="#{mecanismo.fechaFin}"/>
+                            </p:column>
+                            <p:column headerText="Lugar"
+                                      filterMatchMode="contains" styleClass="alCenter w15">
+                                <h:outputText value="#{mecanismo.lugar}"/>
+                            </p:column>
+                            <p:column headerText="Hora" filterMatchMode="contains"
+                                      styleClass="alCenter w15">
+                                <h:outputText value="#{mecanismo.hora}">
+                                    <f:convertDateTime pattern="HH:mm"/>
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="Provincia" filterMatchMode="contains"
+                                      styleClass="alCenter w15">
+                                <h:outputText
+                                        value="#{mecanismo.ubicacionesGeografica.ubicacionesGeografica.ubicacionesGeografica.nombre}"/>
+                            </p:column>
+                            <p:column headerText="Cantón" filterMatchMode="contains"
+                                      styleClass="alCenter w15">
+                                <h:outputText value="#{mecanismo.ubicacionesGeografica.ubicacionesGeografica.nombre}"/>
+                            </p:column>
+                            <p:column headerText="Parroquia" filterMatchMode="contains"
+                                      styleClass="alCenter w15">
+                                <h:outputText value="#{mecanismo.ubicacionesGeografica.nombre}"/>
+                            </p:column>
+                            <p:column headerText="Comunidad" filterMatchMode="contains"
+                                      styleClass="alCenter w15">
+                                <h:outputText value="#{mecanismo.comunidad}"/>
+                            </p:column>
+
+                            <p:column styleClass="w40px alCenter" rendered="#{!informeReunionInformacionBean.revisar}">
+                                <p:commandButton icon="ui-icon-pencil"
+                                                 styleClass="button-small primary"
+                                                 action="#{informeReunionInformacionBean.editarMecanismo(mecanismo)}"
+                                                 update=":frmDlg2:dlg2" process="@this"
+                                                 oncomplete="PF('dlg2').show()"/>
+                                <p:commandButton icon="ui-icon-circle-close"
+                                                 styleClass="button-small primary"
+                                                 action="#{informeReunionInformacionBean.eliminarMecanismo(mecanismo)}"
+                                                 update=":form:tblMecanismosPPS" process="@this">
+                                    <p:confirm header="Confirmación"
+                                               message="¿Está seguro que desea eliminar este Hallazgo?"
+                                               icon="ui-icon-alert"/>
+                                </p:commandButton>
+                            </p:column>
+                        </p:dataTable>
+                    </p:panelGrid>
+
+                </p:panel>
+
+
+                <p:fragment>
+                    <h:panelGroup id="pnl2" rendered="#{!informeReunionInformacionBean.tipo.equals('revisarDatos')}">
+
+                        <observaciones:tablaObservaciones aparace="true"
+                                                          soloLectura="#{!informeReunionInformacionBean.revisar}"
+                                                          mostrarSiVacio="#{informeReunionInformacionBean.revisar}"
+                                                          idClase="#{mediosVerificacionController.mediosVerificacionBean.proyectosBean.proyecto.id}"
+                                                          nombreClase="ParticipacionSocial"
+                                                          seccion="informeReunionInformativa"
+                                                          rol="admin"
+                                                          componenteActualizarEliminar="pnl2"/>
+                    </h:panelGroup>
+                </p:fragment>
+
+
+                <div class="buttons main">
+                    <p:commandButton value="Guardar" update=":form"
+                                     rendered="#{!informeReunionInformacionBean.tipo.equals('revisarDatos')}"
+                                     action="#{informeReunionInformacionController.guardar()}"
+                                     styleClass="ui-confirmdialog-yes secondary" icon="ui-icon-disk"/>
+
+                    <p:commandButton value="Enviar" action="#{informeReunionInformacionController.finalizar}"
+                                     update=":form" icon="ui-icon-check"
+                                     rendered="#{!informeReunionInformacionBean.tipo.equals('revisarDatos')}"/>
+                </div>
+
+            </p:panel>
+        </h:form>
+
+        <h:form id="form_docResp">
+            <p:dialog id="docResp" widgetVar="docResp" header="Documentos de Respaldo"
+                      modal="true">
+
+                <p:panelGrid columns="1" layout="grid" styleClass="w100" id="panelD">
+                    <h:panelGrid layout="grid" columns="2">
+
+                        <p:outputLabel value="Tipo de Documento:" for="cmb_tipo_medios"/>
+                        <p:selectOneMenu converter="selectItemConverter"
+                                         value="#{informeReunionInformacionBean.catalogoMedio}"
+                                         id="cmb_tipo_medios" required="true"
+                                >
+                            <f:selectItem itemLabel="Seleccionar" noSelectionOption="true"/>
+                            <f:selectItems
+                                    value="#{informeReunionInformacionController.informeReunionInformacionBean.catalogoMediosParticipacionSociales}"
+                                    />
+                        </p:selectOneMenu>
+
+                    </h:panelGrid>
+                    <h:panelGrid columns="1" layout="grid" styleClass="w100">
+
+
+                        <p:outputLabel value="Descripción" for="dt_des"/>
+                        <h:inputTextarea required="true" maxlength="255" id="dt_des"
+                                         value="#{informeReunionInformacionController.informeReunionInformacionBean.registroMediosParticipacionSocial.descripcion}"
+                                         styleClass="w100"/>
+                        <p:outputLabel value="Respaldo" for="dt_resp"/>
+                        <h:inputTextarea required="true" maxlength="255" id="dt_resp"
+                                         value="#{informeReunionInformacionController.informeReunionInformacionBean.registroMediosParticipacionSocial.nombreDocumentoResplado}"
+                                         styleClass="w100"/>
+
+                    </h:panelGrid>
+
+
+                </p:panelGrid>
+
+                <div class="buttons">
+                    <p:commandButton value="Aceptar" styleClass="primary"
+                                     actionListener="#{informeReunionInformacionController.guardarInformeReunion()}"
+                                     update=":form:table,:form_docResp:panelD">
+                    </p:commandButton>
+                    <p:commandButton type="button" value="Cancelar" styleClass="secondary"
+                                     onclick="PF('docResp').hide()"/>
+                </div>
+
+            </p:dialog>
+        </h:form>
+
+        <h:form id="frmDlg2">
+            <p:dialog id="dlg2" widgetVar="dlg2" header="Mecanismos de participación social"
+                      modal="true">
+                <p:panelGrid id="panel1" columns="1" layout="grid" styleClass="w100">
+                    <h:panelGrid layout="grid">
+                        <h:panelGrid columns="2">
+
+
+                            <p:outputLabel for="fecInimecanismo"
+                                           value="Fecha de inicio de Mecanismo"/>
+                            <p:calendar id="fecInimecanismo" required="true"
+                                        value="#{informeReunionInformacionBean.mecanismo.fechaInicio}">
+                                <p:ajax event="dateSelect" update="@(.fecFinmecanismo)"/>
+                            </p:calendar>
+                            <p:outputLabel for="fecFinmecanismo"
+                                           value="Fecha de finalización de Mecanismo"/>
+                            <p:calendar id="fecFinmecanismo" required="true" styleClass="fecFinmecanismo"
+                                        mindate="#{informeReunionInformacionBean.mecanismo.fechaInicio}"
+                                        value="#{informeReunionInformacionBean.mecanismo.fechaFin}"/>
+                            <p:outputLabel value="Lugar" for="LugarM"/>
+                            <p:inputTextarea maxlength="200" scrollHeight="10" required="true" id="LugarM"
+                                             autoResize="true" widgetVar="100px"
+                                             value="#{informeReunionInformacionBean.mecanismo.lugar}">
+                                <f:validateLength maximum="200"/>
+                                <p:ajax/></p:inputTextarea>
+
+                            <p:outputLabel value="Hora" for="hora"/>
+                            <p:calendar id="hora" value="#{informeReunionInformacionBean.mecanismo.hora}"
+                                        pattern="HH:mm" timeOnly="true"
+                                        onkeypress="return numbersonly(this, event, false);" maxlength="5"/>
+
+                            <p:outputLabel value="Provincia" for="cmb_provincias"/>
+                            <p:selectOneMenu value="#{denunciaBean.provincia}" required="true"
+                                             id="cmb_provincias" requiredMessage="Provincia es requerido">
+                                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                              itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems
+                                        value="#{denunciaController.denunciaBean.provincias}"
+
+                                        var="provincia" itemValue="#{provincia}"
+                                        itemLabel="#{provincia.nombre}"/>
+                                <f:converter converterId="selectItemConverter"/>
+                                <p:ajax listener="#{denunciaController.cargarCantones}"
+                                        update="cmb_cantones"/>
+                            </p:selectOneMenu>
+                            <p:outputLabel value="Cant&oacute;n" for="cmb_cantones"/>
+                            <p:selectOneMenu value="#{denunciaBean.canton}" id="cmb_cantones" required="true">
+                                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                              itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{denunciaBean.cantones}" var="canton"
+                                               itemValue="#{canton}" itemLabel="#{canton.nombre}"/>
+                                <f:converter converterId="selectItemConverter"/>
+                                <p:ajax listener="#{denunciaController.cargarParroquias}"
+                                        update="cmb_parroquias"/>
+                            </p:selectOneMenu>
+                            <p:outputLabel value="Parroquia" for="cmb_parroquias"/>
+                            <p:selectOneMenu value="#{denunciaBean.parroquia}" required="true"
+                                             id="cmb_parroquias">
+                                <f:selectItem itemLabel="#{labels['common.item.choose']}"
+                                              itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{denunciaBean.parroquias}" var="parroquia"
+                                               itemValue="#{parroquia}" itemLabel="#{parroquia.nombre}"/>
+                                <f:converter converterId="selectItemConverter"/>
+                            </p:selectOneMenu>
+                            <p:outputLabel value="Comunidad" for="comunidad"/>
+                            <p:inputTextarea maxlength="100" scrollHeight="10" required="true" id="comunidad"
+                                             autoResize="true" widgetVar="100px"
+                                             value="#{informeReunionInformacionBean.mecanismo.comunidad}"><p:ajax/></p:inputTextarea>
+
+                        </h:panelGrid>
+                    </h:panelGrid>
+                </p:panelGrid>
+                <p:separator/>
+
+                <div class="buttons">
+                    <p:commandButton
+                            actionListener="#{informeReunionInformacionBean.agregarMecanismo()}"
+                            process="@this :frmDlg2:dlg2" value="Aceptar"
+                            update=":form:tblMecanismosPPS"/>
+                    <p:commandButton icon="ui-icon-close" value="Cancelar" type="button" styleClass="secondary"
+                                     onclick="PF('dlg2').hide();">
+                        <p:resetInput target="frmDlg2"/>
+                    </p:commandButton>
+                </div>
+            </p:dialog>
+            
+            <p:dialog header="Estimado Proponente" widgetVar="dlgPPS" visible="#{mediosVerificacionBean.verDiag and loginBean.isUserInRole('sujeto de control')}" modal="true" resizable="false" width="500" closable="false">
+				<h:panelGroup rendered="true">
+					<h:outputText styleClass="alJustify"
+						value="Estimado proponente, Usted no puede ingresar información en la Evaluación Social del Sistema Único de Información Ambiental, sin 
+						contar con el oficio de aprobación de los Términos de Referencia para su Estudio de Impacto Ambiental, en cumplimiento del Art.21 de 
+						Reglamento Ambiental de Actividades Mineras. En tal razón, Usted debe elaborar los Términos de Referencia función de su proyecto en 
+						particular, los mismos, que deben ser presentados ante la Autoridad Ambiental Competente en forma física a través de un oficio, para ser 
+						sometidos a evaluación y aprobación ya sea del Ministerio del Ambiente y Agua o de la Autoridad Ambiental de Aplicación Responsable" />						
+					<div class="buttons">
+						<p:commandButton value="Aceptar" immediate="true" process="@this"
+                                    action="#{mediosVerificacionBean.cancelarActividadesMineria()}"/>
+					</div>
+				</h:panelGroup>
+			</p:dialog>
+            
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>

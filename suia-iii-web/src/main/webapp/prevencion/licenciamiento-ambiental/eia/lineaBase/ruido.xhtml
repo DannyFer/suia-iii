@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+		<ui:define name="content">
+		<ui:include src="../contenido/menu.xhtml" />
+		<div class="content">
+				<f:loadBundle var="labels" basename="ec.gob.ambiente.core.resources.labels_es" />
+<h:form id="frmSonora">
+	<p:growl id="msgs" globalOnly="true" />  
+	<p:panel >
+		<p:panelGrid columns="1" layout="grid" styleClass="w100">
+             <f:facet name="header">
+				<p:commandButton value="Adicionar"  action="#{ruidoController.agregarRuido()}" immediate="true" update=":#{p:component('frmRuido')}"
+						 onclick="PF('dlgRuido').show()" id="btnAgregarNivelPresion" icon="ui-icon-plusthick" styleClass="button-small-text toRight field_mrg" >
+						<p:tooltip id="ttNivelPresion" for="btnAgregarNivelPresion"
+							value="Agregar Monitoreo de Ruido"></p:tooltip>
+					</p:commandButton>
+				<mae:panelGridHeaderHelp value="Nivel de presión sonora" conector="ruidoHelp"  help="#{helps['no.help.yet']}" />
+			</f:facet>
+				<p:dataTable id="tblRuido" paginator="true" rows="10" value="#{ruidoController.medioFisicoBean.listaRuido}"
+								var="ruido" paginatorPosition="bottom" scrollable="true" scrollWidth="720" emptyMessage="#{labels['common.table.empty']}">
+					<p:columnGroup type="header">
+						<p:row>
+							<p:column colspan="11" headerText="Monitorero de Ruido" width="1200"/>
+						</p:row>
+						<p:row>
+							<p:column rowspan="3" headerText="Acciones" width="80"/>
+							<p:column  rowspan="3" headerText="Código de la muestra" width="90" />
+							<p:column  colspan= "2" headerText="Ubicación de puntos de muestreo" width="100" />
+							<p:column  rowspan="3" headerText="Fecha" width="45"/>
+							<p:column  rowspan="3" headerText="Diurno/Nocturno" width="250"/>
+							<p:column  rowspan="3" headerText="Descripción sitio de muestreo"  width="150"/>
+							<p:column  rowspan="3" headerText="Tipo de Zona según uso de suelo" width="150"/>
+							<p:column  rowspan="3" headerText="Nombre de Laboratorio" width="90"/>
+							<p:column  rowspan="3" headerText="Límites (dB)" width="45"/>
+							<p:column  rowspan="3" headerText="Resultado Promedio (dB)" width="100" />
+						</p:row>
+							
+						<p:row>
+						<p:column  colspan= "2" headerText="Coordenadas" width="100" />
+						</p:row>
+						<p:row>
+						<p:column headerText="X" width="50" />
+						<p:column headerText="Y" width="50"/>
+						</p:row>
+					</p:columnGroup>
+					<p:column>
+				
+					 <p:commandButton icon="ui-icon-pencil" action="#{ruidoController.seleccionarRuido(ruido)}"
+                                 title="Editar"
+                                 oncomplete="PF('dlgRuido').show();" update=":#{p:component('frmRuido')}"/>
+                	<p:commandButton icon="ui-icon-trash" action="#{ruidoController.eliminarRuido(ruido)}"
+                                 title="Remover"
+                                 update=":#{p:component('tblRuido')}"/>
+                    
+					</p:column>
+					<p:column styleClass="#{ruido.color}">
+						<h:outputText value="#{ruido.codigo}" />
+					</p:column>
+					<p:column styleClass="#{ruido.color}">
+						<h:outputText value="#{ruido.coordenadaGeneral.x}" >
+						<f:convertNumber pattern="##########.##"/>
+						</h:outputText>
+					</p:column>
+					<p:column styleClass="#{ruido.color}">
+						<h:outputText value="#{ruido.coordenadaGeneral.y}" >
+						<f:convertNumber pattern="##########.##"/>
+						</h:outputText>
+					</p:column>
+					<p:column styleClass="#{ruido.color}">
+						<h:outputText value="#{ruido.fechaMonitoreo}" >
+						<f:convertDateTime pattern="dd-MM-yyyy"/>
+						</h:outputText>
+					</p:column>
+					<p:column styleClass="#{ruido.color}"> 
+						<h:outputText value="#{ruido.horario}" />						
+					</p:column>
+					<p:column styleClass="#{ruido.color}">
+						<h:outputText value="#{ruido.descripcion}" />
+					</p:column>
+					<p:column styleClass="#{ruido.color}">
+						<h:outputText value="#{ruido.catalogoGeneral.descripcion}" />
+					</p:column>
+					<p:column styleClass="#{ruido.color}">
+						<h:outputText value="#{ruido.laboratorio}" />
+					</p:column>
+					<p:column styleClass="#{ruido.color}">
+						<h:outputText value="#{ruido.limite}" />
+					</p:column>
+					<p:column styleClass="#{ruido.color}">
+						<h:outputText value="#{ruido.resultado}" />
+					</p:column>
+				</p:dataTable>
+				</p:panelGrid>
+				</p:panel>
+
+				<div class="buttons">
+					<p:commandButton id="btnGuardar" value="Guardar" icon="ui-icon-check" action="#{ruidoController.guardar()}"
+						update=":#{p:component('tblRuido')}" />
+					<p:commandButton value="Cancelar" icon="ui-icon-cancel" action="#{ruidoController.cancelar()}" 	process="@this">
+						<p:confirm header="Confirmación" message="¿Está seguro de cancelar?" icon="ui-icon-alert" />
+					</p:commandButton>
+			</div>	
+	</h:form>
+	<p:dialog id="agregarRuido" header="Monitoreo de Ruido" widgetVar="dlgRuido" modal="true" width="420" resizable="false">
+	<h:form id="frmRuido">
+	<p:panel id="pnlRuido">
+	<h:panelGrid columns="2" styleClass="w100 alCenter" columnClasses="alRight, field_mrg w66 alLeft">
+		<p:outputLabel value="Código" for="txtCodigo"/>
+		<p:inputText id="txtCodigo" value="#{ruidoController.medioFisicoBean.ruido.codigo}" required="true" requiredMessage="El campo código es requerido.">
+		</p:inputText>
+		<p:outputLabel value="Coordenada X" for="txtX"/>
+		<p:inputText id="txtX" required="true" value="#{ruidoController.medioFisicoBean.ruido.coordenadaGeneral.x}"
+					 onkeypress="return NumCheckDouble(event,this);" requiredMessage="El campo coordenada x es requerido.">
+		</p:inputText>
+		<p:outputLabel value="Coordenada Y" for="txtY"/>
+		<p:inputText id="txtY" required="true" value="#{ruidoController.medioFisicoBean.ruido.coordenadaGeneral.y}"
+					 onkeypress="return NumCheckDouble(event,this);" requiredMessage="El campo coordenada y es requerido."/>
+		<p:outputLabel value="Fecha" for="fecha"/>
+		<p:calendar id="fecha" value="#{ruidoController.medioFisicoBean.ruido.fechaMonitoreo}" pattern="dd-MM-yyyy" mask="true" requiredMessage="El campo fecha es requerido."/>
+		<p:outputLabel value="Horario" for="cmbHorario"/>
+		<p:selectOneMenu value="#{ruidoController.medioFisicoBean.ruido.horario}" id="cmbHorario" required="true" requiredMessage="El campo horario es requerido.">
+				<f:selectItem itemLabel="Diurno" itemValue="Diurno" />
+				<f:selectItem itemLabel="Nocturno" itemValue="Nocturno"/>
+				<p:ajax listener="#{ruidoController.limiteUnidad()}" update="outLimite"/>
+		</p:selectOneMenu>
+		<p:outputLabel value="Descripción" for="txtDescripcion"/>
+		<p:inputText id="txtDescripcion" value="#{ruidoController.medioFisicoBean.ruido.descripcion}" required="true" requiredMessage="El campo descripción es requerido."/>
+		<p:outputLabel value="Tipo de zona" for="cmbZona"/>
+		<p:selectOneMenu value="#{ruidoController.medioFisicoBean.ruido.catalogoGeneral}" id="cmbZona" converter="selectItemConverter" required="true" requiredMessage="El campo tipo zona es requerido.">
+				<f:selectItems value="#{ruidoController.medioFisicoBean.listaCatalogoGeneral}" />
+				<p:ajax listener="#{ruidoController.limiteUnidad()}" update="outLimite"/>
+		</p:selectOneMenu>
+		<p:outputLabel value="Laboratorio" for="cmbLaboratorio"/>
+		<p:selectOneMenu
+					value="#{ruidoController.medioFisicoBean.ruido.laboratorio}"
+					required="true" id="cmbLaboratorio"
+					converter="selectItemConverter2" style="width:100%" requiredMessage="El campo laboratorio es requerido.">
+					<f:selectItems value="#{ruidoController.medioFisicoBean.laboratorios}" />
+		</p:selectOneMenu>
+		
+		<p:outputLabel value="Límites (dB)"/>
+		<p:inputText  value="#{ruidoController.medioFisicoBean.ruido.limite}" id="outLimite" readonly="true" />
+		<p:outputLabel value="Resultado Promedio (dB)" for="txtResultado"/>
+		<p:inputText id="txtResultado" required="true" value="#{ruidoController.medioFisicoBean.ruido.resultado}"
+					 onkeypress="return NumCheckDouble(event,this);" requiredMessage="El campo resultado es requerido.">
+		<f:validateDoubleRange minimum="0.00"/>
+		</p:inputText>
+		</h:panelGrid>
+	</p:panel>
+	
+	<p:separator />
+	<div class="buttons">
+		<p:commandButton action="#{ruidoController.agregarAListaRuido()}"  value="Agregar" update=":#{p:component('msgs')}, :#{p:component('tblRuido')}"  
+				oncomplete="handlRuidoRequest(xhr, status, args)" />
+	</div>
+	</h:form>
+</p:dialog>
+<script type="text/javascript">
+        function handlRuidoRequest(xhr, status, args) {
+            if (args.validationFailed || !args.ruidoIn) {
+                PF('dlgRuido').jq.effect("shake", {times: 5}, 100);
+            }
+            else {
+                PF('dlgRuido').hide();
+                $('#loginLink').fadeOut();
+            }
+        }
+    </script>
+		</div>
+	</ui:define>
+</ui:composition>

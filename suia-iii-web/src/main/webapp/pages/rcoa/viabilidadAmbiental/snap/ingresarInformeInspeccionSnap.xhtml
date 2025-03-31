@@ -1,0 +1,399 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+	<ui:define name="content">
+
+		<style type="text/css">
+.ui-panelgrid-header .ui-widget-header td {
+	background: #00aac3 !important;
+}
+
+.textSecundario {
+	font-weight: normal !important;
+}
+
+.ui-state-error {
+	color: #cd0a0a !important;
+}
+
+.ui-datepicker-unselectable span {
+	background: #b9b5b5 !important;
+}
+
+.panelContenedor td{
+	padding: 0 !important;
+}
+</style>
+
+		<script type="text/javascript">
+		 function removeDisabled()
+		    {
+		        $('.ui-state-disabled').removeClass('ui-state-disabled');
+		    }
+	</script>
+
+		<f:event type="preRenderView"
+			listener="#{registrarInformeInspeccionSnapController.validarTareaBpm()}" />
+
+
+		<h:form id="form" onShow="removeDisabled();">
+			<h:panelGroup id="pnlDatos">
+				<h:panelGrid styleClass="w100" id="pnlDocumentos"
+					rendered="#{!registrarInformeInspeccionSnapController.mostrarFirma}">
+
+					<object type="application/pdf"
+						data="#{registrarInformeInspeccionSnapController.urlInforme}?pfdrid_c=true"
+						width="100%" height="500px">
+						Su navegador no soporta la visualización de pdf. Puede descargar
+						el documento presionando el siguiente botón:
+						<p:commandButton value="Descargar" styleClass="primary"
+							ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+							<p:fileDownload
+								value="#{registrarInformeInspeccionSnapController.getStream()}" />
+						</p:commandButton>
+					</object>
+					<br />
+					<br />
+					<p:panelGrid columns="1" layout="grid" styleClass="w100"
+						rendered="#{registrarInformeInspeccionSnapController.informacionViabilidadLegal != null}">
+						<f:facet name="header">
+							<h:outputText value="OBSERVACIONES JURIDICO" />
+						</f:facet>
+
+						<p:inputTextarea rows="5" disabled="true"
+							value="#{registrarInformeInspeccionSnapController.informacionViabilidadLegal.descripcionJuridico}"
+							style="resize: none;" autoResize="false" />
+
+					</p:panelGrid>
+					<br />
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="1. Datos informativos" />
+						</f:facet>
+
+						<p:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="header w25, null">
+							<p:outputLabel for="txtFechaInspeccion"
+								value="Fecha inspección de campo" style="color: white" />
+							<h:panelGrid styleClass="w25 panelContenedor" >
+								<p:calendar id="txtFechaInspeccion"
+									value="#{registrarInformeInspeccionSnapController.informeInspeccion.fechaInspeccion}"
+									timeZone="America/Guayaquil" readonlyInput="true"
+									pattern="dd/MM/yyyy" maxdate="today">
+									<p:ajax process="@this" />
+								</p:calendar>
+							</h:panelGrid>
+						</p:panelGrid>
+
+					</p:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="2. Análisis de Viabilidad Ambiental" />
+						</f:facet>
+
+						<p:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="null w50, null w50">
+							<f:facet name="header">
+								<h:outputText value="a)	Zonificación del área protegida" />
+								<br />
+								<br />
+								<p:outputLabel
+									value="El  proyecto, obra o actividad se encuentran dentro de las siguientes zonas del área protegida"
+									styleClass="textSecundario" />
+							</f:facet>
+
+							<h:panelGroup>
+								<p:dataGrid var="cabecera" styleClass="pnlHeaders"
+									value="#{registrarInformeInspeccionSnapController.listaZonasAreas}"
+									columns="1" layout="grid">
+									<p:dataTable id="tblDiagnosticos" styleClass="w100"
+										value="#{cabecera.listaPreguntas}" var="pregunta"
+										emptyMessage="#{labels['common.table.empty']}">
+										<p:column headerText="#{cabecera.descripcion}">
+											<h:outputText value="#{pregunta.descripcion}" />
+										</p:column>
+										<p:column headerText="Selección" styleClass="w70px"
+											style="text-align:center">
+											<p:selectBooleanCheckbox
+												value="#{pregunta.respuesta.respBoolean}">
+												<p:ajax process="@this" />
+											</p:selectBooleanCheckbox>
+										</p:column>
+
+									</p:dataTable>
+								</p:dataGrid>
+
+								<h:outputText style="font-size:9px; margin-left: 4%;"
+									value="+ Aplica únicamente para las áreas protegidas marino costeras" />
+							</h:panelGroup>
+
+							<p:dataGrid var="cabecera" styleClass="pnlHeaders"
+								value="#{registrarInformeInspeccionSnapController.preguntasZonificacion}"
+								columns="1" layout="grid">
+								<p:dataGrid var="pregunta" value="#{cabecera.listaPreguntas}"
+									columns="1" id="pnlCabeceras" styleClass="pnlHeaders"
+									columnClasses="w25">
+									<p:panelGrid columns="1" styleClass="panel_data w100"
+										columnClasses="w25">
+										<f:facet name="header">
+											<h:outputText value="#{pregunta.descripcion}" />
+										</f:facet>
+										<p:outputPanel styleClass="alRight">
+											<p:inputTextarea id="txtFacilidades" maxlength="6000"
+												rows="5" rendered="#{pregunta.tipo eq 2}" required="true"
+												style="resize: none;" autoResize="false"
+												value="#{pregunta.respuesta.respText}">
+												<p:ajax process="@this" />
+											</p:inputTextarea>
+											<p:selectOneRadio value="#{pregunta.respuesta.respBoolean}"
+												required="true" rendered="#{pregunta.tipo eq 1}"
+												requiredMessage="El campo '#{pregunta.descripcion}' es requerido">
+												<f:selectItem itemLabel="Si" itemValue="true" />
+												<f:selectItem itemLabel="No" itemValue="false" />
+												<p:ajax event="change" process="@this"
+													update=":form:pnlResultado"
+													listener="#{registrarInformeInspeccionSnapController.actualizarTotalViabilidad()}" />
+											</p:selectOneRadio>
+										</p:outputPanel>
+									</p:panelGrid>
+
+								</p:dataGrid>
+							</p:dataGrid>
+						</p:panelGrid>
+
+						<p:dataGrid var="cabecera" id="dtgCabecera"
+							value="#{registrarInformeInspeccionSnapController.preguntasInspeccion}"
+							columns="1" layout="grid">
+							<p:dataGrid var="pregunta" value="#{cabecera.listaPreguntas}"
+								columns="1" layout="grid" id="pnlCabeceras"
+								styleClass="pnlSubHeaders">
+								<f:facet name="header">
+									<h:outputText value="#{cabecera.descripcion}" />
+									<br />
+									<br />
+									<h:outputText value="#{cabecera.subDescripcion}"
+										styleClass="textSecundario" />
+								</f:facet>
+
+								<p:panelGrid columns="2" styleClass="panel_data w100"
+									id="pnlContentPregunta" columnClasses="header w50, null">
+									<p:outputLabel for="txtPregunta"
+										value="#{pregunta.descripcion}" style="color: white"
+										rendered="#{pregunta.tipo eq 2}" />
+									<p:outputLabel for="rdbPregunta"
+										value="#{pregunta.descripcion}" style="color: white"
+										rendered="#{pregunta.tipo eq 1}" />
+									<p:outputLabel for="rdbUnaPregunta"
+										value="#{pregunta.descripcion}" style="color: white"
+										rendered="#{pregunta.tipo eq 3}" />
+									<p:outputPanel styleClass="alRight">
+										<p:inputTextarea id="txtPregunta" maxlength="3000" rows="5"
+											rendered="#{pregunta.tipo eq 2}" required="true"
+											style="resize: none;" autoResize="false"
+											value="#{pregunta.respuesta.respText}">
+											<p:ajax process="@this" />
+										</p:inputTextarea>
+										<p:selectOneRadio value="#{pregunta.respuesta.respBoolean}"
+											required="true" rendered="#{pregunta.tipo eq 1}"
+											id="rdbPregunta">
+											<f:selectItem itemLabel="Si" itemValue="true" />
+											<f:selectItem itemLabel="No" itemValue="false" />
+											<p:ajax event="change" process="@this"
+												update=":form:pnlResultado"
+												listener="#{registrarInformeInspeccionSnapController.actualizarTotalViabilidad()}" />
+										</p:selectOneRadio>
+										<p:selectOneRadio value="#{pregunta.respuesta.respBoolean}"
+											rendered="#{pregunta.tipo eq 3}" id="rdbUnaPregunta">
+											<f:selectItem itemLabel="" itemValue="true" />
+											<p:ajax event="change" process="@this"
+												update=":form:pnlResultado"
+												listener="#{registrarInformeInspeccionSnapController.actualizarCamposRelacionados(cabecera, pregunta)}" />
+										</p:selectOneRadio>
+									</p:outputPanel>
+								</p:panelGrid>
+
+							</p:dataGrid>
+						</p:dataGrid>
+
+						<p:panelGrid id="pnlResultado" columns="3"
+							styleClass="panel_data w100"
+							columnClasses="header w25, alCenterImportant w25, alCenterImportant">
+							<h:outputText value="RESULTADO" />
+							<p:inputText required="true"
+								value="#{registrarInformeInspeccionSnapController.totalCalificacion}"
+								style="width: 50% !important;" styleClass="alCenter"
+								disabled="true" />
+							<h:outputText
+								value="#{registrarInformeInspeccionSnapController.tipoPronunciamiento}"
+								styleClass="alCenter bold" />
+						</p:panelGrid>
+
+					</p:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="3. CONCLUSIONES" />
+						</f:facet>
+						<control:imputConTextoEnriquecido id="txtConclusiones"
+							requiredMessage="El campo Conclusiones es requerido"
+							valor="#{registrarInformeInspeccionSnapController.informeInspeccion.conclusiones}"
+							soloLectura="false" />
+					</p:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="4. RECOMENDACIONES" />
+						</f:facet>
+						<control:imputConTextoEnriquecido id="txtRecomendaciones"
+							requiredMessage="El campo Recomendaciones es requerido"
+							valor="#{registrarInformeInspeccionSnapController.informeInspeccion.recomendaciones}"
+							soloLectura="false">
+						</control:imputConTextoEnriquecido>
+					</p:panelGrid>
+					<h:inputHidden
+						validator="#{registrarInformeInspeccionSnapController.validateDatosIngreso}" />
+
+					<br />
+					<h:outputText styleClass="bold text-red alJustify"
+						value="Nota: Antes de continuar con el trámite por favor verifique que el PRONUNCIAMIENTO sea el correcto" />
+					<br />
+
+				</h:panelGrid>
+
+				<h:panelGroup id="pnlFirma"
+					rendered="#{registrarInformeInspeccionSnapController.mostrarFirma}">
+					<h:panelGrid styleClass="alCenter w100" columns="1">
+						<h:outputText value="Firmar informe de inspección"
+							styleClass="encabezado1_4em" />
+						<h:panelGrid styleClass="alCenter w66" columns="1">
+							<p:panel styleClass="alCenter" rendered="#{!registrarInformeInspeccionSnapController.soloToken}">
+								<h:form>
+									<h:panelGrid styleClass="alCenter w50" columns="2">
+										<h:outputText value="Cuenta con token?"
+											styleClass="encabezado" style="text-align:right" />
+										<p:selectOneRadio id="verificaToken"
+											value="#{registrarInformeInspeccionSnapController.token}">
+											<f:selectItem itemLabel="Sí" itemValue="true" />
+											<f:selectItem itemLabel="No" itemValue="false" />
+											<p:ajax event="change" update=":form :formDialogs"
+												listener="#{registrarInformeInspeccionSnapController.guardarToken}" />
+										</p:selectOneRadio>
+									</h:panelGrid>
+								</h:form>
+							</p:panel>
+						</h:panelGrid>
+					</h:panelGrid>
+				</h:panelGroup>
+			</h:panelGroup>
+
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Guardar" process="@this form"
+						update="pnlDatos pnlButtons" immediate="true"
+						rendered="#{!registrarInformeInspeccionSnapController.mostrarFirma}"
+						actionListener="#{registrarInformeInspeccionSnapController.guardarInforme()}"
+						icon="ui-icon-disk">
+						<p:ajax process="txtFechaInspeccion txtRecomendaciones txtConclusiones" />
+					</p:commandButton>
+					<p:commandButton value="Firmar" process="@this form"
+						update="pnlDatos pnlButtons" 
+						rendered="#{!registrarInformeInspeccionSnapController.mostrarFirma}"
+						disabled="#{!registrarInformeInspeccionSnapController.informeGuardado}"
+						actionListener="#{registrarInformeInspeccionSnapController.firmarInforme()}"
+						icon="ui-icon-key">
+						<p:ajax process="txtFechaInspeccion txtRecomendaciones txtConclusiones" />
+						<p:confirm
+							message="¿Está seguro que el pronunciamiento es correcto? Se procederá a la firma del informe de inspección."
+							header="Confirmación" />
+					</p:commandButton>
+					<p:commandButton value="Firmar documento" type="button"
+						styleClass="buttonLarge" icon="ui-icon-key"
+						rendered="#{registrarInformeInspeccionSnapController.mostrarFirma and !registrarInformeInspeccionSnapController.token}"
+						update=":formDialogs:pnlFirmaManual"
+						onclick="PF('signDialog').show();" />
+					<p:commandButton value="Firmar documento" type="button"
+						styleClass="buttonLarge" icon="ui-icon-key" 
+						rendered="#{registrarInformeInspeccionSnapController.mostrarFirma and registrarInformeInspeccionSnapController.token}"
+						onclick="window.location.href='#{registrarInformeInspeccionSnapController.firmarDocumento()}'" />
+					<p:commandButton value="Enviar" process="@this"
+						update="pnlDatos pnlButtons"
+						rendered="#{registrarInformeInspeccionSnapController.mostrarFirma}"
+						disabled="#{!registrarInformeInspeccionSnapController.habilitarEnviar}"
+						action="#{registrarInformeInspeccionSnapController.aceptar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</h:panelGroup>
+		</h:form>
+
+		<h:form id="pnlObservaciones">
+			<h:panelGrid styleClass="w100" 
+				rendered="#{!registrarInformeInspeccionSnapController.mostrarFirma}">
+
+				<h:panelGroup id="pnlObsInformeTecnico">
+					<observaciones:tablaObservacionesViabilidad
+						idComponent="obsTecnico" seccion="Viabilidad oficio SNAP"
+						componenteActualizarEliminar="pnlObsInformeTecnico" aparace="true"
+						mostrarSiVacio="false"
+						idClase="#{registrarInformeInspeccionSnapController.oficioPronunciamiento.id}"
+						nombreClase="oficioViabilidadSnap" soloLectura="true" />
+				</h:panelGroup>
+			</h:panelGrid>
+		</h:form>
+
+		<h:form id="formDialogs">
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="auto" height="auto" position="center top">
+				<p:panel id="pnlFirmaManual">
+					<h:panelGrid columns="2" cellpadding="10"
+						style="text-align:right !important">
+						<p:outputLabel value="1. Descargue el informe" styleClass="bold" />
+						<p:commandButton value="Descargar" ajax="false"
+							icon="ui-icon-arrowthick-1-s" styleClass="primary"
+							immediate="true">
+							<p:fileDownload
+								value="#{registrarInformeInspeccionSnapController.descargar()}" />
+						</p:commandButton>
+						<p:outputLabel for="uploadRequired"
+							value="2. Adjunte el informe firmado" styleClass="bold" />
+						<p:fileUpload
+							fileUploadListener="#{registrarInformeInspeccionSnapController.uploadListenerDocumentos}"
+							multiple="false" sizeLimit="5242880"
+							allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Tamaño de archivo no válido"
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update=":form lblNombreDocFirmado"
+							rendered="#{!registrarInformeInspeccionSnapController.token}">
+							<f:attribute name="clave" value=":form" />
+						</p:fileUpload>
+						<p:outputLabel value="" />
+						<h:outputText id="lblNombreDocFirmado"
+							value="#{registrarInformeInspeccionSnapController.nombreDocumentoFirmado}" />
+					</h:panelGrid>
+				</p:panel>
+				<h:inputHidden id="uploadRequired"
+					required="#{!registrarInformeInspeccionSnapController.token and !registrarInformeInspeccionSnapController.subido}" />
+				<p:separator />
+				<div style="display: block; width: 100%; text-align: right;">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialog').hide()" icon="ui-icon-close" />
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

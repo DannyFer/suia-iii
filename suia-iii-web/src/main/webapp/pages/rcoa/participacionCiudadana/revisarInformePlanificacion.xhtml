@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml">
+	
+	<ui:define name="context-extra">
+      <h:outputText value="Datos"/>
+      <h:outputText value="Estudio de Impacto Ambiental"/>
+      <h:outputLink value="#"  target="_blank">
+          <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+      </h:outputLink>
+  	</ui:define>
+  	
+	<ui:define name="content">
+		<h:form id="frm">
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<p:outputLabel value="Descargar el Informe de Planificación del PPC" />
+				</f:facet>
+				<h:panelGrid columns="2" cellpadding="10"
+					style="text-align:right !important">
+					<p:outputLabel value="Descargar el informe de Planificación"
+						styleClass="bold" />
+					<p:commandButton value="Descargar" ajax="false"
+						icon="ui-icon-arrowthick-1-s" styleClass="primary"
+						immediate="true">
+						<p:fileDownload
+							value="#{revisarInformePlanificacionPPCController.descargarInforme()}" />
+					</p:commandButton>
+				</h:panelGrid>
+			</p:panelGrid>
+			
+			
+			<p:panelGrid columns="1" layout="grid" styleClass="w100">
+				<f:facet name="header">
+					<p:outputLabel value="Pronunciamiento de informe de planificación" />
+				</f:facet>
+				<h:panelGrid columns="2" cellpadding="10" style="text-align:right !important">
+					<p:outputLabel value="¿Tiene observaciones?" styleClass="bold" />
+					<p:selectOneRadio unselectable="true" value="#{revisarInformePlanificacionPPCController.tieneObservaciones}">
+			            <f:selectItem itemLabel="Si" itemValue="true" />
+			            <f:selectItem itemLabel="No" itemValue="false" />
+			            <p:ajax update=":frm:idrequierefacilitadores"/>
+			        </p:selectOneRadio>
+				</h:panelGrid>
+			</p:panelGrid>
+
+			<h:panelGroup id="idrequierefacilitadores">
+				<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{!revisarInformePlanificacionPPCController.tieneObservaciones}">
+					<f:facet name="header">
+						<p:outputLabel value="Facilitadores" />
+					</f:facet>
+					<h:panelGrid columns="1">
+						<p:outputLabel
+							value="¿El proceso de participación ciudadana requiere facilitadores ambientales adicionales?"
+							styleClass="bold" />
+						<p:selectOneRadio unselectable="true" value="#{revisarInformePlanificacionPPCController.requiereFacilitador}">
+							<f:selectItem itemLabel="Si" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax update=":frm:idrequierefacilitadores"/>
+						</p:selectOneRadio>
+					</h:panelGrid>
+					
+					<h:panelGrid columns="1" rendered="#{revisarInformePlanificacionPPCController.requiereFacilitador}">
+						<p:outputLabel value="Número de facilitadores" styleClass="bold" />
+						<p:inputText value="#{revisarInformePlanificacionPPCController.numeroFacilitador}"/>
+					</h:panelGrid>
+				</p:panelGrid>
+			</h:panelGroup>
+
+			<div class="buttons main">
+                <ui:remove><p:commandButton value="Guardar" styleClass="large" icon="ui-icon-disk"/></ui:remove>
+                <p:commandButton value="Enviar" title="Enviar" icon="ui-icon-check" action="#{revisarInformePlanificacionPPCController.completarTarea()}"
+                	widgetVar="btnEnviar" onstart="PF('btnEnviar').disable()" update="@form">
+                    <p:confirm message="#{msg['message.confirmacion.envio.tarea']}" header="#{msg['header.confirmacion.envio.tarea']}" />
+                </p:commandButton>
+                <p:commandButton value="Cancelar" immediate="true" action="/bandeja/bandejaTareas.jsf?faces-redirect=true" icon="ui-icon-cancel" styleClass="secondary">
+                    <p:confirm message="#{msg['message.confirmacion.cancelacion.tarea']}" header="#{msg['header.confirmacion.cancelacion.tarea']}" />
+                </p:commandButton>
+            </div>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

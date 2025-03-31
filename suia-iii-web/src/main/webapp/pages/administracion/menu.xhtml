@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" template="/WEB-INF/templates/default.xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+	<ui:define name="content">
+		<h:form id="frmDatos">
+			<p:growl id="msgs" globalOnly="true" />
+			<p:panel header="Menú">
+				<p:tree value="#{menuController.menuBean.root}" var="menu" styleClass="w100">
+					<p:treeNode expandedIcon="ui-icon-folder-open" collapsedIcon="ui-icon-folder-collapsed">
+						<h:panelGrid columns="3" styleClass="w100" columnsClasses="null, field_mrg_x2, field_mrg_x2">
+							<h:outputLabel value="#{menu.nombre}" />
+							<p:commandButton styleClass="button-small primary" icon="ui-icon-plus" rendered="#{menu.nodoFinal=='false'}" actionListener="#{menuController.seleccionarAgregar(menu)}" update=":#{p:component('formActualiza')}" oncomplete="PF('dlgInsertar').show()" />
+							<p:commandButton styleClass="button-small primary" icon="ui-icon-pencil" rendered="#{menu.nombre != 'MENU SUIA'}" actionListener="#{menuController.seleccionarActualizar(menu)}" update=":#{p:component('formActualiza')}" oncomplete="PF('dlgInsertar').show()" />
+						</h:panelGrid>
+					</p:treeNode>
+				</p:tree>
+			</p:panel>
+		</h:form>
+
+		<p:dialog header="Actualización de datos" widgetVar="dlgInsertar" modal="true" resizable="false" draggable="false" style="overflow: auto;" width="768" height="350">
+			<h:form id="formActualiza">
+				<p:panelGrid columns="2">
+					<h:outputLabel value="*Nombre:" />
+					<control:todoTextoComoIngrese identificador="txtNombre" valor="#{menuController.menuBean.menuH.nombre}" tamanio="20" longitud="200" />
+					<h:outputLabel value="Acción:" />
+					<control:todoTextoComoIngrese identificador="txtAccion" valor="#{menuController.menuBean.menuH.accion}" tamanio="20" longitud="200" />
+					<h:outputLabel value="*Url:" />
+					<control:todoTextoComoIngrese identificador="txtUrl" valor="#{menuController.menuBean.menuH.url}" tamanio="20" longitud="200" />
+					<h:outputLabel value="*Ícono:" />
+					<h:panelGroup>
+						<control:todoTextoComoIngrese identificador="txtIcono" valor="#{menuController.menuBean.menuH.icono}" tamanio="20" longitud="100" />
+						<h:outputLink value="http://jquery-ui.googlecode.com/svn/tags/1.6rc5/tests/static/icons.html" target="_blank">Lista íconos disponibles</h:outputLink>
+					</h:panelGroup>
+					<h:outputLabel value="*Orden:" />
+					<control:soloTextoNumeros identificador="txtOrden" valor="#{menuController.menuBean.menuH.orden}" tamanio="50" longitud="3" />
+
+					<h:outputLabel value="*Nodo Final:" />
+					<h:selectBooleanCheckbox value="#{menuController.menuBean.menuH.nodoFinal}" />
+
+					<h:outputLabel value="Hijo De:" />
+					<control:combo identificador="cmbPadre" lista="#{combosController.listaMenuPadres}" valor="#{menuController.menuBean.idPadre}" />
+
+					<h:outputLabel value="*Estado: " />
+					<h:selectBooleanCheckbox value="#{menuController.menuBean.menuH.estado}" />
+					<h:outputLabel value="*Visible en la barra de menú: " />
+					<h:selectBooleanCheckbox value="#{menuController.menuBean.menuH.muestraMenu}" />
+					<p:commandButton icon="ui-icon-disk" value="Guardar" action="#{menuController.guardar()}" update=":#{p:component('frmDatos')}" oncomplete="PF('dlgInsertar').hide();" />
+				</p:panelGrid>
+			</h:form>
+		</p:dialog>
+
+
+	</ui:define>
+</ui:composition>

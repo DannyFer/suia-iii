@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:mae-components="http://ec.gob.ambiente/mae-components" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:t="http://myfaces.apache.org/tomahawk">
+	
+	<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	
+		<p:dataTable value="#{gestorDesechosPeligrososController.listDesechosDisposicionFinal}" var="item">
+			<p:column headerText="Nombre del Desecho" filterBy="#{item.desechoPeligroso.descripcion}" filterMatchMode="contains">
+				<h:outputText value="#{item.desechoPeligroso.descripcion}" />
+			</p:column>
+			<p:column headerText="Código" filterBy="#{item.desechoPeligroso.clave}" filterMatchMode="contains" styleClass="alCenter w15">
+				<h:outputText value="#{item.desechoPeligroso.clave}" />
+			</p:column>
+			<p:column headerText="Modalidad" styleClass="alCenter w15">
+				<h:outputText value="#{item.modalidad.nombre}" />
+			</p:column>
+			<p:column headerText="Tipo Eliminación" styleClass="alCenter w15">
+				<h:outputText value="#{item.tipoEliminacionDesecho.nombre}" />
+			</p:column>
+			<p:column headerText="Clave">
+				<h:outputLabel styleClass="text-area" value="#{item.tipoEliminacionDesecho.clave}" />
+			</p:column>
+			<p:column styleClass="w15" headerText="Acciones">
+				<center>
+					<p:commandButton icon="ui-icon-plus" styleClass="primary" update=":form:tabView:idtbldesechosDisFinal :form:tabView:idtblsumatoriadesechosDisFinal"
+						action="#{gestorDesechosPeligrososController.desechoDispoFinalSeleccionado(item)}"/>
+				</center>
+			</p:column>
+		</p:dataTable>
+			
+		<p:dataTable id="idtbldesechosDisFinal" value="#{gestorDesechosPeligrososController.listaDesechosDisFinal}"
+			var="desecho" emptyMessage="#{labels['common.table.empty']}" style="table-layout=auto">			
+			<f:facet name="header">
+				<h:outputText value="Desechos a procesar" />
+			</f:facet>						
+			<p:column headerText="Nombre de desecho peligroso">
+				<h:outputText 
+					value="#{desecho.desechoPeligroso.descripcion}" />
+			</p:column>
+			<p:column headerText="Tipo">
+				<h:outputLabel styleClass="text-area"
+					value="#{desecho.eliminacionDesecho.tipoEliminacionDesecho.nombre}" />
+			</p:column>
+			<p:column headerText="Clave">
+				<h:outputLabel styleClass="text-area"
+					value="#{desecho.eliminacionDesecho.tipoEliminacionDesecho.clave}" />
+			</p:column>
+			<p:column headerText="Unidad">
+				<h:outputLabel styleClass="text-area"
+					value="#{desecho.unidadMedida.descripcion}" />
+			</p:column>
+			<p:column headerText="Cantidad">
+				<h:outputLabel styleClass="text-area"
+					value="#{desecho.cantidad}" />
+			</p:column>
+			<p:column styleClass="w15" headerText="Acciones">
+				<center>
+					<p:commandButton icon="ui-icon-pencil" styleClass="primary"  
+					action="#{gestorDesechosPeligrososController.tipoDisFinalSeleccionado(desecho)}"
+					update=":form:tabView:idDlgTipoDisFinal"/>
+					<p:commandButton icon="ui-icon-trash" styleClass="primary" update=":form:tabView:idtbldesechosDisFinal :form:tabView:idtblsumatoriadesechosDisFinal"
+						action="#{gestorDesechosPeligrososController.modificarDisFinal(desecho)}">
+						<p:confirm header="Confirmación" message="Esta seguro de eliminar?" icon="ui-icon-alert" />
+					</p:commandButton>
+					<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+						<p:commandButton value="Si" type="button"
+							styleClass="ui-confirmdialog-yes primary" icon="ui-icon-check" />
+						<p:commandButton value="No" type="button"
+							styleClass="ui-confirmdialog-no primary" icon="ui-icon-closethick" />
+					</p:confirmDialog>
+				</center>												
+			</p:column>
+		</p:dataTable>
+		
+		<p:dataTable id="idtblsumatoriadesechosDisFinal"
+			value="#{gestorDesechosPeligrososController.listaDesechosDisFinal}"
+			var="desecho" 
+			emptyMessage="#{labels['common.table.empty']}"
+			style="table-layout=auto">			
+			<f:facet name="header">
+				<h:outputText value="Sumatoria desechos a procesar" />
+			</f:facet>
+			<p:column headerText="Nombre de desecho peligroso">
+				<h:outputText 
+					value="#{desecho.desechoPeligroso.descripcion}" />
+			</p:column>
+			<p:column headerText="Tipo">
+				<h:outputLabel styleClass="text-area"
+					value="#{desecho.eliminacionDesecho.tipoEliminacionDesecho.nombre}" />
+			</p:column>
+			<p:column headerText="Clave">
+				<h:outputLabel styleClass="text-area"
+					value="#{desecho.eliminacionDesecho.tipoEliminacionDesecho.clave}" />
+			</p:column>
+			<p:column headerText="Unidad">
+				<h:outputLabel styleClass="text-area"
+					value="t" />
+			</p:column>
+			<p:column headerText="Cantidad">
+				<h:outputLabel styleClass="text-area"
+					value="#{desecho.cantidadTonelada}" />
+			</p:column>
+		</p:dataTable>
+		
+		<h:panelGroup>
+			<p:panelGrid id="observacionesDisposicionFinalGrid" columns="1" layout="grid" styleClass="w100" rendered="#{gestorDesechosPeligrososController.verObservaciones}">
+				<f:facet name="header">
+					<h:outputText value="Observaciones"/>
+				</f:facet>
+				<p:dataTable var="item" value="#{gestorDesechosPeligrososController.listObservacionesDisposicionFinal}">
+					<p:column headerText="Campo">
+						<h:outputText value="#{item.campo}"/>
+					</p:column>
+					<p:column headerText="Detalle">
+						<h:outputText value="#{item.descripcion}"/>
+					</p:column>
+				</p:dataTable>
+			</p:panelGrid>
+		</h:panelGroup>
+		
+		
+		<p:dialog widgetVar="idDlgTipoDisFinal" modal="true" dynamic="true"
+		id="idDlgTipoDisFinal" resizable="false" header="Tipo : #{gestorDesechosPeligrososController.desechoDisFinalSeleccionado.eliminacionDesecho.tipoEliminacionDesecho.nombre}">
+		<p:panelGrid columns="2" styleClass="panel_data w100"
+			columnClasses="header w25,null w75">
+			<h:outputText value="Unidad" />
+			<p:selectOneMenu styleClass="w100" converter="selectItemConverter" value="#{gestorDesechosPeligrososController.desechoDisFinalSeleccionado.unidadMedida}">
+				<f:selectItem itemLabel="Seleccione..." noSelectionOption="true" />
+				<f:selectItems
+					value="#{gestorDesechosPeligrososController.listUnidad}" var="item"
+					itemLabel="#{item.descripcion}" itemValue="#{item}" />
+			</p:selectOneMenu>
+
+			<h:outputText value="Cantidad" />
+			<pe:inputNumber maxValue="9999999999" decimalPlaces="2" value="#{gestorDesechosPeligrososController.desechoDisFinalSeleccionado.cantidad}">
+				
+			</pe:inputNumber>
+			
+			<h:outputText value="Reporte en unidades (U) únicamente para los desechos ES-04 y ES-06"
+			rendered="#{gestorDesechosPeligrososController.desechoES0406}" />
+			<pe:inputNumber maxValue="9999999999" rendered="#{gestorDesechosPeligrososController.desechoES0406}"
+				value="#{gestorDesechosPeligrososController.desechoDisFinalSeleccionado.cantidadEs0406}">
+				
+			</pe:inputNumber>
+			
+		</p:panelGrid>
+		
+		<p:panel header="Sustancias RETCE (voluntario hasta la expedición de norma)" id="idPnlSustanciaRetce">		
+			<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75">
+				<h:outputText value="Sustancias identificadas" for="nombreContaminante"/>
+				<p:selectOneMenu id="nombreContaminante" value="#{gestorDesechosPeligrososController.desechoDisFinalSeleccionado.catalogoSustancias}" styleClass="w100"  converter="selectItemConverter">
+					<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+					<f:selectItems value="#{gestorDesechosPeligrososController.catalogoSustanciasRetceList}" var="item" itemLabel="#{item.descripcionProductoQuimico}" itemValue="#{item}"/>
+				</p:selectOneMenu>					
+
+				<h:outputText value="Cantidad (t/año)" />
+				<pe:inputNumber maxValue="999999" decimalPlaces="2" value="#{gestorDesechosPeligrososController.desechoDisFinalSeleccionado.cantidadDesechoRetce}">
+					<f:validateDoubleRange minimum="0.1" maximum="999999" />
+				</pe:inputNumber>
+				
+				<h:outputText value="Método de estimación" />
+				<p:selectOneMenu styleClass="w100" value="#{gestorDesechosPeligrososController.desechoDisFinalSeleccionado.metodoEstimacion}">
+					<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+					<f:selectItem itemLabel="Medición directa" itemValue="Medición directa" />
+					<f:selectItem itemLabel="Factores de emisión" itemValue="Factores de emisión" />
+					<f:selectItem itemLabel="Balance de materiales" itemValue="Balance de materiales" />
+					<f:selectItem itemLabel="Cálculos de ingeniería" itemValue="Cálculos de ingeniería" />
+					<f:selectItem itemLabel="Uso de datos históricos  de muestreo en la fuente" itemValue="Uso de datos históricos  de muestreo en la fuente" />.
+					<p:ajax event="change" update="idPlgAdjcalculoDisF" listener="#{gestorDesechosPeligrososController.verAdjuntoCalculoDisFinal}"/>
+				</p:selectOneMenu>
+				
+				
+			</p:panelGrid>
+			<p:panelGrid columns="2" styleClass="panel_data w100" columnClasses="header w25,null w75" id="idPlgAdjcalculoDisF"> 
+				<h:outputText id="idLblCalculo" value="Cálculo" rendered="#{gestorDesechosPeligrososController.adjuntaArchivoCalculo}"/>
+				<p:panelGrid columns="1">
+					<h:outputText value="#{gestorDesechosPeligrososController.documentoCalculo.nombre}" rendered="#{gestorDesechosPeligrososController.adjuntaArchivoCalculo}"/>
+					<p:fileUpload id="fileCalculo" rendered="#{gestorDesechosPeligrososController.adjuntaArchivoCalculo}"
+	                                             fileUploadListener="#{gestorDesechosPeligrososController.fileUploadCalculo}"
+	                                             allowTypes="/(\.|\/)(pdf)$/" label="Adjuntar archivos .pdf (20Mb)"                                              
+	                                             uploadLabel="Subir" auto="true"                                              
+	                                             cancelLabel="Cancelar"
+	                                             invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo PDF"
+	                                             invalidSizeMessage="Debe adjuntar un archivo no mayor de 20 Mb."
+	                                             styleClass="w100 toLeft primary" mode="advanced"
+	                                             update="idPlgAdjcalculoDisF"/>
+                 </p:panelGrid>
+			</p:panelGrid>
+		</p:panel>
+		<t:div styleClass="buttons">
+			<p:commandButton value="Guardar" icon="ui-icon-disk" action="#{gestorDesechosPeligrososController.guardarDisFinal()}" 
+			 update="idtbldesechosDisFinal idtblsumatoriadesechosDisFinal"/>
+		</t:div>
+
+	</p:dialog>
+	
+	</p:panelGrid>
+
+</html>

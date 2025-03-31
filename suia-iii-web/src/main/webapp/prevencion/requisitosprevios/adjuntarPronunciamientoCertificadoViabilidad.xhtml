@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<ui:composition template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{adjuntarPronunciamientoCertificadoViabilidadBean.validarTareaBpm()}" />
+        <h:form>
+            <f:viewParam name="pronunciamiento" value="#{adjuntarPronunciamientoCertificadoViabilidadBean.tipoPronunciamiento}" />
+            <p:panelGrid columns="1" layout="grid" styleClass="w50 alLeft" columnClasses="w100">
+                <f:facet name="header">
+                    <h:outputText value="Documentos del proyecto" />
+                </f:facet>
+                <h:panelGrid styleClass="panel_data" columns="2" columnClasses="header, w20px alCenter" rowClasses="null, alt">
+                    <h:outputText value="Oficio del certificado de intersección" />
+                    <p:commandButton icon="ui-icon-search" styleClass="button-small primary" action="#{revisarViabilidadController.descargarOficio()}" ajax="false" />
+                    <h:outputText value="Mapa del certificado de intersección" />
+                    <p:commandButton icon="ui-icon-search" styleClass="button-small primary" action="#{revisarViabilidadController.descargarMapa()}" ajax="false" />
+                    <h:outputText value="Coordenadas del proyecto" />
+                    <p:commandButton icon="ui-icon-search" styleClass="button-small primary" action="#{revisarViabilidadController.descargarCoordenadas()}" ajax="false" />
+                    <h:outputText value="Respuestas del proponente" />
+                    <p:commandButton ajax="false" icon="ui-icon-search" styleClass="button-small primary">
+                        <p:fileDownload value="#{adjuntarPronunciamientoCertificadoViabilidadBean.fileStreamPreguntasProponente()}" />
+                    </p:commandButton>
+                </h:panelGrid>
+
+            </p:panelGrid>
+        </h:form>
+
+        <br />
+
+        <h:form id="form">
+
+            <h:panelGrid columns="1" styleClass="separator_bottom">
+                <p:outputLabel for="pronunciamientoValor" value="Su pronunciamiento es de tipo" styleClass="bold" />
+                <p:selectOneRadio id="pronunciamientoValor" value="#{adjuntarPronunciamientoCertificadoViabilidadBean.esPronunciamientoFavorable}" required="true">
+                    <f:selectItem itemLabel="Favorable" itemValue="true" />
+                    <f:selectItem itemLabel="No favorable" itemValue="false" />
+                    <p:ajax event="change"
+						listener="#{adjuntarPronunciamientoCertificadoViabilidadBean.manejarPronunciamiento}"
+						update="@this" />
+                </p:selectOneRadio>
+            </h:panelGrid>
+            <br />
+
+            <p:panelGrid columns="1" layout="grid" styleClass="w100">
+                <f:facet name="header">
+                    <mae:panelGridHeaderHelp value="Pronunciamiento de Certificado de Viabilidad" conector="generalHelp" image="#{request.contextPath}/resources/images/help-how.png" help="#{helps['no.help.yet']}" />
+                </f:facet>
+
+                <h:panelGrid cellpadding="2" styleClass="w50">
+
+                    <h:panelGrid id="labelPronunciamiento">
+
+                        <p:outputLabel rendered="#{adjuntarPronunciamientoCertificadoViabilidadBean.adjuntoPronunciamiento != null}" value="#{adjuntarPronunciamientoCertificadoViabilidadBean.adjuntoPronunciamiento.name}" />
+
+                        <p:outputLabel rendered="#{adjuntarPronunciamientoCertificadoViabilidadBean.adjuntoPronunciamiento == null}" value="Pronunciamiento(.pdf) *" />
+
+                    </h:panelGrid>
+
+                    <p:fileUpload id="pronunciamientoFile" width="100%" required="true" value="#{adjuntarPronunciamientoCertificadoViabilidadBean.adjuntoPronunciamiento}" sizeLimit="3145728" allowTypes="/(\.|\/)(pdf)$/" fileUploadListener="#{adjuntarPronunciamientoCertificadoViabilidadBean.uploadListener}" label="Seleccionar" cancelLabel="Cancelar" uploadLabel="Adjuntar" auto="true" update=":#{p:component('marchPronunciamiento')}, :#{p:component('labelPronunciamiento')}" invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo pdf." invalidSizeMessage="Debe adjuntar un archivo no mayor de 3 Mb." />
+
+                    <p:growl id="marchPronunciamiento" showDetail="true" />
+
+                </h:panelGrid>
+            </p:panelGrid>
+
+            <div class="buttons main">
+            
+            	<p:commandButton value="Firmar" immediate="true"
+						update=":formDialogs:pnlDialog" onclick="PF('signDialog').show();"
+						icon="ui-icon-key" styleClass="primary" />
+						
+                <p:commandButton value="Finalizar" action="#{adjuntarPronunciamientoCertificadoViabilidadController.completarTarea()}" styleClass="primary" />
+            </div>
+        </h:form>
+        
+        <h:form id="formDialogs">
+
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600px" height="auto">
+				<p:panel id="pnlDialog">
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel value="Firmar pronunciamiento de viabilidad"
+							styleClass="bold" />
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold"
+							rendered="#{!adjuntarPronunciamientoCertificadoViabilidadController.ambienteProduccion}" />
+						<p:selectOneRadio id="verificaToken"
+							value="#{adjuntarPronunciamientoCertificadoViabilidadController.token}"
+							rendered="#{!adjuntarPronunciamientoCertificadoViabilidadController.ambienteProduccion}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change"
+								update=":formDialogs:pnlFirmaManual :formDialogs:pnlFirmaToken"
+								listener="#{adjuntarPronunciamientoCertificadoViabilidadController.guardarToken}" />
+						</p:selectOneRadio>
+
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{adjuntarPronunciamientoCertificadoViabilidadController.ambienteProduccion}" />
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{adjuntarPronunciamientoCertificadoViabilidadController.ambienteProduccion}" />
+
+						<h:panelGroup id="pnlFirmaToken">
+							<p:commandButton value="Firmar documento" type="button"
+								styleClass="primary" icon="ui-icon-key"
+								rendered="#{adjuntarPronunciamientoCertificadoViabilidadController.token}"
+								onclick="window.location.href='#{adjuntarPronunciamientoCertificadoViabilidadController.firmarOficio()}'" />
+
+
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!adjuntarPronunciamientoCertificadoViabilidadController.token}">
+							<p:outputLabel value="1. Descargar el Informe" styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload
+									value="#{adjuntarPronunciamientoCertificadoViabilidadController.descargarInformacion()}" />
+							</p:commandButton>
+							<p:outputLabel for="uploadRequired"
+								value="2. Adjuntar el Pronunciamiento Firmado" styleClass="bold" />
+							<p:fileUpload id="Idfirmadassss"
+								fileUploadListener="#{adjuntarPronunciamientoCertificadoViabilidadController.uploadListenerInformacionFirmada}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreDocFirmado"
+								rendered="#{!adjuntarPronunciamientoCertificadoViabilidadController.token}">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreDocFirmado"
+								value="#{adjuntarPronunciamientoCertificadoViabilidadController.nombreDocumentoFirmado}" />
+						</h:panelGrid>
+
+						<h:inputHidden id="uploadRequired"
+							required="#{adjuntarPronunciamientoCertificadoViabilidadController.informacionSubida}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialog').hide()" icon="ui-icon-close" />
+					<p:commandButton value="Enviar" styleClass="secondary"
+						update=":form"
+						action="#{adjuntarPronunciamientoCertificadoViabilidadController.completarTarea()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+
+			<p:separator />
+		</h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

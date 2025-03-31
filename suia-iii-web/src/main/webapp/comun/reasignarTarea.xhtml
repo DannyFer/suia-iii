@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+	<ui:define name="content">
+		<h:form>
+			<p:panel>
+				<f:facet name="header">
+					<h:outputText value="Reasignar tarea: #{reasignarTareaComunBean.task.names.get(0).text}" rendered="#{reasignarTareaComunBean.onStartedTask}" />
+					<h:outputText value="Asignar tarea: #{reasignarTareaComunBean.taskName}" rendered="#{!reasignarTareaComunBean.onStartedTask}" />
+				</f:facet>
+
+				<h:panelGrid columns="1" styleClass="separatorTop">
+					<p:dataTable id="tablaUsuarios" value="#{reasignarTareaComunBean.users}" var="user" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom" rows="7" sortBy="#{user.carga}" sortOrder="ascending" emptyMessage="#{labels['common.table.empty']}">
+						<f:facet name="header">
+							<h:outputText value="Usuarios disponibles" />
+						</f:facet>
+						<p:column styleClass="w20px alCenter">
+							<p:selectBooleanCheckbox value="#{user.selectable}">
+								<f:ajax execute="@this" render="tablaUsuarios" listener="#{reasignarTareaComunBean.updateSelectedUser(user)}" />
+							</p:selectBooleanCheckbox>
+						</p:column>
+						<p:column headerText="Usuario" sortBy="#{user.nombre}" styleClass="w25">
+							<h:outputText value="#{user.nombre}" />
+						</p:column>
+						<p:column headerText="Nombre" sortBy="#{user.nombrePersona}" styleClass="w45">
+							<h:outputText value="#{user.nombrePersona}" />
+						</p:column>
+						<p:column headerText="CR" sortBy="#{user.coeficienteRendimiento}" styleClass="w10 alCenter">
+							<h:outputText value="#{user.coeficienteRendimiento}" />
+						</p:column>
+						<p:column headerText="Tareas" sortBy="#{user.numeroTramites}" styleClass="w10 alCenter">
+							<h:outputText value="#{user.numeroTramites}" />
+						</p:column>
+						<p:column headerText="Peso" sortBy="#{user.pesoTotalTareas}" styleClass="w10 alCenter">
+							<h:outputText value="#{user.pesoTotalTareas}" />
+						</p:column>
+						<p:column headerText="Carga (%)" sortBy="#{user.carga}" styleClass="w15 alCenter">
+							<h:outputText value="#{user.carga}">
+								<f:convertNumber maxFractionDigits="2" />
+							</h:outputText>
+						</p:column>
+					</p:dataTable>
+				</h:panelGrid>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Reasignar" action="#{reasignarTareaComunBean.executeOperationAction()}" icon="ui-icon-check" />
+					<p:commandButton value="Cancelar" immediate="true" action="#{reasignarTareaComunBean.cancelar()}" icon="ui-icon-cancel" styleClass="secondary" />
+				</div>
+			</p:panel>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

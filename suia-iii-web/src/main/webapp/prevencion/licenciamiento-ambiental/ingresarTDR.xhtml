@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="context-extra">
+        <h:outputText value="TDR"  rendered="#{not empty elaborarPronunciamientoAreaLABean.tipo}"/>
+        <h:outputText value="Documento de TDR" rendered="#{not empty elaborarPronunciamientoAreaLABean.tipo}"/>
+
+
+        <p:commandButton id="downloadadjuntoTDRS" icon="ui-icon-arrowthick-1-s"
+                         ajax="false" styleClass="button-small primary" title="Ver"
+                         immediate="true" rendered="#{not empty elaborarPronunciamientoAreaLABean.tipo}">
+            <p:fileDownload
+                    value="#{elaborarPronunciamientoAreaLABean.stream}" rendered="#{not empty elaborarPronunciamientoAreaLABean.tipo}"/>
+        </p:commandButton>
+    </ui:define>
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{ingresarDocumentoTDRLAController.validarTareaBpm()}"/>
+        <h:form id="form">
+            <h3>Ingresar TDR</h3>
+
+
+            <p:panelGrid columns="1" layout="grid" styleClass="w100" id="adjuntoTDR"
+                         columnClasses=" " rendered="true">
+                <f:facet name="header">
+                    <h:outputText value="Adjunte el documento de los TDR *"
+                                  rendered="#{not empty ingresarDocumentoTDRLAController.pronunciamiento}"/>
+                    <p:outputLabel
+                            value="Adjunte el documento de los TDR" for="adjunto"
+                            rendered="#{empty ingresarDocumentoTDRLAController.pronunciamiento}"/>
+                    <h:inputHidden id="adjunto" required="#{empty ingresarDocumentoTDRLAController.pronunciamiento}"/>
+                </f:facet>
+                <h:panelGrid columns="2" columnClasses="null, field_mrg">
+                    <p:outputLabel
+                            value="#{empty ingresarDocumentoTDRLAController.pronunciamiento ? 'Documento(.pdf)' :
+                                ingresarDocumentoTDRLAController.pronunciamiento.name}"/>
+                    <p:commandButton id="downloadadjuntoTDR" icon="ui-icon-arrowthick-1-s"
+                                     ajax="false" styleClass="button-small primary" title="Ver"
+                                     immediate="true"
+                                     rendered="#{not empty ingresarDocumentoTDRLAController.pronunciamiento}">
+                        <p:fileDownload
+                                value="#{ingresarDocumentoTDRLAController.streamContent}"/>
+                    </p:commandButton>
+                </h:panelGrid>
+                <p:fileUpload
+                        fileUploadListener="#{ingresarDocumentoTDRLAController.adjuntarPronunciamiento}"
+                        multiple="false" sizeLimit="5242880" allowTypes="/(\.|\/)(pdf)$/i"
+                        label="Seleccionar" uploadLabel="Subir"
+                        invalidFileMessage="Tipo de archivo no válido"
+                        invalidSizeMessage="Tamaño de archivo no válido"
+                        cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+                        auto="true" update="adjuntoTDR"
+                        rendered="true"
+                        >
+                </p:fileUpload>
+            </p:panelGrid>
+
+
+            <div class="buttons main">
+                <p:commandButton value="Enviar" update=":form"
+                                 action="#{ingresarDocumentoTDRLAController.iniciarTarea}"
+                                 title="Enviar datos" icon="ui-icon-check">
+                    <p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+                               header="#{msg['header.confirmacion.envio.tarea']}"/>
+                </p:commandButton>
+            </div>
+
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

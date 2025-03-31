@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:mae="http://java.sun.com/jsf/composite/mae-composite" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+	<p:panelGrid columns="1" layout="grid" styleClass="buttonAdjuntarCoordenadasContainer w100">
+		<f:facet name="header">
+			<p:outputLabel value="&nbsp;&nbsp;"/>
+			<p:commandButton value="Adjuntar" onclick="PF('adjuntarCoordenadasWGS').show()" styleClass="buttonAdjuntarCoordenadas button-small-text toRight field_mrg" type="button" icon="ui-icon-document" rendered="#{!ingresoDigitalizacionProyectosController.tienecoordenadasWGS}"/>
+			<p:commandButton rendered="#{!empty cargarCoordenadasWGSBean.plantillaCoordenadas and !ingresoDigitalizacionProyectosController.tienecoordenadasWGS}" value="Descargar plantilla" styleClass="button-small-text toRight field_mrg" icon="ui-icon-arrowthick-1-s" ajax="false" immediate="true">
+				<p:fileDownload value="#{cargarCoordenadasWGSBean.plantillaCoordenadas}" />
+			</p:commandButton>
+		</f:facet>
+		<p:outputLabel value="#{labels['label.proceso.digitalizacion.coordenadas.wgs8417s']}"/>
+		<p:dataTable id="tbl_coordenadas_wgs" rowIndexVar="index" value="#{cargarCoordenadasWGSBean.coordinatesWrappersGeo}" var="item" emptyMessage="#{labels['common.table.empty']}">
+			<p:subTable value="#{item.coordenadas}" var="coordenada">
+				<p:columnGroup type="header">
+					<p:row>
+						<p:column headerText="#{item.tipoForma}" styleClass="alCenter w100 table-column-header" colspan="3" />
+					</p:row>
+					<p:row>
+						<p:column headerText="Shape" styleClass="alCenter table-column-header" />
+						<p:column headerText="X" styleClass="alCenter table-column-header" />
+						<p:column headerText="Y" styleClass="alCenter table-column-header" />				
+					</p:row>
+				</p:columnGroup>
+				<p:column headerText="Shape" styleClass="alCenter">
+					<h:outputText value="#{coordenada.orden}" />
+				</p:column>
+				<p:column headerText="X" styleClass="alCenter">
+					<h:outputText value="#{coordenada.x.intValue()}" />
+				</p:column>
+				<p:column headerText="Y" styleClass="alCenter">
+					<h:outputText value="#{coordenada.y.intValue()}" />
+				</p:column>		
+			</p:subTable>
+		</p:dataTable>
+
+		<p:dataTable id="tablaUbicacionesWgs" value="#{cargarCoordenadasWGSBean.ubicacionesSeleccionadas}" var="ubicacion" emptyMessage="#{labels['common.table.empty']}">
+			<p:column headerText="Provincia">
+				<h:outputText value="#{ubicacion.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+			</p:column>
+			<p:column headerText="Cantón">
+				<h:outputText value="#{ubicacion.ubicacionesGeografica.nombre}">
+				</h:outputText>
+			</p:column>
+			<p:column headerText="Parroquia" >
+			<h:outputText value="#{ubicacion.nombre}"/>
+		    </p:column>
+		</p:dataTable>
+	</p:panelGrid>
+	<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{not empty cargarCoordenadasWGSBean.areasProtegidasWgs or not empty cargarCoordenadasWGSBean.bosquesProtectoresWgs}">
+		<f:facet name="header">
+			<h:outputText value="Interseca con" />
+		</f:facet>
+			<h:panelGrid columns="2" id="pnlAreasProtegidasWgs">
+				<p:dataTable id="tbl_snapWgs" rowIndexVar="index" var="item"
+					emptyMessage="#{labels['common.table.empty']}" value="#{cargarCoordenadasWGSBean.areasProtegidasWgs}">
+					<p:column headerText="SISTEMA NACIONAL DE ÁREAS PROTEGIDAS - SNAP" styleClass="alCenter w15">
+						<h:outputText value="#{item}" />
+					</p:column>
+				</p:dataTable>
+				<p:dataTable id="tbl_bosquesWgs" rowIndexVar="index" var="item" value="#{cargarCoordenadasWGSBean.bosquesProtectoresWgs}"
+					emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="BOSQUES PROTECTORES" styleClass="alCenter w15">
+						<h:outputText value="#{item}" />
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+	</p:panelGrid>
+			
+	<p:dialog header="Adjuntar coordenadas" width="600" height="auto" widgetVar="adjuntarCoordenadasWGS" modal="true" resizable="false">
+		<br />
+		<p:panelGrid columns="1" styleClass="w100" columnClasses="label, value">
+			<h:outputText value="Seleccione el archivo excel (.xls)" />
+			<p:fileUpload uploadLabel="Subir" auto="true" cancelLabel="Cancelar" label="Seleccionar" fileUploadListener="#{cargarCoordenadasWGSBean.handleFileUploadWGS}"
+				mode="advanced" dragDropSupport="false" multiple="false" allowTypes="/(\.|\/)(xls)$/"
+				invalidFileMessage="El archivo es inválido." invalidSizeMessage="El archivo es demasiado grande." update="@form tbl_coordenadas_wgs"/>
+		</p:panelGrid>
+		<div class="buttons">
+			<p:commandButton type="button" value="Cerrar" nclick="PF('adjuntarCoordenadasWGS').hide()" />
+		</div>
+	</p:dialog>
+</html>

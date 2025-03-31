@@ -1,0 +1,830 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+	<ui:define name="content">
+
+		<style type="text/css">
+.ui-panelgrid-header .ui-widget-header td {
+	background: #00aac3 !important;
+}
+
+.textSecundario {
+	font-weight: normal !important;
+}
+
+.ui-state-error {
+	color: #cd0a0a !important;
+}
+
+.ui-datepicker-unselectable span {
+	background: #b9b5b5 !important;
+}
+
+.panelContenedor td{
+	padding: 0 !important;
+}
+</style>
+
+		<f:event type="preRenderView"
+			listener="#{registrarInformeInspeccionForestalController.validarTareaBpm()}" />
+
+
+		<h:form id="form">
+			<h:panelGroup id="pnlDatos">
+				<h:panelGrid styleClass="w100" id="pnlDocumentos"
+					rendered="#{!registrarInformeInspeccionForestalController.mostrarFirma}">
+					<object type="application/pdf"
+						data="#{registrarInformeInspeccionForestalController.urlInforme}?pfdrid_c=true"
+						width="100%" height="500px"> Su navegador no soporta la
+						visualización de pdf. Puede descargar el documento presionando el
+						siguiente botón: </object>
+					<p:commandButton value="Descargar" styleClass="primary"
+						ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+						<p:fileDownload
+							value="#{registrarInformeInspeccionForestalController.getStream()}" />
+					</p:commandButton>
+					<br />
+					<br />
+					<ui:remove>
+						<p:panelGrid columns="1" layout="grid" styleClass="w100"
+							rendered="#{registrarInformeInspeccionForestalController.informacionViabilidadLegal != null}">
+							<f:facet name="header">
+								<h:outputText value="OBSERVACIONES JURIDICO" />
+							</f:facet>
+
+							<p:inputTextarea rows="5" disabled="true"
+								value="#{registrarInformeInspeccionForestalController.informacionViabilidadLegal.descripcionJuridico}"
+								style="resize: none;" autoResize="false" />
+
+						</p:panelGrid>
+						<br />
+					</ui:remove>
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="1. DATOS GENERALES" />
+						</f:facet>
+
+						<p:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="header w25, null">
+							<p:outputLabel value="Fecha de elaboración de informe"
+								style="color: white" />
+							<h:outputText
+								value="#{registrarInformeInspeccionForestalController.informeInspeccion.fechaElaboracion}" />
+
+							<p:outputLabel for="txtFechaInspeccion"
+								value="Fecha inspección de campo" style="color: white" />
+							<h:panelGrid styleClass="w25 panelContenedor">
+								<p:calendar id="txtFechaInspeccion"
+									value="#{registrarInformeInspeccionForestalController.informeInspeccion.fechaInspeccion}"
+									timeZone="America/Guayaquil" readonlyInput="true"
+									required="true" pattern="dd/MM/yyyy" maxdate="today">
+									<p:ajax event="dateSelect" process="@this" />
+								</p:calendar>
+							</h:panelGrid>
+
+							<p:outputLabel value="Nombre del Proyecto o Actividad"
+								style="color: white" />
+							<h:outputText
+								value="#{registrarInformeInspeccionForestalController.proyectoLicenciaCoa.nombreProyecto}" />
+
+							<p:outputLabel
+								value="Intersección  del  proyecto,  obra  o  actividad"
+								style="color: white" />
+							<h:outputText
+								value="#{registrarInformeInspeccionForestalController.interseccionesProyecto}"
+								escape="false" />
+
+							<p:outputLabel value="Razón Social del operador"
+								style="color: white" />
+							<h:outputText
+								value="#{registrarInformeInspeccionForestalController.razonSocial}" />
+
+							<p:outputLabel value="Delegados del operador para inspección"
+								style="color: white" />
+							<p:dataTable id="tblDelegadoOperador"
+								value="#{registrarInformeInspeccionForestalController.listaDelegadosOperador}"
+								var="item" emptyMessage="#{labels['common.table.empty']}">
+								<f:facet name="header">
+									<p:commandButton value="Adicionar"
+										action="#{registrarInformeInspeccionForestalController.nuevoDelegado()}"
+										oncomplete="PF('dlgDelegadoOperador').show()"
+										update=":frmDialogs:pnlDatosDelegado"
+										styleClass="button-small-text toRight field_mrg"
+										process="@this" icon="ui-icon-plusthick" />
+								</f:facet>
+								<p:column headerText="Cedula">
+									<h:outputText value="#{item.cedula}" />
+								</p:column>
+								<p:column headerText="Nombres y Apellidos">
+									<h:outputText value="#{item.nombre}" />
+								</p:column>
+								<p:column headerText="Cargo" styleClass="alCenter">
+									<h:outputText value="#{item.cargo}" />
+								</p:column>
+								<p:column styleClass="w70px alCenter">
+									<p:commandButton icon="ui-icon-trash" title="Eliminar"
+										process="@this" styleClass="primary"
+										actionListener="#{registrarInformeInspeccionForestalController.eliminarDelegado(item)}"
+										update="tblDelegadoOperador" />
+								</p:column>
+							</p:dataTable>
+
+							<p:outputLabel value="Equipo técnico delegado para la inspección"
+								style="color: white" />
+							<p:dataTable id="tblEquipoTecnico"
+								value="#{registrarInformeInspeccionForestalController.listaTecnicosDelegados}"
+								var="item" emptyMessage="#{labels['common.table.empty']}">
+								<f:facet name="header">
+									<p:commandButton value="Adicionar"
+										update=":frmDialogs:pnlDatosTecnicoDelegado"
+										action="#{registrarInformeInspeccionForestalController.nuevoTecnicoDelegado()}"
+										oncomplete="PF('dlgTecnicoDelegado').show()"
+										styleClass="button-small-text toRight field_mrg"
+										process="@this" icon="ui-icon-plusthick" />
+								</f:facet>
+
+								<p:column headerText="Nombres y Apellidos">
+									<h:outputText value="#{item.usuario.persona.nombre}" />
+								</p:column>
+								<p:column headerText="Cargo" styleClass="alCenter">
+									<h:outputText value="#{item.cargo}" />
+								</p:column>
+								<p:column styleClass="w70px alCenter">
+									<p:commandButton icon="ui-icon-trash" title="Eliminar"
+										process="@this" styleClass="primary"
+										actionListener="#{registrarInformeInspeccionForestalController.eliminarTecnico(item)}"
+										update="tblEquipoTecnico" />
+								</p:column>
+							</p:dataTable>
+						</p:panelGrid>
+
+
+					</p:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="2. ANTECEDENTES" />
+						</f:facet>
+
+						<p:inputTextarea id="txtAntecedentes" maxlength="5000" rows="5"
+							required="true"
+							requiredMessage="El campo 'Antecedentes' es requerido."
+							value="#{registrarInformeInspeccionForestalController.informeInspeccion.antecedentes}"
+							style="resize: none;" autoResize="false">
+							<p:ajax process="@this" />
+						</p:inputTextarea>
+
+					</p:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="3. MARCO LEGAL" />
+						</f:facet>
+
+						<p:inputTextarea id="txtMarcoLegal" maxlength="10000" rows="5"
+							required="true"
+							requiredMessage="El campo 'Marco Legal' es requerido."
+							value="#{registrarInformeInspeccionForestalController.informeInspeccion.marcoLegal}"
+							style="resize: none;" autoResize="false">
+							<p:ajax process="@this" />
+						</p:inputTextarea>
+
+					</p:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="4. OBJETIVO" />
+
+							<p:commandButton icon="ui-icon-help"
+								styleClass="button-small toRight" id="btnHelpObjetivo" />
+							<p:tooltip for="btnHelpObjetivo" trackMouse="true"
+								position="bottom" styleClass="w33">
+								<h:panelGrid columns="1" styleClass="w100">
+									<h:outputText
+										value="Realizar inspección técnica al proyecto denominado #{registrarInformeInspeccionForestalController.proyectoLicenciaCoa.nombreProyecto} para verificar la información que se presenta sobre los tipos de ecosistemas, uso de suelo y cobertura vegetal del área de implantación del proyecto, a fin de validar las medidas de manejo propuestas para la gestión de los impactos ambientales negativos hacia las funciones del Patrimonio Forestal Nacional (protección del suelo, el agua, la flora y fauna silvestres." />
+								</h:panelGrid>
+							</p:tooltip>
+						</f:facet>
+
+						<p:inputTextarea id="txtObjetivo" maxlength="5000" rows="5"
+							required="true"
+							requiredMessage="El campo 'Objetivo' es requerido."
+							value="#{registrarInformeInspeccionForestalController.informeInspeccion.objetivo}"
+							style="resize: none;" autoResize="false">
+							<p:ajax process="@this" />
+						</p:inputTextarea>
+
+					</p:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="5. PROCEDIMIENTO" />
+						</f:facet>
+
+						<p:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="null w50, null w50">
+							<f:facet name="header">
+								<h:outputText
+									value="Coordenadas de sitios de referencia durante el recorrido DATUM UTM WGS 84 Zona 17 Sur" />
+								<p:commandButton value="Adicionar"
+									action="#{registrarInformeInspeccionForestalController.nuevaCoordenada()}"
+									update=":frmDialogs:pnlDatosCoordenada"
+									oncomplete="PF('dlgAddCoordenada').show()"
+									styleClass="button-small-text toRight field_mrg"
+									process="@this" icon="ui-icon-plusthick" />
+							</f:facet>
+
+							<p:dataTable id="tblCoordenadas" rowIndexVar="index"
+								value="#{registrarInformeInspeccionForestalController.listaCoordenadas}"
+								var="item" emptyMessage="#{labels['common.table.empty']}">
+								<p:column headerText="Número" styleClass="alCenter">
+									<h:outputText value="#{index + 1}" />
+								</p:column>
+								<p:column headerText="Coordenada X">
+									<h:outputText value="#{item.coordenadaX}" />
+								</p:column>
+								<p:column headerText="Coordenada Y">
+									<h:outputText value="#{item.coordenadaY}" />
+								</p:column>
+								<p:column headerText="Descripción">
+									<h:outputText value="#{item.descripcion}" />
+								</p:column>
+								<p:column styleClass="w70px alCenter">
+									<p:commandButton icon="ui-icon-trash" title="Eliminar"
+										process="@this" styleClass="primary"
+										actionListener="#{registrarInformeInspeccionForestalController.eliminarCoordenada(item)}"
+										update="tblCoordenadas" />
+								</p:column>
+							</p:dataTable>
+						</p:panelGrid>
+
+						<p:panelGrid columns="1" styleClass="panel_data w100"
+							columnClasses="null w50, null w50">
+							<f:facet name="header">
+								<h:outputText
+									value="Caracterización del tipo y estado de cobertura vegetal nativa existente en el área del proyecto, obra o actividad" />
+							</f:facet>
+							<p:inputTextarea id="txtTipoCobertura" maxlength="1000" rows="3"
+								required="true"
+								requiredMessage="El campo 'Caracterización del tipo y estado de cobertura vegetal nativa existente en el área del proyecto, obra o actividad' es requerido."
+								value="#{registrarInformeInspeccionForestalController.informeInspeccion.tipoCoberturaVegetal}"
+								style="resize: none;" autoResize="false">
+								<p:ajax process="@this" />
+							</p:inputTextarea>
+							<p:dataTable id="tblTipoCobertura"
+								value="#{registrarInformeInspeccionForestalController.listaImgsTipoCobertura}"
+								var="item" emptyMessage="#{labels['common.table.empty']}">
+								<f:facet name="header">
+									<p:commandButton value="Adicionar"
+										action="#{registrarInformeInspeccionForestalController.nuevaFotografia(1)}"
+										oncomplete="PF('dlgAddFotografia').show()"
+										update=":frmDialogs:pnlDatosFotografia"
+										styleClass="button-small-text toRight field_mrg"
+										process="@this" icon="ui-icon-plusthick" />
+								</f:facet>
+								<p:column headerText="Fotografía" styleClass="alCenter">
+									<img src="data:image/jpg;base64, #{item.url}" height='160'
+										width='200' style='padding-left: 10%' />
+								</p:column>
+								<p:column headerText="Descripción">
+									<h:outputText value="#{item.descripcion}" />
+								</p:column>
+								<p:column headerText="Fecha">
+									<h:outputText value="#{item.fechaFotografia}" />
+								</p:column>
+								<p:column styleClass="w70px alCenter">
+									<p:commandButton icon="ui-icon-trash" title="Eliminar"
+										process="@this" styleClass="primary"
+										actionListener="#{registrarInformeInspeccionForestalController.eliminarFotografia(1, item)}"
+										update="tblTipoCobertura" />
+									<p:commandButton icon="ui-icon-arrowthick-1-s"
+										styleClass="primary" title="Descargar" ajax="false"
+										immediate="true" rendered="#{item.docImagen.id ne null}">
+										<p:fileDownload
+											value="#{registrarInformeInspeccionForestalController.descargarFotografia(item)}" />
+									</p:commandButton>
+								</p:column>
+
+							</p:dataTable>
+						</p:panelGrid>
+
+						<p:panelGrid columns="1" styleClass="panel_data w100"
+							columnClasses="null w50, null w50">
+							<f:facet name="header">
+								<h:outputText
+									value="Caracterización del tipo de Ecosistema presente en el área del proyecto, obra o actividad" />
+							</f:facet>
+							<p:inputTextarea id="txtTipoEcosistema" maxlength="1000" rows="3"
+								required="true"
+								requiredMessage="El campo 'Caracterización del tipo de Ecosistema presente en el área del proyecto, obra o actividad' es requerido."
+								value="#{registrarInformeInspeccionForestalController.informeInspeccion.tipoEcosistema}"
+								style="resize: none;" autoResize="false">
+								<p:ajax process="@this" />
+							</p:inputTextarea>
+							<p:dataTable id="tblTipoEcosistema"
+								value="#{registrarInformeInspeccionForestalController.listaImgsTipoEcosistema}"
+								var="item" emptyMessage="#{labels['common.table.empty']}">
+								<f:facet name="header">
+									<p:commandButton value="Adicionar"
+										action="#{registrarInformeInspeccionForestalController.nuevaFotografia(2)}"
+										oncomplete="PF('dlgAddFotografia').show()"
+										update=":frmDialogs:pnlDatosFotografia"
+										styleClass="button-small-text toRight field_mrg"
+										process="@this" icon="ui-icon-plusthick" />
+								</f:facet>
+								<p:column headerText="Fotografía" styleClass="alCenter">
+									<img src="data:image/jpg;base64, #{item.url}" height='160'
+										width='200' style='padding-left: 10%' />
+								</p:column>
+								<p:column headerText="Descripción">
+									<h:outputText value="#{item.descripcion}" />
+								</p:column>
+								<p:column headerText="Fecha">
+									<h:outputText value="#{item.fechaFotografia}" />
+								</p:column>
+								<p:column styleClass="w70px alCenter">
+									<p:commandButton icon="ui-icon-trash" title="Eliminar"
+										process="@this" styleClass="primary"
+										actionListener="#{registrarInformeInspeccionForestalController.eliminarFotografia(2, item)}"
+										update="tblTipoEcosistema" />
+									<p:commandButton icon="ui-icon-arrowthick-1-s"
+										styleClass="primary" title="Descargar" ajax="false"
+										immediate="true" rendered="#{item.docImagen.id ne null}">
+										<p:fileDownload
+											value="#{registrarInformeInspeccionForestalController.descargarFotografia(item)}" />
+									</p:commandButton>
+								</p:column>
+
+							</p:dataTable>
+						</p:panelGrid>
+
+						<p:panelGrid columns="1" styleClass="panel_data w100"
+							columnClasses="null w50, null w50">
+							<f:facet name="header">
+								<h:outputText
+									value="Descripción del área de implantación del proyecto, obra o actividad" />
+							</f:facet>
+							<p:inputTextarea id="txtAreaImplantacion" maxlength="1000"
+								rows="3" required="true"
+								requiredMessage="El campo 'Descripción del área de implantación del proyecto, obra o actividad' es requerido."
+								value="#{registrarInformeInspeccionForestalController.informeInspeccion.areaImplantacion}"
+								style="resize: none;" autoResize="false">
+								<p:ajax process="@this" />
+							</p:inputTextarea>
+							<p:dataTable id="tblAreaImplantacion"
+								value="#{registrarInformeInspeccionForestalController.listaImgsAreaImplantacion}"
+								var="item" emptyMessage="#{labels['common.table.empty']}">
+								<f:facet name="header">
+									<p:commandButton value="Adicionar"
+										action="#{registrarInformeInspeccionForestalController.nuevaFotografia(3)}"
+										oncomplete="PF('dlgAddFotografia').show()"
+										update=":frmDialogs:pnlDatosFotografia"
+										styleClass="button-small-text toRight field_mrg"
+										process="@this" icon="ui-icon-plusthick" />
+								</f:facet>
+								<p:column headerText="Fotografía" styleClass="alCenter">
+									<img src="data:image/jpg;base64, #{item.url}" height='160'
+										width='200' style='padding-left: 10%' />
+								</p:column>
+								<p:column headerText="Descripción">
+									<h:outputText value="#{item.descripcion}" />
+								</p:column>
+								<p:column headerText="Fecha">
+									<h:outputText value="#{item.fechaFotografia}" />
+								</p:column>
+								<p:column styleClass="w70px alCenter">
+									<p:commandButton icon="ui-icon-trash" title="Eliminar"
+										process="@this" styleClass="primary"
+										actionListener="#{registrarInformeInspeccionForestalController.eliminarFotografia(3, item)}"
+										update="tblAreaImplantacion" />
+									<p:commandButton icon="ui-icon-arrowthick-1-s"
+										styleClass="primary" title="Descargar" ajax="false"
+										immediate="true" rendered="#{item.docImagen.id ne null}">
+										<p:fileDownload
+											value="#{registrarInformeInspeccionForestalController.descargarFotografia(item)}" />
+									</p:commandButton>
+								</p:column>
+
+							</p:dataTable>
+						</p:panelGrid>
+
+					</p:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="6. CONCLUSIONES" />
+							<p:commandButton icon="ui-icon-help"
+								styleClass="button-small toRight" id="btnHelpConclusiones" />
+							<p:tooltip id="toolTipContent" for="btnHelpConclusiones"
+								position="bottom" styleClass="w33">
+								<h:panelGrid columns="1" styleClass="w100">
+									<h:outputText
+										value="•	Hallazgos de datos cualitativos o cuantitativos de la información ingresada por el operador." />
+									<br />
+									<h:outputText
+										value="•	Indicar si se evidencia la ejecución de actividades relacionadas con el proyecto, obra o actividad, previo a la obtención de la viabilidad ambiental." />
+									<br />
+									<h:outputText
+										value="•	Indicar el o los ecosistemas presentes en el área de estudio." />
+									<br />
+									<h:outputText
+										value="•	Indicar el tipo de cobertura vegetal y uso del suelo del área de estudio." />
+									<br />
+									<h:outputText
+										value="•	En base los posibles impactos ambientales negativos a generarse sobre las funciones de protección del suelo, el agua, la flora y fauna silvestres, indicar cuales son las medidas de manejo sobre las funciones de protección antes indicadas." />
+									<br />
+									<h:outputText
+										value="•	En base a las conclusiones, a los impactos ambientales sobre el Patrimonio Forestal Nacional y sus medidas de manejo, determinar si es procedente emitir la viabilidad ambiental." />
+								</h:panelGrid>
+							</p:tooltip>
+						</f:facet>
+
+
+						<control:imputConTextoEnriquecido id="txtConclusiones"
+							requiredMessage="El campo 'Conclusiones' es requerido"
+							valor="#{registrarInformeInspeccionForestalController.informeInspeccion.conclusiones}"
+							soloLectura="false" />
+
+					</p:panelGrid>
+
+					<p:panelGrid columns="1" layout="grid" styleClass="w100">
+						<f:facet name="header">
+							<h:outputText value="7. RECOMENDACIONES" />
+
+							<p:commandButton icon="ui-icon-help"
+								styleClass="button-small toRight" id="btnHelpRecomendaciones" />
+							<p:tooltip for="btnHelpRecomendaciones" trackMouse="true"
+								position="bottom" styleClass="w33">
+								<h:panelGrid columns="1" styleClass="w100">
+									<h:outputText
+										value="En caso que la información proporcionada por el operador, difiera con lo verificado en la inspección técnica, el técnico responsable deberá recomendar al operador, complementar la información de acuerdo a los hallazgos identificados." />
+								</h:panelGrid>
+							</p:tooltip>
+						</f:facet>
+
+						<control:imputConTextoEnriquecido id="txtRecomendaciones"
+							requiredMessage="El campo 'Recomendaciones' es requerido"
+							valor="#{registrarInformeInspeccionForestalController.informeInspeccion.recomendaciones}"
+							soloLectura="false" />
+
+					</p:panelGrid>
+
+					<h:inputHidden
+						validator="#{registrarInformeInspeccionForestalController.validateDatosIngreso}" />
+				</h:panelGrid>
+
+
+				<h:panelGroup id="pnlFirma"
+					rendered="#{registrarInformeInspeccionForestalController.mostrarFirma}">
+					<h:panelGrid styleClass="alCenter w100" columns="1">
+						<h:outputText value="Firmar informe de inspección"
+							styleClass="encabezado1_4em" />
+						<h:panelGrid styleClass="alCenter w66" columns="1">
+							<p:panel styleClass="alCenter" rendered="#{!registrarInformeInspeccionForestalController.soloToken}">
+								<h:form>
+									<h:panelGrid styleClass="alCenter w50" columns="2">
+										<h:outputText value="Cuenta con token?"
+											styleClass="encabezado" style="text-align:right" />
+										<p:selectOneRadio id="verificaToken"
+											value="#{registrarInformeInspeccionForestalController.token}">
+											<f:selectItem itemLabel="Sí" itemValue="true" />
+											<f:selectItem itemLabel="No" itemValue="false" />
+											<p:ajax event="change" update=":form :frmDialogs"
+												listener="#{registrarInformeInspeccionForestalController.guardarToken}" />
+										</p:selectOneRadio>
+									</h:panelGrid>
+								</h:form>
+							</p:panel>
+						</h:panelGrid>
+					</h:panelGrid>
+				</h:panelGroup>
+
+			</h:panelGroup>
+
+			<h:panelGroup id="pnlButtons">
+				<div class="buttons main">
+					<p:commandButton value="Guardar" process="@this form"
+						update="pnlDatos pnlButtons" immediate="true"
+						rendered="#{!registrarInformeInspeccionForestalController.mostrarFirma}"
+						actionListener="#{registrarInformeInspeccionForestalController.guardarInforme()}"
+						icon="ui-icon-disk">
+						<p:ajax process="@this txtConclusiones txtRecomendaciones" />
+					</p:commandButton>
+					<p:commandButton value="Firmar" icon="ui-icon-key"
+						update="pnlDatos pnlButtons" process="@this form"
+						action="#{registrarInformeInspeccionForestalController.firmarInforme()}"
+						rendered="#{!registrarInformeInspeccionForestalController.mostrarFirma}"
+						disabled="#{!registrarInformeInspeccionForestalController.informeGuardado}">
+						<p:confirm
+							message="¿Está seguro que la información esta correcta? Se procederá a la firma del informe de inspección."
+							header="Confirmación" />
+					</p:commandButton>
+					<p:commandButton value="Firmar documento" type="button"
+						styleClass="buttonLarge" icon="ui-icon-key" 
+						rendered="#{registrarInformeInspeccionForestalController.mostrarFirma and !registrarInformeInspeccionForestalController.token}"
+						update=":frmFirmaManual:pnlFirmaManual"
+						onclick="PF('signDialog').show();" />
+					<p:commandButton value="Firmar documento" type="button"
+						styleClass="buttonLarge" icon="ui-icon-key" 
+						rendered="#{registrarInformeInspeccionForestalController.mostrarFirma and registrarInformeInspeccionForestalController.token}"
+						onclick="window.location.href='#{registrarInformeInspeccionForestalController.firmarDocumento()}'" />
+					<p:commandButton value="Enviar" process="@this"
+						update="pnlDatos pnlButtons"
+						rendered="#{registrarInformeInspeccionForestalController.mostrarFirma}"
+						action="#{registrarInformeInspeccionForestalController.aceptar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+
+				</div>
+			</h:panelGroup>
+		</h:form>
+
+		<h:form id="frmDialogs">
+			<p:dialog id="dlgDelegadoOperador" widgetVar="dlgDelegadoOperador"
+				modal="true" resizable="false" width="600" header="Datos delegado">
+				<h:panelGrid columns="2" styleClass="panel_data w100"
+					id="pnlDatosDelegado" columnClasses="header w25, null"
+					rowClasses="null, alt">
+					<p:outputLabel for="cedulaDelegado" styleClass="ui-label-form"
+						value="Cédula" />
+					<p:inputText required="true" id="cedulaDelegado"
+						value="#{registrarInformeInspeccionForestalController.delegadoOperador.cedula}"
+						maxlength="10">
+						<pe:keyFilter regEx="/[a-z0-9]/i " />
+						<p:ajax event="change"
+							listener="#{registrarInformeInspeccionForestalController.validarCedulaListener}"
+							update="nombreDelegado" />
+					</p:inputText>
+
+					<p:outputLabel value="Nombre" for="nombreDelegado"
+						styleClass="ui-label-form" />
+					<p:inputText id="nombreDelegado"
+						value="#{registrarInformeInspeccionForestalController.delegadoOperador.nombre}"
+						readonly="true" />
+
+					<p:outputLabel value="Cargo" for="cargoDelgado"
+						styleClass="ui-label-form" />
+					<p:inputText id="cargoDelgado" required="true"
+						value="#{registrarInformeInspeccionForestalController.delegadoOperador.cargo}"
+						maxlength="30" />
+				</h:panelGrid>
+				<br />
+				<div class="buttons">
+					<p:commandButton styleClass="primary" value="Aceptar"
+						actionListener="#{registrarInformeInspeccionForestalController.agregarDelegadoOperador()}"
+						oncomplete="handleDlgDelegadoOperador(xhr, status, args)"
+						process="@this pnlDatosDelegado"
+						update="pnlDatosDelegado :form:tblDelegadoOperador" />
+					<p:commandButton value="Cancelar" styleClass="secondary"
+						actionListener="#{registrarInformeInspeccionForestalController.nuevoDelegado()}"
+						oncomplete="PF('dlgDelegadoOperador').hide()" process="@this"
+						update="pnlDatosDelegado :form:tblDelegadoOperador">
+						<p:resetInput target="@form" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+
+			<p:dialog id="dlgTecnicoDelegado" widgetVar="dlgTecnicoDelegado"
+				modal="true" resizable="false" width="600"
+				header="Datos técnico delegado">
+				<h:panelGrid columns="2" styleClass="panel_data w100"
+					id="pnlDatosTecnicoDelegado" columnClasses="header w25, null"
+					rowClasses="null, alt">
+					<p:outputLabel for="cedulaTecnicoDelegado"
+						styleClass="ui-label-form" value="Cédula" />
+					<p:inputText required="true" id="cedulaTecnicoDelegado"
+						value="#{registrarInformeInspeccionForestalController.tecnicoDelegado.cedula}"
+						maxlength="10">
+						<pe:keyFilter regEx="/[a-z0-9]/i " />
+						<p:ajax event="change"
+							listener="#{registrarInformeInspeccionForestalController.buscarUsuario}"
+							update="nombreTecnicoDelegado" />
+					</p:inputText>
+
+					<p:outputLabel value="Nombre" for="nombreTecnicoDelegado"
+						styleClass="ui-label-form" />
+					<p:inputText id="nombreTecnicoDelegado"
+						value="#{registrarInformeInspeccionForestalController.tecnicoDelegado.usuario.persona.nombre}"
+						readonly="true" />
+
+					<p:outputLabel value="Cargo" for="cargoTecnicoDelgado"
+						styleClass="ui-label-form" />
+					<p:inputText id="cargoTecnicoDelgado" required="true"
+						value="#{registrarInformeInspeccionForestalController.tecnicoDelegado.cargo}"
+						maxlength="30" />
+				</h:panelGrid>
+				<br />
+				<div class="buttons">
+					<p:commandButton styleClass="primary" value="Aceptar"
+						actionListener="#{registrarInformeInspeccionForestalController.agregarTecnicoDelegado()}"
+						oncomplete="handleDlgTecnicoDelegado(xhr, status, args)"
+						process="@this pnlDatosTecnicoDelegado"
+						update="pnlDatosTecnicoDelegado :form:tblEquipoTecnico" />
+					<p:commandButton value="Cancelar" styleClass="secondary"
+						actionListener="#{registrarInformeInspeccionForestalController.nuevoTecnicoDelegado()}"
+						oncomplete="PF('dlgTecnicoDelegado').hide()" process="@this"
+						update="pnlDatosTecnicoDelegado :form:tblEquipoTecnico">
+						<p:resetInput target="@form" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+
+			<p:dialog id="dlgAddFotografia" widgetVar="dlgAddFotografia"
+				modal="true" resizable="false" width="600" header="Datos fotografía">
+				<h:panelGrid columns="2" styleClass="panel_data w100"
+					id="pnlDatosFotografia" columnClasses="header w25, null"
+					rowClasses="null, alt">
+
+					<p:outputLabel value="Fotografía" styleClass="ui-label-form" />
+					<h:panelGroup id="pnlDocimagen">
+						<p:fileUpload id="fileFoto" multiple="false"
+							fileUploadListener="#{registrarInformeInspeccionForestalController.uploadFileFoto}"
+							sizeLimit="1048576" allowTypes="/(\.|\/)(jpg)$/"
+							label="Seleccionar (jpg 1Mb)" uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Debe adjuntar un archivo no mayor de 10 Mb."
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" required="true" update="pnlDocimagen" />
+						<h:outputText
+							value="#{registrarInformeInspeccionForestalController.nuevaFotografia.nombre}" />
+					</h:panelGroup>
+
+					<p:outputLabel for="txtDescripcionFoto"
+						value="Descripción fotografia" style="color: white" />
+					<p:inputText id="txtDescripcionFoto" required="true"
+						value="#{registrarInformeInspeccionForestalController.nuevaFotografia.descripcion}" />
+
+					<p:outputLabel for="txtFechaInspeccion"
+						value="Fecha inspección de campo" style="color: white" />
+					<p:calendar id="txtFechaInspeccion"
+						value="#{registrarInformeInspeccionForestalController.nuevaFotografia.fechaFotografia}"
+						timeZone="America/Guayaquil" readonlyInput="true" required="true"
+						pattern="dd/MM/yyyy"  maxdate="today"/>
+					<h:inputHidden
+						validator="#{registrarInformeInspeccionForestalController.validateDatosFoto}" />
+				</h:panelGrid>
+
+				<br />
+				<div class="buttons">
+					<p:commandButton styleClass="primary" value="Aceptar"
+						actionListener="#{registrarInformeInspeccionForestalController.agregarFotografia()}"
+						oncomplete="handleDlgAddFotografia(xhr, status, args)"
+						process="@this pnlDatosFotografia"
+						update="pnlDatosFotografia :form:tblTipoCobertura :form:tblTipoEcosistema :form:tblAreaImplantacion" />
+					<p:commandButton value="Cancelar" styleClass="secondary"
+						actionListener="#{registrarInformeInspeccionForestalController.cancelarFotografia()}"
+						oncomplete="PF('dlgAddFotografia').hide()" process="@this"
+						update="pnlDatosFotografia">
+						<p:resetInput target="@form" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+
+			<p:dialog id="dlgAddCoordenada" widgetVar="dlgAddCoordenada"
+				modal="true" resizable="false" width="600" header="Datos fotografía">
+				<h:panelGrid columns="2" styleClass="panel_data w100"
+					id="pnlDatosCoordenada" columnClasses="header w25, null"
+					rowClasses="null, alt">
+
+					<p:outputLabel value="Coordenada X" styleClass="ui-label-form" />
+					<pe:inputNumber id="coordX"
+						value="#{registrarInformeInspeccionForestalController.nuevaCoordenada.coordenadaX}"
+						required="true" autocomplete="off"
+						requiredMessage="El campo 'Coordenada X' es requerido."
+						decimalPlaces="4" thousandSeparator="" maxValue="9999999999.9999">
+						<p:ajax process="@this" />
+						<p:tooltip for="coordX" escape="false" trackMouse="true"
+							value="Coordenanda X en formato WGS84 17S" />
+					</pe:inputNumber>
+
+					<p:outputLabel value="Coordenada Y" styleClass="ui-label-form" />
+					<pe:inputNumber id="coordY"
+						value="#{registrarInformeInspeccionForestalController.nuevaCoordenada.coordenadaY}"
+						required="true" autocomplete="off"
+						requiredMessage="El campo 'Coordenada Y' es requerido."
+						decimalPlaces="4" thousandSeparator="" maxValue="9999999999.9999">
+						<p:ajax process="@this" />
+						<p:tooltip for="coordY" escape="false" trackMouse="true"
+							value="Coordenanda Y en formato WGS84 17S" />
+					</pe:inputNumber>
+
+					<p:outputLabel for="txtDescripcionCoordenada" value="Descripción"
+						style="color: white" />
+					<p:inputText id="txtDescripcionCoordenada" required="true"
+						value="#{registrarInformeInspeccionForestalController.nuevaCoordenada.descripcion}" />
+
+					<h:inputHidden
+						validator="#{registrarInformeInspeccionForestalController.validateCooordedana}" />
+				</h:panelGrid>
+
+				<br />
+				<div class="buttons">
+					<p:commandButton styleClass="primary" value="Aceptar"
+						actionListener="#{registrarInformeInspeccionForestalController.agregarCoordenada()}"
+						oncomplete="handleDlgAddCoordenada(xhr, status, args)"
+						process="@this pnlDatosCoordenada"
+						update="pnlDatosCoordenada :form:tblCoordenadas" />
+					<p:commandButton value="Cancelar" styleClass="secondary"
+						actionListener="#{registrarInformeInspeccionForestalController.nuevaCoordenada()}"
+						oncomplete="PF('dlgAddCoordenada').hide()" process="@this"
+						update="pnlDatosCoordenada">
+						<p:resetInput target="@form" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+
+		</h:form>
+
+		<h:form id="frmFirmaManual">
+			<p:dialog header="Firma Electrónica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="auto" height="auto" position="center top">
+				<p:panel id="pnlFirmaManual">
+					<h:panelGrid columns="2" cellpadding="10"
+						style="text-align:right !important">
+						<p:outputLabel value="1. Descargue el informe" styleClass="bold" />
+						<p:commandButton value="Descargar" ajax="false"
+							icon="ui-icon-arrowthick-1-s" styleClass="primary"
+							immediate="true">
+							<p:fileDownload
+								value="#{registrarInformeInspeccionForestalController.descargar()}" />
+						</p:commandButton>
+						<p:outputLabel for="uploadRequired"
+							value="2. Adjunte el informe firmado" styleClass="bold" />
+						<p:fileUpload
+							fileUploadListener="#{registrarInformeInspeccionForestalController.uploadListenerDocumentos}"
+							multiple="false" sizeLimit="5242880"
+							allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Tamaño de archivo no válido"
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update=":form lblNombreDocFirmado"
+							rendered="#{!registrarInformeInspeccionForestalController.token}">
+							<f:attribute name="clave" value=":form" />
+						</p:fileUpload>
+						<p:outputLabel value="" />
+						<h:outputText id="lblNombreDocFirmado"
+							value="#{registrarInformeInspeccionForestalController.nombreDocumentoFirmado}" />
+					</h:panelGrid>
+				</p:panel>
+				<h:inputHidden id="uploadRequired"
+					required="#{!registrarInformeInspeccionForestalController.token and !registrarInformeInspeccionForestalController.subido}" />
+				<p:separator />
+				<div style="display: block; width: 100%; text-align: right;">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialog').hide()" icon="ui-icon-close" />
+				</div>
+			</p:dialog>
+		</h:form>
+
+		<script type="text/javascript">
+	function handleDlgDelegadoOperador(xhr, status, args) {
+		if (args.validationFailed || !args.addDelegadoOperador) {
+			PF('dlgDelegadoOperador').show();
+		}
+		else {
+			PF('dlgDelegadoOperador').hide();
+		}
+	}
+
+	function handleDlgTecnicoDelegado(xhr, status, args) {
+		if (args.validationFailed || !args.addTecnioDelegado) {
+			PF('dlgTecnicoDelegado').show();
+		}
+		else {
+			PF('dlgTecnicoDelegado').hide();
+		}
+	}
+
+	function handleDlgAddFotografia(xhr, status, args) {
+		if (args.validationFailed || !args.addFotografia) {
+			PF('dlgAddFotografia').show();
+		}
+		else {
+			PF('dlgAddFotografia').hide();
+		}
+	}
+
+	function handleDlgAddCoordenada(xhr, status, args) {
+		if (args.validationFailed || !args.addCoordenada) {
+			PF('dlgAddCoordenada').show();
+		}
+		else {
+			PF('dlgAddCoordenada').hide();
+		}
+	}
+</script>
+
+	</ui:define>
+</ui:composition>

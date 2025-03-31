@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<ui:composition
+	template="/control/aprobacionRequisitosTecnicos/templates/verArt.xhtml">
+	<ui:define name="content-art">
+		<h:form>
+			<p:panel id="parte"
+				header="Tipo de eliminación o disposición final de los desechos generados en la gestión">
+				<p:dataTable id="tblEliminacion"
+					value="#{eliminacionDesechoControllers.eliminacionDesechosBean.eliminacionesRecepciones}"
+					var="eliminacion" emptyMessage="#{labels['common.table.empty']}">
+					<p:column headerText="Nombre de desecho peligroso">
+						<h:outputText
+							value="#{eliminacion.entityRecepcionDesecho.descripcionDesecho}" />
+					</p:column>
+					<p:column headerText="Código de desecho">
+						<h:outputText value="#{eliminacion.entityRecepcionDesecho.codigo}" />
+					</p:column>
+					<p:column>
+						<div class="buttons-inline centrar">
+							<p:commandButton icon="ui-icon-search"
+								action="#{eliminacionDesechoControllers.verEliminacionRecepcion(eliminacion)}"
+								title="Ver" styleClass="button-small primary"
+								oncomplete="PF('dlgEliminacion').show();"
+								update=":#{p:component('dlgEliminacion')}" />
+						</div>
+					</p:column>
+				</p:dataTable>
+			</p:panel>
+
+			<div class="buttons main">
+				<p:commandButton value="Atrás" immediate="true" process="@this"
+					action="/control/aprobacionRequisitosTecnicos/gestion/almacenamientoTemporalVer.jsf?faces-redirect=true"
+					icon="ui-icon-arrowthick-1-w" />
+				<p:commandButton value="Siguiente" immediate="true" process="@this"
+					action="#{aprobacionRequisitosTecnicosController.recuperarPageSiguiente(true)}"
+					icon="ui-icon-arrowthick-1-e" />
+			</div>
+		</h:form>
+
+		<p:dialog header="Datos eliminación o disposición final"
+			id="dlgEliminacion" widgetVar="dlgEliminacion" modal="true"
+			resizable="false" draggable="false" width="750">
+			<h:form>
+				<p:dataTable
+					value="#{eliminacionDesechoControllers.eliminacionDesechosBean.eliminacionDesechosVer}"
+					var="desecho">
+					<p:columnGroup type="header">
+						<p:row>
+							<p:column colspan="3"
+								headerText="Sistema de eliminación o disposición final" />
+							<p:column colspan="2"
+								headerText="Generación de desechos peligrosos debido a la eliminación" />
+						</p:row>
+						<p:row>
+							<p:column rowspan="2" headerText="Tipo" />
+							<p:column colspan="2" rowspan="1" headerText="Capacidad anual" />
+							<p:column rowspan="2" headerText="Nombre de desecho peligroso, especial o no peligroso" />
+							<p:column rowspan="2" headerText="Código del desecho" />
+						</p:row>
+						<p:row>
+							<p:column headerText="Cantidad(T)" />
+							<p:column headerText="Cantidad(u)" />
+
+						</p:row>
+					</p:columnGroup>
+					<p:column>
+						<h:outputLabel value="#{desecho.tipoEliminacionDesecho.nombre}" />
+					</p:column>
+					<p:column>
+						<h:outputText value="#{desecho.cantidad}">
+							<f:convertNumber maxFractionDigits="2" />
+						</h:outputText>
+					</p:column>
+					<p:column>
+						<h:outputText
+							value="#{!empty desecho.cantidadEspecial ? desecho.cantidadEspecial : 'N/A'}">
+							<f:convertNumber maxFractionDigits="2" />
+						</h:outputText>
+					</p:column>
+					<p:column>
+						<h:outputLabel
+							value="#{empty desecho.desecho.descripcion ? desecho.nombreDesecho : desecho.desecho.descripcion}" />
+					</p:column>
+					<p:column>
+						<h:outputLabel
+							value="#{empty desecho.desecho.clave ? 'N/A' : desecho.desecho.clave }" />
+					</p:column>
+
+				</p:dataTable>
+				<div class="buttons">
+					<p:commandButton value="Cerrar"
+						onclick="PF('dlgEliminacion').hide()" />
+				</div>
+			</h:form>
+		</p:dialog>
+
+
+	</ui:define>
+</ui:composition>
+</html>

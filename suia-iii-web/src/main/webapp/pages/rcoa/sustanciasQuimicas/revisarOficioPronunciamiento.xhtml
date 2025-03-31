@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/default-task.xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+	<ui:define name="content">
+		<h:form id="form">
+
+			<h:panelGrid styleClass="w100">
+				<h:outputText value="#{revisarOficioPronunciamientoRSQController.tituloDocumento}" styleClass="bold" />
+				<p:separator />
+				<object type="application/pdf"
+					data="#{revisarOficioPronunciamientoRSQController.urlDocumento}"
+					height="600" width="100%" />
+			</h:panelGrid>
+			
+			<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{revisarOficioPronunciamientoRSQController.verInforme}">				
+				<p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary" immediate="true"
+				rendered="#{not empty revisarOficioPronunciamientoRSQController.documentoInforme}">
+             		<p:fileDownload value="#{documentosRSQController.streamedContentRsq(revisarOficioPronunciamientoRSQController.documentoInforme)}"/>
+        		 </p:commandButton> 		
+			</p:panelGrid> 
+			
+			<h:panelGrid id="pnlGridObs" columns="2">
+				<h:outputLabel value="¿Es necesario realizar correcciones al Informe Técnico?*"  
+				rendered="#{revisarOficioPronunciamientoRSQController.verInforme}"/>
+				<p:selectOneRadio value="#{revisarOficioPronunciamientoRSQController.obsInforme}"
+				rendered="#{revisarOficioPronunciamientoRSQController.verInforme}"
+				required="true" requiredMessage="Seleccione si requiere observaciones">
+					<f:selectItem itemLabel="Si" itemValue="#{true}"/>
+					<f:selectItem itemLabel="No" itemValue="#{false}"/>
+					<p:ajax update="@this"/>
+				</p:selectOneRadio>				
+				
+				<h:outputLabel value="¿Es necesario realizar correcciones al Oficio de Pronunciamiento?*"  
+				rendered="#{revisarOficioPronunciamientoRSQController.verOficio}"/>
+				<p:selectOneRadio value="#{revisarOficioPronunciamientoRSQController.obsOficio}"
+				rendered="#{revisarOficioPronunciamientoRSQController.verOficio}"
+				required="true" requiredMessage="Seleccione si requiere observaciones">
+					<f:selectItem itemLabel="Si" itemValue="#{true}"/>
+					<f:selectItem itemLabel="No" itemValue="#{false}"/>
+					<p:ajax update="@this"/>
+				</p:selectOneRadio>
+				
+				<h:outputLabel value="¿Es necesario realizar correcciones al Registro de Sustancias Químicas?*"  
+				rendered="#{revisarOficioPronunciamientoRSQController.verRsq}"/>
+				<p:selectOneRadio value="#{revisarOficioPronunciamientoRSQController.obsRsq}"
+				rendered="#{revisarOficioPronunciamientoRSQController.verRsq}"
+				required="true" requiredMessage="Seleccione si requiere observaciones">
+					<f:selectItem itemLabel="Si" itemValue="#{true}"/>
+					<f:selectItem itemLabel="No" itemValue="#{false}"/>
+					<p:ajax update="@this"/>
+				</p:selectOneRadio>
+				
+				<h:outputLabel value="Si es necesario realizar correcciones, el trámite regresará al técnico" 
+				style="color:red"/>
+				<h:inputHidden validator="#{revisarOficioPronunciamientoRSQController.validarObservaciones}"/>
+			</h:panelGrid>
+			
+			<h:panelGroup>
+				<observaciones:tablaObservacionesRSQ idComponent="obsInforme"
+					componenteActualizarEliminar="@none"
+					seccion="RSQ Informe Tecnico"
+					nombreClase="InformeOficioRSQ"
+					idClase="#{revisarOficioPronunciamientoRSQController.informe.id}"							
+					aparace="#{revisarOficioPronunciamientoRSQController.verInforme}"
+					mostrarSiVacio="true"
+					soloLectura="false" />
+				<observaciones:tablaObservacionesRSQ idComponent="obsOficio"
+					componenteActualizarEliminar="@none"
+					idActualizar=":form:btnPlnGroup"
+					seccion="RSQ Oficio Pronunciamiento"
+					nombreClase="InformeOficioRSQ"
+					idClase="#{revisarOficioPronunciamientoRSQController.informe.id}"							
+					aparace="#{revisarOficioPronunciamientoRSQController.verOficio}"
+					mostrarSiVacio="true"
+					soloLectura="false" />
+				<observaciones:tablaObservacionesRSQ idComponent="obsRsq"
+					componenteActualizarEliminar="@none"
+					idActualizar=":form:btnPlnGroup"
+					seccion="RSQ Registro Sustancias Quimicas"
+					nombreClase="InformeOficioRSQ"
+					idClase="#{revisarOficioPronunciamientoRSQController.informe.id}"							
+					aparace="#{revisarOficioPronunciamientoRSQController.verRsq}"
+					mostrarSiVacio="true"
+					soloLectura="false" />
+			</h:panelGroup> 
+			
+			<h:panelGroup id="btnPlnGroup"> 			
+
+			<t:div styleClass="buttons main">			
+				<p:commandButton value="Atrás"
+					action="#{revisarOficioPronunciamientoRSQController.verListener(false)}"
+					icon="ui-icon-arrow-1-w" process="@this :form:pnlGridObs" update=":form" 
+					rendered="#{revisarOficioPronunciamientoRSQController.verOficio or revisarOficioPronunciamientoRSQController.verRsq}"/>
+
+				<p:commandButton value="Siguiente"
+					action="#{revisarOficioPronunciamientoRSQController.verListener(true)}"
+					icon="ui-icon-arrow-1-e" process="@this :form:pnlGridObs" update=":form" 
+					rendered="#{revisarOficioPronunciamientoRSQController.verInforme or (revisarOficioPronunciamientoRSQController.verOficio and revisarOficioPronunciamientoRSQController.pronunAprobado)}"/>
+
+				<p:commandButton value="Firmar"
+					rendered="#{revisarOficioPronunciamientoRSQController.verFirmar}"
+					oncomplete="if(!args.validationFailed) PF('signDialogFirmar').show();" icon="ui-icon-key" styleClass="large"
+					process="@this :form:pnlGridObs"/>
+				
+				<p:commandButton value="Enviar"
+					rendered="#{revisarOficioPronunciamientoRSQController.verEnviar}"
+					action="#{revisarOficioPronunciamientoRSQController.enviar}"
+					icon="ui-icon-check" update=":#{p:component('form')}" 
+					process="@this :form:pnlGridObs"/>	
+			</t:div>
+			
+			</h:panelGroup>
+
+			<p:dialog header="Firmar Documento" id="signDialogFirmar"
+				widgetVar="signDialogFirmar" closeOnEscape="false" modal="true"
+				resizable="false" width="auto" height="auto" position="center top">
+				
+				<h:panelGrid columns="2" cellpadding="10" rendered="#{revisarOficioPronunciamientoRSQController.editarToken}"
+						style="text-align:right !important">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold" />
+						<p:selectOneRadio id="verificaToken" value="#{revisarOficioPronunciamientoRSQController.token}" style="alCenter">
+										<f:selectItem itemLabel="Sí" itemValue="true" />
+										<f:selectItem itemLabel="No" itemValue="false" />
+										<p:ajax event="change" update="panelFirma"/>
+						</p:selectOneRadio>
+				</h:panelGrid>
+				<p:panel id="panelFirma">
+					<h:panelGrid columns="2" cellpadding="10"
+					rendered="#{revisarOficioPronunciamientoRSQController.token}" columnClasses="alCenter">
+						<p:outputLabel value="Oficio Pronunciamiento" styleClass="bold" />
+						<p:commandButton value="Firma Electrónica" type="button" styleClass="primary large" icon="ui-icon-key"
+            			onclick="window.location.href='#{revisarOficioPronunciamientoRSQController.firmaElectronica()}'"/>
+            	
+            			<p:outputLabel value="Registro Sustancias Químicas" styleClass="bold" rendered="#{revisarOficioPronunciamientoRSQController.pronunAprobado}"/>
+						<p:commandButton value="Firma Electrónica" type="button" styleClass="primary large" icon="ui-icon-key"
+            			onclick="window.location.href='#{revisarOficioPronunciamientoRSQController.firmaElectronicaRsq()}'"
+            			rendered="#{revisarOficioPronunciamientoRSQController.pronunAprobado}"/>
+            	
+						</h:panelGrid>
+					<h:panelGrid columns="2" cellpadding="10"	style="text-align:right !important" 
+					rendered="#{!revisarOficioPronunciamientoRSQController.token}">
+						<p:outputLabel value="1. Descargue el oficio" styleClass="bold" />
+						<p:commandButton value="Descargar" ajax="false"
+							icon="ui-icon-arrowthick-1-s" styleClass="primary"
+							immediate="true">
+							<p:fileDownload
+								value="#{revisarOficioPronunciamientoRSQController.descargarDocumento()}" />
+						</p:commandButton>
+
+						<p:outputLabel value="2. Adjunte el oficio firmado "
+							styleClass="bold"/>
+						<p:fileUpload
+							fileUploadListener="#{revisarOficioPronunciamientoRSQController.uploadFileFirmado}"
+							multiple="false" sizeLimit="5242880"
+							allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Tamaño de archivo no válido"
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update="panelFirma">
+						</p:fileUpload>
+					</h:panelGrid>
+					
+					<h:panelGrid columns="2" cellpadding="10"	style="text-align:right !important" 
+					rendered="#{revisarOficioPronunciamientoRSQController.pronunAprobado and !revisarOficioPronunciamientoRSQController.token}">
+						<p:outputLabel value="1. Descargue el documento de Registro de Sustancias Químicas" styleClass="bold" />
+						<p:commandButton value="Descargar" ajax="false"
+							icon="ui-icon-arrowthick-1-s" styleClass="primary"
+							immediate="true">
+							<p:fileDownload
+								value="#{revisarOficioPronunciamientoRSQController.descargarDocumentoRsq()}" />
+						</p:commandButton>
+
+						<p:outputLabel value="2. Adjunte el oficio firmado "
+							styleClass="bold" />
+						<p:fileUpload
+							fileUploadListener="#{revisarOficioPronunciamientoRSQController.uploadFileFirmadoRsq}"
+							multiple="false" sizeLimit="5242880"
+							allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Tamaño de archivo no válido"
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update="panelFirma">
+						</p:fileUpload>
+					</h:panelGrid>
+				</p:panel>
+				<t:div styleClass="buttons">
+		<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('signDialogFirmar').hide()" styleClass="secondary"/>
+		<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}" styleClass="primary" process="signDialogFirmar" oncomplete="if(!args.validationFailed) PF('signDialogFirmar').hide();"
+			actionListener="#{revisarOficioPronunciamientoRSQController.enviar}"/>
+	</t:div>
+			</p:dialog>
+		</h:form>
+
+	</ui:define>
+</ui:composition>

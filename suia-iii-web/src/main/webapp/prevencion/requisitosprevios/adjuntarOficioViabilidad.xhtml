@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                template="/WEB-INF/templates/default-task.xhtml">
+    <ui:define name="context-extra">
+
+    </ui:define>
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{adjuntarOficioViabilidadBean.validarTareaBpm()}"/>
+        <h:form>
+            <h:panelGrid cellpadding="2" styleClass="w100">
+
+                <h3>"¿Cuenta usted con la aprobación de la Viabilidad Técnica?"</h3>
+
+                <h:panelGrid columns="2" style="margin-bottom:10px" cellpadding="5">
+                    <p:outputLabel for="radioButtomPronunciamiento" />
+                    <p:selectOneRadio id="radioButtomPronunciamiento"
+                                      value="#{adjuntarOficioViabilidadBean.aprobacionFavorable}">
+                        <f:selectItem itemLabel="Sí" itemValue="true" />
+                        <f:selectItem itemLabel="No" itemValue="false" />
+                        <p:ajax process="@this" update=":#{p:component('pnl_desechos_adjuntar_oficio')}" />
+                    </p:selectOneRadio>
+                </h:panelGrid>
+
+                <h:panelGroup id="pnl_desechos_adjuntar_oficio">
+
+                <h:panelGrid cellpadding="2" styleClass="w100" rendered="#{adjuntarOficioViabilidadBean.aprobacionFavorable}">
+
+                    <h3>Adjuntar oficio</h3>
+
+                    <p:outputLabel value="Oficio (Archivo PDF): *"/>
+
+                    <p:fileUpload id="archOficio" width="100%" required="true"
+                                  value="#{adjuntarOficioViabilidadBean.oficio}"
+                                  sizeLimit="3145728" allowTypes="/(\.|\/)(pdf)$/"
+                                  fileUploadListener="#{adjuntarOficioViabilidadBean.adjuntarOficio}"
+                                  label="Seleccionar" cancelLabel="Cancelar" uploadLabel="Adjuntar" auto="true"
+                                  update=":#{p:component('marchOficio')}, :#{p:component('labelOficio')}"
+                                  invalidFileMessage="Tipo de archivo no válido, por favor seleccione un archivo de tipo pdf."
+                                  invalidSizeMessage="Debe adjuntar un archivo no mayor de 3 Mb."/>
+
+                    <p:growl id="marchOficio" showDetail="true"/>
+
+                    <h:panelGrid id="labelOficio">
+
+                        <p:outputLabel rendered="#{adjuntarOficioViabilidadBean.oficio != null}"
+                                       value="#{adjuntarOficioViabilidadBean.oficio.name}"/>
+
+                    </h:panelGrid>
+
+                </h:panelGrid>
+
+                </h:panelGroup>
+
+            </h:panelGrid>
+
+            <div class="buttons main">
+                <p:commandButton value="Enviar"
+                                 action="#{adjuntarOficioViabilidadRTController.realizarTarea}"
+                                 title="Enviar datos" icon="ui-icon-check">
+                </p:commandButton>
+            </div>
+
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</html>

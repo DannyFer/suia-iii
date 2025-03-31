@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100"
+	style="margin-top: 15px !important;">
+	<f:facet name="header">
+		<h:outputText value="Información del proyecto" />
+	</f:facet>
+	<p:panelGrid columns="2" styleClass="panel_data w1000"
+		columnClasses="header w25,null w75">
+		<h:outputText value="Nombre Proyecto:" />
+		<h:outputText
+			value="#{generadorDesechosPeligrososVerController.informacionProyecto.nombreProyecto}" />
+		<h:outputText
+			value="#{generadorDesechosPeligrososVerController.informacionProyecto.esEmisionFisica?'Nombre Proceso':'Tipo de Trámite'}:" />
+		<h:outputText
+			value="#{generadorDesechosPeligrososVerController.informacionProyecto.nombreProceso}" />
+		<h:outputText value="RGD asociado:" />
+		<h:outputText
+			value="#{generadorDesechosPeligrososVerController.generadorDesechosRetce.codigoGeneradorDesechosPeligrosos}" />
+		<h:outputText value="Año de reporte:" />
+		<h:outputText
+			value="#{generadorDesechosPeligrososVerController.generadorDesechosRetce.anioDeclaracion}" />
+	</p:panelGrid>
+</p:panelGrid>
+
+<br />
+
+<p:panelGrid columns="1" layout="grid" styleClass="w100">
+	<f:facet name="header">
+		<h:outputText value="IDENTIFICACIÓN DE DESECHOS" width="600px" />
+	</f:facet>
+	<p:dataTable
+		value="#{generadorDesechosPeligrososVerController.listaIdentificacionDesechos}"
+		sortBy="#{identificacion.desechoPeligroso.descripcion}"
+		var="identificacion" emptyMessage="#{labels['common.table.empty']}">
+		<p:columnGroup type="header">
+			<p:row>
+				<p:column headerText="Nombre desecho" rowspan="2"
+					styleClass="alCenter table-column-header" />
+				<p:column headerText="Código" rowspan="2"
+					styleClass="alCenter table-column-header" />
+				<p:column headerText="Unidad" rowspan="2"
+					styleClass="alCenter table-column-header" />
+				<p:column headerText="Cantidad del año anterior (si lo tuviera)"
+					rowspan="2" styleClass="alCenter table-column-header" />
+				<p:column headerText="Cantidad de generación anual" rowspan="2"
+					styleClass="alCenter table-column-header" />
+				<p:column headerText="Cantidad que no pudo ser gestionada"
+					rowspan="2" styleClass="alCenter table-column-header" />
+				<p:column colspan="3"
+					rendered="#{generadorDesechosPeligrososVerController.existeReporteUnidades}"
+					headerText="Reporte en unidades (U) únicamente para los desechos ES-04 y ES-06" />
+				<p:column headerText="" rowspan="2"
+					rendered="#{generadorDesechosPeligrososVerController.mostrarColumnaHistorial}"
+					styleClass="alCenter table-column-header w20px" />
+			</p:row>
+			<p:row>
+				<p:column headerText="Cantidad del año anterior (si lo tuviera)"
+					rendered="#{generadorDesechosPeligrososVerController.existeReporteUnidades}" />
+				<p:column headerText="Cantidad de generación anual"
+					rendered="#{generadorDesechosPeligrososVerController.existeReporteUnidades}" />
+				<p:column headerText="Cantidad que no pudo ser gestionada"
+					rendered="#{generadorDesechosPeligrososVerController.existeReporteUnidades}" />
+			</p:row>
+		</p:columnGroup>
+		<p:column>
+			<h:outputText value="#{identificacion.desechoPeligroso.descripcion}" />
+		</p:column>
+		<p:column>
+			<h:outputText value="#{identificacion.desechoPeligroso.clave}" />
+		</p:column>
+		<p:column>
+			<h:outputText value="#{identificacion.tipoUnidad.descripcion}" />
+		</p:column>
+		<p:column styleClass="alCenter">
+			<h:outputText value="#{identificacion.cantidadAnioAnterior}" />
+		</p:column>
+		<p:column styleClass="alCenter">
+			<h:outputText value="#{identificacion.cantidadGeneracionAnual}" />
+		</p:column>
+		<p:column styleClass="alCenter">
+			<h:outputText value="#{identificacion.cantidadNoGestionada}" />
+		</p:column>
+		<p:column
+			rendered="#{generadorDesechosPeligrososVerController.existeReporteUnidades}"
+			styleClass="alCenter">
+			<h:outputText
+				value="#{identificacion.cantidadAnioAnteriorUnidades ne null ? identificacion.cantidadAnioAnteriorUnidades : 'NA'}" />
+		</p:column>
+		<p:column
+			rendered="#{generadorDesechosPeligrososVerController.existeReporteUnidades}"
+			styleClass="alCenter">
+			<h:outputText
+				value="#{identificacion.cantidadGeneracionAnualUnidades ne null ? identificacion.cantidadGeneracionAnualUnidades : 'N/A'}" />
+		</p:column>
+		<p:column
+			rendered="#{generadorDesechosPeligrososVerController.existeReporteUnidades}"
+			styleClass="alCenter">
+			<h:outputText
+				value="#{identificacion.cantidadNoGestionadaUnidades ne null ? identificacion.cantidadNoGestionadaUnidades : 'N/A'}" />
+		</p:column>
+		<p:column style="text-align: center" styleClass="w20px"
+			rendered="#{generadorDesechosPeligrososVerController.mostrarColumnaHistorial}">
+			<p:commandButton icon="ui-icon-search" styleClass="button-small orange"
+				action="#{generadorDesechosPeligrososVerController.verHistorialIdentificacion(identificacion)}"
+				oncomplete="PF('verHistorialIdentificacion').show()"
+				update=":form:tabGenerador:tblVerHistorialIdentificacion"
+				rendered="#{identificacion.listaHistorial.size() > 0}"
+				title="Ver Historial" />
+		</p:column>
+	</p:dataTable>
+</p:panelGrid>
+
+<p:dialog id="verHistorialIdentificacion"
+	widgetVar="verHistorialIdentificacion" modal="true" resizable="false"
+	width="850" header="Historial Identificación">
+	<p:dataTable id="tblVerHistorialIdentificacion"
+			value="#{generadorDesechosPeligrososVerController.listaIdentificacionDesechosHistorial}"
+			sortBy="#{identificacion.desechoPeligroso.descripcion}"
+			var="identificacion" emptyMessage="#{labels['common.table.empty']}">
+			<p:columnGroup type="header">
+				<p:row>
+					<p:column headerText="Fecha modificación" rowspan="2"
+						styleClass="alCenter table-column-header" style="width: 80px;" />
+					<p:column headerText="Nombre desecho" rowspan="2"
+						styleClass="alCenter table-column-header" />
+					<p:column headerText="Código" rowspan="2"
+						styleClass="alCenter table-column-header" />
+					<p:column headerText="Unidad" rowspan="2"
+						styleClass="alCenter table-column-header" />
+					<p:column headerText="Cantidad del año anterior (si lo tuviera)"
+						rowspan="2" styleClass="alCenter table-column-header" />
+					<p:column headerText="Cantidad de generación anual" rowspan="2"
+						styleClass="alCenter table-column-header" />
+					<p:column headerText="Cantidad que no pudo ser gestionada"
+						rowspan="2" styleClass="alCenter table-column-header" />
+					<p:column colspan="3"
+						rendered="#{generadorDesechosPeligrososVerController.esDesechoEspecialUnidades}"
+						headerText="Reporte en unidades (U) únicamente para los desechos ES-04 y ES-06" />
+				</p:row>
+				<p:row>
+					<p:column headerText="Cantidad del año anterior (si lo tuviera)"
+						rendered="#{generadorDesechosPeligrososVerController.esDesechoEspecialUnidades}" />
+					<p:column headerText="Cantidad de generación anual"
+						rendered="#{generadorDesechosPeligrososVerController.esDesechoEspecialUnidades}" />
+					<p:column headerText="Cantidad que no pudo ser gestionada"
+						rendered="#{generadorDesechosPeligrososVerController.esDesechoEspecialUnidades}" />
+				</p:row>
+			</p:columnGroup>
+			<p:column style="width: 80px;">
+				<h:outputText value="#{identificacion.fechaCreacion}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{identificacion.desechoPeligroso.descripcion}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{identificacion.desechoPeligroso.clave}" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{identificacion.tipoUnidad.descripcion}" />
+			</p:column>
+			<p:column styleClass="alCenter">
+				<h:outputText value="#{identificacion.cantidadAnioAnterior}" />
+			</p:column>
+			<p:column styleClass="alCenter">
+				<h:outputText value="#{identificacion.cantidadGeneracionAnual}" />
+			</p:column>
+			<p:column styleClass="alCenter">
+				<h:outputText value="#{identificacion.cantidadNoGestionada}" />
+			</p:column>
+			<p:column
+				rendered="#{generadorDesechosPeligrososVerController.esDesechoEspecialUnidades}"
+				styleClass="alCenter">
+				<h:outputText
+					value="#{identificacion.cantidadAnioAnteriorUnidades ne null ? identificacion.cantidadAnioAnteriorUnidades : 'NA'}" />
+			</p:column>
+			<p:column
+				rendered="#{generadorDesechosPeligrososVerController.esDesechoEspecialUnidades}"
+				styleClass="alCenter">
+				<h:outputText
+					value="#{identificacion.cantidadGeneracionAnualUnidades ne null ? identificacion.cantidadGeneracionAnualUnidades : 'N/A'}" />
+			</p:column>
+			<p:column
+				rendered="#{generadorDesechosPeligrososVerController.esDesechoEspecialUnidades}"
+				styleClass="alCenter">
+				<h:outputText
+					value="#{identificacion.cantidadNoGestionadaUnidades ne null ? identificacion.cantidadNoGestionadaUnidades : 'N/A'}" />
+			</p:column>
+	</p:dataTable>
+	<br />
+</p:dialog>
+
+</html>

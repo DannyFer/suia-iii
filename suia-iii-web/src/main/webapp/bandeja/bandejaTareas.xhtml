@@ -1,0 +1,424 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<ui:composition template="/WEB-INF/templates/default.xhtml">
+    <ui:define name="content">
+    <style type="text/css">
+td.cssSelecctionHiden .ui-chkbox{
+display: none;
+}
+
+.cssBoton .ui-icon {
+    background-image: url("/suia-iii/javax.faces.resource/images/ui-icons_ffffff_256x240.png.jsf?ln=primefaces-suia") !important;
+}
+
+</style>
+
+        <f:loadBundle var="labels" basename="ec.gob.ambiente.core.resources.labels_es" />
+        <h:form prependId="false">
+
+            <h:panelGroup id="bandejaIndicator" styleClass="bandejaIndicator" style="display: none;">
+                <h:panelGrid columns="2" columnsClasses="null, fiel_mrg">
+                    <p:graphicImage value="/resources/images/ajax-loader.gif" />
+                    <p:outputLabel value="Actualizando bandeja..." styleClass="bold" />
+                </h:panelGrid>
+            </h:panelGroup>
+
+            <p:tabView id="tabView">
+                <ui:remove>
+                <p:tab title="Bandeja de tareas (#{bandejaTareasController.bandejaTareasBean.tareas.size()})" id="tabBandeja">
+                    <p:dataTable value="#{bandejaTareasBean.tareas}" var="tarea" filterDelay="600" widgetVar="bandejaTable" rows="20" paginatorAlwaysVisible="false" paginator="true" paginatorPosition="bottom" emptyMessage="#{labels['common.table.empty']}">
+                        <p:column headerText="Trámite" filterMatchMode="contains" filterBy="#{tarea.procedure}" styleClass="alCenter singleLine">
+                            <h:outputText value="#{tarea.procedure}" title="#{tarea.procedure}" />
+
+                        </p:column>
+                        <p:column headerText="Flujo" filterMatchMode="contains" filterBy="#{tarea.processName}" styleClass="singleLine">
+                    |        <h:outputText value="#{tarea.processName}" title="#{tarea.processName}" />
+                        </p:column>
+                        <p:column headerText="Actividad" filterMatchMode="contains" filterBy="#{tarea.taskNameHuman}" styleClass="singleLine">
+                            <h:outputText value="#{tarea.taskNameHuman}" title="#{tarea.taskNameHuman}" />
+                        </p:column>
+                        <p:column headerText="Registro" filterMatchMode="contains" filterBy="#{tarea.activationDate}" styleClass="alCenter w15">
+                            <h:outputText value="#{tarea.activationDate}" />
+                        </p:column>
+                        <p:column styleClass="alCenter w10">
+                            <f:facet name="header">
+                                <p:commandButton title="Recargar" styleClass="normal" icon="ui-icon-refresh" oncomplete="jQuery('input.ui-column-filter ').val('');PF('bandejaTable').filter();" />
+                            </f:facet>
+                            <p:commandButton styleClass="primary" icon="ui-icon-play" title="Iniciar tarea" actionListener="#{bandejaTareasController.startTask(tarea)}" />
+                            <p:commandButton rendered="#{tarea.projectId != null}"  styleClass="primary" icon="ui-icon-document-b" title="Ver detalles de proyecto" action="#{bandejaTareasController.viewProject(tarea)}" />
+
+                        </p:column>
+                    </p:dataTable>
+                </p:tab>
+                </ui:remove>
+                
+                <p:tab title="Bandeja de tareas" id="tabBandeja">
+                    <p:dataTable value="#{bandejaTareasController.listarTareasPaginador}" var="tarea" filterDelay="600"  
+                    rows="10" paginatorAlwaysVisible="false" paginator="true" paginatorPosition="bottom" 
+                    emptyMessage="#{labels['common.table.empty']}" lazy="true" 
+                    rowKey="#{tarea.taskId}" 
+					selection="#{bandejaTareasController.listaSelectTareas}" disabledSelection="#{bandejaTareasController.habilitarFirmaMasiva(tarea)}" 
+					id="tareas">
+                        <p:column headerText="Trámite" filterMatchMode="contains" filterBy="#{tarea.procedure}" styleClass="alCenter singleLine">
+                            <h:outputText value="#{tarea.procedure}" title="#{tarea.procedure}" />
+
+                        </p:column>
+                        <p:column headerText="Flujo" filterMatchMode="contains" filterBy="#{tarea.processName}" styleClass="singleLine">
+                            <h:outputText value="#{tarea.processName}" title="#{tarea.processName}" />
+                        </p:column>
+                        <p:column headerText="Actividad" filterMatchMode="contains" filterBy="#{tarea.taskNameHuman}" styleClass="singleLine">
+                            <h:outputText value="#{tarea.taskNameHuman}" title="#{tarea.taskNameHuman}" />
+                        </p:column>
+                        <p:column headerText="Registro" styleClass="alCenter w15">
+                            <h:outputText value="#{tarea.activationDate}" />
+                        </p:column>
+                        
+                        <ui:remove>
+                        <p:column headerText="Dias restantes para ser archivado" styleClass="alCenter w15" rendered="#{bandejaTareasController.operador}">
+                            <h:outputText value="#{bandejaTareasController.diasRestantes(tarea)} días" />
+                        </p:column>
+                        </ui:remove>
+                        
+                        <p:column styleClass="alCenter w10">
+                            <f:facet name="header">
+                                <p:commandButton title="Recargar" styleClass="normal" icon="ui-icon-refresh" oncomplete="jQuery('input.ui-column-filter ').val('');PF('bandejaTable').filter();" />
+                            </f:facet>
+                            <p:commandButton styleClass="primary" icon="ui-icon-play" title="Iniciar tarea" actionListener="#{bandejaTareasController.startTask(tarea)}"  update="@form"/>
+                            <p:commandButton rendered="#{tarea.projectId != null}"  styleClass="primary" icon="ui-icon-document-b" title="Ver detalles de proyecto" action="#{bandejaTareasController.viewProject(tarea)}" />
+                        </p:column>                       
+                        <p:column selectionMode="multiple" width="15" style="text-align:center" rendered="#{bandejaTareasController.mostrarFirmaMasiva}"
+						styleClass="#{bandejaTareasController.habilitarFirmaMasiva(tarea) ? 'cssSelecctionHiden' : ''}"/>
+
+						<p:ajax event="toggleSelect" update="pnlButtons" />
+						<p:ajax event="rowSelectCheckbox" update="pnlButtons" />
+						<p:ajax event="rowUnselectCheckbox" update="pnlButtons" />
+                        <p:ajax event="rowSelect" update="pnlButtons" />
+
+						<f:facet name="footer">
+							<h:panelGroup id="pnlButtons" >
+								<div class="buttons main">
+									<p:commandButton id="btnEnviarFirma" process="tareas"
+										icon="ui-icon-check" styleClass="secondary cssBoton"
+										style="background: #006A77 !important;" value="Firmar"
+                                        action="#{bandejaTareasController.enviarParaFirma()}"
+										rendered="#{!empty bandejaTareasController.listaSelectTareas}">
+                                    </p:commandButton>
+								</div>
+							</h:panelGroup>
+						</f:facet>
+                    </p:dataTable>
+                </p:tab>
+                <p:tab title="Notificaciones (#{notificacionesController.notificacionesBean.total})" id="tabNotificaciones" rendered="false">
+                    <p:dataTable value="#{notificacionesBean.notificationsList}" filterDelay="600" lazy="true" var="notificacion" id="tablaNotificaciones" widgetVar="tablaNotificaciones" rowStyleClass="#{notificacion.readed ? null : 'bold'}" rows="20" paginatorAlwaysVisible="false" paginator="true" paginatorPosition="bottom" emptyMessage="#{labels['common.table.empty']}">
+                        <p:column headerText="Proyecto" filterBy="#{notificacion.project}" styleClass="alCenter w15">
+                            <h:outputText value="#{notificacion.project}">
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Fecha" styleClass="alCenter w15">
+                            <h:outputText value="#{notificacion.date}">
+                                <f:convertDateTime pattern="dd/MM/yyyy h:mm a" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Asunto" styleClass="w70 singleLine">
+                            <h:outputText value="#{notificacion.subject}" escape="false" />
+                        </p:column>
+                        <p:column styleClass="alCenter w70px">
+                            <f:facet name="header">
+                                <p:commandButton title="Recargar" styleClass="normal" icon="ui-icon-refresh" oncomplete="jQuery('input.ui-column-filter').val('');PF('tablaNotificaciones').filter();" />
+                            </f:facet>
+                            <p:commandButton icon="ui-icon-search" styleClass="primary" update="tablaNotificaciones" oncomplete="PF('dlgNotificacion').show();" actionListener="#{notificacionesController.seleccionarNotificacion(notificacion, true)}" />
+                            <f:verbatim>&nbsp;&nbsp;</f:verbatim>
+                            <p:commandButton icon="ui-icon-check" styleClass="primary" update="@form" actionListener="#{notificacionesController.eliminarNotificacion(notificacion)}">
+                                <p:confirm header="Confirmación" message="¿Está seguro que desea marcar esta notificación como atendida?" icon="ui-icon-alert" />
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+                </p:tab>
+
+                <p:tab title="Nuevas Notificaciones  (#{notificacionesController.notificacionesBean.total})" id="tabNotificacionesLazy">
+                    <p:dataTable value="#{notificacionesBean.listaNotificacionesMail}" filterDelay="600" lazy="true" var="notificacion" id="tablaNotificacionesLazy" widgetVar="tablaNotificacionesLazy" rows="20" paginatorAlwaysVisible="false" paginator="true" paginatorPosition="bottom" emptyMessage="#{labels['common.table.empty']}">
+                       
+                        <p:column headerText="Proyecto" filterBy="#{notificacion.codigoProyecto}" filterMatchMode="contains" styleClass="alCenter w25">
+                            <h:outputText value="#{notificacion.codigoProyecto}">
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Fecha" styleClass="alCenter w20">
+                            <h:outputText value="#{notificacion.fechaEnvio}">
+                                <f:convertDateTime pattern="dd/MM/yyyy h:mm a" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Asunto" styleClass="w70 singleLine">
+                            <h:outputText value="#{notificacion.asunto}" escape="false" />
+                        </p:column>
+                        
+                        <p:column styleClass="alCenter w15">
+                            <p:commandButton icon="ui-icon-search" styleClass="primary" update="@form" oncomplete="PF('dlgNotificacion').show();" actionListener="#{notificacionesController.seleccionarNotificacionMail(notificacion, false)}" />
+                        </p:column>
+                    </p:dataTable>
+                </p:tab>
+                <p:tab title="Notificaciones revisadas (#{notificacionesController.notificacionesBean.totalRevisadas})" id="tabNotificacionesRevisadas">
+                    <p:dataTable value="#{notificacionesBean.listaNotificacionesMailRevisadas}" filterDelay="600" lazy="true" var="notificacion" id="tablaNotificacionesRevisadas" widgetVar="tablaNotificacionesRevisadas" rows="20" paginatorAlwaysVisible="false" paginator="true" paginatorPosition="bottom" emptyMessage="#{labels['common.table.empty']}">
+                       
+                        <p:column headerText="Proyecto" filterBy="#{notificacion.codigoProyecto}" filterMatchMode="contains" styleClass="alCenter w25">
+                            <h:outputText value="#{notificacion.codigoProyecto}">
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Fecha" styleClass="alCenter w20">
+                            <h:outputText value="#{notificacion.fechaEnvio}">
+                                <f:convertDateTime pattern="dd/MM/yyyy h:mm a" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Asunto" styleClass="w70 singleLine">
+                            <h:outputText value="#{notificacion.asunto}" escape="false" />
+                        </p:column>
+                        
+                        <p:column styleClass="alCenter w15">
+                            <p:commandButton icon="ui-icon-search" styleClass="primary" update="tablaNotificacionesRevisadas" oncomplete="PF('dlgNotificacion').show();" actionListener="#{notificacionesController.seleccionarNotificacionMail(notificacion, false)}" />
+                        </p:column>
+                    </p:dataTable>
+                </p:tab>
+                <p:tab title="Notificaciones atendidas (#{notificacionesController.notificacionesBean.totalEliminadas})" id="tabNotificacionesEliminada" rendered="false">
+                    <p:dataTable value="#{notificacionesBean.deletedNotificationsList}" lazy="true" filterDelay="600" widgetVar="tablaNotificacionesEliminada" var="notificacion" id="tablaNotificacionesEliminadas" rowStyleClass="#{notificacion.readed ? null : 'bold'}" rows="20" paginatorAlwaysVisible="false" paginator="true" paginatorPosition="bottom" emptyMessage="#{labels['common.table.empty']}">
+                        <p:column headerText="Proyecto" filterBy="#{notificacion.project}" styleClass="alCenter w15">
+                            <h:outputText value="#{notificacion.project}">
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Fecha" styleClass="alCenter w15">
+                            <h:outputText value="#{notificacion.date}">
+                                <f:convertDateTime pattern="dd/MM/yyyy h:mm a" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Asunto" styleClass="w70 singleLine">
+                            <h:outputText value="#{notificacion.subject}" escape="false" />
+                        </p:column>
+                        <p:column styleClass="alCenter w70px">
+                            <f:facet name="header">
+                                <p:commandButton title="Recargar" styleClass="normal" icon="ui-icon-refresh" oncomplete="jQuery('input.ui-column-filter').val('');PF('tablaNotificacionesEliminada').filter();" />
+                            </f:facet>
+                            <p:commandButton icon="ui-icon-search" styleClass="primary" update="tablaNotificacionesEliminadas" oncomplete="PF('dlgNotificacion').show();" actionListener="#{notificacionesController.seleccionarNotificacion(notificacion, false)}" />
+
+                        </p:column>
+                    </p:dataTable>
+                </p:tab>
+            </p:tabView>
+
+            <p:poll interval="#{bandejaUpdaterController.interval}" onstart="handleStatusRequestShow()" oncomplete="handleStatusRequestHide()" onerror="handleStatusRequestHide()" global="false" listener="#{bandejaUpdaterController.update()}" update="tabView" />
+
+            <p:dialog header="Notificación" widgetVar="dlgNotificacion" id="dlgNotificacionId" modal="true" width="600" resizable="false">
+                <p:outputPanel autoUpdate="true">
+                    <h:panelGrid columns="1" styleClass="w100">
+                        <h:panelGrid styleClass="panel_data w100" columns="2" columnClasses="header w25, null" rowClasses="null, alt">
+                            <h:outputText value="Fecha" styleClass="bold" />
+                            <h:outputText value="#{notificacionesBean.notification.date}">
+                                <f:convertDateTime pattern="dd/MM/yyyy h:mm a" />
+                            </h:outputText>
+                            <h:outputText value="Asunto" styleClass="bold" />
+                            <h:outputText value="#{notificacionesBean.notification.subject}" escape="false" />
+                            <h:outputText value="Proyecto" rendered="#{!empty notificacionesBean.notification.project}" />
+                            <h:outputText value="#{notificacionesBean.notification.project}" rendered="#{!empty notificacionesBean.notification.project}" />
+                        </h:panelGrid>
+                        <br />
+                        <h:outputText value="Contenido" styleClass="bold" />
+                        <p:panel styleClass="alJustify">
+                            <h:outputText value="#{notificacionesBean.notification.text}" escape="false" />
+                        </p:panel>
+                    </h:panelGrid>
+                    <p:separator />
+                    <div class="buttons">
+                        <p:commandButton value="Atendida" icon="ui-icon-check" styleClass="secondary primary" update="@form" rendered="#{notificacionesController.notificacionesBean.removable}" actionListener="#{notificacionesController.eliminarNotificacion(notificacionesBean.notification)}">
+                            <p:confirm header="Confirmación" message="¿Está seguro que desea marcar esta notificación como atendida?" icon="ui-icon-alert" />
+                        </p:commandButton>
+                    </div>
+                </p:outputPanel>
+            </p:dialog>
+                        
+            <p:dialog id="surveyDialog" header="Notificación" modal="true" closable="true" resizable="false" width="450" style="text-align: justify;"
+				visible="#{bandejaTareasController.bloquear}" onHide="location.reload();">		
+				<h:outputText  value="Estimado operador " rendered="#{bandejaTareasController.operador}"/>
+				<h:outputText  value="Estimado técnico " rendered="#{bandejaTareasController.tecnico}"/>
+				<h:outputText  value="continúe el proceso de Regularización Ambiental con la Autoridad Ambiental Competente de forma física (Estudio en formato digital),  hasta contar con el módulo habilitado de conformidad a lo establecido en el inciso cuarto del art. 34 del Acuerdo Ministerial 109 publicado en el Registro Oficial No. 640 del 23 de noviembre de 2018. Considere los tiempos establecidos para los procesos de Regularización Ambiental." />					
+		    </p:dialog>
+		    
+		   <p:dialog header="Información" id="bloqueoEntes" widgetVar="bloqueoEntes" modal="true" width="400" resizable="false" closable="false" draggable="false">
+				<h:panelGroup rendered="#{bandejaTareasController.bloquearEnte}">
+					<h:outputText value="La Autoridad Ambiental Nacional ha procedido con el bloqueo del proceso de emisión de autorizaciones administrativas  ambientales, hasta que la Autoridad Ambiental competente cumpla los requisitos de actualización de la información requerida, para la habilitación del sistema SUIA para el proceso de regularización ambiental de la nueva autoridad" styleClass="alJustify"/>
+					<div class="buttons">
+						<p:commandButton value="Cerrar" styleClass="primary" onclick="PF('bloqueoEntes').hide();" />
+					</div>		
+				</h:panelGroup>
+			</p:dialog>
+		    
+		   <p:dialog header="Información" id="bloqueoConRolTmp" widgetVar="bloqueoConRolTmp" modal="true" width="400" resizable="false" closable="false" draggable="false">
+				<h:panelGroup rendered="#{bandejaTareasController.bloquearPorRolTmp}">
+					<h:outputText value="En el sistema se están configurando sus credenciales como nueva Autoridad Ambiental Competente, en cuanto se finalice el proceso usted podrá continuar con el trámite" styleClass="alJustify"/>
+					<div class="buttons">
+						<p:commandButton value="Cerrar" styleClass="primary" onclick="PF('bloqueoConRolTmp').hide();" />
+					</div>		
+				</h:panelGroup>
+			</p:dialog>
+			
+			<p:dialog header="Notificación" id="bloqueoBypass" widgetVar="bloqueoBypass" modal="true" width="700" 
+			resizable="false" closable="false" draggable="false" >
+				<h:panelGroup rendered="#{bandejaTareasController.bloquearBypass}">
+					<h:outputText value="#{bandejaTareasController.getMensajeSuspensionBypass()}" styleClass="alJustify" escape="false"/>
+					<div class="buttons">
+						<p:commandButton value="Cerrar" styleClass="primary" onclick="PF('bloqueoBypass').hide();" />
+					</div>		
+				</h:panelGroup>
+			</p:dialog>
+
+			<p:dialog id="bloqueoRegistroAmbientalPpc"
+				widgetVar="bloqueoRegistroAmbientalPpc" header="Información"
+				modal="true" resizable="false" width="700px" closable="false">
+				<h:panelGroup rendered="#{bandejaTareasController.bloquearRegistroAmbiental}">
+					<h:outputText
+						value="#{bandejaTareasController.getMensajeBloqueoRegistroAmbiental()}"
+						escape="false" />
+				</h:panelGroup>
+				<br />
+				<div class="buttons">
+					<p:commandButton value="Cerrar"
+						onclick="PF('bloqueoRegistroAmbientalPpc').hide();" />
+				</div>
+			</p:dialog>
+
+			<p:dialog header="Términos y condiciones" id="idTerminos"
+				modal="true" width="500" resizable="false" closable="false"
+				draggable="false"
+				visible="#{bandejaTareasController.terminos==1}">
+				
+				<ui:remove>
+				<h:panelGrid colmuns="1" styleClass="barItemClose" id="panelSesion">
+					<p:commandLink value="Cerrar sesión" actionListener="#{loginBean.cerrarSession}" process="@this" rendered="#{terminosCondicionesController.verFirmar}"/>										
+				</h:panelGrid>
+				</ui:remove>
+				
+				<div style="text-align: justify;">
+                    <p>La información consignada en el presente Sistema Único de Información Ambiental (SUIA) es verdadera y podrá ser verificada por el Ministerio del Ambiente, Agua y Transición Ecológica. En caso de falsedad u ocultamiento de información me someto a las penas previstas en el Art. 255 del Código Orgánico Integral Penal y el Art. 318 numeral 5 del Código Orgánico del Ambiente.</p>
+                    <p>Eximo al Ministerio del Ambiente, Agua y Transición Ecológica de toda responsabilidad, inclusive frente a terceros, si esta información proporcionada fuere falsa o errónea.</p>
+                    <p>Me comprometo a proporcionar al Ministerio del Ambiente, Agua y Transición Ecológica todos los sustentos que justifiquen la información registrada.</p>
+                    <p>Autorizo al Ministerio del Ambiente, Agua y Transición Ecológica, a realizar cuanto análisis y verificación se consideren necesarias en cualquier momento.</p>
+                    <p>Me responsabilizo actual y permanentemente por el buen uso de la clave de acceso registrada para acceder al Sistema Único de Información Ambiental (SUIA) y me hago responsable por cualquier mal e inadecuado uso.</p>
+                    <p>En virtud de la presente declaración, renuncio a instaurar por este motivo cualquier tipo de acción civil, penal o administrativa en contra del Ministerio del Ambiente, Agua y Transición Ecológica y de sus representantes legales y demás servidores por el contenido erróneo de la información ingresada.</p>
+                </div>
+                
+				<div class="buttons" id="btnAceptar">
+				
+				 <ui:remove>
+				<p:commandButton value="Descargar Documento" ajax="false"
+							icon="ui-icon-arrowthick-1-s" styleClass="primary"
+						immediate="true"
+						rendered="#{!terminosCondicionesController.verFirmar}">
+							<p:fileDownload
+								value="#{terminosCondicionesController.descargarDocumentoOperador()}"/>
+						</p:commandButton>
+					
+				<p:commandButton value="Firmar"
+					rendered="#{terminosCondicionesController.verFirmar}"
+							oncomplete="PF('signDialogFirmar').show()" icon="ui-icon-key"
+							styleClass="primary" process="@this" />
+					
+					<p:commandButton value="Aceptar" styleClass="primary"
+						rendered="#{!terminosCondicionesController.verFirmar}"
+						action="#{bandejaTareasController.cerrarTerminos()}"
+						update="idTerminos" />
+					</ui:remove>						
+					<p:commandButton value="Aceptar" styleClass="primary"
+						action="#{bandejaTareasController.cerrarTerminos()}"
+						update="idTerminos" />
+					
+				</div>
+			</p:dialog>
+			
+			<ui:remove>
+			<p:dialog header="Firmar Documento" id="signDialogFirmar"
+				widgetVar="signDialogFirmar" closeOnEscape="false" modal="true"
+				resizable="false" width="auto" height="auto" position="center top">
+				
+				<h:panelGrid columns="2" cellpadding="10" rendered="#{!terminosCondicionesController.ambienteProduccion}"
+						style="text-align:right !important">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold" />
+						<p:selectOneRadio id="verificaToken" value="#{terminosCondicionesController.token}" style="alCenter">
+										<f:selectItem itemLabel="Sí" itemValue="true" />
+										<f:selectItem itemLabel="No" itemValue="false" />
+										<p:ajax event="change" update="panelFirma" listener="#{terminosCondicionesController.guardarToken}" process="@this"/>
+						</p:selectOneRadio>
+				</h:panelGrid>
+				<p:panel id="panelFirma">
+					<h:panelGrid columns="2" cellpadding="10"
+					rendered="#{terminosCondicionesController.token}" columnClasses="alCenter">
+						<p:outputLabel value="Términos y Condiciones" styleClass="bold" />
+						<p:commandButton value="Firma Electrónica" type="button" styleClass="primary large" icon="ui-icon-key"
+            			onclick="window.location.href='#{terminosCondicionesController.firmaElectronica()}'"/>
+            	
+					</h:panelGrid>
+					<h:panelGrid columns="2" cellpadding="10"	style="text-align:right !important" 
+					rendered="#{!terminosCondicionesController.token}">
+						<p:outputLabel value="1. Descargue el documento" styleClass="bold" />
+						<p:commandButton value="Descargar" ajax="false"
+							icon="ui-icon-arrowthick-1-s" styleClass="primary"
+							immediate="true">
+							<p:fileDownload
+								value="#{terminosCondicionesController.descargarDocumento()}" />
+						</p:commandButton>
+
+						<p:outputLabel value="2. Adjunte el documento firmado "
+							styleClass="bold"/>
+						<p:fileUpload
+							fileUploadListener="#{terminosCondicionesController.uploadFileFirmado}"
+							multiple="false" sizeLimit="5242880"
+							allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+							uploadLabel="Subir"
+							invalidFileMessage="Tipo de archivo no válido"
+							invalidSizeMessage="Tamaño de archivo no válido"
+							cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+							auto="true" update="panelFirma">
+						</p:fileUpload>
+					</h:panelGrid>			
+					
+				</p:panel>
+				
+				<t:div styleClass="buttons">
+		<p:commandButton icon="ui-icon-cancel" value="#{msg['button.cerrar']}" process="@this" oncomplete="PF('signDialogFirmar').hide()" styleClass="secondary"/>
+		<p:commandButton icon="ui-icon-plus" value="#{msg['button.aceptar']}" styleClass="primary" process="signDialogFirmar" oncomplete="if(!args.validationFailed) PF('signDialogFirmar').hide();"
+			actionListener="#{terminosCondicionesController.enviar}" update="idTerminos"/>
+	</t:div>
+			</p:dialog>
+			</ui:remove>
+			
+			<p:dialog id="mensajeMineria" widgetVar="mensajeMineria" header="Actividad Bloqueada" modal="true" resizable="false" width="700px" closable="false">
+				<h:form id="frmMensajeMineria">
+				<br />
+				<h:panelGroup id="pnlMensajeMineria">
+					<div>
+					Estimado Operador su actividad se
+					encuentra bloqueada en cumplimiento de la sentencia No. 1149-19-JP/21 con fecha 10
+					de noviembre de 2021 CASO No. 1149-19-JP/20 emitida por la Corte Constitucional
+					del Ecuador, por cuanto los procesos de Participación Ciudadana/Consulta Ambiental
+					deberán ajustarse a la normativa que se emita para el efecto.
+					<br />
+
+					</div>
+				
+				</h:panelGroup>
+
+				<div class="buttons">
+					<p:commandButton value="Cerrar" onclick="PF('mensajeMineria').hide()" />
+				</div>
+			</h:form>
+			</p:dialog>
+
+			<script type="text/javascript">
+                function handleStatusRequestShow() {
+                    $('#bandejaIndicator').show();
+                }
+                function handleStatusRequestHide() {
+                    $('#bandejaIndicator').hide();
+                }
+            </script>
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>

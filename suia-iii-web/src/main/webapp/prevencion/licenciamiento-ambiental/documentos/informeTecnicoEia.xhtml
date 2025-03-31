@@ -1,0 +1,285 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+    <ui:define name="context-extra">
+        <h:outputText value="Datos"/>
+        <h:outputText value="Estudio de Impacto Ambiental"/>
+
+        <h:outputLink value="#{request.contextPath}#{eia.verEIA()}" target="_blank">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+
+
+        <h:outputText value="Pronunciamiento" rendered="#{!informeTecnicoEiaBean.documentOffice.isEmpty()}"/>
+        <h:outputText value="Ministerio de Justicia" rendered="#{!informeTecnicoEiaBean.documentOffice.isEmpty()}"/>
+
+        <h:outputLink value="#{informeTecnicoEiaBean.documentOffice}" target="_blank" rendered="#{!informeTecnicoEiaBean.documentOffice.isEmpty()}">
+            <p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search"/>
+        </h:outputLink>
+
+        <c:forEach items="#{informeTecnicoEiaBean.listaPronunciamiento}" var="pronunciamiento">
+
+            <h:outputText value="Pronunciamiento"/>
+            <h:outputText value='#{msg["label.prevencion.".concat(pronunciamiento.tipo)]}'/>
+            <p:commandButton styleClass="primary button-small" rendered="#{!informeTecnicoEiaBean.validaMemorando(pronunciamiento)}"
+                             actionListener="#{informeTecnicoEiaBean.setPronunciamientoActivo(pronunciamiento)}"
+                             icon="ui-icon-search" oncomplete="PF('dlg').show();"
+                             update="@(.modal)"/>
+			 <p:commandButton icon="ui-icon-arrowthick-1-s" ajax="false"
+                              styleClass="primary button-small" rendered="#{informeTecnicoEiaBean.validaMemorando(pronunciamiento)}">
+            	<p:fileDownload value="#{informeTecnicoEiaBean.getStreamDocumento(pronunciamiento.tipo)}"/>
+            </p:commandButton>
+        </c:forEach>
+
+        <p:dialog
+                header='Pronunciamiento - #{msg["label.prevencion.".concat(informeTecnicoEiaBean.pronunciamientoActivo.tipo)]}'
+                widgetVar="dlg" modal="true" styleClass="modal" id="modal"
+                height="400">
+            <control:imputConTextoEnriquecido valor="#{informeTecnicoEiaBean.pronunciamientoActivo.contenido}"
+                                              soloLectura="true"
+                                              requerido="false"/>
+        </p:dialog>
+
+    </ui:define>
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{informeTecnicoEiaBean.validarTareaBpm()}"/>
+
+        <h:form>
+            <p:panelGrid columns="1" layout="grid" styleClass="w100"
+                         columnClasses="w100">
+                <f:facet name="header">
+                    <mae:panelGridHeaderHelp value="Informe técnico"
+                                             conector="generalHelp"
+                                             help="Para completar el informe, por favor ingrese la información requerida en las secciones correspondientes. Para previsualizar el documento presione Guardar." />
+                </f:facet>
+                <object id="pdf_informe" type="application/pdf"
+                        data="#{informeTecnicoEiaBean.informePath}?pfdrid_c=true"
+                        width="100%" height="400px">
+                    Su navegador no soporta la visualización de pdf. Puede descargar el
+                    documento presionando el siguiente botón:
+                    <p:commandButton value="Descargar" styleClass="primary"
+                                     ajax="false" icon="ui-icon-arrowthick-1-s" action="#">
+                        <p:fileDownload value="#{informeTecnicoEiaBean.stream}"/>
+                    </p:commandButton>
+                </object>
+
+                <br/>
+                <br/>
+                <h:panelGrid columns="1" styleClass="w100" id="pronunciamiento-wrapper"
+                             columnClasses="w50, field_mrg w50">
+                    <p:outputLabel for="requiere-modificaciones"
+                                   value="¿Requiere modificaciones el informe?"
+                                   rendered="#{informeTecnicoEiaBean.revisar}"></p:outputLabel>
+                    <p:selectOneRadio id="requiere-modificaciones" value="#{informeTecnicoEiaBean.requiereModificaciones}"
+                                      required="#{informeTecnicoEiaBean.revisar}"
+                                      rendered="#{informeTecnicoEiaBean.revisar}">
+                        <f:selectItem itemLabel="Si"
+                                      itemValue="true"/>
+                        <f:selectItem itemLabel="No"
+                                      itemValue="false"/>
+                                      
+                                      <p:ajax update="@form"/>
+                    </p:selectOneRadio>
+
+
+                    <p:outputLabel for="pronunciamiento" value="Tipo de pronunciamiento"/>
+                    <p:selectOneRadio id="pronunciamiento" value="#{informeTecnicoEiaBean.pronunciamiento}" required="true" disabled="#{informeTecnicoEiaBean.revisar or informeTecnicoEiaBean.informeTecnicoEia.finalizado}">
+                        <f:selectItem itemLabel="Pronunciamiento Aprobación"
+                                      itemValue="true"/>
+                        <f:selectItem itemLabel="Pronunciamiento Observación"
+                                      itemValue="false"/>
+                        <p:ajax update="pnlActualizarCi"/>												
+                    </p:selectOneRadio>
+                    
+                    <br/>
+                    <h:panelGroup id="pnlActualizarCi">
+						<p:outputLabel for="actualizarCI" rendered="#{informeTecnicoEiaBean.pronunciamiento ne null and !informeTecnicoEiaBean.pronunciamiento}"
+							value="¿Requiere actualización del Certificado de Intersección?" />
+						<p:selectOneRadio id="actualizarCI"  rendered="#{informeTecnicoEiaBean.pronunciamiento ne null and !informeTecnicoEiaBean.pronunciamiento}"
+							value="#{proyectosBean.proyecto.estadoActualizacionCertInterseccion}" required="true"
+							disabled="#{informeTecnicoEiaBean.revisar}">
+							<f:selectItem itemLabel="SI" itemValue="1" />
+							<f:selectItem itemLabel="NO" itemValue="0" />
+						</p:selectOneRadio>
+					</h:panelGroup>
+
+                </h:panelGrid>
+                <br/>
+                <h:panelGrid styleClass="w100" rendered="#{!informeTecnicoEiaBean.revisar and !informeTecnicoEiaBean.informeTecnicoEia.finalizado}">
+                    <p:outputLabel styleClass="bold" 
+                           value="Asunto" for="asunto"></p:outputLabel>
+		             <p:inputText value="#{informeTecnicoEiaBean.informeTecnicoEia.antecendentes}" required="true" readonly="#{informeTecnicoEiaBean.soloLectura}"
+		             id="asunto" requiredMessage="#{msg['label.prevencion.tdr.campo']} 'Asunto' #{msg['label.prevencion.tdr.requerido']}.">
+		             <p:ajax process="@this"/>
+		             </p:inputText>
+		             
+		             <br/>
+		             <p:outputLabel styleClass="bold"
+                           value="Pronunciamiento *" for="pronunciamieno"></p:outputLabel>
+		            <control:imputConTextoEnriquecido id="pronunciamieno" 
+		                                              requiredMessage="#{msg['label.prevencion.tdr.campo']} 'Pronunciamiento' #{msg['label.prevencion.tdr.requerido']}."
+		                                              valor="#{informeTecnicoEiaBean.informeTecnicoEia.objetivos}"
+		                                              soloLectura="#{informeTecnicoEiaBean.soloLectura}" requerido="true"/>   
+
+                    
+
+                </h:panelGrid>
+                <observaciones:tablaObservaciones soloLectura="true" aparace="true" mostrarSiVacio="true"
+                                                          idComponent="sololectura"
+                                                          idClase="#{informeTecnicoEiaBean.proyectosBean.proyecto.id}"
+                                                          nombreClase="Pronunciamiento"
+                                                          seccion="*"
+                                                          rol="sjsj"
+                                                          componenteActualizarEliminar="pnl1"/>
+                
+            </p:panelGrid>           
+           
+			<h:panelGroup id="pnl2" 
+			rendered="#{informeTecnicoEiaBean.revisar or !informeTecnicoEiaBean.observacionesController.getObservacionesBB().getMapaSecciones().get('informe').isEmpty() or observacionesController.listaObservacionesH.get('id').mapaSecciones.get('informe').size() > 0}">
+				<p:fragment>
+					<h2 class="bold">Observaciones del pronunciamiento</h2>					 
+					
+					<observaciones:tablaObservaciones aparace="true"
+                                                      soloLectura="#{!informeTecnicoEiaBean.revisar}"
+                                                      mostrarSiVacio="#{informeTecnicoEiaBean.revisar}"
+                                                      idClase="#{informeTecnicoEiaBean.proyectosBean.proyecto.id}"
+                                                      nombreClase="InformeTecnicoEia"
+                                                      seccion="informe"
+                                                      rol="sjsj"
+                                                      componenteActualizarEliminar="pnl2"/>					
+					
+				</p:fragment>
+				
+				
+			</h:panelGroup>
+
+			<div class="buttons main">
+                <p:commandButton value="Guardar" update="@form"
+                                 action="#{informeTecnicoEiaBean.guardar()}"
+                                 styleClass="ui-confirmdialog-yes secondary" icon="ui-icon-disk"
+                                 process="@this pronunciamieno"/>
+                <p:commandButton value="Siguiente" update="pronunciamiento-wrapper"
+                				 action="#{informeTecnicoEiaBean.abrirFirma()}"  
+                                 styleClass="primary" icon="ui-icon-arrowthick-1-e"
+                                 rendered="#{!informeTecnicoEiaBean.requiereModificaciones}"/>
+
+				<p:commandButton value="Siguiente" update="pronunciamiento-wrapper"
+					action="#{informeTecnicoEiaBean.guardarContinuar()}"
+					styleClass="primary" icon="ui-icon-arrowthick-1-e"
+					rendered="#{informeTecnicoEiaBean.requiereModificaciones}"/>
+			</div>
+        </h:form>
+        
+        <h:form id="formDialogs">
+
+			<p:dialog header="Firma Electronica" id="signDialog"
+				widgetVar="signDialog" closeOnEscape="false" modal="true"
+				resizable="false" width="600px" height="auto">
+				<p:panel>
+					<h:panelGrid styleClass="w100" columns="1">
+						<h:outputLabel value="Firmar informe  "
+							styleClass="bold" />							
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid styleClass="w100" columns="3"
+						columnClasses="w25, w25 toCenter, toCenter">
+						<p:outputLabel value="¿Cuenta con token?" styleClass="bold"
+							rendered="#{!informeTecnicoEiaBean.ambienteProduccion}" />
+						<p:selectOneRadio id="verificaToken"
+							value="#{informeTecnicoEiaBean.token}"
+							rendered="#{!informeTecnicoEiaBean.ambienteProduccion}">
+							<f:selectItem itemLabel="Sí" itemValue="true" />
+							<f:selectItem itemLabel="No" itemValue="false" />
+							<p:ajax event="change"
+								update=":formDialogs:pnlFirmaManual :formDialogs:pnlFirmaToken"
+								listener="#{informeTecnicoEiaBean.guardarToken}" />
+						</p:selectOneRadio>
+
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{informeTecnicoEiaBean.ambienteProduccion}" />
+						<h:outputText value="" styleClass="encabezado"
+							rendered="#{informeTecnicoEiaBean.ambienteProduccion}" />
+
+						<h:panelGroup id="pnlFirmaToken">
+
+
+							<p:commandButton value="Firmar documento" type="button"
+								styleClass="primary" icon="ui-icon-key"
+								rendered="#{informeTecnicoEiaBean.token}"
+								onclick="window.location.href='#{informeTecnicoEiaBean.urlAlfresco}'" />
+						</h:panelGroup>
+					</h:panelGrid>
+
+					<br />
+
+					<h:panelGroup id="pnlFirmaManual">
+						<h:panelGrid columns="2" cellpadding="10" styleClass="w100"
+							style="text-align:right !important" columnClasses="w66, toCenter"
+							rendered="#{!informeTecnicoEiaBean.token}">
+							<p:outputLabel value="1. Descargar el Informe" styleClass="bold" />
+							<p:commandButton value="Descargar" ajax="false"
+								icon="ui-icon-arrowthick-1-s" styleClass="primary"
+								immediate="true">
+								<p:fileDownload
+									value="#{informeTecnicoEiaBean.descargarInformacion()}" />
+							</p:commandButton>
+							<p:outputLabel for="uploadRequired"
+								value="2. Adjuntar el Informe firmado"
+								styleClass="bold" />
+							<p:fileUpload id="Idfirmada"
+								fileUploadListener="#{informeTecnicoEiaBean.uploadListenerInformacionFirmada}"
+								multiple="false" sizeLimit="5242880"
+								allowTypes="/(\.|\/)(pdf)$/i" label="Seleccionar"
+								uploadLabel="Subir"
+								invalidFileMessage="Tipo de archivo no válido"
+								invalidSizeMessage="Tamaño de archivo no válido"
+								cancelLabel="Cancelar" mode="advanced" dragDropSupport="false"
+								auto="true" update="lblNombreDocFirmado"
+								rendered="#{!informeTecnicoEiaBean.token}">
+								<f:attribute name="clave" value=":form" />
+							</p:fileUpload>
+
+
+							<p:outputLabel value="" />
+							<h:outputText id="lblNombreDocFirmado"
+								value="#{informeTecnicoEiaBean.nombreDocumentoFirmado}" />
+						</h:panelGrid>
+
+						<h:inputHidden id="uploadRequired"
+							required="#{!informeTecnicoEiaBean.token and !informeTecnicoEiaBean.informacionSubida}" />
+					</h:panelGroup>
+					<br />
+				</p:panel>
+
+				<p:separator />
+				<div class="buttons main">
+					<p:commandButton value="Cerrar" styleClass="primary"
+						onclick="PF('signDialog').hide()" icon="ui-icon-close" 
+						immediate="true"/>
+					<p:commandButton value="Enviar" styleClass="secondary"  
+						action="#{informeTecnicoEiaBean.guardarContinuar()}"
+						icon="ui-icon-check">
+						<p:confirm message="#{msg['message.confirmacion.envio.tarea']}"
+							header="#{msg['header.confirmacion.envio.tarea']}" />
+					</p:commandButton>
+				</div>
+			</p:dialog>
+			
+			<p:separator />
+
+		</h:form>
+        
+    </ui:define>
+</ui:composition>
+</html>

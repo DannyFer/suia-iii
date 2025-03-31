@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+    <ui:define name="content">
+        <f:loadBundle var="labels" basename="ec.gob.ambiente.core.resources.labels_es" />
+        <ui:include src="../contenido/menu.xhtml" />
+        <div class="content">
+            <h:form id="frmDatos">
+                <p:growl id="msgs" globalOnly="true"/>
+                <p:panel header="Grupos taxonómicos" rendered="#{faunaController.faunaBean.grupoTaxonomicoSeleccionado == null}">
+                    <p:dataTable value="#{faunaController.faunaBean.listaGruposTaxonomicos}" var="grupo">
+                        <p:column headerText="Completado">
+                            <center>
+                                <h:selectBooleanCheckbox disabled="true"/>
+                            </center>
+                        </p:column>
+                        <p:column headerText="Descripción">
+                            <center>
+                                <h:outputText value="#{grupo.descripcion}"/>
+                            </center>
+                        </p:column>
+                        <p:column headerText="Registrar">
+                            <center>
+                                <p:commandButton value="Registrar" action="#{faunaController.seleccionarGrupoTaxonomico(grupo)}" update=":#{p:component('frmDatos')}, :#{p:component('tblTablas')}"/>
+                            </center>
+                        </p:column>
+                    </p:dataTable>
+                </p:panel>
+                <p:outputPanel id="pnlTipoMuestreo">
+                    <p:panel header="#{faunaController.faunaBean.grupoTaxonomicoSeleccionado.descripcion}" rendered="#{faunaController.faunaBean.grupoTaxonomicoSeleccionado != null}">
+                        <h:panelGrid columns="4">
+                            <h:outputLabel value="*Tipo muestreo:"/>
+
+                            <control:comboAjax identificador="cmbTipoMuestreo" lista="#{combosFaunaController.listaTipoMuestreo}" valor="#{faunaController.faunaBean.idTipoMuestreo}" requerido="true" habilitar="#{faunaController.faunaBean.fauna.id != null}" idComponenteActualizar="tblTablas" ajax="#{faunaController.cargarTablas()}"/>
+                            <h:outputLabel value="Piso zoogeográfico:"
+                                           rendered="#{faunaController.faunaBean.grupoTaxonomicoSeleccionado.id == faunaController.faunaBean.idMastofauna or faunaController.faunaBean.grupoTaxonomicoSeleccionado.id == faunaController.faunaBean.idOrnitofauna or faunaController.faunaBean.grupoTaxonomicoSeleccionado.id == faunaController.faunaBean.idHerpetofauna}"/>
+                            <p:selectOneMenu value="#{faunaController.faunaBean.fauna.idCatalogoPisoZoogeografico}" style="width: 200px;"
+                                             rendered="#{faunaController.faunaBean.grupoTaxonomicoSeleccionado.id == faunaController.faunaBean.idMastofauna or faunaController.faunaBean.grupoTaxonomicoSeleccionado.id == faunaController.faunaBean.idOrnitofauna or faunaController.faunaBean.grupoTaxonomicoSeleccionado.id == faunaController.faunaBean.idHerpetofauna}">
+                                <f:selectItems value="#{combosFaunaController.listaPisoZoogeografico}" />
+                                <p:ajax event="change" />
+                            </p:selectOneMenu>
+                            <h:outputLabel value="Cobertura vegetal:" 
+                                           rendered="#{faunaController.faunaBean.grupoTaxonomicoSeleccionado.id != faunaController.faunaBean.idMastofauna}"/>
+                            <p:selectOneMenu value="#{faunaController.faunaBean.fauna.idCatalogoCoberturaVegetal}" style="width: 200px;"
+                                             rendered="#{faunaController.faunaBean.grupoTaxonomicoSeleccionado.id != faunaController.faunaBean.idMastofauna}">
+                                <f:selectItems value="#{combosFaunaController.listaCoberturaVegetal}" />
+                                <p:ajax event="change" />
+                            </p:selectOneMenu>
+                            <h:outputLabel value="Zonas Ictiohidrográficas:"
+                                           rendered="#{faunaController.faunaBean.grupoTaxonomicoSeleccionado.id == faunaController.faunaBean.idEntomofauna or faunaController.faunaBean.grupoTaxonomicoSeleccionado.id == faunaController.faunaBean.idIctiofauna or faunaController.faunaBean.grupoTaxonomicoSeleccionado.id == faunaController.faunaBean.idMacroinvertebradosAcuaticos}"/>
+
+                            <p:selectOneMenu value="#{faunaController.faunaBean.fauna.idCatalogoZonasIctiohidrograficas}" style="width: 200px;"
+                                             rendered="#{faunaController.faunaBean.grupoTaxonomicoSeleccionado.id == faunaController.faunaBean.idEntomofauna or faunaController.faunaBean.grupoTaxonomicoSeleccionado.id == faunaController.faunaBean.idIctiofauna or faunaController.faunaBean.grupoTaxonomicoSeleccionado.id == faunaController.faunaBean.idMacroinvertebradosAcuaticos}">
+                                <f:selectItems value="#{combosFaunaController.listaZonasIctiohidrograficas}" />
+                                <p:ajax event="change" />
+                            </p:selectOneMenu>
+                            <h:outputLabel value="*Metodología aplicada:" />
+                            <h:panelGroup>
+                                <p:fileUpload fileUploadListener="#{faunaController.handleFileUpload}" mode="advanced"
+                                              label="Seleccione" update="txtNombreAnexo"
+                                              auto="true" sizeLimit="1000000" allowTypes="/(\.|\/)(pdf)$/" />
+                                <p:commandLink action="#{faunaController.descargarAdjunto()}" ajax="false" target="_blank">
+                                    <h:outputText id="txtNombreAnexo" value="#{faunaController.faunaBean.fauna.adjunto.nombre}" />
+                                </p:commandLink>
+                            </h:panelGroup>
+                        </h:panelGrid>
+                    </p:panel>
+
+                </p:outputPanel>
+            </h:form>
+            <p:tabView id="tblTablas" activeIndex="#{faunaController.faunaBean.indiceTab}">
+                <p:tab title="Cualitativo" disabled="#{faunaController.faunaBean.idTipoMuestreo == '16'}">
+                    <ui:include src="tablaCoordenada.xhtml" />
+                    <ui:include src="tablaIndividuo.xhtml"/>
+                    <ui:include src="tablaIndividuoOrnitofauna.xhtml"/>
+                    <ui:include src="tablaIndividuoHerpetofauna.xhtml"/>
+                    <ui:include src="tablaIndividuoEntomofauna.xhtml"/>
+                    <ui:include src="tablaIndividuoIctiofauna.xhtml"/>
+                </p:tab>
+                <p:tab title="Cuantitativo" disabled="#{faunaController.faunaBean.idTipoMuestreo == '15'}">
+                    <ui:include src="tablaCoordenada1.xhtml" />
+                    <ui:include src="tablaIndividuo1.xhtml"/>
+                    <ui:include src="tablaIndividuoOrnitofauna1.xhtml"/>
+                    <ui:include src="tablaIndividuoHerpetofauna1.xhtml"/>
+                    <ui:include src="tablaIndividuoEntomofauna1.xhtml"/>
+                    <ui:include src="tablaIndividuoIctiofauna1.xhtml"/>
+                    <ui:include src="tablaIndividuoMacroinvertebrados1.xhtml"/>
+                    <ui:include src="cuantitativoEspecie.xhtml"/>
+                    <ui:include src="cuantitativoEspecieOrnitofauna.xhtml"/>
+                    <ui:include src="cuantitativoEspecieHerpetofauna.xhtml"/>
+                    <ui:include src="cuantitativoEspecieEntomofauna.xhtml"/>
+                    <ui:include src="cuantitativoEspecieIctiofauna.xhtml"/>
+                </p:tab>
+            </p:tabView>
+            <br/>
+        </div>
+    </ui:define>
+</ui:composition>

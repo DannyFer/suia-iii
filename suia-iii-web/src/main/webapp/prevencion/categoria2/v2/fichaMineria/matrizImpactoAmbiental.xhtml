@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+    <ui:define name="content">
+        <f:event type="preRenderView" listener="#{informacionGeneralController.validarTareaBpmV2()}"/>
+        <ui:include src="contenido/menuMineria.xhtml" />
+        <style>
+            .ui-treetable th{
+                background: #008a8a !important;
+                color: #ffffff !important;
+                font-weight: bold !important;
+            }
+
+            .ui-treetable .ui-widget-header{
+                border-top: 4px solid #00aac3 !important;
+            }
+        </style>        
+        <div class="content">
+            <h:form id="frmDatos">
+                <p:panel
+                    header="6. Matriz de identificación de impactos ambientales">
+                    <p:panelGrid columns="1" layout="grid" styleClass="w100" columnClasses="">
+                        <f:facet name="header">
+                            <mae:panelGridHeaderHelp value="Datos generales" conector="generalHelp"
+                                                     image="#{request.contextPath}/resources/images/help-how.png"
+                                                     help="#{helps['registro.general']}" />
+                        </f:facet>
+                        <p:treeTable id="ablImpactos" value="#{matrizAmbientalController.matrizPlanAmbientalBB.root}" var="actividad"
+                                     >
+                            <p:column headerText="Actividad" style="text-align: justify">
+                                <h:outputText style="width: 100px;white-space: normal" value="#{actividad.actividadMinera.actividadComercial.nombreActividad}" rendered="#{actividad.nodoFinal=='false'}"/>
+
+                            </p:column>
+                            <p:column headerText="Factor" style="text-align: justify">
+                                <h:outputText value="#{actividad.factor.nombre}" style="width: 100px;white-space: normal"/>                                    
+                            </p:column>
+                            <p:column headerText="Impacto" style="text-align: justify">
+                                <h:outputText value="#{actividad.impacto.nombre}" style="width: 100px;white-space: normal"/>                                    
+                            </p:column>
+                            <p:column headerText="Acciones">
+                                <center>
+                                    <p:commandButton styleClass="primary" value="Adicionar impacto" rendered="#{actividad.nodoFinal=='false'}"
+                                                      action="#{matrizAmbientalController.seleccionarActividad(actividad)}"
+                                                     oncomplete="PF('dlgImpacto').show();"  update=":#{p:component('pnlImpacto')}"/>
+                                    <p:commandButton styleClass="primary" icon="ui-icon-pencil" rendered="#{actividad.nodoFinal}"
+                                                     title="Editar impacto" action="#{matrizAmbientalController.seleccionarActividad(actividad)}"
+                                                     oncomplete="PF('dlgImpacto').show();"  update=":#{p:component('pnlImpacto')}"/>
+                                    <p:commandButton styleClass="primary" icon="ui-icon-trash" rendered="#{actividad.nodoFinal}"
+                                                     title="Eliminar impacto" action="#{matrizAmbientalController.eliminarImpacto(actividad)}"
+                                                     update=":#{p:component('ablImpactos')}"/>
+                                    <!-- MarielaG para mostrar historico -->
+									<p:commandButton icon="ui-icon-search"
+										action="#{matrizAmbientalController.fillHistorialImpactos(actividad)}"
+										title="Ver Historial" styleClass="orange"
+										update=":formImpactoHistorial:impactoHistorialDlg"
+										oncomplete="PF('impactoHistorialDlg').show();"
+										rendered="#{actividad.nodoFinal and actividad.historialModificaciones}" />
+									<h:outputText value="Nuevo" styleClass="bold text-orange"
+										rendered="#{actividad.nodoFinal and actividad.nuevoEnModificacion and !actividad.historialModificaciones}" />
+									<!-- fin historico -->
+                                </center>
+                            </p:column>
+
+                        </p:treeTable>                        
+                        <!-- MarielaG para mostrar historico eliminados-->
+						<h:panelGrid styleClass="panel_data" columns="2"
+							columnClasses="header background-orange, null"
+							rendered="#{matrizAmbientalController.impactosEliminados}"
+							rowClasses="null, alt">
+							<h:outputText value="Impactos eliminados" />
+							<p:commandButton styleClass="button-small orange"
+								process="@this" icon="ui-icon-search"
+								action="#{matrizAmbientalController.fillHistorialImpactosEliminados()}"
+								update=":formImpactoHistorial:impactoHistorialDlg"
+								oncomplete="PF('impactoHistorialDlg').show();" />
+						</h:panelGrid>
+						<!-- fin historico -->
+                    </p:panelGrid>
+                    <br />					
+                    <div class="buttons main">
+                        <p:commandButton value="Atrás" immediate="true" process="@this" icon="ui-icon-arrowthick-1-w"
+                                         action="/prevencion/categoria2/v2/fichaMineria/muestreoInicial.jsf?faces-redirect=true" />
+                        <p:commandButton value="Guardar" icon="ui-icon-disk" update=":#{p:component('frmDatos')}"
+                                         oncomplete="window.scrollTo(0,0);"
+                                         action="#{matrizAmbientalController.guardar()}" />
+                        <p:commandButton value="Siguiente" immediate="true" process="@this" icon="ui-icon-arrowthick-1-e"
+                                         action="/prevencion/categoria2/v2/fichaMineria/planManejoAmbiental.jsf?faces-redirect=true" />
+                    </div>
+                </p:panel>
+            </h:form>
+
+            <p:dialog header="Detalle impacto ambiental" widgetVar="dlgImpacto"
+                      modal="true" resizable="false" draggable="false" width="450" height="200">
+                <h:form id="frmDet">
+                    <p:panel>
+                        <h:panelGrid id="pnlImpacto" columns="2">
+                            <p:outputLabel value="Fase:" />
+                            <h:outputText
+                                value="#{matrizAmbientalController.matrizPlanAmbientalBB.entityNodoActividad.actividadMinera.actividadComercial.categoriaFase.fase.nombre}" />
+                            <p:outputLabel value="Actividad:" />
+                            <h:outputText
+                                value="#{matrizAmbientalController.matrizPlanAmbientalBB.entityNodoActividad.actividadMinera.actividadComercial.nombreActividad}" />
+                            <p:outputLabel value="Factor" for="cmbFactor:cpcmbFactor" />
+                            <control:comboAjax identificador="cmbFactor"
+                                               valor="#{matrizAmbientalController.matrizPlanAmbientalBB.idFactor}"
+                                               lista="#{matrizAmbientalController.matrizPlanAmbientalBB.listaFactores}"
+                                               ajax="#{matrizAmbientalController.cargarActividadesImpactos()}"
+                                               id="cmbFactor" idComponenteActualizar="pnlImpacto"
+                                               />
+                            <p:outputLabel value="Impacto" for="cmbImpacto:cpcmbImpacto" />
+                            <control:combo id="cmbImpacto" identificador="cmbImpacto"
+                                           valor="#{matrizAmbientalController.matrizPlanAmbientalBB.idImpacto}"
+                                           lista="#{matrizAmbientalController.matrizPlanAmbientalBB.listaImpactos}"
+                                           />
+                        </h:panelGrid>
+                        <center>
+                            <p:commandButton value="Guardar" styleClass="primary"
+                                             update=":#{p:component('frmDatos')},:#{p:component('frmDet')}"
+                                             action="#{matrizAmbientalController.guardarImpacto()}"
+                                             oncomplete="handleActividadRequest(xhr, status, args);" />
+                        </center>
+                    </p:panel>
+                </h:form>
+            </p:dialog>
+            <script type="text/javascript">
+                function handleActividadRequest(xhr, status, args) {
+                    if (args.validationFailed || !args.impactoIn) {
+                    }
+                    else {
+                        PF('dlgImpacto').hide();
+                        $('#loginLink').fadeOut();
+                    }
+                }
+            </script>
+        </div>
+        
+        <!-- MarielaG para mostrar historicos -->
+		<h:form id="formImpactoHistorial">
+			<p:dialog header="Historial de Impactos" id="impactoHistorialDlg"
+				widgetVar="impactoHistorialDlg" modal="true" resizable="false"
+				width="600">
+				<h:panelGroup>
+					<h:panelGrid columns="1" columnClasses="w100">
+						<p:dataTable id="tableHistorial" rowIndexVar="index"
+							value="#{matrizAmbientalController.matrizPlanAmbientalBB.historialImpactosSeleccionados}"
+							rendered="#{matrizAmbientalController.matrizPlanAmbientalBB.historialImpactosSeleccionados.size() > 0}"
+							var="item" emptyMessage="#{labels['common.table.empty']}">
+							<p:column headerText="Actividad">
+								<h:outputText
+									value="#{item.matrizAmbientalMineria.actividadMinera.actividadComercial.nombreActividad}" />
+							</p:column>
+							<p:column headerText="Factor">
+								<h:outputText value="#{item.factorPma.nombre}" />
+							</p:column>
+							<p:column headerText="Impacto">
+								<h:outputText value="#{item.impactoPma.nombre}" />
+							</p:column>
+							<p:column headerText="Fecha Modificación" styleClass="w15">
+								<h:outputText value="#{item.fechaHistorico}">
+									<f:convertDateTime pattern="dd/MM/yyyy k:mm" />
+								</h:outputText>
+							</p:column>
+						</p:dataTable>
+					</h:panelGrid>
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<!-- fin historico -->
+    </ui:define>
+</ui:composition>

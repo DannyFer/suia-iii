@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+      xmlns:mae="http://java.sun.com/jsf/composite/mae-composite">
+
+<ui:composition
+        template="/prevencion/licenciamiento-ambiental/eia/default.xhtml">
+    <ui:define name="content-eia">
+        <h:form id="frmDatos" styleClass="form">
+            <p:outputLabel value="¿En su proyecto se identifican sitios contaminados
+ajenos a su actividad?, en caso de ser afirmativo registre la siguiente tabla,
+caso contrario marque no." />
+            <p:selectOneRadio required="true" onchange="#{medioFisicoBean.vaciarListaIdentificacionSitiosContaminadosFuentesContaminacion()}"
+                              value="#{identificacionSitiosContaminadosFuentesContaminacionController.medioFisicoBean.estudio.tieneIdentificacionSitiosContaminados}">
+                <f:selectItem itemLabel="Sí"
+                              itemValue="true"/>
+                <f:selectItem itemLabel="No"
+                              itemValue="false" />
+                <p:ajax process="@this"
+                        update="@(.form)" />
+            </p:selectOneRadio>
+
+            <h:panelGrid columns="1"
+                         rendered="#{(identificacionSitiosContaminadosFuentesContaminacionController.medioFisicoBean.estudio.tieneIdentificacionSitiosContaminados != null) and (!identificacionSitiosContaminadosFuentesContaminacionController.medioFisicoBean.estudio.tieneIdentificacionSitiosContaminados)}"
+                         id="justificacion">
+
+                <!-- <p:outputLabel value="Justificación" for="just"
+                               rendered="#{(identificacionSitiosContaminadosFuentesContaminacionController.medioFisicoBean.estudio.tieneIdentificacionSitiosContaminados)}"
+                               />
+
+                <p:inputTextarea id="just" readonly="false"
+                                 rendered="#{(identificacionSitiosContaminadosFuentesContaminacionController.medioFisicoBean.estudio.tieneIdentificacionSitiosContaminados)}"
+                                 value="#{identificacionSitiosContaminadosFuentesContaminacionController.medioFisicoBean.justificacionSitiosContaminados}"
+                                 required="false"
+                                 cols="150" rows="7" maxlength="1000"
+                                 styleClass="w100" autoResize="false">
+                    <p:ajax process="@this just"/>
+                        </p:inputTextarea> -->
+
+            </h:panelGrid>
+
+
+            <p:panelGrid columns="1" layout="grid" styleClass="w100" id="pnlGridIdentificacionSitiosContaminadosFuentesContaminacionTable" rendered="#{(identificacionSitiosContaminadosFuentesContaminacionController.medioFisicoBean.estudio.tieneIdentificacionSitiosContaminados != null) and (identificacionSitiosContaminadosFuentesContaminacionController.medioFisicoBean.estudio.tieneIdentificacionSitiosContaminados)}">
+                <f:facet name="header">
+                    <p:commandButton value="Adicionar" oncomplete="PF('identificacionSitiosContaminadosFuentesContaminacionDialog').show()"
+                                     action="#{medioFisicoBean.limpiar()}" styleClass="button-small-text toRight field_mrg" icon="ui-icon-plusthick"
+
+                                     process="@this" update="identificacionSitiosContaminadosFuentesContaminacionDialog"/>
+                    <p:outputLabel value="Identificación de sitios contaminados o fuentes de contaminación" for="identificacionSitiosContaminadosFuentesContaminacionTable"/>
+                    <h:inputHidden id="muestraHid" />
+                </f:facet>
+                <p:dataTable id="identificacionSitiosContaminadosFuentesContaminacionTable" value="#{identificacionSitiosContaminadosFuentesContaminacionController.medioFisicoBean.listaIdentificacionSitiosContaminadosFuentesContaminacion}"
+                             var="identificacionSitiosContaminados" emptyMessage="#{labels['common.table.empty']}">
+                    <p:columnGroup type="header">
+
+                        <p:row>
+                            <p:column rowspan="2" headerText="Componente ambiental afectado"/>
+
+                            <p:column colspan="2" headerText="Ubicación de puntos de muestreo - Coordenadas"/>
+
+                            <p:column rowspan="2" headerText="Fuentes de contaminación"/>
+
+                            <p:column rowspan="2" headerText="" styleClass="w40px"/>
+                        </p:row>
+                        <p:row>
+                            <p:column headerText="X" />
+                            <p:column headerText="Y" />
+                        </p:row>
+
+                    </p:columnGroup>
+                    <p:column styleClass="singleLine">
+                        <h:outputText value="#{identificacionSitiosContaminados.componenteAmbientalAfectado}" title="#{identificacionSitiosContaminados.componenteAmbientalAfectado}"/>
+                    </p:column>
+
+                    <p:column>
+                        <h:outputText value="#{identificacionSitiosContaminados.coordenadaX}" title="#{identificacionSitiosContaminados.coordenadaX}"/>
+                    </p:column>
+
+                    <p:column>
+                        <h:outputText value="#{identificacionSitiosContaminados.coordenadaY}" title="#{identificacionSitiosContaminados.coordenadaY}"/>
+                    </p:column>
+
+                    <p:column>
+                        <h:outputText value="#{identificacionSitiosContaminados.fuenteContaminacion}" title="#{identificacionSitiosContaminados.fuenteContaminacion}"/>
+                    </p:column>
+
+
+
+
+                    <p:column styleClass="w40px alCenter">
+
+                        <p:commandButton update=":frmDatos:identificacionSitiosContaminadosFuentesContaminacionDialog"
+                                         styleClass="button-small primary"
+                                         process="@this" icon="ui-icon-pencil"
+                                         actionListener="#{identificacionSitiosContaminadosFuentesContaminacionController.seleccionarIdentificacionSitiosContaminadosFuentesContaminacion(identificacionSitiosContaminados)}"
+                                         oncomplete="PF('identificacionSitiosContaminadosFuentesContaminacionDialog').show()"/>
+
+
+                        <p:commandButton update="identificacionSitiosContaminadosFuentesContaminacionTable"
+                                         styleClass="button-small primary" process="@this"
+                                         icon="ui-icon-circle-close"
+                                         actionListener="#{identificacionSitiosContaminadosFuentesContaminacionController.eliminarIdentificacionSitiosContaminadosFuentesContaminacion(identificacionSitiosContaminados)}">
+
+                            <p:confirm header="Confirmación"
+                                       message="¿Está seguro que desea eliminar esta identificación?"
+                                       icon="ui-icon-alert"/>
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+                <p:dialog header="Identificación de sitios contaminados o fuentes de contaminación"
+                          id="identificacionSitiosContaminadosFuentesContaminacionDialog" widgetVar="identificacionSitiosContaminadosFuentesContaminacionDialog" modal="true" width="600"
+                          resizable="false" draggable="false">
+                    <h:panelGroup id="identificacionSitiosContaminadosFuentesContaminacionContainer">
+                        <h:panelGrid styleClass="w100 separatorBottom" columns="2" columnClasses="w50, field_mrg w50">
+
+                            <p:outputLabel value="Componente ambiental afectado" for="ComponenteAmbientalAfectado"/>
+                            <p:outputLabel value="Fuentes de contaminación" for="FuentesContaminacion"/>
+                            <p:inputText value="#{identificacionSitiosContaminadosFuentesContaminacionController.medioFisicoBean.identificacionSitiosContaminadosFuentesContaminacion.componenteAmbientalAfectado}"
+                                         id="ComponenteAmbientalAfectado"
+                                         required="#{identificacionSitiosContaminadosFuentesContaminacionController.medioFisicoBean.estudio.tieneIdentificacionSitiosContaminados}"
+                                    />
+
+                            <p:inputText value="#{identificacionSitiosContaminadosFuentesContaminacionController.medioFisicoBean.identificacionSitiosContaminadosFuentesContaminacion.fuenteContaminacion}"
+                                         id="FuentesContaminacion"
+                                         required="#{identificacionSitiosContaminadosFuentesContaminacionController.medioFisicoBean.estudio.tieneIdentificacionSitiosContaminados}"
+                                    />
+
+                        </h:panelGrid>
+
+                        <h:panelGrid styleClass="w100 separatorBottom" columns="2" columnClasses="w50, field_mrg w50">
+                            <p:outputLabel value="X" for="x"/>
+                            <p:outputLabel value="Y" for="y"/>
+                            <pe:inputNumber id="x" decimalPlaces="2" thousandSeparator=""
+                                            value="#{identificacionSitiosContaminadosFuentesContaminacionController.medioFisicoBean.identificacionSitiosContaminadosFuentesContaminacion.coordenadaX}"
+                                            required="#{identificacionSitiosContaminadosFuentesContaminacionController.medioFisicoBean.estudio.tieneIdentificacionSitiosContaminados}">
+                                <f:validateLength minimum="6"></f:validateLength>
+                            </pe:inputNumber>
+                            <pe:inputNumber id="y" decimalPlaces="2" thousandSeparator=""
+                                            value="#{identificacionSitiosContaminadosFuentesContaminacionController.medioFisicoBean.identificacionSitiosContaminadosFuentesContaminacion.coordenadaY}"
+                                            required="#{identificacionSitiosContaminadosFuentesContaminacionController.medioFisicoBean.estudio.tieneIdentificacionSitiosContaminados}">
+                                <f:validateLength minimum="7" ></f:validateLength>
+                            </pe:inputNumber>
+                        </h:panelGrid>
+                    </h:panelGroup>
+
+                    <p:separator/>
+
+                    <div class="buttons">
+                        <p:commandButton actionListener="#{identificacionSitiosContaminadosFuentesContaminacionController.agregarIdentificacionSitiosContaminadosFuentesContaminacion()}"
+                                         process="@this identificacionSitiosContaminadosFuentesContaminacionContainer" value="Aceptar"
+                                         update="identificacionSitiosContaminadosFuentesContaminacionTable, identificacionSitiosContaminadosFuentesContaminacionDialog"
+
+                                         oncomplete="addSitioContaminado(xhr, status, args)"/>
+                        <p:commandButton value="Cancelar" type="button" onclick="PF('identificacionSitiosContaminadosFuentesContaminacionDialog').hide()"
+                                         styleClass="secondary"/>
+                    </div>
+                </p:dialog>
+            </p:panelGrid>
+
+            <div class="buttons main">
+                <p:commandButton value="Atrás" immediate="true" process="@this"
+                                 action="/prevencion/licenciamiento-ambiental/eia/medioFisico/calidadSuelo.jsf?faces-redirect=true"
+                                 icon="ui-icon-arrowthick-1-w" />
+
+
+                <p:commandButton value="Guardar" icon="ui-icon-check"
+                                 process="@this identificacionSitiosContaminadosFuentesContaminacionContainer"
+                                 actionListener="#{identificacionSitiosContaminadosFuentesContaminacionController.guardar()}"
+                                 update="@form" />
+
+                <p:commandButton value="Siguiente" immediate="true" process="@this"
+                                 action="/prevencion/licenciamiento-ambiental/eia/adjuntos/adjuntos.jsf?id=13&amp;faces-redirect=true"
+                                 icon="ui-icon-arrowthick-1-e" />
+
+            </div>
+
+            <script type="text/javascript">
+
+                function addSitioContaminado(xhr, status, args) {
+                    if (args.addSitio)
+                        PF('identificacionSitiosContaminadosFuentesContaminacionDialog').hide();
+                    else
+                        PF('identificacionSitiosContaminadosFuentesContaminacionDialog').show();
+                }
+
+            </script>
+
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>

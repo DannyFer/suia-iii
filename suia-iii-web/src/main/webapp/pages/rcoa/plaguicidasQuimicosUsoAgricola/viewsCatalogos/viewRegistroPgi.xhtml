@@ -1,0 +1,144 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:mae-components="http://ec.gob.ambiente/mae-components"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+
+
+<div style="padding-bottom: 12px; padding-left: 4px;">
+	<h:outputText value="Registro de Plan de Gestión Integral PGI"
+		styleClass="bold" />
+</div>
+
+<h:panelGrid styleClass="w100">
+	<p:dataTable id="dtNumeroPgi" var="pgi" styleClass="table table-hover"
+		value="#{administrarRegistroPgiBean.listaNumeroPgi}"
+		paginator="true" paginatorAlwaysVisible="false"
+		paginatorPosition="bottom" sortBy="#{pgi.operador.nombre}"
+		sortOrder="ASCENDING" emptyMessage="#{labels['common.table.empty']}"
+		currentPageReportTemplate="{currentPage} de {totalPages}" rows="20"
+		rowsPerPageTemplate="20,40,60">
+
+		<p:column headerText="RUC / Cédula" filterBy="#{pgi.operador.nombre}"
+			filterMatchMode="contains">
+			<h:outputText value="#{pgi.operador.nombre}" />
+		</p:column>
+		<p:column headerText="Nombre Operador">
+			<h:outputText value="#{pgi.nombreOperador}" />
+		</p:column>
+		<p:column headerText="Nro. Plan de Gestión Integral PGI">
+			<h:outputText value="#{pgi.numeroPlan}" />
+		</p:column>
+		<p:column headerText="Gremio">
+			<h:outputText value="#{pgi.gremio.nombre}" />
+		</p:column>
+		<p:column headerText="Agregar" styleClass="alCenter w10">
+			<f:facet name="header">
+				<p:commandButton value="Agregar" title="Agregar"
+					styleClass="secondary" process="@this" icon="ui-icon-plus"
+					actionListener="#{administrarRegistroPgiBean.agregarPgi()}"
+					update=":form:tab:dlgAgregarPgi :form:tab:txtCedulaOperador"
+					oncomplete="PF('dlgAgregarPgi').show();" resetValues="true" />
+			</f:facet>
+
+			<p:commandButton styleClass="button-small primary" process="@this"
+				icon="ui-icon-pencil"
+				actionListener="#{administrarRegistroPgiBean.editarPgi(pgi)}"
+				update=":form:tab:dlgAgregarPgi :form:tab:txtCedulaOperador"
+				oncomplete="PF('dlgAgregarPgi').show();" resetValues="true" />
+
+			<p:commandButton update="dtNumeroPgi"
+				styleClass="button-small primary" process="@this"
+				icon="ui-icon-trash" immediate="true"
+				actionListener="#{administrarRegistroPgiBean.eliminarPgi(pgi)}"
+				rendered="#{!pgi.esOperadorSga}">
+				<p:confirm icon="ui-icon-alert" header="Confirmación"
+					message="¿Está seguro de eliminar el registro?" />
+			</p:commandButton>
+		</p:column>
+
+	</p:dataTable>
+
+</h:panelGrid>
+
+
+<p:dialog header="Registro de Plan de Gestión Integral PGI"
+	id="dlgAgregarPgi" widgetVar="dlgAgregarPgi" modal="true"
+	resizable="false" width="600" closable="false">
+
+	<p:panelGrid columns="2" styleClass="panel_data w100"
+		columnClasses="header w40, w60">
+		<p:outputLabel value="RUC / Cédula:" style="color: white"
+			for="txtNumeroCedula" />
+		<h:panelGroup>
+			<h:panelGrid styleClass="w100" columns="2"
+				columnClasses="w75 null, w25 null">
+				<p:inputText id="txtCedulaOperador"
+					value="#{administrarRegistroPgiBean.cedulaOperador}"
+					maxlength="20" autocomplete="off" required="true"
+					requiredMessage="El campo 'RUC / Cédula' es requerido"
+					onkeypress="return numbersonly(this, event);"
+					disabled="#{administrarRegistroPgiBean.numeroPgi.esOperadorSga}">
+				</p:inputText>
+				<p:commandButton value="Buscar" update="pnlPgiAdd"
+					styleClass="primary" immediate="true"
+					actionListener="#{administrarRegistroPgiBean.buscarCedula()}"
+					disabled="#{administrarRegistroPgiBean.numeroPgi.esOperadorSga}"
+					process="@this">
+					<p:ajax process="txtCedulaOperador" />
+				</p:commandButton>
+			</h:panelGrid>
+		</h:panelGroup>
+	</p:panelGrid>
+
+	<p:panelGrid id="pnlPgiAdd" columns="2" styleClass="panel_data w100"
+		columnClasses="header w40, w60">
+
+		<h:outputText value="Nombre Operador" />
+		<p:inputText disabled="true"
+			value="#{administrarRegistroPgiBean.numeroPgi.nombreOperador}" />
+		<p:outputLabel value="Nro. Plan de Gestión Integral PGI:"
+			style="color: white" for="txtNroPgi" />
+		<p:inputText id="txtNroPgi" autocomplete="off"
+			value="#{administrarRegistroPgiBean.numeroPgi.numeroPlan}"
+			maxlength="200" required="true" />
+		<p:outputLabel value="Gremio:" style="color: white" for="cmbGremio" />
+		<p:selectOneMenu id="cmbGremio" required="true"
+			value="#{administrarRegistroPgiBean.numeroPgi.gremio}"
+			converter="selectItemConverter" filter="true"
+			filterMatchMode="startsWith">
+			<f:selectItem itemLabel="#{labels['common.item.choose']}"
+				itemValue="#{null}" noSelectionOption="true" />
+			<f:selectItems
+				value="#{administrarRegistroPgiBean.listaGremio}" var="item"
+				itemLabel="#{item.nombre}" itemValue="#{item}" />
+		</p:selectOneMenu>
+	</p:panelGrid>
+
+	<h:inputHidden
+		validator="#{administrarRegistroPgiBean.validateRegistroPgi}" />
+
+	<br />
+	<p:outputPanel>
+		<div class="buttons">
+			<p:commandButton value="Cancelar" styleClass="wizard-custom-btn-back"
+				immediate="true" oncomplete="PF('dlgAgregarPgi').hide();"
+				resetValues="true"
+				actionListener="#{administrarRegistroPgiBean.limpiarPgi()}" />
+			<p:commandButton value="Aceptar"
+				actionListener="#{administrarRegistroPgiBean.aceptarPgi()}"
+				oncomplete="if(!args.validationFailed) PF('dlgAgregarPgi').hide();"
+				update="dtNumeroPgi" process="dlgAgregarPgi" />
+		</div>
+	</p:outputPanel>
+</p:dialog>
+
+
+</html>

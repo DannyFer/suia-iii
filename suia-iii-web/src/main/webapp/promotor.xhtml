@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:controles-prime="http://java.sun.com/jsf/composite/controles-prime"
+	xmlns:mae-composite="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+<h:head>
+	<h:outputStylesheet name="suia-layout.css" library="css" />
+	<h:outputStylesheet name="suia-styles.css" library="css" />
+	<h:outputStylesheet name="suia-pf-custom.css" library="css" />
+	<h:outputScript name="util.js" library="js" />
+	<link rel="shortcut icon"
+		href="#{request.contextPath}/resources/images/favicon.ico" />
+	<title>MAE</title>
+</h:head>
+<h:body onload="nobackbutton();">
+	<div>
+		<div class="header-left-part"></div>
+		<div id="header" class="containerHeader">
+			<div class="header-right-part"></div>
+			<div class="clear"></div>
+			<div class="header-right-part-bar"></div>
+			<div class="clear"></div>
+		</div>
+		<div class="containerPromotor bordercontainer">
+			<div id="page">
+				<div id="content">
+					<ui:include src="/WEB-INF/templates/status.xhtml" />
+					<style>
+.col1 {
+	width: 30%;
+}
+
+.col2 {
+	width: 70%;
+}
+
+.colAlign {
+	vertical-align: top;
+	width: 30%;
+}
+
+.w37 {
+	width: 37%;
+}
+
+.w21 {
+	width: 21%;
+}
+</style>
+					<p:growl globalOnly="true" id="msgs" />
+
+					<h:form id="frmDatosUsuario">
+						<p:panel id="panelUsuario" header="Usuario">
+							<h:panelGrid columns="2" width="100%" columnClasses="col1,col2">
+								<h:outputLabel value="Tipo Entidad*" />
+								<p:selectOneMenu
+									value="#{promotorController.promotorBean.tipoPersona}"
+									style="width: 251px;">
+									<f:selectItem itemLabel="Persona Natural" itemValue="N" />
+									<f:selectItem itemLabel="Persona Jurídica" itemValue="J" />
+									<p:ajax event="change" update="panelUsuario"
+										listener="#{promotorController.cambioTipoPersona()}" />
+								</p:selectOneMenu>
+							</h:panelGrid>
+							<h:panelGrid id="pnlPersonaNatural" columns="2" width="100%"
+								columnClasses="col1,col2"
+								rendered="#{promotorController.promotorBean.tipoPersona == 'N'}">
+								<h:outputLabel value="Tipo de Documento*" />
+								<p:selectOneMenu id="cmbTipoDocumento"
+									value="#{promotorController.promotorBean.usuario.docuId}"
+									style="width: 251px;">
+									<f:selectItems value="#{combosController.listaTipoDocumento}" />
+									<p:ajax event="change"
+										update=":#{p:component('pnlPersonaNatural')},:#{p:component('btnValidar')}"
+										listener="#{promotorController.validarIngresoCampoDocumento()}" />
+								</p:selectOneMenu>
+								<h:outputLabel value="Cédula / RUC / Pasaporte*" />
+								<h:panelGroup>
+									<p:inputText id="txtDocumento"
+										value="#{promotorController.promotorBean.usuario.pin}"
+										maxlength="#{promotorController.promotorBean.scriptTamanioDocumento}"
+										onkeypress="#{promotorController.promotorBean.scriptNumerosDocumento}"
+										styleClass="w37" />
+									<h:outputText value="...." style="color:white;" />
+									<p:commandButton id="btnValidar" style="width: 10%"
+										value="Validar" action="#{promotorController.validarCedula()}"
+										rendered="#{promotorController.eligioPasaporte}"
+										update=":#{p:component('msgs')}, :#{p:component('pnlPersonaNatural')}, :#{p:component('btnAceptar')}"
+										styleClass="primary" />
+								</h:panelGroup>
+								<h:outputLabel value="Nombres y Apellidos*" />
+								<p:inputText id="txtNombre" disabled="#{promotorController.eligioPasaporte}"
+									value="#{promotorController.promotorBean.persona.nombre}"
+									readonly="#{promotorController.promotorBean.wsEncontrado}"
+									styleClass="w37" onkeypress="return soloLetras(event);"
+									onchange="javascript:this.value = this.value.toUpperCase();"
+									style="text-transform: uppercase" maxlength="250" />
+								<h:outputLabel value="Tratamiento y Título Académico *" />
+								<h:panelGroup>
+									<p:selectOneMenu id="cmbTratamiento" style="width: 94px;"
+										value="#{promotorController.promotorBean.idTipoTrato}"
+										disabled="#{promotorController.promotorBean.usuario.docuId =='Cédula' and promotorController.promotorBean.wsEncontrado}">
+										<f:selectItems value="#{combosController.listaTipoTratos}" />
+									</p:selectOneMenu>
+									<h:outputText value="...." style="color:white;" />
+
+									<p:inputText
+										value="#{promotorController.promotorBean.persona.titulo}"
+										styleClass="w21" maxlength="15"
+										style="vertical-align: top; text-transform: uppercase;"
+										onkeypress="return soloLetras(event);"
+										onchange="javascript:this.value = this.value.toUpperCase();" />
+								</h:panelGroup>
+								<h:outputLabel value="Nacionalidad*" />
+								<controles-prime:combo identificador="cmbNacionalidad"
+									lista="#{combosController.listaNacionalidades}"
+									valor="#{promotorController.promotorBean.idNacionalidad}" />
+								<h:outputLabel value="Género*" />
+								<controles-prime:combo identificador="cmbGenero"
+									lista="#{combosController.listaGenero}"
+									valor="#{promotorController.promotorBean.persona.genero}"
+									habilitar="#{promotorController.promotorBean.usuario.docuId =='Cédula' and promotorController.promotorBean.wsEncontrado}" />
+							</h:panelGrid>
+							<h:panelGrid id="pnlPersonaJuridica" columns="2" width="100%"
+								columnClasses="col1,col2"
+								rendered="#{promotorController.promotorBean.tipoPersona == 'J'}">
+								<h:outputLabel value="RUC*" />
+								<h:panelGroup>
+									<p:inputText id="txtJuri"
+										value="#{promotorController.promotorBean.usuario.pin}"
+										styleClass="w37" maxlength="13"
+										disabled="#{promotorController.promotorBean.usuario.id != null}"
+										onkeypress="return numbersonly(this, event);" />
+									<h:outputText value="...." style="color:white;" />
+
+									<p:commandButton value="Validar"
+										action="#{promotorController.validarRuc()}"
+										update=":#{p:component('msgs')}, :#{p:component('pnlPersonaJuridica')}, :#{p:component('btnAceptar')}"
+										style="vertical-align: top" styleClass="primary" />
+								</h:panelGroup>
+								<h:outputLabel value="Nombre organización*" />
+								<controles-prime:todoTextoMayuscula
+									identificador="txtNombreOrganizacion"
+									soloLectura="true"
+									valor="#{promotorController.promotorBean.organizacion.nombre}"
+									tamanio="33" longitud="250" />
+									
+									<h:outputLabel value="Nombre Comercial*" />
+								<controles-prime:todoTextoMayuscula
+									identificador="txtNombreComercial"
+									soloLectura="true"
+									valor="#{promotorController.promotorBean.organizacion.nombreComercial}"
+									tamanio="33" longitud="250" />
+									
+								<h:outputLabel value="Cédula / RUC Representante*" />
+								<controles-prime:soloTextoNumeros
+									identificador="txtDocRepresentante"
+									valor="#{promotorController.promotorBean.persona.pin}"
+									tamanio="33" longitud="13"
+									soloLectura="true" />
+								<h:outputLabel value="Nombres y Apellidos del representante*" />
+								<controles-prime:soloTextoMayuscula
+									identificador="txtNombreRepresentante"
+									soloLectura="true"
+									valor="#{promotorController.promotorBean.persona.nombre}"
+									tamanio="33" longitud="250" />
+								<h:outputLabel value="Cargo Representante*" />
+								<controles-prime:todoTextoMayuscula
+									identificador="txtCargoRepresentante" tamanio="33"
+									longitud="250"
+									valor="#{promotorController.promotorBean.persona.posicion}" />
+								<h:outputLabel value="Tipo de Organización*" />
+								<p:selectOneMenu id="cmbTipoOrganizacion"
+									value="#{promotorController.promotorBean.idTipoOrganizacion}"
+									style="width: 251px;">
+									<f:selectItems
+										value="#{combosController.listaTipoOrganizacion}" />
+									<p:ajax event="change"
+										update=":#{p:component('pnlParticipacionEstado')}" />
+								</p:selectOneMenu>
+								<h:outputText value="" />
+								<h:panelGroup id="pnlParticipacionEstado">
+									<controles-prime:combo identificador="cmbParticipacionEstado"
+										rendered="#{promotorController.promotorBean.idTipoOrganizacion == 8}"
+										lista="#{combosController.listaEmpresaMixta}"
+										valor="#{promotorController.promotorBean.organizacion.participacionEstado}" />
+								</h:panelGroup>
+							</h:panelGrid>
+							<h:panelGrid columns="2" width="100%" columnClasses="col1,col2">
+
+							</h:panelGrid>
+						</p:panel>
+
+						<p:panel header="Información de Contacto">
+							<h:panelGrid columns="2" width="100%" columnClasses="col1,col2">
+								<h:outputLabel value="Teléfono*" />
+								<p:inputText value="#{promotorController.promotorBean.telefono}"
+									styleClass="w37" id="txtTelefono" maxlength="15"
+									onkeypress="return numbersonly(this,event)">
+									<pe:keyFilter mask="num" />
+								</p:inputText>
+								<h:outputLabel value="Celular*" />
+								<p:inputText value="#{promotorController.promotorBean.celular}"
+									styleClass="w37" id="txtCelular" maxlength="15"
+									onkeypress="return numbersonly(this,event)">
+									<pe:keyFilter mask="num" />
+								</p:inputText>
+								<h:outputLabel value="Correo electrónico*" />
+								<p:inputText value="#{promotorController.promotorBean.email}"
+									styleClass="w37" id="txtEmail" maxlength="50" />
+								<h:outputLabel value="Dirección*" />
+								<p:inputTextarea
+									value="#{promotorController.promotorBean.direccion}"
+									maxlength="250" id="txtDireccion" rows="2" styleClass="w37"
+									autoResize="false" />
+								<h:outputLabel value="Información de Contacto Adicional" />
+								<p:dataTable id="tblContacto" style="width: 100%"
+									value="#{promotorController.promotorBean.listaContactoOpcionales}"
+									var="contacto" emptyMessage="-">
+									<p:column width="30%">
+										<f:facet name="header">
+											<p:selectOneMenu id="cmbTipoContacto"
+												value="#{promotorController.promotorBean.idFormaContacto}"
+												style="width: 175px;">
+												<f:selectItems
+													value="#{combosController.listaFormasContactoPromotor}" />
+												<p:ajax event="change"
+													update=":#{p:component('valor')}, :#{p:component('btnContacto')}"
+													listener="#{promotorController.validarNumeros()}" />
+											</p:selectOneMenu>
+										</f:facet>
+										<center>
+											<p:selectOneMenu disabled="true"
+												style="width: 175px; background-color: #FFFFFF; color:
+												black;"
+												value="#{contacto.formasContacto.id}">
+												<f:selectItems
+													value="#{combosController.listaFormasContactoPromotor}" />
+											</p:selectOneMenu>
+										</center>
+									</p:column>
+
+									<p:column width="55%">
+										<f:facet name="header">
+											<p:inputText
+												value="#{promotorController.promotorBean.contacto.valor}"
+												size="40"
+												maxlength="#{promotorController.promotorBean.scriptTamanio}"
+												readonly="#{promotorController.promotorBean.idFormaContacto == null}"
+												id="valor"
+												onkeypress="#{promotorController.promotorBean.scriptNumeros}" />
+										</f:facet>
+										<h:outputText value="#{contacto.valor}" />
+									</p:column>
+
+									<p:column width="15%">
+										<f:facet name="header">
+											<p:commandButton id="btnContacto" value="Adicionar"
+												disabled="#{promotorController.promotorBean.idFormaContacto == null}"
+												action="#{promotorController.agregarContacto()}"
+												update="tblContacto,:#{p:component('msgs')}" />
+										</f:facet>
+										<div class="buttons-inline alCenter">
+											<p:commandButton icon="ui-icon-trash" styleClass="primary"
+												title="Remover"
+												action="#{promotorController.removerContacto(contacto)}"
+												update="tblContacto" />
+										</div>
+									</p:column>
+								</p:dataTable>
+							</h:panelGrid>
+						</p:panel>
+
+						<p:panel header="Ubicación">
+							<mae-composite:ubicacionGeografica
+								idParroquia="#{promotorController.promotorBean.idParroquia}" />
+						</p:panel>
+						<p:panel
+							header="Condiciones de Uso del Sistema Único de Información Ambiental (SUIA)">
+							<h:panelGrid columns="2" width="100%" columnClasses="col1,col2">
+								<h:outputLabel value="Condiciones de Uso" />
+								<h:outputLink value="#{request.contextPath}/acuerdo/acuerdo.pdf"
+									target="_blank">Ver</h:outputLink>
+								<h:outputLabel value="¿Acepta las Condiciones de Uso? " />
+								<h:panelGrid columns="2">
+									<p:selectBooleanCheckbox
+										value="#{promotorController.promotorBean.aceptaTerminos}" />
+									<h:outputText value="Sí, acepto." />
+								</h:panelGrid>
+							</h:panelGrid>
+
+						</p:panel>
+						<div class="buttons main">
+							<p:commandButton id="btnAceptar" value="Aceptar"
+								action="#{promotorController.validarRegistro}"
+								icon="ui-icon-check"
+								update=":#{p:component('pnlPersonaNatural')}" />
+							<p:commandButton value="Cancelar"
+								action="#{promotorController.cancelar()}" styleClass="secondary"
+								icon="ui-icon-cancel" ajax="false" immediate="true" />
+						</div>
+					</h:form>
+				</div>
+
+			</div>
+		</div>
+
+		<p:dialog widgetVar="dialogGuardar" modal="true" resizable="false"
+			closable="false" draggable="false" header="Información">
+			<p:outputPanel autoUpdate="true">
+				<h:panelGrid columns="1" styleClass="w100">
+					<h:outputText
+						value="Por favor verifique la dirección de correo electrónico ingresada:" />
+					<h1>#{promotorController.promotorBean.email}</h1>
+					<h:outputText styleClass="encabezado text-red"
+						value="Nota: En caso de que sea incorrecta no podrá ingresar al sistema, presione el botón Cancelar y realice las modificaciones pertinentes." />
+				</h:panelGrid>
+				<div align="right">
+					<p:commandButton id="btnAceptar" value="Aceptar"
+						action="#{promotorController.guardar()}" icon="ui-icon-check"
+						update=":#{p:component('msgs')}" styleClass="primary" />
+					<p:commandButton value="Cancelar"
+						onclick="PF('dialogGuardar').hide();" styleClass="secondary"
+						icon="ui-icon-cancel" />
+				</div>
+			</p:outputPanel>
+		</p:dialog>
+		<ui:insert name="footer">
+			<ui:include src="/WEB-INF/templates/footer.xhtml" />
+		</ui:insert>
+	</div>
+</h:body>
+</html>

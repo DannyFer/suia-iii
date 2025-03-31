@@ -1,0 +1,380 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+	xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:control="http://java.sun.com/jsf/composite/controles-prime">
+
+	<style>
+.ui-accordion .ui-accordion-header .pnlBotones .ui-icon {
+	left: 50% !important;
+}
+
+.ui-fileupload-content {
+	border: none !important;
+	padding: 0px;
+}
+
+.cssHeaderTable .ui-icon {
+	background-image:
+		url("/suia-iii/javax.faces.resource/images/ui-icons_ffffff_256x240.png.jsf?ln=primefaces-suia")
+		!important;
+}
+
+.noHeaderTable.ui-datatable table thead tr {
+	display: none;
+}
+
+.noHeaderTable.ui-datatable td {
+	border: 1px solid #aaa !important;
+}
+</style>
+
+	<p:panelGrid id="pnlPlanesManejo" columns="1" layout="grid"
+		styleClass="w100" columnClasses="w100">
+
+		<h:outputText
+			rendered="#{estudioImpactoAmbientalController.numeroRevision > 0}"
+			value="#{estudioImpactoAmbientalController.mensajeSubPlanesObservados}"
+			styleClass="text-red alJustify" escape="false" />
+
+		<p:commandButton ajax="false" value="Descargar plantilla"
+			rendered="#{estudioImpactoAmbientalController.habilitadoIngreso}"
+			styleClass="toRight field_mrg primary" immediate="true">
+			<p:fileDownload
+				value="#{estudioImpactoAmbientalController.getPlantillaPlan()}" />
+		</p:commandButton>
+
+		<p:accordionPanel id="acdPlan"
+			activeIndex="#{estudioImpactoAmbientalController.indexPma}"
+			value="#{estudioImpactoAmbientalController.listaPlanManejo}"
+			var="planEia" dynamic="false">
+			<p:ajax event="tabChange" update="acdPlan"
+				listener="#{estudioImpactoAmbientalController.onTabChange}" />
+			<p:tab id="tab">
+				<f:facet name="title">
+					<div>
+						#{planEia.subplan.nombre}
+						<p:commandButton value="Adjuntar Sub Plan"
+							rendered="#{estudioImpactoAmbientalController.habilitadoIngreso and !planEia.planManejo.registroRevisado}"
+							action="#{estudioImpactoAmbientalController.nuevoDetalleSubPlan(planEia)}"
+							oncomplete="PF('dlgAdjuntarPlanManejo').show()"
+							onclick="event.stopPropagation();"
+							update=":formDialogAdjunto:dlgAdjuntarPlanManejo :form:pnlButton"
+							styleClass="button-small-text toRight field_mrg" />
+					</div>
+				</f:facet>
+
+				<h:panelGroup id="pnlIngresoPlan">
+					<h:panelGroup
+						rendered="#{planEia.subplan.requerido or (!planEia.subplan.requerido and planEia.planManejo.ingresoDetalle)}">
+						<h:panelGrid columns="3" styleClass="panel_data w100"
+							columnClasses="header w30, null, alCenter w15"
+							rowClasses="null, alt">
+							<h:outputText value="Archivo Sub Plan: " />
+							<h:outputText
+								value="#{planEia.planManejo.plantillaSubPlan.nombre}" />
+							<h:panelGroup>
+								<p:commandButton id="downloadAutorizacion"
+									icon="ui-icon-arrowthick-1-s" styleClass="secondary"
+									title="Ver" ajax="false" immediate="true"
+									rendered="#{planEia.planManejo.plantillaSubPlan.nombre ne null}">
+									<p:fileDownload
+										value="#{descargarDocumentosCoaController.descargarDocumentoEIA(planEia.planManejo.plantillaSubPlan)}" />
+								</p:commandButton>
+								<p:commandButton icon="ui-icon-trash"
+									title="#{msg['button.eliminar']}" styleClass="secondary"
+									update="acdPlan :form:pnlButton"
+									rendered="#{planEia.planManejo.plantillaSubPlan.nombre ne null and estudioImpactoAmbientalController.habilitadoIngreso and !planEia.planManejo.registroRevisado}"
+									action="#{estudioImpactoAmbientalController.eliminarPlantillaSubPlan(planEia)}">
+									<p:confirm header="Confirmación"
+										message="¿Está seguro que desea eliminar el documento?"
+										icon="ui-icon-alert" />
+								</p:commandButton>
+							</h:panelGroup>
+						</h:panelGrid>
+						<h:panelGrid columns="2" styleClass="panel_data w100"
+							columnClasses="header w30, null" rowClasses="null, alt">
+							<h:outputText value="Costo Sub Plan: " />
+							<h:outputText value="#{planEia.planManejo.costoSubplan}">
+								<f:convertNumber type="currency" currencySymbol="$ " />
+							</h:outputText>
+						</h:panelGrid>
+
+						<br />
+						<br />
+						<p:dataTable id="tblAnexosSubPlan" var="item"
+							value="#{planEia.planManejo.listaAnexosSubPlan}"
+							styleClass="noHeaderTable"
+							emptyMessage="#{labels['common.table.empty']}"
+							style="margin-bottom: 10px;">
+							<f:facet name="header">
+								<h:outputText value="Anexos (Opcional) (Formato PDF hasta 20MB)"
+									styleClass="w80 toLeft" />
+								<p:commandButton icon="ui-icon-plus"
+									actionListener="#{estudioImpactoAmbientalController.agregarAnexoSubPlan(planEia)}"
+									value="#{msg['button.agregar']}" process="tblAnexosSubPlan"
+									rendered="#{estudioImpactoAmbientalController.habilitadoIngreso and !planEia.planManejo.registroRevisado}"
+									styleClass="cssHeaderTable button-small-text primary toRight field_mrg"
+									update=":form:pnlButton"
+									oncomplete="PF('dlgAnexoSubPlan').show()" />
+							</f:facet>
+							<p:column headerText="Nombre del adjunto">
+								<h:outputText value="#{item.nombre}" />
+							</p:column>
+							<p:column headerText="Acción" styleClass="alCenter w15">
+								<p:commandButton id="downloadAutorizacion"
+									icon="ui-icon-arrowthick-1-s" styleClass="secondary"
+									title="Ver" ajax="false" immediate="true"
+									rendered="#{item.nombre ne null}">
+									<p:fileDownload
+										value="#{descargarDocumentosCoaController.descargarDocumentoEIA(item)}" />
+								</p:commandButton>
+								<p:commandButton icon="ui-icon-trash"
+									title="#{msg['button.eliminar']}" styleClass="secondary"
+									process="tblAnexosSubPlan"
+									update="tblAnexosSubPlan :form:pnlButton"
+									rendered="#{estudioImpactoAmbientalController.habilitadoIngreso and !planEia.planManejo.registroRevisado}"
+									action="#{estudioImpactoAmbientalController.eliminarAnexoSubPlan(planEia, item)}">
+									<p:confirm header="Confirmación"
+										message="¿Está seguro que desea eliminar el documento?"
+										icon="ui-icon-alert" />
+								</p:commandButton>
+							</p:column>
+						</p:dataTable>
+					</h:panelGroup>
+
+					<h:panelGroup
+						rendered="#{!planEia.subplan.requerido and planEia.planManejo.ingresoDetalle ne null and !planEia.planManejo.ingresoDetalle}">
+						<h:panelGrid columns="1" layout="grid" styleClass="w100"
+							columnClasses="" style="padding:10px !important">
+							<p:outputLabel value="Justificación" styleClass="bold" />
+							<p:inputTextarea
+								placeholder="Entre como mínimo 1 y como máximo 5000 caracteres."
+								value="#{planEia.planManejo.justificacion}" id="justificacion"
+								disabled="true" maxlength="5000" autoResize="false" rows="4"
+								readonly="true">
+								<p:ajax process="@this" />
+							</p:inputTextarea>
+						</h:panelGrid>
+					</h:panelGroup>
+
+					<br />
+					<h:panelGroup
+						rendered="#{estudioImpactoAmbientalController.numeroRevision > 0}">
+
+						<h:panelGroup
+							rendered="#{estudioImpactoAmbientalController.habilitadoIngreso}">
+							<p:separator />
+							<h:panelGrid styleClass="w100" columns="3"
+								columnClasses="w30 null, w10 null, w60 null">
+								<p:outputLabel value="¿Existen observaciones?" />
+								<p:selectOneRadio disabled="true"
+									value="#{planEia.planManejo.tieneObservaciones}">
+									<f:selectItem itemValue="true" itemLabel="Si" />
+									<f:selectItem itemValue="false" itemLabel="No" />
+								</p:selectOneRadio>
+								<h:outputText value="" />
+							</h:panelGrid>
+						</h:panelGroup>
+
+						<h:panelGroup
+							rendered="#{estudioImpactoAmbientalController.mostrarObservaciones}">
+							<p:separator />
+							<h:panelGrid styleClass="w100" columns="3"
+								columnClasses="w30 null, w10 null, w60 null">
+								<p:outputLabel value="¿Existen observaciones?" />
+								<p:selectOneRadio id="rbtObservacionesSubPlan"
+									styleClass="cssRbtObs#{planEia.subplan.codigo}"
+									requiredMessage="En el #{planEia.subplan.nombre} no se registró la respuesta a la pregunta ¿Existen observaciones?, por favor registrar la respuesta correspondiente de acuerdo con el análisis realizado."
+									required="true"
+									disabled="#{planEia.planManejo.planManejoObservacion.tieneObservaciones and (planEia.listaObservacionesSubPlan.size() > 0 or (estudioImpactoAmbientalController.numeroRevision > 1 and planEia.planManejo.listaSubsanacionesSubPlan.size() > 0))}"
+									value="#{planEia.planManejo.planManejoObservacion.tieneObservaciones}">
+									<f:selectItem itemValue="true" itemLabel="Si" />
+									<f:selectItem itemValue="false" itemLabel="No" />
+									<p:ajax process="@this"
+										update="pnlObservacionesPma :form:pnlButton" />
+								</p:selectOneRadio>
+								<h:outputText value="" />
+							</h:panelGrid>
+						</h:panelGroup>
+
+						<h:panelGroup
+							rendered="#{planEia.planManejo.tieneObservaciones and estudioImpactoAmbientalController.habilitadoIngreso}">
+							<br />
+							<p:dataTable id="tblObservaciones" var="item"
+								styleClass="table table-hover"
+								value="#{planEia.listaObservacionesSubPlan}" paginator="true"
+								paginatorAlwaysVisible="false" paginatorPosition="bottom"
+								rowIndexVar="index"
+								emptyMessage="#{labels['common.table.empty']}"
+								currentPageReportTemplate="{currentPage} de {totalPages}"
+								rows="5" rowsPerPageTemplate="5,10,15">
+								<f:facet name="header">Observaciones</f:facet>
+								<p:column headerText="Nro." styleClass="w8 alCenter">
+									<h:outputText value="#{index + 1}" />
+								</p:column>
+								<p:column headerText="Técnico">
+									<h:outputText value="#{item.usuario.persona.nombre}" />
+								</p:column>
+								<p:column headerText="Fecha">
+									<h:outputText value="#{item.fechaRegistro}">
+										<f:convertDateTime pattern="dd/MM/yyyy, h:mm:ss aa" />
+									</h:outputText>
+								</p:column>
+								<p:column headerText="Campo observado">
+									<h:outputText style="word-wrap: break-word;" escape="false"
+										value="#{item.campo}" />
+								</p:column>
+								<p:column headerText="Observación" styleClass="w10 alCenter">
+									<p:commandButton icon="ui-icon-search"
+										styleClass="button-small primary" title="Ver" process="@this"
+										update=":formDialogAdjunto:dlgVerObservacionSubPlan"
+										actionListener="#{estudioImpactoAmbientalController.verDetalleObservacionPma(item)}">
+									</p:commandButton>
+								</p:column>
+								<p:column headerText="¿Corregida?" styleClass="w10 alCenter">
+									<h:outputText
+										value="#{item.observacionCorregida ? 'Si' : 'No'}" />
+								</p:column>
+							</p:dataTable>
+						</h:panelGroup>
+
+						<h:panelGroup
+							rendered="#{planEia.planManejo.tieneObservaciones and planEia.planManejo.listaSubsanacionesSubPlan.size() > 0}">
+							<br />
+							<p:accordionPanel id="acdProgramas"
+								value="#{planEia.planManejo.listaSubsanacionesSubPlan}"
+								var="planSubsanacionEia" dynamic="false"
+								activeIndex="#{estudioImpactoAmbientalController.indexSubsanacion}">
+								<p:tab>
+									<f:facet name="title">
+										<div class="pnlBotones">
+											<h:outputText
+												value="#{planSubsanacionEia.planManejo.getTituloObservacion()}" />
+											<h:panelGroup>
+												<p:commandButton value="Subsanar observaciones"
+													action="#{estudioImpactoAmbientalController.nuevoDetalleSubPlan(planSubsanacionEia)}"
+													oncomplete="PF('dlgAdjuntarPlanManejo').show()"
+													onclick="event.stopPropagation();"
+													rendered="#{estudioImpactoAmbientalController.habilitadoIngreso and !planSubsanacionEia.planManejo.registroRevisado}"
+													update=":formDialogAdjunto:dlgAdjuntarPlanManejo :form:pnlButton"
+													styleClass="button-small-text toRight field_mrg" />
+											</h:panelGroup>
+										</div>
+									</f:facet>
+
+									<h:panelGroup
+										rendered="#{planEia.subplan.requerido or (!planEia.subplan.requerido and planSubsanacionEia.planManejo.ingresoDetalle)}">
+										<h:panelGrid columns="3" styleClass="panel_data w100"
+											columnClasses="header w30, null, alCenter w10"
+											rowClasses="null, alt">
+											<h:outputText value="Archivo Sub Plan: " />
+											<h:outputText
+												value="#{planSubsanacionEia.planManejo.plantillaSubPlan.nombre}" />
+											<h:panelGroup>
+												<p:commandButton id="downloadAutorizacion"
+													icon="ui-icon-arrowthick-1-s"
+													styleClass="button-small secondary" title="Ver"
+													ajax="false" immediate="true"
+													rendered="#{planSubsanacionEia.planManejo.plantillaSubPlan.nombre ne null}">
+													<p:fileDownload
+														value="#{descargarDocumentosCoaController.descargarDocumentoEIA(planSubsanacionEia.planManejo.plantillaSubPlan)}" />
+												</p:commandButton>
+												<p:commandButton icon="ui-icon-trash"
+													title="#{msg['button.eliminar']}"
+													styleClass="button-small secondary"
+													update="acdProgramas :form:pnlButton"
+													rendered="#{planSubsanacionEia.planManejo.plantillaSubPlan.nombre ne null and estudioImpactoAmbientalController.habilitadoIngreso and !planSubsanacionEia.planManejo.registroRevisado}"
+													action="#{estudioImpactoAmbientalController.eliminarPlantillaSubPlan(planSubsanacionEia)}">
+													<p:confirm header="Confirmación"
+														message="¿Está seguro que desea eliminar el documento?"
+														icon="ui-icon-alert" />
+												</p:commandButton>
+											</h:panelGroup>
+										</h:panelGrid>
+										<h:panelGrid columns="2" styleClass="panel_data w100"
+											columnClasses="header w30, null" rowClasses="null, alt">
+											<h:outputText value="Costo Sub Plan: " />
+											<h:outputText
+												value="#{planSubsanacionEia.planManejo.costoSubplan}">
+												<f:convertNumber type="currency" currencySymbol="$ " />
+											</h:outputText>
+										</h:panelGrid>
+
+										<br />
+										<p:dataTable id="tblAnexosSubsanacion" var="item"
+											value="#{planSubsanacionEia.planManejo.listaAnexosSubPlan}"
+											styleClass="" emptyMessage="#{labels['common.table.empty']}">
+											<f:facet name="header">
+												<h:outputText
+													value="Anexos (Opcional) (Formato PDF hasta 20MB)"
+													styleClass="w80 toLeft" />
+												<p:commandButton icon="ui-icon-plus"
+													actionListener="#{estudioImpactoAmbientalController.agregarAnexoSubPlan(planSubsanacionEia)}"
+													value="#{msg['button.agregar']}"
+													process="tblAnexosSubsanacion"
+													rendered="#{estudioImpactoAmbientalController.habilitadoIngreso and !planSubsanacionEia.planManejo.registroRevisado}"
+													styleClass="cssHeaderTable primary toRight field_mrg"
+													update=":form:pnlButton"
+													oncomplete="PF('dlgAnexoSubPlan').show()" />
+											</f:facet>
+											<p:column headerText="Nombre del adjunto">
+												<h:outputText value="#{item.nombre}" />
+											</p:column>
+											<p:column headerText="Acción" styleClass="alCenter w15">
+												<p:commandButton id="downloadAutorizacion"
+													icon="ui-icon-arrowthick-1-s" styleClass="secondary"
+													title="Ver" ajax="false" immediate="true"
+													rendered="#{item.nombre ne null}">
+													<p:fileDownload
+														value="#{descargarDocumentosCoaController.descargarDocumentoEIA(item)}" />
+												</p:commandButton>
+												<p:commandButton icon="ui-icon-trash"
+													title="#{msg['button.eliminar']}" styleClass="secondary"
+													process="tblAnexosSubsanacion"
+													update="tblAnexosSubsanacion :form:pnlButton"
+													rendered="#{estudioImpactoAmbientalController.habilitadoIngreso and !planSubsanacionEia.planManejo.registroRevisado}"
+													action="#{estudioImpactoAmbientalController.eliminarAnexoSubPlan(planSubsanacionEia, item)}">
+													<p:confirm header="Confirmación"
+														message="¿Está seguro que desea eliminar el documento?"
+														icon="ui-icon-alert" />
+												</p:commandButton>
+											</p:column>
+										</p:dataTable>
+									</h:panelGroup>
+									<h:panelGroup
+										rendered="#{!planEia.subplan.requerido and planSubsanacionEia.planManejo.ingresoDetalle ne null and !planSubsanacionEia.planManejo.ingresoDetalle}">
+										<h:panelGrid columns="1" layout="grid" styleClass="w100"
+											columnClasses="" style="padding:10px !important">
+											<p:outputLabel value="Justificación" styleClass="bold" />
+											<p:inputTextarea
+												placeholder="Entre como mínimo 1 y como máximo 5000 caracteres."
+												value="#{planSubsanacionEia.planManejo.justificacion}"
+												id="justificacion" disabled="true" maxlength="5000"
+												autoResize="false" rows="4" readonly="true">
+												<p:ajax process="@this" />
+											</p:inputTextarea>
+										</h:panelGrid>
+									</h:panelGroup>
+								</p:tab>
+							</p:accordionPanel>
+						</h:panelGroup>
+
+						<h:panelGroup id="pnlObservacionesPma">
+							<ui:include
+								src="/pages/rcoa/estudioImpactoAmbiental/formularios/viewObservacionPma.xhtml" />
+						</h:panelGroup>
+					</h:panelGroup>
+				</h:panelGroup>
+
+			</p:tab>
+		</p:accordionPanel>
+
+
+	</p:panelGrid>
+</ui:composition>

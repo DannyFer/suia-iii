@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/default-task.xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:t="http://myfaces.apache.org/tomahawk"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:mae="http://java.sun.com/jsf/composite/mae-composite"
+                xmlns:observaciones="http://java.sun.com/jsf/composite/observaciones">
+<ui:define name="context-extra">
+	<h:outputText value="Trámite" />
+	<h:outputText value="#{registrarSustanciasQuimicasController.registroSustanciaQuimica.codigo}" />
+	<h:outputLink value="ingresarInformacionRSQVer.jsf" target="_blank">
+		<p:commandButton type="button" styleClass="primary button-small" icon="ui-icon-search" />
+	</h:outputLink>	
+</ui:define>
+
+ <ui:define name="content">    
+ <h:form id="form">
+ <h:outputText value="Estimado técnico, la información cargada por el operador la debe visualizar presionando sobre el botón de la lupa del campo Trámite en la sección del Contexto de la actividad" />
+ <br />
+ 	<p:panel>
+    	<f:facet name="header">
+        	<p:outputLabel value="Resultado de la revisión de RSQ y conclusiones de inspección"/>        		
+        </f:facet>
+        <h:panelGrid columns="2" layout="grid" styleClass="panel_data w100" columnClasses="header w25,w75">
+        	<h:outputText value="Tipo Pronunciamiento"/>
+        	<p:selectOneRadio value="#{revisarResultadoInspeccionRSQController.registroSustanciaQuimica.tipoPronunciamiento}" 
+			required="true" requiredMessage="Campo Tipo Pronunciamiento es Requerido" converter="selectItemConverter">
+				<f:selectItems value="#{revisarResultadoInspeccionRSQController.tipoPronunciamientoLista}" var="item"
+				 itemLabel="#{item.nombre}" itemValue="#{item}"/>
+				<p:ajax update="btnEnviar"/>
+			</p:selectOneRadio>	
+		</h:panelGrid>                          
+               
+    </p:panel>
+    
+    <p:panel>
+    	<f:facet name="header">
+        	<p:outputLabel value="Resultados de las inspecciones realizadas"/>        		
+        </f:facet>                           
+        <p:dataTable id="resultadosTable" value="#{revisarResultadoInspeccionRSQController.ubicacionSustanciaProyectoLista}" var="item"
+	 			emptyMessage="#{labels['common.table.empty']}" lazy="true">
+
+			<p:column headerText="Sustancia Quimica" styleClass="alCenter">
+				<h:outputText value="#{item.gestionarProductosQuimicosProyectoAmbiental.sustanciaquimica.descripcion}" />
+			</p:column>
+
+			<p:column headerText="Lugar">
+				<h:outputText value="#{item.lugares}" />
+			</p:column>
+
+			<p:column headerText="Provincia">
+				<h:outputText value="#{item.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+			</p:column>
+			
+			<p:column headerText="Cantón">
+				<h:outputText value="#{item.ubicacionesGeografica.nombre}" />
+			</p:column>
+			
+			<p:column headerText="Dirección">
+				<h:outputText value="#{item.direccion}" />
+			</p:column>
+			
+			<p:column headerText="Teléfono">
+				<h:outputText value="#{item.telefono}" />
+			</p:column>
+
+			<p:column headerText="Inspección" styleClass="w10 alCenter">
+				<h:outputText value="#{item.necesitaInspeccion?'Si':'No'}" />
+			</p:column>
+			
+			<p:column headerText="Cumple">
+				<p:selectOneRadio value="#{item.cumpleValor}"  layout="grid" columns="1"
+				required="true" requiredMessage="Campo Cumple es Requerido"
+				rendered="#{item.necesitaInspeccion}" disabled="true">
+					<f:selectItem itemLabel="Si" itemValue="#{true}"/>
+					<f:selectItem itemLabel="No" itemValue="#{false}"/>
+					<p:ajax update=":form:observacionesTable"/>
+				</p:selectOneRadio>
+			</p:column>
+
+			<p:column headerText="Acción">
+				<p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary" immediate="true"
+				rendered="#{item.necesitaInspeccion and not empty revisarResultadoInspeccionRSQController.buscarInforme(item)}">
+                	<p:fileDownload value="#{revisarResultadoInspeccionRSQController.descargarDocumento(item)}"/>
+                </p:commandButton> 
+                <h:outputText value="Sin Informe de Inspección de Apoyo" 
+                rendered="#{empty revisarResultadoInspeccionRSQController.buscarInforme(item)}"/>
+			</p:column>
+		</p:dataTable>		
+		    
+<!-- 	</p:panel> -->
+	
+<!-- 	<p:panel>	 -->
+	<p:panelGrid columns="1" layout="grid" styleClass="w100" rendered="#{not empty revisarResultadoInspeccionRSQController.documentoInforme}">
+		<f:facet name="header">
+			<h:outputText value="Informe de Inspección General"/>		
+		</f:facet>
+		<p:commandButton value="Descargar" ajax="false" icon="ui-icon-arrowthick-1-s" styleClass="primary" immediate="true">
+             <p:fileDownload value="#{documentosRSQController.streamedContentRsq(revisarResultadoInspeccionRSQController.documentoInforme)}"/>
+         </p:commandButton> 		
+	</p:panelGrid> 
+<!-- 	</p:panel>	 -->
+           	
+<!--     <p:panel> -->	
+<!--     	<f:facet name="header"> -->
+			<br />	
+        	<p:outputLabel value="Observaciones encontradas en la inspección de campo."/>        	
+        	<br />	
+        	<br />	
+<!--         </f:facet>                            -->
+        <p:dataTable id="observacionesTable" value="#{revisarResultadoInspeccionRSQController.ubicacionSustanciaProyectoListaObservaciones}" var="item"
+	 			emptyMessage="#{labels['common.table.empty']}" lazy="true">
+
+			<p:column headerText="Sustancia Quimica" styleClass="alCenter w15">
+				<h:outputText value="#{item.gestionarProductosQuimicosProyectoAmbiental.sustanciaquimica.descripcion}" />
+			</p:column>
+
+			<p:column headerText="Lugar" styleClass="w15">
+				<h:outputText value="#{item.lugares}" />
+			</p:column>
+
+			<p:column headerText="Provincia / Cantón" styleClass="w15">
+				<h:outputText value="#{item.ubicacionesGeografica.ubicacionesGeografica.nombre}" />
+						/
+				<h:outputText value="#{item.ubicacionesGeografica.nombre}" />
+			</p:column>
+
+			<p:column headerText="Cumple" styleClass="w10 alCenter">
+				<h:outputText value="#{item.cumpleValor?'Si':'No'}"/>
+			</p:column>
+
+			<p:column headerText="Observaciones">
+				<p:inputTextarea value="#{item.observacionesInforme}" maxlength="255" styleClass="w100"
+				required="true" requiredMessage="El campo 'Observaciones' es requerido" disabled="true"/>
+			</p:column>
+		</p:dataTable> 
+	</p:panel>
+	
+	<p:panel>
+    	<f:facet name="header">
+        	<p:outputLabel value="Observaciones a enviar al operador"/>        		
+        </f:facet>                           
+        <observaciones:tablaObservacionesRSQ idComponent="@this"
+				componenteActualizarEliminar="@none" 
+				seccion="*"
+				nombreClase="RegistroSustanciaQuimica"
+				idClase="#{revisarResultadoInspeccionRSQController.registroSustanciaQuimica.id}"
+				aparace="true" 
+				mostrarSiVacio="true" 
+				soloLectura="true" />       
+	</p:panel>
+	
+	<t:div styleClass="buttons main">                            
+    	<p:commandButton value="Guardar"
+        	action="#{revisarResultadoInspeccionRSQController.guardar()}"
+            icon="ui-icon-disk" update=":#{p:component('form')}"/>
+        <p:commandButton id="btnEnviar" value="Enviar"
+            action="#{revisarResultadoInspeccionRSQController.enviar()}"
+            icon="ui-icon-check" update=":#{p:component('form')}"
+            disabled="#{empty revisarResultadoInspeccionRSQController.registroSustanciaQuimica.tipoPronunciamiento}"/>                            
+        <p:commandButton value="Cancelar" styleClass="secondary" icon="ui-icon-close" 
+        	action="#{revisarResultadoInspeccionRSQController.irBandeja()}" 
+        	process="@this"/>
+        
+    </t:div>
+</h:form>         
+</ui:define>
+</ui:composition>

@@ -1,0 +1,134 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	template="/WEB-INF/templates/default-task.xhtml">
+	<ui:define name="context-extra">
+		<h:outputText value="Datos" />
+		<h:outputText value="Estudio de Impacto Ambiental" />
+
+		<h:outputLink value="#{request.contextPath}#{eia.verEIA()}"
+			target="_blank">
+			<p:commandButton type="button" styleClass="primary button-small"
+				icon="ui-icon-search" />
+		</h:outputLink>
+
+
+		<h:outputText value="Informe ténico" />
+		<h:outputText value="Datos del informe técnico" />
+
+		<p:commandButton styleClass="primary button-small"
+			actionListener="#{oficioAprobacionEiaBean.setMostrarInforme(true)}"
+			icon="ui-icon-search" oncomplete="PF('dlg2').show();" update="modal" />
+
+		<p:dialog header="Informe Técnico" widgetVar="dlg2" modal="true"
+			id="modal" height="500" width="100%">
+			<p:outputPanel rendered="#{oficioAprobacionEiaBean.mostrarInforme}">
+				<ui:include src="../vistaPrevia/informeTecnicoEIAVistaPrevia.xhtml" />
+			</p:outputPanel>
+		</p:dialog>
+
+	</ui:define>
+	<ui:define name="content">
+		<f:event type="preRenderView"
+			listener="#{descargarLicenciaAmbientalLABean.validarTareaBpm()}" />
+		<h:form>
+			<h3>Descargar Pronunciamiento</h3>
+			<br />
+			
+			<h:panelGrid columns="2" text-align="left" columnClasses="header, w20px alCenter" rowClasses="null, alt" 
+				rendered="#{descargarLicenciaAmbientalLABean.showSurvey()}" width="500" >
+				<h:outputText  value="Estimado Proponente se solicita completar la siguiente encuesta, una vez realizado dicha tareas podrá obtener la documentación de su proyecto" />
+				<p:commandButton value="Encuesta" styleClass="primary" update="surveyDialog"
+                    	actionListener="#{descargarLicenciaAmbientalLABean.showDialogSurvey()}" />
+			</h:panelGrid>
+				
+				<p:dialog id="surveyDialog" header="Encuesta de Satisfacción de Servicios" modal="true" closable="true" resizable="false"
+				visible="#{descargarLicenciaAmbientalLABean.showSurveyD}" onHide="location.reload();">
+				<iframe frameborder="0" align="left" src="#{descargarLicenciaAmbientalLABean.urlLinkSurvey()}"
+					scrolling="auto" width="925" height="450" marginheight="5" marginwidth="10"></iframe>
+		    </p:dialog>
+				
+			<p:commandButton value="Descargar" ajax="false" rendered="#{!descargarLicenciaAmbientalLABean.showSurvey()}"
+				icon="ui-icon-arrowthick-1-s" id="certificado"
+				styleClass="oculto primary">
+				<p:fileDownload value="#{descargarLicenciaAmbientalLABean.stream}" />
+			</p:commandButton>
+
+			<div class="buttons main">
+				<p:commandButton value="Enviar" update="continuarDialog"
+					actionListener="#{descargarLicenciaAmbientalLABean.iniciarTarea()}" title="Enviar datos" icon="ui-icon-check" >
+				</p:commandButton>
+			</div>
+
+			<p:dialog
+					header="Notificación de Registro de Generador de Desechos Peligrosos y/o Especiales"
+					id="procesoAdministrativo" widgetVar="procesoAdministrativo"
+					modal="true" width="600" resizable="false" closable="true"
+					draggable="false">
+				<p:separator/>
+				<h:panelGrid columns="1" styleClass="w100"
+							 columnClasses="alJustify">
+					<h:outputText
+							rendered="#{descargarLicenciaAmbientalLABean.mostrar60()}"
+							value="Estimado usuario, en cumplimiento de la normativa ambiental vigente, usted debe iniciar el proceso de obtención del respectivo Registro de Generador de Desechos Peligrosos y/o Especiales en el término no mayor a 60 días hábiles, en caso de no aplicar, se debe remitir el justificativo a esta Dependencia dentro del mismo término."
+							styleClass="bold text-red"/>
+					<h:outputText
+							rendered="#{descargarLicenciaAmbientalLABean.mostrar30()}"
+							value="Estimado usuario, en cumplimiento de la normativa ambiental vigente, usted debe iniciar el proceso de obtención del respectivo Registro de Generador de Desechos Peligrosos y/o Especiales en el término no mayor a 30 días hábiles, en caso de no aplicar, se debe remitir el justificativo a esta Dependencia dentro del mismo término."
+							styleClass="bold text-red"/>
+					<h:outputText
+						rendered="#{descargarLicenciaAmbientalLABean.mostrar00()}"
+						value="Estimado usuario, en cumplimiento de la normativa ambiental vigente, usted debe iniciar el proceso de obtención del respectivo Registro de Generador de Desechos Peligrosos y/o Especiales de forma inmediata, en caso de no aplicar, se debe remitir el justificativo a esta Dependencia."
+						styleClass="bold text-red"/>
+				</h:panelGrid>
+			</p:dialog>
+			
+			<p:dialog
+					header="Notificación"
+					id="documentosCamaroneras" widgetVar="documentosCamaroneras"
+					modal="true" width="400" resizable="false" closable="true"
+					draggable="false">
+				<p:separator/>
+				<h:panelGrid columns="1" styleClass="w100"
+							 columnClasses="alJustify">
+					<h:outputText
+						value="En la primera Auditoria de Cumplimiento o en el Informe de Cumplimiento del PMA, el Operador debe presentar el Acuerdo de Concesión y  Acuerdo de Autorización  emitido por la Subsecretaría de Acuacultura." />
+				</h:panelGrid>
+			</p:dialog>
+
+			<p:remoteCommand process="@this" update="procesoAdministrativo"
+							 rendered="#{descargarLicenciaAmbientalLABean.mostrar30() or descargarLicenciaAmbientalLABean.mostrar60() or fichaAmbientalGeneralFinalizarControllerV2.mostrar00()}"
+							 autoRun="true"
+							 oncomplete="PF('procesoAdministrativo').show()"/>
+							 
+			<p:remoteCommand process="@this" update="documentosCamaroneras"
+							 rendered="#{descargarLicenciaAmbientalLABean.mostrarMsjAcuerdosCamaroneras()}"
+							 autoRun="true"
+							 oncomplete="PF('documentosCamaroneras').show()"/>
+
+			<p:dialog id="continuarDialog" widgetVar="continuarDialog"
+					  header="Información" modal="true" closable="false"
+					  resizable="false" width="500">
+
+				<p:panel>
+					<h:panelGrid columns="1" styleClass="w100"
+								 columnClasses="alCenter">
+						<p:outputLabel
+								value="#{descargarLicenciaAmbientalLABean.mensajeFinalizar}"/>
+						<p:commandButton value="Aceptar" ajax="false" styleClass="primary"
+										 action="#{descargarLicenciaAmbientalLABean.direccionar()}"/>
+					</h:panelGrid>
+				</p:panel>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>
