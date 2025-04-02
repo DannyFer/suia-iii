@@ -459,12 +459,10 @@ public class InformacionPreliminarController {
 	private CertificadoInterseccionOficioCoa oficioCI;
 	private String nombreOperador,cedulaOperador,razonSocial,codigoCiiu;
 	private Usuario usuarioAutoridad;
-	private Usuario subsePatrimonioNatural;
 	private List<UbicacionesGeografica> ubicacionProyectoLista;
     private List<DetalleInterseccionProyectoAmbiental> interseccionLista;			
     private List<CapasCoa> capasCoaLista;
     
-	private boolean estadoCiiu;
 	private boolean estadoMagnitud;
 	private boolean estadoSustanciasQuimicas;
 	@Getter
@@ -2787,8 +2785,6 @@ public class InformacionPreliminarController {
 		if(validarMayorImportancia)
 			catalogoMayorImportancia();//se habilita porque es necesario recuperar el sector y cual es la actividad principal
 		
-		estadoCiiu=true;
-
 		esCiiu1HidrocarburoMineriaElectrico = false;
 		if(ciiuPrincipal != null && ciiuPrincipal.getTipoSector() != null) {
 			String nombreSector = ciiuPrincipal.getTipoSector().getNombre().toUpperCase();
@@ -3063,8 +3059,6 @@ public class InformacionPreliminarController {
 		if(validarMayorImportancia)
 			catalogoMayorImportancia();//se habilita porque es necesario recuperar el sector y cual es la actividad principal
 		
-		estadoCiiu=true;
-		
 		esCiiu2HidrocarburoMineriaElectrico = false;
 		if(ciiuComplementaria1 != null && ciiuComplementaria1.getTipoSector() != null) {
 			String nombreSector = ciiuComplementaria1.getTipoSector().getNombre().toUpperCase();
@@ -3313,8 +3307,6 @@ public class InformacionPreliminarController {
 		
 		if(validarMayorImportancia)
 			catalogoMayorImportancia();//se habilita porque es necesario recuperar el sector y cual es la actividad principal
-		
-		estadoCiiu=true;
 		
 		esCiiu3HidrocarburoMineriaElectrico = false;
 		if(ciiuComplementaria2 != null && ciiuComplementaria2.getTipoSector() != null) {
@@ -3990,7 +3982,7 @@ public class InformacionPreliminarController {
 				}
 			}
 			
-			Integer categoriaAlta = 0, importanciaAlta = 0, id = 0;
+			Integer categoriaAlta = 0, importanciaAlta = 0;
 			CatalogoCIUU catalogoMayorImp = new CatalogoCIUU();
 			String wfPuesto="";
 			actividadSubYCombi= new CatalogoImportanciaVO();
@@ -4003,7 +3995,7 @@ public class InformacionPreliminarController {
 					if (importancia > importanciaAlta) {
 						categoriaAlta = catalogos.getTipoPermiso();
 						importanciaAlta = catalogos.getImportancia();
-						id = catalogos.getCatalogo().getId();
+						catalogos.getCatalogo().getId();
 						catalogoMayorImp=catalogos.getCatalogo();
 						wfPuesto=catalogos.getWf();
 						actividadSubYCombi.setCatalogo(catalogos.getCatalogo());
@@ -4014,7 +4006,7 @@ public class InformacionPreliminarController {
 					categoriaAlta = catalogos.getTipoPermiso();
 					importanciaAlta = catalogos.getImportancia();
 					catalogoMayorImp=catalogos.getCatalogo();
-					id = catalogos.getCatalogo().getId();
+					catalogos.getCatalogo().getId();
 					wfPuesto=catalogos.getWf();
 					actividadSubYCombi.setCatalogo(catalogos.getCatalogo());
 					actividadSubYCombi.setSubActividades(catalogos.getSubActividades());
@@ -5076,8 +5068,7 @@ public class InformacionPreliminarController {
 					residuosActividadesCiiuBean.guardarInfoResiduosActividad(ciiu3, 3);
 				}
 			}
-			estadoCiiu=false;
-//		}
+			//		}
 		if(ciiu1.getGenetico()!=null && ciiu1.getGenetico() && documentoGeneticoCiiu1.getContenidoDocumento()!=null)
 			guardarDocGeneticCiiu1();
 		if(ciiu2.getGenetico()!=null && ciiu2.getGenetico() && documentoGeneticoCiiu2.getContenidoDocumento()!=null)
@@ -5497,6 +5488,7 @@ public class InformacionPreliminarController {
 		
 	}
 	
+	@SuppressWarnings("unused")
 	public void areaResponsable()
 	{	
 		Area enteAcreditadoProyecto=null;
@@ -6940,7 +6932,6 @@ public class InformacionPreliminarController {
 			try {
 				documentoFacade.guardarDocumentoAlfresco(proyecto.getCodigoUnicoAmbiental(), "Coordenadas_Geográficas", 1L, documento, TipoDocumentoSistema.RCOA_COORDENADA_GEOGRAFICA);
 			} catch (ServiceException | CmisAlfrescoException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -6962,7 +6953,6 @@ public class InformacionPreliminarController {
 			try {
 				documentoFacade.guardarDocumentoAlfresco(proyecto.getCodigoUnicoAmbiental(), "Coordenadas_Implantación", 1L, documento, TipoDocumentoSistema.RCOA_COORDENADA_IMPLANTACION);
 			} catch (ServiceException | CmisAlfrescoException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -7048,7 +7038,6 @@ public class InformacionPreliminarController {
 			try {
 				documentoFacade.guardarDocumentoAlfresco(proyecto.getCodigoUnicoAmbiental(), "INFORMACION_PRELIMINAR", 1L, documentoAltoImpacto, TipoDocumentoSistema.RCOA_DOCUMENTO_ALTO_IMPACTO);
 			} catch (ServiceException | CmisAlfrescoException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -7061,7 +7050,6 @@ public class InformacionPreliminarController {
 		try {
 			documentoFacade.guardarDocumentoAlfresco(proyecto.getCodigoUnicoAmbiental(), "INFORMACION_PRELIMINAR", 1L, documentoGeneticoCiiu1, TipoDocumentoSistema.RCOA_DOCUMENTO_GENETICO);
 		} catch (ServiceException | CmisAlfrescoException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -7073,7 +7061,6 @@ public class InformacionPreliminarController {
 		try {
 			documentoFacade.guardarDocumentoAlfresco(proyecto.getCodigoUnicoAmbiental(), "INFORMACION_PRELIMINAR", 1L, documentoGeneticoCiiu2, TipoDocumentoSistema.RCOA_DOCUMENTO_GENETICO);
 		} catch (ServiceException | CmisAlfrescoException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -7085,7 +7072,6 @@ public class InformacionPreliminarController {
 		try {
 			documentoFacade.guardarDocumentoAlfresco(proyecto.getCodigoUnicoAmbiental(), "INFORMACION_PRELIMINAR", 1L, documentoGeneticoCiiu3, TipoDocumentoSistema.RCOA_DOCUMENTO_GENETICO);
 		} catch (ServiceException | CmisAlfrescoException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -7097,7 +7083,6 @@ public class InformacionPreliminarController {
 		try {
 			documentoDocSectorial = documentoFacade.guardarDocumentoAlfresco(proyecto.getCodigoUnicoAmbiental(), "INFORMACION_PRELIMINAR", 1L, documentoDocSectorial, TipoDocumentoSistema.RCOA_DOCUMENTO_SECTORIAL);
 		} catch (ServiceException | CmisAlfrescoException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -7108,7 +7093,6 @@ public class InformacionPreliminarController {
 		try {
 			documentoDocFrontera = documentoFacade.guardarDocumentoAlfresco(proyecto.getCodigoUnicoAmbiental(), "INFORMACION_PRELIMINAR", 1L, documentoDocFrontera, TipoDocumentoSistema.RCOA_DOCUMENTO_FRONTERA);
 		} catch (ServiceException | CmisAlfrescoException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -7122,7 +7106,6 @@ public class InformacionPreliminarController {
 			try {
 				documentoDocCamaronera = documentoFacade.guardarDocumentoAlfresco(proyecto.getCodigoUnicoAmbiental(), "INFORMACION_PRELIMINAR", 1L, documentoDocCamaronera, TipoDocumentoSistema.RCOA_DOCUMENTO_TITULO_CONCESION_CAMARONERA);
 			} catch (ServiceException | CmisAlfrescoException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -7545,11 +7528,10 @@ public class InformacionPreliminarController {
 					return;
 				}
 				
-				if(validacionActividadMinera())
-				{
-					DefaultRequestContext.getCurrentInstance().execute("PF('mensajeMineria').show();");
-					return;
-				}
+//				if(validacionActividadMinera()){
+//					DefaultRequestContext.getCurrentInstance().execute("PF('mensajeMineria').show();");
+//					return;
+//				}
 				if(validarActividadART())
 				{
 					return;
@@ -10277,18 +10259,7 @@ public class InformacionPreliminarController {
 
 		for (UbicacionesGeografica ubiCiu : coordenadasRcoaBean.getUbicacionesSeleccionadas()) {
 			if(ubiCiu.getEnteAcreditado() != null) {
-				String gad = ubiCiu.getEnteAcreditado().getAreaAbbreviation();
-				//System.out.println(gad);
-				//Ticket#10428871
-				/*if (gad.equals("GADPN")) {
-					// actividades ciiu para bloqueo
-					if (objCat.getCodigo().equals("G4730.01") || objCat.getCodigo().equals("G4730.01.01")
-							|| objCat.getCodigo().equals("J6120.01.01") || objCat.getCodigo().equals("J6120.01.02")) {
-	
-						bloquearGad = true;
-					}
-	
-				}*/
+				ubiCiu.getEnteAcreditado().getAreaAbbreviation();
 				
 				//if (gad.equals("GADPSDT") || gad.equals("GADMG")) Ticket#10435654 
 				/*if (gad.equals("GADPSDT")) { //Ticket#10437991

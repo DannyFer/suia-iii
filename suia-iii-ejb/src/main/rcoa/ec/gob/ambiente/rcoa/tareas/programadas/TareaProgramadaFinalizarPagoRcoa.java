@@ -17,7 +17,7 @@ public class TareaProgramadaFinalizarPagoRcoa {
 	private FinalizarPagosRcoaFacade finalizarPagosRcoaFacade;
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	@Schedule(second = "00",  minute = "*/20", hour = "*", dayOfWeek = "Mon-Sun", dayOfMonth = "*", month = "*", year = "*", info = "Terminacion Tarea de pago Estudio de Impacto Ambiental",persistent = true)
+	@Schedule(second = "00",  minute = "*/5", hour = "*", dayOfWeek = "Mon-Sun", dayOfMonth = "*", month = "*", year = "*", info = "Terminacion Tarea de pago Estudio de Impacto Ambiental",persistent = true)
 	public void ejecutar(){
 		System.out.println("entro a finalizar pagos rcoa");
 		finalizarPagosRcoaFacade.obtenerPagosRealizados();

@@ -571,7 +571,7 @@ public class FichaMineria020Controller {
 		if (proyectosBean.getProyectoRcoa() != null && proyectosBean.getProyectoRcoa().getId() != null) {
 			esProyectoRcoa = true;
 			proyectoLicenciaCoa = proyectosBean.getProyectoRcoa();
-			actividadPrincipal = proyectoLicenciaCuaCiuuFacade.actividadPrincipal(proyectoLicenciaCoa);
+			actividadPrincipal = proyectoLicenciaCuaCiuuFacade.actividadPrincipal("MAATE-RA-2025-537238");
 			coordenadasImplantacion = new ArrayList<CoordendasPoligonos>();
 			List<ProyectoLicenciaAmbientalCoaShape> formasImplantacion = proyectoLicenciaAmbientalShapeFacade.buscarFormaGeograficaPorProyecto(proyectoLicenciaCoa, 1, 0); // coordenadas // implantacion
 
@@ -780,6 +780,7 @@ public class FichaMineria020Controller {
 	
 	public List<ConsultorRcoa> mostrarConsultores() {
 		try {
+			listaConsultoresMostrar.clear();
 			for (ConsultorRcoa consultor : listconsultoresRcoa) {
 				consultor.getId();
 				consultor.getIdentificacion();

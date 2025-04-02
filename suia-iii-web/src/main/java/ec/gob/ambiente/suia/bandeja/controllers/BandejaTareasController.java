@@ -283,10 +283,10 @@ public class BandejaTareasController implements Serializable {
 			}
 		}
 
-		if (encontrarActividadesProyecto(taskSummaryCustom)) {
-			RequestContext.getCurrentInstance().execute("PF('mensajeMineria').show();");
-			return;
-		}
+//		if (encontrarActividadesProyecto(taskSummaryCustom)) {
+//			RequestContext.getCurrentInstance().execute("PF('mensajeMineria').show();");
+//			return;
+//		}
 
 		if ((taskSummaryCustom.getTaskName().contains("pex_revision_pago")
 				|| taskSummaryCustom.getTaskName().contains("pex_nuevo_facilitador")
